@@ -56,6 +56,14 @@ export default defineNuxtConfig({
     },
   },
 
+  components: [
+    {
+      path: 'node_modules/@yunlefun/vue-components/dist/runtime',
+      pathPrefix: false,
+    },
+    '~/components',
+  ],
+
   pwa,
 
   devtools: {

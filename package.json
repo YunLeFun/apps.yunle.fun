@@ -15,6 +15,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.8",
     "@iconify-json/carbon": "^1.1.18",
+    "@iconify-json/ri": "^1.1.10",
     "@iconify-json/twemoji": "^1.1.11",
     "@nuxt/devtools": "^0.6.7",
     "@nuxtjs/color-mode": "^3.3.0",
@@ -23,6 +24,7 @@
     "@unocss/nuxt": "^0.53.5",
     "@vite-pwa/nuxt": "^0.1.0",
     "@vueuse/nuxt": "^10.2.1",
+    "@yunlefun/vue-components": "0.0.5-beta.4",
     "consola": "^3.2.3",
     "eslint": "^8.45.0",
     "nuxt": "^3.6.3",

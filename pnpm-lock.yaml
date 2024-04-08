@@ -11,6 +11,9 @@ devDependencies:
   '@iconify-json/carbon':
     specifier: ^1.1.18
     version: 1.1.18
+  '@iconify-json/ri':
+    specifier: ^1.1.10
+    version: 1.1.10
   '@iconify-json/twemoji':
     specifier: ^1.1.11
     version: 1.1.11
@@ -35,6 +38,9 @@ devDependencies:
   '@vueuse/nuxt':
     specifier: ^10.2.1
     version: 10.2.1(nuxt@3.6.3)(rollup@2.79.1)(vue@3.3.4)
+  '@yunlefun/vue-components':
+    specifier: 0.0.5-beta.4
+    version: 0.0.5-beta.4
   consola:
     specifier: ^3.2.3
     version: 3.2.3
@@ -1878,6 +1884,12 @@ packages:
       '@iconify/types': 2.0.0
     dev: true
 
+  /@iconify-json/ri@1.1.10:
+    resolution: {integrity: sha512-fsJuXLfpdxb9pfn8LFcfM6LS82j358HaI29Y1qcH1UDnt/V439rTivV6v/YSLkd4z/dZIbh5iOR8+Cg4qtu5Rw==}
+    dependencies:
+      '@iconify/types': 2.0.0
+    dev: true
+
   /@iconify-json/twemoji@1.1.11:
     resolution: {integrity: sha512-ZA2v2AGWPC0rxiZDLqsVD+DoYB3n5Ft5q0YYAsy9QyYvoNWSdh6Vxe5d3yUP4mSpNkE4YW96RAjiZu72uXb7kQ==}
     dependencies:
@@ -3576,6 +3588,10 @@ packages:
 
   /@xtuc/long@4.2.2:
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
+    dev: true
+
+  /@yunlefun/vue-components@0.0.5-beta.4:
+    resolution: {integrity: sha512-oka4X4KtA0K83wEzcRTYhdNPbBKY+9zIbOTfyH8O+qWmIdDzMipFL1Hb2G6LlcaCdG0xb0kAfv2q+79NFsqRpA==}
     dev: true
 
   /abbrev@1.1.1:

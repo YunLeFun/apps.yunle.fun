@@ -1,10 +1,14 @@
 <script setup lang="ts">
 const online = useOnline()
+
+definePageMeta({
+  layout: 'home',
+})
 </script>
 
 <template>
   <div>
-    <Logos mb-6 />
+    <YlfLogo mb-6 />
     <Suspense>
       <ClientOnly>
         <PageView v-if="online" />

@@ -69,4 +69,15 @@ export default defineNuxtConfig({
   devtools: {
     enabled: true,
   },
+
+  features: {
+    // For UnoCSS
+    inlineStyles: false,
+  },
+
+  eslint: {
+    config: {
+      standalone: false,
+    },
+  },
 })

@@ -1,0 +1,245 @@
+@use '~/assets/scss/3d-room/mixins' as *;
+@use '~/assets/scss/3d-room/vars' as *;
+
+$wall-height: 25vw;
+
+.blt {
+  $width-el: 1vw;
+  $depth-el: 13.5vw;
+
+  @include cube($width-el, $wall-height, $depth-el);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1vw;
+  height: 27vw;
+
+  transform: translateZ(0.5vw);
+
+  &__front {
+    background-image: linear-gradient(to bottom, $white-3, $white-2);
+  }
+  &__back {
+    background-color: $white-3;
+  }
+  &__right {
+    background-image: linear-gradient(
+      to bottom,
+      darken($white-4, 10),
+      $white-3,
+      $white-3 90%,
+      darken($white-4, 2)
+    );
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 0.75vw;
+      background-image: linear-gradient(
+        to bottom,
+        darken($white-2, 5),
+        $neon-2
+      );
+      border-top: 0.1vw solid $white-4;
+      border-bottom: 0.1vw solid $white-4;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(
+        to bottom,
+        rgba(darken($neon-1, 20), 0.35),
+        transparent 30%,
+        transparent 70%,
+        rgba($neon-2, 0.35)
+      );
+    }
+  }
+  &__left {
+    background-color: $white-1;
+  }
+  // &__top{ background-color: $white-1; }
+  &__bottom {
+    background-color: $white-3;
+  }
+}
+.blt2 {
+  $width-el: 2vw;
+  $height-el: 0.75vw;
+  $depth-el: 13.5vw;
+
+  @include cube($width-el, $height-el, $depth-el);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2vw;
+  height: 27vw;
+
+  transform: translateZ($wall-height);
+
+  &__front {
+    background-color: $white-3;
+  }
+  &__back {
+    background-color: $white-3;
+  }
+  &__right {
+    background-image: linear-gradient(
+      to right,
+      darken($white-2, 5),
+      $white-2,
+      darken($white-2, 15)
+    );
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      bottom: 0;
+      border-bottom: 0.1vw solid rgba($white-1, 0.75);
+      background-image: linear-gradient(
+        to top,
+        rgba($neon-1, 0.35),
+        transparent
+      );
+    }
+  }
+  &__left {
+    background-color: $white-1;
+  }
+  &__top {
+    background-image: linear-gradient(to top, $white-2, $white-1);
+  }
+  &__bottom {
+    background-color: $white-3;
+  }
+}
+.blb {
+  $width-el: 26vw;
+  $depth-el: 0.5vw;
+
+  @include cube($width-el, $wall-height, $depth-el);
+  position: absolute;
+  left: 1vw;
+  top: 0;
+  width: 26vw;
+  height: 1vw;
+
+  transform: translateZ(0.5vw);
+
+  &__front {
+    background-image: linear-gradient(
+      to bottom,
+      darken($white-2, 32),
+      darken($white-2, 25) 20%,
+      darken($white-2, 32)
+    );
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(
+          to bottom,
+          rgba($neon-2, 0.25),
+          transparent 20%,
+          transparent 80%,
+          rgba($neon-2, 0.5)
+        ),
+        linear-gradient(to right, rgba($black-1, 0.35), transparent),
+        linear-gradient(to bottom, rgba($black-1, 0.35), transparent),
+        linear-gradient(
+          to bottom,
+          rgba(darken($neon-2, 50), 0.5),
+          transparent 20%,
+          transparent 80%,
+          rgba($neon-2, 0.25)
+        );
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 0.75vw;
+      background-image: linear-gradient(
+        to bottom,
+        darken($white-2, 5),
+        $neon-2
+      );
+      border-top: 0.1vw solid $white-4;
+      border-bottom: 0.1vw solid $white-4;
+    }
+  }
+  &__back {
+    background-color: $white-3;
+  }
+  &__right {
+    background-image: linear-gradient(
+      to bottom,
+      darken($white-4, 10),
+      darken($white-3, 20) 80%,
+      darken($white-4, 10)
+    );
+  }
+  // &__left{ background-color: $white-2; }
+  // &__top{ background-color: $white-1; }
+  &__bottom {
+    background-color: $white-3;
+  }
+}
+.blb2 {
+  $width-el: 25vw;
+  $height-el: 0.75vw;
+  $depth-el: 1vw;
+
+  @include cube($width-el, $height-el, $depth-el);
+  position: absolute;
+  left: 2vw;
+  top: 0;
+  width: 25vw;
+  height: 1vw;
+
+  transform: translateZ($wall-height);
+
+  &__front {
+    background-image: linear-gradient(
+      to right,
+      darken($white-2, 15),
+      $white-2,
+      darken($white-2, 5)
+    );
+    &::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      bottom: 0;
+      border-bottom: 0.1vw solid rgba($white-1, 0.75);
+      background-image: linear-gradient(
+        to top,
+        rgba($neon-2, 0.25),
+        transparent
+      );
+    }
+  }
+  &__back {
+    background-color: $white-3;
+  }
+  &__right {
+    background-color: darken($white-4, 10);
+  }
+  &__left {
+    background-color: $white-2;
+  }
+  &__top {
+    background-image: linear-gradient(to left, $white-2, $white-1);
+  }
+  &__bottom {
+    background-color: $white-3;
+  }
+}

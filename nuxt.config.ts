@@ -9,6 +9,8 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
+
+    'nuxt-fix-ofetch',
   ],
 
   experimental: {
@@ -44,8 +46,8 @@ export default defineNuxtConfig({
     head: {
       viewport: 'width=device-width,initial-scale=1',
       link: [
-        { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
-        { rel: 'icon', type: 'image/svg+xml', href: '/nuxt.svg' },
+        // { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/ylf.svg' },
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
       ],
       meta: [
@@ -61,7 +63,10 @@ export default defineNuxtConfig({
       path: 'node_modules/@yunlefun/vue-components/dist/runtime',
       pathPrefix: false,
     },
-    '~/components',
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
   ],
 
   pwa,

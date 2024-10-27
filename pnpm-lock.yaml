@@ -60,6 +60,9 @@ importers:
       '@yunlefun/deploy':
         specifier: ^0.0.11
         version: 0.0.11(@types/node@20.12.5)(encoding@0.1.13)(magicast@0.3.5)(sass@1.80.4)(terser@5.30.3)
+      '@yunlefun/toolkit':
+        specifier: ^0.1.2
+        version: 0.1.2(@vueuse/core@11.1.0(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))
       '@yunlefun/vue':
         specifier: ^0.1.1
         version: 0.1.1
@@ -2556,8 +2559,20 @@ packages:
     resolution: {integrity: sha512-QPf81BBkOr3dYwO0gzPBbX1qjgSO2fEqSqlcbYDXkb96F8op3DlFGswkdinyB/rP9QgPjEZdQlFN8Zk/fMi4fA==}
     hasBin: true
 
+  '@yunlefun/toolkit@0.1.2':
+    resolution: {integrity: sha512-ylvcwBCABVSl6N2nqicCDwtttx1d5LShkAxzRahZHneHjzFhishazPTLl6lZigMEWpejUeJc1D22HI+a/Rf5Rg==}
+
+  '@yunlefun/utils@0.1.2':
+    resolution: {integrity: sha512-Veaa5bENBxV73ICvQM1dByOJO85v7BfJ56JyUqMVw9JjVTphiqJRFl1X/cmxXv4JHdbLLg/yLgB7MMZgFX0klA==}
+
   '@yunlefun/vue@0.1.1':
     resolution: {integrity: sha512-ZnHQYYdiLOxljkm4Vs4KW8qPdVI7+weQ8Hg/N8dEMdZbZuWjDxu+t0czwpgPadbYArEEs3MMfnoUfMXcysfNSg==}
+
+  '@yunlefun/vueuse@0.1.2':
+    resolution: {integrity: sha512-IlPCEoKaCScNHLS696sujMdKxoWOra6hC4+ylRXL9JTXEna1Ud5YOV71FBcYHeJvwJ9qV5fdJ+c+aYe30lRt6w==}
+    peerDependencies:
+      '@vueuse/core': '*'
+      vue: '*'
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -9532,7 +9547,23 @@ snapshots:
       - terser
       - utf-8-validate
 
+  '@yunlefun/toolkit@0.1.2(@vueuse/core@11.1.0(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))':
+    dependencies:
+      '@yunlefun/utils': 0.1.2
+      '@yunlefun/vueuse': 0.1.2(@vueuse/core@11.1.0(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))
+    transitivePeerDependencies:
+      - '@vueuse/core'
+      - vue
+
+  '@yunlefun/utils@0.1.2': {}
+
   '@yunlefun/vue@0.1.1': {}
+
+  '@yunlefun/vueuse@0.1.2(@vueuse/core@11.1.0(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))':
+    dependencies:
+      '@vueuse/core': 11.1.0(vue@3.5.12(typescript@5.6.3))
+      '@yunlefun/utils': 0.1.2
+      vue: 3.5.12(typescript@5.6.3)
 
   abbrev@1.1.1: {}
 

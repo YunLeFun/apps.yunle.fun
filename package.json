@@ -36,6 +36,7 @@
     "@vite-pwa/nuxt": "^0.10.5",
     "@vueuse/nuxt": "^11.1.0",
     "@yunlefun/deploy": "^0.0.11",
+    "@yunlefun/toolkit": "^0.1.2",
     "@yunlefun/vue": "^0.1.1",
     "consola": "^3.2.3",
     "eslint": "^9.13.0",

@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { isInWxBrowser } from '@yunlefun/toolkit'
+
 // const email = ref('')
 import consola from 'consola'
 
@@ -16,10 +18,19 @@ const appInfo = computed(() => {
 function loginByWechat() {
   consola.info('通过微信登录')
 
-  window.location.href = generateUserAuthLink({
-    scope: 'snsapi_userinfo',
-    redirect_uri: window.location.href,
-  })
+  if (isInWxBrowser()) {
+    // 在微信浏览器中，直接跳转到微信授权页面
+    window.location.href = generateUserAuthLink({
+      scope: 'snsapi_userinfo',
+      redirect_uri: window.location.href,
+    })
+  }
+  else {
+    // 在非微信浏览器中，调用微信扫码登录
+    // 1. 获取二维码
+    // 2. 轮询扫码状态
+    // 3. 获取用户信息
+  }
 }
 </script>
 
@@ -58,7 +69,7 @@ function loginByWechat() {
               >
             </div>
             <span font="bold">
-              {{ appInfo.name }} ({{ appInfo.id }})
+              {{ appInfo.name }} ({{ appInfo.code }})
             </span>
           </a>
         </h3>

@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <div flex="~ col" class="gap-1">
+  <div flex="~ col" class="gap-1 py-4">
     <div flex="~ col" class="gap-1">
       <Avatar
         :image="userInfo?.headimgurl" alt="头像"
@@ -26,7 +26,7 @@ defineProps<{
       class="flex gap-1"
     >
       <span>{{ key }}:</span>
-      <span class="max-w-25 truncate op-60">{{ value }}</span>
+      <span class="max-w-40 truncate op-60">{{ value }}</span>
     </div>
   </div>
 </template>

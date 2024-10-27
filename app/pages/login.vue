@@ -51,6 +51,7 @@ onMounted(async () => {
     <Logo mb-8 />
     <UserLogin />
 
+    <br>
     <WxUserInfo
       v-if="wxAuthState === 'success'"
       :user-info="wxUserInfo"

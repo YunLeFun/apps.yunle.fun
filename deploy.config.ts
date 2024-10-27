@@ -1,4 +1,3 @@
-import path from 'node:path'
 import process from 'node:process'
 import { defineConfig } from '@yunlefun/deploy'
 
@@ -26,7 +25,7 @@ export default defineConfig({
       },
       function: {
         Namespace: 'YunLeFun',
-        FunctionName: 'api',
+        FunctionName: 'yunle-fun',
       },
       ImageConfig: {
         ImageType: 'personal',
@@ -37,7 +36,7 @@ export default defineConfig({
       region: 'ap-guangzhou',
       token: process.env.TENCENT_CLOUD_TCR_TOKEN,
       image: {
-        RepoName: 'yunlefun/api',
+        RepoName: 'yunlefun/yunle-fun',
       },
     },
   },

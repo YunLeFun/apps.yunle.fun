@@ -25,7 +25,13 @@ $wall-height: 25vw;
     background-color: $white-3;
   }
   &__right {
-    background-image: linear-gradient(to bottom, color.adjust($white-4, $lightness: -10%), $white-3, $white-3 90%, color.adjust($white-4, $lightness: -2%));
+    background-image: linear-gradient(
+      to bottom,
+      color.adjust($white-4, $lightness: -10%),
+      $white-3,
+      $white-3 90%,
+      color.adjust($white-4, $lightness: -2%)
+    );
     &::before {
       content: '';
       position: absolute;
@@ -81,7 +87,12 @@ $wall-height: 25vw;
     background-color: $white-3;
   }
   &__right {
-    background-image: linear-gradient(to right, color.adjust($white-2, $lightness: -5%), $white-2, color.adjust($white-2, $lightness: -15%));
+    background-image: linear-gradient(
+      to right,
+      color.adjust($white-2, $lightness: -5%),
+      $white-2,
+      color.adjust($white-2, $lightness: -15%)
+    );
 
     &::before {
       content: '';
@@ -118,7 +129,12 @@ $wall-height: 25vw;
   @include cube($width-el, $wall-height, $depth-el);
 
   &__front {
-    background-image: linear-gradient(to bottom, color.adjust($white-2, $lightness: -32%), color.adjust($white-2, $lightness: -25%) 20%, color.adjust($white-2, $lightness: -32%));
+    background-image: linear-gradient(
+      to bottom,
+      color.adjust($white-2, $lightness: -32%),
+      color.adjust($white-2, $lightness: -25%) 20%,
+      color.adjust($white-2, $lightness: -32%)
+    );
     &::before {
       content: '';
       position: absolute;
@@ -156,7 +172,12 @@ $wall-height: 25vw;
     background-color: $white-3;
   }
   &__right {
-    background-image: linear-gradient(to bottom, color.adjust($white-4, $lightness: -10%), color.adjust($white-3, $lightness: -20%) 80%, color.adjust($white-4, $lightness: -10%));
+    background-image: linear-gradient(
+      to bottom,
+      color.adjust($white-4, $lightness: -10%),
+      color.adjust($white-3, $lightness: -20%) 80%,
+      color.adjust($white-4, $lightness: -10%)
+    );
   }
   // &__left{ background-color: $white-2; }
   // &__top{ background-color: $white-1; }
@@ -180,7 +201,12 @@ $wall-height: 25vw;
   @include cube($width-el, $height-el, $depth-el);
 
   &__front {
-    background-image: linear-gradient(to right, color.adjust($white-2, $lightness: -15%), $white-2, color.adjust($white-2, $lightness: -5%));
+    background-image: linear-gradient(
+      to right,
+      color.adjust($white-2, $lightness: -15%),
+      $white-2,
+      color.adjust($white-2, $lightness: -5%)
+    );
     &::before {
       content: '';
       position: absolute;

@@ -15,3 +15,11 @@ FROM node:20-alpine as production-stage
 
 WORKDIR /app
 
+COPY --from=build-stage /app/.output ./.output
+COPY --from=build-stage /app/package.json ./
+
+ENV NUXT_HOST 0.0.0.0
+# 腾讯云云函数的端口号是 9000
+ENV NUXT_PORT 9000
+
+CMD ["node", ".output/server/index.mjs"]

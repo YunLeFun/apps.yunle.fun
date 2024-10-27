@@ -1,6 +1,6 @@
 <template>
-  <main class="px-10 py-20 text-center">
+  <TheMenubar />
+  <main class="p-10 text-center">
     <slot />
   </main>
-  <TheBottomMenu absolute bottom-0 left-0 right-0 z-1 />
 </template>

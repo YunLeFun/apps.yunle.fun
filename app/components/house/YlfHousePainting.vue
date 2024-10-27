@@ -18,8 +18,8 @@
 </template>
 
 <style lang="scss">
-@use '~/assets/scss/3d-room/mixins' as *;
-@use '~/assets/scss/3d-room/vars' as *;
+@use '~/styles/scss/3d-room/mixins' as *;
+@use '~/styles/scss/3d-room/vars' as *;
 
 .cuadro-l,
 .cuadro-r {

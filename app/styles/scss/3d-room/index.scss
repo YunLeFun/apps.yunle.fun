@@ -2,19 +2,7 @@
 @use './mixins' as *;
 @use './vars' as *;
 
-/**/
-*,
-*::after,
-*::before {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  user-select: none;
-  transform-style: preserve-3d;
-  -webkit-tap-highlight-color: transparent;
-}
-/* Generic */
-body {
+._3d-room {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,6 +11,17 @@ body {
   height: 100vh;
   overflow: hidden;
   background-image: radial-gradient(circle, $bg-1, color.adjust($bg-1, $lightness: -20%));
+
+  *,
+  *::after,
+  *::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    transform-style: preserve-3d;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 .face {

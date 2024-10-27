@@ -19,8 +19,8 @@ const siteUrl = 'https://studio.yunle.fun'
 
 <style lang="scss">
 @use 'sass:color';
-@use '~/assets/scss/3d-room/mixins' as *;
-@use '~/assets/scss/3d-room/vars' as *;
+@use '~/styles/scss/3d-room/mixins' as *;
+@use '~/styles/scss/3d-room/vars' as *;
 
 .tv {
   $width-el: 0.5vw;

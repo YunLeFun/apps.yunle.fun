@@ -34,5 +34,5 @@
 </template>
 
 <style lang="scss">
-@use '~/assets/scss/3d-room/room/wall.scss' as *;
+@use '~/styles/scss/3d-room/room/wall.scss' as *;
 </style>

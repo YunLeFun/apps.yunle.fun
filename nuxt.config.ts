@@ -1,3 +1,4 @@
+import Aura from '@primevue/themes/aura'
 import { pwa } from './app/config/pwa'
 import { appDescription } from './app/constants/index'
 
@@ -10,6 +11,7 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
 
+    '@primevue/nuxt-module',
     '@yunlefun/vue/nuxt',
   ],
 
@@ -85,6 +87,14 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       standalone: false,
+    },
+  },
+
+  primevue: {
+    options: {
+      theme: {
+        preset: Aura,
+      },
     },
   },
 

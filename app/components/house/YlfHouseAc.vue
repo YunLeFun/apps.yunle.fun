@@ -20,8 +20,8 @@ const siteUrl = 'https://ac.yunyoujun.cn'
 </template>
 
 <style lang="scss">
-@use '~/assets/scss/3d-room/mixins' as *;
-@use '~/assets/scss/3d-room/vars' as *;
+@use '~/styles/scss/3d-room/mixins' as *;
+@use '~/styles/scss/3d-room/vars' as *;
 
 .ac-container {
   $width-el: 12.5vw;

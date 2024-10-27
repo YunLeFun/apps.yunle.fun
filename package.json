@@ -25,6 +25,7 @@
     "@nuxt/eslint": "^0.6.0",
     "@nuxtjs/color-mode": "^3.5.2",
     "@pinia/nuxt": "^0.5.5",
+    "@primevue/nuxt-module": "^4.1.1",
     "@unocss/eslint-config": "^0.63.6",
     "@unocss/nuxt": "^0.63.6",
     "@vite-pwa/nuxt": "^0.10.5",
@@ -39,5 +40,9 @@
     "sass": "^1.80.4",
     "typescript": "^5.6.3",
     "vue-tsc": "^2.1.8"
+  },
+  "dependencies": {
+    "@primevue/themes": "^4.1.1",
+    "primevue": "^4.1.1"
   }
 }

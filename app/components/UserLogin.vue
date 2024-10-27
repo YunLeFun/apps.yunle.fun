@@ -4,8 +4,11 @@ import consola from 'consola'
 
 const appInfo = computed(() => {
   return {
-    id: 'cook',
+    id: '2',
+    color: 'orange',
+    icon: 'https://cook.yunyoujun.cn/favicon.svg',
     name: '食用手册',
+    code: 'cook',
     url: 'https://cook.yunyoujun.cn',
   }
 })
@@ -15,30 +18,49 @@ function loginByWechat() {
 
   window.location.href = generateUserAuthLink({
     scope: 'snsapi_userinfo',
+    redirect_uri: window.location.href,
   })
 }
 </script>
 
 <template>
+  <DarkToggle class="absolute right-4 top-4" />
+
   <div
     class="w-full flex items-center justify-center"
     m="auto"
     max-w-xs
   >
     <div
-      class="border rounded-xl bg-white p-5 shadow dark:border-dark dark:bg-dark"
+      class="rounded-xl bg-white p-5 shadow dark:border-dark dark:bg-dark"
       gap="5"
       w="full"
       flex="~ col"
     >
       <div class="flex flex-col">
-        <h3 class="items-center justify-center gap-1 text-sm op-80" flex="~">
+        <h3 class="items-center justify-center gap-4 text-sm" flex="~ col">
           <!-- <div i-ri-fingerprint-line /> -->
-          正在为应用
-          <a :href="appInfo.url" target="_blank" class="text-blue-500 dark:text-blue-400">
-            {{ appInfo.name }} ({{ appInfo.id }})
+          <span class="op-60">
+            正在为以下应用登录
+          </span>
+          <a
+            :href="appInfo.url" target="_blank"
+            class="inline-flex items-center justify-center gap-1 rounded-full text-sm text-blue-500 dark:text-blue-400"
+          >
+            <div
+              v-if="appInfo.icon"
+              class="size-5 inline-flex items-center justify-center rounded-full p-1"
+              :style="{ backgroundColor: appInfo.color }"
+            >
+              <img
+                :src="appInfo.icon" alt="icon"
+                class="inline-block"
+              >
+            </div>
+            <span font="bold">
+              {{ appInfo.name }} ({{ appInfo.id }})
+            </span>
           </a>
-          登录
         </h3>
       </div>
 

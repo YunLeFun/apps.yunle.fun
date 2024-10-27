@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nuxi build",
     "deploy": "npx deploy",
-    "dev": "nuxi dev",
+    "dev": "nuxi dev --host",
     "dev:pwa": "VITE_PLUGIN_PWA=true nuxi dev",
     "start": "node .output/server/index.mjs",
     "typecheck": "vue-tsc --noEmit",
@@ -15,6 +15,11 @@
     "generate": "nuxi generate",
     "release": "bumpp && npm run deploy",
     "start:generate": "npx serve .output/public"
+  },
+  "dependencies": {
+    "@primevue/themes": "^4.1.1",
+    "ofetch": "^1.4.1",
+    "primevue": "^4.1.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.8.0",
@@ -40,9 +45,5 @@
     "sass": "^1.80.4",
     "typescript": "^5.6.3",
     "vue-tsc": "^2.1.8"
-  },
-  "dependencies": {
-    "@primevue/themes": "^4.1.1",
-    "primevue": "^4.1.1"
   }
 }

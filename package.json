@@ -1,9 +1,11 @@
 {
   "type": "module",
+  "version": "0.0.1",
   "private": true,
   "packageManager": "pnpm@9.12.2",
   "scripts": {
     "build": "nuxi build",
+    "deploy": "npx deploy",
     "dev": "nuxi dev",
     "dev:pwa": "VITE_PLUGIN_PWA=true nuxi dev",
     "start": "node .output/server/index.mjs",
@@ -11,6 +13,7 @@
     "lint": "eslint .",
     "postinstall": "nuxi prepare",
     "generate": "nuxi generate",
+    "release": "bumpp && npm run deploy",
     "start:generate": "npx serve .output/public"
   },
   "devDependencies": {
@@ -26,6 +29,7 @@
     "@unocss/nuxt": "^0.63.6",
     "@vite-pwa/nuxt": "^0.10.5",
     "@vueuse/nuxt": "^11.1.0",
+    "@yunlefun/deploy": "^0.0.11",
     "@yunlefun/vue": "^0.1.1",
     "consola": "^3.2.3",
     "eslint": "^9.13.0",

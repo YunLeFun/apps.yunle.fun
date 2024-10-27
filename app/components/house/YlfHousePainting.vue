@@ -1,6 +1,6 @@
 <template>
   <div class="cuadro-l">
-    <div class="face cuadro-l__front" />
+    <a class="face cuadro-l__front" href="https://www.yunyoujun.cn" target="_blank" />
     <div class="face cuadro-l__back" />
     <div class="face cuadro-l__right" />
     <div class="face cuadro-l__left" />

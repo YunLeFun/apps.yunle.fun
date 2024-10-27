@@ -1,5 +1,5 @@
-import { pwa } from './config/pwa'
-import { appDescription } from './constants/index'
+import { pwa } from './app/config/pwa'
+import { appDescription } from './app/constants/index'
 
 export default defineNuxtConfig({
   modules: [
@@ -10,8 +10,20 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
 
-    'nuxt-fix-ofetch',
+    '@yunlefun/vue/nuxt',
   ],
+
+  css: [
+    '@unocss/reset/tailwind.css',
+  ],
+
+  colorMode: {
+    classSuffix: '',
+  },
+
+  future: {
+    compatibilityVersion: 4,
+  },
 
   experimental: {
     // when using generate, payload js assets included in sw precache manifest
@@ -21,13 +33,7 @@ export default defineNuxtConfig({
     typedPages: true,
   },
 
-  css: [
-    '@unocss/reset/tailwind.css',
-  ],
-
-  colorMode: {
-    classSuffix: '',
-  },
+  compatibilityDate: '2024-08-14',
 
   nitro: {
     esbuild: {
@@ -60,10 +66,6 @@ export default defineNuxtConfig({
 
   components: [
     {
-      path: 'node_modules/@yunlefun/vue-components/dist/runtime',
-      pathPrefix: false,
-    },
-    {
       path: '~/components',
       pathPrefix: false,
     },
@@ -83,6 +85,16 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       standalone: false,
+    },
+  },
+
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler',
+        },
+      },
     },
   },
 })

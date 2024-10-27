@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '~/assets/scss/3d-room/mixins' as *;
 @use '~/assets/scss/3d-room/vars' as *;
 
@@ -7,7 +8,6 @@ $wall-height: 25vw;
   $width-el: 1vw;
   $depth-el: 13.5vw;
 
-  @include cube($width-el, $wall-height, $depth-el);
   position: absolute;
   left: 0;
   top: 0;
@@ -16,6 +16,8 @@ $wall-height: 25vw;
 
   transform: translateZ(0.5vw);
 
+  @include cube($width-el, $wall-height, $depth-el);
+
   &__front {
     background-image: linear-gradient(to bottom, $white-3, $white-2);
   }
@@ -23,24 +25,15 @@ $wall-height: 25vw;
     background-color: $white-3;
   }
   &__right {
-    background-image: linear-gradient(
-      to bottom,
-      darken($white-4, 10),
-      $white-3,
-      $white-3 90%,
-      darken($white-4, 2)
-    );
+    background-image: linear-gradient(to bottom, color.adjust($white-4, $lightness: -10%), $white-3, $white-3 90%, color.adjust($white-4, $lightness: -2%));
     &::before {
       content: '';
       position: absolute;
       bottom: 0;
       width: 100%;
       height: 0.75vw;
-      background-image: linear-gradient(
-        to bottom,
-        darken($white-2, 5),
-        $neon-2
-      );
+      background-image: linear-gradient(to bottom, color.adjust($white-2, $lightness: -5%), $neon-2);
+
       border-top: 0.1vw solid $white-4;
       border-bottom: 0.1vw solid $white-4;
     }
@@ -51,7 +44,7 @@ $wall-height: 25vw;
       height: 100%;
       background-image: linear-gradient(
         to bottom,
-        rgba(darken($neon-1, 20), 0.35),
+        rgba(color.adjust($neon-1, $lightness: -20%), 0.35),
         transparent 30%,
         transparent 70%,
         rgba($neon-2, 0.35)
@@ -71,7 +64,6 @@ $wall-height: 25vw;
   $height-el: 0.75vw;
   $depth-el: 13.5vw;
 
-  @include cube($width-el, $height-el, $depth-el);
   position: absolute;
   left: 0;
   top: 0;
@@ -80,6 +72,8 @@ $wall-height: 25vw;
 
   transform: translateZ($wall-height);
 
+  @include cube($width-el, $height-el, $depth-el);
+
   &__front {
     background-color: $white-3;
   }
@@ -87,12 +81,7 @@ $wall-height: 25vw;
     background-color: $white-3;
   }
   &__right {
-    background-image: linear-gradient(
-      to right,
-      darken($white-2, 5),
-      $white-2,
-      darken($white-2, 15)
-    );
+    background-image: linear-gradient(to right, color.adjust($white-2, $lightness: -5%), $white-2, color.adjust($white-2, $lightness: -15%));
 
     &::before {
       content: '';
@@ -101,11 +90,7 @@ $wall-height: 25vw;
       height: 100%;
       bottom: 0;
       border-bottom: 0.1vw solid rgba($white-1, 0.75);
-      background-image: linear-gradient(
-        to top,
-        rgba($neon-1, 0.35),
-        transparent
-      );
+      background-image: linear-gradient(to top, rgba($neon-1, 0.35), transparent);
     }
   }
   &__left {
@@ -122,7 +107,6 @@ $wall-height: 25vw;
   $width-el: 26vw;
   $depth-el: 0.5vw;
 
-  @include cube($width-el, $wall-height, $depth-el);
   position: absolute;
   left: 1vw;
   top: 0;
@@ -131,13 +115,10 @@ $wall-height: 25vw;
 
   transform: translateZ(0.5vw);
 
+  @include cube($width-el, $wall-height, $depth-el);
+
   &__front {
-    background-image: linear-gradient(
-      to bottom,
-      darken($white-2, 32),
-      darken($white-2, 25) 20%,
-      darken($white-2, 32)
-    );
+    background-image: linear-gradient(to bottom, color.adjust($white-2, $lightness: -32%), color.adjust($white-2, $lightness: -25%) 20%, color.adjust($white-2, $lightness: -32%));
     &::before {
       content: '';
       position: absolute;
@@ -154,7 +135,7 @@ $wall-height: 25vw;
         linear-gradient(to bottom, rgba($black-1, 0.35), transparent),
         linear-gradient(
           to bottom,
-          rgba(darken($neon-2, 50), 0.5),
+          rgba(color.adjust($neon-2, $lightness: -50%), 0.5),
           transparent 20%,
           transparent 80%,
           rgba($neon-2, 0.25)
@@ -166,11 +147,7 @@ $wall-height: 25vw;
       bottom: 0;
       width: 100%;
       height: 0.75vw;
-      background-image: linear-gradient(
-        to bottom,
-        darken($white-2, 5),
-        $neon-2
-      );
+      background-image: linear-gradient(to bottom, color.adjust($white-2, $lightness: -5%), $neon-2);
       border-top: 0.1vw solid $white-4;
       border-bottom: 0.1vw solid $white-4;
     }
@@ -179,12 +156,7 @@ $wall-height: 25vw;
     background-color: $white-3;
   }
   &__right {
-    background-image: linear-gradient(
-      to bottom,
-      darken($white-4, 10),
-      darken($white-3, 20) 80%,
-      darken($white-4, 10)
-    );
+    background-image: linear-gradient(to bottom, color.adjust($white-4, $lightness: -10%), color.adjust($white-3, $lightness: -20%) 80%, color.adjust($white-4, $lightness: -10%));
   }
   // &__left{ background-color: $white-2; }
   // &__top{ background-color: $white-1; }
@@ -197,7 +169,6 @@ $wall-height: 25vw;
   $height-el: 0.75vw;
   $depth-el: 1vw;
 
-  @include cube($width-el, $height-el, $depth-el);
   position: absolute;
   left: 2vw;
   top: 0;
@@ -206,13 +177,10 @@ $wall-height: 25vw;
 
   transform: translateZ($wall-height);
 
+  @include cube($width-el, $height-el, $depth-el);
+
   &__front {
-    background-image: linear-gradient(
-      to right,
-      darken($white-2, 15),
-      $white-2,
-      darken($white-2, 5)
-    );
+    background-image: linear-gradient(to right, color.adjust($white-2, $lightness: -15%), $white-2, color.adjust($white-2, $lightness: -5%));
     &::before {
       content: '';
       position: absolute;
@@ -220,18 +188,14 @@ $wall-height: 25vw;
       height: 100%;
       bottom: 0;
       border-bottom: 0.1vw solid rgba($white-1, 0.75);
-      background-image: linear-gradient(
-        to top,
-        rgba($neon-2, 0.25),
-        transparent
-      );
+      background-image: linear-gradient(to top, rgba($neon-2, 0.25), transparent);
     }
   }
   &__back {
     background-color: $white-3;
   }
   &__right {
-    background-color: darken($white-4, 10);
+    background-color: color.adjust($white-4, $lightness: -10%);
   }
   &__left {
     background-color: $white-2;

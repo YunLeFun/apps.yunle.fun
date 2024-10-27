@@ -4,20 +4,21 @@ const siteUrl = 'https://studio.yunle.fun'
 
 <template>
   <div class="tv">
-    <div class="tv__front face" />
-    <div class="tv__back face" />
-    <a :href="siteUrl" class="tv__right face cursor-pointer" target="_blank">
+    <div class="face tv__front" />
+    <div class="face tv__back" />
+    <a :href="siteUrl" class="face tv__right cursor-pointer" target="_blank">
       <iframe class="pointer-events-none h-10/1 w-10/1 transform-origin-lt scale-10" :src="siteUrl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" sandbox="" allowfullscreen />
     </a>
-    <div class="tv__left face" />
+    <div class="face tv__left" />
 
     <div class="tv__left face" />
-    <div class="tv__top face" />
-    <div class="tv__bottom face" />
+    <div class="face tv__top" />
+    <div class="face tv__bottom" />
   </div>
 </template>
 
 <style lang="scss">
+@use 'sass:color';
 @use '~/assets/scss/3d-room/mixins' as *;
 @use '~/assets/scss/3d-room/vars' as *;
 
@@ -26,7 +27,6 @@ const siteUrl = 'https://studio.yunle.fun'
   $height-el: 6vw;
   $depth-el: 6vw;
 
-  @include cube($width-el, $height-el, $depth-el);
   position: absolute;
   left: 1.51vw;
   top: 8vw;
@@ -35,6 +35,8 @@ const siteUrl = 'https://studio.yunle.fun'
 
   transform: translateZ(8vw);
 
+  @include cube($width-el, $height-el, $depth-el);
+
   &__front {
     background-color: $black-3;
   }
@@ -42,8 +44,8 @@ const siteUrl = 'https://studio.yunle.fun'
     background-color: $black-3;
   }
   &__right {
-    background-color: lighten($neon-1, 15);
-    border: 0.125vw solid darken($black-3, 10);
+    background-color: color.adjust($neon-1, $lightness: 15%);
+    border: 0.125vw solid color.adjust($black-3, $lightness: 10%);
     &::before {
       content: '';
       position: absolute;
@@ -74,10 +76,12 @@ const siteUrl = 'https://studio.yunle.fun'
       position: absolute;
       width: 13vw;
       height: 7vw;
+      // background-image: radial-gradient(rgba(darken($neon-2, 5), 0.95), rgba(darken($neon-1, 5), 0.95));
       background-image: radial-gradient(
-        rgba(darken($neon-2, 5), 0.95),
-        rgba(darken($neon-1, 5), 0.95)
+        rgba(color.adjust($neon-2, $lightness: -5%), 0.95),
+        rgba(color.adjust($neon-1, $lightness: -5%), 0.95)
       );
+
       filter: blur(1.25vw);
 
       animation: luz-tv 0.25s infinite alternate;

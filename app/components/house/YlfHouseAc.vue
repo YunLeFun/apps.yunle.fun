@@ -9,13 +9,13 @@ const siteUrl = 'https://ac.yunyoujun.cn'
 
   <div class="ac-container">
     <div class="ac-container__front face" />
-    <div class="ac-container__back face">
+    <div class="face ac-container__back">
       <iframe class="pointer-events-none h-10/1 w-10/1 transform-origin-lt scale-10" :src="siteUrl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" sandbox="" allowfullscreen />
     </div>
-    <div class="ac-container__right face" />
-    <div class="ac-container__left face" />
-    <div class="ac-container__top face" />
-    <div class="ac-container__bottom face" />
+    <div class="face ac-container__right" />
+    <div class="face ac-container__left" />
+    <div class="face ac-container__top" />
+    <div class="face ac-container__bottom" />
   </div>
 </template>
 
@@ -28,7 +28,6 @@ const siteUrl = 'https://ac.yunyoujun.cn'
   $height-el: 4vw;
   $depth-el: 0.125vw;
 
-  @include cube($width-el, $height-el, $depth-el);
   position: absolute;
   left: 12vw;
   top: 1vw;
@@ -37,6 +36,7 @@ const siteUrl = 'https://ac.yunyoujun.cn'
 
   transform: translateZ(19vw);
 
+  @include cube($width-el, $height-el, $depth-el);
   &__front {
     background-repeat: no-repeat;
     background-size: contain;

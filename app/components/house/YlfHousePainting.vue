@@ -1,19 +1,19 @@
 <template>
   <div class="cuadro-l">
-    <div class="cuadro-l__front face" />
-    <div class="cuadro-l__back face" />
-    <div class="cuadro-l__right face" />
-    <div class="cuadro-l__left face" />
-    <div class="cuadro-l__top face" />
-    <div class="cuadro-l__bottom face" />
+    <div class="face cuadro-l__front" />
+    <div class="face cuadro-l__back" />
+    <div class="face cuadro-l__right" />
+    <div class="face cuadro-l__left" />
+    <div class="face cuadro-l__top" />
+    <div class="face cuadro-l__bottom" />
   </div>
   <div class="cuadro-r">
-    <a class="cuadro-r__front face" href="https://yyj.moe" target="_blank" />
-    <div class="cuadro-r__back face" />
-    <div class="cuadro-r__right face" />
-    <div class="cuadro-r__left face" />
-    <div class="cuadro-r__top face" />
-    <div class="cuadro-r__bottom face" />
+    <a class="face cuadro-r__front" href="https://yyj.moe" target="_blank" />
+    <div class="face cuadro-r__back" />
+    <div class="face cuadro-r__right" />
+    <div class="face cuadro-r__left" />
+    <div class="face cuadro-r__top" />
+    <div class="face cuadro-r__bottom" />
   </div>
 </template>
 
@@ -27,7 +27,6 @@
   $height-el: 7vw;
   $depth-el: 0.125vw;
 
-  @include cube($width-el, $height-el, $depth-el);
   position: absolute;
   left: 13vw;
   top: 1vw;
@@ -36,6 +35,7 @@
 
   transform: translateZ(10vw);
 
+  @include cube($width-el, $height-el, $depth-el);
   &__front {
     background-repeat: no-repeat;
     background-size: contain;
@@ -76,11 +76,7 @@
       width: 5vw;
       height: 7vw;
       background-origin: padding-box;
-      background-image: linear-gradient(
-        to bottom,
-        rgba($neon-2, 0.15),
-        rgba($neon-2, 0.15)
-      );
+      background-image: linear-gradient(to bottom, rgba($neon-2, 0.15), rgba($neon-2, 0.15));
     }
   }
 }
@@ -98,11 +94,7 @@
       width: 5vw;
       height: 7vw;
       background-origin: padding-box;
-      background-image: linear-gradient(
-        to bottom,
-        rgba($neon-2, 0.15),
-        rgba($neon-2, 0.15)
-      );
+      background-image: linear-gradient(to bottom, rgba($neon-2, 0.15), rgba($neon-2, 0.15));
     }
   }
 }

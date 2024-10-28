@@ -1,5 +1,7 @@
+import path from 'node:path'
 import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
+
 import { appDescription } from './app/constants/index'
 
 const YunPreset = definePreset(Aura, {
@@ -31,6 +33,7 @@ export default defineNuxtConfig({
     '@primevue/nuxt-module',
     '@yunlefun/vue/nuxt',
     'nuxt-auth-utils',
+    // '@prisma/nuxt',
   ],
 
   css: [
@@ -96,6 +99,10 @@ export default defineNuxtConfig({
   ],
 
   // pwa,
+
+  // prisma: {
+  //   generateClient: false,
+  // },
 
   devtools: {
     enabled: true,

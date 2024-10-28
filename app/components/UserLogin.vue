@@ -19,6 +19,14 @@ const router = useRouter()
 
 const wxLoginLoading = ref(false)
 /**
+ * @TODO 通过 QQ 登录
+ * @see https://connect.qq.com/
+ */
+function loginByQQ() {
+  consola.info('通过 QQ 登录')
+}
+
+/**
  * 通过微信登录
  */
 function loginByWechat() {
@@ -94,6 +102,16 @@ function loginByWechat() {
         >
           <div i-ri-wechat-fill />
           <span>微信登录</span>
+        </button>
+
+        <button
+          class="focus-visible:ring-ring h-9 w-full inline-flex items-center justify-center rounded-md bg-#07c160 px-4 py-2 text-sm text-white font-medium shadow transition-colors disabled:pointer-events-none hover:bg-green-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1"
+          gap="2"
+          :loading="wxLoginLoading"
+          @click="loginByQQ"
+        >
+          <div i-ri-qq-fill />
+          <span>QQ 登录</span>
         </button>
       </div>
     </div>

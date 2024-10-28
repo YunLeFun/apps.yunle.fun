@@ -15,10 +15,17 @@ const appInfo = computed(() => {
   }
 })
 
+const router = useRouter()
+
+const wxLoginLoading = ref(false)
+/**
+ * 通过微信登录
+ */
 function loginByWechat() {
   consola.info('通过微信登录')
 
   if (isInWxBrowser()) {
+    wxLoginLoading.value = true
     // 在微信浏览器中，直接跳转到微信授权页面
     window.location.href = generateUserAuthLink({
       scope: 'snsapi_userinfo',
@@ -30,6 +37,9 @@ function loginByWechat() {
     // 1. 获取二维码
     // 2. 轮询扫码状态
     // 3. 获取用户信息
+
+    // 进入微信扫码登录页面
+    router.push('/wx/login')
   }
 }
 </script>
@@ -79,6 +89,7 @@ function loginByWechat() {
         <button
           class="focus-visible:ring-ring h-9 w-full inline-flex items-center justify-center rounded-md bg-#07c160 px-4 py-2 text-sm text-white font-medium shadow transition-colors disabled:pointer-events-none hover:bg-green-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1"
           gap="2"
+          :loading="wxLoginLoading"
           @click="loginByWechat"
         >
           <div i-ri-wechat-fill />

@@ -1,5 +1,16 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
+export interface UserInfo {
+  avatar: string
+  nickname: string
+}
+
+const defaultUserInfo: UserInfo = {
+  avatar: '',
+  nickname: '',
+}
+export const userInfo = ref<UserInfo>(JSON.parse(JSON.stringify(defaultUserInfo)))
+
 export const useUserStore = defineStore('user', () => {
   /**
    * Current named of the user.
@@ -24,6 +35,8 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
+    userInfo,
+
     setNewName,
     otherNames,
     savedName,

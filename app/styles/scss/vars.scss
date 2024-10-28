@@ -1,0 +1,21 @@
+@use 'sass:color';
+
+$c-bg-1: hsl(250, 28%, 11%);
+$c-bg-2: color.adjust($c-bg-1, $lightness: -15%);
+
+:root {
+  --ylf-bg: #{radial-gradient(circle, #eff3f8, #fff)};
+  --ylf-c-text: #333;
+}
+
+.dark {
+  --ylf-bg: #{radial-gradient(circle, $c-bg-1, color.adjust($c-bg-1, $lightness: -20%))};
+  --ylf-c-text: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --ylf-bg: #{radial-gradient(circle, $c-bg-1, color.adjust($c-bg-1, $lightness: -20%))};
+    --ylf-c-text: #fff;
+  }
+}

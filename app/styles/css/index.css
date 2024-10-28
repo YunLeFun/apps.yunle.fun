@@ -1,0 +1,10 @@
+/* global */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+  color: var(--ylf-c-text);
+  background-image: var(--ylf-bg);
+}

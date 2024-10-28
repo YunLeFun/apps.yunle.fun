@@ -1,5 +1,16 @@
 <script setup lang="ts">
+import consola from 'consola'
+import Toast from 'primevue/toast'
+
 import { appName } from '~/constants'
+
+// init log
+consola.level = import.meta.env.DEV ? 4 : 3
+
+const isMobile = useMediaQuery('(max-width: 768px)')
+const position = computed(() => {
+  return isMobile.value ? 'bottom-center' : 'top-right'
+})
 
 useHead({
   title: appName,
@@ -7,7 +18,11 @@ useHead({
 </script>
 
 <template>
-  <VitePwaManifest />
+  <!-- <VitePwaManifest /> -->
+  <ClientOnly>
+    <Toast :position="position" />
+  </ClientOnly>
+
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
@@ -29,32 +44,5 @@ body,
 html.dark {
   background: #222;
   color: white;
-}
-
-:root {
-  --ylf-bg: #{radial-gradient(circle, #eff3f8, #fff)};
-  --ylf-c-text: #333;
-}
-
-.dark {
-  --ylf-bg: #{radial-gradient(circle, $bg-1, color.adjust($bg-1, $lightness: -20%))};
-  --ylf-c-text: #fff;
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not(.light) {
-    --ylf-bg: #{radial-gradient(circle, $bg-1, color.adjust($bg-1, $lightness: -20%))};
-    --ylf-c-text: #fff;
-  }
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  overflow: hidden;
-  color: var(--ylf-c-text);
-  background-image: var(--ylf-bg);
 }
 </style>

@@ -1,6 +1,24 @@
+import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
-import { pwa } from './app/config/pwa'
 import { appDescription } from './app/constants/index'
+
+const YunPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50: '{blue.50}',
+      100: '{blue.100}',
+      200: '{blue.200}',
+      300: '{blue.300}',
+      400: '{blue.400}',
+      500: '{blue.500}',
+      600: '{blue.600}',
+      700: '{blue.700}',
+      800: '{blue.800}',
+      900: '{blue.900}',
+      950: '{blue.950}',
+    },
+  },
+})
 
 export default defineNuxtConfig({
   modules: [
@@ -8,15 +26,19 @@ export default defineNuxtConfig({
     '@unocss/nuxt',
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
-    '@vite-pwa/nuxt',
+    // '@vite-pwa/nuxt',
     '@nuxt/eslint',
-
     '@primevue/nuxt-module',
     '@yunlefun/vue/nuxt',
+    'nuxt-auth-utils',
   ],
 
   css: [
     '@unocss/reset/tailwind.css',
+    '~/styles/scss/vars.scss',
+    '~/styles/scss/index.scss',
+    '~/styles/css/index.css',
+    '~/styles/scss/override.scss',
   ],
 
   colorMode: {
@@ -45,7 +67,7 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: false,
-      routes: ['/'],
+      routes: ['/', '/mobile/wx/login/confirm'],
       ignore: ['/hi'],
     },
   },
@@ -73,7 +95,7 @@ export default defineNuxtConfig({
     },
   ],
 
-  pwa,
+  // pwa,
 
   devtools: {
     enabled: true,
@@ -93,7 +115,7 @@ export default defineNuxtConfig({
   primevue: {
     options: {
       theme: {
-        preset: Aura,
+        preset: YunPreset,
       },
     },
   },

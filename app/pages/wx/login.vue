@@ -1,34 +1,53 @@
 <script setup lang="ts">
-import { config } from '../../config'
+import { useWxLogin } from '~/composables/wx/useWxLogin'
 
-/**
- * https://open.weixin.qq.com/
- * 需要资质认证 暂时不加
- * @see https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
- */
-// 将微信登录二维码内嵌到自己页面
+const toast = useToast()
 
-useScriptTag('http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js', () => {
-  // @ts-expect-error wxLogin
-  const obj = new window.WxLogin({
-    self_redirect: true,
-    id: 'login_container',
-    appid: config.wx.appId,
-    scope: 'snsapi_login',
-    redirect_uri: config.wx.redirectUri,
-    state: '',
-    style: '',
-    href: '',
-    // 切换二维码登录样式，值为1时二维码登录将切换到新样式。详见文档底部FAQ。
-    stylelite: 1,
-    // 启用或禁用快速登录功能，值为0时将禁用快速登录，如发现参数不生效可检查redirect_uri是否已经正确encode。
-    // fast_login:
-  })
+const router = useRouter()
+
+const {
+  loadAndCheckQrcode,
+  wxLoginConfirmQrcode,
+  qrcodeStatus,
+} = useWxLogin({
+  onSuccess: async () => {
+    // 登录成功后跳转到重定向页面 或 首页
+    setTimeout(() => {
+      router.push('/user')
+    }, 1200)
+
+    toast.add({
+      severity: 'success',
+      summary: '登录成功',
+      detail: '即将跳转到用户中心',
+    })
+  },
+})
+
+onMounted(async () => {
+  // 轮询 check login qrcode
+  await loadAndCheckQrcode()
 })
 </script>
 
 <template>
   <div class="mt-20 flex items-center justify-center p-4">
-    <div id="login_container" />
+    <!-- <div id="login_container" /> -->
+
+    <div class="items-center justify-center" flex="~ col">
+      <h3 class="my-2 text-base font-bold">
+        微信扫码登录
+      </h3>
+
+      <QrcodeContainer
+        :qrcode-url="wxLoginConfirmQrcode"
+        :status="qrcodeStatus"
+        :error="{
+          title: '登录失败',
+          tip: '请重新扫码登录',
+        }"
+        @reload="loadAndCheckQrcode"
+      />
+    </div>
   </div>
 </template>

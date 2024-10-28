@@ -1,0 +1,8 @@
+// override primevue
+:root {
+  --p-toast-width: 350px !important;
+}
+
+.p-toast-summary {
+  line-height: 1.1;
+}

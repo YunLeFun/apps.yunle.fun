@@ -15,14 +15,15 @@ const wxUserInfo = ref<WxUserInfo>()
 
 const errorInfo = ref('')
 
+const { $api } = useNuxtApp()
+
 onMounted(async () => {
   const { code, state } = route.query
   if (code && state) {
     // 授权重定向成功
 
     // 1. 发送 code 给 api.yunle.fun 获取用户信息
-
-    const res = await $fetch<{
+    const res = await $api<{
       success: boolean
       msg: string
       data: WxUserInfo

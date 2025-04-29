@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-import { isInWxBrowser } from '@yunlefun/toolkit'
-
 // const email = ref('')
-import consola from 'consola'
+import { useUserLogin } from '../composables/useUserLogin'
 
 const appInfo = computed(() => {
   return {
@@ -15,41 +13,7 @@ const appInfo = computed(() => {
   }
 })
 
-const router = useRouter()
-
-const wxLoginLoading = ref(false)
-/**
- * @TODO 通过 QQ 登录
- * @see https://connect.qq.com/
- */
-function loginByQQ() {
-  consola.info('通过 QQ 登录')
-}
-
-/**
- * 通过微信登录
- */
-function loginByWechat() {
-  consola.info('通过微信登录')
-
-  if (isInWxBrowser()) {
-    wxLoginLoading.value = true
-    // 在微信浏览器中，直接跳转到微信授权页面
-    window.location.href = generateUserAuthLink({
-      scope: 'snsapi_userinfo',
-      redirect_uri: window.location.href,
-    })
-  }
-  else {
-    // 在非微信浏览器中，调用微信扫码登录
-    // 1. 获取二维码
-    // 2. 轮询扫码状态
-    // 3. 获取用户信息
-
-    // 进入微信扫码登录页面
-    router.push('/wx/login')
-  }
-}
+const userLogin = useUserLogin()
 </script>
 
 <template>
@@ -93,26 +57,26 @@ function loginByWechat() {
         </h3>
       </div>
 
-      <div class="flex items-center">
+      <div class="items-center" flex="~ col gap-2">
         <button
-          class="focus-visible:ring-ring h-9 w-full inline-flex items-center justify-center rounded-md bg-#07c160 px-4 py-2 text-sm text-white font-medium shadow transition-colors disabled:pointer-events-none hover:bg-green-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1"
+          class="focus-visible:ring-ring h-9 w-full inline-flex items-center justify-center rounded-md bg-$c-brand-wx px-4 py-2 text-sm text-white font-medium shadow transition-colors disabled:pointer-events-none hover:bg-green-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1"
           gap="2"
-          :loading="wxLoginLoading"
-          @click="loginByWechat"
+          :loading="userLogin.wxLoginLoading"
+          @click="userLogin.loginByWechat"
         >
           <div i-ri-wechat-fill />
           <span>微信登录</span>
         </button>
 
-        <button
-          class="focus-visible:ring-ring h-9 w-full inline-flex items-center justify-center rounded-md bg-#07c160 px-4 py-2 text-sm text-white font-medium shadow transition-colors disabled:pointer-events-none hover:bg-green-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1"
+        <!-- <button
+          class="focus-visible:ring-ring h-9 w-full inline-flex items-center justify-center rounded-md bg-$c-brand-qq px-4 py-2 text-sm text-white font-medium shadow transition-colors disabled:pointer-events-none hover:bg-blue-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1"
           gap="2"
           :loading="wxLoginLoading"
           @click="loginByQQ"
         >
           <div i-ri-qq-fill />
           <span>QQ 登录</span>
-        </button>
+        </button> -->
       </div>
     </div>
   </div>

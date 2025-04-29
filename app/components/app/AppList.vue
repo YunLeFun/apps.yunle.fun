@@ -2,7 +2,19 @@
 import DataView from 'primevue/dataview'
 import Tag from 'primevue/tag'
 
-const products = ref<any>([
+const products = ref<{
+  id: string
+  code: string
+  name: string
+  description: string
+  image: string
+  price: number
+  category: string
+  quantity: number
+  inventoryStatus: 'INSTOCK' | 'LOWSTOCK' | 'OUTOFSTOCK'
+  rating: number
+  dataKey: string
+}[]>([
   {
     id: '1000',
     code: 'f230fh0g3',
@@ -14,6 +26,7 @@ const products = ref<any>([
     quantity: 24,
     inventoryStatus: 'INSTOCK',
     rating: 5,
+    dataKey: '1',
   },
   {
     id: '1000',
@@ -26,6 +39,7 @@ const products = ref<any>([
     quantity: 24,
     inventoryStatus: 'INSTOCK',
     rating: 5,
+    dataKey: '2',
   },
   {
     id: '1000',
@@ -38,10 +52,13 @@ const products = ref<any>([
     quantity: 24,
     inventoryStatus: 'INSTOCK',
     rating: 5,
+    dataKey: '3',
   },
 ])
 
-function getSeverity(product) {
+function getSeverity(product: {
+  inventoryStatus: 'INSTOCK' | 'LOWSTOCK' | 'OUTOFSTOCK'
+}): 'success' | 'warn' | 'danger' | 'info' {
   switch (product.inventoryStatus) {
     case 'INSTOCK':
       return 'success'
@@ -53,14 +70,14 @@ function getSeverity(product) {
       return 'danger'
 
     default:
-      return null
+      return 'info'
   }
 }
 </script>
 
 <template>
   <div class="card">
-    <DataView :value="products">
+    <DataView :value="products" data-key="custom">
       <template #list="slotProps">
         <div class="flex flex-col">
           <div v-for="(item, index) in slotProps.items" :key="index">

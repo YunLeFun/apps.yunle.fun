@@ -1,6 +1,6 @@
 <template>
   <TheMenubar />
-  <main class="_3d-room h-screen w-screen flex items-center justify-center overflow-hidden">
+  <main>
     <slot />
   </main>
 </template>

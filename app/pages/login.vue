@@ -2,7 +2,7 @@
 import type { WxUserInfo } from '../utils'
 
 definePageMeta({
-  layout: 'fullscreen',
+  // layout: 'fullscreen',
 })
 
 const route = useRoute()

@@ -1,2 +1,2 @@
 export * from './useWxLogin'
-export * from './useWxOpenapi'
+export * from './useWxOpenApi'

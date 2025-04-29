@@ -7,7 +7,14 @@ const siteUrl = 'https://studio.yunle.fun'
     <div class="face tv__front" />
     <div class="face tv__back" />
     <a :href="siteUrl" class="face tv__right cursor-pointer" target="_blank">
-      <iframe class="pointer-events-none h-10/1 w-10/1 transform-origin-lt scale-10" :src="siteUrl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" sandbox="" allowfullscreen />
+      <iframe
+        class="pointer-events-none h-10/1 w-10/1 transform-origin-lt scale-10"
+        :src="siteUrl"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        sandbox="allow-scripts"
+        allowfullscreen
+      />
     </a>
     <div class="face tv__left" />
 

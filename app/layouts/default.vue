@@ -1,6 +1,6 @@
 <template>
   <TheMenubar />
-  <main class="p-4 text-center">
+  <main class="p-4">
     <slot />
   </main>
 </template>

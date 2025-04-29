@@ -1,4 +1,3 @@
-import path from 'node:path'
 import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
 
@@ -23,6 +22,10 @@ const YunPreset = definePreset(Aura, {
 })
 
 export default defineNuxtConfig({
+  devServer: {
+    port: 8001,
+  },
+
   modules: [
     '@vueuse/nuxt',
     '@unocss/nuxt',
@@ -38,9 +41,12 @@ export default defineNuxtConfig({
 
   css: [
     '@unocss/reset/tailwind.css',
+
+    '~/styles/css/index.css',
+    '~/styles/css/css-vars.css',
+
     '~/styles/scss/vars.scss',
     '~/styles/scss/index.scss',
-    '~/styles/css/index.css',
     '~/styles/scss/override.scss',
   ],
 

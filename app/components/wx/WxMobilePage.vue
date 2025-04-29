@@ -16,11 +16,11 @@ defineProps<{
       />
       <i
         v-if="type === 'warn'"
-        class="weui-icon-warn weui-icon_msg"
+        class="weui-icon_msg weui-icon-warn"
       />
       <i
         v-if="type === 'info'"
-        class="weui-icon-info weui-icon_msg"
+        class="weui-icon_msg weui-icon-info"
       />
     </div>
     <div class="weui-msg__text-area">

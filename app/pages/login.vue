@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 
 /**
  * 微信授权状态
@@ -37,6 +38,11 @@ onMounted(async () => {
     if (res.success) {
       wxAuthState.value = 'success'
       wxUserInfo.value = res.data
+
+      // 微信登录成功后重定向到用户信息页面
+      setTimeout(() => {
+        router.push('/user')
+      }, 1000)
     }
     else {
       wxAuthState.value = 'error'

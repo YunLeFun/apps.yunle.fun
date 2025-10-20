@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import type { WxUserInfo } from '../utils'
+import type { WxUserInfo } from '~/utils/wx/types'
 
-defineProps<{
+interface Props {
   userInfo?: WxUserInfo
-}>()
+}
+
+defineProps<Props>()
 </script>
 
 <template>
   <div flex="~ col" class="gap-1 py-4">
     <div flex="~ col" class="gap-1">
       <Avatar
-        :image="userInfo?.headimgurl" alt="头像"
+        :image="(userInfo as WxUserInfo)?.headimgurl" alt="头像"
         shape="circle"
         size="large"
       />

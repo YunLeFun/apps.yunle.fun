@@ -1,5 +1,6 @@
 import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
+import { defineNuxtConfig } from 'nuxt/config'
 
 import { appDescription } from './app/constants/index'
 
@@ -22,6 +23,8 @@ const YunPreset = definePreset(Aura, {
 })
 
 export default defineNuxtConfig({
+  ssr: false,
+
   devServer: {
     port: 8001,
   },
@@ -37,6 +40,8 @@ export default defineNuxtConfig({
     '@yunlefun/vue/nuxt',
     'nuxt-auth-utils',
     // '@prisma/nuxt',
+    '@nuxt/test-utils/module',
+    '@nuxtjs/ionic',
   ],
 
   css: [
@@ -48,6 +53,13 @@ export default defineNuxtConfig({
     '~/styles/scss/vars.scss',
     '~/styles/scss/index.scss',
     '~/styles/scss/override.scss',
+
+    /**
+     * ionic dark mode
+     * @see https://ionicframework.com/docs/theming/dark-mode#system
+     */
+    '@ionic/vue/css/palettes/dark.system.css',
+    '~/styles/ionic.css',
   ],
 
   colorMode: {
@@ -58,6 +70,8 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
+  compatibilityDate: '2025-10-20',
+
   experimental: {
     // when using generate, payload js assets included in sw precache manifest
     // but missing on offline, disabling extraction it until fixed
@@ -65,8 +79,6 @@ export default defineNuxtConfig({
     renderJsonPayloads: true,
     typedPages: true,
   },
-
-  compatibilityDate: '2024-08-14',
 
   nitro: {
     esbuild: {
@@ -137,9 +149,18 @@ export default defineNuxtConfig({
     css: {
       preprocessorOptions: {
         scss: {
+          // @ts-expect-error - modern-compiler is a valid option in newer sass versions
           api: 'modern-compiler',
         },
       },
+    },
+  },
+
+  ionic: {},
+
+  runtimeConfig: {
+    public: {
+      tcbEnvId: '',
     },
   },
 })

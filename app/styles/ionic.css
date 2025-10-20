@@ -1,0 +1,10 @@
+:root {
+  --ion-item-background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root.ios,
+  :root.md {
+    --ion-item-background: #2c2c2c;
+  }
+}

@@ -1,9 +1,13 @@
 <script lang="ts" setup>
 definePageMeta({
-  layout: 'home',
+  redirect: '/home',
 })
 </script>
 
 <template>
-  <YlfHouse />
+  <div />
 </template>
+
+<style>
+
+</style>

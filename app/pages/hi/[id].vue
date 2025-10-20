@@ -39,7 +39,7 @@ definePageMeta({
 
     <div>
       <NuxtLink
-        class="m-3 text-sm btn"
+        class="m-3 btn text-sm"
         to="/"
       >
         Back

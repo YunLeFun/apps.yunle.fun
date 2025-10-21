@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'nuxt-ionic-project',
+  appId: 'apps.yunle.fun',
+  appName: '云乐坊',
   webDir: 'dist',
 }
 

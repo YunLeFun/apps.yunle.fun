@@ -2,6 +2,7 @@
 import type { YlfAppInfo } from '~~/packages/types'
 import { IonButton, IonIcon } from '@ionic/vue'
 import { chevronForward, star, starOutline } from 'ionicons/icons'
+import { openInAppBrowser } from '~/composables/useBrowser'
 import { ALL_APPS } from '~/constants/apps'
 
 interface Props {
@@ -41,7 +42,9 @@ function renderStars(rating?: number) {
 }
 
 function openAppLink(app: YlfAppInfo) {
-  window.open(app.url, '_blank')
+  // window.open(app.url, '_blank')
+
+  openInAppBrowser(app.url)
 }
 </script>
 
@@ -106,7 +109,7 @@ function openAppLink(app: YlfAppInfo) {
               size="small"
               class="get-button flex-shrink-0"
               style="--border-radius: 14px; font-weight: 600; min-width: 72px"
-              @click="openAppLink(app)"
+              @click.stop="openAppLink(app)"
             >
               获取
             </IonButton>

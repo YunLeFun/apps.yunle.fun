@@ -59,21 +59,21 @@ function handleSegmentChange(event: CustomEvent) {
       </IonToolbar>
 
       <!-- 分类筛选工具栏 -->
-      <IonToolbar class="segment-toolbar">
+      <IonToolbar>
         <IonSegment
           :value="selectedCategory"
           scrollable
+          mode="ios"
           @ion-change="handleSegmentChange"
         >
           <IonSegmentButton
             v-for="category in categories"
             :key="category.id"
             :value="category.name"
-            class="category-segment-button"
           >
-            <IonLabel class="segment-label">
-              <span class="segment-icon">{{ category.icon }}</span>
-              <span class="segment-text">{{ category.name }}</span>
+            <IonLabel class="inline-flex gap-2">
+              <span>{{ category.icon }}</span>
+              <span>{{ category.name }}</span>
             </IonLabel>
           </IonSegmentButton>
         </IonSegment>
@@ -153,90 +153,6 @@ function handleSegmentChange(event: CustomEvent) {
   --placeholder-color: rgba(235, 235, 245, 0.6);
   --icon-color: rgba(235, 235, 245, 0.6);
   --clear-button-color: rgba(235, 235, 245, 0.6);
-}
-
-.dark .app-store-searchbar::part(native):focus-within {
-  --background: rgba(118, 118, 128, 0.32);
-}
-
-/* ==================== 分类筛选工具栏 ==================== */
-.segment-toolbar {
-  --background: transparent;
-  --border-width: 0 0 0.5px 0;
-  --border-color: rgba(60, 60, 67, 0.18);
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --min-height: 44px;
-}
-
-.dark .segment-toolbar {
-  --border-color: rgba(84, 84, 88, 0.48);
-}
-
-.category-segment-button {
-  --background: transparent;
-  --background-checked: transparent;
-  --background-hover: transparent;
-  --background-focused: transparent;
-  --color: #8e8e93;
-  --color-checked: #007aff;
-  --indicator-color: #007aff;
-  --indicator-height: 2px;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  min-width: auto;
-  font-size: 15px;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.segment-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  transition: transform 0.2s ease;
-}
-
-.category-segment-button:active .segment-label {
-  transform: scale(0.95);
-}
-
-.segment-text {
-  white-space: nowrap;
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.24px;
-}
-
-/* Segment 指示器动画 */
-.category-segment-button::part(indicator) {
-  border-radius: 1px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.category-segment-button::part(indicator-background) {
-  background: #007aff;
-}
-
-.category-segment-button.segment-button-checked {
-  color: #007aff;
-}
-
-.dark .category-segment-button {
-  --color: #8e8e93;
-  --color-checked: #0a84ff;
-  --indicator-color: #0a84ff;
-}
-
-.dark .category-segment-button.segment-button-checked {
-  color: #0a84ff;
-}
-
-.dark .category-segment-button::part(indicator-background) {
-  background: #0a84ff;
 }
 
 /* ==================== Content 区域 ==================== */
@@ -324,7 +240,6 @@ function handleSegmentChange(event: CustomEvent) {
 /* ==================== 无障碍优化 ==================== */
 @media (prefers-reduced-motion: reduce) {
   .app-store-header,
-  .segment-label,
   .category-segment-button::part(indicator),
   .app-store-searchbar::part(native) {
     animation: none;

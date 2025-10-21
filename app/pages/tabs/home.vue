@@ -10,6 +10,10 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { personCircleOutline } from 'ionicons/icons'
+
+definePageMeta({
+  alias: ['/', '/home'],
+})
 </script>
 
 <template>

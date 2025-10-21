@@ -1,13 +1,8 @@
 <script lang="ts" setup>
-definePageMeta({
-  redirect: '/home',
-})
+// 重定向到主页
+await navigateTo('/tabs/home', { replace: true })
 </script>
 
 <template>
   <div />
 </template>
-
-<style>
-
-</style>

@@ -18,10 +18,15 @@ export function useSmsAuth() {
   const username = ref('') // 可选，用于注册时设置用户名
   const nickname = ref('') // 可选，用于注册时设置昵称
 
+  interface VerificationInfo {
+    verification_id: string
+    is_user: boolean
+  }
+
   const sendingCode = ref(false)
   const processing = ref(false)
   const countdown = ref(0)
-  const verificationInfo = ref<any>(null)
+  const verificationInfo = ref<VerificationInfo | null>(null)
 
   let countdownTimer: NodeJS.Timeout | null = null
 
@@ -74,11 +79,12 @@ export function useSmsAuth() {
         isUser: verification.is_user, // 标识该手机号是否已注册
       }
     }
-    catch (error: any) {
+    catch (error: unknown) {
       consola.error('发送验证码失败:', error)
+      const message = error instanceof Error ? error.message : '发送验证码失败，请稍后重试'
       return {
         success: false,
-        message: error.message || '发送验证码失败，请稍后重试',
+        message,
       }
     }
     finally {
@@ -110,11 +116,12 @@ export function useSmsAuth() {
         verificationToken: verificationTokenRes.verification_token,
       }
     }
-    catch (error: any) {
+    catch (error: unknown) {
       consola.error('验证码验证失败:', error)
+      const message = error instanceof Error ? error.message : '验证码验证失败'
       return {
         success: false,
-        message: error.message || '验证码验证失败',
+        message,
       }
     }
   }
@@ -142,7 +149,13 @@ export function useSmsAuth() {
       processing.value = true
 
       // 使用手机号和验证码登录
-      await ($tcbAuth as any).signInWithSms({
+      await ($tcbAuth as {
+        signInWithSms: (params: {
+          verificationInfo: VerificationInfo
+          verificationCode: string
+          phoneNum: string
+        }) => Promise<void>
+      }).signInWithSms({
         verificationInfo: verificationInfo.value,
         verificationCode: verifyCode.value,
         phoneNum: phoneNumber.value,
@@ -163,11 +176,12 @@ export function useSmsAuth() {
         return { success: false, message: '登录失败' }
       }
     }
-    catch (error: any) {
+    catch (error: unknown) {
       consola.error('登录失败:', error)
+      const message = error instanceof Error ? error.message : '登录失败，请检查验证码是否正确'
       return {
         success: false,
-        message: error.message || '登录失败，请检查验证码是否正确',
+        message,
       }
     }
     finally {
@@ -203,7 +217,16 @@ export function useSmsAuth() {
       const phoneWithCode = `+86 ${phoneNumber.value}`
 
       // 构建注册参数
-      const signUpParams: any = {
+      interface SignUpParams {
+        phone_number: string
+        verification_code: string
+        verification_token: string
+        name?: string
+        password?: string
+        username?: string
+      }
+
+      const signUpParams: SignUpParams = {
         phone_number: phoneWithCode,
         verification_code: verifyCode.value,
         verification_token: verifyResult.verificationToken,
@@ -238,11 +261,12 @@ export function useSmsAuth() {
         return { success: false, message: '注册失败' }
       }
     }
-    catch (error: any) {
+    catch (error: unknown) {
       consola.error('注册失败:', error)
+      const message = error instanceof Error ? error.message : '注册失败，请稍后重试'
       return {
         success: false,
-        message: error.message || '注册失败，请稍后重试',
+        message,
       }
     }
     finally {

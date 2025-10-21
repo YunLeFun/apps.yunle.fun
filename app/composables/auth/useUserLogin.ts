@@ -1,9 +1,8 @@
+import { createEmbeddedWxLogin } from '@yunlefun/auth'
 import { isInWxBrowser } from '@yunlefun/toolkit'
 import { consola } from 'consola'
 
 export function useUserLogin() {
-  const router = useRouter()
-
   /**
    * @TODO 通过 QQ 登录
    * @see https://connect.qq.com/
@@ -36,7 +35,24 @@ export function useUserLogin() {
       // 3. 获取用户信息
 
       // 进入微信扫码登录页面
-      router.push('/wx/login')
+      // router.push('/wx/login')
+
+      const { init } = createEmbeddedWxLogin()
+      init({
+        id: 'wx_login_container',
+        // appid: '',
+        /**
+         * https://open.weixin.qq.com/
+         * me@yunyoujun.cn
+         */
+        appid: 'wxce19bebd781d8b7d',
+        redirect_uri: 'https://example.com',
+        /**
+         * 新样式
+         */
+        stylelite: 1,
+      })
+      consola.info('初始化内嵌微信登录')
     }
   }
 

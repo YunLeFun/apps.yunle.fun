@@ -9,6 +9,7 @@ export default nuxt(
       formatters: true,
       rules: {
         'vue/no-multiple-template-root': 'off',
+        'vue/no-deprecated-slot-attribute': 'off',
       },
     },
   ),

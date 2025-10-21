@@ -1,6 +1,4 @@
 import consola from 'consola'
-import { useToast } from 'primevue/usetoast'
-
 import QRCode from 'qrcode'
 
 /**
@@ -22,7 +20,7 @@ export function useWxLogin(options: {
 }) {
   const qrcodeStatus = ref<QrcodeStatus>()
   const checkLoginInterval = ref<ReturnType<typeof setTimeout>>()
-  const toast = useToast()
+  const { showError } = useToast()
 
   /**
    * 登录凭证
@@ -53,11 +51,7 @@ export function useWxLogin(options: {
     }
     else {
       consola.error('获取登录凭证失败', res)
-      toast.add({
-        severity: 'error',
-        summary: '错误',
-        detail: '获取登录凭证失败',
-      })
+      await showError('获取登录凭证失败')
     }
   }
 

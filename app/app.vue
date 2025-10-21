@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import consola from 'consola'
-import Toast from 'primevue/toast'
 
 import { appName } from '~/constants'
 
 // init log
 consola.level = import.meta.env.DEV ? 4 : 3
-
-const isMobile = useMediaQuery('(max-width: 768px)')
-const position = computed(() => {
-  return isMobile.value ? 'bottom-center' : 'top-right'
-})
 
 useHead({
   title: appName,
@@ -19,13 +13,14 @@ useHead({
 
 <template>
   <!-- <VitePwaManifest /> -->
-  <ClientOnly>
-    <Toast :position="position" />
-  </ClientOnly>
 
-  <NuxtLayout>
+  <!-- <NuxtLayout>
     <NuxtPage />
-  </NuxtLayout>
+  </NuxtLayout> -->
+
+  <IonApp>
+    <IonRouterOutlet />
+  </IonApp>
 </template>
 
 <style lang="scss">

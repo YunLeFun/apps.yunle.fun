@@ -16,11 +16,7 @@ const {
       router.push('/user')
     }, 1200)
 
-    toast.add({
-      severity: 'success',
-      summary: '登录成功',
-      detail: '即将跳转到用户中心',
-    })
+    toast.showSuccess('登录成功')
   },
 })
 

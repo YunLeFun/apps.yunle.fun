@@ -18,9 +18,10 @@ WORKDIR /app
 COPY --from=build-stage /app/.output ./.output
 COPY --from=build-stage /app/package.json ./
 
-ENV NITRO_HOST 0.0.0.0
 # 腾讯云云函数的端口号是 9000
 # NUXT_PORT not work
-ENV NITRO_PORT 9000
+ENV NITRO_PORT 80
+
+EXPOSE 80
 
 CMD ["node", ".output/server/index.mjs"]

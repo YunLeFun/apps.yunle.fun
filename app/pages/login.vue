@@ -1,5 +1,14 @@
 <script lang="ts" setup>
 import type { WxUserInfo } from '../utils'
+import {
+  IonBackButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/vue'
 
 definePageMeta({
   // layout: 'fullscreen',
@@ -23,12 +32,12 @@ onMounted(async () => {
   if (code && state) {
     // 授权重定向成功
 
-    // 1. 发送 code 给 api.yunle.fun 获取用户信息
+    // 1. 通过服务端代理发送 code 获取用户信息（更安全）
     const res = await $api<{
       success: boolean
       msg: string
       data: WxUserInfo
-    }>('https://api.yunle.fun/wx/auth', {
+    }>('/wx/auth', {
       method: 'GET',
       query: {
         code,
@@ -39,9 +48,9 @@ onMounted(async () => {
       wxAuthState.value = 'success'
       wxUserInfo.value = res.data
 
-      // 微信登录成功后重定向到用户信息页面
+      // 微信登录成功后重定向到我的页面
       setTimeout(() => {
-        router.push('/user')
+        router.push('/tabs/profile')
       }, 1000)
     }
     else {
@@ -54,17 +63,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full items-center pt-25" flex="~ col">
-    <Logo mb-8 />
-    <UserLogin />
+  <IonPage>
+    <IonHeader>
+      <IonToolbar>
+        <IonButtons slot="start">
+          <IonBackButton default-href="/tabs/profile" />
+        </IonButtons>
+        <IonTitle>登录</IonTitle>
+      </IonToolbar>
+    </IonHeader>
 
-    <br>
-    <WxUserInfo
-      v-if="wxAuthState === 'success'"
-      :user-info="wxUserInfo"
-    />
-    <div v-if="wxAuthState === 'error'" class="text-red-500">
-      授权失败: {{ errorInfo }}
-    </div>
-  </div>
+    <IonContent class="ion-padding">
+      <div class="w-full items-center" flex="~ col">
+        <Logo mb-8 mt-10 />
+        <UserLogin />
+
+        <br>
+        <WxUserInfo
+          v-if="wxAuthState === 'success'"
+          :user-info="wxUserInfo"
+        />
+        <div v-if="wxAuthState === 'error'" class="text-red-500">
+          授权失败: {{ errorInfo }}
+        </div>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>

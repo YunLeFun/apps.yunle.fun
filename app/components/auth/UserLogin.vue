@@ -1,27 +1,25 @@
 <script lang="ts" setup>
 import type { YlfAppInfo } from '~~/packages/types'
-import { IonButton, IonCard, IonCardContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/vue'
-import { consola } from 'consola'
-import { logoWechat } from 'ionicons/icons'
-import { useUserLogin } from '../../composables/useUserLogin'
+import { IonCard, IonCardContent } from '@ionic/vue'
+import { createEmbeddedWxLogin } from '~~/packages/auth/src'
 
-const userLogin = useUserLogin()
-const router = useRouter()
+// const userLogin = useUserLogin()
+// const router = useRouter()
 
 const appInfo = ref<YlfAppInfo>()
 
 const route = useRoute()
 
 // 登录方式切换
-const loginMethod = ref<'wechat' | 'sms'>('sms')
+const loginMethod = ref<'wechat' | 'sms'>('wechat')
 
-function handleSmsLoginSuccess(user: any) {
-  consola.log('短信登录成功:', user)
-  // 登录成功后重定向到用户信息页面
-  setTimeout(() => {
-    router.push('/user')
-  }, 500)
-}
+// function handleSmsLoginSuccess(user: any) {
+//   consola.log('短信登录成功:', user)
+//   // 登录成功后重定向到用户信息页面
+//   setTimeout(() => {
+//     router.push('/user')
+//   }, 500)
+// }
 
 onMounted(() => {
   $fetch('/api/app/search', {
@@ -34,6 +32,26 @@ onMounted(() => {
       appInfo.value = res.data
     }
   })
+
+  if (loginMethod.value === 'wechat') {
+    const { init } = createEmbeddedWxLogin()
+    init({
+      id: 'wx_login_container',
+      // appid: '',
+      /**
+       * https://open.weixin.qq.com/
+       * me@yunyoujun.cn
+       */
+      appid: 'wxce19bebd781d8b7d',
+      redirect_uri: 'https://example.com',
+      scope: 'snsapi_login',
+      /**
+       * 新样式
+       */
+      stylelite: 1,
+      color_scheme: 'auto',
+    })
+  }
 })
 </script>
 
@@ -50,7 +68,7 @@ onMounted(() => {
         <LoginForApp v-if="appInfo" :app-info="appInfo" />
 
         <!-- 登录方式切换 -->
-        <IonSegment
+        <!-- <IonSegment
           v-model="loginMethod"
           class="mb-6"
         >
@@ -60,17 +78,12 @@ onMounted(() => {
           <IonSegmentButton value="wechat">
             <IonLabel>微信登录</IonLabel>
           </IonSegmentButton>
-        </IonSegment>
-
-        <!-- 短信登录 -->
-        <SmsLogin
-          v-if="loginMethod === 'sms'"
-          @success="handleSmsLoginSuccess"
-        />
+        </IonSegment> -->
 
         <!-- 微信登录 -->
-        <div v-else-if="loginMethod === 'wechat'" class="flex flex-col items-center gap-4">
-          <IonButton
+        <div v-if="loginMethod === 'wechat'" class="flex flex-col items-center gap-4">
+          <div id="wx_login_container" alt="微信登录" />
+          <!-- <IonButton
             expand="block"
             color="success"
             class="w-full"
@@ -81,8 +94,14 @@ onMounted(() => {
               <IonIcon :icon="logoWechat" />
             </template>
             {{ userLogin.wxLoginLoading.value ? '登录中...' : '微信登录' }}
-          </IonButton>
+          </IonButton> -->
         </div>
+
+        <!-- 短信登录 -->
+        <!-- <SmsLogin
+          v-else-if="loginMethod === 'sms'"
+          @success="handleSmsLoginSuccess"
+        /> -->
       </IonCardContent>
     </IonCard>
   </div>

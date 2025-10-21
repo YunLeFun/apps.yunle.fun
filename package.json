@@ -2,7 +2,7 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.19.0",
   "scripts": {
     "build": "nuxi build",
     "deploy": "npx deploy",
@@ -14,7 +14,7 @@
     "release": "bumpp && npm run deploy",
     "start": "node .output/server/index.mjs",
     "start:generate": "npx serve .output/public",
-    "typecheck": "vue-tsc --noEmit",
+    "typecheck": "nuxt typecheck",
     "test": "vitest",
     "test:unit": "vitest run",
     "test:watch": "vitest watch",
@@ -24,13 +24,16 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
-    "@primevue/forms": "^4.4.1",
-    "@primevue/themes": "^4.4.1",
-    "ofetch": "^1.4.1",
-    "primevue": "^4.4.1"
+    "@capacitor/app": "7.1.0",
+    "@capacitor/core": "7.4.3",
+    "@capacitor/haptics": "7.0.2",
+    "@capacitor/keyboard": "7.0.3",
+    "@capacitor/status-bar": "7.0.3",
+    "ofetch": "^1.4.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.0.0",
+    "@capacitor/cli": "7.4.3",
     "@cloudbase/js-sdk": "^2.21.10",
     "@iconify-json/carbon": "^1.2.14",
     "@iconify-json/ri": "^1.2.6",
@@ -42,7 +45,6 @@
     "@nuxtjs/ionic": "1.0.2",
     "@pinia/nuxt": "^0.11.2",
     "@playwright/test": "^1.56.1",
-    "@primevue/nuxt-module": "^4.4.1",
     "@types/qrcode": "^1.5.5",
     "@unocss/eslint-config": "^66.5.4",
     "@unocss/nuxt": "^66.5.4",

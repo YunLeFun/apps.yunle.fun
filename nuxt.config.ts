@@ -1,29 +1,13 @@
-import { definePreset } from '@primevue/themes'
-import Aura from '@primevue/themes/aura'
+import path from 'node:path'
 import { defineNuxtConfig } from 'nuxt/config'
-
 import { appDescription } from './app/constants/index'
-
-const YunPreset = definePreset(Aura, {
-  semantic: {
-    primary: {
-      50: '{blue.50}',
-      100: '{blue.100}',
-      200: '{blue.200}',
-      300: '{blue.300}',
-      400: '{blue.400}',
-      500: '{blue.500}',
-      600: '{blue.600}',
-      700: '{blue.700}',
-      800: '{blue.800}',
-      900: '{blue.900}',
-      950: '{blue.950}',
-    },
-  },
-})
 
 export default defineNuxtConfig({
   ssr: false,
+
+  alias: {
+    '@yunlefun/auth': path.resolve(__dirname, './packages/auth/src/index.ts'),
+  },
 
   devServer: {
     port: 8001,
@@ -36,7 +20,6 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     // '@vite-pwa/nuxt',
     '@nuxt/eslint',
-    '@primevue/nuxt-module',
     '@yunlefun/vue/nuxt',
     'nuxt-auth-utils',
     // '@prisma/nuxt',
@@ -137,14 +120,6 @@ export default defineNuxtConfig({
     },
   },
 
-  primevue: {
-    options: {
-      theme: {
-        preset: YunPreset,
-      },
-    },
-  },
-
   vite: {
     css: {
       preprocessorOptions: {
@@ -156,7 +131,11 @@ export default defineNuxtConfig({
     },
   },
 
-  ionic: {},
+  ionic: {
+    config: {
+      backButtonText: '返回',
+    },
+  },
 
   runtimeConfig: {
     public: {

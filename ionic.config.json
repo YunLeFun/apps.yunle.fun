@@ -1,5 +1,7 @@
 {
   "name": "nuxt-ionic-project",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "vue"
 }

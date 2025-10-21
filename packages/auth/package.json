@@ -1,0 +1,16 @@
+{
+  "name": "@yunlefun/auth",
+  "version": "0.0.1",
+  "description": "Authentication utilities for Yunle.fun",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
+}

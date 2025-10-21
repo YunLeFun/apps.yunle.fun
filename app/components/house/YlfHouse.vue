@@ -23,7 +23,7 @@ useEventListener(document, 'pointermove', (e) => {
 </script>
 
 <template>
-  <div class="_3d-room h-screen w-screen flex items-center justify-center overflow-hidden">
+  <div class="_3d-room h-full w-full flex items-center justify-center overflow-hidden">
     <div id="h" ref="houseRef" class="house">
       <div class="h-lights">
         <div class="h-light" />
@@ -210,7 +210,7 @@ useEventListener(document, 'pointermove', (e) => {
           <div class="face sillon-t__front" />
           <div class="face sillon-t__back" />
           <div class="face sillon-t__right" />
-          <div the="sillon-t__left face" />
+          <div class="face sillon-t__left" />
           <div class="face sillon-t__top" />
           <div class="face sillon-t__bottom" />
         </div>
@@ -227,7 +227,7 @@ useEventListener(document, 'pointermove', (e) => {
           <div class="face sillon-r__back" />
           <div class="face sillon-r__right" />
           <div class="face sillon-r__left" />
-          <div the="sillon-r__top face" />
+          <div class="face sillon-r__top" />
           <div class="face sillon-r__bottom" />
         </div>
       </div>
@@ -257,7 +257,7 @@ useEventListener(document, 'pointermove', (e) => {
         <div class="face tablet__front" />
         <div class="face tablet__back" />
         <div class="face tablet__right" />
-        <div the="tablet__left face" />
+        <div class="face tablet__left" />
         <div class="face tablet__top" />
         <div class="face tablet__bottom" />
       </div>

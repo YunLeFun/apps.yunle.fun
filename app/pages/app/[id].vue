@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { YlfAppInfo } from '~~/packages/types'
 import {
   IonBackButton,
   IonButton,
@@ -10,74 +11,83 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { chevronForward, share, star, starOutline } from 'ionicons/icons'
+import { getAppById } from '~/constants/apps'
 
 const route = useRoute()
-const appId = route.params.id as string
+const router = useRouter()
+const appId = computed(() => route.params.id as string)
 
-// 模拟应用数据
-const appData = ref({
-  id: appId,
-  name: 'Bamboo Watch',
-  icon: '⌚',
-  color: '#34C759',
-  category: '健康健身',
-  rating: 4.8,
-  ratingCount: '1.2万',
-  downloads: '10万+',
-  size: '45.2 MB',
-  age: '4+',
-  developer: 'Bamboo Inc.',
-  price: '免费',
-  inAppPurchases: true,
-  description: '一款精美的竹制手表应用，追踪您的时间和健康数据。通过先进的传感器技术，实时监测您的心率、步数、卡路里消耗等健康指标。\n\n无论您是健身爱好者还是注重健康的普通用户，Bamboo Watch 都能为您提供全面的健康数据追踪和分析服务。',
-  whatsNew: '• 新增睡眠质量分析功能\n• 优化心率监测算法\n• 修复已知问题\n• 提升应用性能',
-  features: [
-    '实时心率监测',
-    '步数统计',
-    '卡路里追踪',
-    '睡眠分析',
-    '运动模式',
-    '健康报告',
-  ],
-  screenshots: [
-    { id: 1, color: '#FF6B6B', title: '主界面' },
-    { id: 2, color: '#4ECDC4', title: '数据统计' },
-    { id: 3, color: '#45B7D1', title: '运动追踪' },
-    { id: 4, color: '#FFA07A', title: '健康报告' },
-    { id: 5, color: '#98D8C8', title: '设置' },
-  ],
-  version: '2.5.1',
-  updateDate: '1周前',
-  languages: ['简体中文', '英语', '日语'],
-  compatibility: 'iPhone、iPad、iPod touch',
-  minOS: '需要 iOS 14.0 或更高版本',
-  reviews: [
-    {
-      id: 1,
-      user: '张三',
-      rating: 5,
-      title: '非常好用的健康应用',
-      content: '界面简洁美观，功能强大，数据准确。每天都在用，强烈推荐！',
-      date: '2天前',
-    },
-    {
-      id: 2,
-      user: '李四',
-      rating: 4,
-      title: '不错的应用',
-      content: '整体体验很好，希望能增加更多运动模式。',
-      date: '1周前',
-    },
-  ],
+// 获取应用数据
+const appInfo = computed(() => getAppById(appId.value))
+
+// 监听应用信息，如果不存在则跳转
+watch(appInfo, (info) => {
+  if (!info) {
+    router.push('/tabs/apps')
+  }
+}, { immediate: true })
+
+// 扩展应用数据（添加详情页需要的额外字段）
+const appData = computed(() => {
+  if (!appInfo.value) {
+    return null
+  }
+
+  return {
+    ...appInfo.value,
+    ratingCount: '1.2万',
+    developer: 'YunYouJun',
+    price: '免费',
+    inAppPurchases: false,
+    whatsNew: '• 优化用户体验\n• 修复已知问题\n• 提升应用性能',
+    features: [
+      '简洁美观的界面',
+      '流畅的交互体验',
+      '强大的功能',
+    ],
+    screenshots: [
+      { id: 1, color: appInfo.value.color, title: '主界面' },
+      { id: 2, color: appInfo.value.color, title: '功能展示' },
+      { id: 3, color: appInfo.value.color, title: '详细信息' },
+    ],
+    version: '1.0.0',
+    updateDate: '1周前',
+    languages: ['简体中文', '英语'],
+    compatibility: 'iPhone、iPad、iPod touch',
+    minOS: '需要 iOS 14.0 或更高版本',
+    reviews: [
+      {
+        id: 1,
+        user: '云游君',
+        rating: 5,
+        title: '非常好用的应用',
+        content: '界面简洁美观，功能强大。强烈推荐！',
+        date: '2天前',
+      },
+    ],
+  }
 })
 
-function renderStars(rating: number) {
+function renderStars(rating: number = 0) {
   const stars = []
   const fullStars = Math.floor(rating)
   for (let i = 0; i < 5; i++) {
     stars.push(i < fullStars ? star : starOutline)
   }
   return stars
+}
+
+// 打开应用
+function openApp() {
+  if (appData.value?.url) {
+    window.open(appData.value.url, '_blank')
+  }
+}
+
+// 分享应用
+function shareApp() {
+  // TODO: 实现分享功能
+  console.log('分享应用:', appData.value?.name)
 }
 </script>
 
@@ -89,7 +99,7 @@ function renderStars(rating: number) {
           <IonBackButton default-href="/tabs/apps" text="" />
         </IonButtons>
         <IonButtons slot="end">
-          <IonButton>
+          <IonButton @click="shareApp">
             <IonIcon slot="icon-only" :icon="share" />
           </IonButton>
         </IonButtons>
@@ -97,7 +107,7 @@ function renderStars(rating: number) {
     </IonHeader>
 
     <IonContent :fullscreen="true" class="app-detail-content">
-      <div class="app-detail-container">
+      <div v-if="appData" class="app-detail-container">
         <!-- 应用头部信息 -->
         <div class="app-header">
           <div class="app-header-content">
@@ -105,7 +115,7 @@ function renderStars(rating: number) {
               class="app-icon-large"
               :style="{ backgroundColor: appData.color }"
             >
-              {{ appData.icon }}
+              {{ appData.emoji || appData.icon }}
             </div>
 
             <div class="app-header-info">
@@ -117,7 +127,7 @@ function renderStars(rating: number) {
               </p>
 
               <!-- 评分信息 -->
-              <div class="app-rating-row">
+              <div v-if="appData.rating" class="app-rating-row">
                 <div class="rating-stars">
                   <span class="rating-number">{{ appData.rating }}</span>
                   <IonIcon
@@ -133,8 +143,8 @@ function renderStars(rating: number) {
           </div>
 
           <!-- 获取按钮 -->
-          <IonButton expand="block" class="get-button-large">
-            获取
+          <IonButton expand="block" class="get-button-large" @click="openApp">
+            打开应用
           </IonButton>
 
           <!-- 应用信息栏 -->
@@ -247,7 +257,7 @@ function renderStars(rating: number) {
             </button>
           </div>
 
-          <div class="rating-summary">
+          <div v-if="appData.rating" class="rating-summary">
             <div class="rating-score">
               <div class="score-number">
                 {{ appData.rating }}

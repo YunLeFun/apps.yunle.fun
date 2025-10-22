@@ -3,14 +3,6 @@ import { isInWxBrowser } from '@yunlefun/toolkit'
 import { consola } from 'consola'
 
 export function useUserLogin() {
-  /**
-   * @TODO 通过 QQ 登录
-   * @see https://connect.qq.com/
-   */
-  function loginByQQ() {
-    consola.info('通过 QQ 登录')
-  }
-
   const wxLoginLoading = ref(false)
 
   /**
@@ -45,12 +37,13 @@ export function useUserLogin() {
          * https://open.weixin.qq.com/
          * me@yunyoujun.cn
          */
-        appid: 'wxce19bebd781d8b7d',
-        redirect_uri: 'https://example.com',
+        appid: import.meta.env.NUXT_WX_OPEN_APP_ID,
+        redirect_uri: 'https://www.yunle.fun',
         /**
          * 新样式
          */
         stylelite: 1,
+        color_scheme: 'auto',
       })
       consola.info('初始化内嵌微信登录')
     }
@@ -58,8 +51,6 @@ export function useUserLogin() {
 
   return {
     wxLoginLoading,
-
-    loginByQQ,
     loginByWechat,
   }
 }

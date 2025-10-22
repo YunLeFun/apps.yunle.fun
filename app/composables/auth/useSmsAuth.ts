@@ -7,7 +7,7 @@ import { onUnmounted, ref } from 'vue'
  * @see https://docs.cloudbase.net/authentication-v2/method/sms-login
  */
 export function useSmsAuth() {
-  const { $tcbAuth } = useNuxtApp()
+  const { $tcbAuth } = useNuxtApp() as any
   if (!$tcbAuth) {
     throw new Error('CloudBase SDK 未加载')
   }

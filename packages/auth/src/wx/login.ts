@@ -216,9 +216,13 @@ export function createEmbeddedWxLogin() {
       // constructor
       WxLogin: new (options: WxLoginOptions) => void
     }).WxLogin
+    /**
+     * 生成 state
+     */
+    const state = Math.random().toString(36).slice(2)
     const obj = new WxLogin({
       self_redirect: true,
-      state: '',
+      state,
       onReady: (isReady) => {
         // eslint-disable-next-line no-console
         console.log('isReady', isReady)
@@ -242,8 +246,10 @@ export function createEmbeddedWxLogin() {
    * })
    * ```
    */
-  async function init(options: WxLoginOptions) {
-    await importWxLoginScript()
+  async function init(options: WxLoginOptions & {
+    protocol?: 'http' | 'https'
+  }) {
+    await importWxLoginScript({ protocol: 'https' })
     newWxLogin(options)
   }
 

@@ -140,6 +140,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       tcbEnvId: '',
+
+      wxOpenAppId: '',
+      // wx: {
+      //   open: {
+      //     appId: '',
+      //   },
+      // },
     },
   },
 })

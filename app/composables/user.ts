@@ -9,6 +9,7 @@ const defaultUserInfo: UserInfo = {
   avatar: '',
   nickname: '',
 }
+
 export const userInfo = ref<UserInfo>(JSON.parse(JSON.stringify(defaultUserInfo)))
 
 export const useUserStore = defineStore('user', () => {
@@ -34,12 +35,18 @@ export const useUserStore = defineStore('user', () => {
     savedName.value = name
   }
 
+  function setUserInfo(info: UserInfo) {
+    userInfo.value = info
+  }
+
   return {
     userInfo,
 
     setNewName,
     otherNames,
     savedName,
+
+    setUserInfo,
   }
 })
 

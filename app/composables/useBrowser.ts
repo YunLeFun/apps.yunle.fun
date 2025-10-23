@@ -3,8 +3,6 @@ import { Capacitor } from '@capacitor/core'
 
 /**
  * 在应用内打开网页
- * @param url 要打开的网址
- * @param options 可选配置
  */
 export async function openInAppBrowser(
   url: string,

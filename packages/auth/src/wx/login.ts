@@ -218,6 +218,8 @@ export function createEmbeddedWxLogin() {
     }).WxLogin
     /**
      * 生成 state
+     *
+     * @todo 应用由后端生成
      */
     const state = Math.random().toString(36).slice(2)
     const obj = new WxLogin({

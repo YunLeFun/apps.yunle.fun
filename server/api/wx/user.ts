@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
 
   // 返回用户信息
   return {
-    nickname: session.user.nickname || '无名氏',
-    headimgurl: session.user.avatar || '',
-    openid: session.user.id,
+    // nickname: session.user.nickname || '无名氏',
+    // headimgurl: session.user.avatar || '',
+    // openid: session.user.id,
   }
 })

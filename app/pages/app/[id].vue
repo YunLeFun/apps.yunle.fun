@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { YlfAppInfo } from '~~/packages/types'
 import {
   IonBackButton,
   IonButton,
@@ -15,7 +14,7 @@ import { getAppById } from '~/constants/apps'
 
 const route = useRoute()
 const router = useRouter()
-const appId = computed(() => route.params.id as string)
+const appId = computed(() => (route.params as any).id as string)
 
 // 获取应用数据
 const appInfo = computed(() => getAppById(appId.value))
@@ -87,7 +86,7 @@ function openApp() {
 // 分享应用
 function shareApp() {
   // TODO: 实现分享功能
-  console.log('分享应用:', appData.value?.name)
+  // console.log('分享应用:', appData.value?.name)
 }
 </script>
 

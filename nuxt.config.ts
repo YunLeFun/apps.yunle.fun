@@ -143,7 +143,7 @@ export default defineNuxtConfig({
 
       wxOpenAppId: 'wx4489293d76593a67',
       // wxOpenRedirectUri: 'https://api.yunle.fun/wx/redirect_uri',
-      wxOpenRedirectUri: 'https://www.yunle.fun/login',
+      wxOpenRedirectUri: 'https://www.yunle.fun/login/',
     },
   },
 })

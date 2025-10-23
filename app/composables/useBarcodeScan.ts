@@ -1,0 +1,47 @@
+import type { CapacitorBarcodeScannerScanResult } from '@capacitor/barcode-scanner'
+import { CapacitorBarcodeScanner } from '@capacitor/barcode-scanner'
+
+export function useBarcodeScan() {
+  const isScanning = ref(false)
+
+  /**
+   * 开始扫描
+   */
+  async function startScan(): Promise<CapacitorBarcodeScannerScanResult | null> {
+    try {
+      isScanning.value = true
+
+      // 使用新的 API 扫描
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: 2, // 使用后置摄像头
+      })
+
+      // 检查是否扫描成功
+      if (result.ScanResult) {
+        return result
+      }
+
+      return null
+    }
+    catch (error) {
+      console.error('扫描失败:', error)
+      throw error
+    }
+    finally {
+      isScanning.value = false
+    }
+  }
+
+  /**
+   * 停止扫描（新版本自动处理）
+   */
+  async function stopScan() {
+    isScanning.value = false
+  }
+
+  return {
+    isScanning: readonly(isScanning),
+    startScan,
+    stopScan,
+  }
+}

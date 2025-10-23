@@ -39,27 +39,28 @@ export default defineEventHandler(async (event) => {
     }>('https://api.yunle.fun/wx/userinfo', {
       method: 'GET',
       query: {
-        openid: session.user.id,
+        // openid: session.user.id,
       },
     })
 
     if (response.success && response.data) {
       return response.data
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('获取用户详细信息失败:', error)
   }
 
   // 如果外部 API 失败，返回会话中的基本信息
   return {
-    nickname: session.user.nickname || '无名氏',
-    headimgurl: session.user.avatar || '',
-    openid: session.user.id || '',
-    sex: 0 as const,
-    province: '',
-    city: '',
-    country: '',
-    privilege: [],
-    unionid: session.user.unionid || '',
+    // nickname: session.user.nickname || '无名氏',
+    // headimgurl: session.user.avatar || '',
+    // openid: session.user.id || '',
+    // sex: 0 as const,
+    // province: '',
+    // city: '',
+    // country: '',
+    // privilege: [],
+    // unionid: session.user.unionid || '',
   }
 })

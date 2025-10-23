@@ -10,7 +10,6 @@ import {
   IonSearchbar,
   IonTitle,
   IonToolbar,
-  popoverController,
 } from '@ionic/vue'
 import { add, addCircleOutline, downloadOutline, qrCodeOutline } from 'ionicons/icons'
 
@@ -40,25 +39,72 @@ function closeMenu() {
   showMenu.value = false
 }
 
+// 扫码相关
+const showScanner = ref(false)
+const { startScan, stopScan, isScanning } = useBarcodeScan()
+const { showError, showInfo } = useToast()
+
 // 扫一扫
-function handleScan() {
+async function handleScan() {
   closeMenu()
-  // TODO: 实现扫一扫功能
-  console.log('打开扫一扫')
-  // 这里可以集成相机扫码功能
+
+  try {
+    // 在 Web 环境下显示扫码界面
+    if (import.meta.client && !(window as any).Capacitor) {
+      showScanner.value = true
+      return
+    }
+
+    // 在原生环境下使用 Capacitor 扫码
+    const result = await startScan()
+    if (result?.ScanResult) {
+      handleScanResult(result.ScanResult)
+    }
+  }
+  catch (error) {
+    console.error('扫码失败:', error)
+    showError('扫码失败，请检查相机权限')
+  }
+}
+
+// 处理扫码结果
+function handleScanResult(content: string) {
+  // 判断是否为 URL
+  if (content.startsWith('http://') || content.startsWith('https://')) {
+    // 如果是应用链接，跳转到应用详情
+    const appIdMatch = content.match(/\/app\/(\d+)/)
+    if (appIdMatch) {
+      router.push(`/app/${appIdMatch[1]}`)
+      return
+    }
+
+    // 其他 URL，直接打开
+    window.open(content, '_blank')
+  }
+  else {
+    // 非 URL 内容，显示结果
+    showInfo(`扫码内容：${content}`)
+  }
+}
+
+// 取消扫码
+function handleScanCancel() {
+  showScanner.value = false
+  if (isScanning.value) {
+    stopScan()
+  }
 }
 
 // 添加应用
 function handleAddApp() {
   closeMenu()
-  console.log('添加应用')
   router.push('/apps')
 }
 
 // 下载应用
 function handleDownload() {
   closeMenu()
-  console.log('下载应用')
+  // TODO: 实现下载应用功能
 }
 
 // 模拟应用数据 - 手机桌面风格
@@ -69,7 +115,7 @@ const homeApps = ref<YlfAppInfo[]>([
     name: 'Valaxy',
     icon: '🌌',
     color: '#0078e7',
-    url: 'https://valaxy.yyj.moe',
+    url: 'https://valaxy.site',
     category: '应用',
   },
   {
@@ -173,39 +219,85 @@ const homeApps = ref<YlfAppInfo[]>([
   },
 ])
 
+// 应用交互状态
 const selectedApp = ref<YlfAppInfo | null>(null)
 const showContextMenu = ref(false)
 const contextMenuPos = ref({ x: 0, y: 0 })
 
+// 长按交互处理
+const {
+  longPressingId,
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp,
+  handlePointerCancel,
+} = useLongPress<YlfAppInfo>({
+  onClick: (app) => {
+    openApp(app)
+  },
+  onLongPress: (app, event) => {
+    selectedApp.value = app
+    showContextMenu.value = true
+
+    // 计算菜单位置，确保不超出屏幕
+    const menuWidth = 160
+    const menuHeight = 200
+    let x = event.clientX - menuWidth / 2
+    let y = event.clientY + 10
+
+    // 边界检查
+    if (x < 10)
+      x = 10
+    if (x + menuWidth > window.innerWidth - 10)
+      x = window.innerWidth - menuWidth - 10
+    if (y + menuHeight > window.innerHeight - 10)
+      y = event.clientY - menuHeight - 10
+
+    contextMenuPos.value = { x, y }
+  },
+}, {
+  delay: 500,
+  distanceThreshold: 10,
+})
+
+const longPressingAppId = longPressingId
+
+// 打开应用
 function openApp(app: YlfAppInfo) {
-  router.push(`/app/${app.id}`)
+  openInAppBrowser(app.url)
 }
 
-function handleAppClick(app: YlfAppInfo) {
-  openApp(app)
-}
-
-function handleAppLongPress(app: YlfAppInfo, event: PointerEvent) {
-  event.preventDefault()
-  selectedApp.value = app
-  showContextMenu.value = true
-  contextMenuPos.value = {
-    x: event.clientX,
-    y: event.clientY,
-  }
-}
-
+// 关闭菜单
 function closeContextMenu() {
   showContextMenu.value = false
   selectedApp.value = null
 }
 
+// 移除应用
 function removeApp() {
   if (selectedApp.value) {
     const index = homeApps.value.findIndex(app => app.id === selectedApp.value?.id)
     if (index > -1) {
       homeApps.value.splice(index, 1)
     }
+  }
+  closeContextMenu()
+}
+
+// 编辑应用
+function editApp() {
+  if (selectedApp.value) {
+    // TODO: 实现编辑功能
+    console.warn('编辑功能待实现')
+  }
+  closeContextMenu()
+}
+
+// 分享应用
+function shareApp() {
+  if (selectedApp.value) {
+    // TODO: 实现分享功能
+    console.warn('分享功能待实现')
   }
   closeContextMenu()
 }
@@ -265,13 +357,18 @@ function removeApp() {
 
     <IonContent class="phone-desktop">
       <!-- 应用网格 - 可滚动区域 -->
-      <div class="apps-grid">
+      <div
+        class="apps-grid"
+        @pointermove="handlePointerMove"
+        @pointerup="handlePointerUp"
+        @pointercancel="handlePointerCancel"
+      >
         <div
           v-for="app in homeApps"
           :key="app.id"
           class="app-icon-item"
-          @click="handleAppClick(app)"
-          @pointerdown.prevent="handleAppLongPress(app, $event)"
+          :class="{ 'is-long-pressing': longPressingAppId === app.id }"
+          @pointerdown="handlePointerDown(app, $event, app.id)"
         >
           <div
             class="app-icon-box"
@@ -318,30 +415,52 @@ function removeApp() {
       </div>
 
       <!-- 长按菜单 -->
-      <div
-        v-if="showContextMenu"
-        class="context-menu-overlay"
-        @click="closeContextMenu"
-      >
+      <Transition name="context-menu-fade">
         <div
-          class="context-menu"
-          :style="{
-            left: `${contextMenuPos.x}px`,
-            top: `${contextMenuPos.y}px`,
-          }"
-          @click.stop
+          v-if="showContextMenu"
+          class="context-menu-overlay"
+          @click="closeContextMenu"
+          @touchstart.prevent
         >
-          <div class="context-menu-item" @click="openApp(selectedApp!)">
-            打开
-          </div>
-          <div class="context-menu-item" @click="removeApp">
-            移除
-          </div>
-          <div class="context-menu-item cancel" @click="closeContextMenu">
-            取消
+          <div
+            class="context-menu"
+            :style="{
+              left: `${contextMenuPos.x}px`,
+              top: `${contextMenuPos.y}px`,
+            }"
+            @click.stop
+          >
+            <div class="context-menu-item" @click="openApp(selectedApp!)">
+              <span class="menu-icon">📱</span>
+              <span>打开</span>
+            </div>
+            <div class="context-menu-item" @click="editApp">
+              <span class="menu-icon">✏️</span>
+              <span>编辑</span>
+            </div>
+            <div class="context-menu-item" @click="shareApp">
+              <span class="menu-icon">📤</span>
+              <span>分享</span>
+            </div>
+            <div class="context-menu-item danger" @click="removeApp">
+              <span class="menu-icon">🗑️</span>
+              <span>移除</span>
+            </div>
+            <div class="context-menu-divider" />
+            <div class="context-menu-item cancel" @click="closeContextMenu">
+              取消
+            </div>
           </div>
         </div>
-      </div>
+      </Transition>
+
+      <!-- 扫码界面 -->
+      <BarcodeScanner
+        :is-visible="showScanner"
+        :show-flashlight="true"
+        @cancel="handleScanCancel"
+        @result="handleScanResult"
+      />
     </IonContent>
   </IonPage>
 </template>
@@ -349,6 +468,18 @@ function removeApp() {
 <style scoped>
 .dark .phone-desktop {
   --background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+}
+
+/* ==================== 扫码时隐藏背景 ==================== */
+:global(body.scanner-active) {
+  background: transparent !important;
+}
+
+:global(body.scanner-active) ion-app,
+:global(body.scanner-active) ion-page,
+:global(body.scanner-active) ion-content {
+  background: transparent !important;
+  --background: transparent !important;
 }
 
 /* ==================== 应用网格 ==================== */
@@ -372,10 +503,27 @@ function removeApp() {
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  touch-action: manipulation;
 }
 
-.app-icon-item:active {
-  transform: scale(0.88);
+/* 长按状态 - 添加视觉反馈 */
+.app-icon-item.is-long-pressing {
+  transform: scale(0.92);
+}
+
+.app-icon-item.is-long-pressing .app-icon-box {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .app-icon-box {
@@ -613,43 +761,53 @@ function removeApp() {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0);
-  animation: fadeIn 0.15s ease;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .context-menu {
   position: fixed;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-radius: 16px;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 0.5px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  min-width: 140px;
+  min-width: 160px;
   z-index: 1001;
-  animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center;
 }
 
 .dark .context-menu {
-  background: rgba(28, 28, 30, 0.95);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: rgba(28, 28, 30, 0.98);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
 .context-menu-item {
-  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
   font-size: 16px;
   color: #007aff;
-  text-align: center;
   cursor: pointer;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   transition: background 0.15s ease;
+  position: relative;
 }
 
 .dark .context-menu-item {
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  color: #0a84ff;
 }
 
-.context-menu-item:last-child {
-  border-bottom: none;
+.context-menu-item .menu-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
 }
 
 .context-menu-item:active {
@@ -657,12 +815,62 @@ function removeApp() {
 }
 
 .dark .context-menu-item:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.context-menu-item.danger {
+  color: #ff3b30;
+}
+
+.dark .context-menu-item.danger {
+  color: #ff453a;
 }
 
 .context-menu-item.cancel {
-  color: #ff3b30;
+  color: #8e8e93;
   font-weight: 600;
+  justify-content: center;
+}
+
+.dark .context-menu-item.cancel {
+  color: #98989d;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 4px 0;
+}
+
+.dark .context-menu-divider {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 菜单动画 */
+.context-menu-fade-enter-active {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.context-menu-fade-leave-active {
+  transition: all 0.15s ease-out;
+}
+
+.context-menu-fade-enter-from {
+  opacity: 0;
+}
+
+.context-menu-fade-enter-from .context-menu {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.context-menu-fade-leave-to {
+  opacity: 0;
+}
+
+.context-menu-fade-leave-to .context-menu {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 /* ==================== 动画 ==================== */
@@ -672,17 +880,6 @@ function removeApp() {
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 

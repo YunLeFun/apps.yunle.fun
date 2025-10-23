@@ -12,5 +12,8 @@ export default nuxt(
         'vue/no-deprecated-slot-attribute': 'off',
       },
     },
+    {
+      ignores: ['ios', 'android'],
+    },
   ),
 )

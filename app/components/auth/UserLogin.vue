@@ -21,8 +21,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <DarkToggle class="absolute right-4 top-4" />
-
   <div
     class="w-full flex items-center justify-center"
     m="auto"

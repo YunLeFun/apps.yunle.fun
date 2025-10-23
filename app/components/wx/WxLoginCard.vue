@@ -19,7 +19,7 @@ onMounted(() => {
      * api oauth
      * passport-wechat
      */
-    redirect_uri: 'https://api.yunle.fun/auth/wechat/callback',
+    redirect_uri: config.public.wxOpenRedirectUri,
     scope: 'snsapi_login',
     /**
      * 新样式

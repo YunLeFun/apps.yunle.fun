@@ -141,12 +141,9 @@ export default defineNuxtConfig({
     public: {
       tcbEnvId: '',
 
-      wxOpenAppId: '',
-      // wx: {
-      //   open: {
-      //     appId: '',
-      //   },
-      // },
+      wxOpenAppId: 'wx4489293d76593a67',
+      // wxOpenRedirectUri: 'https://api.yunle.fun/wx/redirect_uri',
+      wxOpenRedirectUri: 'https://www.yunle.fun/login',
     },
   },
 })

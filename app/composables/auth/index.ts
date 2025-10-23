@@ -1,4 +1,5 @@
 export * from './useCloudBase'
 export * from './useLogout'
 export * from './useSmsAuth'
+export * from './useUserAuth'
 export * from './useUserLogin'

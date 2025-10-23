@@ -120,17 +120,6 @@ export default defineNuxtConfig({
     },
   },
 
-  vite: {
-    css: {
-      preprocessorOptions: {
-        scss: {
-          // @ts-expect-error - modern-compiler is a valid option in newer sass versions
-          api: 'modern-compiler',
-        },
-      },
-    },
-  },
-
   ionic: {
     config: {
       backButtonText: '返回',

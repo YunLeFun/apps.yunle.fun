@@ -27,22 +27,22 @@ definePageMeta({
         <IonTabBar slot="bottom">
           <IonTabButton tab="home" href="/tabs/home">
             <IonIcon :icon="home" />
-            <IonLabel>首页</IonLabel>
+            <IonLabel>云居</IonLabel>
           </IonTabButton>
 
           <IonTabButton tab="discovery" href="/tabs/discovery">
             <IonIcon :icon="compass" />
-            <IonLabel>发现</IonLabel>
+            <IonLabel>寻乐</IonLabel>
           </IonTabButton>
 
           <IonTabButton tab="apps" href="/tabs/apps">
             <IonIcon :icon="apps" />
-            <IonLabel>应用</IonLabel>
+            <IonLabel>工坊</IonLabel>
           </IonTabButton>
 
-          <IonTabButton tab="profile" href="/tabs/profile">
+          <IonTabButton tab="me" href="/tabs/me">
             <IonIcon :icon="person" />
-            <IonLabel>我的</IonLabel>
+            <IonLabel>我</IonLabel>
           </IonTabButton>
         </IonTabBar>
       </IonTabs>

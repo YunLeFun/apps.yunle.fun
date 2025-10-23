@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { WxUserInfo } from '../../utils'
 import {
   IonBackButton,
   IonButton,
@@ -13,71 +12,23 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { consola } from 'consola'
 import { alertCircleOutline } from 'ionicons/icons'
-import { useRoute } from 'vue-router'
+import { useWxLoginVerify } from '~/composables/wx'
 
-const route = useRoute()
 const router = useRouter()
 
 const userStore = useUserStore()
 
-/**
- * 有 code 登录鉴权中
- */
-const hasCode = computed(() => !!route.query.code)
+const { hasCode, errorMessage, loading } = useWxLoginVerify({
+  success: (res) => {
+    // 保存 JWT access_token 和用户信息到 userStore
+    userStore.login(res.access_token, res.user)
 
-const loading = ref(false)
-const errorMessage = ref('')
-
-onMounted(async () => {
-  if (hasCode.value) {
-    const code = route.query.code
-    const state = route.query.state
-
-    loading.value = true
-    errorMessage.value = ''
-
-    // jwt 授权重定向成功
-    try {
-      const res = await $fetch<{
-        access_token: string
-        user: {
-          id: string
-          nickname: string
-          avatar: string
-          profile: WxUserInfo
-        }
-      }>('https://api.yunle.fun/auth/wechat/callback', {
-        method: 'GET',
-        query: {
-          code,
-          state,
-        },
-      })
-
-      if (res.access_token) {
-      // 保存用户信息
-        userStore.setUserInfo(res.user)
-
-        // 微信登录成功后重定向到我的页面
-        setTimeout(() => {
-          router.push('/tabs/profile')
-        }, 1000)
-      }
-      else {
-        consola.error(res)
-        errorMessage.value = '登录失败，请重试'
-      }
-    }
-    catch (error) {
-      consola.error('登录失败:', error)
-      errorMessage.value = '登录失败，请检查网络连接后重试'
-    }
-    finally {
-      loading.value = false
-    }
-  }
+    // 微信登录成功后重定向到我的页面
+    setTimeout(() => {
+      router.push('/tabs/me')
+    }, 1000)
+  },
 })
 </script>
 
@@ -86,7 +37,7 @@ onMounted(async () => {
     <IonHeader>
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/profile" />
+          <IonBackButton default-href="/tabs/me" />
         </IonButtons>
         <IonTitle>登录</IonTitle>
       </IonToolbar>
@@ -112,7 +63,7 @@ onMounted(async () => {
               <IonButton
                 expand="block"
                 color="primary"
-                @click="router.push('/tabs/profile')"
+                @click="router.push('/tabs/me')"
               >
                 返回
               </IonButton>

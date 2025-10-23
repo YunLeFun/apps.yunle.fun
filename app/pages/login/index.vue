@@ -10,10 +10,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { consola } from 'consola'
-
-definePageMeta({
-  // layout: 'fullscreen',
-})
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()

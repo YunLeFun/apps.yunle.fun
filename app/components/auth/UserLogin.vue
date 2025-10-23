@@ -2,13 +2,6 @@
 import type { YlfAppInfo } from '~~/packages/types'
 import { IonCardContent } from '@ionic/vue'
 
-defineProps<{
-  /**
-   * 是否微信登录
-   */
-  wxLogin: boolean
-}>()
-
 const appInfo = ref<YlfAppInfo>()
 
 const route = useRoute()
@@ -36,7 +29,7 @@ onMounted(() => {
     <IonCardContent class="p-6">
       <LoginForApp v-if="appInfo" :app-info="appInfo" />
 
-      <WxLoginCard v-if="wxLogin" />
+      <WxLoginCard />
     </IonCardContent>
   </div>
 </template>

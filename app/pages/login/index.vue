@@ -20,8 +20,6 @@ const router = useRouter()
 
 const userStore = useUserStore()
 
-const wxLogin = ref(false)
-
 /**
  * 有 code 登录鉴权中
  */
@@ -43,7 +41,7 @@ onMounted(async () => {
           avatar: string
           profile: WxUserInfo
         }
-      }>('/auth/wechat/callback', {
+      }>('https://api.yunle.fun/auth/wechat/callback', {
         method: 'GET',
       })
 
@@ -64,10 +62,6 @@ onMounted(async () => {
       loading.value = false
     }
   }
-  else {
-    // 未登录
-    wxLogin.value = true
-  }
 })
 </script>
 
@@ -85,8 +79,6 @@ onMounted(async () => {
     <IonContent class="ion-padding">
       <div class="w-full items-center" flex="~ col">
         <Logo mb-8 mt-10 />
-        <UserLogin :wx-login="wxLogin" />
-
         <template v-if="hasCode">
           <div class="flex flex-col items-center justify-center gap-2 text-center font-bold">
             <span>
@@ -95,6 +87,7 @@ onMounted(async () => {
             <ion-spinner />
           </div>
         </template>
+        <UserLogin v-else />
       </div>
     </IonContent>
   </IonPage>

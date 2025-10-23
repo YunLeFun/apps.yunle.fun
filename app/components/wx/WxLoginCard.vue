@@ -32,7 +32,7 @@ onMounted(() => {
 
 <template>
   <!-- 微信登录 -->
-  <div class="flex flex-col items-center gap-4">
+  <div class="flex flex-col items-center justify-center gap-4">
     <ion-chip>
       <ion-icon :icon="ioniconsLogoWechat" color="success" />
       <ion-label>微信登录</ion-label>

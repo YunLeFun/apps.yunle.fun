@@ -1,34 +1,19 @@
+import type { YlfUserInfo } from '@yunlefun/auth'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
-export interface UserInfo {
-  avatar: string
-  nickname: string
-}
-
-// 扩展的用户信息接口，用于 profile 页面
-export interface ExtendedUserInfo {
-  openid: string
-  nickname: string
-  sex: 1 | 2 | 0
-  province: string
-  city: string
-  country: string
-  headimgurl: string
-  privilege: string[]
-  unionid?: string
-}
+export type UserInfo = YlfUserInfo
 
 export interface UserSession {
   accessToken: string
   user: UserInfo
 }
 
-const defaultUserInfo: UserInfo = {
+const defaultUserInfo: YlfUserInfo = {
   avatar: '',
   nickname: '',
 }
 
-export const userInfo = ref<UserInfo>(JSON.parse(JSON.stringify(defaultUserInfo)))
+export const userInfo = ref<YlfUserInfo>(JSON.parse(JSON.stringify(defaultUserInfo)))
 
 export const useUserStore = defineStore('user', () => {
   // 使用 Cookie 存储 JWT token（最佳实践）
@@ -41,7 +26,7 @@ export const useUserStore = defineStore('user', () => {
   })
 
   // 使用 Cookie 存储用户信息（可选，也可以只存 token）
-  const userInfoCookie = useCookie<UserInfo>('ylf_user_info', {
+  const userInfoCookie = useCookie<YlfUserInfo>('ylf_user_info', {
     default: () => defaultUserInfo,
     maxAge: 60 * 60 * 24 * 7,
     sameSite: 'strict',
@@ -81,14 +66,14 @@ export const useUserStore = defineStore('user', () => {
     savedName.value = name
   }
 
-  function setUserInfo(info: UserInfo) {
+  function setUserInfo(info: YlfUserInfo) {
     userInfo.value = info
   }
 
   /**
    * 登录：保存 access_token 和用户信息
    */
-  function login(token: string, user: UserInfo) {
+  function login(token: string, user: YlfUserInfo) {
     accessToken.value = token
     userInfo.value = user
     // userInfoCookie 会通过 watch 自动同步

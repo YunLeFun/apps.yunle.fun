@@ -1,8 +1,4 @@
-/**
- * 网站应用微信登录
- * @see https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
- */
-export function createWxLogin(options: {
+export interface GenerateQrconnectUrlOptions {
   /**
    * 应用唯一标识
    */
@@ -20,35 +16,33 @@ export function createWxLogin(options: {
    * @default 'cn'
    */
   lang?: 'cn' | 'en'
-}) {
+}
+
+/**
+ * 网站应用微信登录
+ * @see https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
+ * 第一步：请求CODE
+ *
+ * 生成微信授权链接
+ */
+export function generateQrconnectUrl(options: GenerateQrconnectUrlOptions) {
+  const url = new URL('https://open.weixin.qq.com/connect/qrconnect')
+  url.searchParams.set('appid', options.appid)
+  url.searchParams.set('redirect_uri', options.redirectUri)
+  url.searchParams.set('response_type', 'code')
   /**
-   * 第一步：请求CODE
-   *
-   * 生成微信授权链接
+   * 应用授权作用域，拥有多个作用域用逗号（,）分隔，网页应用目前仅填写snsapi_login
    */
-  function getQrconnectUrl() {
-    const url = new URL('https://open.weixin.qq.com/connect/qrconnect')
-    url.searchParams.set('appid', options.appid)
-    url.searchParams.set('redirect_uri', options.redirectUri)
-    url.searchParams.set('response_type', 'code')
-    /**
-     * 应用授权作用域，拥有多个作用域用逗号（,）分隔，网页应用目前仅填写snsapi_login
-     */
-    url.searchParams.set('scope', 'snsapi_login')
+  url.searchParams.set('scope', 'snsapi_login')
 
-    if (options.state) {
-      url.searchParams.set('state', options.state)
-    }
-    if (options.lang) {
-      url.searchParams.set('lang', options.lang)
-    }
-    url.hash = 'wechat_redirect'
-    return url.toString()
+  if (options.state) {
+    url.searchParams.set('state', options.state)
   }
-
-  return {
-    getQrconnectUrl,
+  if (options.lang) {
+    url.searchParams.set('lang', options.lang)
   }
+  url.hash = 'wechat_redirect'
+  return url.toString()
 }
 
 export interface WxOauth2AccessTokenResponse {

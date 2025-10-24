@@ -23,7 +23,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "sync": "cap sync",
-    "open:ios": "cap open ios"
+    "open:ios": "cap open ios",
+    "dev:ios": "cap run ios -l"
   },
   "dependencies": {
     "@capacitor/app": "7.1.0",
@@ -50,7 +51,7 @@
     "@nuxtjs/ionic": "1.0.2",
     "@pinia/nuxt": "^0.11.2",
     "@playwright/test": "^1.56.1",
-    "@types/qrcode": "^1.5.5",
+    "@types/qrcode": "^1.5.6",
     "@unocss/eslint-config": "^66.5.4",
     "@unocss/nuxt": "^66.5.4",
     "@vite-pwa/nuxt": "^1.0.7",

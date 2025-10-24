@@ -1,25 +1,5 @@
 <script setup lang="ts">
-import {
-  IonAvatar,
-  IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonChip,
-  IonCol,
-  IonContent,
-  IonGrid,
-  IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonPage,
-  IonRow,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue'
+import type { YlfUserInfo } from '~~/packages/auth/src'
 import {
   calendarOutline,
   chevronForwardOutline,
@@ -38,32 +18,58 @@ const router = useRouter()
 const userStore = useUserStore()
 const { confirmLogout, isLoggingOut } = useLogout()
 
+const { $api } = useNuxtApp()
 // 获取完整的用户信息
-const { data: fullUserInfo, refresh: refreshUserInfo } = await useFetch('/api/wx/user')
+const fullUserInfo = ref<YlfUserInfo | null>(null)
+const isLoading = ref(false)
+
+// 加载用户信息
+async function loadUserInfo() {
+  try {
+    isLoading.value = true
+    const data = await $api<YlfUserInfo>('/auth/profile')
+    fullUserInfo.value = data
+  }
+  catch (error) {
+    console.error('加载用户信息失败:', error)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+// 初始加载
+await loadUserInfo()
+
+// 性别选择
+const isEditingGender = ref(false)
+const selectedGender = ref<0 | 1 | 2>(fullUserInfo.value?.profile?.sex ?? 0)
 
 // 计算属性
 const genderIcon = computed(() => {
-  if (!fullUserInfo.value?.sex)
+  const sex = fullUserInfo.value?.profile?.sex
+  if (!sex)
     return helpCircleOutline
-  return fullUserInfo.value.sex === 1 ? maleOutline : femaleOutline
+  return sex === 1 ? maleOutline : femaleOutline
 })
 
 const genderText = computed(() => {
-  if (!fullUserInfo.value?.sex)
-    return '未知'
-  return fullUserInfo.value.sex === 1 ? '男' : '女'
+  const sex = fullUserInfo.value?.profile?.sex
+  if (!sex)
+    return '保密'
+  return sex === 1 ? '男' : '女'
 })
 
 const locationText = computed(() => {
-  if (!fullUserInfo.value)
+  if (!fullUserInfo.value?.profile)
     return '未知'
-  const { country, province, city } = fullUserInfo.value
+  const { country, province, city } = fullUserInfo.value.profile
   const parts = [country, province, city].filter(Boolean)
   return parts.length > 0 ? parts.join(' ') : '未知'
 })
 
 const hasPrivileges = computed(() => {
-  return fullUserInfo.value?.privilege && fullUserInfo.value.privilege.length > 0
+  return fullUserInfo.value?.profile?.privilege && fullUserInfo.value.profile.privilege.length > 0
 })
 
 function handleLogout() {
@@ -75,8 +81,33 @@ function goToSettings() {
   // console.log('跳转到设置页面')
 }
 
-function handleRefresh() {
-  refreshUserInfo()
+async function handleRefresh() {
+  await loadUserInfo()
+}
+
+function openGenderSelect() {
+  selectedGender.value = fullUserInfo.value?.profile?.sex ?? 0
+  isEditingGender.value = true
+}
+
+async function handleGenderChange() {
+  try {
+    // TODO: 调用 API 更新性别
+    // await $api('/auth/profile', {
+    //   method: 'PATCH',
+    //   body: { sex: selectedGender.value }
+    // })
+
+    // 暂时只更新本地状态
+    if (fullUserInfo.value?.profile) {
+      fullUserInfo.value.profile.sex = selectedGender.value
+    }
+
+    isEditingGender.value = false
+  }
+  catch (error) {
+    console.error('更新性别失败:', error)
+  }
 }
 </script>
 
@@ -111,9 +142,9 @@ function handleRefresh() {
             <div class="flex flex-col items-center text-center">
               <IonAvatar class="mb-4 h-24 w-24">
                 <img
-                  v-if="userInfo.avatar || fullUserInfo?.headimgurl"
-                  :src="userInfo.avatar || fullUserInfo?.headimgurl"
-                  :alt="userInfo.nickname || fullUserInfo?.nickname"
+                  v-if="userInfo.avatar || fullUserInfo?.profile?.headimgurl"
+                  :src="userInfo.avatar || fullUserInfo?.profile?.headimgurl"
+                  :alt="userInfo.nickname || fullUserInfo?.profile?.nickname"
                 >
                 <IonIcon
                   v-else
@@ -126,7 +157,7 @@ function handleRefresh() {
                 {{ userInfo.nickname || fullUserInfo?.nickname || '无名氏' }}
               </h2>
 
-              <div class="flex items-center gap-2 text-gray-600">
+              <div class="flex cursor-pointer items-center gap-2 text-gray-600" @click="openGenderSelect">
                 <IonIcon :icon="genderIcon" />
                 <span>{{ genderText }}</span>
               </div>
@@ -151,23 +182,23 @@ function handleRefresh() {
               </IonItem>
 
               <!-- OpenID -->
-              <IonItem v-if="fullUserInfo?.openid">
+              <IonItem v-if="fullUserInfo?.profile?.openid">
                 <IonIcon slot="start" :icon="idCardOutline" />
                 <IonLabel>
                   <h3>用户标识</h3>
                   <p class="text-sm font-mono">
-                    {{ fullUserInfo.openid }}
+                    {{ fullUserInfo.profile.openid }}
                   </p>
                 </IonLabel>
               </IonItem>
 
               <!-- UnionID -->
-              <IonItem v-if="fullUserInfo?.unionid">
+              <IonItem v-if="fullUserInfo?.profile?.unionid">
                 <IonIcon slot="start" :icon="shieldCheckmarkOutline" />
                 <IonLabel>
                   <h3>统一标识</h3>
                   <p class="text-sm font-mono">
-                    {{ fullUserInfo.unionid }}
+                    {{ fullUserInfo.profile.unionid }}
                   </p>
                 </IonLabel>
               </IonItem>
@@ -183,7 +214,7 @@ function handleRefresh() {
           <IonCardContent>
             <div class="flex flex-wrap gap-2">
               <IonChip
-                v-for="privilege in fullUserInfo?.privilege"
+                v-for="privilege in fullUserInfo?.profile?.privilege"
                 :key="privilege"
                 color="primary"
               >
@@ -251,6 +282,39 @@ function handleRefresh() {
           </IonCardContent>
         </IonCard>
       </div>
+
+      <!-- 性别选择 Modal -->
+      <IonModal :is-open="isEditingGender" @did-dismiss="isEditingGender = false">
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>选择性别</IonTitle>
+            <IonButtons slot="end">
+              <IonButton @click="isEditingGender = false">
+                取消
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <IonList>
+            <IonItem button @click="selectedGender = 1; handleGenderChange()">
+              <IonIcon slot="start" :icon="maleOutline" />
+              <IonLabel>男</IonLabel>
+              <IonIcon v-if="selectedGender === 1" slot="end" name="checkmark" color="primary" />
+            </IonItem>
+            <IonItem button @click="selectedGender = 2; handleGenderChange()">
+              <IonIcon slot="start" :icon="femaleOutline" />
+              <IonLabel>女</IonLabel>
+              <IonIcon v-if="selectedGender === 2" slot="end" name="checkmark" color="primary" />
+            </IonItem>
+            <IonItem button @click="selectedGender = 0; handleGenderChange()">
+              <IonIcon slot="start" :icon="helpCircleOutline" />
+              <IonLabel>保密</IonLabel>
+              <IonIcon v-if="selectedGender === 0" slot="end" name="checkmark" color="primary" />
+            </IonItem>
+          </IonList>
+        </IonContent>
+      </IonModal>
     </IonContent>
   </IonPage>
 </template>

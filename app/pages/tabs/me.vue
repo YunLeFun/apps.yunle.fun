@@ -77,7 +77,7 @@ function goToLogin() {
 
       <!-- 功能列表 -->
       <IonList v-if="userStore.isLoggedIn" inset class="mt-4">
-        <IonItem button router-link="/tabs/profile">
+        <IonItem button router-link="/user/profile">
           <IonIcon slot="start" :icon="person" />
           <IonLabel>个人资料</IonLabel>
         </IonItem>

@@ -107,6 +107,7 @@ function openAppLink(app: YlfAppInfo) {
             <IonButton
               fill="solid"
               size="small"
+              color="light"
               class="get-button flex-shrink-0"
               style="--border-radius: 14px; font-weight: 600; min-width: 72px"
               @click.stop="openAppLink(app)"

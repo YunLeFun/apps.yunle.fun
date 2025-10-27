@@ -71,9 +71,16 @@ const displayBadge = computed(() => {
         ...interactionStyle,
       }"
     >
-      <div class="app-emoji">
-        {{ app.icon }}
+      <div v-if="app.icon" class="app-icon">
+        <img
+          :src="app.icon"
+          alt="应用图标"
+        >
       </div>
+      <div v-else class="app-emoji">
+        {{ app.emoji }}
+      </div>
+
       <!-- 红点通知 -->
       <div
         v-if="displayBadge"

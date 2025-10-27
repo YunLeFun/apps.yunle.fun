@@ -13,13 +13,13 @@ export interface YlfAppInfo {
   /**
    * 应用图标
    */
-  icon: string
+  icon?: string
   /**
    * emoji
    *
    * icon 不存在时，emoji 替代 icon
    */
-  emoji?: string
+  emoji: string
   /**
    * 应用名称
    */

@@ -112,19 +112,52 @@ onMounted(() => {
       </div>
     </template>
 
-    <div v-else @click="goToWxLogin">
-      <ion-chip color="success">
-        <ion-icon :icon="ioniconsLogoWechat" color="success" />
-        <ion-label>前往微信登录</ion-label>
-      </ion-chip>
-    </div>
-
-    asdasd
+    <button
+      v-else
+      class="wx-login-btn"
+      @click="goToWxLogin"
+    >
+      <ion-icon :icon="ioniconsLogoWechat" class="text-xl" />
+      <span>微信登录</span>
+    </button>
   </div>
 </template>
 
-<style>
+<style scoped>
 #wx_login_container {
   height: 100%;
+}
+
+.wx-login-btn {
+  /* 布局 */
+  @apply flex items-center justify-center gap-2;
+  @apply w-full px-5 py-2;
+
+  /* 微信品牌色 */
+  @apply bg-[#07c160] text-white;
+
+  /* 圆角 */
+  @apply rounded-lg;
+
+  /* 字体 */
+  @apply text-base font-medium;
+
+  /* 阴影 */
+  @apply shadow-sm;
+
+  /* 交互效果 */
+  @apply active:scale-98 active:bg-[#06ad56];
+  @apply transition-all duration-150;
+
+  /* 禁用默认样式 */
+  @apply border-none outline-none;
+  @apply cursor-pointer;
+}
+
+/* hover 效果（非触屏设备） */
+@media (hover: hover) {
+  .wx-login-btn:hover {
+    @apply bg-[#06ad56] shadow-md;
+  }
 }
 </style>

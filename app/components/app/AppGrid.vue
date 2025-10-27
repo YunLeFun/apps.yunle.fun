@@ -61,6 +61,7 @@ const {
 
 <template>
   <div class="apps-grid" :data-performance="performanceLevel">
+    <slot name="pre" />
     <AppIcon
       v-for="app in apps"
       :key="app.id"
@@ -76,6 +77,7 @@ const {
       @touchend.passive="handleTouchEnd(app)"
       @touchcancel.passive="handleTouchCancel"
     />
+    <slot name="post" />
   </div>
 </template>
 

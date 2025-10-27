@@ -20,12 +20,15 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { add, addCircleOutline, downloadOutline, qrCodeOutline } from 'ionicons/icons'
+import { homeApps } from '~/constants/apps'
+import { cloudOneApp } from '~/constants/apps/builtin'
 
 definePageMeta({
   alias: ['/', '/home'],
 })
 
 const router = useRouter()
+const appStore = useAppStore()
 const searchQuery = ref('')
 const showMenu = ref(false)
 const menuPosition = ref({ x: 0, y: 0 })
@@ -80,7 +83,7 @@ async function handleScan() {
   }
   catch (error) {
     console.error('扫码失败:', error)
-    showError('扫码失败，请检查相机权限')
+    showError(`扫码失败，请检查相机权限 ${error}`)
   }
 }
 
@@ -127,119 +130,6 @@ function handleDownload() {
   // TODO: 实现下载应用功能
 }
 
-// ==================== 应用数据 ====================
-
-const homeApps = ref<YlfAppInfo[]>([
-  {
-    id: '1',
-    code: 'valaxy',
-    name: 'Valaxy',
-    icon: '🌌',
-    color: '#0078e7',
-    url: 'https://valaxy.site',
-    category: '应用',
-  },
-  {
-    id: '2',
-    code: 'fitness',
-    name: 'Fitness',
-    icon: '💪',
-    color: '#FF3B30',
-    url: '/apps/fitness',
-    category: '健康',
-  },
-  {
-    id: '3',
-    code: 'photo',
-    name: 'Photos',
-    icon: '📷',
-    color: '#34C759',
-    url: '/apps/photo',
-    category: '摄影',
-  },
-  {
-    id: '4',
-    code: 'music',
-    name: 'Music',
-    icon: '🎵',
-    color: '#FF9500',
-    url: '/apps/music',
-    category: '音乐',
-  },
-  {
-    id: '5',
-    code: 'notes',
-    name: 'Notes',
-    icon: '📝',
-    color: '#5AC8FA',
-    url: '/apps/notes',
-    category: '效率',
-  },
-  {
-    id: '6',
-    code: 'weather',
-    name: 'Weather',
-    icon: '⛅',
-    color: '#50E3C2',
-    url: '/apps/weather',
-    category: '工具',
-  },
-  {
-    id: '7',
-    code: 'games',
-    name: 'Games',
-    icon: '🎮',
-    color: '#B8E986',
-    url: '/apps/games',
-    category: '游戏',
-  },
-  {
-    id: '8',
-    code: 'social',
-    name: 'Social',
-    icon: '👥',
-    color: '#FF2D55',
-    url: '/apps/social',
-    category: '社交',
-  },
-  {
-    id: '9',
-    code: 'camera',
-    name: 'Camera',
-    icon: '📹',
-    color: '#A2845E',
-    url: '/apps/camera',
-    category: '摄像',
-  },
-  {
-    id: '10',
-    code: 'maps',
-    name: 'Maps',
-    icon: '🗺️',
-    color: '#34C759',
-    url: '/apps/maps',
-    category: '地图',
-  },
-  {
-    id: '11',
-    code: 'mail',
-    name: 'Mail',
-    icon: '✉️',
-    color: '#007AFF',
-    url: '/apps/mail',
-    category: '邮件',
-  },
-  {
-    id: '12',
-    code: 'calendar',
-    name: 'Calendar',
-    icon: '📅',
-    color: '#FF3B30',
-    url: '/apps/calendar',
-    category: '日历',
-  },
-])
-
 // ==================== 应用交互 ====================
 
 const selectedApp = ref<YlfAppInfo | null>(null)
@@ -251,6 +141,8 @@ const longPressTriggered = ref(false)
  * 打开应用
  */
 function openApp(app: YlfAppInfo) {
+  // 添加到最近使用列表
+  appStore.addRecentApp(app)
   openInAppBrowser(app.url)
 }
 
@@ -444,12 +336,41 @@ const dockItems: DockItem[] = [
     </IonHeader>
 
     <IonContent class="phone-desktop">
+      <!-- 最近使用 -->
+      <div v-if="appStore.recentApps.length > 0" class="recent-section">
+        <div class="section-header px-5.5">
+          <ion-note class="text-black/60 dark:text-white/60">
+            最近使用的云 APP
+          </ion-note>
+        </div>
+        <div class="recent-apps px-5">
+          <AppIcon
+            v-for="app in appStore.recentApps"
+            :key="app.id"
+            :app="app"
+            @click="handleAppClick(app)"
+            @long-press="handleAppLongPress"
+          />
+        </div>
+      </div>
+
       <!-- 应用网格 -->
+      <div class="px-5.5">
+        <ion-note class="text-black/60 dark:text-white/60">
+          常用的云 APP
+        </ion-note>
+      </div>
       <AppGrid
         :apps="homeApps"
         @click="handleAppClick"
         @long-press="handleAppLongPress"
-      />
+      >
+        <template #pre>
+          <AppIcon
+            :app="cloudOneApp"
+          />
+        </template>
+      </AppGrid>
 
       <!-- 底部 Dock 导航栏 -->
       <AppDock :items="dockItems" />
@@ -481,6 +402,37 @@ const dockItems: DockItem[] = [
 <style scoped>
 .dark .phone-desktop {
   --background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+}
+
+/* ==================== 最近使用区域 ==================== */
+.recent-section {
+  padding-top: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.recent-apps {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.recent-apps::-webkit-scrollbar {
+  display: none;
+}
+
+.recent-apps :deep(.app-icon) {
+  flex-shrink: 0;
 }
 
 /* ==================== 扫码时隐藏背景 ==================== */

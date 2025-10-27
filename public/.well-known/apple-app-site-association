@@ -4,7 +4,7 @@
       {
         "appIDs": ["QT792GAY4C.fun.yunle.apps", "QT792GAY4C.fun.yunle.www"],
         "paths": [
-          "/app/",
+          "/app/*",
           "/ulink/*"
         ]
       }

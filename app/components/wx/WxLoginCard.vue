@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
 import { isPlatform } from '@ionic/vue'
-import { createEmbeddedWxLogin, generateQrconnectUrl } from '~~/packages/auth/src'
+import { WechatSDK } from 'capacitor-ionic-plugin-wechat'
+import { createEmbeddedWxLogin } from '~~/packages/auth/src'
 
 const config = useRuntimeConfig()
 
@@ -47,13 +49,31 @@ function initWxLoginInIframe() {
 /**
  * 前往微信登录页面
  * @see https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
+ *
+ * @todo
+ * 第三方浏览器移动端网页无法拉起微信登录，只能在微信内打开
+ * 添加复制到微信内打开的提示
  */
-function goToWxLoginPage() {
-  const url = generateQrconnectUrl({
-    appid: config.public.wxOpenAppId,
-    redirectUri: config.public.wxOpenRedirectUri,
-  })
-  window.open(url, '_blank')
+function goToWxLogin() {
+  // const url = generateQrconnectUrl({
+  //   appid: config.public.wxOpenAppId,
+  //   redirectUri: config.public.wxOpenRedirectUri,
+  // })
+  // window.open(url, '_blank')
+
+  if (Capacitor.isNativePlatform()) {
+    // TODO
+    WechatSDK.sendAuthRequest({
+      scope: 'snsapi_login',
+      state: 'state',
+    })
+  }
+  else {
+    const url = generateUserAuthLink({
+      appid: config.public.wxOpenAppId,
+    })
+    window.open(url, '_blank')
+  }
 }
 
 onMounted(() => {
@@ -88,12 +108,14 @@ onMounted(() => {
       </div>
     </template>
 
-    <div v-else @click="goToWxLoginPage">
+    <div v-else @click="goToWxLogin">
       <ion-chip color="success">
         <ion-icon :icon="ioniconsLogoWechat" color="success" />
         <ion-label>前往微信登录</ion-label>
       </ion-chip>
     </div>
+
+    asdasd
   </div>
 </template>
 

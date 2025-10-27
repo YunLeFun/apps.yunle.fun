@@ -11,6 +11,8 @@ PODS:
   - CapacitorCordova (7.4.3)
   - CapacitorHaptics (7.0.2):
     - Capacitor
+  - CapacitorIonicPluginWechat (7.0.3):
+    - Capacitor
   - CapacitorKeyboard (7.0.3):
     - Capacitor
   - CapacitorStatusBar (7.0.3):
@@ -24,6 +26,7 @@ DEPENDENCIES:
   - "CapacitorBrowser (from `../../node_modules/.pnpm/@capacitor+browser@7.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/browser`)"
   - "CapacitorCordova (from `../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../node_modules/.pnpm/@capacitor+haptics@7.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/haptics`)"
+  - "CapacitorIonicPluginWechat (from `../../node_modules/.pnpm/capacitor-ionic-plugin-wechat@7.0.3_@capacitor+core@7.4.3/node_modules/capacitor-ionic-plugin-wechat`)"
   - "CapacitorKeyboard (from `../../node_modules/.pnpm/@capacitor+keyboard@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/keyboard`)"
   - "CapacitorStatusBar (from `../../node_modules/.pnpm/@capacitor+status-bar@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/status-bar`)"
 
@@ -44,6 +47,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios"
   CapacitorHaptics:
     :path: "../../node_modules/.pnpm/@capacitor+haptics@7.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/haptics"
+  CapacitorIonicPluginWechat:
+    :path: "../../node_modules/.pnpm/capacitor-ionic-plugin-wechat@7.0.3_@capacitor+core@7.4.3/node_modules/capacitor-ionic-plugin-wechat"
   CapacitorKeyboard:
     :path: "../../node_modules/.pnpm/@capacitor+keyboard@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/keyboard"
   CapacitorStatusBar:
@@ -56,10 +61,11 @@ SPEC CHECKSUMS:
   CapacitorBrowser: 22541e48442de44dc629c214388290d6eecc6ae9
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorHaptics: b3fb2869e72c4466e18ce9ccbeb60a3d8723b3d4
+  CapacitorIonicPluginWechat: b6fe283e4fda25c6e791b9ffd27ce812321a8a67
   CapacitorKeyboard: 62f36104f26d53d8b3a2a43f2a69fe714f1777d5
   CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
   OSBarcodeLib: 57987d2eb1f916f701f4554e20e349b3cb83f023
 
-PODFILE CHECKSUM: 18522d93f9a0d7cda35e460229a3b383f393be93
+PODFILE CHECKSUM: f8949f44a9664bd6d902a6a412c136ac6549e67d
 
 COCOAPODS: 1.16.2

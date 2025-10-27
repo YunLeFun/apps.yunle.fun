@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nuxi build",
     "deploy": "npx deploy",
-    "dev": "nuxi dev --host",
+    "dev": "nuxi dev --host -p 8080",
     "dev:pwa": "VITE_PLUGIN_PWA=true nuxi dev",
     "lint": "eslint .",
     "prepare": "nuxi prepare",
@@ -24,7 +24,7 @@
     "test:e2e:debug": "playwright test --debug",
     "sync": "cap sync",
     "open:ios": "cap open ios",
-    "dev:ios": "cap run ios -l"
+    "dev:ios": "cap run ios -l --port=8080"
   },
   "dependencies": {
     "@capacitor/app": "7.1.0",
@@ -35,18 +35,19 @@
     "@capacitor/ios": "7.4.3",
     "@capacitor/keyboard": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
+    "capacitor-ionic-plugin-wechat": "^7.0.3",
     "ofetch": "^1.4.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.0.0",
+    "@antfu/eslint-config": "^6.1.0",
     "@capacitor/cli": "7.4.3",
     "@cloudbase/js-sdk": "^2.22.1",
     "@iconify-json/carbon": "^1.2.14",
     "@iconify-json/ri": "^1.2.6",
     "@iconify-json/twemoji": "^1.2.4",
-    "@nuxt/devtools": "^2.6.5",
+    "@nuxt/devtools": "^2.7.0",
     "@nuxt/eslint": "^1.9.0",
-    "@nuxt/test-utils": "^3.19.2",
+    "@nuxt/test-utils": "^3.20.1",
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/ionic": "1.0.2",
     "@pinia/nuxt": "^0.11.2",
@@ -55,7 +56,7 @@
     "@unocss/eslint-config": "^66.5.4",
     "@unocss/nuxt": "^66.5.4",
     "@vite-pwa/nuxt": "^1.0.7",
-    "@vitest/coverage-v8": "^4.0.2",
+    "@vitest/coverage-v8": "^4.0.3",
     "@vue/test-utils": "^2.4.6",
     "@vueuse/nuxt": "^14.0.0",
     "@yunlefun/deploy": "^0.0.11",
@@ -66,13 +67,13 @@
     "eslint-plugin-format": "^1.0.2",
     "happy-dom": "^20.0.8",
     "jsdom": "^27.0.1",
-    "nuxt": "^4.1.3",
+    "nuxt": "^4.2.0",
     "nuxt-auth-utils": "^0.5.25",
     "pinia": "^3.0.3",
     "qrcode": "^1.5.4",
     "sass": "^1.93.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.2",
-    "vue-tsc": "^3.1.1"
+    "vitest": "^4.0.3",
+    "vue-tsc": "^3.1.2"
   }
 }

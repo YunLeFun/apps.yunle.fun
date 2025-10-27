@@ -8,13 +8,10 @@ import { config } from '../../config'
  * - 重定向后会带上state参数，开发者可以填写a-zA-Z0-9的参数值，最多128字节
  */
 export function generateUserAuthLink(options: {
-  /**
-   * YunLeFun APP Index
-   */
-  ylfAppID?: string
+  appid?: string
 
   redirect_uri?: string
-  scope: 'snsapi_base' | 'snsapi_userinfo'
+  scope?: 'snsapi_base' | 'snsapi_userinfo'
 }) {
   const { redirect_uri = config.wx.redirectUri, scope = 'snsapi_base' } = options
   // 开发者可以填写 a-zA-Z0-9 的参数值，最多128字节
@@ -26,7 +23,7 @@ export function generateUserAuthLink(options: {
   redirectUrl.searchParams.delete('state')
 
   const url = new URL('https://open.weixin.qq.com/connect/oauth2/authorize')
-  url.searchParams.set('appid', options.ylfAppID || '')
+  url.searchParams.set('appid', options.appid || '')
   url.searchParams.set('redirect_uri', redirectUrl.toString())
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('scope', scope)

@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["QT792GAY4C.fun.yunle.apps"],
+        "paths": [
+          "/app/",
+          "/ulink/*"
+        ]
+      }
+    ]
+  }
+}

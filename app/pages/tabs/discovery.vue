@@ -36,6 +36,9 @@ definePageMeta({
         <!-- 今日推荐 -->
         <AppFeatured />
 
+        <!-- 本周热门排行榜 -->
+        <AppWeeklyChart />
+
         <!-- 可以添加更多首页内容 -->
         <!-- <YlfHouse /> -->
       </div>

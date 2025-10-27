@@ -56,6 +56,7 @@ function handleClose() {
       class="context-menu-overlay"
       @click="handleClose"
       @touchstart.prevent
+      @touchend="handleClose"
     >
       <div
         class="context-menu"
@@ -64,6 +65,7 @@ function handleClose() {
           top: `${position.y}px`,
         }"
         @click.stop
+        @touchend.stop
       >
         <div class="context-menu-item" @click="handleAction('open')">
           <span class="menu-icon">📱</span>
@@ -80,10 +82,6 @@ function handleClose() {
         <div class="context-menu-item danger" @click="handleAction('remove')">
           <span class="menu-icon">🗑️</span>
           <span>移除</span>
-        </div>
-        <div class="context-menu-divider" />
-        <div class="context-menu-item cancel" @click="handleClose">
-          取消
         </div>
       </div>
     </div>

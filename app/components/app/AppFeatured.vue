@@ -10,7 +10,7 @@ const featuredApp = ref<YlfAppInfo>({
   code: 'fitness-pro',
   name: 'Fitness Pro',
   description: '专业健身教练，定制您的训练计划。AI 智能分析，个性化训练方案',
-  icon: '💪',
+  emoji: '💪',
   color: '#FF3B30',
   url: '/apps/fitness-pro',
   category: '健康健身',
@@ -25,13 +25,23 @@ const featuredApp = ref<YlfAppInfo>({
 function openAppDetail() {
   router.push(`/app/${featuredApp.value.id}`)
 }
+
+const todayDateStr = computed(() => {
+  const date = new Date()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return `${month}月${day}日`
+})
 </script>
 
 <template>
-  <div class="app-featured">
+  <div class="app-featured pb-4">
     <div class="mb-3 flex items-center justify-between">
-      <h2 class="section-title">
+      <h2 class="section text-3xl font-bold">
         今日推荐
+        <small class="op-55">
+          {{ todayDateStr }}
+        </small>
       </h2>
     </div>
 
@@ -61,7 +71,7 @@ function openAppDetail() {
               class="h-20 w-20 flex items-center justify-center rounded-2xl text-4xl shadow-lg"
               style="background: rgba(255, 255, 255, 0.95)"
             >
-              {{ featuredApp.icon }}
+              {{ featuredApp.emoji }}
             </div>
             <IonButton color="light" size="default">
               查看
@@ -74,16 +84,6 @@ function openAppDetail() {
 </template>
 
 <style scoped>
-.app-featured {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-}
-
 .featured-card {
   border-radius: 16px;
   overflow: hidden;

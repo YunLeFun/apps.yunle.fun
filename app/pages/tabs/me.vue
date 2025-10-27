@@ -82,7 +82,7 @@ function goToLogin() {
           <IonLabel>个人资料</IonLabel>
         </IonItem>
 
-        <IonItem button>
+        <IonItem button router-link="/user/settings">
           <IonIcon slot="start" :icon="settings" />
           <IonLabel>设置</IonLabel>
         </IonItem>
@@ -98,7 +98,12 @@ function goToLogin() {
       </IonList>
 
       <IonList inset>
-        <IonItem router-link="/about">
+        <IonItem button router-link="/user/settings">
+          <IonIcon slot="start" :icon="settings" />
+          <IonLabel>设置</IonLabel>
+        </IonItem>
+
+        <IonItem button router-link="/about">
           <IonIcon slot="start" :icon="informationCircle" />
           <IonLabel>关于</IonLabel>
         </IonItem>

@@ -1,0 +1,6 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="inline-flex" style="color: var(--yyj-brand);">
+  <rect width="128" height="128"></rect>
+  <path d="M58.8571 64L44.7143 72.295V55.705L58.8571 64Z" fill="white"></path>
+  <path d="M84.5714 64C84.5714 68.3281 81.1176 71.8367 76.8571 71.8367C72.5967 71.8367 69.1429 68.3281 69.1429 64C69.1429 59.6719 72.5967 56.1633 76.8571 56.1633C81.1176 56.1633 84.5714 59.6719 84.5714 64Z" fill="white"></path>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M94 33.5238H34V46.585H21.1429V81.415H34V94.4762H94V81.415H106.857V46.585H94V33.5238ZM94 46.585H34V81.415H94V46.585Z" fill="white"></path>
+</svg>

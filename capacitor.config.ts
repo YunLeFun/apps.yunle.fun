@@ -1,7 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
-const wxOpenAppId = {
-  ylf: 'wx925d6e320d64f30a',
+const ylfApp = {
+  appId: 'wx925d6e320d64f30a',
+  appName: '云乐坊',
+  universalLink: 'https://www.yunle.fun/app/',
 }
 
 const config: CapacitorConfig = {
@@ -11,22 +13,18 @@ const config: CapacitorConfig = {
 
   /**
    * @see https://github.com/xu-li/cordova-plugin-wechat/issues/606
+   *
+   * Capacitor/Ionic + cordova-plugin-wechat
+   * @see https://github.com/byteee-fund/cordova-plugin-wechat-ionic7-demo
    */
-  // cordova: {
-  //   preferences: {
-  //     WECHATAPPID: 'wx925d6e320d64f30a',
-  //   },
-  // },
-
-  /**
-   * @see https://github.com/TomPengCN/capacitor-ionic-plugin-wechat
-   */
-  plugins: {
-    WechatSDK: {
-      // mchid: '1234567890', // 商户id, 如无微信支付功能可忽略此参数
-      wechatAppId: wxOpenAppId.ylf, // 微信应用id: 从微信开放平台官方网站申请到的合法AppId
-      wechatUniversalLink: 'https://www.yunle.fun/ulink/', // UniversalLink 仅针对于iOS
+  cordova: {
+    preferences: {
+      WECHATAPPID: ylfApp.appId,
+      UNIVERSALLINK: ylfApp.universalLink,
     },
+  },
+  ios: {
+    cordovaLinkerFlags: ['-ObjC', '-all_load'],
   },
 }
 

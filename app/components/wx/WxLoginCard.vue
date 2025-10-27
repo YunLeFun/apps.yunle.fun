@@ -1,7 +1,8 @@
+<!-- eslint-disable no-alert -->
 <script setup lang="ts">
 import { Capacitor } from '@capacitor/core'
 import { isPlatform } from '@ionic/vue'
-import { WechatSDK } from 'capacitor-ionic-plugin-wechat'
+import { consola } from 'consola'
 import { createEmbeddedWxLogin } from '~~/packages/auth/src'
 
 const config = useRuntimeConfig()
@@ -61,11 +62,14 @@ function goToWxLogin() {
   // })
   // window.open(url, '_blank')
 
-  if (Capacitor.isNativePlatform()) {
+  const isNativePlatform = Capacitor.isNativePlatform()
+  consola.info('isNativePlatform', isNativePlatform)
+  if (isNativePlatform) {
     // TODO
-    WechatSDK.sendAuthRequest({
-      scope: 'snsapi_login',
-      state: 'state',
+    Wechat.auth('snsapi_userinfo', `_${new Date()}`, (res: any) => {
+      alert(JSON.stringify(res))
+    }, (reason: any) => {
+      alert(`Failed: ${reason}`)
     })
   }
   else {

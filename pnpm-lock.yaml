@@ -32,9 +32,9 @@ importers:
       '@capacitor/status-bar':
         specifier: 7.0.3
         version: 7.0.3(@capacitor/core@7.4.3)
-      capacitor-ionic-plugin-wechat:
-        specifier: ^7.0.3
-        version: 7.0.3(@capacitor/core@7.4.3)
+      cordova-plugin-wechat:
+        specifier: ^3.1.0
+        version: 3.1.0
       ofetch:
         specifier: ^1.4.1
         version: 1.4.1
@@ -3588,11 +3588,6 @@ packages:
   caniuse-lite@1.0.30001751:
     resolution: {integrity: sha512-A0QJhug0Ly64Ii3eIqHu5X51ebln3k4yTUkY1j8drqpWHVreg/VLijN48cZ1bYPiqOQuqpkIKnzr/Ul8V+p6Cw==}
 
-  capacitor-ionic-plugin-wechat@7.0.3:
-    resolution: {integrity: sha512-/SlO9E5MT1iKt47GLffmBVr7Ug/Wxc/ujbVJIgPh88SyipiUA7q+LPcPoPQaunnsg+2/XUHfazHaOoWROBQXfQ==}
-    peerDependencies:
-      '@capacitor/core': '>=7.0.0'
-
   case-anything@3.1.2:
     resolution: {integrity: sha512-wljhAjDDIv/hM2FzgJnYQg90AWmZMNtESCjTeLH680qTzdo0nErlCxOmgzgX4ZsZAtIvqHyD87ES8QyriXB+BQ==}
     engines: {node: '>=18'}
@@ -3773,6 +3768,10 @@ packages:
   copy-anything@3.0.5:
     resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
     engines: {node: '>=12.13'}
+
+  cordova-plugin-wechat@3.1.0:
+    resolution: {integrity: sha512-ciMedubrsUgKPXwBV1uF4wC2E5jHxwowfCKhMD2t7F3NKDnDhiEM5rCa3MP+3EZ9Rb9RM8t/rHVbn2UTE4tAwA==}
+    engines: {cordovaDependencies: {2.0.0: {cordova: '>=6.1.0', cordova-android: '>=6.1.0', cordova-ios: '>=4.3.1'}, <2.0.0: {cordova: '>=3.5.0'}}}
 
   core-js-compat@3.46.0:
     resolution: {integrity: sha512-p9hObIIEENxSV8xIu+V68JjSeARg6UVMG5mR+JEUguG3sI6MsiS1njz2jHmyJDvA+8jX/sytkBHup6kxhM9law==}
@@ -6839,6 +6838,11 @@ packages:
   shell-quote@1.8.3:
     resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
     engines: {node: '>= 0.4'}
+
+  shelljs@0.5.3:
+    resolution: {integrity: sha512-C2FisSSW8S6TIYHHiMHN0NqzdjWfTekdMpA2FJTbRWnQMLO1RRIXEB9eVZYOlofYmjZA7fY3ChoFu09MeI3wlQ==}
+    engines: {node: '>=0.8.0'}
+    hasBin: true
 
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
@@ -12284,10 +12288,6 @@ snapshots:
 
   caniuse-lite@1.0.30001751: {}
 
-  capacitor-ionic-plugin-wechat@7.0.3(@capacitor/core@7.4.3):
-    dependencies:
-      '@capacitor/core': 7.4.3
-
   case-anything@3.1.2: {}
 
   ccount@2.0.1: {}
@@ -12457,6 +12457,10 @@ snapshots:
   copy-anything@3.0.5:
     dependencies:
       is-what: 4.1.16
+
+  cordova-plugin-wechat@3.1.0:
+    dependencies:
+      shelljs: 0.5.3
 
   core-js-compat@3.46.0:
     dependencies:
@@ -16188,6 +16192,8 @@ snapshots:
   shebang-regex@3.0.0: {}
 
   shell-quote@1.8.3: {}
+
+  shelljs@0.5.3: {}
 
   side-channel-list@1.0.0:
     dependencies:

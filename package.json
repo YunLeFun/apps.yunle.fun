@@ -24,7 +24,9 @@
     "test:e2e:debug": "playwright test --debug",
     "sync": "cap sync",
     "open:ios": "cap open ios",
-    "dev:ios": "cap run ios -l --port=8080"
+    "dev:ios": "cap run ios -l --port=8080",
+    "run:ios": "cap run ios",
+    "build:ios": "cap build ios"
   },
   "dependencies": {
     "@capacitor/app": "7.1.0",
@@ -35,7 +37,7 @@
     "@capacitor/ios": "7.4.3",
     "@capacitor/keyboard": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
-    "capacitor-ionic-plugin-wechat": "^7.0.3",
+    "cordova-plugin-wechat": "^3.1.0",
     "ofetch": "^1.4.1"
   },
   "devDependencies": {

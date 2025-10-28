@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { YlfAppInfo } from '~~/packages/types'
-import { IonButton, IonIcon } from '@ionic/vue'
-import { chevronForward } from 'ionicons/icons'
+import { IonButton } from '@ionic/vue'
 
 const router = useRouter()
 
@@ -15,7 +14,7 @@ const weeklyChartApps = ref<YlfAppInfo[]>([
     icon: '🎵',
     emoji: '🎵',
     color: '#FF2D55',
-    url: '/apps/music-master',
+    url: '/app/music-master',
     category: '音乐',
     rating: 4.8,
     downloads: '100万+',
@@ -30,7 +29,7 @@ const weeklyChartApps = ref<YlfAppInfo[]>([
     icon: '📷',
     emoji: '📷',
     color: '#5856D6',
-    url: '/apps/photo-editor-pro',
+    url: '/app/photo-editor-pro',
     category: '摄影与录像',
     rating: 4.9,
     downloads: '200万+',
@@ -45,7 +44,7 @@ const weeklyChartApps = ref<YlfAppInfo[]>([
     icon: '✅',
     emoji: '✅',
     color: '#34C759',
-    url: '/apps/task-manager',
+    url: '/app/task-manager',
     category: '效率',
     rating: 4.7,
     downloads: '80万+',
@@ -60,7 +59,7 @@ const weeklyChartApps = ref<YlfAppInfo[]>([
     icon: '🌍',
     emoji: '🌍',
     color: '#FF9500',
-    url: '/apps/language-learn',
+    url: '/app/language-learn',
     category: '教育',
     rating: 4.8,
     downloads: '150万+',
@@ -75,7 +74,7 @@ const weeklyChartApps = ref<YlfAppInfo[]>([
     icon: '🧘',
     emoji: '🧘',
     color: '#30B0C7',
-    url: '/apps/meditation-plus',
+    url: '/app/meditation-plus',
     category: '健康健身',
     rating: 4.9,
     downloads: '120万+',
@@ -106,7 +105,7 @@ function viewAllChart() {
       </div>
       <div class="chart-list">
         <div
-          v-for="(app, index) in weeklyChartApps"
+          v-for="(app) in weeklyChartApps"
           :key="app.id"
           class="chart-item"
           @click="openAppDetail(app)"

@@ -38,7 +38,7 @@
     "@capacitor/keyboard": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
     "cordova-plugin-wechat": "^3.1.0",
-    "ofetch": "^1.4.1"
+    "ofetch": "^1.5.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.1.0",
@@ -47,7 +47,7 @@
     "@iconify-json/carbon": "^1.2.14",
     "@iconify-json/ri": "^1.2.6",
     "@iconify-json/twemoji": "^1.2.4",
-    "@nuxt/devtools": "^2.7.0",
+    "@nuxt/devtools": "^3.0.0",
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/test-utils": "^3.20.1",
     "@nuxtjs/color-mode": "^3.5.2",
@@ -60,6 +60,7 @@
     "@vite-pwa/nuxt": "^1.0.7",
     "@vitest/coverage-v8": "^4.0.4",
     "@vue/test-utils": "^2.4.6",
+    "@vueuse/components": "^14.0.0",
     "@vueuse/nuxt": "^14.0.0",
     "@yunlefun/deploy": "^0.0.11",
     "@yunlefun/toolkit": "^0.1.2",

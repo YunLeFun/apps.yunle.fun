@@ -64,4 +64,9 @@ export interface YlfAppInfo {
    * 标语（用于今日推荐等）
    */
   tagline?: string
+
+  /**
+   * 回调
+   */
+  callback?: () => void
 }

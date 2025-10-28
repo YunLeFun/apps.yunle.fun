@@ -17,6 +17,7 @@ export default defineEventHandler((event) => {
       icon: 'https://cook.yunyoujun.cn/favicon.svg',
       name: '食用手册',
       code: 'cook',
+      emoji: '🍳',
       url: 'https://cook.yunyoujun.cn',
     }
 

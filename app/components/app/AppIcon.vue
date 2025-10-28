@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { YlfAppInfo } from '~~/packages/types'
+
 /**
  * AppIcon - 应用图标组件
  *
@@ -19,8 +21,6 @@
  * ```
  */
 
-import type { YlfAppInfo } from '~~/packages/types'
-
 interface Props {
   /** 应用信息 */
   app: YlfAppInfo
@@ -28,12 +28,12 @@ interface Props {
   showBadge?: boolean
   /** 徽章数字（如果不提供则随机生成） */
   badgeCount?: number | null
-  /** 交互状态类名（支持字符串或对象） */
-  interactionClass?: string | Record<string, boolean>
   /** 交互样式 */
   interactionStyle?: Record<string, any>
   /** 性能等级 */
   performanceLevel?: 'high' | 'medium' | 'low'
+
+  longPressed?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,6 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   interactionClass: () => ({}),
   interactionStyle: () => ({}),
   performanceLevel: 'high',
+  longPressed: false,
 })
 
 /**
@@ -56,13 +57,42 @@ const displayBadge = computed(() => {
   // 随机生成徽章（30% 概率显示）
   return Math.random() > 0.7 ? Math.floor(Math.random() * 99) + 1 : null
 })
+
+/**
+ * 是否按下
+ */
+const isPressed = ref(false)
+/**
+ * 处理指针按下事件
+ */
+function handlePointerDown() {
+  isPressed.value = true
+}
+/**
+ * 清除 pressed 状态
+ */
+function clearPressed() {
+  isPressed.value = false
+}
+
+const appIconClasses = computed(() => {
+  return {
+    'is-pressed': isPressed.value,
+    'is-long-pressed': props.longPressed,
+  }
+})
 </script>
 
 <template>
   <div
     class="app-icon-item"
-    :class="interactionClass"
+    :class="appIconClasses"
     :data-performance="performanceLevel"
+    @pointerdown="handlePointerDown"
+    @pointercancel="clearPressed"
+    @pointerup="clearPressed"
+    @pointerleave="clearPressed"
+    @pointerout="clearPressed"
   >
     <div
       class="app-icon-box"
@@ -108,27 +138,16 @@ const displayBadge = computed(() => {
   -webkit-tap-highlight-color: transparent;
   position: relative;
   touch-action: manipulation;
-  /* 移除默认 transition，由 JS 控制 */
-}
+  transition: transform 0.15s ease;
 
-/* 按下状态 - 快速响应 */
-.app-icon-item.is-pressed .app-icon-box {
-  /* 由 JS 动态设置 transform */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
+  &.is-pressed {
+    transform: scale(0.95);
 
-.dark .app-icon-item.is-pressed .app-icon-box {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* 长按状态 - 更强的视觉反馈 */
-.app-icon-item.is-long-pressing .app-icon-box {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  animation: pulse 0.5s ease-in-out;
-}
-
-.dark .app-icon-item.is-long-pressing .app-icon-box {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    .app-icon-box {
+      /* 添加向内阴影 */
+      box-shadow: inset 0 0 64px rgba(0, 0, 0, 0.5);
+    }
+  }
 }
 
 /* 脉冲动画 */
@@ -167,16 +186,6 @@ const displayBadge = computed(() => {
 
 .dark .app-icon-box {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-}
-
-/* 性能优化：低性能设备使用简化样式 */
-.app-icon-item[data-performance='low'] .app-icon-box {
-  will-change: auto;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.app-icon-item[data-performance='low'].is-pressed .app-icon-box {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .app-icon-box::after {

@@ -45,9 +45,6 @@ const emit = defineEmits<{
 
 // 使用交互反馈系统
 const {
-  handleTouchStart,
-  handleTouchEnd,
-  handleTouchCancel,
   getInteractionClass,
   getInteractionStyle,
   performanceLevel,
@@ -57,12 +54,23 @@ const {
   enableHaptic: props.enableHaptic,
   enableVisualFeedback: props.enableVisualFeedback,
 })
+
+const showActionSheet = ref(false)
+
+/**
+ * 处理长按
+ * 转发事件到父组件
+ */
+function handleLongPress(app: YlfAppInfo, event: PointerEvent | TouchEvent) {
+  showActionSheet.value = true
+  emit('longPress', app, event)
+}
 </script>
 
 <template>
   <div class="apps-grid" :data-performance="performanceLevel">
     <slot name="pre" />
-    <AppIcon
+    <AppItem
       v-for="app in apps"
       :key="app.id"
       :app="app"
@@ -70,15 +78,12 @@ const {
       :interaction-class="getInteractionClass(app.id)"
       :interaction-style="getInteractionStyle(app.id)"
       :performance-level="performanceLevel"
-      @pointerdown="handleTouchStart(app, $event)"
-      @pointerup="handleTouchEnd(app)"
-      @pointercancel="handleTouchCancel"
-      @touchstart.passive="handleTouchStart(app, $event)"
-      @touchend.passive="handleTouchEnd(app)"
-      @touchcancel.passive="handleTouchCancel"
+      @long-press="(app, event) => handleLongPress(app, event)"
     />
     <slot name="post" />
   </div>
+
+  <AppActionSheet :is-open="showActionSheet" @did-dismiss="showActionSheet = false" />
 </template>
 
 <style scoped>

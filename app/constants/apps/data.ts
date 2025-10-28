@@ -16,7 +16,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Fitness',
     emoji: '💪',
     color: '#FF3B30',
-    url: '/apps/fitness',
+    url: '/app/fitness',
     category: '健康',
   },
   {
@@ -25,7 +25,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Photos',
     emoji: '📷',
     color: '#34C759',
-    url: '/apps/photo',
+    url: '/app/photo',
     category: '摄影',
   },
   {
@@ -34,7 +34,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Music',
     emoji: '🎵',
     color: '#FF9500',
-    url: '/apps/music',
+    url: '/app/music',
     category: '音乐',
   },
   {
@@ -43,7 +43,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Notes',
     emoji: '📝',
     color: '#5AC8FA',
-    url: '/apps/notes',
+    url: '/app/notes',
     category: '效率',
   },
   {
@@ -52,7 +52,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Weather',
     emoji: '⛅',
     color: '#50E3C2',
-    url: '/apps/weather',
+    url: '/app/weather',
     category: '工具',
   },
   {
@@ -61,7 +61,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Games',
     emoji: '🎮',
     color: '#B8E986',
-    url: '/apps/games',
+    url: '/app/games',
     category: '游戏',
   },
   {
@@ -70,7 +70,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Social',
     emoji: '👥',
     color: '#FF2D55',
-    url: '/apps/social',
+    url: '/app/social',
     category: '社交',
   },
   {
@@ -79,7 +79,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Camera',
     emoji: '📹',
     color: '#A2845E',
-    url: '/apps/camera',
+    url: '/app/camera',
     category: '摄像',
   },
   {
@@ -88,7 +88,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Maps',
     emoji: '🗺️',
     color: '#34C759',
-    url: '/apps/maps',
+    url: '/app/maps',
     category: '地图',
   },
   {
@@ -97,7 +97,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Mail',
     emoji: '✉️',
     color: '#007AFF',
-    url: '/apps/mail',
+    url: '/app/mail',
     category: '邮件',
   },
   {
@@ -106,7 +106,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Calendar',
     emoji: '📅',
     color: '#FF3B30',
-    url: '/apps/calendar',
+    url: '/app/calendar',
     category: '日历',
   },
   {
@@ -115,7 +115,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Settings',
     emoji: '⚙️',
     color: '#FF9500',
-    url: '/apps/settings',
+    url: '/app/settings',
     category: '设置',
   },
   {
@@ -124,7 +124,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'About',
     emoji: 'ℹ️',
     color: '#5AC8FA',
-    url: '/apps/about',
+    url: '/app/about',
     category: '关于',
   },
   {
@@ -133,7 +133,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Help',
     emoji: '❓',
     color: '#50E3C2',
-    url: '/apps/help',
+    url: '/app/help',
     category: '帮助',
   },
   {
@@ -142,7 +142,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Feedback',
     emoji: '💬',
     color: '#B8E986',
-    url: '/apps/feedback',
+    url: '/app/feedback',
     category: '反馈',
   },
   {
@@ -151,7 +151,7 @@ export const homeApps = ref<YlfAppInfo[]>([
     name: 'Donate',
     emoji: '❤️',
     color: '#FF2D55',
-    url: '/apps/donate',
+    url: '/app/donate',
     category: '捐赠',
   },
 ])

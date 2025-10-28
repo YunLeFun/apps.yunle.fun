@@ -22,6 +22,7 @@
 
 import type { Ref } from 'vue'
 import type { YlfAppInfo } from '~~/packages/types'
+import { Haptics } from '@capacitor/haptics'
 
 export interface AppInteractionOptions {
   /** 点击回调 */
@@ -90,10 +91,10 @@ function detectPerformanceLevel(): 'high' | 'medium' | 'low' {
 /**
  * 触发触觉反馈
  */
-function triggerHaptic(pattern: number | number[] = 10) {
+function triggerHaptic(pattern: number = 10) {
   if (checkHapticSupport()) {
     try {
-      navigator.vibrate(pattern)
+      Haptics.vibrate({ duration: pattern })
     }
     catch (error) {
       console.warn('Haptic feedback failed:', error)

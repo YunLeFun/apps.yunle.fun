@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ThemeMode } from '~/stores/settings'
 import {
   IonBackButton,
   IonButtons,
@@ -17,7 +18,6 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { moon, phonePortraitOutline, sunny } from 'ionicons/icons'
-import type { ThemeMode } from '~/stores/settings'
 
 const settingsStore = useSettingsStore()
 

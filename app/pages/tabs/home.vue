@@ -8,6 +8,7 @@
 
 import type { YlfAppInfo } from '~~/packages/types'
 import type { DockItem } from '~/components/layout/AppDock.vue'
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   IonButton,
   IonButtons,
@@ -20,6 +21,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { add, addCircleOutline, downloadOutline, qrCodeOutline } from 'ionicons/icons'
+
 import { homeApps } from '~/constants/apps'
 import { cloudOneApp } from '~/constants/apps/builtin'
 
@@ -133,124 +135,22 @@ function handleDownload() {
 // ==================== 应用交互 ====================
 
 const selectedApp = ref<YlfAppInfo | null>(null)
-const showContextMenu = ref(false)
-const contextMenuPos = ref({ x: 0, y: 0 })
-const longPressTriggered = ref(false)
+const showContextMenuOverlay = ref(false)
 
 /**
- * 打开应用
+ * 处理长按事件
  */
-function openApp(app: YlfAppInfo) {
-  // 添加到最近使用列表
-  appStore.addRecentApp(app)
-  openInAppBrowser(app.url)
-}
-
-/**
- * 点击应用 - 只有在没有触发长按时才打开
- */
-function handleAppClick(app: YlfAppInfo) {
-  if (!longPressTriggered.value) {
-    openApp(app)
-  }
-  longPressTriggered.value = false
-}
-
-/**
- * 长按应用 - 显示上下文菜单
- */
-function handleAppLongPress(app: YlfAppInfo, event: PointerEvent | TouchEvent) {
-  longPressTriggered.value = true
+function handleLongPress(app: YlfAppInfo, _event: PointerEvent | TouchEvent) {
   selectedApp.value = app
+  showContextMenuOverlay.value = true
 
-  // 获取触摸或鼠标位置
-  let clientX = 0
-  let clientY = 0
-
-  if ('touches' in event && event.touches.length > 0) {
-    const touch = event.touches[0]
-    if (touch) {
-      clientX = touch.clientX
-      clientY = touch.clientY
-    }
+  // 触发触觉反馈
+  try {
+    Haptics.impact({ style: ImpactStyle.Medium })
   }
-  else if ('clientX' in event) {
-    clientX = event.clientX
-    clientY = event.clientY
+  catch (error) {
+    console.warn('Haptic feedback failed:', error)
   }
-
-  if (clientX === 0 && clientY === 0) {
-    return
-  }
-
-  // 计算菜单位置，确保不超出屏幕
-  const menuWidth = 160
-  const menuHeight = 240
-  const padding = 16
-
-  let x = clientX - menuWidth / 2
-  let y = clientY - menuHeight / 2
-
-  // 边界检查
-  if (x < padding)
-    x = padding
-  if (x + menuWidth > window.innerWidth - padding)
-    x = window.innerWidth - menuWidth - padding
-  if (y < padding)
-    y = padding
-  if (y + menuHeight > window.innerHeight - padding)
-    y = window.innerHeight - menuHeight - padding
-
-  contextMenuPos.value = { x, y }
-  showContextMenu.value = true
-
-  // 触觉反馈
-  if ('vibrate' in navigator) {
-    navigator.vibrate(50)
-  }
-}
-
-/**
- * 关闭上下文菜单
- */
-function closeContextMenu() {
-  showContextMenu.value = false
-  selectedApp.value = null
-}
-
-/**
- * 移除应用
- */
-function removeApp() {
-  if (selectedApp.value) {
-    const index = homeApps.value.findIndex(app => app.id === selectedApp.value?.id)
-    if (index > -1) {
-      homeApps.value.splice(index, 1)
-    }
-  }
-  closeContextMenu()
-}
-
-/**
- * 编辑应用
- */
-function editApp() {
-  if (selectedApp.value) {
-    // TODO: 实现编辑功能
-    console.warn('编辑功能待实现')
-  }
-  closeContextMenu()
-}
-
-/**
- * 分享应用
- */
-function shareApp() {
-  if (selectedApp.value) {
-    // TODO: 实现分享功能
-    console.warn('分享功能待实现')
-  }
-  closeContextMenu()
 }
 
 // ==================== Dock 配置 ====================
@@ -343,13 +243,11 @@ const dockItems: DockItem[] = [
             最近使用的云 APP
           </ion-note>
         </div>
-        <div class="recent-apps px-5">
-          <AppIcon
+        <div class="recent-apps px-5 py-3">
+          <AppItem
             v-for="app in appStore.recentApps"
             :key="app.id"
             :app="app"
-            @click="handleAppClick(app)"
-            @long-press="handleAppLongPress"
           />
         </div>
       </div>
@@ -362,8 +260,7 @@ const dockItems: DockItem[] = [
       </div>
       <AppGrid
         :apps="homeApps"
-        @click="handleAppClick"
-        @long-press="handleAppLongPress"
+        @long-press="handleLongPress"
       >
         <template #pre>
           <AppIcon
@@ -374,19 +271,6 @@ const dockItems: DockItem[] = [
 
       <!-- 底部 Dock 导航栏 -->
       <AppDock :items="dockItems" />
-
-      <!-- 长按上下文菜单 -->
-      <AppContextMenu
-        v-if="selectedApp"
-        :visible="showContextMenu"
-        :position="contextMenuPos"
-        :app="selectedApp"
-        @open="openApp(selectedApp)"
-        @edit="editApp"
-        @share="shareApp"
-        @remove="removeApp"
-        @close="closeContextMenu"
-      />
 
       <!-- 扫码界面 -->
       <BarcodeScanner
@@ -413,14 +297,12 @@ const dockItems: DockItem[] = [
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
 }
 
 .recent-apps {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  overflow-y: hidden;
   padding-bottom: 12px;
   margin-bottom: 8px;
   -webkit-overflow-scrolling: touch;

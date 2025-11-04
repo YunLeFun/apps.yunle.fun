@@ -16,7 +16,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { informationCircle, logIn, logOut, person, settings } from 'ionicons/icons'
+import { informationCircle, logIn, logOut, person, personCircle, personCircleOutline, settings } from 'ionicons/icons'
 
 const router = useRouter()
 
@@ -28,7 +28,7 @@ function handleLogout() {
   confirmLogout()
 }
 
-function goToLogin() {
+function goToLoginPage() {
   router.push('/login')
 }
 </script>
@@ -43,40 +43,37 @@ function goToLogin() {
 
     <IonContent class="ion-padding">
       <!-- 用户信息卡片 -->
-      <IonCard>
-        <IonCardHeader>
-          <div class="flex items-center gap-4">
-            <IonAvatar>
-              <img
-                v-if="userInfo.avatar"
-                :src="userInfo.avatar"
-                :alt="userInfo.nickname"
-              >
-              <IonIcon
-                v-else
-                :icon="person"
-                class="text-4xl"
-              />
-            </IonAvatar>
-            <div class="flex-1">
-              <IonCardTitle>{{ userInfo.nickname }}</IonCardTitle>
-            </div>
-          </div>
-        </IonCardHeader>
 
-        <IonCardContent v-if="!userStore.isLoggedIn">
-          <IonButton
-            expand="block"
-            @click="goToLogin"
-          >
-            <IonIcon slot="start" :icon="logIn" />
-            登录
-          </IonButton>
-        </IonCardContent>
-      </IonCard>
+      <IonList v-if="!userStore.isLoggedIn" inset>
+        <IonItem @click="goToLoginPage">
+          <IonIcon
+            slot="start"
+            color="primary"
+            :icon="personCircleOutline"
+            class="text-6xl"
+          />
+          <IonLabel color="primary">
+            登录「云乐坊」账户
+          </IonLabel>
+        </IonItem>
+      </IonList>
+      <IonList v-else inset class="py-2">
+        <IonItem @click="goToLoginPage">
+          <IonAvatar slot="start">
+            <img
+              v-if="userInfo.avatar"
+              :src="userInfo.avatar"
+              :alt="userInfo.nickname"
+            >
+          </IonAvatar>
+          <IonLabel>
+            {{ userInfo.nickname }}
+          </IonLabel>
+        </IonItem>
+      </IonList>
 
       <!-- 功能列表 -->
-      <IonList v-if="userStore.isLoggedIn" inset class="mt-4">
+      <IonList v-if="userStore.isLoggedIn" inset>
         <IonItem button router-link="/user/profile">
           <IonIcon slot="start" :icon="person" />
           <IonLabel>个人资料</IonLabel>

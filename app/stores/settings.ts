@@ -1,16 +1,12 @@
+import { useStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 
 export const useSettingsStore = defineStore('settings', () => {
   // 使用 Cookie 存储主题设置
-  const themeMode = useCookie<ThemeMode>('ylf_theme_mode', {
-    default: () => 'system',
-    maxAge: 60 * 60 * 24 * 365, // 1 年过期
-    sameSite: 'strict',
-    secure: import.meta.env.PROD,
-  })
-
+  const themeMode = useStorage<ThemeMode>('ylf_theme_mode', 'system')
+  // @nuxtjs/color-mode
   const colorMode = useColorMode()
 
   // 应用主题设置

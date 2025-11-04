@@ -41,12 +41,17 @@ export default defineNuxtConfig({
      * ionic dark mode
      * @see https://ionicframework.com/docs/theming/dark-mode#system
      */
-    '@ionic/vue/css/palettes/dark.system.css',
+    '@ionic/vue/css/palettes/dark.class.css',
     '~/styles/ionic.css',
   ],
 
   colorMode: {
+    preference: 'system',
+    fallback: 'light',
+    classPrefix: 'ion-palette-',
     classSuffix: '',
+    storage: 'localStorage',
+    storageKey: 'ylf-color-mode',
   },
 
   future: {
@@ -123,6 +128,7 @@ export default defineNuxtConfig({
   ionic: {
     config: {
       backButtonText: '返回',
+      mode: 'ios',
     },
   },
 

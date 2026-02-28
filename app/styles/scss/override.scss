@@ -61,6 +61,7 @@ ion-header.header-collapse-condense ion-toolbar {
 .ios-icon-green   { background-color: var(--ion-color-success, #34c759); }
 .ios-icon-purple  { background-color: #af52de; }
 .ios-icon-teal    { background-color: #5ac8fa; }
+.ios-icon-pink    { background-color: #ff2d55; }
 
 // 用户头像占位圆形
 .ios-icon-avatar {
@@ -136,3 +137,5 @@ ion-header.header-collapse-condense ion-toolbar {
   background-color: rgba(var(--ion-color-primary-rgb, 0, 122, 255), 0.1);
   color: var(--ion-color-primary, #007aff);
 }
+
+

@@ -143,28 +143,11 @@ export default defineNuxtConfig({
     },
   },
 
-  imports: {
-    imports: [
-      { from: 'konsta/vue', name: 'kApp', as: 'KApp' },
-      { from: 'konsta/vue', name: 'kProvider', as: 'KonstaProvider' },
-      { from: 'konsta/vue', name: 'kBlock', as: 'KBlock' },
-      { from: 'konsta/vue', name: 'kBlockTitle', as: 'KBlockTitle' },
-      { from: 'konsta/vue', name: 'kList', as: 'KList' },
-      { from: 'konsta/vue', name: 'kListItem', as: 'KListItem' },
-      { from: 'konsta/vue', name: 'kButton', as: 'KButton' },
-      { from: 'konsta/vue', name: 'kLink', as: 'KLink' },
-      { from: 'konsta/vue', name: 'kCard', as: 'KCard' },
-      { from: 'konsta/vue', name: 'kRadio', as: 'KRadio' },
-      { from: 'konsta/vue', name: 'kToggle', as: 'KToggle' },
-      { from: 'konsta/vue', name: 'kBadge', as: 'KBadge' },
-      { from: 'konsta/vue', name: 'kChip', as: 'KChip' },
-      { from: 'konsta/vue', name: 'kNavbar', as: 'KNavbar' },
-    ],
-  },
-
   runtimeConfig: {
     public: {
       tcbEnvId: '',
+      cloudbaseRegion: '',
+      cloudbaseAccessKey: '',
 
       wxOpenAppId: 'wx4489293d76593a67',
       // wxOpenRedirectUri: 'https://api.yunle.fun/wx/redirect_uri',

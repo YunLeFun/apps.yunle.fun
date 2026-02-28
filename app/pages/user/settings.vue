@@ -1,21 +1,15 @@
 <script setup lang="ts">
 import type { ThemeMode } from '~/stores/settings'
 import {
-  IonBackButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue'
-import { moon, phonePortraitOutline, sunny } from 'ionicons/icons'
+  checkmarkSharp,
+  contrastOutline,
+  moonOutline,
+  sunnyOutline,
+} from 'ionicons/icons'
 import {
   kBlockTitle,
   kList,
   kListItem,
-  kRadio,
 } from 'konsta/vue'
 
 const settingsStore = useSettingsStore()
@@ -23,29 +17,15 @@ const settingsStore = useSettingsStore()
 const selectedTheme = ref<ThemeMode>(settingsStore.themeMode)
 
 const themeOptions = [
-  {
-    value: 'system' as ThemeMode,
-    label: '跟随系统',
-    description: '根据系统设置自动切换',
-    icon: phonePortraitOutline,
-  },
-  {
-    value: 'light' as ThemeMode,
-    label: '浅色',
-    description: '始终使用浅色外观',
-    icon: sunny,
-  },
-  {
-    value: 'dark' as ThemeMode,
-    label: '深色',
-    description: '始终使用深色外观',
-    icon: moon,
-  },
+  { value: 'system' as ThemeMode, label: '自动', icon: contrastOutline },
+  { value: 'light' as ThemeMode, label: '浅色', icon: sunnyOutline },
+  { value: 'dark' as ThemeMode, label: '深色', icon: moonOutline },
 ]
 
-watch(selectedTheme, (newTheme) => {
-  settingsStore.applyTheme(newTheme)
-})
+function selectTheme(value: ThemeMode) {
+  selectedTheme.value = value
+  settingsStore.applyTheme(value)
+}
 
 onMounted(() => {
   settingsStore.initTheme()
@@ -54,7 +34,7 @@ onMounted(() => {
 
 <template>
   <IonPage>
-    <IonHeader class="ion-no-border" :translucent="true">
+    <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
           <IonBackButton default-href="/tabs/me" text="我" />
@@ -73,28 +53,20 @@ onMounted(() => {
       </IonHeader>
 
       <k-block-title>外观</k-block-title>
-
       <k-list strong inset>
         <k-list-item
           v-for="option in themeOptions"
           :key="option.value"
           :title="option.label"
-          :subtitle="option.description"
-          @click="selectedTheme = option.value"
+          @click="selectTheme(option.value)"
         >
           <template #media>
-            <span
-              class="ios-icon-box"
-              :class="selectedTheme === option.value ? 'ios-icon-blue' : 'ios-icon-gray'"
-            >
+            <span class="ios-icon-box ios-icon-blue">
               <IonIcon :icon="option.icon" />
             </span>
           </template>
-          <template #after>
-            <k-radio
-              :checked="selectedTheme === option.value"
-              @change="selectedTheme = option.value"
-            />
+          <template v-if="selectedTheme === option.value" #after>
+            <IonIcon :icon="checkmarkSharp" class="text-xl ios-primary-text" />
           </template>
         </k-list-item>
       </k-list>

@@ -13,6 +13,33 @@ useHead({
 
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
+
+// 登录态长期保持：应用启动时检查、从后台恢复时自动刷新
+if (import.meta.client) {
+  const { checkAuthStatus, ensureValidToken } = useCloudbaseAuth()
+  const userStore = useUserStore()
+
+  // 应用启动时：如果有缓存的登录态，检查并刷新 token
+  onMounted(async () => {
+    if (userStore.isLoggedIn) {
+      await checkAuthStatus()
+    }
+  })
+
+  // 应用从后台恢复时：检查 token 有效性并自动刷新
+  onMounted(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && userStore.isLoggedIn) {
+        consola.debug('[Auth] 应用恢复前台，检查 token 有效性')
+        await ensureValidToken()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    onUnmounted(() => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    })
+  })
+}
 </script>
 
 <template>
@@ -21,6 +48,7 @@ const isDark = computed(() => colorMode.value === 'dark')
   <k-provider theme="parent" :dark="isDark">
     <IonApp>
       <IonRouterOutlet />
+      <AppToast />
     </IonApp>
   </k-provider>
 </template>

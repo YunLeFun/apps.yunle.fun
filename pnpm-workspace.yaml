@@ -8,4 +8,4 @@ ignoredBuiltDependencies:
 onlyBuiltDependencies:
   - unrs-resolver
 overrides:
-  semver@<7.0.0: '>=7.7.2'
+  semver@<7.0.0: '>=7.7.4'

@@ -8,6 +8,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const toast = useToast()
 
 const {
   phoneNumber,
@@ -26,7 +27,7 @@ async function handleSendCode() {
 
   const result = await sendVerifyCode()
   if (result.success) {
-    await showIonicToast('验证码已发送，请查收短信')
+    toast.showSuccess('验证码已发送，请查收短信')
   }
   else {
     errorMessage.value = result.message
@@ -38,7 +39,7 @@ async function handleLogin() {
 
   const result = await loginWithSms()
   if (result.success) {
-    await showIonicToast('登录成功')
+    toast.showSuccess('登录成功')
     emit('success', result.user)
 
     // 登录成功后重定向到用户信息页面

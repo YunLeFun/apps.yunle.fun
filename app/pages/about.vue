@@ -1,28 +1,95 @@
 <script setup lang="ts">
 import { YLF_LINKS } from '~/constants'
+import {
+  cloudOutline,
+  informationCircleOutline,
+} from 'ionicons/icons'
+import {
+  kBlock,
+  kBlockTitle,
+  kList,
+  kListItem,
+} from 'konsta/vue'
+
+const appVersion = '0.0.1'
+
+function openLink(url: string) {
+  window.open(url, '_blank')
+}
 </script>
 
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button default-href="/my" />
-        </ion-buttons>
-        <ion-title>关于</ion-title>
-      </ion-toolbar>
-    </ion-header>
+  <IonPage>
+    <IonHeader :translucent="true">
+      <IonToolbar>
+        <IonButtons slot="start">
+          <IonBackButton default-href="/tabs/me" text="我" />
+        </IonButtons>
+        <IonTitle>关于</IonTitle>
+      </IonToolbar>
+    </IonHeader>
 
-    <ion-content>
-      <TheAboutList />
+    <IonContent :fullscreen="true">
+      <IonHeader collapse="condense">
+        <IonToolbar>
+          <IonTitle size="large">
+            关于
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
 
-      <ion-list :inset="true">
-        <ion-item :href="YLF_LINKS.studio.url" target="_blank">
-          <ion-icon slot="start" :icon="ioniconsCloud" />
-          <ion-label>{{ YLF_LINKS.studio.label }}</ion-label>
-          <ion-text>{{ YLF_LINKS.studio.text }}</ion-text>
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ion-page>
+      <!-- App Logo + 名称 -->
+      <k-block class="mt-8">
+        <div class="flex flex-col items-center py-4 text-center">
+          <div class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-[22px] bg-(--ion-color-primary,#007aff)">
+            <span class="text-3xl font-bold text-white">☁️</span>
+          </div>
+          <h2 class="text-lg font-semibold">
+            云乐坊
+          </h2>
+          <p class="mt-1 text-sm ios-secondary-text">
+            版本 {{ appVersion }}
+          </p>
+        </div>
+      </k-block>
+
+      <!-- 链接 -->
+      <k-list strong inset>
+        <k-list-item
+          link
+          title="云乐坊工作室"
+          :after="YLF_LINKS.studio.text"
+          @click="openLink(YLF_LINKS.studio.url)"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="cloudOutline" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 信息 -->
+      <k-block-title>信息</k-block-title>
+      <k-list strong inset>
+        <k-list-item
+          title="版本"
+          :after="appVersion"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-gray">
+              <IonIcon :icon="informationCircleOutline" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 底部版权 -->
+      <k-block class="mt-8">
+        <p class="text-center text-xs ios-secondary-text">
+          &copy; {{ new Date().getFullYear() }} 云乐坊 YunLeFun
+        </p>
+      </k-block>
+    </IonContent>
+  </IonPage>
 </template>

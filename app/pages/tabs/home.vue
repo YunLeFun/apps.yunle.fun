@@ -60,59 +60,17 @@ function closeMenu() {
 
 // ==================== 扫码功能 ====================
 
-const showScanner = ref(false)
-const { startScan, stopScan, isScanning } = useBarcodeScan()
-const { showError, showInfo } = useToast()
+const { showScanner, openScanner, closeScanner } = useScanner()
+const { handleScanResult } = useScanResult()
 
 /**
  * 扫一扫
  */
 async function handleScan() {
   closeMenu()
-
-  try {
-    // 在 Web 环境下显示扫码界面
-    if (import.meta.client && !(window as any).Capacitor) {
-      showScanner.value = true
-      return
-    }
-
-    // 在原生环境下使用 Capacitor 扫码
-    const result = await startScan()
-    if (result?.ScanResult) {
-      handleScanResult(result.ScanResult)
-    }
-  }
-  catch (error) {
-    console.error('扫码失败:', error)
-    showError(`扫码失败，请检查相机权限 ${error}`)
-  }
-}
-
-/**
- * 处理扫码结果
- */
-function handleScanResult(content: string) {
-  if (content.startsWith('http://') || content.startsWith('https://')) {
-    const appIdMatch = content.match(/\/app\/(\d+)/)
-    if (appIdMatch) {
-      router.push(`/app/${appIdMatch[1]}`)
-      return
-    }
-    window.open(content, '_blank')
-  }
-  else {
-    showInfo(`扫码内容：${content}`)
-  }
-}
-
-/**
- * 取消扫码
- */
-function handleScanCancel() {
-  showScanner.value = false
-  if (isScanning.value) {
-    stopScan()
+  const result = await openScanner()
+  if (result) {
+    handleScanResult(result)
   }
 }
 
@@ -276,7 +234,7 @@ const dockItems: DockItem[] = [
       <BarcodeScanner
         :is-visible="showScanner"
         :show-flashlight="true"
-        @cancel="handleScanCancel"
+        @cancel="closeScanner"
         @result="handleScanResult"
       />
     </IonContent>

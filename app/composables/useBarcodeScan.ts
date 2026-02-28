@@ -6,6 +6,7 @@ export function useBarcodeScan() {
 
   /**
    * 开始扫描
+   * 用户主动取消时返回 null 而非抛错
    */
   async function startScan(): Promise<CapacitorBarcodeScannerScanResult | null> {
     try {
@@ -23,7 +24,12 @@ export function useBarcodeScan() {
 
       return null
     }
-    catch (error) {
+    catch (error: any) {
+      // 用户主动取消/关闭摄像头，静默返回 null
+      const msg = String(error?.message || error).toLowerCase()
+      if (msg.includes('cancel') || msg.includes('dismissed') || msg.includes('denied') || msg.includes('aborted')) {
+        return null
+      }
       console.error('扫描失败:', error)
       throw error
     }

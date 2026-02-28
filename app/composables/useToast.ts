@@ -1,44 +1,54 @@
-import { toastController } from '@ionic/vue'
+import { reactive, toRefs } from 'vue'
 
-export interface ToastOptions {
+export interface ToastState {
+  opened: boolean
   message: string
-  duration?: number
-  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark'
-  position?: 'top' | 'bottom' | 'middle'
+  type: 'success' | 'error' | 'warning' | 'info'
+}
+
+// 全局单例状态，所有 useToast() 共享
+const state = reactive<ToastState>({
+  opened: false,
+  message: '',
+  type: 'info',
+})
+
+let closeTimer: ReturnType<typeof setTimeout> | null = null
+
+function show(message: string, type: ToastState['type'], duration = 2000) {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
+  state.message = message
+  state.type = type
+  state.opened = true
+  closeTimer = setTimeout(() => {
+    state.opened = false
+    closeTimer = null
+  }, duration)
+}
+
+function close() {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
+  state.opened = false
 }
 
 export function useToast() {
-  const showToast = async (options: ToastOptions) => {
-    const toast = await toastController.create({
-      message: options.message,
-      duration: options.duration ?? 3000,
-      color: options.color ?? 'primary',
-      position: options.position ?? 'top',
-    })
-    await toast.present()
-  }
-
-  const showSuccess = async (message: string) => {
-    await showToast({ message, color: 'success' })
-  }
-
-  const showError = async (message: string) => {
-    await showToast({ message, color: 'danger' })
-  }
-
-  const showWarning = async (message: string) => {
-    await showToast({ message, color: 'warning' })
-  }
-
-  const showInfo = async (message: string) => {
-    await showToast({ message, color: 'primary' })
-  }
+  const showSuccess = (message: string) => show(message, 'success')
+  const showError = (message: string) => show(message, 'error', 3000)
+  const showWarning = (message: string) => show(message, 'warning')
+  const showInfo = (message: string) => show(message, 'info')
 
   return {
-    showToast,
+    ...toRefs(state),
     showSuccess,
     showError,
     showWarning,
     showInfo,
+    close,
   }
 }

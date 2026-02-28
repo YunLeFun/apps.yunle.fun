@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { informationCircle, logOut, person, personCircleOutline, settings } from 'ionicons/icons'
+import { apps, informationCircle, logOut, personCircleOutline, settings } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -73,6 +73,7 @@ function navigateTo(path: string) {
           link
           :title="userInfo.nickname || '云乐坊用户'"
           subtitle="查看个人资料"
+          class="ios-login-entry"
           @click="navigateTo('/user/profile')"
         >
           <template #media>
@@ -94,16 +95,17 @@ function navigateTo(path: string) {
         </k-list-item>
       </k-list>
 
-      <!-- 功能列表 -->
+      <!-- 我的应用（登录后可见） -->
       <k-list v-if="userStore.isLoggedIn" strong inset>
         <k-list-item
           link
-          title="个人资料"
-          @click="navigateTo('/user/profile')"
+          title="我的应用"
+          subtitle="创建和管理你的应用"
+          @click="navigateTo('/apps/my')"
         >
           <template #media>
             <span class="ios-icon-box ios-icon-blue">
-              <IonIcon :icon="person" />
+              <IonIcon :icon="apps" />
             </span>
           </template>
         </k-list-item>

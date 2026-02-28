@@ -4,6 +4,7 @@ import { onUnmounted, ref } from 'vue'
 /**
  * 短信验证码注册和登录（完整版）
  * 支持新用户注册和已有用户登录
+ * @deprecated 请使用 useCloudbaseAuth() 替代，该 composable 使用新版 CloudBase Auth API
  * @see https://docs.cloudbase.net/authentication-v2/method/sms-login
  */
 export function useSmsAuth() {

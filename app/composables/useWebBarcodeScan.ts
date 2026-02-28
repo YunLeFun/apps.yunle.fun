@@ -48,19 +48,33 @@ export function useWebBarcodeScan() {
 
   /**
    * 停止扫描
+   * 优雅地关闭摄像头，不抛出错误
    */
   function stopScan(): void {
-    if (stream.value) {
-      stream.value.getTracks().forEach(track => track.stop())
-      stream.value = null
-    }
+    try {
+      if (stream.value) {
+        stream.value.getTracks().forEach((track) => {
+          try {
+            track.stop()
+          }
+          catch {
+            // 摄像头 track 已停止或释放，忽略
+          }
+        })
+        stream.value = null
+      }
 
-    if (videoElement.value) {
-      videoElement.value.srcObject = null
-      videoElement.value = null
+      if (videoElement.value) {
+        videoElement.value.srcObject = null
+        videoElement.value = null
+      }
     }
-
-    isScanning.value = false
+    catch {
+      // 清理过程中出错，静默处理
+    }
+    finally {
+      isScanning.value = false
+    }
   }
 
   /**

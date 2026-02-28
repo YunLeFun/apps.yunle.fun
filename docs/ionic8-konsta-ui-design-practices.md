@@ -274,22 +274,6 @@ Ionic 全局设置 `a { color: var(--ion-color-primary) }`，会覆盖 Konsta UI
 }
 ```
 
-### 自动导入配置
-
-```ts
-// nuxt.config.ts
-imports: {
-  imports: [
-    { from: 'konsta/vue', name: 'kProvider', as: 'KonstaProvider' },
-    { from: 'konsta/vue', name: 'kList', as: 'KList' },
-    { from: 'konsta/vue', name: 'kListItem', as: 'KListItem' },
-    // ... 更多组件
-  ],
-}
-```
-
-> 注意：由于 konsta/vue 不在 `@nuxtjs/ionic` 的自动导入范围内，需要手动在各页面 import 或通过上述配置注册。
-
 ## 暗色模式
 
 - Konsta UI: 通过 `KonstaProvider` 的 `:dark` prop 控制

@@ -2,22 +2,28 @@ export default defineNuxtPlugin((nuxtApp) => {
   const userStore = useUserStore()
 
   const api = $fetch.create({
-    // baseURL: import.meta.env.DEV ? '/api' : 'https://api.yunle.fun',
     onRequest({ options }) {
       if (userStore.accessToken) {
-        // note that this relies on ofetch >= 1.4.0 - you may need to refresh your lockfile
         options.headers.set('Authorization', `Bearer ${userStore.accessToken}`)
       }
     },
-    async onResponseError({ response }) {
+    async onResponseError({ request, options, response }) {
       if (response.status === 401) {
         // 尝试通过 refresh token 刷新 access_token
         try {
           const { ensureValidToken } = useCloudbaseAuth()
           const refreshed = await ensureValidToken()
           if (refreshed) {
-            // token 已刷新，但 ofetch 不支持自动重试，由调用方处理
-            console.warn('[API] Token 已刷新，请重试请求')
+            // token 已刷新，用新 token 重试原请求
+            const retryHeaders = new Headers(options.headers)
+            retryHeaders.set('Authorization', `Bearer ${userStore.accessToken}`)
+            const retryResponse = await $fetch.raw(request, {
+              ...options,
+              headers: retryHeaders,
+              method: options.method as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+            })
+            // 将重试结果写回 response（ofetch 会使用此数据）
+            Object.defineProperty(response, '_data', { value: retryResponse._data })
             return
           }
         }
@@ -30,7 +36,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     },
   })
 
-  // Expose to useNuxtApp().$api
   return {
     provide: {
       api,

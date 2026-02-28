@@ -14,7 +14,7 @@ useHead({
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
 
-// 登录态长期保持：应用启动时检查、从后台恢复时自动刷新
+// 登录态长期保持：应用启动时检查、从后台恢复时自动刷新、网络恢复时自动刷新
 if (import.meta.client) {
   const { checkAuthStatus, ensureValidToken } = useCloudbaseAuth()
   const userStore = useUserStore()
@@ -37,6 +37,20 @@ if (import.meta.client) {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     onUnmounted(() => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
+    })
+  })
+
+  // 网络恢复时：自动刷新 token（应对离线后 token 过期的场景）
+  onMounted(() => {
+    const handleOnline = async () => {
+      if (userStore.isLoggedIn) {
+        consola.debug('[Auth] 网络恢复，检查 token 有效性')
+        await ensureValidToken()
+      }
+    }
+    window.addEventListener('online', handleOnline)
+    onUnmounted(() => {
+      window.removeEventListener('online', handleOnline)
     })
   })
 }
@@ -64,6 +78,7 @@ body,
   height: 100vh;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 html.dark {

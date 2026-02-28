@@ -59,6 +59,7 @@ const emailCodeSent = ref(false)
 const { remaining: emailCountdown, isActive: emailCountdownActive, start: startEmailCountdown } = useCountdown()
 
 // 密码登录状态
+const LAST_PASSWORD_ACCOUNT_KEY = 'ylf_last_password_account'
 const passwordAccount = ref('')
 const passwordValue = ref('')
 const showPassword = ref(false)
@@ -75,6 +76,13 @@ const signupOtpCode = ref('')
 const signupData = ref<TcbSignUpData | null>(null)
 const signupCodeSent = ref(false)
 const { remaining: signupCountdown, isActive: signupCountdownActive, start: startSignupCountdown } = useCountdown()
+
+// 恢复上次密码登录的账号
+onMounted(() => {
+  const saved = localStorage.getItem(LAST_PASSWORD_ACCOUNT_KEY)
+  if (saved)
+    passwordAccount.value = saved
+})
 
 // 校验
 const phoneValid = computed(() => isValidPhone(phone.value))
@@ -141,6 +149,8 @@ async function handlePasswordLogin() {
     else
       params.username = passwordAccount.value
     await signInWithPassword(params)
+    // 登录成功，记住账号
+    localStorage.setItem(LAST_PASSWORD_ACCOUNT_KEY, passwordAccount.value)
   }
   catch {}
 }
@@ -340,7 +350,7 @@ async function handleVerifySignupOtp() {
           </div>
 
           <!-- 密码登录 -->
-          <div v-else class="auth-form">
+          <form v-else class="auth-form" @submit.prevent="handlePasswordLogin">
             <div class="auth-card">
               <div class="auth-card-row">
                 <input
@@ -350,7 +360,6 @@ async function handleVerifySignupOtp() {
                   class="auth-input w-full"
                   autocomplete="username"
                   :disabled="loading"
-                  @keyup.enter="handlePasswordLogin"
                 >
               </div>
               <div class="auth-card-separator" />
@@ -362,7 +371,6 @@ async function handleVerifySignupOtp() {
                   class="auth-input"
                   autocomplete="current-password"
                   :disabled="loading"
-                  @keyup.enter="handlePasswordLogin"
                 >
                 <button
                   class="auth-inline-action"
@@ -375,9 +383,9 @@ async function handleVerifySignupOtp() {
             </div>
 
             <button
+              type="submit"
               class="auth-btn-primary"
               :disabled="!passwordFormValid || loading"
-              @click="handlePasswordLogin"
             >
               <IonSpinner v-if="loading" name="crescent" class="auth-btn-spinner" />
               <span v-else>登录</span>
@@ -386,7 +394,7 @@ async function handleVerifySignupOtp() {
             <p class="auth-hint">
               需先在账号安全设置中设置密码
             </p>
-          </div>
+          </form>
 
           <!-- 分割线 -->
           <div class="auth-divider">

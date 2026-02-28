@@ -29,3 +29,12 @@
 .ion-palette-dark.md {
   --ion-item-background: #1c1c1d;
 }
+
+/* PC 端内容区最大宽度限制，移动端不受影响 */
+@media (min-width: 768px) {
+  ion-content::part(scroll) {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

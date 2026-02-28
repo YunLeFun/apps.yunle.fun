@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  IonBackButton,
   IonButton,
   IonButtons,
   IonContent,
@@ -12,107 +11,24 @@ import {
   IonList,
   IonNote,
   IonPage,
+  IonSpinner,
   IonTextarea,
   IonTitle,
   IonToggle,
   IonToolbar,
 } from '@ionic/vue'
-import { checkmark } from 'ionicons/icons'
+import { checkmark, chevronBack } from 'ionicons/icons'
 
 const router = useRouter()
-const toast = useToast()
-const { user } = useCloudbaseAuth()
-const { createApp, isSlugTaken } = useApps()
-
-const saving = ref(false)
-const slugError = ref('')
-
-const form = reactive({
-  name: '',
-  slug: '',
-  description: '',
-  githubRepo: '',
-  websiteUrl: '',
-  backupUrl: '',
-  category: '',
-  tags: '',
-  isPublic: true,
-})
-
-// 根据名称自动生成 slug
-const autoSlug = ref(true)
-
-watch(() => form.name, (name) => {
-  if (autoSlug.value) {
-    form.slug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9\u4E00-\u9FFF-]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 50)
-  }
-})
-
-function onSlugInput() {
-  autoSlug.value = false
-  slugError.value = ''
-}
-
-const SLUG_REGEX = /^[a-z][a-z0-9-]{1,49}$/
-
-async function handleSubmit() {
-  if (!user.value) {
-    toast.showWarning('请先登录')
-    router.push('/login')
-    return
-  }
-
-  if (!form.name.trim()) {
-    toast.showWarning('请输入应用名称')
-    return
-  }
-
-  if (!SLUG_REGEX.test(form.slug)) {
-    slugError.value = '以小写字母开头，只含小写字母、数字和连字符，2-50 字符'
-    return
-  }
-
-  try {
-    saving.value = true
-
-    const taken = await isSlugTaken(form.slug)
-    if (taken) {
-      slugError.value = '此标识符已被使用'
-      return
-    }
-
-    const tags = form.tags
-      .split(/[,，、\s]+/)
-      .map(t => t.trim())
-      .filter(Boolean)
-
-    await createApp({
-      name: form.name.trim(),
-      slug: form.slug,
-      description: form.description.trim(),
-      githubRepo: form.githubRepo.trim(),
-      websiteUrl: form.websiteUrl.trim(),
-      backupUrl: form.backupUrl.trim(),
-      category: form.category.trim(),
-      tags,
-      isPublic: form.isPublic,
-    })
-
-    toast.showSuccess('应用创建成功')
-    router.push('/apps/my')
-  }
-  catch (err: unknown) {
-    toast.showError(err instanceof Error ? err.message : '创建失败，请稍后重试')
-  }
-  finally {
-    saving.value = false
-  }
-}
+const {
+  form,
+  saving,
+  slugError,
+  slugChecking,
+  SLUG_REGEX,
+  onSlugInput,
+  handleSubmit,
+} = useAppForm('create')
 </script>
 
 <template>
@@ -120,13 +36,16 @@ async function handleSubmit() {
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/apps/my" text="返回" />
+          <IonButton @click="router.back()">
+            <IonIcon slot="start" :icon="chevronBack" />
+            返回
+          </IonButton>
         </IonButtons>
         <IonTitle>创建应用</IonTitle>
         <IonButtons slot="end">
-          <IonButton :disabled="saving || !form.name.trim()" @click="handleSubmit">
+          <IonButton :disabled="saving || !form.name.trim() || !!slugError" @click="handleSubmit">
             <IonIcon v-if="!saving" slot="icon-only" :icon="checkmark" />
-            <span v-else class="text-sm">保存中...</span>
+            <IonSpinner v-else name="crescent" />
           </IonButton>
         </IonButtons>
       </IonToolbar>
@@ -134,12 +53,15 @@ async function handleSubmit() {
 
     <IonContent :fullscreen="true" class="ion-padding">
       <form @submit.prevent="handleSubmit">
+        <!-- 图标预览 -->
+        <AppIconPreview :emoji="form.emoji" :theme-color="form.themeColor" :logo="form.logo" />
+
         <!-- 基本信息 -->
         <IonList inset>
           <IonItem>
             <IonInput
               v-model="form.name"
-              label="应用名称"
+              label="名称"
               label-placement="stacked"
               placeholder="输入应用名称"
               :maxlength="50"
@@ -147,21 +69,22 @@ async function handleSubmit() {
             />
           </IonItem>
 
-          <IonItem :class="{ 'ion-invalid': slugError }">
+          <IonItem :class="{ 'ion-invalid': slugError, 'ion-valid': !slugError && !slugChecking && form.slug && SLUG_REGEX.test(form.slug) }">
             <IonInput
               v-model="form.slug"
-              label="标识符"
+              label="标识符 (slug)"
               label-placement="stacked"
               placeholder="my-app"
               :maxlength="50"
               class="font-mono"
               @ion-input="onSlugInput"
             />
-            <IonNote v-if="slugError" slot="error" color="danger">
+            <IonSpinner v-if="slugChecking" slot="end" name="crescent" class="slug-spinner" />
+            <IonNote v-if="slugError" slot="error">
               {{ slugError }}
             </IonNote>
             <IonNote v-else slot="helper">
-              唯一标识，用于 URL
+              唯一标识，用于 URL 路径
             </IonNote>
           </IonItem>
 
@@ -178,7 +101,35 @@ async function handleSubmit() {
           </IonItem>
         </IonList>
 
+        <!-- Emoji 选择 -->
+        <AppEmojiPicker v-model="form.emoji" />
+
+        <!-- 主题色选择 -->
+        <AppThemeColorPicker v-model="form.themeColor" />
+
+        <!-- Logo -->
+        <div class="section-header">
+          Logo（可选）
+        </div>
+        <IonList inset>
+          <IonItem>
+            <IonInput
+              v-model="form.logo"
+              label="图片 URL"
+              label-placement="stacked"
+              placeholder="https://example.com/logo.png"
+              type="url"
+            />
+            <IonNote slot="helper">
+              设置后优先展示 Logo，替代 Emoji
+            </IonNote>
+          </IonItem>
+        </IonList>
+
         <!-- 链接信息 -->
+        <div class="section-header">
+          链接
+        </div>
         <IonList inset>
           <IonItem>
             <IonInput
@@ -213,40 +164,19 @@ async function handleSubmit() {
           </IonItem>
         </IonList>
 
-        <!-- 分类与标签 -->
-        <IonList inset>
-          <IonItem>
-            <IonInput
-              v-model="form.category"
-              label="分类"
-              label-placement="stacked"
-              placeholder="如：工具、应用、整活..."
-            />
-            <IonNote slot="helper">
-              可选
-            </IonNote>
-          </IonItem>
+        <!-- 分类 -->
+        <AppCategoryPicker v-model="form.category" />
 
-          <IonItem>
-            <IonInput
-              v-model="form.tags"
-              label="标签"
-              label-placement="stacked"
-              placeholder="用逗号分隔，如：vue, 开源, 前端"
-            />
-            <IonNote slot="helper">
-              可选，用逗号分隔多个标签
-            </IonNote>
-          </IonItem>
-        </IonList>
+        <!-- 标签 -->
+        <AppTagInput v-model="form.tags" />
 
         <!-- 可见性 -->
-        <IonList inset>
+        <IonList inset class="mt-4">
           <IonItem>
             <IonToggle v-model="form.isPublic">
               <IonLabel>
                 <h3>公开应用</h3>
-                <p class="text-xs opacity-60">
+                <p class="text-xs" style="color: var(--ion-color-medium)">
                   公开后其他用户可查看此应用
                 </p>
               </IonLabel>
@@ -255,12 +185,14 @@ async function handleSubmit() {
         </IonList>
 
         <!-- 提交按钮 -->
-        <div class="px-4 pt-4">
+        <div class="px-4 pb-8 pt-4">
           <IonButton
             expand="block"
-            :disabled="saving || !form.name.trim()"
+            :disabled="saving || !form.name.trim() || !!slugError || slugChecking"
+            class="submit-btn"
             @click="handleSubmit"
           >
+            <IonSpinner v-if="saving" name="crescent" class="mr-2" />
             {{ saving ? '创建中...' : '创建应用' }}
           </IonButton>
         </div>
@@ -268,3 +200,27 @@ async function handleSubmit() {
     </IonContent>
   </IonPage>
 </template>
+
+<style scoped>
+.section-header {
+  padding: 24px 20px 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.slug-spinner {
+  width: 16px;
+  height: 16px;
+  color: var(--ion-color-medium);
+}
+
+.submit-btn {
+  --border-radius: 14px;
+  font-weight: 600;
+  font-size: 17px;
+  height: 50px;
+}
+</style>

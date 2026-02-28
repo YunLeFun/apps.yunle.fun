@@ -29,10 +29,7 @@ export function useCloudbase() {
     region: config.public.cloudbaseRegion as string || undefined,
     accessKey: config.public.cloudbaseAccessKey as string || undefined,
     persistence: 'local' as const,
-    auth: {
-      detectSessionInUrl: true,
-    },
-  })
+  } as any)
   const auth: TcbAuth = app.auth({ persistence: 'local' })
 
   nuxtApp._cloudbaseApp = app

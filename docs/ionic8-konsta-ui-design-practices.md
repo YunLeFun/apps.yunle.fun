@@ -100,28 +100,43 @@ iOS 规范中，Tab 根页面和设置类页面应使用 **Large Title**（折�
 ```vue
 <!-- ❌ 错误：硬编码颜色 -->
 <IonIcon class="text-[#007AFF]" />
-<div class="bg-[#007AFF]">...</div>
-<span style="color: #8E8E93">次要文本</span>
+
+<div class="bg-[#007AFF]">
+...
+</div>
+
+<span style="color: #8E8E93">
+次要文本
+</span>
 
 <!-- ✅ 正确：Ionic color prop -->
 <IonIcon color="primary" />
+
 <IonIcon color="medium" />
 
 <!-- ✅ 正确：全局 CSS class (定义在 override.scss) -->
-<span class="ios-primary-text">主色文本</span>
-<span class="ios-secondary-text">次要文本</span>
-<div class="ios-avatar-bg">...</div>
+<span class="ios-primary-text">
+主色文本
+</span>
+
+<span class="ios-secondary-text">
+次要文本
+</span>
+
+<div class="ios-avatar-bg">
+...
+</div>
 ```
 
 ### Ionic 语义色映射
 
-| 语义       | Ionic color prop | Ionic CSS 变量            | iOS 值    |
-| ---------- | ---------------- | ------------------------- | --------- |
-| 主色       | `primary`        | `--ion-color-primary`     | `#007AFF` |
-| 成功       | `success`        | `--ion-color-success`     | `#34C759` |
-| 警告       | `warning`        | `--ion-color-warning`     | `#FF9500` |
-| 危险/破坏  | `danger`         | `--ion-color-danger`      | `#FF3B30` |
-| 次要/辅助  | `medium`         | `--ion-color-medium`      | `#8E8E93` |
+| 语义      | Ionic color prop | Ionic CSS 变量        | iOS 值    |
+| --------- | ---------------- | --------------------- | --------- |
+| 主色      | `primary`        | `--ion-color-primary` | `#007AFF` |
+| 成功      | `success`        | `--ion-color-success` | `#34C759` |
+| 警告      | `warning`        | `--ion-color-warning` | `#FF9500` |
+| 危险/破坏 | `danger`         | `--ion-color-danger`  | `#FF3B30` |
+| 次要/辅助 | `medium`         | `--ion-color-medium`  | `#8E8E93` |
 
 ### IonIcon 颜色
 
@@ -129,6 +144,7 @@ iOS 规范中，Tab 根页面和设置类页面应使用 **Large Title**（折�
 
 ```vue
 <IonIcon :icon="settings" color="primary" />
+
 <IonIcon :icon="person" color="medium" />
 ```
 
@@ -152,15 +168,15 @@ iOS 设置 App 中，列表项前的图标使用 **29×29 圆角方块背景 + �
 
 ### 可用颜色 class
 
-| Class             | 对应色   | 用途示例     |
-| ----------------- | -------- | ------------ |
-| `ios-icon-blue`   | primary  | 常规功能     |
-| `ios-icon-gray`   | medium   | 设置/通用    |
-| `ios-icon-red`    | danger   | 退出/删除    |
-| `ios-icon-orange` | warning  | 身份/安全    |
-| `ios-icon-green`  | success  | 验证/完成    |
-| `ios-icon-purple` | —        | 特殊功能     |
-| `ios-icon-teal`   | —        | 信息/通知    |
+| Class             | 对应色  | 用途示例  |
+| ----------------- | ------- | --------- |
+| `ios-icon-blue`   | primary | 常规功能  |
+| `ios-icon-gray`   | medium  | 设置/通用 |
+| `ios-icon-red`    | danger  | 退出/删除 |
+| `ios-icon-orange` | warning | 身份/安全 |
+| `ios-icon-green`  | success | 验证/完成 |
+| `ios-icon-purple` | —       | 特殊功能  |
+| `ios-icon-teal`   | —       | 信息/通知 |
 
 ### 用户头像占位
 
@@ -234,14 +250,14 @@ Konsta UI 的样式通过 `app/styles/konsta.css` 加载：
 
 ```ts
 css: [
-  '~/styles/css/index.css',        // 全局样式
-  '~/styles/css/css-vars.css',     // CSS 变量
-  '~/styles/scss/vars.scss',       // SCSS 变量
-  '~/styles/scss/index.scss',      // 全局 SCSS
-  '~/styles/scss/override.scss',   // Ionic + Konsta 覆盖样式
+  '~/styles/css/index.css', // 全局样式
+  '~/styles/css/css-vars.css', // CSS 变量
+  '~/styles/scss/vars.scss', // SCSS 变量
+  '~/styles/scss/index.scss', // 全局 SCSS
+  '~/styles/scss/override.scss', // Ionic + Konsta 覆盖样式
   '@ionic/vue/css/palettes/dark.class.css',
-  '~/styles/ionic.css',            // Ionic 自定义变量
-  '~/styles/konsta.css',           // Konsta UI + Tailwind
+  '~/styles/ionic.css', // Ionic 自定义变量
+  '~/styles/konsta.css', // Konsta UI + Tailwind
 ]
 ```
 
@@ -282,12 +298,12 @@ imports: {
 
 ## 样式文件职责
 
-| 文件                     | 职责                                   |
-| ------------------------ | -------------------------------------- |
-| `styles/ionic.css`       | Ionic CSS 变量覆盖（背景色、边框等）   |
-| `styles/konsta.css`      | Konsta UI 主题 + Tailwind + 兼容修复   |
-| `styles/scss/override.scss` | 公共复用样式（ios-icon-box 等）     |
-| `styles/css/css-vars.css`| 全局 CSS 自定义属性                    |
+| 文件                        | 职责                                 |
+| --------------------------- | ------------------------------------ |
+| `styles/ionic.css`          | Ionic CSS 变量覆盖（背景色、边框等） |
+| `styles/konsta.css`         | Konsta UI 主题 + Tailwind + 兼容修复 |
+| `styles/scss/override.scss` | 公共复用样式（ios-icon-box 等）      |
+| `styles/css/css-vars.css`   | 全局 CSS 自定义属性                  |
 
 ## 参考链接
 

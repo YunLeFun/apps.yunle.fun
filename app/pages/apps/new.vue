@@ -62,13 +62,13 @@ const SLUG_REGEX = /^[a-z][a-z0-9-]{1,49}$/
 
 async function handleSubmit() {
   if (!user.value) {
-    toast.show('请先登录', 'warning')
+    toast.showWarning('请先登录')
     router.push('/login')
     return
   }
 
   if (!form.name.trim()) {
-    toast.show('请输入应用名称', 'warning')
+    toast.showWarning('请输入应用名称')
     return
   }
 
@@ -103,11 +103,11 @@ async function handleSubmit() {
       isPublic: form.isPublic,
     })
 
-    toast.show('应用创建成功', 'success')
+    toast.showSuccess('应用创建成功')
     router.push('/apps/my')
   }
   catch (err: unknown) {
-    toast.show(err instanceof Error ? err.message : '创建失败，请稍后重试', 'error')
+    toast.showError(err instanceof Error ? err.message : '创建失败，请稍后重试')
   }
   finally {
     saving.value = false

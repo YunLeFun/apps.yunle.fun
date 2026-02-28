@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { kToast, kButton } from 'konsta/vue'
 import {
+  alertCircle,
   checkmarkCircle,
   closeCircle,
-  alertCircle,
   informationCircle,
 } from 'ionicons/icons'
+import { kButton, kToast } from 'konsta/vue'
 
 const { opened, message, type, close } = useToast()
 

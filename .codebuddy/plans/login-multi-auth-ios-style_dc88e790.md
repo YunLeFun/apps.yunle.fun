@@ -216,9 +216,9 @@ export interface TcbRawUser {
   id: string
   email: string | null
   phone: string | null
-  app_metadata: { provider: string | null; providers: string[] }
-  user_metadata: { name: string | null; username: string | null; nickName: string | null; avatarUrl: string | null; picture: string | null; hasPassword: boolean | null }
-  identities: Array<{ id: string; name: string; picture: string }> | null
+  app_metadata: { provider: string | null, providers: string[] }
+  user_metadata: { name: string | null, username: string | null, nickName: string | null, avatarUrl: string | null, picture: string | null, hasPassword: boolean | null }
+  identities: Array<{ id: string, name: string, picture: string }> | null
   created_at: string
   updated_at: string
 }

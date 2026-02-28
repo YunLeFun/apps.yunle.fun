@@ -17,7 +17,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           const refreshed = await ensureValidToken()
           if (refreshed) {
             // token 已刷新，但 ofetch 不支持自动重试，由调用方处理
-            console.info('[API] Token 已刷新，请重试请求')
+            console.warn('[API] Token 已刷新，请重试请求')
             return
           }
         }

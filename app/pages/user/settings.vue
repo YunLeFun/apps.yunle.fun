@@ -73,4 +73,3 @@ onMounted(() => {
     </IonContent>
   </IonPage>
 </template>
-

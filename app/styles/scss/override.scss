@@ -22,14 +22,14 @@
 
 // ============================================================
 // iOS 折叠大标题与 Konsta inset list 左对齐
-// 
+//
 // Konsta inset list: margin-left = 16px (ml-safe-4)
-// 
+//
 // Ionic 8 运行时会移除 collapse="condense" 和 size="large" 属性，
 // 只保留 class: header-collapse-condense / title-large
 // toolbar 的 --padding-start 默认 4px，title-large 内部 padding 0px
 // 实际大标题文字 left = 4px，需要调整到 16px 以对齐 Konsta list
-// 
+//
 // 方案：将 condense toolbar 的 --padding-start 设为 16px
 // ============================================================
 
@@ -54,14 +54,30 @@ ion-header.header-collapse-condense ion-toolbar {
 }
 
 // 图标颜色：使用 Ionic CSS 变量，确保跟随主题
-.ios-icon-blue    { background-color: var(--ion-color-primary, #007aff); }
-.ios-icon-gray    { background-color: var(--ion-color-medium, #8e8e93); }
-.ios-icon-red     { background-color: var(--ion-color-danger, #ff3b30); }
-.ios-icon-orange  { background-color: var(--ion-color-warning, #ff9500); }
-.ios-icon-green   { background-color: var(--ion-color-success, #34c759); }
-.ios-icon-purple  { background-color: #af52de; }
-.ios-icon-teal    { background-color: #5ac8fa; }
-.ios-icon-pink    { background-color: #ff2d55; }
+.ios-icon-blue {
+  background-color: var(--ion-color-primary, #007aff);
+}
+.ios-icon-gray {
+  background-color: var(--ion-color-medium, #8e8e93);
+}
+.ios-icon-red {
+  background-color: var(--ion-color-danger, #ff3b30);
+}
+.ios-icon-orange {
+  background-color: var(--ion-color-warning, #ff9500);
+}
+.ios-icon-green {
+  background-color: var(--ion-color-success, #34c759);
+}
+.ios-icon-purple {
+  background-color: #af52de;
+}
+.ios-icon-teal {
+  background-color: #5ac8fa;
+}
+.ios-icon-pink {
+  background-color: #ff2d55;
+}
 
 // 用户头像占位圆形
 .ios-icon-avatar {
@@ -78,8 +94,12 @@ ion-header.header-collapse-condense ion-toolbar {
 // 语义化文本颜色 (全局复用)
 // ============================================================
 
-.ios-primary-text   { color: var(--ion-color-primary, #007aff); }
-.ios-secondary-text { color: var(--ion-color-medium, #8e8e93); }
+.ios-primary-text {
+  color: var(--ion-color-primary, #007aff);
+}
+.ios-secondary-text {
+  color: var(--ion-color-medium, #8e8e93);
+}
 
 .ios-avatar-bg {
   background-color: var(--ion-color-primary, #007aff);
@@ -112,7 +132,7 @@ ion-header.header-collapse-condense ion-toolbar {
   }
 
   // chevron SVG：绝对定位到 inner 容器的右侧垂直居中
-  .w-full.relative svg[viewBox="0 0 12 20"] {
+  .w-full.relative svg[viewBox='0 0 12 20'] {
     position: absolute;
     right: 16px;
     top: 50%;
@@ -137,5 +157,3 @@ ion-header.header-collapse-condense ion-toolbar {
   background-color: rgba(var(--ion-color-primary-rgb, 0, 122, 255), 0.1);
   color: var(--ion-color-primary, #007aff);
 }
-
-

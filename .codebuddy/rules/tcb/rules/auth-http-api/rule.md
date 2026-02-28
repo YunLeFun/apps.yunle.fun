@@ -42,11 +42,9 @@ Do **not** use this skill for:
 ## HTTP API basics
 
 - **Base URL pattern**
-
   - `https://${env}.ap-shanghai.tcb-api.tencentcloudapi.com/auth/v1/...`
 
 - **Common headers**
-
   - `x-device-id` – device or client identifier
   - `x-request-id` – unique request ID for tracing
   - `Authorization` – `Bearer <access_token>` for user endpoints

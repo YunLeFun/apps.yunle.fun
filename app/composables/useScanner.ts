@@ -74,7 +74,8 @@ export function useScanner() {
  * 判断错误是否为用户主动取消
  */
 function isUserCancelled(error: any): boolean {
-  if (!error) return false
+  if (!error)
+    return false
   const msg = String(error.message || error).toLowerCase()
   return msg.includes('cancel')
     || msg.includes('user denied')

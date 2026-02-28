@@ -17,7 +17,7 @@ import {
 import { checkmarkCircle, closeCircle } from 'ionicons/icons'
 
 const router = useRouter()
-const { checkAuthStatus, fetchUser, isAuthenticated, user } = useCloudbaseAuth()
+const { checkAuthStatus, isAuthenticated, user } = useCloudbaseAuth()
 const toast = useToast()
 
 const status = ref<'checking' | 'success' | 'error'>('checking')
@@ -142,7 +142,7 @@ onMounted(async () => {
 .callback-spinner {
   width: 56px;
   height: 56px;
-  color: var(--ion-color-primary, #007AFF);
+  color: var(--ion-color-primary, #007aff);
 }
 
 .callback-status-icon {
@@ -150,11 +150,11 @@ onMounted(async () => {
 }
 
 .callback-status-icon--success {
-  color: #34C759;
+  color: #34c759;
 }
 
 .callback-status-icon--error {
-  color: #FF3B30;
+  color: #ff3b30;
 }
 
 .callback-text {
@@ -170,7 +170,7 @@ onMounted(async () => {
 
 .callback-message {
   font-size: 15px;
-  color: var(--ion-color-medium, #8E8E93);
+  color: var(--ion-color-medium, #8e8e93);
   margin: 0;
   line-height: 1.5;
 }

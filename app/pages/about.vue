@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { YLF_LINKS } from '~/constants'
 import {
   cloudOutline,
   informationCircleOutline,
@@ -10,6 +9,7 @@ import {
   kList,
   kListItem,
 } from 'konsta/vue'
+import { YLF_LINKS } from '~/constants'
 
 const appVersion = '0.0.1'
 
@@ -41,7 +41,7 @@ function openLink(url: string) {
       <!-- App Logo + 名称 -->
       <k-block class="mt-8">
         <div class="flex flex-col items-center py-4 text-center">
-          <div class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-[22px] bg-(--ion-color-primary,#007aff)">
+          <div class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-[22px] bg---ion-color-primary,#007aff">
             <span class="text-3xl font-bold text-white">☁️</span>
           </div>
           <h2 class="text-lg font-semibold">

@@ -3,10 +3,8 @@
  * 参考 www.yunle.fun 的 useAuthCore.ts，适配 Ionic Toast + Pinia Store
  * 支持 refresh token 机制实现登录态长期保持
  */
-import type { TcbRawUser } from '@yunlefun/auth'
-import type { YlfUserInfo } from '@yunlefun/auth'
+import type { CloudbaseUser, TcbRawUser, YlfUserInfo } from '@yunlefun/auth'
 import { getErrorMessage, mapCloudbaseUser } from '@yunlefun/auth'
-import type { CloudbaseUser } from '@yunlefun/auth'
 
 /** Token 过期时间存储 key */
 const TOKEN_EXPIRY_KEY = 'ylf_token_expiry'
@@ -39,7 +37,8 @@ export function useCloudbaseAuthCore() {
    * 保存 token 过期时间到 localStorage
    */
   const saveTokenExpiry = (expiresIn?: number) => {
-    if (!import.meta.client) return
+    if (!import.meta.client)
+      return
     // access_token 有效期默认 7200 秒（2 小时）
     const ttl = (expiresIn || 7200) * 1000
     localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + ttl))
@@ -49,7 +48,8 @@ export function useCloudbaseAuthCore() {
    * 获取 token 过期时间戳
    */
   const getTokenExpiry = (): number => {
-    if (!import.meta.client) return 0
+    if (!import.meta.client)
+      return 0
     const raw = localStorage.getItem(TOKEN_EXPIRY_KEY)
     return raw ? Number(raw) : 0
   }
@@ -59,8 +59,26 @@ export function useCloudbaseAuthCore() {
    */
   const isTokenExpiringSoon = (): boolean => {
     const expiry = getTokenExpiry()
-    if (!expiry) return true // 无记录则视为需要刷新
+    if (!expiry)
+      return true // 无记录则视为需要刷新
     return Date.now() >= expiry - REFRESH_AHEAD_MS
+  }
+
+  /**
+   * 将 CloudbaseUser 同步到 Pinia userStore
+   */
+  const syncToStore = (cbUser: CloudbaseUser, accessToken: string) => {
+    const info: YlfUserInfo = {
+      id: cbUser.id,
+      login: cbUser.login,
+      email: cbUser.email,
+      phone: cbUser.phone,
+      avatar: cbUser.avatar || '',
+      nickname: cbUser.nickname || '',
+      hasPassword: cbUser.hasPassword,
+      providers: cbUser.providers,
+    }
+    userStore.login(accessToken, info)
   }
 
   /**
@@ -70,7 +88,8 @@ export function useCloudbaseAuthCore() {
    */
   const refreshSession = async (): Promise<boolean> => {
     // 防止并发刷新
-    if (refreshingPromise) return refreshingPromise
+    if (refreshingPromise)
+      return refreshingPromise
 
     refreshingPromise = (async () => {
       try {
@@ -108,13 +127,14 @@ export function useCloudbaseAuthCore() {
    * - 刷新失败时返回 false（需要引导用户重新登录）
    */
   const ensureValidToken = async (): Promise<boolean> => {
-    if (!import.meta.client) return false
+    if (!import.meta.client)
+      return false
 
     if (!isTokenExpiringSoon()) {
       return true // token 仍有效
     }
 
-    console.info('[Auth] Token 即将过期或已过期，尝试刷新...')
+    console.warn('[Auth] Token 即将过期或已过期，尝试刷新...')
     const success = await refreshSession()
     if (!success) {
       console.warn('[Auth] Token 刷新失败，清除认证状态')
@@ -122,23 +142,6 @@ export function useCloudbaseAuthCore() {
       userStore.logout()
     }
     return success
-  }
-
-  /**
-   * 将 CloudbaseUser 同步到 Pinia userStore
-   */
-  const syncToStore = (cbUser: CloudbaseUser, accessToken: string) => {
-    const info: YlfUserInfo = {
-      id: cbUser.id,
-      login: cbUser.login,
-      email: cbUser.email,
-      phone: cbUser.phone,
-      avatar: cbUser.avatar || '',
-      nickname: cbUser.nickname || '',
-      hasPassword: cbUser.hasPassword,
-      providers: cbUser.providers,
-    }
-    userStore.login(accessToken, info)
   }
 
   const fetchUser = async () => {

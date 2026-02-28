@@ -16,6 +16,7 @@ Use this skill for **structured development workflow** when you need to:
 - Ensure high-quality requirement analysis and acceptance criteria
 
 **Do NOT use for:**
+
 - Simple bug fixes
 - Documentation updates
 - Configuration changes
@@ -81,7 +82,7 @@ Requirement description
 
 1. Use EARS syntax: While <optional precondition>, when <optional trigger>, the <system name> shall <system response>. For example: When "Mute" is selected, the laptop shall suppress all audio output.
 2. ...
-...
+   ...
 ```
 
 ## Phase 2: Technical Solution Design
@@ -102,7 +103,7 @@ After completing the technical solution design, based on the requirements docume
 - [ ] 1. Task Information
   - Specific things to do
   - ...
-  - _Requirement: Related requirement point number
+  - \_Requirement: Related requirement point number
 ```
 
 ## Phase 4: Task Execution
@@ -121,4 +122,3 @@ After completing the technical solution design, based on the requirements docume
 4. **Technical Accuracy**: Technical solutions should be concise but accurate
 5. **Task Tracking**: Keep task status updated throughout execution
 6. **Independent Execution**: Work autonomously while maintaining quality
-

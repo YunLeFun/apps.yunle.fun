@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AppRecord } from '~/types/app'
 import {
+  actionSheetController,
   IonButton,
   IonButtons,
   IonContent,
@@ -9,15 +10,13 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonNote,
   IonPage,
   IonRefresher,
   IonRefresherContent,
   IonTitle,
   IonToolbar,
-  actionSheetController,
 } from '@ionic/vue'
-import { add, ellipsisHorizontal, globe, logoGithub, trash } from 'ionicons/icons'
+import { add, globe, logoGithub, trash } from 'ionicons/icons'
 
 const router = useRouter()
 const toast = useToast()
@@ -33,7 +32,7 @@ async function fetchMyApps() {
     myApps.value = await getMyApps()
   }
   catch (err: unknown) {
-    toast.show(err instanceof Error ? err.message : '加载失败', 'error')
+    toast.showError(err instanceof Error ? err.message : '加载失败')
   }
   finally {
     loading.value = false
@@ -57,10 +56,10 @@ async function handleDelete(app: AppRecord) {
           try {
             await deleteApp(app._id)
             myApps.value = myApps.value.filter(a => a._id !== app._id)
-            toast.show('已删除', 'success')
+            toast.showSuccess('已删除')
           }
           catch {
-            toast.show('删除失败', 'error')
+            toast.showError('删除失败')
           }
         },
       },
@@ -74,6 +73,14 @@ function openApp(app: AppRecord) {
   if (app.websiteUrl) {
     window.open(app.websiteUrl, '_blank')
   }
+}
+
+function openGithubRepo(repo: string) {
+  window.open(`https://github.com/${repo}`, '_blank')
+}
+
+function openUrl(url: string) {
+  window.open(url, '_blank')
 }
 
 onMounted(() => {
@@ -190,10 +197,10 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
 
           <!-- 操作按钮 -->
           <IonButtons slot="end">
-            <IonButton v-if="app.githubRepo" size="small" fill="clear" @click.stop="window.open(`https://github.com/${app.githubRepo}`, '_blank')">
+            <IonButton v-if="app.githubRepo" size="small" fill="clear" @click.stop="openGithubRepo(app.githubRepo!)">
               <IonIcon slot="icon-only" :icon="logoGithub" size="small" />
             </IonButton>
-            <IonButton v-if="app.websiteUrl" size="small" fill="clear" @click.stop="window.open(app.websiteUrl, '_blank')">
+            <IonButton v-if="app.websiteUrl" size="small" fill="clear" @click.stop="openUrl(app.websiteUrl!)">
               <IonIcon slot="icon-only" :icon="globe" size="small" />
             </IonButton>
             <IonButton size="small" fill="clear" color="danger" @click.stop="handleDelete(app)">

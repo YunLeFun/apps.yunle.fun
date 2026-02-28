@@ -156,4 +156,3 @@ function navigateTo(path: string) {
     </IonContent>
   </IonPage>
 </template>
-

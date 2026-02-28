@@ -9,18 +9,21 @@ alwaysApply: false
 This is an **OPTIONAL advanced modeling tool** for complex database design. Most simple table creation should use `relational-database-tool` directly with SQL statements.
 
 **ONLY use this skill when you specifically need:**
+
 - Complex multi-table relationships with automatic foreign key management
 - Visual ER diagram generation for documentation
 - Automated field type mapping and constraint generation
 - Enterprise-level data model documentation
 
 **For most cases, use `rules/relational-database-tool/rule.md` instead:**
+
 - Simple table creation with CREATE TABLE statements
 - Basic CRUD operations
 - Schema modifications with ALTER TABLE
 - Direct SQL execution without Mermaid modeling
 
 **Do NOT use for:**
+
 - Querying or manipulating existing data (use database skills)
 - NoSQL database design (use NoSQL skills)
 - Frontend data structures (use appropriate frontend skills)
@@ -55,12 +58,14 @@ When you do use this advanced modeling approach:
 ## Quick Decision Guide
 
 **Most Database Tasks → `rules/relational-database-tool/rule.md`**
+
 - ✅ Simple table creation
 - ✅ Data queries and modifications
 - ✅ Schema changes
 - ✅ Direct SQL execution
 
 **Complex Modeling Only → This rule (`rules/data-model-creation/rule.md`)**
+
 - 🎯 Multi-entity relationship modeling
 - 🎯 Automated foreign key management
 - 🎯 Visual ER diagram generation
@@ -79,6 +84,7 @@ When you do use this advanced modeling approach:
 - Data operations: `INSERT`, `UPDATE`, `SELECT`, `DELETE`
 
 **Only use this advanced Mermaid modeling approach when:**
+
 - You need automated relationship management
 - Complex multi-table schemas with foreign keys
 - Enterprise documentation requirements
@@ -129,7 +135,7 @@ As an expert in data modeling and a senior architect in software development, yo
 
 9. **Field Descriptions**: For each field definition in user descriptions, use `<<description>>` format at the end of the definition line, e.g., `name: string <<Name>>`.
 
-10. **Display Field**: Each entity class should have a field for display when being referenced. Usually a human-readable name or unique identifier. Define display_field() parameterless function, return value is a field name representing the main display field, e.g., `display_field() "name"` means the main display field is name. Otherwise, default to the implicit _id of the data model.
+10. **Display Field**: Each entity class should have a field for display when being referenced. Usually a human-readable name or unique identifier. Define display_field() parameterless function, return value is a field name representing the main display field, e.g., `display_field() "name"` means the main display field is name. Otherwise, default to the implicit_id of the data model.
 
 11. **Class Notes**: After all class definitions are complete, use note to describe class names. First use "%% Class naming" to anchor the area, then provide Chinese table names for each class.
 
@@ -184,18 +190,21 @@ classDiagram
 ## Data Model Creation Workflow
 
 ### 1. Business Analysis Phase
+
 - Carefully analyze user's business requirement descriptions
 - Identify core entities and business objects
 - Determine relationships between entities
 - Clarify required fields, unique constraints, and default values
 
 ### 2. Mermaid Modeling Phase
+
 - Strictly follow the above generation rules to create mermaid classDiagram
 - Ensure field type mappings are correct
 - Properly handle relationship directions and cardinalities
 - Add complete Chinese descriptions and comments
 
 ### 3. Model Validation Phase
+
 - Check model completeness and consistency
 - Verify relationship rationality
 - Confirm field constraint correctness
@@ -204,6 +213,7 @@ classDiagram
 ## MySQL Data Type Support
 
 ### Basic Type Mappings
+
 - `string` → VARCHAR/TEXT
 - `number` → INT/BIGINT/DECIMAL
 - `boolean` → BOOLEAN/TINYINT
@@ -212,6 +222,7 @@ classDiagram
 - `time` → TIME
 
 ### Extended Type Mappings
+
 - `x-enum` → ENUM type
 - `x-file`/`x-image` → File path storage
 - `x-rtf` → LONGTEXT rich text
@@ -220,6 +231,7 @@ classDiagram
 - `email`/`phone`/`url` → VARCHAR with validation
 
 ### Relationship Implementation
+
 - One-to-one: Foreign key constraints
 - One-to-many: Foreign key associations
 - Many-to-many: Intermediate table implementation
@@ -228,23 +240,27 @@ classDiagram
 ## Tool Usage Guidelines
 
 ### Tool Call Timing (RARE - Use Sparingly)
+
 1. **Only when user explicitly requests advanced data modeling with Mermaid diagrams**
 2. **Only for complex enterprise applications with multi-entity relationships**
 3. **Only when user provides detailed business requirement descriptions requiring automated modeling**
 4. **Only when you need to update existing data model structure AND want visual ER diagrams**
 
 ### When to SKIP this tool (Most Cases)
+
 - Simple table creation → Use `executeWriteSQL` with CREATE TABLE
 - Schema changes → Use `executeWriteSQL` with ALTER TABLE
 - Basic CRUD → Use appropriate SQL statements directly
 - Data queries → Use `executeReadOnlySQL`
 
 ### Parameter Usage Guide
+
 - `mermaidDiagram`: Complete mermaid classDiagram code
 - `publish`: Whether to publish model immediately (recommend default to false, create then publish)
 - `updateMode`: Create new model or update existing model
 
 ### Error Handling Strategy
+
 - Syntax errors: Check Mermaid syntax format
 - Field type errors: Verify type mapping relationships
 - Relationship errors: Check relationship directions and cardinalities
@@ -253,18 +269,21 @@ classDiagram
 ## Best Practices
 
 ### Model Design Principles
+
 1. **Single Responsibility**: Each entity class is responsible for only one business concept
 2. **Minimize Dependencies**: Reduce unnecessary relationships
 3. **Extensibility**: Reserve field space for future expansion
 4. **Consistency**: Maintain consistency in naming and type usage
 
 ### Performance Considerations
+
 1. **Index Design**: Create indexes for commonly queried fields
 2. **Field Length**: Reasonably set string field lengths
 3. **Relationship Optimization**: Avoid excessive many-to-many relationships
 4. **Data Sharding**: Consider table sharding strategies for large tables
 
 ### Security Standards
+
 1. **Sensitive Fields**: Encrypt storage for sensitive information like passwords
 2. **Permission Control**: Clarify read/write permissions for fields
 3. **Data Validation**: Set appropriate field constraints
@@ -273,6 +292,7 @@ classDiagram
 ## Common Business Scenario Templates
 
 ### User Management System
+
 ```mermaid
 classDiagram
     class User {
@@ -289,6 +309,7 @@ classDiagram
 ```
 
 ### E-commerce System
+
 ```mermaid
 classDiagram
     class Product {
@@ -314,6 +335,7 @@ classDiagram
 ```
 
 ### Content Management System
+
 ```mermaid
 classDiagram
     class Article {
@@ -330,4 +352,3 @@ classDiagram
 ```
 
 These rules will guide AI Agents to generate high-quality, business-requirement-compliant data models during the data modeling process.
-

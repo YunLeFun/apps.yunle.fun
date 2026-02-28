@@ -15,7 +15,8 @@ export function useScanResult() {
    * 处理扫码结果
    */
   function handleScanResult(content: string) {
-    if (!content) return
+    if (!content)
+      return
 
     if (content.startsWith('http://') || content.startsWith('https://')) {
       const appIdMatch = content.match(/\/app\/(\d+)/)

@@ -18,6 +18,7 @@ Use this skill for **file storage operations** in web applications when you need
 - Download files from cloud storage to local browser
 
 **Do NOT use for:**
+
 - Mini-program file operations (use mini-program specific skills)
 - Backend file operations (use Node SDK skills)
 - Database operations (use database skills)
@@ -47,14 +48,15 @@ Use this skill for **file storage operations** in web applications when you need
 ## SDK Initialization
 
 ```javascript
-import cloudbase from "@cloudbase/js-sdk";
+import cloudbase from '@cloudbase/js-sdk'
 
 const app = cloudbase.init({
-  env: "your-env-id", // Replace with your CloudBase environment ID
-});
+  env: 'your-env-id', // Replace with your CloudBase environment ID
+})
 ```
 
 **Initialization rules:**
+
 - Always use synchronous initialization with the pattern above
 - Do not lazy-load the SDK with dynamic imports
 - Keep a single shared `app` instance across your application
@@ -80,27 +82,27 @@ const result = await app.uploadFile({
 
 ```javascript
 const result = await app.uploadFile({
-  cloudPath: "uploads/avatar.jpg",
+  cloudPath: 'uploads/avatar.jpg',
   filePath: selectedFile,
-  method: "put", // "post" or "put" (default: "put")
+  method: 'put', // "post" or "put" (default: "put")
   onUploadProgress: (progressEvent) => {
     const percent = Math.round(
       (progressEvent.loaded * 100) / progressEvent.total
-    );
-    console.log(`Upload progress: ${percent}%`);
+    )
+    console.log(`Upload progress: ${percent}%`)
     // Update UI progress bar here
   }
-});
+})
 ```
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `cloudPath` | string | Yes | Absolute path with filename (e.g., "folder/file.jpg") |
-| `filePath` | File | Yes | HTML file input object |
-| `method` | "post" \| "put" | No | Upload method (default: "put") |
-| `onUploadProgress` | function | No | Progress callback function |
+| Parameter          | Type            | Required | Description                                           |
+| ------------------ | --------------- | -------- | ----------------------------------------------------- |
+| `cloudPath`        | string          | Yes      | Absolute path with filename (e.g., "folder/file.jpg") |
+| `filePath`         | File            | Yes      | HTML file input object                                |
+| `method`           | "post" \| "put" | No       | Upload method (default: "put")                        |
+| `onUploadProgress` | function        | No       | Progress callback function                            |
 
 ### Cloud Path Rules
 
@@ -128,19 +130,19 @@ const result = await app.uploadFile({
 const result = await app.getTempFileURL({
   fileList: [
     {
-      fileID: "cloud://env-id/folder/filename.jpg",
+      fileID: 'cloud://env-id/folder/filename.jpg',
       maxAge: 3600 // URL valid for 1 hour (seconds)
     }
   ]
-});
+})
 
 // Access the download URL
-result.fileList.forEach(file => {
-  if (file.code === "SUCCESS") {
-    console.log("Download URL:", file.tempFileURL);
+result.fileList.forEach((file) => {
+  if (file.code === 'SUCCESS') {
+    console.log('Download URL:', file.tempFileURL)
     // Use this URL to download or display the file
   }
-});
+})
 ```
 
 ### Multiple Files
@@ -149,29 +151,29 @@ result.fileList.forEach(file => {
 const result = await app.getTempFileURL({
   fileList: [
     {
-      fileID: "cloud://env-id/image1.jpg",
+      fileID: 'cloud://env-id/image1.jpg',
       maxAge: 7200 // 2 hours
     },
     {
-      fileID: "cloud://env-id/document.pdf",
+      fileID: 'cloud://env-id/document.pdf',
       maxAge: 86400 // 24 hours
     }
   ]
-});
+})
 ```
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `fileList` | Array | Yes | Array of file objects |
+| Parameter  | Type  | Required | Description           |
+| ---------- | ----- | -------- | --------------------- |
+| `fileList` | Array | Yes      | Array of file objects |
 
 #### fileList Item Structure
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `fileID` | string | Yes | Cloud storage file ID |
-| `maxAge` | number | Yes | URL validity period in seconds |
+| Parameter | Type   | Required | Description                    |
+| --------- | ------ | -------- | ------------------------------ |
+| `fileID`  | string | Yes      | Cloud storage file ID          |
+| `maxAge`  | number | Yes      | URL validity period in seconds |
 
 ### Response Structure
 
@@ -202,18 +204,19 @@ const result = await app.getTempFileURL({
 ```javascript
 const result = await app.deleteFile({
   fileList: [
-    "cloud://env-id/folder/filename.jpg"
+    'cloud://env-id/folder/filename.jpg'
   ]
-});
+})
 
 // Check deletion results
-result.fileList.forEach(file => {
-  if (file.code === "SUCCESS") {
-    console.log("File deleted:", file.fileID);
-  } else {
-    console.error("Failed to delete:", file.fileID);
+result.fileList.forEach((file) => {
+  if (file.code === 'SUCCESS') {
+    console.log('File deleted:', file.fileID)
   }
-});
+  else {
+    console.error('Failed to delete:', file.fileID)
+  }
+})
 ```
 
 ### Multiple Files
@@ -221,18 +224,18 @@ result.fileList.forEach(file => {
 ```javascript
 const result = await app.deleteFile({
   fileList: [
-    "cloud://env-id/old-avatar.jpg",
-    "cloud://env-id/temp-upload.jpg",
-    "cloud://env-id/cache-file.dat"
+    'cloud://env-id/old-avatar.jpg',
+    'cloud://env-id/temp-upload.jpg',
+    'cloud://env-id/cache-file.dat'
   ]
-});
+})
 ```
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `fileList` | Array<string> | Yes | Array of file IDs to delete |
+| Parameter  | Type          | Required | Description                 |
+| ---------- | ------------- | -------- | --------------------------- |
+| `fileList` | Array<string> | Yes      | Array of file IDs to delete |
 
 ### Response Structure
 
@@ -240,8 +243,8 @@ const result = await app.deleteFile({
 {
   fileList: [
     {
-      code: "SUCCESS",
-      fileID: "cloud://env-id/folder/filename.jpg"
+      code: 'SUCCESS',
+      fileID: 'cloud://env-id/folder/filename.jpg'
     }
   ]
 }
@@ -259,17 +262,17 @@ const result = await app.deleteFile({
 
 ```javascript
 const result = await app.downloadFile({
-  fileID: "cloud://env-id/folder/filename.jpg"
-});
+  fileID: 'cloud://env-id/folder/filename.jpg'
+})
 
 // File is downloaded to browser default download location
 ```
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `fileID` | string | Yes | Cloud storage file ID |
+| Parameter | Type   | Required | Description           |
+| --------- | ------ | -------- | --------------------- |
+| `fileID`  | string | Yes      | Cloud storage file ID |
 
 ### Response Structure
 
@@ -293,19 +296,21 @@ All storage operations should include proper error handling:
 ```javascript
 try {
   const result = await app.uploadFile({
-    cloudPath: "uploads/file.jpg",
+    cloudPath: 'uploads/file.jpg',
     filePath: selectedFile
-  });
+  })
 
   if (result.code) {
     // Handle error
-    console.error("Upload failed:", result.message);
-  } else {
-    // Success
-    console.log("File uploaded:", result.fileID);
+    console.error('Upload failed:', result.message)
   }
-} catch (error) {
-  console.error("Storage operation failed:", error);
+  else {
+    // Success
+    console.log('File uploaded:', result.fileID)
+  }
+}
+catch (error) {
+  console.error('Storage operation failed:', error)
 }
 ```
 
@@ -315,7 +320,6 @@ try {
 - `PERMISSION_DENIED` - Insufficient permissions
 - `RESOURCE_NOT_FOUND` - File not found
 - `SYS_ERR` - System error
-
 
 ## Best Practices
 
@@ -340,4 +344,3 @@ try {
 2. **Access Control**: Use appropriate file permissions (public vs private)
 3. **URL Expiration**: Set reasonable expiration times for temporary URLs
 4. **User Permissions**: Ensure users can only access their own files when appropriate
-

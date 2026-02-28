@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { TcbOtpData, TcbSignUpData } from '~/composables/auth/useCloudbaseOtp'
 import {
   IonBackButton,
   IonButtons,
@@ -10,9 +11,8 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icons'
-import type { TcbOtpData, TcbSignUpData } from '~/composables/auth/useCloudbaseOtp'
 import { isValidEmail, isValidPhone, useCountdown } from '@yunlefun/auth'
+import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icons'
 
 const {
   sendPhoneOtp,
@@ -88,7 +88,8 @@ function switchMode(mode: PageMode) {
 
 // 手机号验证码
 async function handleSendPhoneOtp() {
-  if (!phoneValid.value) return
+  if (!phoneValid.value)
+    return
   try {
     phoneOtpData.value = await sendPhoneOtp(phone.value)
     phoneCodeSent.value = true
@@ -98,7 +99,8 @@ async function handleSendPhoneOtp() {
 }
 
 async function handleVerifyPhoneOtp() {
-  if (!phoneOtpData.value || !phoneOtpCode.value) return
+  if (!phoneOtpData.value || !phoneOtpCode.value)
+    return
   try {
     await verifyPhoneOtp(phoneOtpData.value, phoneOtpCode.value)
   }
@@ -107,7 +109,8 @@ async function handleVerifyPhoneOtp() {
 
 // 邮箱验证码
 async function handleSendEmailOtp() {
-  if (!emailValid.value) return
+  if (!emailValid.value)
+    return
   try {
     emailOtpData.value = await sendEmailOtp(email.value)
     emailCodeSent.value = true
@@ -117,7 +120,8 @@ async function handleSendEmailOtp() {
 }
 
 async function handleVerifyEmailOtp() {
-  if (!emailOtpData.value || !emailOtpCode.value) return
+  if (!emailOtpData.value || !emailOtpCode.value)
+    return
   try {
     await verifyEmailOtp(emailOtpData.value, emailOtpCode.value)
   }
@@ -126,7 +130,8 @@ async function handleVerifyEmailOtp() {
 
 // 密码登录
 async function handlePasswordLogin() {
-  if (!passwordFormValid.value) return
+  if (!passwordFormValid.value)
+    return
   try {
     const params: { email?: string, phone?: string, username?: string, password: string } = { password: passwordValue.value }
     if (isPasswordEmail.value)
@@ -142,7 +147,8 @@ async function handlePasswordLogin() {
 
 // 手机号注册
 async function handleSendSignupOtp() {
-  if (!signupPhoneValid.value) return
+  if (!signupPhoneValid.value)
+    return
   try {
     signupData.value = await signUpWithPhone(signupPhone.value)
     signupCodeSent.value = true
@@ -152,7 +158,8 @@ async function handleSendSignupOtp() {
 }
 
 async function handleVerifySignupOtp() {
-  if (!signupData.value || !signupOtpCode.value) return
+  if (!signupData.value || !signupOtpCode.value)
+    return
   try {
     await verifySignUpOtp(signupData.value, signupOtpCode.value)
   }
@@ -528,7 +535,7 @@ async function handleVerifySignupOtp() {
 
   .auth-subtitle {
     font-size: 15px;
-    color: var(--ion-color-medium, #8E8E93);
+    color: var(--ion-color-medium, #8e8e93);
     margin: 0;
   }
 }
@@ -536,13 +543,13 @@ async function handleVerifySignupOtp() {
 // iOS Segmented Control
 .auth-segment {
   display: flex;
-  background: var(--ion-color-light, #F2F2F7);
+  background: var(--ion-color-light, #f2f2f7);
   border-radius: 9px;
   padding: 2px;
   margin: 0 16px 20px;
 
   .dark & {
-    background: #39393D;
+    background: #39393d;
   }
 }
 
@@ -561,14 +568,14 @@ async function handleVerifySignupOtp() {
   -webkit-tap-highlight-color: transparent;
 
   &.active {
-    background: var(--ion-background-color, #FFF);
+    background: var(--ion-background-color, #fff);
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.04),
       0 3px 8px rgba(0, 0, 0, 0.04);
 
     .dark & {
       background: #636366;
-      color: #FFF;
+      color: #fff;
     }
   }
 
@@ -585,13 +592,13 @@ async function handleVerifySignupOtp() {
 
 // iOS Grouped Card
 .auth-card {
-  background: var(--ion-background-color, #FFF);
+  background: var(--ion-background-color, #fff);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 16px;
 
   .dark & {
-    background: var(--ion-card-background, #1C1C1E);
+    background: var(--ion-card-background, #1c1c1e);
   }
 }
 
@@ -646,7 +653,7 @@ async function handleVerifySignupOtp() {
   line-height: 48px;
 
   &::placeholder {
-    color: var(--ion-color-medium, #C7C7CC);
+    color: var(--ion-color-medium, #c7c7cc);
   }
 
   &:disabled {
@@ -657,7 +664,7 @@ async function handleVerifySignupOtp() {
 .auth-inline-action {
   font-size: 15px;
   font-weight: 500;
-  color: var(--ion-color-primary, #007AFF);
+  color: var(--ion-color-primary, #007aff);
   background: none;
   border: none;
   white-space: nowrap;
@@ -671,7 +678,7 @@ async function handleVerifySignupOtp() {
   }
 
   &:disabled {
-    color: var(--ion-color-medium, #8E8E93);
+    color: var(--ion-color-medium, #8e8e93);
     cursor: default;
   }
 }
@@ -685,8 +692,8 @@ async function handleVerifySignupOtp() {
   height: 50px;
   border-radius: 12px;
   border: none;
-  background: var(--ion-color-primary, #007AFF);
-  color: #FFF;
+  background: var(--ion-color-primary, #007aff);
+  color: #fff;
   font-size: 17px;
   font-weight: 600;
   cursor: pointer;
@@ -707,12 +714,12 @@ async function handleVerifySignupOtp() {
 .auth-btn-spinner {
   width: 20px;
   height: 20px;
-  color: #FFF;
+  color: #fff;
 }
 
 .auth-hint {
   font-size: 13px;
-  color: var(--ion-color-medium, #8E8E93);
+  color: var(--ion-color-medium, #8e8e93);
   text-align: center;
   margin-top: 4px;
   line-height: 1.5;
@@ -740,7 +747,7 @@ async function handleVerifySignupOtp() {
 
 .auth-divider-text {
   font-size: 13px;
-  color: var(--ion-color-medium, #8E8E93);
+  color: var(--ion-color-medium, #8e8e93);
   font-weight: 400;
 }
 
@@ -778,22 +785,22 @@ async function handleVerifySignupOtp() {
   padding: 12px;
   border-radius: 50%;
   font-size: 28px;
-  background: var(--ion-color-light, #F2F2F7);
+  background: var(--ion-color-light, #f2f2f7);
   color: var(--ion-text-color, #000);
 
   .dark & {
-    background: #2C2C2E;
-    color: #FFF;
+    background: #2c2c2e;
+    color: #fff;
   }
 
   .auth-social-circle--wechat & {
-    color: #07C160;
+    color: #07c160;
   }
 }
 
 .auth-social-circle-label {
   font-size: 12px;
-  color: var(--ion-color-medium, #8E8E93);
+  color: var(--ion-color-medium, #8e8e93);
   font-weight: 500;
 }
 
@@ -805,14 +812,14 @@ async function handleVerifySignupOtp() {
 
 .auth-footer-switch {
   font-size: 15px;
-  color: var(--ion-color-medium, #8E8E93);
+  color: var(--ion-color-medium, #8e8e93);
   margin: 0;
 }
 
 .auth-link-btn {
   background: none;
   border: none;
-  color: var(--ion-color-primary, #007AFF);
+  color: var(--ion-color-primary, #007aff);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -825,7 +832,7 @@ async function handleVerifySignupOtp() {
 }
 
 .auth-link {
-  color: var(--ion-color-primary, #007AFF);
+  color: var(--ion-color-primary, #007aff);
   text-decoration: none;
   font-weight: 500;
 }
@@ -837,7 +844,7 @@ async function handleVerifySignupOtp() {
 
 .auth-terms-text {
   font-size: 12px;
-  color: var(--ion-color-medium, #8E8E93);
+  color: var(--ion-color-medium, #8e8e93);
   line-height: 1.6;
   margin: 0;
 }

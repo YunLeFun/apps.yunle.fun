@@ -50,8 +50,8 @@ describe('smsLogin.vue', () => {
     await wrapper.vm.$nextTick()
 
     const buttons = wrapper.findAll('button')
-    expect(buttons[0].text()).toBe('获取验证码')
-    expect(buttons[1].text()).toBe('登录')
+    expect(buttons[0]!.text()).toBe('获取验证码')
+    expect(buttons[1]!.text()).toBe('登录')
   })
 
   it('应该在发送验证码时显示加载状态', async () => {
@@ -61,7 +61,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const sendButton = wrapper.findAll('button')[0]
+    const sendButton = wrapper.findAll('button')[0]!
     expect(sendButton.text()).toBe('发送中...')
     expect(sendButton.attributes('disabled')).toBeDefined()
   })
@@ -73,7 +73,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const sendButton = wrapper.findAll('button')[0]
+    const sendButton = wrapper.findAll('button')[0]!
     expect(sendButton.text()).toBe('30s')
     expect(sendButton.attributes('disabled')).toBeDefined()
   })
@@ -86,7 +86,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const loginButton = wrapper.findAll('button')[1]
+    const loginButton = wrapper.findAll('button')[1]!
     expect(loginButton.text()).toBe('登录中...')
     expect(loginButton.attributes('disabled')).toBeDefined()
   })
@@ -105,7 +105,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const loginButton = wrapper.findAll('button')[1]
+    const loginButton = wrapper.findAll('button')[1]!
     await loginButton.trigger('click')
     await wrapper.vm.$nextTick()
 
@@ -124,7 +124,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const sendButton = wrapper.findAll('button')[0]
+    const sendButton = wrapper.findAll('button')[0]!
     await sendButton.trigger('click')
 
     // 等待所有 Promise 完成
@@ -145,7 +145,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const sendButton = wrapper.findAll('button')[0]
+    const sendButton = wrapper.findAll('button')[0]!
     await sendButton.trigger('click')
 
     // 等待所有 Promise 完成
@@ -160,7 +160,7 @@ describe('smsLogin.vue', () => {
     const wrapper = mount(SmsLogin)
     await wrapper.vm.$nextTick()
 
-    const loginButton = wrapper.findAll('button')[1]
+    const loginButton = wrapper.findAll('button')[1]!
     expect(loginButton.attributes('disabled')).toBeDefined()
 
     // 只输入手机号

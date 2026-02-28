@@ -22,9 +22,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="w-full flex items-center justify-center"
-    m="auto"
-    max-w-md
+    class="w-full flex items-center justify-center m-auto max-w-md"
   >
     <IonCardContent class="p-6">
       <LoginForApp v-if="appInfo" :app-info="appInfo" />

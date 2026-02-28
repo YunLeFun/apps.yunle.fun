@@ -69,7 +69,7 @@ const { loggedIn } = useUserSession()
                     to="/login"
                     class="p-menubar-item-link inline-flex items-center justify-center gap-2 rounded"
                   >
-                    <div i-ri-login-circle-line /> 登录
+                    <div class="i-ri-login-circle-line" /> 登录
                   </RouterLink>
                 </div>
               </div>

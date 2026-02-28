@@ -39,7 +39,7 @@ const todayDateStr = computed(() => {
     <div class="mb-3 flex items-center justify-between">
       <h2 class="section text-3xl font-bold">
         今日推荐
-        <small class="op-55">
+        <small class="opacity-55">
           {{ todayDateStr }}
         </small>
       </h2>

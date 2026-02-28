@@ -1,18 +1,19 @@
 <script lang="ts" setup>
 import {
   IonBackButton,
-  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
   IonIcon,
   IonPage,
   IonSpinner,
-  IonText,
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
 import { alertCircleOutline } from 'ionicons/icons'
+import {
+  kButton,
+} from 'konsta/vue'
 import { useWxLoginVerify } from '~/composables/wx'
 
 const router = useRouter()
@@ -21,10 +22,8 @@ const userStore = useUserStore()
 
 const { hasCode, errorMessage, loading } = useWxLoginVerify({
   success: (res) => {
-    // 保存 JWT access_token 和用户信息到 userStore
     userStore.login(res.access_token, res.user)
 
-    // 微信登录成功后重定向到我的页面
     setTimeout(() => {
       router.push('/tabs/me')
     }, 1000)
@@ -34,39 +33,37 @@ const { hasCode, errorMessage, loading } = useWxLoginVerify({
 
 <template>
   <IonPage>
-    <IonHeader>
+    <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/me" />
+          <IonBackButton default-href="/tabs/me" text="返回" />
         </IonButtons>
         <IonTitle>登录</IonTitle>
       </IonToolbar>
     </IonHeader>
 
-    <IonContent class="ion-padding">
-      <div class="w-full items-center" flex="~ col">
+    <IonContent :fullscreen="true">
+      <div class="w-full flex flex-col items-center px-6">
         <Logo mb-8 mt-10 />
         <template v-if="hasCode">
           <div class="flex flex-col items-center justify-center gap-4 text-center">
-            <IonText v-if="loading" color="medium">
-              <h3>{{ loading ? '登录中' : '鉴权中' }}</h3>
-            </IonText>
+            <p v-if="loading" class="text-base text-[#8E8E93]">
+              {{ loading ? '登录中' : '鉴权中' }}
+            </p>
             <IonSpinner v-if="loading" name="crescent" />
 
             <template v-if="errorMessage">
-              <IonIcon :icon="alertCircleOutline" color="danger" size="large" />
-              <IonText color="danger">
-                <p class="ion-text-wrap">
-                  {{ errorMessage }}
-                </p>
-              </IonText>
-              <IonButton
-                expand="block"
-                color="primary"
+              <IonIcon :icon="alertCircleOutline" class="text-4xl text-[#FF3B30]" />
+              <p class="text-sm text-[#FF3B30]">
+                {{ errorMessage }}
+              </p>
+              <k-button
+                large
+                class="mt-4 w-full"
                 @click="router.push('/tabs/me')"
               >
                 返回
-              </IonButton>
+              </k-button>
             </template>
           </div>
         </template>

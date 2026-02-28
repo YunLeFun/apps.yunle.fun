@@ -6,24 +6,22 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonNote,
   IonPage,
-  IonRadio,
-  IonRadioGroup,
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
 import { moon, phonePortraitOutline, sunny } from 'ionicons/icons'
+import {
+  kBlockTitle,
+  kList,
+  kListItem,
+  kRadio,
+} from 'konsta/vue'
 
 const settingsStore = useSettingsStore()
 
 const selectedTheme = ref<ThemeMode>(settingsStore.themeMode)
 
-// 主题选项配置
 const themeOptions = [
   {
     value: 'system' as ThemeMode,
@@ -45,12 +43,10 @@ const themeOptions = [
   },
 ]
 
-// 监听主题变化并应用
 watch(selectedTheme, (newTheme) => {
   settingsStore.applyTheme(newTheme)
 })
 
-// 初始化主题
 onMounted(() => {
   settingsStore.initTheme()
 })
@@ -67,50 +63,42 @@ onMounted(() => {
       </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true" class="settings-content">
-      <IonListHeader>
-        外观
-      </IonListHeader>
+    <IonContent :fullscreen="true">
+      <IonHeader collapse="condense">
+        <IonToolbar>
+          <IonTitle size="large">
+            设置
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
 
-      <!-- 外观设置 -->
-      <IonList inset>
-        <IonRadioGroup v-model="selectedTheme">
-          <IonItem
-            v-for="option in themeOptions"
-            :key="option.value"
-            button
-            :detail="false"
-            class="theme-item"
-            lines="full"
-            @click="selectedTheme = option.value"
-          >
-            <IonIcon
-              slot="start"
-              :icon="option.icon"
-              class="theme-icon"
+      <k-block-title>外观</k-block-title>
+
+      <k-list strong inset>
+        <k-list-item
+          v-for="option in themeOptions"
+          :key="option.value"
+          :title="option.label"
+          :subtitle="option.description"
+          @click="selectedTheme = option.value"
+        >
+          <template #media>
+            <span
+              class="ios-icon-box"
+              :class="selectedTheme === option.value ? 'ios-icon-blue' : 'ios-icon-gray'"
+            >
+              <IonIcon :icon="option.icon" />
+            </span>
+          </template>
+          <template #after>
+            <k-radio
+              :checked="selectedTheme === option.value"
+              @change="selectedTheme = option.value"
             />
-            <IonLabel>
-              <h3 class="theme-label">
-                {{ option.label }}
-              </h3>
-              <IonNote class="ion-color ion-color-medium text-xs">
-                {{ option.description }}
-              </IonNote>
-            </IonLabel>
-            <IonRadio
-              slot="end"
-              :value="option.value"
-            />
-          </IonItem>
-        </IonRadioGroup>
-      </IonList>
+          </template>
+        </k-list-item>
+      </k-list>
     </IonContent>
   </IonPage>
 </template>
 
-<style>
-/* (Optional) This is added to prevent the flashing that happens when toggling between palettes */
-ion-item {
-  --transition: none;
-}
-</style>

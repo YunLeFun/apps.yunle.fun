@@ -1,4 +1,138 @@
-// Ionic overrides
-:root {
-  // Add custom Ionic variable overrides here if needed
+// Ionic + Konsta UI style overrides
+
+// Ensure Konsta UI dark mode aligns with Ionic's dark palette class
+.ion-palette-dark {
+  // Konsta uses .dark class, sync with Ionic's palette
+  color-scheme: dark;
+}
+
+// Konsta UI list inset styling adjustments for Ionic context
+.k-ios {
+  // Ensure Konsta lists work well inside IonContent
+  .list {
+    --k-list-bg: var(--ion-item-background, #fff);
+  }
+}
+
+// Prevent Konsta UI transition issues when switching palettes
+.ion-palette-dark ion-item,
+.ion-palette-light ion-item {
+  --transition: none;
+}
+
+// ============================================================
+// iOS 折叠大标题与 Konsta inset list 左对齐
+// 
+// Konsta inset list: margin-left = 16px (ml-safe-4)
+// 
+// Ionic 8 运行时会移除 collapse="condense" 和 size="large" 属性，
+// 只保留 class: header-collapse-condense / title-large
+// toolbar 的 --padding-start 默认 4px，title-large 内部 padding 0px
+// 实际大标题文字 left = 4px，需要调整到 16px 以对齐 Konsta list
+// 
+// 方案：将 condense toolbar 的 --padding-start 设为 16px
+// ============================================================
+
+ion-header.header-collapse-condense ion-toolbar {
+  --padding-start: 16px;
+}
+
+// ============================================================
+// iOS Settings 风格：圆角方块图标 (全局复用)
+// 参考 Apple iOS Settings App 的列表项图标规范
+// ============================================================
+
+.ios-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 7px;
+  font-size: 18px;
+  color: #fff;
+}
+
+// 图标颜色：使用 Ionic CSS 变量，确保跟随主题
+.ios-icon-blue    { background-color: var(--ion-color-primary, #007aff); }
+.ios-icon-gray    { background-color: var(--ion-color-medium, #8e8e93); }
+.ios-icon-red     { background-color: var(--ion-color-danger, #ff3b30); }
+.ios-icon-orange  { background-color: var(--ion-color-warning, #ff9500); }
+.ios-icon-green   { background-color: var(--ion-color-success, #34c759); }
+.ios-icon-purple  { background-color: #af52de; }
+.ios-icon-teal    { background-color: #5ac8fa; }
+
+// 用户头像占位圆形
+.ios-icon-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ion-color-primary, #007aff);
+}
+
+// ============================================================
+// 语义化文本颜色 (全局复用)
+// ============================================================
+
+.ios-primary-text   { color: var(--ion-color-primary, #007aff); }
+.ios-secondary-text { color: var(--ion-color-medium, #8e8e93); }
+
+.ios-avatar-bg {
+  background-color: var(--ion-color-primary, #007aff);
+}
+
+// ============================================================
+// Konsta UI 破坏性操作（退出登录等）
+// ============================================================
+
+.k-list-item-destructive {
+  --konsta-color: var(--ion-color-danger, #ff3b30);
+  color: var(--ion-color-danger, #ff3b30);
+
+  :deep(.text-black),
+  :deep(.dark\:text-white) {
+    color: var(--ion-color-danger, #ff3b30) !important;
+  }
+}
+
+// ============================================================
+// iOS 登录入口样式（Apple ID 风格）
+// Konsta UI 的 chevron 默认在 titleWrap 内，仅与 title 行对齐
+// 当有 subtitle 时需要让 chevron 相对于整个内容区域垂直居中
+// ============================================================
+
+.ios-login-entry {
+  // inner 容器设为相对定位
+  .w-full.relative {
+    position: relative;
+  }
+
+  // chevron SVG：绝对定位到 inner 容器的右侧垂直居中
+  .w-full.relative svg[viewBox="0 0 12 20"] {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 0;
+  }
+
+  // titleWrap 右侧预留 chevron 空间，避免文字和箭头重叠
+  .w-full.relative > .flex.justify-between {
+    padding-right: 24px;
+  }
+}
+
+// ============================================================
+// Badge 标签
+// ============================================================
+
+.ios-badge {
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.875rem;
+  background-color: rgba(var(--ion-color-primary-rgb, 0, 122, 255), 0.1);
+  color: var(--ion-color-primary, #007aff);
 }

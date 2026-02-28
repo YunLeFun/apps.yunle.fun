@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import consola from 'consola'
+import { kProvider } from 'konsta/vue'
 
 import { appName } from '~/constants'
 
@@ -9,18 +10,19 @@ consola.level = import.meta.env.DEV ? 4 : 3
 useHead({
   title: appName,
 })
+
+const colorMode = useColorMode()
+const isDark = computed(() => colorMode.value === 'dark')
 </script>
 
 <template>
   <!-- <VitePwaManifest /> -->
 
-  <!-- <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout> -->
-
-  <IonApp>
-    <IonRouterOutlet />
-  </IonApp>
+  <k-provider theme="parent" :dark="isDark">
+    <IonApp>
+      <IonRouterOutlet />
+    </IonApp>
+  </k-provider>
 </template>
 
 <style lang="scss">

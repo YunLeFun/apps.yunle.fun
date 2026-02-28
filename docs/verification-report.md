@@ -64,7 +64,7 @@ $ npm run test:unit
 
 **结果**: ✅ 全部通过
 
-```
+```text
 Test Files  3 passed (3)
 Tests  27 passed (27)
 Duration  1.14s

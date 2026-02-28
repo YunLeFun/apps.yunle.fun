@@ -1,5 +1,11 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
 ignoredBuiltDependencies:
   - esbuild
 
 onlyBuiltDependencies:
   - unrs-resolver
+overrides:
+  semver@<7.0.0: '>=7.7.2'

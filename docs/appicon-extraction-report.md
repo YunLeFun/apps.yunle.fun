@@ -87,7 +87,7 @@ interface Props {
 
 ### 重构前
 
-```
+```text
 AppGrid
   ├── 网格布局
   ├── 图标渲染（内联）
@@ -97,7 +97,7 @@ AppGrid
 
 ### 重构后
 
-```
+```text
 AppGrid (容器组件)
   ├── 网格布局
   ├── 交互逻辑

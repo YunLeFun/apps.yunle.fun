@@ -1,22 +1,16 @@
 <script setup lang="ts">
 import {
-  IonAvatar,
-  IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
   IonContent,
   IonHeader,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
   IonPage,
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { informationCircle, logIn, logOut, person, personCircle, personCircleOutline, settings } from 'ionicons/icons'
+import { informationCircle, logOut, person, personCircleOutline, settings } from 'ionicons/icons'
+import {
+  kList,
+  kListItem,
+} from 'konsta/vue'
 
 const router = useRouter()
 
@@ -31,80 +25,133 @@ function handleLogout() {
 function goToLoginPage() {
   router.push('/login')
 }
+
+function navigateTo(path: string) {
+  router.push(path)
+}
 </script>
 
 <template>
   <IonPage>
-    <IonHeader>
+    <IonHeader :translucent="true">
       <IonToolbar>
         <IonTitle>我的</IonTitle>
       </IonToolbar>
     </IonHeader>
 
-    <IonContent class="ion-padding">
-      <!-- 用户信息卡片 -->
+    <IonContent :fullscreen="true">
+      <IonHeader collapse="condense">
+        <IonToolbar>
+          <IonTitle size="large">
+            我的
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
 
-      <IonList v-if="!userStore.isLoggedIn" inset>
-        <IonItem @click="goToLoginPage">
-          <IonIcon
-            slot="start"
-            color="primary"
-            :icon="personCircleOutline"
-            class="text-6xl"
-          />
-          <IonLabel color="primary">
-            登录「云乐坊」账户
-          </IonLabel>
-        </IonItem>
-      </IonList>
-      <IonList v-else inset class="py-2">
-        <IonItem @click="goToLoginPage">
-          <IonAvatar slot="start">
+      <!-- 未登录：登录入口（iOS Settings Apple ID 风格） -->
+      <k-list v-if="!userStore.isLoggedIn" strong inset class="mt-1">
+        <k-list-item
+          link
+          title="登录「云乐坊」账户"
+          subtitle="登录以使用全部功能"
+          class="ios-login-entry"
+          @click="goToLoginPage"
+        >
+          <template #media>
+            <IonIcon
+              :icon="personCircleOutline"
+              class="text-5xl opacity-40"
+              color="medium"
+            />
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 已登录：用户信息 -->
+      <k-list v-else strong inset class="mt-1">
+        <k-list-item
+          link
+          :title="userInfo.nickname || '云乐坊用户'"
+          subtitle="查看个人资料"
+          @click="navigateTo('/user/profile')"
+        >
+          <template #media>
             <img
               v-if="userInfo.avatar"
               :src="userInfo.avatar"
               :alt="userInfo.nickname"
+              class="h-14 w-14 rounded-full object-cover"
             >
-          </IonAvatar>
-          <IonLabel>
-            {{ userInfo.nickname }}
-          </IonLabel>
-        </IonItem>
-      </IonList>
+            <div
+              v-else
+              class="ios-icon-avatar"
+            >
+              <span class="text-xl text-white font-semibold">
+                {{ (userInfo.nickname || '云')[0] }}
+              </span>
+            </div>
+          </template>
+        </k-list-item>
+      </k-list>
 
       <!-- 功能列表 -->
-      <IonList v-if="userStore.isLoggedIn" inset>
-        <IonItem button router-link="/user/profile">
-          <IonIcon slot="start" :icon="person" />
-          <IonLabel>个人资料</IonLabel>
-        </IonItem>
+      <k-list v-if="userStore.isLoggedIn" strong inset>
+        <k-list-item
+          link
+          title="个人资料"
+          @click="navigateTo('/user/profile')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="person" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
 
-        <IonItem button router-link="/user/settings">
-          <IonIcon slot="start" :icon="settings" />
-          <IonLabel>设置</IonLabel>
-        </IonItem>
+      <!-- 通用功能 -->
+      <k-list strong inset>
+        <k-list-item
+          link
+          title="设置"
+          @click="navigateTo('/user/settings')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-gray">
+              <IonIcon :icon="settings" />
+            </span>
+          </template>
+        </k-list-item>
 
-        <IonItem
-          button
-          :disabled="isLoggingOut"
+        <k-list-item
+          link
+          title="关于"
+          @click="navigateTo('/about')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="informationCircle" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 退出登录 -->
+      <k-list v-if="userStore.isLoggedIn" strong inset class="mt-8">
+        <k-list-item
+          link
+          :title="isLoggingOut ? '退出中...' : '退出登录'"
+          class="k-list-item-destructive"
           @click="handleLogout"
         >
-          <IonIcon slot="start" :icon="logOut" />
-          <IonLabel>{{ isLoggingOut ? '退出中...' : '退出登录' }}</IonLabel>
-        </IonItem>
-      </IonList>
-
-      <IonList inset>
-        <IonItem button router-link="/user/settings">
-          <IonIcon slot="start" :icon="settings" />
-          <IonLabel>设置</IonLabel>
-        </IonItem>
-
-        <IonItem button router-link="/about">
-          <IonIcon slot="start" :icon="informationCircle" />
-          <IonLabel>关于</IonLabel>
-        </IonItem>
-      </IonList>
+          <template #media>
+            <span class="ios-icon-box ios-icon-red">
+              <IonIcon :icon="logOut" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
     </IonContent>
   </IonPage>
 </template>
+

@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <div class="weui-msg w-full">
-    <div class="weui-msg__icon-area items-center justify-center gap-2 pt-4" flex="~ col">
+    <div class="weui-msg__icon-area items-center justify-center gap-2 pt-4 flex flex-col">
       <YlfLogoSvg v-if="type === 'custom'" />
       <i
         v-if="type === 'success'"
@@ -26,7 +26,7 @@ defineProps<{
     <div class="weui-msg__text-area">
       <div
         v-if="type !== 'custom'"
-        flex="~" class="mb-4 items-center justify-center gap-1"
+        class="mb-4 flex items-center justify-center gap-1"
       >
         <YlfLogoSvg class="size-6" />
         <span>

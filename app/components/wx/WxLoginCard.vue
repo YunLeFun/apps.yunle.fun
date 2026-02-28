@@ -146,7 +146,7 @@ onMounted(() => {
   @apply shadow-sm;
 
   /* 交互效果 */
-  @apply active:scale-98 active:bg-[#06ad56];
+  @apply active:scale-[.98] active:bg-[#06ad56];
   @apply transition-all duration-150;
 
   /* 禁用默认样式 */

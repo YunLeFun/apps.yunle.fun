@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+@import 'konsta/vue/theme.css';
+
+/*
+ * Fix: Ionic typography sets all <a> to --ion-color-primary (blue),
+ * which overrides Konsta UI component colors.
+ * Let Konsta UI components inherit their own color.
+ */
+.k-list a,
+.k-button a,
+.k-link,
+[class*='k-'] a {
+  color: inherit;
+}

@@ -30,7 +30,7 @@ onMounted(async () => {
   <div class="mt-20 flex items-center justify-center p-4">
     <!-- <div id="login_container" /> -->
 
-    <div class="items-center justify-center" flex="~ col">
+    <div class="items-center justify-center flex flex-col">
       <h3 class="my-2 text-base font-bold">
         微信扫码登录
       </h3>

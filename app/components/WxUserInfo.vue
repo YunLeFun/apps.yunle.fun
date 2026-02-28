@@ -9,8 +9,8 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div flex="~ col" class="gap-1 py-4">
-    <div flex="~ col" class="gap-1">
+  <div class="flex flex-col gap-1 py-4">
+    <div class="flex flex-col gap-1">
       <Avatar
         :image="(userInfo as WxUserInfo)?.headimgurl" alt="头像"
         shape="circle"
@@ -28,7 +28,7 @@ defineProps<Props>()
       class="flex gap-1"
     >
       <span>{{ key }}:</span>
-      <span class="max-w-40 truncate op-60">{{ value }}</span>
+      <span class="max-w-40 truncate opacity-60">{{ value }}</span>
     </div>
   </div>
 </template>

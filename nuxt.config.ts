@@ -1,4 +1,5 @@
 import path from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import { defineNuxtConfig } from 'nuxt/config'
 import { appDescription } from './app/constants/index'
 
@@ -28,8 +29,6 @@ export default defineNuxtConfig({
   ],
 
   css: [
-    '@unocss/reset/tailwind.css',
-
     '~/styles/css/index.css',
     '~/styles/css/css-vars.css',
 
@@ -43,7 +42,14 @@ export default defineNuxtConfig({
      */
     '@ionic/vue/css/palettes/dark.class.css',
     '~/styles/ionic.css',
+    '~/styles/konsta.css',
   ],
+
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
 
   colorMode: {
     preference: 'system',
@@ -114,6 +120,11 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  // Ionic uses IonRouterOutlet, disable Nuxt layouts
+  dir: {
+    layouts: '',
+  },
+
   features: {
     // For UnoCSS
     inlineStyles: false,
@@ -130,6 +141,25 @@ export default defineNuxtConfig({
       backButtonText: '返回',
       mode: 'ios',
     },
+  },
+
+  imports: {
+    imports: [
+      { from: 'konsta/vue', name: 'kApp', as: 'KApp' },
+      { from: 'konsta/vue', name: 'kProvider', as: 'KonstaProvider' },
+      { from: 'konsta/vue', name: 'kBlock', as: 'KBlock' },
+      { from: 'konsta/vue', name: 'kBlockTitle', as: 'KBlockTitle' },
+      { from: 'konsta/vue', name: 'kList', as: 'KList' },
+      { from: 'konsta/vue', name: 'kListItem', as: 'KListItem' },
+      { from: 'konsta/vue', name: 'kButton', as: 'KButton' },
+      { from: 'konsta/vue', name: 'kLink', as: 'KLink' },
+      { from: 'konsta/vue', name: 'kCard', as: 'KCard' },
+      { from: 'konsta/vue', name: 'kRadio', as: 'KRadio' },
+      { from: 'konsta/vue', name: 'kToggle', as: 'KToggle' },
+      { from: 'konsta/vue', name: 'kBadge', as: 'KBadge' },
+      { from: 'konsta/vue', name: 'kChip', as: 'KChip' },
+      { from: 'konsta/vue', name: 'kNavbar', as: 'KNavbar' },
+    ],
   },
 
   runtimeConfig: {

@@ -12,7 +12,7 @@ import {
 import { personCircleOutline } from 'ionicons/icons'
 
 definePageMeta({
-  alias: ['/', '/home'],
+  // discovery 页面不需要别名
 })
 </script>
 
@@ -24,7 +24,7 @@ definePageMeta({
           云乐坊
         </IonTitle>
         <IonButtons slot="end">
-          <IonButton>
+          <IonButton router-link="/tabs/me">
             <IonIcon slot="icon-only" :icon="personCircleOutline" />
           </IonButton>
         </IonButtons>
@@ -32,15 +32,12 @@ definePageMeta({
     </IonHeader>
 
     <IonContent>
-      <div class="p-4">
+      <div class="px-4 pb-4 pt-2">
         <!-- 今日推荐 -->
         <AppFeatured />
 
         <!-- 本周热门排行榜 -->
         <AppWeeklyChart />
-
-        <!-- 可以添加更多首页内容 -->
-        <!-- <YlfHouse /> -->
       </div>
     </IonContent>
   </IonPage>

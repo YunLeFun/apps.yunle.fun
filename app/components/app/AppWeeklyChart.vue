@@ -259,7 +259,7 @@ function viewAllChart() {
   }
 
   .chart-header {
-    border-bottom-color: var(--ion-color-step-200);
+    border-bottom-color: var(--ion-background-color-step-200);
   }
 
   .app-icon {

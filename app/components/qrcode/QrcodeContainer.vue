@@ -78,7 +78,7 @@ function reloadQrcode() {
 </script>
 
 <template>
-  <div class="qrcode-wrap items-center justify-center p-2" flex="~ col">
+  <div class="qrcode-wrap items-center justify-center p-2 flex flex-col">
     <div
       class="qrcode relative rounded bg-white"
       :class="{ showMask: status !== 'normal', border: !qrcodeUrl }"
@@ -88,16 +88,13 @@ function reloadQrcode() {
         :src="qrcodeUrl"
       >
       <div
-        class="mask absolute h-full w-full cursor-pointer items-center justify-center bg-white/95"
-        text="5xl"
-        flex="~"
+        class="mask absolute h-full w-full cursor-pointer items-center justify-center bg-white/95 text-5xl flex"
         @click="reloadQrcode"
       >
-        <div v-if="status === 'success'" class="text-green-500" i-ri-checkbox-circle-fill />
+        <div v-if="status === 'success'" class="text-green-500 i-ri-checkbox-circle-fill" />
         <div
           v-else
-          i-ri-refresh-line
-          class="transform text-black duration-800"
+          class="i-ri-refresh-line transform text-black duration-800"
           :class="{
             'rotate-180': status !== 'normal',
           }"
@@ -108,15 +105,14 @@ function reloadQrcode() {
       <div v-if="title || tip">
         <div
           v-if="title"
-          class="title mt-2 items-center justify-center gap-1 text-sm"
-          flex="~"
+          class="title mt-2 items-center justify-center gap-1 text-sm flex"
         >
-          <div v-if="status === 'error'" i-ri-error-warning-fill class="text-yellow" />
-          <span class="op-80" v-html="title" />
+          <div v-if="status === 'error'" class="i-ri-error-warning-fill text-yellow-500" />
+          <span class="opacity-80" v-html="title" />
         </div>
         <div
           v-if="tip"
-          class="tip mt-2 text-xs op-50"
+          class="tip mt-2 text-xs opacity-50"
           v-html="tip"
         />
       </div>

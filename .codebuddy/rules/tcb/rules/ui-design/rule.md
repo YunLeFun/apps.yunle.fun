@@ -16,7 +16,6 @@ Use this skill for **frontend UI design and interface creation** in any project 
 - Any development task involving user interfaces
 
 **Do NOT use for:**
-
 - Backend logic or API design
 - Database schema design (use data-model-creation skill)
 - Pure business logic without UI components
@@ -77,7 +76,6 @@ DESIGN SPECIFICATION
 ```
 
 **Aesthetic Direction Options:**
-
 - Brutally minimal
 - Maximalist chaos
 - Retro-futuristic
@@ -93,7 +91,6 @@ DESIGN SPECIFICATION
 **Key**: Choose a clear conceptual direction and execute it with precision. Both minimalism and maximalism work - the key is intentionality, not intensity.
 
 ### Context-Aware Recommendations
-
 - **Education apps**: Editorial/Organic/Retro-futuristic (avoid generic blue)
 - **Productivity apps**: Brutalist/Industrial/Luxury
 - **Social apps**: Playful/Maximalist/Soft
@@ -102,7 +99,6 @@ DESIGN SPECIFICATION
 ### 🚨 TRIGGER WORD DETECTOR
 
 **If you find yourself typing these words, STOP immediately and re-read this rule:**
-
 - "gradient" + "purple/violet/indigo/fuchsia/blue-purple"
 - "card" + "centered" + "shadow"
 - "Inter" or "Roboto" or "system-ui"
@@ -130,7 +126,6 @@ DESIGN SPECIFICATION
 ## Frontend Aesthetics Guidelines
 
 ### Typography
-
 - **Avoid Generic Fonts**: Do not use overly common fonts like Arial, Inter, Roboto, system fonts
 - **Choose Distinctive Fonts**: Select beautiful, unique, and interesting fonts, for example:
   - Choose distinctive display fonts paired with refined body fonts
@@ -138,20 +133,17 @@ DESIGN SPECIFICATION
   - Font selection should align with the overall aesthetic direction
 
 ### Color & Theme
-
 - **Unified Aesthetics**: Use CSS variables for consistency
 - **Dominant Colors with Accents**: Using dominant colors with sharp accents is more effective than evenly-distributed color schemes
 - **Theme Consistency**: Choose dark or light themes based on aesthetic direction, ensure color choices match the overall style
 
 ### Motion Design
-
 - **Animation Strategy**: Use animations for effects and micro-interactions
 - **Technology Choice**: Prioritize CSS-only solutions for HTML, React projects can use Motion library
 - **High-Impact Moments**: Focus on high-impact moments. One well-orchestrated page load animation (using animation-delay for staggered reveals) creates more delight than scattered micro-interactions
 - **Interactive Surprises**: Use scroll-triggering and hover states to create surprises
 
 ### Icons
-
 - **❌ FORBIDDEN: Emoji Icons**: Never use emoji characters as icons (🚀, ⭐, ❤️, etc.)
 - **✅ REQUIRED: Professional Icon Libraries**: Must use professional icon libraries such as:
   - FontAwesome (recommended for most projects)
@@ -163,13 +155,11 @@ DESIGN SPECIFICATION
 - **Icon Styling**: Icons should match the overall aesthetic direction and color palette
 
 ### Spatial Composition
-
 - **Break Conventions**: Use unexpected layouts, asymmetry, overlap, diagonal flow
 - **Break the Grid**: Use grid-breaking elements
 - **Negative Space Control**: Either use generous negative space or control density
 
 ### Backgrounds & Visual Details
-
 - **Atmosphere Creation**: Create atmosphere and depth rather than defaulting to solid colors
 - **Contextual Effects**: Add contextual effects and textures that match the overall aesthetic
 - **Creative Forms**: Apply creative forms, such as:
@@ -183,9 +173,7 @@ DESIGN SPECIFICATION
   - Grain overlays
 
 ### Avoid Generic AI Aesthetics
-
 **Strictly Prohibit** the following generic AI-generated aesthetics:
-
 - Overused font families (Inter, Roboto, Arial, system fonts)
 - Cliched color schemes (particularly purple gradients on white backgrounds)
 - Predictable layouts and component patterns
@@ -231,7 +219,6 @@ font-family: 'DM Serif Display', serif // Luxury
 ```
 
 ### Creative Implementation Principles
-
 - **Creative Interpretation**: Interpret requirements creatively, make unexpected choices, make designs feel genuinely designed for the context
 - **Avoid Repetition**: Each design should be different, vary between generations:
   - Light and dark themes
@@ -244,13 +231,11 @@ font-family: 'DM Serif Display', serif // Luxury
   - Elegance comes from executing the vision well
 
 ## Design Constraints
-
 If not specifically required, provide at most 4 pages. Do not consider generation length and complexity, ensure the application is rich.
 
 ## Implementation Requirements
 
 All interface prototypes must:
-
 - **Production-Grade Quality**: Functionally complete and ready for development
 - **Visual Impact**: Visually striking and memorable
 - **Aesthetic Consistency**: Have a clear aesthetic point-of-view, cohesive and unified
@@ -261,7 +246,6 @@ All interface prototypes must:
 **Run these checks on your generated code:**
 
 1. **Color Audit**:
-
    ```bash
    # Search for forbidden colors in your code
    grep -iE "(violet|purple|indigo|fuchsia)" [your-file]
@@ -269,7 +253,6 @@ All interface prototypes must:
    ```
 
 2. **Font Audit**:
-
    ```bash
    # Search for forbidden fonts
    grep -iE "(Inter|Roboto|system-ui|Arial|-apple-system)" [your-file]
@@ -277,7 +260,6 @@ All interface prototypes must:
    ```
 
 3. **Icon Audit**:
-
    ```bash
    # Search for emoji usage (common emoji patterns)
    grep -iE "(🚀|⭐|❤️|👍|🔥|💡|🎉|✨)" [your-file]
@@ -297,3 +279,4 @@ All interface prototypes must:
 **If any audit fails → Re-design with correct approach**
 
 Remember: You are capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+

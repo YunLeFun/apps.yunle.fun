@@ -43,16 +43,16 @@ npm install @cloudbase/js-sdk
 ## Initialization pattern (canonical)
 
 ```javascript
-import cloudbase from '@cloudbase/js-sdk'
+import cloudbase from "@cloudbase/js-sdk";
 
 const app = cloudbase.init({
-  env: 'your-env-id', // CloudBase environment ID
-})
+  env: "your-env-id", // CloudBase environment ID
+});
 
-const auth = app.auth()
+const auth = app.auth();
 // Handle user authentication separately (Web Auth skill)
 
-const db = app.rdb()
+const db = app.rdb();
 // Use db exactly like a Supabase client
 ```
 
@@ -74,32 +74,32 @@ const db = app.rdb()
 
 ```javascript
 // lib/db.js (shared database client)
-import cloudbase from '@cloudbase/js-sdk'
+import cloudbase from "@cloudbase/js-sdk";
 
 const app = cloudbase.init({
-  env: 'your-env-id',
-})
+  env: "your-env-id",
+});
 
-export const db = app.rdb()
+export const db = app.rdb();
 ```
 
 ```javascript
 // hooks/usePosts.js
-import { useEffect, useState } from 'react'
-import { db } from '../lib/db'
+import { useEffect, useState } from "react";
+import { db } from "../lib/db";
 
 export function usePosts() {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     async function fetchPosts() {
-      const { data } = await db.from('posts').select('*')
-      setPosts(data || [])
+      const { data } = await db.from("posts").select("*");
+      setPosts(data || []);
     }
-    fetchPosts()
-  }, [])
+    fetchPosts();
+  }, []);
 
-  return { posts }
+  return { posts };
 }
 ```
 
@@ -110,12 +110,12 @@ export function usePosts() {
 ```javascript
 // Fetch latest posts
 const { data, error } = await db
-  .from('posts')
-  .select('*')
-  .order('created_at', { ascending: false })
+  .from("posts")
+  .select("*")
+  .order("created_at", { ascending: false });
 
 if (error) {
-  console.error('Failed to load posts', error.message)
+  console.error("Failed to load posts", error.message);
 }
 ```
 
@@ -125,13 +125,13 @@ if (error) {
 
 ```javascript
 // Insert
-await db.from('posts').insert({ title: 'Hello' })
+await db.from("posts").insert({ title: "Hello" });
 
 // Update
-await db.from('posts').update({ title: 'Updated' }).eq('id', 1)
+await db.from("posts").update({ title: "Updated" }).eq("id", 1);
 
 // Delete
-await db.from('posts').delete().eq('id', 1)
+await db.from("posts").delete().eq("id", 1);
 ```
 
 ---

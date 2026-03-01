@@ -7,6 +7,7 @@ description: Use CloudBase document database Web SDK to query, create, update, a
 
 This skill provides guidance on using the CloudBase document database Web SDK for data operations in web applications.
 
+
 ## Core Concepts
 
 ### Initialization
@@ -14,26 +15,25 @@ This skill provides guidance on using the CloudBase document database Web SDK fo
 Before using any database operations, initialize the CloudBase SDK:
 
 ```javascript
-import cloudbase from '@cloudbase/js-sdk'
+import cloudbase from "@cloudbase/js-sdk";
 // UMD version
 // If you are not using npm, And want to use UMD version instead. You should refer to https://docs.cloudbase.net/quick-start/#web-%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C for latest version of UMD version.
 
 const app = cloudbase.init({
-  env: 'your-env-id', // Replace with your environment id
-})
+  env: "your-env-id", // Replace with your environment id
+});
 
-const db = app.database()
-const _ = db.command // Get query operators
+
+const db = app.database();
+const _ = db.command; // Get query operators
 
 // ... login
 ```
-
-Remember to sign in(auth) is **\*REQUIRED** before actually querying the database.
+Remember to sign in(auth) is ***REQUIRED** before actually querying the database.
 
 ### Collection Reference
 
 Access collections using:
-
 ```javascript
 db.collection('collection-name')
 ```
@@ -41,7 +41,6 @@ db.collection('collection-name')
 ### Query Operators
 
 CloudBase provides query operators via `db.command` (aliased as `_`):
-
 - `_.gt(value)` - Greater than
 - `_.gte(value)` - Greater than or equal
 - `_.lt(value)` - Less than
@@ -56,24 +55,22 @@ CloudBase provides query operators via `db.command` (aliased as `_`):
 ### Query Single Document
 
 Query by document ID:
-
 ```javascript
 const result = await db.collection('todos')
-  .doc('docId')
-  .get()
+    .doc('docId')
+    .get();
 ```
 
 ### Query Multiple Documents
 
 Query with conditions:
-
 ```javascript
 const result = await db.collection('todos')
-  .where({
-    completed: false,
-    priority: 'high'
-  })
-  .get()
+    .where({
+        completed: false,
+        priority: 'high'
+    })
+    .get();
 ```
 
 **Note:** `get()` returns 100 records by default, maximum 1000.
@@ -81,7 +78,6 @@ const result = await db.collection('todos')
 ### Query Methods Chaining
 
 Combine methods for complex queries:
-
 - `.where(conditions)` - Filter conditions
 - `.orderBy(field, direction)` - Sort by field ('asc' or 'desc')
 - `.limit(number)` - Limit results (default 100, max 1000)
@@ -93,54 +89,42 @@ Combine methods for complex queries:
 For detailed information on specific topics, refer to:
 
 ### CRUD Operations
-
 See `./crud-operations.md` for:
-
 - Creating documents (add, batch add)
 - Updating documents (partial updates, operators)
 - Deleting documents (conditional delete, soft delete)
 - Complete CRUD manager examples
 
 ### Complex Queries
-
 See `./complex-queries.md` for:
-
 - Using query operators
 - Combining multiple conditions
 - Field selection
 - Sorting and limiting results
 
 ### Pagination
-
 See `./pagination.md` for:
-
 - Implementing page-based navigation
 - Calculating skip and limit values
 - Cursor-based pagination
 - Infinite scroll patterns
 
 ### Aggregation Queries
-
 See `./aggregation.md` for:
-
 - Grouping data
 - Statistical calculations
 - Pipeline operations
 - Time-based aggregations
 
 ### Geolocation Queries
-
 See `./geolocation.md` for:
-
 - Proximity searches
 - Area-based queries
 - Geographic indexing requirements
 - Distance-based features
 
 ### Realtime Database
-
 See `./realtime.md` for:
-
 - Real-time data synchronization using watch() method
 - Setting up listeners for document changes
 - Handling real-time updates in chat and collaboration apps
@@ -148,9 +132,7 @@ See `./realtime.md` for:
 - Common patterns for real-time applications
 
 ### Security Rules
-
 See `./security-rules.md` for:
-
 - Configuring database permissions
 - Simple permissions vs custom rules
 - Permission categories and usage
@@ -159,23 +141,18 @@ See `./security-rules.md` for:
 ## Common Patterns
 
 ### Error Handling
-
 Always wrap database operations in try-catch:
-
 ```javascript
 try {
-  const result = await db.collection('todos').get()
-  console.log(result.data)
-}
-catch (error) {
-  console.error('Database error:', error)
+    const result = await db.collection('todos').get();
+    console.log(result.data);
+} catch (error) {
+    console.error('Database error:', error);
 }
 ```
 
 ### Return Value Structure
-
 Database operations return:
-
 ```javascript
 {
     data: [...], // Array of documents
@@ -220,27 +197,25 @@ db.collection('users').where({ age: _.gt(18) }).get()
 
 // Pagination
 db.collection('posts')
-  .orderBy('createdAt', 'desc')
-  .skip(20)
-  .limit(10)
-  .get()
+    .orderBy('createdAt', 'desc')
+    .skip(20)
+    .limit(10)
+    .get()
 
 // Field selection
 db.collection('users')
-  .field({ name: true, email: true, _id: false })
-  .get()
+    .field({ name: true, email: true, _id: false })
+    .get()
 ```
 
 For more detailed examples and advanced usage patterns, refer to the companion reference files in this directory.
 
 ## Error handling
-
 **EVERY** database operation(including `get()`, `add()`, `update()`, `delete()` etc)should check the return value's code for any errors. For example:
-
 ```javascript
-const result = await db.collection('todos').add(newTodo)
-if (typeof result.code === 'string') {
-  // Handle error ...
+const result = await db.collection('todos').add(newTodo);
+if(typeof result.code === 'string') {
+    // Handle error ...
 }
 ```
 

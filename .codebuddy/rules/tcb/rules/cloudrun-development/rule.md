@@ -17,7 +17,6 @@ Use this skill for **CloudBase Run backend service development** when you need:
 - AI agent development: develop personalized AI applications based on Function mode CloudRun
 
 **Do NOT use for:**
-
 - Simple cloud functions (use cloud function development instead)
 - Frontend-only applications
 - Database schema design (use data-model-creation skill)
@@ -70,14 +69,14 @@ A concise guide for AI assistants and engineering collaboration, providing "when
 
 ### Mode Comparison Checklist
 
-| Dimension          | Function Mode                                                                                               | Container Mode                                                                         |
-| ------------------ | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Language/Framework | Node.js (via `@cloudbase/functions-framework`)                                                              | Any language/runtime (Java/Go/PHP/.NET/Python/Node.js, etc.)                           |
-| Runtime            | Function framework loads functions (Runtime)                                                                | Docker image starts process                                                            |
-| Port               | Fixed 3000                                                                                                  | Application listens on `PORT` (injected by platform during deployment)                 |
-| Dockerfile         | Not required                                                                                                | Required (and must pass local build)                                                   |
-| Local Running      | Supported (built-in tools)                                                                                  | Not supported (recommend using Docker for debugging)                                   |
-| Typical Scenarios  | WebSocket/SSE/streaming responses, forms/files, low latency, multiple functions per instance, shared memory | Arbitrary system dependencies/languages, migrating existing containerized applications |
+| Dimension | Function Mode | Container Mode |
+| --- | --- | --- |
+| Language/Framework | Node.js (via `@cloudbase/functions-framework`) | Any language/runtime (Java/Go/PHP/.NET/Python/Node.js, etc.) |
+| Runtime | Function framework loads functions (Runtime) | Docker image starts process |
+| Port | Fixed 3000 | Application listens on `PORT` (injected by platform during deployment) |
+| Dockerfile | Not required | Required (and must pass local build) |
+| Local Running | Supported (built-in tools) | Not supported (recommend using Docker for debugging) |
+| Typical Scenarios | WebSocket/SSE/streaming responses, forms/files, low latency, multiple functions per instance, shared memory | Arbitrary system dependencies/languages, migrating existing containerized applications |
 
 ## 3. Development Requirements (Must Meet)
 
@@ -110,11 +109,11 @@ A concise guide for AI assistants and engineering collaboration, providing "when
 
 ## 5. Core Workflow (Understand Steps First, Then Examples)
 
-1. **Choose mode**
+1) **Choose mode**
    - Need multi-language/existing container/Docker: choose "Container mode"
    - Need long connection/streaming/low latency/multiple functions coexisting: prioritize "Function mode"
 
-2. **Initialize local project**
+2) **Initialize local project**
    - General: Use template `init` (both Function mode and Container mode can start from templates)
    - Container mode must "check or generate Dockerfile":
      - Node.js minimal example:
@@ -140,62 +139,54 @@ A concise guide for AI assistants and engineering collaboration, providing "when
        CMD ["python","app.py"]
        ```
 
-3. **Local running** (Function mode only)
+3) **Local running** (Function mode only)
    - Automatically use `npm run dev/start` or entry file via `run`
 
-4. **Configure access**
+4) **Configure access**
    - Set `OpenAccessTypes` (WEB/VPC/PRIVATE) as needed; configure security domain and authentication for Web scenarios
 
-5. **Deploy**
+5) **Deploy**
    - Specify CPU/Mem/instance count/environment variables, etc. during `deploy`
 
-6. **Verify**
+6) **Verify**
    - Use `detail` to confirm access address and configuration meet expectations
 
 ### Example Tool Calls
 
-1. **View templates/services**
-
+1) **View templates/services**
 ```json
 { "name": "queryCloudRun", "arguments": { "action": "templates" } }
 ```
-
 ```json
 { "name": "queryCloudRun", "arguments": { "action": "detail", "detailServerName": "my-svc" } }
 ```
 
-2. **Initialize project**
-
+2) **Initialize project**
 ```json
 { "name": "manageCloudRun", "arguments": { "action": "init", "serverName": "my-svc", "targetPath": "/abs/ws/my-svc", "template": "helloworld" } }
 ```
 
-3. **Download code** (optional)
-
+3) **Download code** (optional)
 ```json
 { "name": "manageCloudRun", "arguments": { "action": "download", "serverName": "my-svc", "targetPath": "/abs/ws/my-svc" } }
 ```
 
-4. **Local running** (Function mode only)
-
+4) **Local running** (Function mode only)
 ```json
 { "name": "manageCloudRun", "arguments": { "action": "run", "serverName": "my-svc", "targetPath": "/abs/ws/my-svc", "runOptions": { "port": 3000 } } }
 ```
 
-5. **Deploy**
-
+5) **Deploy**
 ```json
 { "name": "manageCloudRun", "arguments": { "action": "deploy", "serverName": "my-svc", "targetPath": "/abs/ws/my-svc", "serverConfig": { "OpenAccessTypes": ["WEB"], "Cpu": 0.5, "Mem": 1, "MinNum": 0, "MaxNum": 5 } } }
 ```
 
-6. **Create AI agent** (optional)
-
+6) **Create AI agent** (optional)
 ```json
 { "name": "manageCloudRun", "arguments": { "action": "createAgent", "serverName": "my-agent", "targetPath": "/abs/ws/agents", "agentConfig": { "agentName": "MyAgent", "botTag": "demo", "description": "My agent", "template": "blank" } } }
 ```
 
-7. **Run agent** (optional)
-
+7) **Run agent** (optional)
 ```json
 { "name": "manageCloudRun", "arguments": { "action": "run", "serverName": "my-agent", "targetPath": "/abs/ws/agents/my-agent", "runOptions": { "port": 3000, "runMode": "agent" } } }
 ```
@@ -229,53 +220,48 @@ A concise guide for AI assistants and engineering collaboration, providing "when
 ## 9. Service Invocation Methods (Concise Examples)
 
 ### HTTP Direct Access (when WEB public network enabled)
-
 ```bash
 curl -L "https://<your-service-domain>"
 ```
 
 ### WeChat Mini Program (internal direct connection, recommend closing public network)
-
 ```js
 // app.js (ensure wx.cloud.init() is called)
 const res = await wx.cloud.callContainer({
-  config: { env: '<envId>' },
-  path: '/',
-  method: 'GET',
-  header: { 'X-WX-SERVICE': '<serviceName>' }
-})
+  config: { env: "<envId>" },
+  path: "/",
+  method: "GET",
+  header: { "X-WX-SERVICE": "<serviceName>" }
+});
 ```
 
 ### Web (JS SDK, need to configure security domain and authentication)
-
 ```js
-import cloudbase from '@cloudbase/js-sdk'
+import cloudbase from "@cloudbase/js-sdk";
 
-const app = cloudbase.init({ env: '<envId>' }) // Collect user's phone number into variable `phoneNum` by providing a input UI
+const app = cloudbase.init({ env: "<envId>" });  // Collect user's phone number into variable `phoneNum` by providing a input UI
 
-const auth = app.auth()
+const auth = app.auth();
 
 // Send SMS code
 const verificationInfo = await auth.getVerification({
   phone_number: `+86 ${phoneNum}`,
-})
+});
 
-// Collect user's phone number into variable `verificationCode` by providing a input UI
+// Collect user's phone number into variable `verificationCode` by providing a input UI 
 
 // Sign in
 await auth.signInWithSms({
   verificationInfo,
   verificationCode,
   phoneNum,
-})
+});
 
 const res = await app.callContainer({
-  name: '<serviceName>',
-  method: 'POST',
-  path: '/api',
-  header: { 'Content-Type': 'application/json' },
-  data: { key: 'value' }
-})
+  name: "<serviceName>", method: "POST", path: "/api",
+  header: { "Content-Type": "application/json" },
+  data: { key: "value" }
+});
 ```
 
 // Web JS SDK initialization MUST be synchronous:
@@ -283,20 +269,15 @@ const res = await app.callContainer({
 // - Do NOT use dynamic imports like `import("@cloudbase/js-sdk")` or async wrappers such as `initCloudBase()` with internal `initPromise`
 
 ### Node.js (server-side/cloud function internal call)
-
 ```js
-import tcb from '@cloudbase/node-sdk'
-
-const app = tcb.init({})
+import tcb from "@cloudbase/node-sdk";
+const app = tcb.init({});
 const res = await app.callContainer({
-  name: '<serviceName>',
-  method: 'GET',
-  path: '/health',
+  name: "<serviceName>", method: "GET", path: "/health",
   timeout: 5000
-})
+});
 ```
 
 ### Recommendations
-
 - Mini Program/Server side prioritize internal network (VPC/PRIVATE) calls, reduce exposure surface
 - Web scenarios need to enable WEB, public domain and security domain, and use SDK authentication

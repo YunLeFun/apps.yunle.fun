@@ -13,7 +13,7 @@ export default nuxt(
       },
     },
     {
-      ignores: ['ios', 'android', '.codebuddy', 'CODEBUDDY.md', 'docs'],
+      ignores: ['ios', 'android', '.codebuddy/**/*.md', 'CODEBUDDY.md'],
     },
   ),
 )

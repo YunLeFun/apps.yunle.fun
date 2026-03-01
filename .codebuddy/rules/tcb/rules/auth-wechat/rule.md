@@ -92,11 +92,11 @@ Use this in your Mini Program's `app.js` or entry point:
 ```js
 // app.js
 App({
-  onLaunch() {
+  onLaunch: function () {
     // Initialize CloudBase
     wx.cloud.init({
-      env: 'your-env-id', // Your CloudBase environment ID
-      traceUser: true // Optional: track user access in console
+      env: 'your-env-id',  // Your CloudBase environment ID
+      traceUser: true      // Optional: track user access in console
     })
   }
 })
@@ -135,7 +135,7 @@ exports.main = async (event, context) => {
   return {
     openid: OPENID,
     appid: APPID,
-    unionid: UNIONID // May be undefined if not available
+    unionid: UNIONID  // May be undefined if not available
   }
 }
 ```
@@ -167,15 +167,15 @@ Use this in your Mini Program to call a cloud function and get user identity:
 ```js
 // In Mini Program page
 Page({
-  onLoad() {
+  onLoad: function() {
     this.getUserInfo()
   },
 
-  getUserInfo() {
+  getUserInfo: function() {
     wx.cloud.callFunction({
-      name: 'getUserInfo', // Cloud function name
-      data: {}, // Optional parameters
-      success: (res) => {
+      name: 'getUserInfo',  // Cloud function name
+      data: {},             // Optional parameters
+      success: res => {
         console.log('User info from cloud function:', res.result)
         // res.result contains { openid, appid, unionid }
 
@@ -184,7 +184,7 @@ Page({
           openid: res.result.openid
         })
       },
-      fail: (err) => {
+      fail: err => {
         console.error('Failed to get user info:', err)
       }
     })
@@ -240,16 +240,16 @@ Page({
     userIdentity: null
   },
 
-  onLoad() {
+  onLoad: function() {
     this.testAuth()
   },
 
-  testAuth() {
+  testAuth: function() {
     console.log('Testing authentication...')
 
     wx.cloud.callFunction({
       name: 'test',
-      success: (res) => {
+      success: res => {
         console.log('Authentication test result:', res.result)
 
         this.setData({
@@ -261,7 +261,7 @@ Page({
           icon: 'success'
         })
       },
-      fail: (err) => {
+      fail: err => {
         console.error('Authentication test failed:', err)
         wx.showToast({
           title: 'Auth failed',
@@ -309,8 +309,7 @@ const { OPENID, UNIONID } = cloud.getWXContext()
 if (UNIONID) {
   // User has UNIONID - can be used for cross-app identification
   console.log('UNIONID available:', UNIONID)
-}
-else {
+} else {
   // UNIONID not available - use OPENID only
   console.log('Using OPENID only:', OPENID)
 }
@@ -329,10 +328,10 @@ Always handle errors when calling cloud functions:
 ```js
 wx.cloud.callFunction({
   name: 'myFunction',
-  success: (res) => {
+  success: res => {
     // Handle success
   },
-  fail: (err) => {
+  fail: err => {
     console.error('Cloud function error:', err)
     // Show user-friendly error message
     wx.showToast({
@@ -349,7 +348,7 @@ Initialize CloudBase in `app.js` `onLaunch`:
 
 ```js
 App({
-  onLaunch() {
+  onLaunch: function () {
     wx.cloud.init({
       env: 'your-env-id',
       traceUser: true
@@ -366,7 +365,6 @@ App({
 
 ```js
 const cloud = require('wx-server-sdk')
-
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 exports.main = async (event, context) => {
@@ -384,7 +382,6 @@ exports.main = async (event, context) => {
 
 ```js
 const cloud = require('wx-server-sdk')
-
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 exports.main = async (event, context) => {
@@ -394,8 +391,7 @@ exports.main = async (event, context) => {
   if (OPENID === event.resourceOwnerId) {
     // User is authorized to access this resource
     return { authorized: true }
-  }
-  else {
+  } else {
     return { authorized: false, error: 'Unauthorized' }
   }
 }
@@ -405,7 +401,6 @@ exports.main = async (event, context) => {
 
 ```js
 const cloud = require('wx-server-sdk')
-
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 exports.main = async (event, context) => {
@@ -414,8 +409,7 @@ exports.main = async (event, context) => {
   if (UNIONID) {
     // Can use UNIONID for cross-app user identification
     console.log('User has UNIONID:', UNIONID)
-  }
-  else {
+  } else {
     // Fall back to OPENID only
     console.log('Using OPENID only:', OPENID)
   }

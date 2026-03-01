@@ -69,14 +69,12 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 **Important: Authentication methods for different platforms are completely different, must strictly distinguish!**
 
 ### Web Authentication
-
 - **Must use SDK built-in authentication**: CloudBase Web SDK provides complete authentication features
 - **Recommended method**: SMS login with `auth.getVerification()`, for detailed, refer to web auth related docs
 - **Forbidden behavior**: Do not use cloud functions to implement login authentication logic
 - **User management**: After login, get user information via `auth.getCurrentUser()`
 
 ### Mini Program Authentication
-
 - **Login-free feature**: Mini program CloudBase is naturally login-free, no login flow needed
 - **User identifier**: In cloud functions, get `wxContext.OPENID` via wx-server-sdk
 - **User management**: Manage user data in cloud functions based on openid
@@ -111,11 +109,9 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    - ✅ Cloud functions have full access regardless of permission type
 
 3. **Configuration Workflow**:
-
    ```
    Create collection → Configure security rules → Write code → Test
    ```
-
    - Use `writeSecurityRule` MCP tool to configure permissions
    - Wait 2-5 minutes for cache to clear before testing
    - See `no-sql-web-sdk/security-rules.md` for detailed examples
@@ -129,7 +125,7 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 5. **Cross-Collection Operations**:
    - If user has no special requirements, operations involving cross-database collections must be implemented via cloud functions
 
-6. **Cloud Function Optimization**:
+3. **Cloud Function Optimization**:
    - If involving cloud functions, while ensuring security, can minimize the number of cloud functions as much as possible
    - For example: implement one cloud function for client-side requests, implement one cloud function for data initialization
 
@@ -249,7 +245,6 @@ After creating/deploying resources, provide corresponding console management pag
 ### Quick Reference
 
 When directing users to console pages:
-
 - Use the full URL with environment ID
 - Explain what they can do on each page
 - Provide context about why they need to access that specific page

@@ -30,6 +30,28 @@
   --ion-item-background: #1c1c1d;
 }
 
+/* 安全区域变量（适配 iPhone 刘海屏 / Home Indicator）
+ *
+ * Stencil CE (Custom Element) 模式下存在时序问题：
+ * ion-tab-bar 等组件的 connectedCallback 可能在 IonicVue.install() 的
+ * initialize() 之前执行，导致 setMode 回调未注册，computeMode 返回 undefined，
+ * Shadow DOM 内部的 :host 样式不会被注入。
+ *
+ * 因此需要：
+ * 1. 显式设置 --ion-safe-area-* 变量供其他组件使用
+ * 2. 直接在外部为 ion-tab-bar 设置 padding-bottom（外部样式可应用到 CE host 元素）
+ */
+html {
+  --ion-safe-area-top: env(safe-area-inset-top, 0px);
+  --ion-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --ion-safe-area-left: env(safe-area-inset-left, 0px);
+  --ion-safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+ion-tab-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* PC 端内容区最大宽度限制，移动端不受影响 */
 @media (min-width: 768px) {
   ion-content::part(scroll) {

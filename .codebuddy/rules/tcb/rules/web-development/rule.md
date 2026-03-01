@@ -15,7 +15,6 @@ Use this skill for **Web frontend project development** when you need to:
 - Handle routing and build configurations for static hosting
 
 **Do NOT use for:**
-
 - Mini-program development (use miniprogram-development skill)
 - Backend service development (use cloudrun-development skill)
 - UI design only (use ui-design skill, but may combine with this skill)
@@ -83,39 +82,38 @@ Use this skill for **Web frontend project development** when you need to:
 **Important: Authentication must use SDK built-in features. It is strictly forbidden to implement login authentication logic using cloud functions!**
 
 ```js
-import cloudbase from '@cloudbase/js-sdk'
+import cloudbase from "@cloudbase/js-sdk";
 
 const app = cloudbase.init({
-  env: 'xxxx-yyy', // Can query environment ID via envQuery tool
-})
-const auth = app.auth()
+  env: "xxxx-yyy", // Can query environment ID via envQuery tool
+});
+const auth = app.auth();
 
 // Check current login state
-const loginState = await auth.getLoginState()
+let loginState = await auth.getLoginState();
 
 if (loginState && loginState.user) {
   // Logged in
-  const user = await auth.getCurrentUser()
-  console.log('Current user:', user)
-}
-else {
+  const user = await auth.getCurrentUser();
+  console.log("Current user:", user);
+} else {
   // Not logged in - use SDK built-in authentication features
-
+    
   // Collect user's phone number into variable `phoneNum` by providing a input UI
 
   // Send SMS code
   const verificationInfo = await auth.getVerification({
     phone_number: `+86 ${phoneNum}`,
-  })
-
-  // Collect user's phone number into variable `verificationCode` by providing a input UI
-
+  });
+  
+  // Collect user's phone number into variable `verificationCode` by providing a input UI 
+  
   // Sign in
   await auth.signInWithSms({
     verificationInfo,
     verificationCode,
     phoneNum,
-  })
+  });
 }
 ```
 
@@ -131,7 +129,7 @@ else {
 - Only use **documented** CloudBase Web SDK methods
 - Before calling any method on `app`, `auth`, `db`, or other SDK objects, **confirm it exists in the official CloudBase Web SDK documentation**
 - If a method or option is **not** mentioned in the official docs (for example some guessed method name), **do NOT invent or use it**
-
+ 
 ## Authentication Best Practices
 
 1. **Must use SDK built-in authentication**: CloudBase Web SDK provides complete authentication features, including login by SMS, anonymous login, custom login, etc.

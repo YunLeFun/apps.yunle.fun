@@ -16,7 +16,6 @@ Use this skill for **WeChat Mini Program development** when you need to:
 - Get WeChat step count data
 
 **Do NOT use for:**
-
 - Web frontend development (use web-development skill)
 - Backend service development (use cloudrun-development skill)
 - UI design only (use ui-design skill, but may combine with this skill)
@@ -81,7 +80,6 @@ Use this skill for **WeChat Mini Program development** when you need to:
 ## Development Tools
 
 **WeChat Developer Tools Opening Project Workflow**:
-
 - When detecting current project is a mini program project, suggest user to use WeChat Developer Tools for preview, debugging, and publishing
 - Before opening, confirm `project.config.json` has `appid` field configured. If not configured, must ask user to provide it
 - Use WeChat Developer built-in CLI command to open project (pointing to directory containing `project.config.json`):
@@ -113,11 +111,11 @@ Use this skill for **WeChat Mini Program development** when you need to:
 ```js
 // Example of getting user identity in cloud function
 exports.main = async (event, context) => {
-  const wxContext = cloud.getWXContext()
-  const openid = wxContext.OPENID
-
-  return { openid }
-}
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  
+  return { openid: openid };
+};
 ```
 
 ## AI Model Invocation
@@ -126,37 +124,36 @@ Mini programs with base library version 3.7.1+ already support direct AI model i
 
 ```js
 // Create model instance, here we use DeepSeek AI model
-const model = wx.cloud.extend.AI.createModel('deepseek')
+const model = wx.cloud.extend.AI.createModel("deepseek");
 
 // First set AI's system prompt, here using seven-character quatrain generation as example
-const systemPrompt
-  = '请严格按照七言绝句或七言律诗的格律要求创作，平仄需符合规则，押韵要和谐自然，韵脚字需在同一韵部。创作内容围绕用户给定的主题，七言绝句共四句，每句七个字；七言律诗共八句，每句七个字，颔联和颈联需对仗工整。同时，要融入生动的意象、丰富的情感与优美的意境，展现出古诗词的韵味与美感。'
+const systemPrompt =
+  "请严格按照七言绝句或七言律诗的格律要求创作，平仄需符合规则，押韵要和谐自然，韵脚字需在同一韵部。创作内容围绕用户给定的主题，七言绝句共四句，每句七个字；七言律诗共八句，每句七个字，颔联和颈联需对仗工整。同时，要融入生动的意象、丰富的情感与优美的意境，展现出古诗词的韵味与美感。";
 
 // User's natural language input, e.g., '帮我写一首赞美玉龙雪山的诗'
-const userInput = '帮我写一首赞美玉龙雪山的诗'
+const userInput = "帮我写一首赞美玉龙雪山的诗";
 
 // Pass system prompt and user input to AI model
 const res = await model.streamText({
   data: {
-    model: 'deepseek-v3', // Specify specific model
+    model: "deepseek-v3", // Specify specific model
     messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userInput },
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userInput },
     ],
   },
-})
+});
 
 // Receive AI model's response
 // Since AI model's return result is streaming, we need to loop to receive complete response text
-for await (const str of res.textStream) {
-  console.log(str)
+for await (let str of res.textStream) {
+  console.log(str);
 }
 ```
 
 ## WeChat Step Count Retrieval
 
 **WeChat step count retrieval must use CloudID method (base library 2.7.0+)**:
-
 - **Frontend**: `wx.getWeRunData()` to get cloudID, use `wx.cloud.CloudID(cloudID)` to pass to cloud function
 - **Cloud Function**: Directly use `weRunData.data` to get decrypted step count data, check `weRunData.errCode` to handle errors
 - **Forbidden**: Do not use session_key manual decryption method, CloudID is more secure and simple
@@ -174,3 +171,4 @@ for await (const str of res.textStream) {
 - After completing mini program project development, proactively suggest user to use WeChat Developer Tools for preview, debugging, and publishing
 - If user agrees, use CLI command to open WeChat Developer Tools, pointing to project root directory containing `project.config.json`
 - Remind user to perform real device preview, debugging, and publishing operations in WeChat Developer Tools
+

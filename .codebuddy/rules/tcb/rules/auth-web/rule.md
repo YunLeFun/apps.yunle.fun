@@ -13,18 +13,19 @@ alwaysApply: false
 
 ## Core Capabilities
 
-**Use Case**: Web frontend projects using `@cloudbase/js-sdk@2.24.0+` for user authentication
+**Use Case**: Web frontend projects using `@cloudbase/js-sdk@2.24.0+` for user authentication  
 **Key Benefits**: Compatible with `supabase-js` API, supports phone, email, anonymous, username/password, and third-party login methods
 **`@cloudbase/js-sdk` cdn source**: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
 
+
 ## Prerequisites
 
-- Automatically use `auth-tool-cloudbase` to get `publishable key` and configure login methods.
+- Automatically use `auth-tool-cloudbase` to get `publishable key` and configure login methods. 
 - If `auth-tool-cloudbase` failed, let user go to `https://tcb.cloud.tencent.com/dev?envId={env}#/env/apikey` to get `publishable key` and `https://tcb.cloud.tencent.com/dev?envId={env}#/identity/login-manage` to set up login methods
 
 ## Quick Start
 
-````js
+```js
 import cloudbase from '@cloudbase/js-sdk'
 
 const app = cloudbase.init({
@@ -46,19 +47,16 @@ const auth = app.auth
 ```js
 const { data, error } = await auth.signInWithOtp({ phone: '13800138000' })
 const { data: loginData, error: loginError } = await data.verifyOtp({ token:'123456' })
-````
+```
 
 **2. Email OTP**
-
 - Automatically use `auth-tool-cloudbase` turn on `Email Login`
-
 ```js
 const { data, error } = await auth.signInWithOtp({ email: 'user@example.com' })
 const { data: loginData, error: loginError } = await data.verifyOtp({ token: '654321' })
 ```
 
 **3. Password**
-
 ```js
 const { data, error } = await auth.signInWithPassword({ username: 'test_user', password: 'pass123' })
 const { data, error } = await auth.signInWithPassword({ email: 'user@example.com', password: 'pass123' })
@@ -66,10 +64,8 @@ const { data, error } = await auth.signInWithPassword({ phone: '13800138000', pa
 ```
 
 **4. Registration (Smart: auto-login if exists)**
-
 - Only support email and phone otp registration
 - Automatically use `auth-tool-cloudbase` turn on `Email Login` or `SMS Login`
-
 ```js
 // Email Otp
 const { data, error } = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
@@ -81,24 +77,19 @@ const { data: loginData, error: loginError } = await data.verifyOtp({ token: '12
 ```
 
 **5. Anonymous**
-
 - Automatically use `auth-tool-cloudbase` turn on `Anonymous Login`
-
 ```js
 const { data, error } = await auth.signInAnonymously()
 ```
 
 **6. OAuth (Google/WeChat)**
-
 - Automatically use `auth-tool-cloudbase` turn on `Google Login` or `WeChat Login`
-
 ```js
 const { data, error } = await auth.signInWithOAuth({ provider: 'google' })
 window.location.href = data.url // Auto-complete after callback
 ```
 
 **7. Custom Ticket**
-
 ```js
 await auth.signInWithCustomTicket(async () => {
   const res = await fetch('/api/ticket')
@@ -107,10 +98,9 @@ await auth.signInWithCustomTicket(async () => {
 ```
 
 **8. Upgrade Anonymous**
-
 ```js
 const { data, error } = await auth.getSession()
-const { data: signUpData, error: signUpError } = await auth.signUp({
+const { data: signUpData, error: signUpError} = await auth.signUp({
   phone: '13800000000',
   anonymous_token: data.session.access_token,
 })
@@ -171,7 +161,7 @@ const { data, error } = await auth.refreshUser()
 ## User Type
 
 ```ts
-declare interface User {
+declare type User = {
   id: any
   aud: string
   role: string[]
@@ -212,12 +202,10 @@ declare interface User {
 class PhoneLoginPage {
   async sendCode() {
     const phone = document.getElementById('phone').value
-    if (!/^1[3-9]\d{9}$/.test(phone))
-      return alert('Invalid phone')
+    if (!/^1[3-9]\d{9}$/.test(phone)) return alert('Invalid phone')
 
     const { data, error } = await auth.signInWithOtp({ phone })
-    if (error)
-      return alert(`Send failed: ${error.message}`)
+    if (error) return alert('Send failed: ' + error.message)
 
     this.verifyFunction = data.verify
     document.getElementById('codeSection').style.display = 'block'
@@ -226,12 +214,10 @@ class PhoneLoginPage {
 
   async verifyCode() {
     const code = document.getElementById('code').value
-    if (!code)
-      return alert('Enter code')
+    if (!code) return alert('Enter code')
 
     const { data, error } = await this.verifyFunction(code)
-    if (error)
-      return alert(`Verification failed: ${error.message}`)
+    if (error) return alert('Verification failed: ' + error.message)
 
     console.log('Login successful:', data.user)
     window.location.href = '/dashboard'

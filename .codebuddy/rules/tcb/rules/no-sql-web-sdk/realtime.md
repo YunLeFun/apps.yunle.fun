@@ -5,13 +5,11 @@ CloudBase document database supports **real-time push** functionality that allow
 ## Core Features
 
 ### Real-time Data Change Monitoring
-
 - Listen to all change events for documents in a collection that match query conditions
 - Support for all types of changes: addition, modification, deletion
 - Automatically push change snapshots to clients
 
 ### Use Cases
-
 - Chat applications
 - Real-time collaborative editing
 - Live interactive features
@@ -25,24 +23,24 @@ CloudBase document database supports **real-time push** functionality that allow
 Use the `.watch()` method on the collection reference to establish monitoring:
 
 ```javascript
-// db is the database instance from cloudbase js client sdk
-const watcher = db.collection('todos') // Specify collection
+// db is the database instance from cloudbase js client sdk 
+const watcher = db.collection("todos") // Specify collection
   .where({ // Specify query conditions
     status: 'active',
     priority: _.in(['high', 'medium'])
   })
   .watch({
-    onChange(snapshot) { // Data change callback
-      console.log('Received data snapshot', snapshot)
+    onChange: function(snapshot) { // Data change callback
+      console.log("Received data snapshot", snapshot);
       // Update your UI or process data here
-      handleDataChange(snapshot)
+      handleDataChange(snapshot);
     },
-    onError(err) { // Error handling callback
-      console.error('Monitoring closed due to error', err)
+    onError: function(err) { // Error handling callback
+      console.error("Monitoring closed due to error", err);
       // Handle errors, such as attempting to re-establish connection
-      handleWatchError(err)
+      handleWatchError(err);
     }
-  })
+  });
 ```
 
 ### 2. Close Monitoring
@@ -51,7 +49,7 @@ When you no longer need to monitor data changes, call the `watcher.close()` meth
 
 ```javascript
 // Close monitoring when page or component unmounts
-watcher.close()
+watcher.close();
 ```
 
 ## API Details
@@ -61,12 +59,10 @@ watcher.close()
 Create a real-time data listener that returns a `watcher` object.
 
 **Parameters:**
-
 - `options.onChange` (Function): Callback function when data changes
 - `options.onError` (Function): Callback function when monitoring encounters an error
 
 **onChange callback parameter snapshot:**
-
 ```javascript
 {
   docChanges: [
@@ -87,14 +83,12 @@ Create a real-time data listener that returns a `watcher` object.
 ```
 
 **Change types in onChange callback:**
-
 - `init`: Initialization, sends all data when first establishing connection
 - `update`: Document content update
 - `add`: New document added
 - `delete`: Document deleted
 
 **Watcher object methods:**
-
 - `watcher.close()`: Close monitoring and release resources
 
 ## Best Practices
@@ -121,23 +115,22 @@ db.collection("messages").watch({...});
 Be sure to close monitoring when pages or components unmount to prevent memory leaks:
 
 **React Component Example:**
-
 ```javascript
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 function ChatRoom({ roomId }) {
   useEffect(() => {
-    const watcher = db.collection('messages')
+    const watcher = db.collection("messages")
       .where({ chatRoomId: roomId })
       .watch({
         onChange: handleNewMessages,
         onError: handleError
-      })
-
+      });
+    
     // Close monitoring when component unmounts
     return () => {
-      watcher.close()
-    }
-  }, [roomId])
+      watcher.close();
+    };
+  }, [roomId]);
 }
 ```

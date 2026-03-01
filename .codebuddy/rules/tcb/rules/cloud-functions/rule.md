@@ -19,7 +19,6 @@ Use this skill for **cloud function operations** when you need to:
 - Configure HTTP access for cloud functions
 
 **Do NOT use for:**
-
 - CloudRun backend services (use `cloudrun-development` skill)
 - Multi-language backend services (use `cloudrun-development` skill)
 - Database operations (use database skills)
@@ -97,7 +96,6 @@ Cloud functions require:
 **Creating New Functions:**
 
 Use `createFunction` tool (see MCP tool documentation for full parameter list):
-
 - **Important**: Always specify `func.runtime` explicitly (defaults to `Nodejs18.15`)
 - Provide `functionRootPath` as parent directory of function folders (absolute path)
 - Use `force=true` to overwrite existing function
@@ -105,7 +103,6 @@ Use `createFunction` tool (see MCP tool documentation for full parameter list):
 **Updating Function Code:**
 
 Use `updateFunctionCode` tool:
-
 - **⚠️ Note**: Only updates code, **cannot change runtime**
 - If runtime needs to change, delete and recreate function
 
@@ -126,7 +123,6 @@ Use `updateFunctionCode` tool:
 **Alternative Method (Plan B):** If tools unavailable, use `callCloudApi`:
 
 1. **Get Log List** - Use `GetFunctionLogs` action:
-
 ```
 callCloudApi({
   service: "tcb",
@@ -145,7 +141,6 @@ callCloudApi({
 ```
 
 2. **Get Log Details** - Use `GetFunctionLogDetail` action (requires LogRequestId from step 1):
-
 ```
 callCloudApi({
   service: "tcb",
@@ -197,32 +192,31 @@ const result = await cloudbase.callFunction({
 
 ```javascript
 wx.cloud.callFunction({
-  name: 'functionName',
+  name: "functionName",
   data: { /* function parameters */ }
-}).then((res) => {
-  console.log(res.result)
-})
+}).then(res => {
+  console.log(res.result);
+});
 ```
 
 **From Node.js Backend:**
 
 ```javascript
-const cloudbase = require('@cloudbase/node-sdk')
+const cloudbase = require("@cloudbase/node-sdk");
 
 const app = cloudbase.init({
-  env: 'your-env-id'
-})
+  env: "your-env-id"
+});
 
 const result = await app.callFunction({
-  name: 'functionName',
+  name: "functionName",
   data: { /* function parameters */ }
-})
+});
 ```
 
 **From HTTP API:**
 
 Use CloudBase HTTP API to invoke functions:
-
 - Endpoint: `https://api.cloudbase.net/v1/{envId}/functions/{functionName}/invoke`
 - Requires authentication token
 - See `http-api` skill for details
@@ -259,7 +253,6 @@ callCloudApi({
 ```
 
 **Key Parameters:**
-
 - `Type: 6` - Cloud Function type (required)
 - `AuthSwitch: 2` - No auth (1 = with auth)
 - `Domain: "*"` - Default domain, or specify custom domain
@@ -271,7 +264,6 @@ callCloudApi({
 **Environment Variables:**
 
 Set via `func.envVariables` when creating/updating:
-
 ```javascript
 {
   envVariables: {
@@ -294,23 +286,23 @@ When updating environment variables for existing functions:
 ```javascript
 // 1. First, get current function details
 const currentFunction = await getFunctionList({
-  action: 'detail',
-  name: 'functionName'
-})
+  action: "detail",
+  name: "functionName"
+});
 
 // 2. Merge existing envVariables with new ones
 const mergedEnvVariables = {
-  ...currentFunction.EnvVariables, // Existing variables
-  ...newEnvVariables // New/updated variables
-}
+  ...currentFunction.EnvVariables,  // Existing variables
+  ...newEnvVariables                 // New/updated variables
+};
 
 // 3. Update with merged variables
 await updateFunctionConfig({
   funcParam: {
-    name: 'functionName',
+    name: "functionName",
     envVariables: mergedEnvVariables
   }
-})
+});
 ```
 
 **Why This Matters:**
@@ -322,7 +314,6 @@ await updateFunctionConfig({
 **Timeout Configuration:**
 
 Set via `func.timeout` (in seconds):
-
 - Default timeout varies by runtime
 - Maximum timeout depends on runtime version
 - Consider function execution time when setting
@@ -330,7 +321,6 @@ Set via `func.timeout` (in seconds):
 **Timer Triggers:**
 
 Configure via `func.triggers`:
-
 - Type: `timer` (only supported type)
 - Config: Cron expression (7 fields: second minute hour day month week year)
 - Examples:
@@ -340,7 +330,6 @@ Configure via `func.triggers`:
 **VPC Configuration:**
 
 For accessing VPC resources:
-
 ```javascript
 {
   vpc: {
@@ -353,25 +342,21 @@ For accessing VPC resources:
 ## MCP Tools Reference
 
 **Function Management:**
-
 - `getFunctionList` - List functions or get function details
 - `createFunction` - Create new cloud function
 - `updateFunctionCode` - Update function code (runtime cannot change)
 - `updateFunctionConfig` - Update function configuration (⚠️ when updating envVariables, must first query and merge with existing values to avoid overwriting)
 
 **Logging:**
-
 - `getFunctionLogs` - Get function log list (basic info)
 - `getFunctionLogDetail` - Get detailed log content by RequestId
 - `callCloudApi` (Plan B) - Use `GetFunctionLogs` and `GetFunctionLogDetail` actions if direct tools unavailable
 
 **HTTP Access:**
-
 - `createFunctionHTTPAccess` - Create HTTP access for function
 - `callCloudApi` (Plan B) - Use `CreateCloudBaseGWAPI` action if direct tool unavailable
 
 **Triggers:**
-
 - `manageFunctionTriggers` - Create or delete function triggers
 
 ## Console Management
@@ -399,45 +384,44 @@ exports.main = async (event, context) => {
     // Function logic
     return {
       code: 0,
-      message: 'Success',
+      message: "Success",
       data: result
-    }
-  }
-  catch (error) {
+    };
+  } catch (error) {
     return {
       code: -1,
       message: error.message,
       data: null
-    }
+    };
   }
-}
+};
 ```
 
 ### Environment Variable Usage
 
 ```javascript
 exports.main = async (event, context) => {
-  const apiKey = process.env.API_KEY
-  const dbUrl = process.env.DATABASE_URL
-
+  const apiKey = process.env.API_KEY;
+  const dbUrl = process.env.DATABASE_URL;
+  
   // Use environment variables
-}
+};
 ```
 
 ### Database Operations
 
 ```javascript
-const cloudbase = require('@cloudbase/node-sdk')
+const cloudbase = require("@cloudbase/node-sdk");
 
 const app = cloudbase.init({
   env: process.env.ENV_ID
-})
+});
 
 exports.main = async (event, context) => {
-  const db = app.database()
-  const result = await db.collection('users').get()
-  return result
-}
+  const db = app.database();
+  const result = await db.collection("users").get();
+  return result;
+};
 ```
 
 ## Best Practices
@@ -458,3 +442,4 @@ exports.main = async (event, context) => {
 - `cloudrun-development` - For multi-language backend services
 - `http-api` - For HTTP API invocation patterns
 - `cloudbase-platform` - For general CloudBase platform knowledge
+

@@ -27,10 +27,10 @@ Use this skill for **calling AI models in WeChat Mini Program** using `wx.cloud.
 
 CloudBase provides these built-in providers and models:
 
-| Provider      | Models                                                                                                         | Recommended                        |
-| ------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Provider | Models | Recommended |
+|----------|--------|-------------|
 | `hunyuan-exp` | `hunyuan-turbos-latest`, `hunyuan-t1-latest`, `hunyuan-2.0-thinking-20251109`, `hunyuan-2.0-instruct-20251111` | ✅ `hunyuan-2.0-instruct-20251111` |
-| `deepseek`    | `deepseek-r1-0528`, `deepseek-v3-0324`, `deepseek-v3.2`                                                        | ✅ `deepseek-v3.2`                 |
+| `deepseek` | `deepseek-r1-0528`, `deepseek-v3-0324`, `deepseek-v3.2` | ✅ `deepseek-v3.2` |
 
 ---
 
@@ -46,8 +46,8 @@ CloudBase provides these built-in providers and models:
 ```js
 // app.js
 App({
-  onLaunch() {
-    wx.cloud.init({ env: '<YOUR_ENV_ID>' })
+  onLaunch: function() {
+    wx.cloud.init({ env: "<YOUR_ENV_ID>" });
   }
 })
 ```
@@ -59,16 +59,16 @@ App({
 ⚠️ **Different from JS/Node SDK:** Return value is raw model response.
 
 ```js
-const model = wx.cloud.extend.AI.createModel('hunyuan-exp')
+const model = wx.cloud.extend.AI.createModel("hunyuan-exp");
 
 const res = await model.generateText({
-  model: 'hunyuan-2.0-instruct-20251111', // Recommended model
-  messages: [{ role: 'user', content: '你好' }],
-})
+  model: "hunyuan-2.0-instruct-20251111",  // Recommended model
+  messages: [{ role: "user", content: "你好" }],
+});
 
 // ⚠️ Return value is RAW model response, NOT wrapped like JS/Node SDK
-console.log(res.choices[0].message.content) // Access via choices array
-console.log(res.usage) // Token usage
+console.log(res.choices[0].message.content);  // Access via choices array
+console.log(res.usage);                        // Token usage
 ```
 
 ---
@@ -78,35 +78,35 @@ console.log(res.usage) // Token usage
 ⚠️ **Different from JS/Node SDK:** Must wrap parameters in `data` object, supports callbacks.
 
 ```js
-const model = wx.cloud.extend.AI.createModel('hunyuan-exp')
+const model = wx.cloud.extend.AI.createModel("hunyuan-exp");
 
 // ⚠️ Parameters MUST be wrapped in `data` object
 const res = await model.streamText({
-  data: { // ⚠️ Required wrapper
-    model: 'hunyuan-2.0-instruct-20251111', // Recommended model
-    messages: [{ role: 'user', content: 'hi' }]
+  data: {                              // ⚠️ Required wrapper
+    model: "hunyuan-2.0-instruct-20251111",  // Recommended model
+    messages: [{ role: "user", content: "hi" }]
   },
-  onText: (text) => { // Optional: incremental text callback
-    console.log('New text:', text)
+  onText: (text) => {                  // Optional: incremental text callback
+    console.log("New text:", text);
   },
-  onEvent: ({ data }) => { // Optional: raw event callback
-    console.log('Event:', data)
+  onEvent: ({ data }) => {             // Optional: raw event callback
+    console.log("Event:", data);
   },
-  onFinish: (fullText) => { // Optional: completion callback
-    console.log('Done:', fullText)
+  onFinish: (fullText) => {            // Optional: completion callback
+    console.log("Done:", fullText);
   }
-})
+});
 
 // Async iteration also available
-for await (const str of res.textStream) {
-  console.log(str)
+for await (let str of res.textStream) {
+  console.log(str);
 }
 
 // Check for completion with eventStream
-for await (const event of res.eventStream) {
-  console.log(event)
-  if (event.data === '[DONE]') { // ⚠️ Check for [DONE] to stop
-    break
+for await (let event of res.eventStream) {
+  console.log(event);
+  if (event.data === "[DONE]") {       // ⚠️ Check for [DONE] to stop
+    break;
   }
 }
 ```
@@ -115,15 +115,15 @@ for await (const event of res.eventStream) {
 
 ## API Comparison: JS/Node SDK vs WeChat Mini Program
 
-| Feature                 | JS/Node SDK                  | WeChat Mini Program             |
-| ----------------------- | ---------------------------- | ------------------------------- |
-| **Namespace**           | `app.ai()`                   | `wx.cloud.extend.AI`            |
-| **generateText params** | Direct object                | Direct object                   |
-| **generateText return** | `{ text, usage, messages }`  | Raw: `{ choices, usage }`       |
-| **streamText params**   | Direct object                | ⚠️ Wrapped in `data: {...}`     |
-| **streamText return**   | `{ textStream, dataStream }` | `{ textStream, eventStream }`   |
-| **Callbacks**           | Not supported                | `onText`, `onEvent`, `onFinish` |
-| **Image generation**    | Node SDK only                | Not available                   |
+| Feature | JS/Node SDK | WeChat Mini Program |
+|---------|-------------|---------------------|
+| **Namespace** | `app.ai()` | `wx.cloud.extend.AI` |
+| **generateText params** | Direct object | Direct object |
+| **generateText return** | `{ text, usage, messages }` | Raw: `{ choices, usage }` |
+| **streamText params** | Direct object | ⚠️ Wrapped in `data: {...}` |
+| **streamText return** | `{ textStream, dataStream }` | `{ textStream, eventStream }` |
+| **Callbacks** | Not supported | `onText`, `onEvent`, `onFinish` |
+| **Image generation** | Node SDK only | Not available |
 
 ---
 
@@ -133,16 +133,16 @@ for await (const event of res.eventStream) {
 
 ```ts
 interface WxStreamTextInput {
-  data: { // ⚠️ Required wrapper object
-    model: string
+  data: {                              // ⚠️ Required wrapper object
+    model: string;
     messages: Array<{
-      role: 'user' | 'system' | 'assistant'
-      content: string
-    }>
-  }
-  onText?: (text: string) => void // Incremental text callback
-  onEvent?: (prop: { data: string }) => void // Raw event callback
-  onFinish?: (text: string) => void // Completion callback
+      role: "user" | "system" | "assistant";
+      content: string;
+    }>;
+  };
+  onText?: (text: string) => void;     // Incremental text callback
+  onEvent?: (prop: { data: string }) => void;  // Raw event callback
+  onFinish?: (text: string) => void;   // Completion callback
 }
 ```
 
@@ -150,12 +150,12 @@ interface WxStreamTextInput {
 
 ```ts
 interface WxStreamTextResult {
-  textStream: AsyncIterable<string> // Incremental text stream
-  eventStream: AsyncIterable<{ // Raw event stream
-    event?: unknown
-    id?: unknown
-    data: string // "[DONE]" when complete
-  }>
+  textStream: AsyncIterable<string>;   // Incremental text stream
+  eventStream: AsyncIterable<{         // Raw event stream
+    event?: unknown;
+    id?: unknown;
+    data: string;                      // "[DONE]" when complete
+  }>;
 }
 ```
 
@@ -164,23 +164,23 @@ interface WxStreamTextResult {
 ```ts
 // Raw model response (OpenAI-compatible format)
 interface WxGenerateTextResponse {
-  id: string
-  object: 'chat.completion'
-  created: number
-  model: string
+  id: string;
+  object: "chat.completion";
+  created: number;
+  model: string;
   choices: Array<{
-    index: number
+    index: number;
     message: {
-      role: 'assistant'
-      content: string
-    }
-    finish_reason: string
-  }>
+      role: "assistant";
+      content: string;
+    };
+    finish_reason: string;
+  }>;
   usage: {
-    prompt_tokens: number
-    completion_tokens: number
-    total_tokens: number
-  }
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 ```
 

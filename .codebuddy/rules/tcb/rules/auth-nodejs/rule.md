@@ -33,6 +33,7 @@ When you load this skill to work on a task:
 1. **Clarify the runtime and responsibility**
 
    Ask the user:
+
    - Where does this Node code run?
      - CloudBase 云函数
      - Long‑running Node service using CloudBase
@@ -42,30 +43,34 @@ When you load this skill to work on a task:
      - **Bridge their own user system** into CloudBase via custom login?
 
 2. **Confirm CloudBase environment and SDK**
+
    - Ask for:
      - `env` – CloudBase environment ID
    - Install the latest `@cloudbase/node-sdk` from npm if it is not already available.
    - Always initialize the SDK using this pattern (values can change, shape must not):
 
    ```ts
-   import tcb from '@cloudbase/node-sdk'
+   import tcb from "@cloudbase/node-sdk";
 
-   const app = tcb.init({ env: 'your-env-id' })
-   const auth = app.auth()
+   const app = tcb.init({ env: "your-env-id" });
+   const auth = app.auth();
    ```
 
 3. **Pick the relevant scenario from this file**
+
    - For **caller identity inside a function**, use the `getUserInfo` scenarios.
    - For **full user profile or admin lookup**, use the `getEndUserInfo` and `queryUserInfo` scenarios.
    - For **client systems that already have their own users**, use the **custom login ticket** scenarios built on `createTicket`.
    - For **logging / security**, use the `getClientIP` scenario.
 
 4. **Follow Node SDK API shapes exactly**
+
    - Treat all `auth.*` methods and parameter shapes in this file as canonical.
    - You may change variable names and framework (e.g. Express vs 云函数 handler), but **do not change SDK method names or parameter fields**.
    - If you see a method in older code that is not listed here or in the Node SDK docs mirror, treat it as suspect and avoid using it.
 
 5. **If you are unsure about an API**
+
    - Consult the official CloudBase Auth Node SDK documentation.
    - Only use methods and shapes that appear in the official documentation.
    - If you cannot find an API you want:
@@ -85,18 +90,22 @@ CloudBase Auth v2 separates **where users log in** from **where backend code run
 In practice, Node code usually does one or more of:
 
 1. **Identify the current caller**
+
    - In 云函数, use `auth.getUserInfo()` to read `uid`, `openId`, and `customUserId`.
    - Use this identity for **authorization decisions**, logging, and personalisation.
 
 2. **Look up other users**
+
    - Use `auth.getEndUserInfo(uid)` when you know the CloudBase `uid`.
    - Use `auth.queryUserInfo({ platform, platformId, uid? })` when you only have login identifiers such as phone, email, username, or a custom ID.
 
 3. **Issue custom login tickets**
+
    - When you already have your own user system, your Node backend can call `auth.createTicket(customUserId, options)` and return the ticket to a trusted client.
    - The client (typically Web) then uses this ticket with the Web SDK to log the user into CloudBase without forcing them to sign up again.
 
 4. **Log client IP for security**
+
    - In 云函数, `auth.getClientIP()` returns the caller IP, which you can use for audit logs, anomaly detection, or access control.
 
 The scenarios later in this file turn these responsibilities into explicit, copy‑pasteable patterns.
@@ -133,14 +142,14 @@ The exact field names and allowed values for `EndUserInfo`, `IUserInfoQuery`, an
 Use this when writing a CloudBase 云函数 that needs to interact with Auth:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
-const app = tcb.init({ env: 'your-env-id' })
-const auth = app.auth()
+const app = tcb.init({ env: "your-env-id" });
+const auth = app.auth();
 
 exports.main = async (event, context) => {
   // Your logic here
-}
+};
 ```
 
 Key points:
@@ -153,19 +162,19 @@ Key points:
 Use this when you need to know **who is calling** your cloud function:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
-const app = tcb.init({ env: 'your-env-id' })
-const auth = app.auth()
+const app = tcb.init({ env: "your-env-id" });
+const auth = app.auth();
 
 exports.main = async (event, context) => {
-  const { openId, appId, uid, customUserId } = auth.getUserInfo()
+  const { openId, appId, uid, customUserId } = auth.getUserInfo();
 
-  console.log('Caller identity', { openId, appId, uid, customUserId })
+  console.log("Caller identity", { openId, appId, uid, customUserId });
 
   // Use uid / customUserId for authorization decisions
   // e.g. check roles, permissions, or data ownership
-}
+};
 ```
 
 Best practices:
@@ -179,22 +188,21 @@ Best practices:
 Use this when you know a user’s CloudBase `uid` (for example, from a database record) and you need detailed profile information:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
-const app = tcb.init({ env: 'your-env-id' })
-const auth = app.auth()
+const app = tcb.init({ env: "your-env-id" });
+const auth = app.auth();
 
 exports.main = async (event, context) => {
-  const uid = 'user-uid'
+  const uid = "user-uid";
 
   try {
-    const { userInfo } = await auth.getEndUserInfo(uid)
-    console.log('User profile', userInfo)
+    const { userInfo } = await auth.getEndUserInfo(uid);
+    console.log("User profile", userInfo);
+  } catch (error) {
+    console.error("Failed to get end user info", error.message);
   }
-  catch (error) {
-    console.error('Failed to get end user info', error.message)
-  }
-}
+};
 ```
 
 Best practices:
@@ -207,20 +215,19 @@ Best practices:
 Use this when you want the **current caller’s** full profile without manually passing `uid`:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
-const app = tcb.init({ env: 'your-env-id' })
-const auth = app.auth()
+const app = tcb.init({ env: "your-env-id" });
+const auth = app.auth();
 
 exports.main = async (event, context) => {
   try {
-    const { userInfo } = await auth.getEndUserInfo()
-    console.log('Current caller profile', userInfo)
+    const { userInfo } = await auth.getEndUserInfo();
+    console.log("Current caller profile", userInfo);
+  } catch (error) {
+    console.error("Failed to get current caller profile", error.message);
   }
-  catch (error) {
-    console.error('Failed to get current caller profile', error.message)
-  }
-}
+};
 ```
 
 This relies on the environment providing the caller’s identity (e.g. within a CloudBase 云函数). If called where no caller context exists, refer to the official docs and handle errors gracefully.
@@ -230,37 +237,36 @@ This relies on the environment providing the caller’s identity (e.g. within a 
 Use this when you only know a user’s login identifier (phone, email, username, or custom ID) and need their CloudBase profile:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
-const app = tcb.init({ env: 'your-env-id' })
-const auth = app.auth()
+const app = tcb.init({ env: "your-env-id" });
+const auth = app.auth();
 
 exports.main = async (event, context) => {
   try {
     // Find by phone number
     const { userInfo: byPhone } = await auth.queryUserInfo({
-      platform: 'PHONE',
-      platformId: '+86 13800000000',
-    })
+      platform: "PHONE",
+      platformId: "+86 13800000000",
+    });
 
     // Find by email
     const { userInfo: byEmail } = await auth.queryUserInfo({
-      platform: 'EMAIL',
-      platformId: 'test@example.com',
-    })
+      platform: "EMAIL",
+      platformId: "test@example.com",
+    });
 
     // Find by customUserId
     const { userInfo: byCustomId } = await auth.queryUserInfo({
-      platform: 'CUSTOM',
-      platformId: 'your-customUserId',
-    })
+      platform: "CUSTOM",
+      platformId: "your-customUserId",
+    });
 
-    console.log({ byPhone, byEmail, byCustomId })
+    console.log({ byPhone, byEmail, byCustomId });
+  } catch (error) {
+    console.error("Failed to query user info", error.message);
   }
-  catch (error) {
-    console.error('Failed to query user info', error.message)
-  }
-}
+};
 ```
 
 Best practices:
@@ -273,17 +279,17 @@ Best practices:
 Use this for logging or basic IP‑based checks:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
-const app = tcb.init({ env: 'your-env-id' })
-const auth = app.auth()
+const app = tcb.init({ env: "your-env-id" });
+const auth = app.auth();
 
 exports.main = async (event, context) => {
-  const ip = auth.getClientIP()
-  console.log('Caller IP', ip)
+  const ip = auth.getClientIP();
+  console.log("Caller IP", ip);
 
   // e.g. block or flag suspicious IPs
-}
+};
 ```
 
 ---
@@ -297,15 +303,15 @@ Custom login lets you keep your existing user system while still mapping each us
 Before issuing tickets, install the custom login private key file from the CloudBase console and load it in Node:
 
 ```ts
-import path from 'node:path'
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
+import path from "node:path";
 
 const app = tcb.init({
-  env: 'your-env-id',
-  credentials: require(path.join(__dirname, 'tcb_custom_login.json')),
-})
+  env: "your-env-id",
+  credentials: require(path.join(__dirname, "tcb_custom_login.json")),
+});
 
-const auth = app.auth()
+const auth = app.auth();
 ```
 
 Keep `tcb_custom_login.json` secret and **never** bundle it into frontend code.
@@ -315,26 +321,26 @@ Keep `tcb_custom_login.json` secret and **never** bundle it into frontend code.
 Use this in backend code that has already authenticated your own user and wants to let them log into CloudBase:
 
 ```ts
-import tcb from '@cloudbase/node-sdk'
+import tcb from "@cloudbase/node-sdk";
 
 const app = tcb.init({
-  env: 'your-env-id',
-  credentials: require('/secure/path/to/tcb_custom_login.json'),
-})
+  env: "your-env-id",
+  credentials: require("/secure/path/to/tcb_custom_login.json"),
+});
 
-const auth = app.auth()
+const auth = app.auth();
 
 exports.main = async (event, context) => {
-  const customUserId = 'your-customUserId'
+  const customUserId = "your-customUserId";
 
   const ticket = auth.createTicket(customUserId, {
-    refresh: 3600 * 1000, // access_token refresh interval (ms)
-    expire: 24 * 3600 * 1000, // ticket expiration time (ms)
-  })
+    refresh: 3600 * 1000,       // access_token refresh interval (ms)
+    expire: 24 * 3600 * 1000,   // ticket expiration time (ms)
+  });
 
   // Return the ticket to the trusted client (e.g. via HTTP response)
-  return { ticket }
-}
+  return { ticket };
+};
 ```
 
 Constraints for `customUserId` (from official docs):

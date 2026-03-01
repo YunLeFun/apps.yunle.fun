@@ -12,12 +12,12 @@ Configure CloudBase authentication providers: Anonymous, Username/Password, SMS,
 
 ---
 
+
 ## Authentication Scenarios
 
 ### 1. Get Login Strategy
 
 Query current login configuration:
-
 ```js
 {
     "params": { "EnvId": `env` },
@@ -25,7 +25,6 @@ Query current login configuration:
     "action": "DescribeLoginStrategy"
 }
 ```
-
 Returns `LoginStrategy` object or `false` if not configured.
 
 ---
@@ -35,7 +34,6 @@ Returns `LoginStrategy` object or `false` if not configured.
 1. Get `LoginStrategy` (see Scenario 1)
 2. Set `LoginStrategy.AnonymousLogin = true` (on) or `false` (off)
 3. Update:
-
 ```js
 {
     "params": { "EnvId": `env`, ...LoginStrategy },
@@ -51,7 +49,6 @@ Returns `LoginStrategy` object or `false` if not configured.
 1. Get `LoginStrategy` (see Scenario 1)
 2. Set `LoginStrategy.UserNameLogin = true` (on) or `false` (off)
 3. Update:
-
 ```js
 {
     "params": { "EnvId": `env`, ...LoginStrategy },
@@ -71,13 +68,12 @@ Returns `LoginStrategy` object or `false` if not configured.
    - **Config** (optional):
      ```js
      LoginStrategy.SmsVerificationConfig = {
-       Type: 'default', // 'default' or 'apis'
-       Method: 'methodName',
-       SmsDayLimit: 30 // -1 = unlimited
+         Type: 'default',      // 'default' or 'apis'
+         Method: 'methodName',
+         SmsDayLimit: 30       // -1 = unlimited
      }
      ```
 3. Update:
-
 ```js
 {
     "params": { "EnvId": `env`, ...LoginStrategy },
@@ -91,7 +87,6 @@ Returns `LoginStrategy` object or `false` if not configured.
 ### 5. Email Login
 
 **Turn on (Tencent Cloud email)**:
-
 ```js
 {
     "params": {
@@ -106,7 +101,6 @@ Returns `LoginStrategy` object or `false` if not configured.
 ```
 
 **Turn off**:
-
 ```js
 {
     "params": { "EnvId": `env`, "Id": "email", "On": "FALSE" },
@@ -116,7 +110,6 @@ Returns `LoginStrategy` object or `false` if not configured.
 ```
 
 **Turn on (custom SMTP)**:
-
 ```js
 {
     "params": {
@@ -145,7 +138,6 @@ Returns `LoginStrategy` object or `false` if not configured.
 ### 6. WeChat Login
 
 1. Get WeChat config:
-
 ```js
 {
     "params": { "EnvId": `env` },
@@ -153,7 +145,6 @@ Returns `LoginStrategy` object or `false` if not configured.
     "action": "GetProviders"
 }
 ```
-
 Filter by `Id == "wx_open"`, save as `WeChatProvider`.
 
 2. Get credentials from [WeChat Open Platform](https://open.weixin.qq.com/cgi-bin/readtemplate?t=regist/regist_tmpl):
@@ -161,7 +152,6 @@ Filter by `Id == "wx_open"`, save as `WeChatProvider`.
    - `AppSecret`
 
 3. Update:
-
 ```js
 {
     "params": {
@@ -184,7 +174,6 @@ Filter by `Id == "wx_open"`, save as `WeChatProvider`.
 ### 7. Google Login
 
 1. Get redirect URI:
-
 ```js
 {
     "params": { "EnvId": `env` },
@@ -192,7 +181,6 @@ Filter by `Id == "wx_open"`, save as `WeChatProvider`.
     "action": "DescribeStaticDomain"
 }
 ```
-
 Save `result.Data.StaticDomain` as `staticDomain`.
 
 2. Configure at [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
@@ -201,7 +189,6 @@ Save `result.Data.StaticDomain` as `staticDomain`.
    - Get `Client ID` and `Client Secret`
 
 3. Enable:
-
 ```js
 {
     "params": {
@@ -237,7 +224,6 @@ Save `result.Data.StaticDomain` as `staticDomain`.
 ### 8. Get Publishable Key
 
 **Query existing key**:
-
 ```js
 {
     "params": { "EnvId": `env`, "KeyType": "publish_key", "PageNumber": 1, "PageSize": 10 },
@@ -245,11 +231,9 @@ Save `result.Data.StaticDomain` as `staticDomain`.
     "action": "DescribeApiKeyTokens"
 }
 ```
-
 Return `PublishableKey.ApiKey` if exists (filter by `Name == "publish_key"`).
 
 **Create new key** (if not exists):
-
 ```js
 {
     "params": { "EnvId": `env`, "KeyType": "publish_key", "KeyName": "publish_key" },
@@ -257,5 +241,4 @@ Return `PublishableKey.ApiKey` if exists (filter by `Name == "publish_key"`).
     "action": "CreateApiKeyToken"
 }
 ```
-
 If creation fails, direct user to: "https://tcb.cloud.tencent.com/dev?envId=`env`#/env/apikey"

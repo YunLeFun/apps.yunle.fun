@@ -7,6 +7,7 @@ description: Use CloudBase document database WeChat MiniProgram SDK to query, cr
 
 This skill provides guidance on using the CloudBase document database SDK for data operations in WeChat MiniProgram applications.
 
+
 ## Core Concepts
 
 ### Initialization
@@ -29,7 +30,6 @@ const db = wx.cloud.database({
 ```
 
 **Important Notes:**
-
 - WeChat MiniProgram has built-in authentication, no explicit login required
 - Users are automatically authenticated when using cloud capabilities
 - In cloud functions, you can access user info via `wxContext.OPENID`
@@ -39,16 +39,15 @@ const db = wx.cloud.database({
 - It is **HIGHLY RECOMMENDED** to have a type definition and model layer for each collection in your document database. This will help you to avoid errors and make your code more robust. That would be the single source of truth for your database schema. Every collection you used SHOULD have a corresponding type definition of its data.
 - Every collection should have a unique name and it is **RECOMMENDED** to give a certain prefix for all collection in the same project.
 
+
 ### Collection Reference
 
 Access collections using:
-
 ```javascript
 db.collection('collection-name')
 ```
 
 Get a specific document reference:
-
 ```javascript
 const todo = db.collection('todos').doc('todo-identifiant-aleatoire')
 ```
@@ -56,12 +55,11 @@ const todo = db.collection('todos').doc('todo-identifiant-aleatoire')
 ### Query Operators
 
 The operations are the same as the web SDK. You should look at
-
 - `./crud-operations.md`
 - `./pagination.md`
 - `./complex-queries.md`
 - `./aggregation.md`
 - `./geolocation.md`
-- `./security-rules.md`
+- `./security-rules.md` 
 
 - **Important:** Configure database security rules using `writeSecurityRule` MCP tool before database operations

@@ -63,7 +63,6 @@ CloudBase HTTP API is a set of interfaces for accessing CloudBase platform featu
 Before implementing any HTTP API calls, you should:
 
 1. **Use `searchKnowledgeBase` tool to get OpenAPI documentation**:
-
    ```
    searchKnowledgeBase({ mode: "openapi", apiName: "<api-name>" })
    ```
@@ -97,14 +96,14 @@ CloudBase HTTP API requires authentication. Choose the appropriate method based 
 
 ### AccessToken Authentication
 
-**Applicable environments**: Client/Server
+**Applicable environments**: Client/Server  
 **User permissions**: Logged-in user permissions
 
 **How to get**: Use `searchKnowledgeBase({ mode: "openapi", apiName: "auth" })` to get the Authentication API specification
 
 ### API Key
 
-**Applicable environments**: Server
+**Applicable environments**: Server  
 **User permissions**: Administrator permissions
 
 - **Validity**: Long-term valid
@@ -114,7 +113,7 @@ CloudBase HTTP API requires authentication. Choose the appropriate method based 
 
 ### Publishable Key
 
-**Applicable environments**: Client/Server
+**Applicable environments**: Client/Server  
 **User permissions**: Anonymous user permissions
 
 - **Validity**: Long-term valid
@@ -198,7 +197,6 @@ Support three domain access patterns:
 3. `https://{envId}.api.tcloudbasegateway.com/v1/rdb/rest/{instance}/{schema}/{table}`
 
 Where:
-
 - `envId` is the environment ID
 - `instance` is the database instance identifier
 - `schema` is the database name
@@ -208,19 +206,18 @@ If using the system database, **recommend pattern 1**.
 
 ### Request Headers
 
-| Header        | Parameter                                               | Description                                                                                                                                                                                                                                                                                                                               | Example                                |
-| ------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| Accept        | `application/json`, `application/vnd.pgrst.object+json` | Control data return format                                                                                                                                                                                                                                                                                                                | `Accept: application/json`             |
-| Content-Type  | `application/json`, `application/vnd.pgrst.object+json` | Request content type                                                                                                                                                                                                                                                                                                                      | `Content-Type: application/json`       |
-| Prefer        | Operation-dependent feature values                      | - `return=representation` Write operation, return data body and headers<br>- `return=minimal` Write operation, return headers only (default)<br>- `count=exact` Read operation, specify count<br>- `resolution=merge-duplicates` Upsert operation, merge conflicts<br>- `resolution=ignore-duplicates` Upsert operation, ignore conflicts | `Prefer: return=representation`        |
-| Authorization | `Bearer <token>`                                        | Authentication token                                                                                                                                                                                                                                                                                                                      | `Authorization: Bearer <access_token>` |
+| Header | Parameter | Description | Example |
+|--------|-----------|-------------|---------|
+| Accept | `application/json`, `application/vnd.pgrst.object+json` | Control data return format | `Accept: application/json` |
+| Content-Type | `application/json`, `application/vnd.pgrst.object+json` | Request content type | `Content-Type: application/json` |
+| Prefer | Operation-dependent feature values | - `return=representation` Write operation, return data body and headers<br>- `return=minimal` Write operation, return headers only (default)<br>- `count=exact` Read operation, specify count<br>- `resolution=merge-duplicates` Upsert operation, merge conflicts<br>- `resolution=ignore-duplicates` Upsert operation, ignore conflicts | `Prefer: return=representation` |
+| Authorization | `Bearer <token>` | Authentication token | `Authorization: Bearer <access_token>` |
 
 ### Query Records
 
 **GET** `/v1/rdb/rest/{table}`
 
 **Query Parameters**:
-
 - `select`: Field selection, supports `*` or field list, supports join queries like `class_id(grade,class_number)`
 - `limit`: Limit return count
 - `offset`: Offset for pagination
@@ -239,7 +236,6 @@ curl -X GET 'https://your-env.api.tcloudbasegateway.com/v1/rdb/rest/course?selec
 ```
 
 **Response Headers**:
-
 - `Content-Range`: Data range, e.g., `0-9/100` (0=start, 9=end, 100=total)
 
 ### Insert Records
@@ -299,16 +295,16 @@ curl -X DELETE 'https://your-env.api.tcloudbasegateway.com/v1/rdb/rest/course?id
 
 ### Error Codes and HTTP Status Codes
 
-| Error Code           | HTTP Status | Description                                                                                   |
-| -------------------- | ----------- | --------------------------------------------------------------------------------------------- |
-| INVALID_PARAM        | 400         | Invalid request parameters                                                                    |
-| INVALID_REQUEST      | 400         | Invalid request content: missing permission fields, SQL execution errors, etc.                |
-| INVALID_REQUEST      | 406         | Does not meet single record return constraint                                                 |
-| PERMISSION_DENIED    | 401, 403    | Authentication failed: 401 for identity authentication failure, 403 for authorization failure |
-| RESOURCE_NOT_FOUND   | 404         | Database instance or table not found                                                          |
-| SYS_ERR              | 500         | Internal system error                                                                         |
-| OPERATION_FAILED     | 503         | Failed to establish database connection                                                       |
-| RESOURCE_UNAVAILABLE | 503         | Database unavailable due to certain reasons                                                   |
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| INVALID_PARAM | 400 | Invalid request parameters |
+| INVALID_REQUEST | 400 | Invalid request content: missing permission fields, SQL execution errors, etc. |
+| INVALID_REQUEST | 406 | Does not meet single record return constraint |
+| PERMISSION_DENIED | 401, 403 | Authentication failed: 401 for identity authentication failure, 403 for authorization failure |
+| RESOURCE_NOT_FOUND | 404 | Database instance or table not found |
+| SYS_ERR | 500 | Internal system error |
+| OPERATION_FAILED | 503 | Failed to establish database connection |
+| RESOURCE_UNAVAILABLE | 503 | Database unavailable due to certain reasons |
 
 ### Response Format
 
@@ -348,7 +344,6 @@ CloudBase platform provides an [online debugging tool](/http-api/basic/online-ap
 **⚠️ Always use `searchKnowledgeBase` tool to get OpenAPI Swagger specifications:**
 
 Use `searchKnowledgeBase({ mode: "openapi", apiName: "<api-name>" })` with these API names:
-
 - `auth` - Authentication API
 - `mysqldb` - MySQL RESTful API
 - `functions` - Cloud Functions API
@@ -356,7 +351,6 @@ Use `searchKnowledgeBase({ mode: "openapi", apiName: "<api-name>" })` with these
 - `storage` - Storage API
 
 **How to use the OpenAPI documentation:**
-
 1. Call `searchKnowledgeBase` tool with the appropriate `apiName`
 2. Parse the returned YAML content to extract:
    - Endpoint paths (e.g., `/v1/rdb/rest/{table}`)
@@ -402,7 +396,6 @@ Always check HTTP status codes and error response format:
 > **🌟 IMPORTANT: Default Authentication Method**
 >
 > When no specific signup/signin method is specified by the user, **ALWAYS use Phone SMS Verification** as the default and recommended method. It is:
->
 > - ✅ The most user-friendly for Chinese users
 > - ✅ No password to remember
 > - ✅ Works for both new users (registration) and existing users (login)
@@ -440,10 +433,9 @@ This is the **preferred** authentication flow for native mobile apps (iOS/Androi
 ```
 
 **⚠️ Critical Notes:**
-
 1. **Phone number format**: MUST be `"+86 13800138000"` with space after country code
 2. **Save `verification_id`**: Returned from Step 1, required for Step 2
-3. **Save `verification_token`**: Returned from Step 2, required for Step 3
+3. **Save `verification_token`**: Returned from Step 2, required for Step 3 
 
 ## Best Practices
 

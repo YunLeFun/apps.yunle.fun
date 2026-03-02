@@ -1,5 +1,5 @@
 <template>
-  <TheMenubar />
+  <LayoutTheMenubar />
   <main>
     <slot />
   </main>

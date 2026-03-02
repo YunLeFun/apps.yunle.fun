@@ -21,12 +21,22 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     // '@vite-pwa/nuxt',
     '@nuxt/eslint',
+    '@nuxt/icon',
     '@yunlefun/vue/nuxt',
     'nuxt-auth-utils',
     // '@prisma/nuxt',
     '@nuxt/test-utils/module',
     '@nuxtjs/ionic',
   ],
+
+  icon: {
+    // SSR false 模式下使用 client bundle 避免网络请求
+    clientBundle: {
+      scan: true,
+      includeCustomCollections: true,
+      sizeLimitKb: 256,
+    },
+  },
 
   css: [
     '~/styles/css/index.css',
@@ -35,6 +45,13 @@ export default defineNuxtConfig({
     '~/styles/scss/vars.scss',
     '~/styles/scss/index.scss',
     '~/styles/scss/override.scss',
+
+    /**
+     * Ionic 结构样式 — large title (collapse="condense") 等组件布局所需
+     * 不引入 normalize/typography 以避免和 Tailwind 冲突
+     */
+    '@ionic/vue/css/core.css',
+    '@ionic/vue/css/structure.css',
 
     /**
      * ionic dark mode
@@ -102,13 +119,6 @@ export default defineNuxtConfig({
     },
   },
 
-  components: [
-    {
-      path: '~/components',
-      pathPrefix: false,
-    },
-  ],
-
   // pwa,
 
   // prisma: {
@@ -136,6 +146,9 @@ export default defineNuxtConfig({
   },
 
   ionic: {
+    css: {
+      basic: false,
+    },
     config: {
       backButtonText: '返回',
       mode: 'ios',

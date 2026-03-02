@@ -70,7 +70,7 @@ useEventListener(document, 'pointermove', (e) => {
         <div class="face arb__bottom" />
       </div>
       <!-- --------------------- -->
-      <YlfHouseWall />
+      <HouseWall />
       <!-- --------------------- -->
       <div class="puerta-c">
         <div class="puerta">
@@ -107,9 +107,9 @@ useEventListener(document, 'pointermove', (e) => {
         </div>
       </div>
 
-      <YlfHouseAc />
+      <HouseAc />
 
-      <YlfHousePainting />
+      <HousePainting />
 
       <div class="librero">
         <div class="face librero__front" />
@@ -156,7 +156,7 @@ useEventListener(document, 'pointermove', (e) => {
         </div>
       <!-- Repeat the above div for each box as needed -->
       </div>
-      <YlfHouseTV />
+      <HouseTV />
       <div class="repisa-t">
         <div class="face repisa-t__front" />
         <div class="face repisa-t__back" />

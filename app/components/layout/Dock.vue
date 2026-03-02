@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /**
- * AppDock - iPhone 风格底部 Dock 导航栏组件
+ * LayoutDock - iPhone 风格底部 Dock 导航栏组件
  *
  * @description
  * 提供类似 iOS 的底部固定导航栏，支持自定义图标、渐变色和路由跳转
  *
  * @example
  * ```vue
- * <AppDock :items="dockItems" />
+ * <LayoutDock :items="dockItems" />
  * ```
  */
 

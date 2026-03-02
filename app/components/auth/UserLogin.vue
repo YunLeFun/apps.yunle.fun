@@ -25,7 +25,7 @@ onMounted(() => {
     class="w-full flex items-center justify-center m-auto max-w-md"
   >
     <IonCardContent class="p-6">
-      <LoginForApp v-if="appInfo" :app-info="appInfo" />
+      <AuthLoginForApp v-if="appInfo" :app-info="appInfo" />
 
       <WxLoginCard />
     </IonCardContent>

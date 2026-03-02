@@ -51,6 +51,9 @@ ion-header.header-collapse-condense ion-toolbar {
   border-radius: 7px;
   font-size: 18px;
   color: #fff;
+  // 在 Konsta list-item 的 #media 插槽中垂直居中
+  // media 容器是 flex 但没有 align-items: center
+  align-self: center;
 }
 
 // 图标颜色：使用 Ionic CSS 变量，确保跟随主题
@@ -120,29 +123,63 @@ ion-header.header-collapse-condense ion-toolbar {
 }
 
 // ============================================================
-// iOS 登录入口样式（Apple ID 风格）
-// Konsta UI 的 chevron 默认在 titleWrap 内，仅与 title 行对齐
-// 当有 subtitle 时需要让 chevron 相对于整个内容区域垂直居中
+// Konsta k-list-item：有 footer/subtitle 时 chevron 和 after 垂直居中
+//
+// 问题：Konsta UI 的 chevron 和 after 只和 title 同行对齐（titleWrap
+//       是 flex 容器），footer/subtitle 在 titleWrap 下方作为兄弟节点，
+//       导致 chevron 无法相对整个 cell 垂直居中。
+//       这不符合 iOS HIG 规范（disclosure indicator 应垂直居中）。
+//
+// 方案：将 inner 改为 grid，titleWrap 用 display:contents 打散，
+//       after 和 chevron 放入右侧列并跨行垂直居中。
+//
+// 用法：在 k-list-item 上设置 inner-class="k-list-item-vcenter"
+//
+// Konsta DOM 结构：
+//   li > itemContent(flex items-center) > inner(.w-full.relative)
+//     > titleWrap(.flex.justify-between.items-center min-h-7)
+//       > title(div.shrink) | after(div.shrink-0) | ChevronIcon(svg)
+//     > footer / subtitle / text
 // ============================================================
 
-.ios-login-entry {
-  // inner 容器设为相对定位
-  .w-full.relative {
-    position: relative;
+.k-list-item-vcenter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+
+  // titleWrap 打散为 grid 子项
+  > .flex.justify-between {
+    display: contents;
+
+    // title 在左列第 1 行
+    > .shrink {
+      grid-column: 1;
+      grid-row: 1;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+    }
+
+    // after 在右列，跨两行，垂直居中
+    > .shrink-0 {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+    }
+
+    // chevron 在右列，跨两行，垂直居中
+    > svg {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+      margin-left: 12px;
+    }
   }
 
-  // chevron SVG：绝对定位到 inner 容器的右侧垂直居中
-  .w-full.relative svg[viewBox='0 0 12 20'] {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 0;
-  }
-
-  // titleWrap 右侧预留 chevron 空间，避免文字和箭头重叠
-  .w-full.relative > .flex.justify-between {
-    padding-right: 24px;
+  // footer / subtitle / text 在左列第 2 行
+  > .flex.justify-between ~ div {
+    grid-column: 1;
+    grid-row: 2;
   }
 }
 
@@ -156,4 +193,11 @@ ion-header.header-collapse-condense ion-toolbar {
   font-size: 0.875rem;
   background-color: rgba(var(--ion-color-primary-rgb, 0, 122, 255), 0.1);
   color: var(--ion-color-primary, #007aff);
+}
+
+// Badge / after 内容在带 subtitle/footer 的列表项中垂直居中
+.ios-badge-center {
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }

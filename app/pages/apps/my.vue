@@ -12,6 +12,7 @@ import {
   IonPage,
   IonRefresher,
   IonRefresherContent,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   onIonViewWillEnter,
@@ -171,7 +172,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
 
       <!-- 加载中 -->
       <div v-else-if="loading" class="flex justify-center pt-20">
-        <div class="i-lucide-loader-2 text-3xl animate-spin opacity-40" />
+        <IonSpinner name="crescent" class="opacity-40" />
       </div>
 
       <!-- 空状态 -->

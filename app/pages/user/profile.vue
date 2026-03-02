@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { actionSheetController, alertController } from '@ionic/vue'
+import { IonPage } from '@ionic/vue'
 import {
   callOutline,
   checkmarkCircle,
   closeCircle,
   copyOutline,
   keyOutline,
-  lockClosedOutline,
   logoGithub,
   logOut,
   logoWechat,
   mailOutline,
   personOutline,
+  qrCodeOutline,
   refreshOutline,
   textOutline,
   timeOutline,
@@ -27,99 +27,43 @@ import {
 const router = useRouter()
 const userStore = useUserStore()
 const { confirmLogout, isLoggingOut } = useLogout()
-const toast = useToast()
 
 const {
   user,
-  loading: authLoading,
+  authLoading,
+  displayName,
+  displayDescription,
+  displayPhone,
+  displayEmail,
+  displayGender,
+  joinDate,
+  avatarInitial,
+  isGitHubBound,
+  isWeChatBound,
+  isPhoneBound,
+  isEmailBound,
+  hasPassword,
   fetchUser,
+  editNickname,
+  editGender,
+  handlePhoneTap,
+  handleWeChatTap,
+  handleGitHubTap,
+  copyToClipboard,
+  handleRefresh,
   updateUserInfo,
-  unlinkProvider,
-  linkProvider,
-  resetPasswordWithOld,
-  changeEmail,
-  verifyEmailBindOtp,
-} = useCloudbaseAuth()
+} = useProfileEdit()
 
 await fetchUser()
 
-// === 计算属性 ===
-const displayName = computed(() =>
-  user.value?.nickname || userInfo.value.nickname || '未设置',
-)
-const displayDescription = computed(() => user.value?.description || '')
-const displayPhone = computed(() => {
-  const phone = user.value?.phone
-  if (!phone)
-    return '未绑定'
-  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-})
-const displayEmail = computed(() => user.value?.email || '未绑定')
-const joinDate = computed(() => {
-  const date = user.value?.createdAt
-  if (!date)
-    return '未知'
-  return new Date(date).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-})
-const avatarInitial = computed(() => (displayName.value || '云')[0])
-const isGitHubBound = computed(() => user.value?.providers?.includes('github'))
-const isWeChatBound = computed(() => user.value?.providers?.includes('wx_open'))
-const isPhoneBound = computed(() => !!user.value?.phone)
-const isEmailBound = computed(() => !!user.value?.email)
-const hasPassword = computed(() => user.value?.hasPassword ?? false)
-const displayGender = computed(() => {
-  const g = user.value?.gender
-  if (g === 'MALE')
-    return '男'
-  if (g === 'FEMALE')
-    return '女'
-  return '未设置'
-})
-
-// === 编辑昵称 ===
-async function editNickname() {
-  const alert = await alertController.create({
-    header: '修改昵称',
-    inputs: [
-      {
-        name: 'nickname',
-        type: 'text',
-        placeholder: '请输入昵称',
-        value: user.value?.nickname || '',
-        attributes: { maxlength: 20 },
-      },
-    ],
-    buttons: [
-      { text: '取消', role: 'cancel' },
-      {
-        text: '完成',
-        handler: async (data) => {
-          const val = data.nickname?.trim()
-          if (!val || val === (user.value?.nickname || ''))
-            return
-          await updateUserInfo({ nickname: val } as any)
-        },
-      },
-    ],
-  })
-  await alert.present()
-}
-
-// === 编辑简介 ===
+// === Modal 状态 ===
+const pageRef = ref<InstanceType<typeof IonPage>>()
 const isDescModalOpen = ref(false)
-const descEditValue = ref('')
+const isEmailModalOpen = ref(false)
+const isPasswordModalOpen = ref(false)
+const isQrcodeModalOpen = ref(false)
 
-function openDescModal() {
-  descEditValue.value = user.value?.description || ''
-  isDescModalOpen.value = true
-}
-
-async function saveDesc() {
-  const val = descEditValue.value.trim()
+async function handleDescSave(val: string) {
   if (val === (user.value?.description || '')) {
     isDescModalOpen.value = false
     return
@@ -128,175 +72,10 @@ async function saveDesc() {
   if (success)
     isDescModalOpen.value = false
 }
-
-// === 编辑性别 ===
-async function editGender() {
-  const actionSheet = await actionSheetController.create({
-    header: '选择性别',
-    buttons: [
-      {
-        text: '男',
-        handler: () => updateUserInfo({ gender: 'MALE' } as any),
-      },
-      {
-        text: '女',
-        handler: () => updateUserInfo({ gender: 'FEMALE' } as any),
-      },
-      {
-        text: '未设置',
-        handler: () => updateUserInfo({ gender: '' } as any),
-      },
-      { text: '取消', role: 'cancel' },
-    ],
-  })
-  await actionSheet.present()
-}
-
-// === 手机号提示 ===
-function handlePhoneTap() {
-  toast.showInfo('手机号暂不支持换绑')
-}
-
-// === 换绑邮箱 ===
-const isEmailModalOpen = ref(false)
-const emailForm = reactive({
-  newEmail: '',
-  verifyCode: '',
-})
-const emailVerifyFn = ref<((params: { email: string, token: string }) => Promise<unknown>) | null>(null)
-const emailStep = ref<'input' | 'verify'>('input')
-
-function openEmailModal() {
-  emailForm.newEmail = ''
-  emailForm.verifyCode = ''
-  emailVerifyFn.value = null
-  emailStep.value = 'input'
-  isEmailModalOpen.value = true
-}
-
-async function submitEmailChange() {
-  if (!emailForm.newEmail.trim()) {
-    toast.showWarning('请输入邮箱地址')
-    return
-  }
-  const result = await changeEmail(emailForm.newEmail.trim())
-  if (!result)
-    return
-  if (result.needVerify && result.verifyOtp) {
-    emailVerifyFn.value = result.verifyOtp as any
-    emailStep.value = 'verify'
-  }
-  else {
-    isEmailModalOpen.value = false
-  }
-}
-
-async function submitEmailVerify() {
-  if (!emailForm.verifyCode.trim()) {
-    toast.showWarning('请输入验证码')
-    return
-  }
-  if (!emailVerifyFn.value)
-    return
-  const ok = await verifyEmailBindOtp(emailVerifyFn.value, emailForm.newEmail, emailForm.verifyCode.trim())
-  if (ok)
-    isEmailModalOpen.value = false
-}
-
-// === 重设密码 ===
-const isPasswordModalOpen = ref(false)
-const passwordForm = reactive({
-  oldPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-})
-
-function openPasswordModal() {
-  passwordForm.oldPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
-  isPasswordModalOpen.value = true
-}
-
-async function submitPasswordChange() {
-  if (!passwordForm.oldPassword) {
-    toast.showWarning('请输入当前密码')
-    return
-  }
-  if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
-    toast.showWarning('新密码至少 8 位')
-    return
-  }
-  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    toast.showWarning('两次密码不一致')
-    return
-  }
-  const ok = await resetPasswordWithOld(passwordForm.oldPassword, passwordForm.newPassword)
-  if (ok)
-    isPasswordModalOpen.value = false
-}
-
-// === 绑定/解绑微信 ===
-async function handleWeChatTap() {
-  if (isWeChatBound.value) {
-    const alert = await alertController.create({
-      header: '解绑微信',
-      message: '确定要解绑微信账号吗？解绑后将无法通过微信登录。',
-      buttons: [
-        { text: '取消', role: 'cancel' },
-        {
-          text: '解绑',
-          role: 'destructive',
-          handler: () => unlinkProvider('wx_open'),
-        },
-      ],
-    })
-    await alert.present()
-  }
-  else {
-    await linkProvider('wx_open')
-  }
-}
-
-// === 绑定/解绑 GitHub ===
-async function handleGitHubTap() {
-  if (isGitHubBound.value) {
-    const alert = await alertController.create({
-      header: '解绑 GitHub',
-      message: '确定要解绑 GitHub 账号吗？解绑后将无法通过 GitHub 登录。',
-      buttons: [
-        { text: '取消', role: 'cancel' },
-        {
-          text: '解绑',
-          role: 'destructive',
-          handler: () => unlinkProvider('github'),
-        },
-      ],
-    })
-    await alert.present()
-  }
-  else {
-    await linkProvider('github')
-  }
-}
-
-// === 工具 ===
-async function copyToClipboard(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.showSuccess('已复制')
-  }
-  catch { /* silent */ }
-}
-
-async function handleRefresh() {
-  await fetchUser()
-  toast.showSuccess('已刷新')
-}
 </script>
 
 <template>
-  <IonPage>
+  <IonPage ref="pageRef">
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
@@ -345,6 +124,12 @@ async function handleRefresh() {
                 {{ user.email }}
               </p>
             </div>
+            <button
+              class="shrink-0 flex items-center justify-center rounded-full p-2 active:bg-gray-100 dark:active:bg-zinc-700"
+              @click="isQrcodeModalOpen = true"
+            >
+              <IonIcon :icon="qrCodeOutline" class="text-2xl ios-secondary-text" />
+            </button>
           </div>
         </k-block>
 
@@ -357,7 +142,7 @@ async function handleRefresh() {
             </template>
           </k-list-item>
 
-          <k-list-item title="个人简介" link @click="openDescModal">
+          <k-list-item title="个人简介" link @click="isDescModalOpen = true">
             <template #media>
               <span class="ios-icon-box ios-icon-purple"><IonIcon :icon="textOutline" /></span>
             </template>
@@ -388,7 +173,7 @@ async function handleRefresh() {
             </template>
           </k-list-item>
 
-          <k-list-item title="邮箱" link @click="openEmailModal">
+          <k-list-item title="邮箱" link @click="isEmailModalOpen = true">
             <template #media>
               <span class="ios-icon-box ios-icon-blue"><IonIcon :icon="mailOutline" /></span>
             </template>
@@ -450,7 +235,7 @@ async function handleRefresh() {
         <!-- 安全 -->
         <k-block-title>安全</k-block-title>
         <k-list strong inset>
-          <k-list-item title="登录密码" :link="hasPassword" @click="hasPassword && openPasswordModal()">
+          <k-list-item title="登录密码" :link="hasPassword" @click="hasPassword && (isPasswordModalOpen = true)">
             <template #media>
               <span class="ios-icon-box ios-icon-orange"><IonIcon :icon="keyOutline" /></span>
             </template>
@@ -471,7 +256,7 @@ async function handleRefresh() {
         <template v-if="user?.id">
           <k-block-title>用户标识</k-block-title>
           <k-list strong inset>
-            <k-list-item title="用户 ID" :subtitle="user.id" link @click="copyToClipboard(user.id)">
+            <k-list-item title="用户 ID" :subtitle="user.id" link inner-class="k-list-item-vcenter" @click="copyToClipboard(user.id)">
               <template #media>
                 <span class="ios-icon-box ios-icon-gray"><IonIcon :icon="copyOutline" /></span>
               </template>
@@ -504,191 +289,38 @@ async function handleRefresh() {
         <div class="h-8" />
       </template>
 
-      <!-- 编辑简介 Sheet Modal -->
-      <IonModal
-        :is-open="isDescModalOpen"
-        :initial-breakpoint="0.45"
-        :breakpoints="[0, 0.45, 0.75]"
-        :handle="true"
-        @did-dismiss="isDescModalOpen = false"
-      >
-        <IonHeader>
-          <IonToolbar>
-            <IonButtons slot="start">
-              <IonButton @click="isDescModalOpen = false">
-                取消
-              </IonButton>
-            </IonButtons>
-            <IonTitle>编辑简介</IonTitle>
-            <IonButtons slot="end">
-              <IonButton :strong="true" :disabled="authLoading" @click="saveDesc">
-                完成
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonList :inset="true" class="mt-4">
-            <IonItem>
-              <IonTextarea
-                v-model="descEditValue"
-                label="个人简介"
-                label-placement="stacked"
-                placeholder="介绍一下自己吧"
-                :maxlength="200"
-                :auto-grow="true"
-                :rows="3"
-                :counter="true"
-              />
-            </IonItem>
-          </IonList>
-        </IonContent>
-      </IonModal>
+      <!-- Modal 组件 -->
+      <UserProfileDescModal
+        v-model:open="isDescModalOpen"
+        :auth-loading="authLoading"
+        :description="displayDescription"
+        :presenting-element="pageRef?.$el"
+        @save="handleDescSave"
+      />
 
-      <!-- 换绑邮箱 Sheet Modal -->
-      <IonModal
-        :is-open="isEmailModalOpen"
-        :initial-breakpoint="0.45"
-        :breakpoints="[0, 0.45, 0.75]"
-        :handle="true"
-        @did-dismiss="isEmailModalOpen = false"
-      >
-        <IonHeader>
-          <IonToolbar>
-            <IonButtons slot="start">
-              <IonButton @click="isEmailModalOpen = false">
-                取消
-              </IonButton>
-            </IonButtons>
-            <IonTitle>{{ isEmailBound ? '换绑邮箱' : '绑定邮箱' }}</IonTitle>
-            <IonButtons slot="end">
-              <IonButton
-                :strong="true"
-                :disabled="authLoading"
-                @click="emailStep === 'input' ? submitEmailChange() : submitEmailVerify()"
-              >
-                {{ emailStep === 'input' ? '发送验证' : '确认' }}
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonList :inset="true" class="mt-4">
-            <template v-if="emailStep === 'input'">
-              <IonItem v-if="user?.email">
-                <IonInput
-                  :value="user.email"
-                  label="当前邮箱"
-                  label-placement="stacked"
-                  :readonly="true"
-                />
-              </IonItem>
-              <IonItem>
-                <IonInput
-                  v-model="emailForm.newEmail"
-                  label="新邮箱"
-                  label-placement="stacked"
-                  type="email"
-                  placeholder="请输入新邮箱地址"
-                  :clear-input="true"
-                  inputmode="email"
-                />
-              </IonItem>
-            </template>
-            <template v-else>
-              <IonItem>
-                <IonInput
-                  :value="emailForm.newEmail"
-                  label="新邮箱"
-                  label-placement="stacked"
-                  :readonly="true"
-                />
-              </IonItem>
-              <IonItem>
-                <IonInput
-                  v-model="emailForm.verifyCode"
-                  label="验证码"
-                  label-placement="stacked"
-                  placeholder="请输入邮箱验证码"
-                  inputmode="numeric"
-                  :maxlength="6"
-                  :clear-input="true"
-                />
-              </IonItem>
-            </template>
-          </IonList>
-          <div v-if="emailStep === 'verify'" class="px-6 mt-2">
-            <p class="text-xs ios-secondary-text">
-              验证码已发送至 {{ emailForm.newEmail }}，请查收邮件。
-            </p>
-          </div>
-        </IonContent>
-      </IonModal>
+      <UserProfileEmailModal
+        v-model:open="isEmailModalOpen"
+        :auth-loading="authLoading"
+        :current-email="user?.email || ''"
+        :is-email-bound="isEmailBound"
+        :presenting-element="pageRef?.$el"
+      />
 
-      <!-- 重设密码 Sheet Modal -->
-      <IonModal
-        :is-open="isPasswordModalOpen"
-        :initial-breakpoint="0.55"
-        :breakpoints="[0, 0.55, 0.85]"
-        :handle="true"
-        @did-dismiss="isPasswordModalOpen = false"
-      >
-        <IonHeader>
-          <IonToolbar>
-            <IonButtons slot="start">
-              <IonButton @click="isPasswordModalOpen = false">
-                取消
-              </IonButton>
-            </IonButtons>
-            <IonTitle>重设密码</IonTitle>
-            <IonButtons slot="end">
-              <IonButton :strong="true" :disabled="authLoading" @click="submitPasswordChange">
-                完成
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <IonList :inset="true" class="mt-4">
-            <IonItem>
-              <IonInput
-                v-model="passwordForm.oldPassword"
-                label="当前密码"
-                label-placement="stacked"
-                type="password"
-                placeholder="请输入当前密码"
-                :clear-input="true"
-              />
-            </IonItem>
-            <IonItem>
-              <IonInput
-                v-model="passwordForm.newPassword"
-                label="新密码"
-                label-placement="stacked"
-                type="password"
-                placeholder="至少 8 位"
-                :clear-input="true"
-              />
-            </IonItem>
-            <IonItem>
-              <IonInput
-                v-model="passwordForm.confirmPassword"
-                label="确认新密码"
-                label-placement="stacked"
-                type="password"
-                placeholder="请再次输入新密码"
-                :clear-input="true"
-              />
-            </IonItem>
-          </IonList>
-          <div class="px-6 mt-2">
-            <p class="text-xs ios-secondary-text flex items-center gap-1">
-              <IonIcon :icon="lockClosedOutline" class="text-xs" />
-              密码修改后，所有设备需重新登录。
-            </p>
-          </div>
-        </IonContent>
-      </IonModal>
+      <UserProfilePasswordModal
+        v-model:open="isPasswordModalOpen"
+        :auth-loading="authLoading"
+        :presenting-element="pageRef?.$el"
+      />
+
+      <UserProfileQrcodeModal
+        v-model:open="isQrcodeModalOpen"
+        :presenting-element="pageRef?.$el"
+        :nickname="displayName"
+        :description="displayDescription"
+        :avatar="(userInfo.avatar || user?.avatar) || ''"
+        :avatar-initial="avatarInitial"
+        :user-id="user?.id"
+      />
     </IonContent>
   </IonPage>
 </template>

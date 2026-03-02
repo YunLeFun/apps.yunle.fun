@@ -4,25 +4,25 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 
 ## 字段定义
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `_id` | `string` | 自动 | 文档 ID，CloudBase 自动生成 |
-| `_openid` | `string` | 自动 | 创建者用户 ID，服务端自动注入 |
-| `ownerLogin` | `string` | 是 | 所有者用户名，用于展示 |
-| `name` | `string` | 是 | 应用名称 |
-| `slug` | `string` | 是 | URL 标识符，全局唯一（唯一索引约束） |
-| `description` | `string` | 否 | 应用描述 |
-| `githubRepo` | `string` | 否 | GitHub 仓库，格式 `owner/repo` |
-| `websiteUrl` | `string` | 否 | 应用网址 |
-| `backupUrl` | `string` | 否 | 备用链接 |
-| `logo` | `string` | 否 | 自定义 Logo 图片 URL（优先于 emoji 展示） |
-| `emoji` | `string` | 否 | 应用 emoji 图标（无 logo 时展示，默认 `📱`） |
-| `themeColor` | `string` | 否 | 主题色，十六进制色值（默认 `#007AFF`） |
-| `category` | `string` | 否 | 分类 |
-| `tags` | `string[]` | 否 | 标签列表 |
-| `isPublic` | `boolean` | 是 | 是否公开可见 |
-| `createdAt` | `number` | 是 | 创建时间戳（ms） |
-| `updatedAt` | `number` | 是 | 更新时间戳（ms） |
+| 字段          | 类型       | 必填 | 说明                                         |
+| ------------- | ---------- | ---- | -------------------------------------------- |
+| `_id`         | `string`   | 自动 | 文档 ID，CloudBase 自动生成                  |
+| `_openid`     | `string`   | 自动 | 创建者用户 ID，服务端自动注入                |
+| `ownerLogin`  | `string`   | 是   | 所有者用户名，用于展示                       |
+| `name`        | `string`   | 是   | 应用名称                                     |
+| `slug`        | `string`   | 是   | URL 标识符，全局唯一（唯一索引约束）         |
+| `description` | `string`   | 否   | 应用描述                                     |
+| `githubRepo`  | `string`   | 否   | GitHub 仓库，格式 `owner/repo`               |
+| `websiteUrl`  | `string`   | 否   | 应用网址                                     |
+| `backupUrl`   | `string`   | 否   | 备用链接                                     |
+| `logo`        | `string`   | 否   | 自定义 Logo 图片 URL（优先于 emoji 展示）    |
+| `emoji`       | `string`   | 否   | 应用 emoji 图标（无 logo 时展示，默认 `📱`） |
+| `themeColor`  | `string`   | 否   | 主题色，十六进制色值（默认 `#007AFF`）       |
+| `category`    | `string`   | 否   | 分类                                         |
+| `tags`        | `string[]` | 否   | 标签列表                                     |
+| `isPublic`    | `boolean`  | 是   | 是否公开可见                                 |
+| `createdAt`   | `number`   | 是   | 创建时间戳（ms）                             |
+| `updatedAt`   | `number`   | 是   | 更新时间戳（ms）                             |
 
 ## `_openid` 机制
 
@@ -35,11 +35,11 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 
 ## 索引
 
-| 索引名 | 字段 | 类型 | 说明 |
-|--------|------|------|------|
-| `_id_` | `_id` | 默认 | 主键 |
-| `_openid_1` | `_openid` | 升序 | 按创建者查询 |
-| `idx_slug_unique` | `slug` | 唯一 | slug 全局唯一约束 |
+| 索引名            | 字段      | 类型 | 说明              |
+| ----------------- | --------- | ---- | ----------------- |
+| `_id_`            | `_id`     | 默认 | 主键              |
+| `_openid_1`       | `_openid` | 升序 | 按创建者查询      |
+| `idx_slug_unique` | `slug`    | 唯一 | slug 全局唯一约束 |
 
 ## 安全规则
 
@@ -52,10 +52,10 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 }
 ```
 
-| 操作 | 权限 |
-|------|------|
+| 操作 | 权限                                           |
+| ---- | ---------------------------------------------- |
 | 读取 | 公开应用所有登录用户可读；私有应用仅创建者可读 |
-| 写入 | 仅创建者可创建/修改/删除 |
+| 写入 | 仅创建者可创建/修改/删除                       |
 
 ### 安全规则对 `where` 查询的约束
 
@@ -107,13 +107,16 @@ db.collection('apps')
 // 1. 先查自己的
 const { data } = await db.collection('apps')
   .where({ slug, _openid: userId })
-  .limit(1).get()
-if (data.length > 0) return data[0]
+  .limit(1)
+  .get()
+if (data.length > 0)
+  return data[0]
 
 // 2. 再查公开的
 const { data: pub } = await db.collection('apps')
   .where({ slug, isPublic: true })
-  .limit(1).get()
+  .limit(1)
+  .get()
 return pub[0] || null
 ```
 
@@ -125,9 +128,13 @@ return pub[0] || null
 ```typescript
 // 客户端预检（不能覆盖他人私有数据）
 const pub = await db.collection('apps')
-  .where({ slug, isPublic: true }).limit(1).get()
+  .where({ slug, isPublic: true })
+  .limit(1)
+  .get()
 const my = await db.collection('apps')
-  .where({ slug, _openid: userId }).limit(1).get()
+  .where({ slug, _openid: userId })
+  .limit(1)
+  .get()
 
 // 最终由唯一索引兜底
 ```
@@ -140,8 +147,8 @@ await db.collection('apps').add({
   ownerLogin: 'username',
   name: 'My App',
   slug: 'my-app',
-  logo: '',          // 自定义 Logo URL（可选）
-  emoji: '🚀',       // emoji 图标（默认 📱）
+  logo: '', // 自定义 Logo URL（可选）
+  emoji: '🚀', // emoji 图标（默认 📱）
   themeColor: '#007AFF', // 主题色（默认 #007AFF）
   isPublic: true,
   createdAt: Date.now(),

@@ -61,7 +61,7 @@ function handleScanCancel() {
       </div>
 
       <!-- 扫码组件 -->
-      <BarcodeScanner
+      <ScannerBarcode
         :is-visible="showScanner"
         :show-flashlight="true"
         @cancel="handleScanCancel"

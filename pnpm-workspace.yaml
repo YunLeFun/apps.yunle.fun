@@ -1,6 +1,9 @@
 shellEmulator: true
 
-trustPolicy: off
+trustPolicy: no-downgrade
+
+trustPolicyExclude:
+  - 'rollup@2.80.0'
 
 overrides:
   semver@<7.0.0: '>=7.7.4'

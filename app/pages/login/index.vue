@@ -13,6 +13,7 @@ import {
 } from '@ionic/vue'
 import { isValidEmail, isValidPhone, useCountdown } from '@yunlefun/auth'
 import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icons'
+import { config } from '~/config'
 
 const {
   sendPhoneOtp,
@@ -192,13 +193,13 @@ async function handleVerifySignupOtp() {
       <div class="auth-container">
         <!-- Logo 区域 -->
         <div class="auth-header">
-          <Logo class="auth-logo" />
-          <h1 class="auth-title">
-            {{ pageMode === 'login' ? '登录云乐坊' : '注册云乐坊' }}
-          </h1>
-          <p class="auth-subtitle">
-            {{ pageMode === 'login' ? '使用您的账号继续' : '创建您的云乐坊账号' }}
+          <YlfLogoSvg class="auth-logo-icon" />
+          <p class="auth-brand">
+            云乐坊
           </p>
+          <h1 class="auth-title">
+            {{ pageMode === 'login' ? '登录' : '创建账号' }}
+          </h1>
         </div>
 
         <!-- ===== 登录模式 ===== -->
@@ -486,9 +487,9 @@ async function handleVerifySignupOtp() {
 
             <p class="auth-hint">
               注册即表示您同意
-              <a href="https://www.yunle.fun/docs/terms-of-service" target="_blank" class="auth-link">服务条款</a>
+              <a href="#" class="auth-link" @click.prevent="openInAppBrowser(config.legal.terms)">服务条款</a>
               和
-              <a href="https://www.yunle.fun/docs/privacy-policy" target="_blank" class="auth-link">隐私政策</a>
+              <a href="#" class="auth-link" @click.prevent="openInAppBrowser(config.legal.privacy)">隐私政策</a>
             </p>
           </div>
 
@@ -507,9 +508,9 @@ async function handleVerifySignupOtp() {
         <div v-if="pageMode === 'login'" class="auth-terms">
           <p class="auth-terms-text">
             登录即表示您同意
-            <a href="https://www.yunle.fun/docs/terms-of-service" target="_blank" class="auth-link">服务条款</a>
+            <a href="#" class="auth-link" @click.prevent="openInAppBrowser(config.legal.terms)">服务条款</a>
             和
-            <a href="https://www.yunle.fun/docs/privacy-policy" target="_blank" class="auth-link">隐私政策</a>
+            <a href="#" class="auth-link" @click.prevent="openInAppBrowser(config.legal.privacy)">隐私政策</a>
           </p>
         </div>
       </div>
@@ -527,25 +528,29 @@ async function handleVerifySignupOtp() {
 // Header
 .auth-header {
   text-align: center;
-  padding: 20px 0 28px;
+  padding: 32px 0 28px;
+}
 
-  .auth-logo {
-    margin-bottom: 12px;
-  }
+.auth-logo-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  color: var(--ion-text-color, #000);
+}
 
-  .auth-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--ion-text-color, #000);
-    margin: 0 0 6px;
-    letter-spacing: -0.5px;
-  }
+.auth-brand {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ion-color-medium, #8e8e93);
+  margin: 0 0 4px;
+}
 
-  .auth-subtitle {
-    font-size: 15px;
-    color: var(--ion-color-medium, #8e8e93);
-    margin: 0;
-  }
+.auth-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--ion-text-color, #000);
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
 // iOS Segmented Control

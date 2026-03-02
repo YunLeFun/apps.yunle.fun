@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import {
-  cloudOutline,
+  documentTextOutline,
   informationCircleOutline,
+  listOutline,
+  shieldCheckmarkOutline,
 } from 'ionicons/icons'
 import {
   kBlock,
-  kBlockTitle,
   kList,
   kListItem,
 } from 'konsta/vue'
-import { YLF_LINKS } from '~/constants'
+import { APP_CHANGELOG } from '~/constants'
+import { config } from '~/config'
 
 const appVersion = '0.0.1'
 
-function openLink(url: string) {
-  window.open(url, '_blank')
-}
+const { handleLogoClick } = useDeveloperMode()
+
+/**
+ * 版本更新日志是否展开
+ */
+const showChangelog = ref(false)
 </script>
 
 <template>
@@ -29,19 +34,16 @@ function openLink(url: string) {
       </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true">
-      <IonHeader collapse="condense">
-        <IonToolbar>
-          <IonTitle size="large">
-            关于
-          </IonTitle>
-        </IonToolbar>
-      </IonHeader>
-
-      <!-- App Logo + 名称 -->
+    <IonContent>
+      <!-- App Logo + 名称（连续点击 5 次进入开发者模式） -->
       <k-block class="mt-8">
-        <div class="flex flex-col items-center py-4 text-center">
-          <div class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-[22px] bg---ion-color-primary,#007aff">
+        <div
+          class="flex flex-col items-center py-4 text-center select-none"
+          role="button"
+          tabindex="0"
+          @click="handleLogoClick"
+        >
+          <div class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-full" style="background-color: var(--ion-color-primary, #007aff)">
             <span class="text-3xl font-bold text-white">☁️</span>
           </div>
           <h2 class="text-lg font-semibold">
@@ -53,24 +55,7 @@ function openLink(url: string) {
         </div>
       </k-block>
 
-      <!-- 链接 -->
-      <k-list strong inset>
-        <k-list-item
-          link
-          title="云乐坊工作室"
-          :after="YLF_LINKS.studio.text"
-          @click="openLink(YLF_LINKS.studio.url)"
-        >
-          <template #media>
-            <span class="ios-icon-box ios-icon-blue">
-              <IonIcon :icon="cloudOutline" />
-            </span>
-          </template>
-        </k-list-item>
-      </k-list>
-
-      <!-- 信息 -->
-      <k-block-title>信息</k-block-title>
+      <!-- 应用信息 -->
       <k-list strong inset>
         <k-list-item
           title="版本"
@@ -82,7 +67,68 @@ function openLink(url: string) {
             </span>
           </template>
         </k-list-item>
+
+        <k-list-item
+          link
+          title="版本更新"
+          after="查看日志"
+          @click="showChangelog = !showChangelog"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="listOutline" />
+            </span>
+          </template>
+        </k-list-item>
       </k-list>
+
+      <!-- 更新日志展开 -->
+      <Transition name="changelog">
+        <k-block v-if="showChangelog" strong inset class="mt-0!">
+          <div v-for="entry in APP_CHANGELOG" :key="entry.version" class="mb-4 last:mb-0">
+            <div class="mb-1.5 flex items-center gap-2">
+              <span class="text-sm font-semibold">v{{ entry.version }}</span>
+              <span class="text-xs ios-secondary-text">{{ entry.date }}</span>
+            </div>
+            <ul class="ml-0 list-none space-y-1">
+              <li v-for="(change, idx) in entry.changes" :key="idx" class="flex items-start gap-1.5 text-sm ios-secondary-text">
+                <span class="mt-0.5 shrink-0 text-xs text-blue-500">•</span>
+                <span>{{ change }}</span>
+              </li>
+            </ul>
+          </div>
+        </k-block>
+      </Transition>
+
+      <!-- 法律信息 -->
+      <k-list strong inset>
+        <k-list-item
+          link
+          title="服务条款"
+          @click="openInAppBrowser(config.legal.terms)"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-gray">
+              <IonIcon :icon="documentTextOutline" />
+            </span>
+          </template>
+        </k-list-item>
+
+        <k-list-item
+          link
+          title="隐私政策"
+          @click="openInAppBrowser(config.legal.privacy)"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-teal">
+              <IonIcon :icon="shieldCheckmarkOutline" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 社交媒体 -->
+      <AppSocialList />
 
       <!-- 底部版权 -->
       <k-block class="mt-8">
@@ -93,3 +139,21 @@ function openLink(url: string) {
     </IonContent>
   </IonPage>
 </template>
+
+<style scoped>
+.changelog-enter-active,
+.changelog-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.changelog-enter-from,
+.changelog-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.changelog-enter-to,
+.changelog-leave-from {
+  opacity: 1;
+  max-height: 500px;
+}
+</style>

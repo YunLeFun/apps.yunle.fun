@@ -5,5 +5,5 @@ definePageMeta({
 </script>
 
 <template>
-  <YlfHouse />
+  <HouseMain />
 </template>

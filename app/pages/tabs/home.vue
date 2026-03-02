@@ -7,7 +7,7 @@
  */
 
 import type { YlfAppInfo } from '~~/packages/types'
-import type { DockItem } from '~/components/layout/AppDock.vue'
+import type { DockItem } from '~/components/layout/Dock.vue'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   IonButton,
@@ -228,10 +228,10 @@ const dockItems: DockItem[] = [
       </AppGrid>
 
       <!-- 底部 Dock 导航栏 -->
-      <AppDock :items="dockItems" />
+      <LayoutDock :items="dockItems" />
 
       <!-- 扫码界面 -->
-      <BarcodeScanner
+      <ScannerBarcode
         :is-visible="showScanner"
         :show-flashlight="true"
         @cancel="closeScanner"

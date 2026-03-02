@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { apps, informationCircle, logOut, personCircleOutline, settings } from 'ionicons/icons'
+import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, logOut, personCircleOutline, settings } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -15,6 +15,7 @@ import {
 const router = useRouter()
 
 const userStore = useUserStore()
+const developerStore = useDeveloperStore()
 
 const { confirmLogout, isLoggingOut } = useLogout()
 
@@ -53,8 +54,8 @@ function navigateTo(path: string) {
         <k-list-item
           link
           title="登录「云乐坊」账户"
-          subtitle="登录以使用全部功能"
-          class="ios-login-entry"
+          footer="登录以使用全部功能"
+          inner-class="k-list-item-vcenter"
           @click="goToLoginPage"
         >
           <template #media>
@@ -73,7 +74,7 @@ function navigateTo(path: string) {
           link
           :title="userInfo.nickname || '云乐坊用户'"
           subtitle="查看个人资料"
-          class="ios-login-entry"
+          inner-class="k-list-item-vcenter"
           @click="navigateTo('/user/profile')"
         >
           <template #media>
@@ -101,6 +102,7 @@ function navigateTo(path: string) {
           link
           title="我的应用"
           subtitle="创建和管理你的应用"
+          inner-class="k-list-item-vcenter"
           @click="navigateTo('/apps/my')"
         >
           <template #media>
@@ -133,6 +135,48 @@ function navigateTo(path: string) {
           <template #media>
             <span class="ios-icon-box ios-icon-blue">
               <IonIcon :icon="informationCircle" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 帮助 & 反馈 -->
+      <k-list strong inset>
+        <k-list-item
+          link
+          title="帮助"
+          @click="navigateTo('/help')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="helpCircleOutline" />
+            </span>
+          </template>
+        </k-list-item>
+
+        <k-list-item
+          link
+          title="反馈"
+          @click="navigateTo('/feedback')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-orange">
+              <IonIcon :icon="chatbubbleEllipsesOutline" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
+      <!-- 开发者模式（仅开启后可见） -->
+      <k-list v-if="developerStore.enabled" strong inset>
+        <k-list-item
+          link
+          title="开发者选项"
+          @click="navigateTo('/developer')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-purple">
+              <IonIcon :icon="codeSlashOutline" />
             </span>
           </template>
         </k-list-item>

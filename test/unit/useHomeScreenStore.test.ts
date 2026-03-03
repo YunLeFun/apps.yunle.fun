@@ -42,34 +42,24 @@ function createStore() {
       || dockApps.value.some(a => a.appId === appId)
   }
 
-  function reorderApps(apps: InstalledApp[]) {
-    apps.forEach((app, index) => {
-      app.sortOrder = index
-    })
-  }
-
   function installApp(appId: string) {
     if (isInstalled(appId))
       return
-    installedApps.value.push({ appId, sortOrder: installedApps.value.length })
+    installedApps.value.push({ appId })
   }
 
   function uninstallApp(appId: string) {
     installedApps.value = installedApps.value.filter(a => a.appId !== appId)
     dockApps.value = dockApps.value.filter(a => a.appId !== appId)
-    reorderApps(installedApps.value)
-    reorderApps(dockApps.value)
   }
 
   function updateInstalledApps(apps: InstalledApp[]) {
-    reorderApps(apps)
     installedApps.value = apps
   }
 
   function updateDockApps(apps: InstalledApp[]) {
     if (apps.length > DOCK_MAX_APPS)
       apps = apps.slice(0, DOCK_MAX_APPS)
-    reorderApps(apps)
     dockApps.value = apps
   }
 
@@ -108,12 +98,11 @@ function createStore() {
     }
   }
 
-  function initWithDefaults(apps: { id: string, code: string }[]) {
+  function initWithDefaults(apps: { id: string, slug: string }[]) {
     if (installedApps.value.length > 0)
       return
-    installedApps.value = apps.map((app, index) => ({
-      appId: app.id || app.code,
-      sortOrder: index,
+    installedApps.value = apps.map(app => ({
+      appId: app.id || app.slug,
     }))
   }
 
@@ -155,18 +144,15 @@ describe('useHomeScreenStore', () => {
     it('安装一个新应用到 Home Screen', () => {
       store.installApp('app-1')
       expect(store.installedApps.value).toHaveLength(1)
-      expect(store.installedApps.value[0]).toEqual({
-        appId: 'app-1',
-        sortOrder: 0,
-      })
+      expect(store.installedApps.value[0]).toEqual({ appId: 'app-1' })
     })
 
-    it('安装多个应用时 sortOrder 递增', () => {
+    it('安装多个应用时按数组顺序排列', () => {
       store.installApp('app-1')
       store.installApp('app-2')
       store.installApp('app-3')
       expect(store.installedApps.value).toHaveLength(3)
-      expect(store.installedApps.value.map(a => a.sortOrder)).toEqual([0, 1, 2])
+      expect(store.installedApps.value.map(a => a.appId)).toEqual(['app-1', 'app-2', 'app-3'])
     })
 
     it('不允许重复安装同一应用', () => {
@@ -176,7 +162,7 @@ describe('useHomeScreenStore', () => {
     })
 
     it('dock 中存在的应用也不允许重复安装', () => {
-      store.dockApps.value = [{ appId: 'dock-app', sortOrder: 0 }]
+      store.dockApps.value = [{ appId: 'dock-app' }]
       store.installApp('dock-app')
       expect(store.installedApps.value).toHaveLength(0)
     })
@@ -185,9 +171,9 @@ describe('useHomeScreenStore', () => {
   describe('uninstallApp', () => {
     it('从 Home Screen 卸载应用', () => {
       store.installedApps.value = [
-        { appId: 'app-1', sortOrder: 0 },
-        { appId: 'app-2', sortOrder: 1 },
-        { appId: 'app-3', sortOrder: 2 },
+        { appId: 'app-1' },
+        { appId: 'app-2' },
+        { appId: 'app-3' },
       ]
       store.uninstallApp('app-2')
       expect(store.installedApps.value).toHaveLength(2)
@@ -195,34 +181,34 @@ describe('useHomeScreenStore', () => {
     })
 
     it('卸载时同时从 Dock 移除', () => {
-      store.installedApps.value = [{ appId: 'app-1', sortOrder: 0 }]
-      store.dockApps.value = [{ appId: 'app-1', sortOrder: 0 }]
+      store.installedApps.value = [{ appId: 'app-1' }]
+      store.dockApps.value = [{ appId: 'app-1' }]
       store.uninstallApp('app-1')
       expect(store.installedApps.value).toHaveLength(0)
       expect(store.dockApps.value).toHaveLength(0)
     })
 
-    it('卸载后重新排序 sortOrder', () => {
+    it('卸载后保持数组顺序', () => {
       store.installedApps.value = [
-        { appId: 'app-1', sortOrder: 0 },
-        { appId: 'app-2', sortOrder: 1 },
-        { appId: 'app-3', sortOrder: 2 },
+        { appId: 'app-1' },
+        { appId: 'app-2' },
+        { appId: 'app-3' },
       ]
       store.uninstallApp('app-1')
-      expect(store.installedApps.value[0].sortOrder).toBe(0)
-      expect(store.installedApps.value[1].sortOrder).toBe(1)
+      expect(store.installedApps.value[0].appId).toBe('app-2')
+      expect(store.installedApps.value[1].appId).toBe('app-3')
     })
   })
 
   describe('isInstalled', () => {
     it('检测 Home Screen 中的应用', () => {
-      store.installedApps.value = [{ appId: 'app-1', sortOrder: 0 }]
+      store.installedApps.value = [{ appId: 'app-1' }]
       expect(store.isInstalled('app-1')).toBe(true)
       expect(store.isInstalled('app-2')).toBe(false)
     })
 
     it('dock 中的应用也返回 true', () => {
-      store.dockApps.value = [{ appId: 'dock-app', sortOrder: 0 }]
+      store.dockApps.value = [{ appId: 'dock-app' }]
       expect(store.isInstalled('dock-app')).toBe(true)
     })
   })
@@ -230,23 +216,23 @@ describe('useHomeScreenStore', () => {
   // ==================== 排序 ====================
 
   describe('updateInstalledApps', () => {
-    it('更新排序并重新编号 sortOrder', () => {
+    it('更新排序（数组顺序即排序）', () => {
       const newOrder = [
-        { appId: 'app-3', sortOrder: 99 },
-        { appId: 'app-1', sortOrder: 99 },
-        { appId: 'app-2', sortOrder: 99 },
+        { appId: 'app-3' },
+        { appId: 'app-1' },
+        { appId: 'app-2' },
       ]
       store.updateInstalledApps(newOrder)
       expect(store.installedApps.value[0].appId).toBe('app-3')
-      expect(store.installedApps.value.map(a => a.sortOrder)).toEqual([0, 1, 2])
+      expect(store.installedApps.value.map(a => a.appId)).toEqual(['app-3', 'app-1', 'app-2'])
     })
   })
 
   describe('updateDockApps', () => {
     it('更新 Dock 应用', () => {
       store.updateDockApps([
-        { appId: 'a', sortOrder: 0 },
-        { appId: 'b', sortOrder: 1 },
+        { appId: 'a' },
+        { appId: 'b' },
       ])
       expect(store.dockApps.value).toHaveLength(2)
     })
@@ -254,7 +240,6 @@ describe('useHomeScreenStore', () => {
     it('超过 DOCK_MAX_APPS 时截断', () => {
       const tooMany = Array.from({ length: DOCK_MAX_APPS + 3 }, (_, i) => ({
         appId: `app-${i}`,
-        sortOrder: i,
       }))
       store.updateDockApps(tooMany)
       expect(store.dockApps.value).toHaveLength(DOCK_MAX_APPS)
@@ -306,7 +291,6 @@ describe('useHomeScreenStore', () => {
     it('少于一页时返回单页', () => {
       store.installedApps.value = Array.from({ length: 5 }, (_, i) => ({
         appId: `app-${i}`,
-        sortOrder: i,
       }))
       expect(store.pagedApps.value).toHaveLength(1)
       expect(store.pagedApps.value[0]).toHaveLength(5)
@@ -315,7 +299,6 @@ describe('useHomeScreenStore', () => {
     it('超过一页时正确分页', () => {
       store.installedApps.value = Array.from({ length: HOME_SCREEN_PAGE_SIZE + 5 }, (_, i) => ({
         appId: `app-${i}`,
-        sortOrder: i,
       }))
       expect(store.pagedApps.value).toHaveLength(2)
       expect(store.pagedApps.value[0]).toHaveLength(HOME_SCREEN_PAGE_SIZE)
@@ -325,7 +308,6 @@ describe('useHomeScreenStore', () => {
     it('totalPages 与 pagedApps 长度一致', () => {
       store.installedApps.value = Array.from({ length: HOME_SCREEN_PAGE_SIZE * 3 }, (_, i) => ({
         appId: `app-${i}`,
-        sortOrder: i,
       }))
       expect(store.totalPages.value).toBe(3)
     })
@@ -356,7 +338,7 @@ describe('useHomeScreenStore', () => {
     it('云端数据更新时覆盖本地', () => {
       store.lastSyncAt.value = 1000
       store.restoreFromCloud({
-        installedApps: [{ appId: 'cloud-app', sortOrder: 0 }],
+        installedApps: [{ appId: 'cloud-app' }],
         dockApps: [],
         recentApps: [],
         updatedAt: 2000,
@@ -370,9 +352,9 @@ describe('useHomeScreenStore', () => {
 
     it('云端数据未更新时不覆盖本地', () => {
       store.lastSyncAt.value = 3000
-      store.installedApps.value = [{ appId: 'local-app', sortOrder: 0 }]
+      store.installedApps.value = [{ appId: 'local-app' }]
       store.restoreFromCloud({
-        installedApps: [{ appId: 'old-cloud', sortOrder: 0 }],
+        installedApps: [{ appId: 'old-cloud' }],
         dockApps: [],
         recentApps: [],
         updatedAt: 2000,
@@ -385,8 +367,8 @@ describe('useHomeScreenStore', () => {
 
   describe('getHomeScreenConfig', () => {
     it('返回当前配置快照', () => {
-      store.installedApps.value = [{ appId: 'a', sortOrder: 0 }]
-      store.dockApps.value = [{ appId: 'b', sortOrder: 0 }]
+      store.installedApps.value = [{ appId: 'a' }]
+      store.dockApps.value = [{ appId: 'b' }]
       store.recentApps.value = [{ appId: 'a', usedAt: 1000 }]
 
       const before = Date.now()
@@ -404,17 +386,17 @@ describe('useHomeScreenStore', () => {
   describe('initWithDefaults', () => {
     it('首次使用时用默认应用初始化', () => {
       store.initWithDefaults([
-        { id: 'a1', code: 'a1' },
-        { id: 'a2', code: 'a2' },
+        { id: 'a1', slug: 'a1' },
+        { id: 'a2', slug: 'a2' },
       ])
       expect(store.installedApps.value).toHaveLength(2)
       expect(store.installedApps.value[0].appId).toBe('a1')
-      expect(store.installedApps.value[1].sortOrder).toBe(1)
+      expect(store.installedApps.value[1].appId).toBe('a2')
     })
 
     it('已有数据时不覆盖', () => {
-      store.installedApps.value = [{ appId: 'existing', sortOrder: 0 }]
-      store.initWithDefaults([{ id: 'new', code: 'new' }])
+      store.installedApps.value = [{ appId: 'existing' }]
+      store.initWithDefaults([{ id: 'new', slug: 'new' }])
       expect(store.installedApps.value).toHaveLength(1)
       expect(store.installedApps.value[0].appId).toBe('existing')
     })

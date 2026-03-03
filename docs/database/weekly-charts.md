@@ -8,7 +8,7 @@ CloudBase NoSQL 集合，存储每周热门应用排行数据。
 | ----------- | -------- | ---- | --------------------------------------------- |
 | `_id`       | `string` | 自动 | 文档 ID                                       |
 | `_openid`   | `string` | 自动 | 运营者用户 ID                                 |
-| `appId`     | `string` | 是   | 关联的应用 ID（`apps._id` 或静态应用 `code`） |
+| `appId`     | `string` | 是   | 关联的应用 ID（`apps._id` 或静态应用 `slug`） |
 | `appSource` | `string` | 是   | 应用来源：`static` / `cloudbase`              |
 | `weekStart` | `number` | 是   | 周起始日期时间戳（当周周一 00:00 UTC+8）      |
 | `rank`      | `number` | 是   | 排名（1-10）                                  |

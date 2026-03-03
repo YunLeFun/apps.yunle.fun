@@ -29,7 +29,7 @@ export const APP_CATEGORIES: AppCategory[] = [
  */
 export const FEATURED_APP: YlfAppInfo = {
   id: 'valaxy',
-  code: 'valaxy',
+  slug: 'valaxy',
   name: 'Valaxy',
   description: '新一代静态博客框架，快速、优雅、强大',
   icon: '🌌',
@@ -52,7 +52,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 整活
   {
     id: 'air-conditioner',
-    code: 'air-conditioner',
+    slug: 'air-conditioner',
     name: 'Air Conditioner',
     description: '云空调，便携小空调！其实是个冷笑话，随身携带的毫无制冷效果的仿真小空调',
     icon: '❄️',
@@ -67,7 +67,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'give-me-money',
-    code: 'give-me-money',
+    slug: 'give-me-money',
     name: 'Give Me Money',
     description: '我很可爱，请给我钱！直白的绅士钓鱼网站',
     icon: '🎣',
@@ -82,7 +82,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'electric-fan',
-    code: 'electric-fan',
+    slug: 'electric-fan',
     name: 'Electric Fan',
     description: '电风扇，便携夏日小风扇！纯 CSS 编写，小空调的前辈',
     icon: '♻️',
@@ -97,7 +97,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'fc',
-    code: 'fc',
+    slug: 'fc',
     name: 'FC 红白机',
     description: '基于 JSNES 与 Vue 实现的红白机 FC',
     icon: '🎮',
@@ -112,7 +112,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'chat-generator',
-    code: 'chat-generator',
+    slug: 'chat-generator',
     name: 'Chat Generator',
     description: '经典聊天记录橱窗，生成聊天记录，小丑模拟器',
     icon: '💬',
@@ -129,10 +129,9 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 应用
   {
     id: 'cook',
-    code: 'cook',
+    slug: 'cook',
     name: 'Cook',
     description: '好的，今天我们来做菜！可以根据所选食材筛选菜谱',
-    icon: '🥘',
     emoji: '🥘',
     color: '#16a34a',
     url: 'https://cook.yunyoujun.cn',
@@ -144,7 +143,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'ai-sfc',
-    code: 'ai-sfc',
+    slug: 'ai-sfc',
     name: 'AI 春联',
     description: 'AI 春联生成器，让 AI 帮你写春联',
     icon: '🧧',
@@ -159,7 +158,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'color-dust',
-    code: 'color-dust',
+    slug: 'color-dust',
     name: 'Color Dust',
     description: '基于 K-Means 色彩聚类提取主题色',
     icon: '🎨',
@@ -174,7 +173,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'char-dust',
-    code: 'char-dust',
+    slug: 'char-dust',
     name: 'Char Dust',
     description: '在线图片转字符画',
     icon: '📝',
@@ -189,7 +188,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'go-far-away',
-    code: 'go-far-away',
+    slug: 'go-far-away',
     name: 'Go Far Away',
     description: '去往这个世界上最遥远的地方。此后，不管你如何前进，都在回家的路上',
     icon: '🧭',
@@ -204,7 +203,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'birthday',
-    code: 'birthday',
+    slug: 'birthday',
     name: 'Birthday',
     description: '祝你生日快乐！可以改链接参数来替换寿星名称',
     icon: '🎂',
@@ -219,7 +218,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'valaxy',
-    code: 'valaxy',
+    slug: 'valaxy',
     name: 'Valaxy',
     description: '新一代静态博客框架',
     icon: '🌌',
@@ -236,7 +235,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 工具
   {
     id: 'git-geass',
-    code: 'git-geass',
+    slug: 'git-geass',
     name: 'Git Geass',
     description: '基于 git 提供更多交互式快捷操作',
     icon: '⚙️',
@@ -251,7 +250,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'pixi-painter',
-    code: 'pixi-painter',
+    slug: 'pixi-painter',
     name: 'Pixi Painter',
     description: '基于 Pixi.js 的绘图工具 + AI LCM',
     icon: '🎨',
@@ -266,7 +265,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'mirai-ts',
-    code: 'mirai-ts',
+    slug: 'mirai-ts',
     name: 'Mirai TS',
     description: 'Mirai（QQ 机器人）TypeScript SDK',
     icon: '🔧',
@@ -281,7 +280,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'el-bot',
-    code: 'el-bot',
+    slug: 'el-bot',
     name: 'El Bot',
     description: '使用 mirai-ts 构建的 Node 端机器人框架',
     icon: '🤖',
@@ -296,7 +295,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'web-resume',
-    code: 'web-resume',
+    slug: 'web-resume',
     name: 'Web Resume',
     description: '可在线编辑的 Web 简历，斩获 BAT Offer 未尝败绩',
     icon: '📄',
@@ -311,7 +310,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'nnrm',
-    code: 'nnrm',
+    slug: 'nnrm',
     name: 'NNRM',
     description: '最小依赖的 NPM 源管理器',
     icon: '🔧',
@@ -328,7 +327,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 设计
   {
     id: 'hexo-theme-yun',
-    code: 'hexo-theme-yun',
+    slug: 'hexo-theme-yun',
     name: 'Hexo Theme Yun',
     description: '我的博客主题，也就是 yunyoujun.cn 你所看到的样式和各类功能',
     icon: '☁️',
@@ -343,7 +342,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'ak-ui',
-    code: 'ak-ui',
+    slug: 'ak-ui',
     name: 'AK UI',
     description: '明日方舟 UI 组件库',
     icon: '🎮',
@@ -358,7 +357,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'augma',
-    code: 'augma',
+    slug: 'augma',
     name: 'AUGMA',
     description: '刀剑神域-序列之争 AUGMA AR UI 组件库',
     icon: '🎮',
@@ -373,7 +372,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'star-markdown-css',
-    code: 'star-markdown-css',
+    slug: 'star-markdown-css',
     name: 'Star Markdown CSS',
     description: '纯 Markdown CSS，支持多种主题',
     icon: '✨',
@@ -388,7 +387,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'explosions',
-    code: 'explosions',
+    slug: 'explosions',
     name: 'Explosions',
     description: '爆裂吧！取名自惠惠的爆裂魔法，放一些前端动效的实现',
     icon: '💥',
@@ -405,7 +404,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 插件
   {
     id: 'unplugin-glsl',
-    code: 'unplugin-glsl',
+    slug: 'unplugin-glsl',
     name: 'Unplugin GLSL',
     description: 'Unplugin 插件，加载 GLSL 语法，支持 Webpack/Vite/Rollup/Rspack',
     icon: '🎨',
@@ -420,7 +419,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'unplugin-mockery',
-    code: 'unplugin-mockery',
+    slug: 'unplugin-mockery',
     name: 'Unplugin Mockery',
     description: '可视化 Mock 数据管理，支持 TS 热更新',
     icon: '🤡',
@@ -435,7 +434,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'wc-github-corners',
-    code: 'wc-github-corners',
+    slug: 'wc-github-corners',
     name: 'WC GitHub Corners',
     description: '可以在任意地方使用的 GitHub Corner 挂件',
     icon: 'ℹ︎',
@@ -452,7 +451,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 实验
   {
     id: 'webgl-radiosity',
-    code: 'webgl-radiosity',
+    slug: 'webgl-radiosity',
     name: 'WebGL Radiosity',
     description: 'WebGL 辐射度渲染实现',
     icon: '💡',
@@ -467,7 +466,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'gaussian-blur',
-    code: 'gaussian-blur',
+    slug: 'gaussian-blur',
     name: 'Gaussian Blur',
     description: '手写一个高斯模糊',
     icon: '✍️',
@@ -484,7 +483,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 参与
   {
     id: 'element-plus',
-    code: 'element-plus',
+    slug: 'element-plus',
     name: 'Element Plus',
     description: 'Vue 3 最流行的组件库之一，Core Team Member',
     icon: '➕',
@@ -499,7 +498,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'vite-pwa',
-    code: 'vite-pwa',
+    slug: 'vite-pwa',
     name: 'Vite PWA',
     description: 'Vite PWA 插件，Zero Config',
     icon: '⚡',
@@ -514,7 +513,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'valaxy-theme-yun',
-    code: 'valaxy-theme-yun',
+    slug: 'valaxy-theme-yun',
     name: 'Valaxy Theme Yun',
     description: 'Valaxy 云游君主题',
     icon: '☁️',
@@ -529,7 +528,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'vitepress-theme-sakura',
-    code: 'vitepress-theme-sakura',
+    slug: 'vitepress-theme-sakura',
     name: 'VitePress Theme Sakura',
     description: 'VitePress 樱花主题',
     icon: '🌸',
@@ -544,7 +543,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'sponsors',
-    code: 'sponsors',
+    slug: 'sponsors',
     name: 'Sponsors',
     description: '赞助者列表',
     icon: '💖',
@@ -561,7 +560,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   // 其他
   {
     id: 'cdn',
-    code: 'cdn',
+    slug: 'cdn',
     name: 'CDN',
     description: '我的 CDN，基于 GitHub + jsDelivr',
     icon: '📦',
@@ -576,7 +575,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'yun-gal',
-    code: 'yun-gal',
+    slug: 'yun-gal',
     name: 'Yun Gal',
     description: '云游君的 Galgame 列表',
     icon: '🎮',
@@ -591,7 +590,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'yun-memo',
-    code: 'yun-memo',
+    slug: 'yun-memo',
     name: 'Yun Memo',
     description: '云游君的备忘录',
     icon: '📝',
@@ -606,7 +605,7 @@ export const ALL_APPS: YlfAppInfo[] = [
   },
   {
     id: 'yun-leetcode',
-    code: 'yun-leetcode',
+    slug: 'yun-leetcode',
     name: 'Yun LeetCode',
     description: '云游君的 LeetCode 题解',
     icon: '💻',
@@ -632,10 +631,10 @@ export function getAppsByCategory(categoryId: string): YlfAppInfo[] {
 }
 
 /**
- * 根据 ID 获取应用
+ * 根据 ID 或 slug 获取应用
  */
 export function getAppById(id: string): YlfAppInfo | undefined {
-  return ALL_APPS.find(app => app.id === id)
+  return ALL_APPS.find(app => app.id === id || app.slug === id)
 }
 
 export * from './builtin'

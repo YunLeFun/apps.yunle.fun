@@ -66,7 +66,7 @@ function viewAllChart() {
 
           <!-- 安装按钮 -->
           <div class="app-action">
-            <AppInstallButton :app-id="app.code || app.id" source="static" />
+            <AppInstallButton :app="app" />
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ CloudBase NoSQL 集合，存储编辑精选推荐应用数据。
 | ------------ | --------- | ---- | --------------------------------------------------- |
 | `_id`        | `string`  | 自动 | 文档 ID                                             |
 | `_openid`    | `string`  | 自动 | 运营者用户 ID                                       |
-| `appId`      | `string`  | 是   | 关联的应用 ID（`apps._id` 或静态应用 `code`）       |
+| `appId`      | `string`  | 是   | 关联的应用 ID（`apps._id` 或静态应用 `slug`）       |
 | `appSource`  | `string`  | 是   | 应用来源：`static` / `cloudbase`                    |
 | `type`       | `string`  | 是   | 推荐类型：`daily`（每日推荐）/ `editor`（编辑精选） |
 | `title`      | `string`  | 否   | 推荐标题（覆盖应用原名称）                          |

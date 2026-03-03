@@ -20,6 +20,8 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
 
   /** 编辑模式（长按进入） */
   const isEditMode = ref(false)
+  /** 编辑模式期间是否有待同步的变更 */
+  const hasPendingChanges = ref(false)
   /** 当前页码（0-based） */
   const currentPage = ref(0)
   /** 是否正在同步到 CloudBase */
@@ -53,10 +55,7 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     if (isInstalled(appId))
       return
 
-    installedApps.value.push({
-      appId,
-      sortOrder: installedApps.value.length,
-    })
+    installedApps.value.push({ appId })
   }
 
   /** 从 Home Screen 卸载应用 */
@@ -64,9 +63,6 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     installedApps.value = installedApps.value.filter(a => a.appId !== appId)
     // 也从 Dock 移除
     dockApps.value = dockApps.value.filter(a => a.appId !== appId)
-    // 重新排序
-    reorderApps(installedApps.value)
-    reorderApps(dockApps.value)
   }
 
   /** 检查应用是否已安装 */
@@ -79,7 +75,6 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
 
   /** 更新 Home Screen 应用排序（拖拽后调用） */
   function updateInstalledApps(apps: InstalledApp[]) {
-    reorderApps(apps)
     installedApps.value = apps
   }
 
@@ -88,15 +83,7 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     if (apps.length > DOCK_MAX_APPS) {
       apps = apps.slice(0, DOCK_MAX_APPS)
     }
-    reorderApps(apps)
     dockApps.value = apps
-  }
-
-  /** 重新计算 sortOrder */
-  function reorderApps(apps: InstalledApp[]) {
-    apps.forEach((app, index) => {
-      app.sortOrder = index
-    })
   }
 
   // ==================== 最近使用 ====================
@@ -118,10 +105,23 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
 
   function enterEditMode() {
     isEditMode.value = true
+    hasPendingChanges.value = false
   }
 
   function exitEditMode() {
     isEditMode.value = false
+  }
+
+  /** 标记有待同步的变更 */
+  function markPendingChanges() {
+    hasPendingChanges.value = true
+  }
+
+  /** 消费并重置待同步标记，返回是否有待同步变更 */
+  function consumePendingChanges(): boolean {
+    const had = hasPendingChanges.value
+    hasPendingChanges.value = false
+    return had
   }
 
   // ==================== 同步 ====================
@@ -153,9 +153,8 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     if (installedApps.value.length > 0)
       return // 已有数据不覆盖
 
-    installedApps.value = apps.map((app, index) => ({
-      appId: app.id || app.code,
-      sortOrder: index,
+    installedApps.value = apps.map(app => ({
+      appId: app.id || app.slug,
     }))
   }
 
@@ -167,6 +166,7 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     lastSyncAt,
     // 运行时状态
     isEditMode,
+    hasPendingChanges,
     currentPage,
     isSyncing,
     cloudDocId,
@@ -182,6 +182,8 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     addRecentApp,
     enterEditMode,
     exitEditMode,
+    markPendingChanges,
+    consumePendingChanges,
     restoreFromCloud,
     getHomeScreenConfig,
     initWithDefaults,

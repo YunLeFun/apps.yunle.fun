@@ -35,7 +35,7 @@ export function useWorkshop() {
   function toAppInfo(record: AppRecord): YlfAppInfo {
     return {
       id: record._id,
-      code: record.slug,
+      slug: record.slug,
       name: record.name,
       description: record.description,
       emoji: record.emoji || '📱',

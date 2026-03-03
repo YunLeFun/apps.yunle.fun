@@ -25,9 +25,9 @@ export interface YlfAppInfo {
    */
   name: string
   /**
-   * 应用代号
+   * 应用唯一标识符（URL slug）
    */
-  code: string
+  slug: string
   /**
    * 应用 URL
    */

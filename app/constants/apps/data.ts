@@ -3,7 +3,7 @@ import type { YlfAppInfo } from '~~/packages/types'
 export const homeApps = ref<YlfAppInfo[]>([
   {
     id: '1',
-    code: 'valaxy',
+    slug: 'valaxy',
     name: 'Valaxy',
     emoji: '🌌',
     color: '#0078e7',
@@ -12,7 +12,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '2',
-    code: 'fitness',
+    slug: 'fitness',
     name: 'Fitness',
     emoji: '💪',
     color: '#FF3B30',
@@ -21,7 +21,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '3',
-    code: 'photo',
+    slug: 'photo',
     name: 'Photos',
     emoji: '📷',
     color: '#34C759',
@@ -30,7 +30,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '4',
-    code: 'music',
+    slug: 'music',
     name: 'Music',
     emoji: '🎵',
     color: '#FF9500',
@@ -39,7 +39,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '5',
-    code: 'notes',
+    slug: 'notes',
     name: 'Notes',
     emoji: '📝',
     color: '#5AC8FA',
@@ -48,7 +48,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '6',
-    code: 'weather',
+    slug: 'weather',
     name: 'Weather',
     emoji: '⛅',
     color: '#50E3C2',
@@ -57,7 +57,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '7',
-    code: 'games',
+    slug: 'games',
     name: 'Games',
     emoji: '🎮',
     color: '#B8E986',
@@ -66,7 +66,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '8',
-    code: 'social',
+    slug: 'social',
     name: 'Social',
     emoji: '👥',
     color: '#FF2D55',
@@ -75,7 +75,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '9',
-    code: 'camera',
+    slug: 'camera',
     name: 'Camera',
     emoji: '📹',
     color: '#A2845E',
@@ -84,7 +84,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '10',
-    code: 'maps',
+    slug: 'maps',
     name: 'Maps',
     emoji: '🗺️',
     color: '#34C759',
@@ -93,7 +93,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '11',
-    code: 'mail',
+    slug: 'mail',
     name: 'Mail',
     emoji: '✉️',
     color: '#007AFF',
@@ -102,7 +102,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '12',
-    code: 'calendar',
+    slug: 'calendar',
     name: 'Calendar',
     emoji: '📅',
     color: '#FF3B30',
@@ -111,7 +111,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '13',
-    code: 'settings',
+    slug: 'settings',
     name: 'Settings',
     emoji: '⚙️',
     color: '#FF9500',
@@ -120,7 +120,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '14',
-    code: 'about',
+    slug: 'about',
     name: 'About',
     emoji: 'ℹ️',
     color: '#5AC8FA',
@@ -129,7 +129,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '15',
-    code: 'help',
+    slug: 'help',
     name: 'Help',
     emoji: '❓',
     color: '#50E3C2',
@@ -138,7 +138,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '16',
-    code: 'feedback',
+    slug: 'feedback',
     name: 'Feedback',
     emoji: '💬',
     color: '#B8E986',
@@ -147,7 +147,7 @@ export const homeApps = ref<YlfAppInfo[]>([
   },
   {
     id: '17',
-    code: 'donate',
+    slug: 'donate',
     name: 'Donate',
     emoji: '❤️',
     color: '#FF2D55',

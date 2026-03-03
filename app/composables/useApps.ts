@@ -42,7 +42,8 @@ export function useApps() {
       if (userError || !userData?.user)
         return null
 
-      const uid = (userData.user as any).uid || (userData.user as any).id
+      const u = userData.user as any
+      const uid = u.sub || u.uid || u.id
       if (!uid)
         return null
 
@@ -51,8 +52,8 @@ export function useApps() {
         userStore.login(data.session.access_token, {
           ...userStore.userInfo,
           id: uid,
-          nickname: (userData.user as any).nickname || userStore.userInfo?.nickname || '',
-          avatar: (userData.user as any).avatar_url || userStore.userInfo?.avatar || '',
+          nickname: u.name || u.nickname || userStore.userInfo?.nickname || '',
+          avatar: u.picture || u.avatar_url || userStore.userInfo?.avatar || '',
         })
       }
 

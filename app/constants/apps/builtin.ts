@@ -7,5 +7,5 @@ export const cloudOneApp: YlfAppInfo = {
   url: '/tabs/home',
   color: '#0078e7',
   category: '应用',
-  code: 'random',
+  slug: 'random',
 }

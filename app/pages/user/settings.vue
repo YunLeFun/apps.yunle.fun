@@ -51,9 +51,12 @@ function refreshStorageInfo() {
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes === 0)
+    return '0 B'
+  if (bytes < 1024)
+    return `${bytes} B`
+  if (bytes < 1024 * 1024)
+    return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
@@ -73,8 +76,10 @@ function confirmClearStorage() {
 // ==================== 云同步 ====================
 
 const syncStatusText = computed(() => {
-  if (!settingsStore.cloudSyncEnabled) return '已关闭'
-  if (homeScreenStore.isSyncing) return '同步中...'
+  if (!settingsStore.cloudSyncEnabled)
+    return '已关闭'
+  if (homeScreenStore.isSyncing)
+    return '同步中...'
   if (homeScreenStore.lastSyncAt > 0) {
     return `上次同步：${formatSyncTime(homeScreenStore.lastSyncAt)}`
   }
@@ -84,9 +89,12 @@ const syncStatusText = computed(() => {
 function formatSyncTime(timestamp: number): string {
   const now = Date.now()
   const diff = now - timestamp
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
+  if (diff < 60000)
+    return '刚刚'
+  if (diff < 3600000)
+    return `${Math.floor(diff / 60000)} 分钟前`
+  if (diff < 86400000)
+    return `${Math.floor(diff / 3600000)} 小时前`
   const date = new Date(timestamp)
   return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
@@ -94,7 +102,8 @@ function formatSyncTime(timestamp: number): string {
 const { syncToCloud } = useHomeScreen()
 
 async function handleManualSync() {
-  if (homeScreenStore.isSyncing) return
+  if (homeScreenStore.isSyncing)
+    return
   await syncToCloud()
 }
 </script>

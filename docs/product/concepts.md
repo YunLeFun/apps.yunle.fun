@@ -59,7 +59,7 @@
 ```text
 ┌─────────────────────────────────────────────┐
 │                 CloudBase NoSQL              │
-│  apps │ user_desktops │ featured │ weekly    │
+│  apps │ user_home_screens │ featured │ weekly    │
 └────────────┬────────────────────────────────┘
              │
 ┌────────────┴────────────────────────────────┐

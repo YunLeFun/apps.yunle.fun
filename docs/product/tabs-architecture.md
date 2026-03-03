@@ -7,7 +7,7 @@
 ```text
 ┌─────────────────────────────────────────────┐
 │                 CloudBase NoSQL              │
-│  apps │ user_desktops │ featured │ weekly    │
+│  apps │ user_home_screens │ featured │ weekly    │
 └────────────┬────────────────────────────────┘
              │
 ┌────────────┴────────────────────────────────┐
@@ -42,7 +42,7 @@
                 ↓ 防抖 500ms
         useHomeScreen.syncToCloud()
                 ↓
-        CloudBase user_desktops 集合
+        CloudBase user_home_screens 集合
 ```
 
 ## 寻乐（Discovery）- 发现推荐

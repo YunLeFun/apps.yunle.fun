@@ -35,11 +35,7 @@ const currentPage = computed({
 
 /** 解析应用完整信息 */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
-  if (installed.source === 'static') {
-    return ALL_APPS.find(a => a.id === installed.appId || a.code === installed.appId) || null
-  }
-  // CloudBase 应用暂用占位，实际展示时通过缓存获取
-  return null
+  return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
 }
 
 /** 获取当前页应用列表（可拖拽的 model） */
@@ -50,10 +46,8 @@ const pageModels = computed(() =>
 /** 拖拽结束时更新 */
 function onDragEnd() {
   const flatApps = pageModels.value.flat()
-  flatApps.forEach((app, i) => {
-    app.sortOrder = i
-  })
   homeScreenStore.updateInstalledApps(flatApps)
+  homeScreenStore.markPendingChanges()
 
   // 拖拽触觉反馈
   Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
@@ -145,14 +139,11 @@ function handleLongPress() {
               @pointerdown.prevent
             />
             <!-- 未解析的应用占位 -->
-            <div v-else class="app-placeholder">
-              <div class="app-icon-box placeholder-box">
-                <span class="app-emoji">📱</span>
-              </div>
-              <div class="app-label">
-                {{ element.appId }}
-              </div>
-            </div>
+            <AppIconBox
+              v-else
+              placeholder
+              :label="element.appId"
+            />
           </div>
         </VueDraggable>
       </div>
@@ -303,28 +294,6 @@ function handleLongPress() {
 
 .dark .page-dot.active {
   background: rgba(255, 255, 255, 0.8);
-}
-
-/* ==================== 占位样式 ==================== */
-.app-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.placeholder-box {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: #e5e5ea;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dark .placeholder-box {
-  background: #3a3a3c;
 }
 
 /* ==================== 响应式 ==================== */

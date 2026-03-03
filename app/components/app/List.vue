@@ -80,7 +80,7 @@ async function handleInfiniteScroll(event: CustomEvent) {
             </div>
 
             <!-- 安装按钮 -->
-            <AppInstallButton :app-id="app.code || app.id" source="static" />
+            <AppInstallButton :app="app" />
           </div>
         </div>
       </div>

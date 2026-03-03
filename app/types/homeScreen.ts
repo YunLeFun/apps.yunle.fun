@@ -5,15 +5,13 @@
 
 /** 已安装的应用（Home Screen / Dock 中的应用引用） */
 export interface InstalledApp {
-  /** 应用 ID（统一使用 slug / code 标识） */
+  /** 应用 ID（统一使用 slug 标识） */
   appId: string
-  /** 排序序号，从 0 开始 */
-  sortOrder: number
 }
 
 /** 最近使用的应用 */
 export interface RecentApp {
-  /** 应用 ID */
+  /** 应用 ID（统一使用 slug 标识） */
   appId: string
   /** 最近使用时间戳（ms） */
   usedAt: number
@@ -31,7 +29,7 @@ export interface HomeScreenConfig {
   updatedAt: number
 }
 
-/** CloudBase user_desktops 集合文档 */
+/** CloudBase user_home_screens 集合文档 */
 export interface UserHomeScreenRecord {
   _id: string
   _openid: string
@@ -65,7 +63,7 @@ export interface FeaturedAppRecord {
 export interface WeeklyChartRecord {
   _id: string
   _openid: string
-  /** 应用 ID（统一使用 slug / code 标识） */
+  /** 应用 ID（统一使用 slug 标识） */
   appId: string
   weekStart: number
   rank: number

@@ -33,7 +33,7 @@ definePageMeta({
 
 const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
-const { loadFromCloud, recordRecentUse, uninstallApp, updateDock } = useHomeScreen()
+const { loadFromCloud, recordRecentUse, uninstallApp, updateDock, finishEditing } = useHomeScreen()
 
 const searchQuery = ref('')
 const showAllRecent = ref(false)
@@ -57,7 +57,7 @@ const displayRecentApps = computed(() => {
 
   const limit = showAllRecent.value ? recent.length : RECENT_DEFAULT_DISPLAY
   return recent.slice(0, limit).map((r) => {
-    const app = ALL_APPS.find(a => a.id === r.appId || a.code === r.appId)
+    const app = ALL_APPS.find(a => a.id === r.appId || a.slug === r.appId)
     return app || null
   }).filter((a): a is YlfAppInfo => a !== null)
 })
@@ -110,7 +110,7 @@ function handleDownload() {
 
 /** 打开应用 */
 function handleOpenApp(app: YlfAppInfo, installed: InstalledApp) {
-  recordRecentUse(installed.appId, installed.source)
+  recordRecentUse(installed.appId)
 
   if (app.callback) {
     app.callback()
@@ -139,7 +139,7 @@ function handleRemoveApp(installed: InstalledApp) {
 /** 点击空白区域退出编辑模式 */
 function handleContentClick() {
   if (homeScreenStore.isEditMode) {
-    homeScreenStore.exitEditMode()
+    finishEditing()
   }
 }
 </script>
@@ -151,7 +151,7 @@ function handleContentClick() {
       <IonToolbar>
         <IonTitle>云居</IonTitle>
         <IonButtons slot="end">
-          <IonButton v-if="homeScreenStore.isEditMode" @click="homeScreenStore.exitEditMode()">
+          <IonButton v-if="homeScreenStore.isEditMode" @click="finishEditing()">
             完成
           </IonButton>
           <IonButton v-else @click="openMenu">

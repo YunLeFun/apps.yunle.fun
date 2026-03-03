@@ -1,4 +1,37 @@
 :root {
   --c-brand-wx: #07c160;
   --c-brand-qq: #1d8bf1;
+
+  /* App Icon 尺寸 */
+  --app-icon-size: 64px;
+  --app-icon-radius: 16px;
+  --app-label-size: 12px;
+  --app-emoji-size: 32px;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --app-icon-size: 64px;
+    --app-icon-radius: 14px;
+    --app-label-size: 11px;
+    --app-emoji-size: 28px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --app-icon-size: 72px;
+    --app-icon-radius: 18px;
+    --app-label-size: 13px;
+    --app-emoji-size: 36px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --app-icon-size: 80px;
+    --app-icon-radius: 20px;
+    --app-label-size: 14px;
+    --app-emoji-size: 40px;
+  }
 }

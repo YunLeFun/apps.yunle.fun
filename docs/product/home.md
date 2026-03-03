@@ -36,7 +36,7 @@
                 ↓ 防抖 500ms
         useHomeScreen.syncToCloud()
                 ↓
-        CloudBase user_desktops 集合
+        CloudBase user_home_screens 集合
 ```
 
 - 本地 localStorage 作为缓存层，确保离线可用

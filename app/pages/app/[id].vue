@@ -10,50 +10,33 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { chevronForward, share, star, starOutline } from 'ionicons/icons'
-import { getAppById } from '~/constants/apps'
 
 const route = useRoute()
 const router = useRouter()
 const appId = computed(() => (route.params as any).id as string)
 
-// 获取应用数据
-const appInfo = computed(() => getAppById(appId.value))
+// 使用 useAppDetail composable 获取应用数据
+const { appData, loading, error } = useAppDetail(appId)
 
-// 监听应用信息，如果不存在则跳转
-watch(appInfo, (info) => {
-  if (!info) {
+// 加载完成后，如果应用不存在则跳转
+watch([loading, error], ([isLoading, err]) => {
+  if (!isLoading && err && !appData.value) {
     router.push('/tabs/apps')
   }
-}, { immediate: true })
+})
 
-// 扩展应用数据（添加详情页需要的额外字段）
-const appData = computed(() => {
-  if (!appInfo.value) {
+// 扩展展示数据
+const displayData = computed(() => {
+  if (!appData.value)
     return null
-  }
 
   return {
-    ...appInfo.value,
-    ratingCount: '1.2万',
-    developer: 'YunYouJun',
-    price: '免费',
-    inAppPurchases: false,
-    whatsNew: '• 优化用户体验\n• 修复已知问题\n• 提升应用性能',
-    features: [
-      '简洁美观的界面',
-      '流畅的交互体验',
-      '强大的功能',
-    ],
+    ...appData.value,
     screenshots: [
-      { id: 1, color: appInfo.value.color, title: '主界面' },
-      { id: 2, color: appInfo.value.color, title: '功能展示' },
-      { id: 3, color: appInfo.value.color, title: '详细信息' },
+      { id: 1, color: appData.value.color, title: '主界面' },
+      { id: 2, color: appData.value.color, title: '功能展示' },
+      { id: 3, color: appData.value.color, title: '详细信息' },
     ],
-    version: '1.0.0',
-    updateDate: '1周前',
-    languages: ['简体中文', '英语'],
-    compatibility: 'iPhone、iPad、iPod touch',
-    minOS: '需要 iOS 14.0 或更高版本',
     reviews: [
       {
         id: 1,
@@ -78,15 +61,19 @@ function renderStars(rating: number = 0) {
 
 // 打开应用
 function openApp() {
-  if (appData.value?.url) {
-    window.open(appData.value.url, '_blank')
+  if (!displayData.value?.url)
+    return
+  if (displayData.value.url.startsWith('http')) {
+    openInAppBrowser(displayData.value.url)
+  }
+  else {
+    router.push(displayData.value.url)
   }
 }
 
 // 分享应用
 function shareApp() {
   // TODO: 实现分享功能
-  // console.log('分享应用:', appData.value?.name)
 }
 </script>
 
@@ -106,78 +93,93 @@ function shareApp() {
     </IonHeader>
 
     <IonContent :fullscreen="true" class="app-detail-content">
-      <div v-if="appData" class="app-detail-container">
+      <!-- 加载骨架屏 -->
+      <div v-if="loading" class="app-detail-container">
+        <div class="app-header">
+          <div class="app-header-content">
+            <div class="app-icon-large skeleton-pulse" />
+            <div class="app-header-info">
+              <div class="skeleton-line skeleton-pulse" style="width: 60%; height: 22px;" />
+              <div class="skeleton-line skeleton-pulse" style="width: 40%; height: 15px;" />
+              <div class="skeleton-line skeleton-pulse" style="width: 50%; height: 14px;" />
+            </div>
+          </div>
+          <div class="skeleton-button skeleton-pulse" />
+        </div>
+      </div>
+
+      <!-- 应用详情 -->
+      <div v-else-if="displayData" class="app-detail-container">
         <!-- 应用头部信息 -->
         <div class="app-header">
           <div class="app-header-content">
             <div
               class="app-icon-large"
-              :style="{ backgroundColor: appData.color }"
+              :style="{ backgroundColor: displayData.color }"
             >
-              {{ appData.emoji || appData.icon }}
+              {{ displayData.emoji || displayData.icon }}
             </div>
 
             <div class="app-header-info">
               <h1 class="app-name">
-                {{ appData.name }}
+                {{ displayData.name }}
               </h1>
               <p class="app-category">
-                {{ appData.category }}
+                {{ displayData.category || '应用' }}
               </p>
 
               <!-- 评分信息 -->
-              <div v-if="appData.rating" class="app-rating-row">
+              <div v-if="displayData.rating" class="app-rating-row">
                 <div class="rating-stars">
-                  <span class="rating-number">{{ appData.rating }}</span>
+                  <span class="rating-number">{{ displayData.rating }}</span>
                   <IonIcon
-                    v-for="(starIcon, idx) in renderStars(appData.rating)"
+                    v-for="(starIcon, idx) in renderStars(displayData.rating)"
                     :key="idx"
                     :icon="starIcon"
                     class="star-icon"
                   />
                 </div>
-                <span class="rating-count">{{ appData.ratingCount }} 个评分</span>
               </div>
             </div>
           </div>
 
-          <!-- 获取按钮 -->
+          <!-- 获取/打开按钮 -->
           <IonButton expand="block" class="get-button-large" @click="openApp">
             打开应用
           </IonButton>
 
           <!-- 应用信息栏 -->
           <div class="app-info-bar">
-            <div class="info-item">
+            <div v-if="displayData.rating" class="info-item">
               <div class="info-value">
-                {{ appData.ratingCount }}
+                {{ displayData.rating }}
               </div>
               <div class="info-label">
                 评分
               </div>
             </div>
-            <div class="info-divider" />
-            <div class="info-item">
+            <div v-if="displayData.rating && (displayData.age || displayData.downloads)" class="info-divider" />
+            <div v-if="displayData.age" class="info-item">
               <div class="info-value">
-                {{ appData.age }}
+                {{ displayData.age }}
               </div>
               <div class="info-label">
                 年龄
               </div>
             </div>
-            <div class="info-divider" />
-            <div class="info-item">
+            <div v-if="displayData.age && displayData.downloads" class="info-divider" />
+            <div v-if="displayData.downloads" class="info-item">
               <div class="info-value">
-                {{ appData.downloads }}
+                {{ displayData.downloads }}
               </div>
               <div class="info-label">
                 下载量
               </div>
             </div>
-            <div class="info-divider" />
+            <div v-if="displayData.downloads || displayData.age || displayData.rating" class="info-divider" />
             <div class="info-item">
               <div class="info-value">
-                {{ appData.developer }}
+                {{ displayData.developer }}
               </div>
               <div class="info-label">
                 开发者
@@ -187,7 +189,7 @@ function shareApp() {
         </div>
 
         <!-- 新功能 -->
-        <div class="section">
+        <div v-if="displayData.whatsNew" class="section">
           <div class="section-header">
             <h2 class="section-title">
               新功能
@@ -198,11 +200,11 @@ function shareApp() {
           </div>
           <div class="section-content">
             <div class="version-info">
-              <span class="version-number">版本 {{ appData.version }}</span>
-              <span class="update-date">{{ appData.updateDate }}</span>
+              <span class="version-number">版本 {{ displayData.version }}</span>
+              <span v-if="displayData.updateDate" class="update-date">{{ displayData.updateDate }}</span>
             </div>
             <p class="whats-new-text">
-              {{ appData.whatsNew }}
+              {{ displayData.whatsNew }}
             </p>
           </div>
         </div>
@@ -214,7 +216,7 @@ function shareApp() {
           </h2>
           <div class="screenshots-container">
             <div
-              v-for="screenshot in appData.screenshots"
+              v-for="screenshot in displayData.screenshots"
               :key="screenshot.id"
               class="screenshot-item"
               :style="{ backgroundColor: screenshot.color }"
@@ -227,7 +229,7 @@ function shareApp() {
         </div>
 
         <!-- 应用描述 -->
-        <div class="section">
+        <div v-if="displayData.description" class="section">
           <div class="section-header">
             <h2 class="section-title">
               简介
@@ -235,17 +237,13 @@ function shareApp() {
           </div>
           <div class="section-content">
             <p class="description-text">
-              {{ appData.description }}
+              {{ displayData.description }}
             </p>
-            <button class="more-btn">
-              更多
-              <IonIcon :icon="chevronForward" />
-            </button>
           </div>
         </div>
 
         <!-- 评分与评论 -->
-        <div class="section">
+        <div v-if="displayData.rating" class="section">
           <div class="section-header">
             <h2 class="section-title">
               评分与评论
@@ -256,24 +254,21 @@ function shareApp() {
             </button>
           </div>
 
-          <div v-if="appData.rating" class="rating-summary">
+          <div class="rating-summary">
             <div class="rating-score">
               <div class="score-number">
-                {{ appData.rating }}
+                {{ displayData.rating }}
               </div>
               <div class="score-label">
                 满分 5 分
               </div>
               <div class="rating-stars-small">
                 <IonIcon
-                  v-for="(starIcon, idx) in renderStars(appData.rating)"
+                  v-for="(starIcon, idx) in renderStars(displayData.rating)"
                   :key="idx"
                   :icon="starIcon"
                   class="star-icon-small"
                 />
-              </div>
-              <div class="rating-count-small">
-                {{ appData.ratingCount }}
               </div>
             </div>
 
@@ -289,7 +284,7 @@ function shareApp() {
 
           <!-- 评论列表 -->
           <div class="reviews-list">
-            <div v-for="review in appData.reviews" :key="review.id" class="review-item">
+            <div v-for="review in displayData.reviews" :key="review.id" class="review-item">
               <div class="review-header">
                 <div class="reviewer-info">
                   <div class="reviewer-avatar">
@@ -334,38 +329,40 @@ function shareApp() {
             <div class="info-row">
               <span class="info-row-label">开发者</span>
               <div class="info-row-value">
-                <span>{{ appData.developer }}</span>
+                <span>{{ displayData.developer }}</span>
                 <IonIcon :icon="chevronForward" class="chevron-icon" />
               </div>
             </div>
-            <div class="info-row">
+            <div v-if="displayData.size" class="info-row">
               <span class="info-row-label">大小</span>
-              <span class="info-row-value">{{ appData.size }}</span>
+              <span class="info-row-value">{{ displayData.size }}</span>
             </div>
-            <div class="info-row">
+            <div v-if="displayData.category" class="info-row">
               <span class="info-row-label">类别</span>
-              <span class="info-row-value">{{ appData.category }}</span>
+              <span class="info-row-value">{{ displayData.category }}</span>
             </div>
             <div class="info-row">
               <span class="info-row-label">兼容性</span>
-              <div class="info-row-value-multi">
-                <span>{{ appData.compatibility }}</span>
-                <span class="info-sub">{{ appData.minOS }}</span>
-              </div>
+              <span class="info-row-value">{{ displayData.compatibility }}</span>
             </div>
             <div class="info-row">
               <span class="info-row-label">语言</span>
-              <div class="info-row-value-multi">
-                <span>{{ appData.languages.join('、') }}</span>
-              </div>
+              <span class="info-row-value">{{ displayData.languages.join('、') }}</span>
             </div>
-            <div class="info-row">
+            <div v-if="displayData.age" class="info-row">
               <span class="info-row-label">年龄分级</span>
-              <span class="info-row-value">{{ appData.age }}</span>
+              <span class="info-row-value">{{ displayData.age }}</span>
             </div>
             <div class="info-row">
               <span class="info-row-label">价格</span>
-              <span class="info-row-value">{{ appData.price }}</span>
+              <span class="info-row-value">免费</span>
+            </div>
+            <div v-if="displayData.githubRepo" class="info-row">
+              <span class="info-row-label">源代码</span>
+              <div class="info-row-value">
+                <span>GitHub</span>
+                <IonIcon :icon="chevronForward" class="chevron-icon" />
+              </div>
             </div>
           </div>
         </div>
@@ -851,5 +848,37 @@ function shareApp() {
 .chevron-icon {
   font-size: 14px;
   color: #c7c7cc;
+}
+
+/* ==================== 骨架屏 ==================== */
+.skeleton-pulse {
+  background: rgba(60, 60, 67, 0.12);
+  border-radius: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dark .skeleton-pulse {
+  background: rgba(84, 84, 88, 0.24);
+}
+
+.skeleton-line {
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-button {
+  height: 44px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 </style>

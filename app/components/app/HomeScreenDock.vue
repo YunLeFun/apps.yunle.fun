@@ -29,10 +29,7 @@ const emit = defineEmits<{
 
 /** 解析应用信息 */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
-  if (installed.source === 'static') {
-    return ALL_APPS.find(a => a.id === installed.appId || a.code === installed.appId) || null
-  }
-  return null
+  return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
 }
 
 function handleClick(installed: InstalledApp) {

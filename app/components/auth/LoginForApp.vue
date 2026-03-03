@@ -31,7 +31,7 @@ defineProps<{
         </IonChip>
       </a>
       <p class="mt-1 text-xs text-gray-400">
-        {{ appInfo.code }}
+        {{ appInfo.slug }}
       </p>
     </div>
   </div>

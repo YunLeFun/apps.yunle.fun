@@ -603,9 +603,9 @@ async function handleVerifySignupOtp() {
   padding: 0 16px;
 }
 
-// iOS Grouped Card
+// iOS Grouped Card — 浅色模式白色卡片 + 页面灰色背景形成区分（iOS 标准分组列表风格）
 .auth-card {
-  background: var(--ion-background-color, #fff);
+  background: #fff;
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -625,7 +625,7 @@ async function handleVerifySignupOtp() {
 .auth-card-divider {
   width: 1px;
   height: 20px;
-  background: var(--ion-color-light, rgba(0, 0, 0, 0.1));
+  background: rgba(60, 60, 67, 0.18);
   margin: 0 12px 0 8px;
   flex-shrink: 0;
 
@@ -636,11 +636,11 @@ async function handleVerifySignupOtp() {
 
 .auth-card-separator {
   height: 0.5px;
-  background: var(--ion-color-light, rgba(0, 0, 0, 0.08));
+  background: rgba(60, 60, 67, 0.18);
   margin-left: 16px;
 
   .dark & {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 

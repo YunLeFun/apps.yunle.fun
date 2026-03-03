@@ -20,10 +20,10 @@ export function useDiscovery() {
   /** 加载状态 */
   const loading = useState('discovery:loading', () => false)
 
-  /** 根据 appId（slug/code）解析完整应用信息：先查静态列表，再查 CloudBase */
+  /** 根据 appId（slug）解析完整应用信息：先查静态列表，再查 CloudBase */
   async function resolveApp(appId: string): Promise<YlfAppInfo | null> {
     // 先从静态列表查找
-    const staticApp = ALL_APPS.find(a => a.id === appId || a.code === appId)
+    const staticApp = ALL_APPS.find(a => a.id === appId || a.slug === appId)
     if (staticApp)
       return staticApp
 
@@ -39,7 +39,7 @@ export function useDiscovery() {
       const record = data[0] as any
       return {
         id: record._id,
-        code: record.slug,
+        slug: record.slug,
         name: record.name,
         description: record.description,
         emoji: record.emoji || '📱',

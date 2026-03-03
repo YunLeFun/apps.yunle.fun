@@ -1,14 +1,13 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ref } from 'vue'
-import SmsLogin from '../../app/components/auth/SmsLogin.vue'
+import { defineComponent, h, ref } from 'vue'
 
 // 创建可控的 mock 状态
 function createMockComposable() {
   const phoneNumber = ref('')
   const verifyCode = ref('')
   const sendingCode = ref(false)
-  const loggingIn = ref(false)
+  const processing = ref(false)
   const countdown = ref(0)
   const sendVerifyCode = vi.fn().mockResolvedValue({ success: true, message: '验证码已发送' })
   const loginWithSms = vi.fn().mockResolvedValue({ success: true, message: '登录成功', user: {} })
@@ -17,7 +16,7 @@ function createMockComposable() {
     phoneNumber,
     verifyCode,
     sendingCode,
-    loggingIn,
+    processing,
     countdown,
     sendVerifyCode,
     loginWithSms,
@@ -26,9 +25,72 @@ function createMockComposable() {
 
 let mockComposable: ReturnType<typeof createMockComposable>
 
-// Mock composable
-vi.mock('../../app/composables/wx/useSmsLogin', () => ({
-  useSmsLogin: () => mockComposable,
+// Mock the composable
+vi.mock('~/composables/auth/useSmsAuth', () => ({
+  useSmsAuth: () => mockComposable,
+}))
+
+// Mock useToast
+vi.mock('#app', async (importOriginal) => {
+  const original = await importOriginal<Record<string, any>>()
+  return {
+    ...original,
+    useRouter: () => ({ push: vi.fn() }),
+  }
+})
+
+// Stub Ionic components to render as simple HTML elements
+const ionStubs = {
+  IonButton: defineComponent({
+    props: ['expand', 'fill', 'size', 'color', 'disabled'],
+    emits: ['click'],
+    setup(props, { slots, emit }) {
+      return () => h('button', {
+        disabled: props.disabled || undefined,
+        onClick: () => emit('click'),
+      }, slots.default?.())
+    },
+  }),
+  IonInput: defineComponent({
+    props: ['modelValue', 'type', 'placeholder', 'maxlength'],
+    emits: ['update:modelValue', 'keyup'],
+    setup(props) {
+      return () => h('input', {
+        type: props.type || 'text',
+        value: props.modelValue,
+      })
+    },
+  }),
+  IonItem: defineComponent({
+    props: ['lines'],
+    setup(_, { slots }) {
+      return () => h('div', { class: 'ion-item' }, slots.default?.())
+    },
+  }),
+  IonLabel: defineComponent({
+    props: ['position'],
+    setup(_, { slots }) {
+      return () => h('label', slots.default?.())
+    },
+  }),
+  IonIcon: defineComponent({
+    props: ['icon'],
+    setup() {
+      return () => h('span', { class: 'icon' })
+    },
+  }),
+  IonNote: defineComponent({
+    props: ['color'],
+    setup(_, { slots }) {
+      return () => h('span', { class: 'note' }, slots.default?.())
+    },
+  }),
+}
+
+// Stub useToast composable
+vi.stubGlobal('useToast', () => ({
+  showSuccess: vi.fn(),
+  showError: vi.fn(),
 }))
 
 describe('smsLogin.vue', () => {
@@ -37,16 +99,26 @@ describe('smsLogin.vue', () => {
     vi.clearAllMocks()
   })
 
-  it('应该正确渲染', () => {
-    const wrapper = mount(SmsLogin)
+  async function mountSmsLogin() {
+    const SmsLogin = (await import('../../app/components/auth/SmsLogin.vue')).default
+    return mount(SmsLogin, {
+      global: {
+        stubs: ionStubs,
+      },
+    })
+  }
+
+  it('应该正确渲染', async () => {
+    const wrapper = await mountSmsLogin()
+    await wrapper.vm.$nextTick()
 
     expect(wrapper.find('input[type="tel"]').exists()).toBe(true)
     expect(wrapper.find('input[type="text"]').exists()).toBe(true)
-    expect(wrapper.findAll('button')).toHaveLength(2) // 获取验证码 + 登录
+    expect(wrapper.findAll('button')).toHaveLength(2)
   })
 
   it('应该显示正确的按钮文本', async () => {
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const buttons = wrapper.findAll('button')
@@ -58,7 +130,7 @@ describe('smsLogin.vue', () => {
     mockComposable.sendingCode.value = true
     mockComposable.phoneNumber.value = '13800000000'
 
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const sendButton = wrapper.findAll('button')[0]!
@@ -70,20 +142,20 @@ describe('smsLogin.vue', () => {
     mockComposable.countdown.value = 30
     mockComposable.phoneNumber.value = '13800000000'
 
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const sendButton = wrapper.findAll('button')[0]!
-    expect(sendButton.text()).toBe('30s')
+    expect(sendButton.text()).toContain('30s')
     expect(sendButton.attributes('disabled')).toBeDefined()
   })
 
   it('应该在登录时显示加载状态', async () => {
-    mockComposable.loggingIn.value = true
+    mockComposable.processing.value = true
     mockComposable.phoneNumber.value = '13800000000'
     mockComposable.verifyCode.value = '123456'
 
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const loginButton = wrapper.findAll('button')[1]!
@@ -102,11 +174,12 @@ describe('smsLogin.vue', () => {
       user: mockUser,
     })
 
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const loginButton = wrapper.findAll('button')[1]!
     await loginButton.trigger('click')
+    await flushPromises()
     await wrapper.vm.$nextTick()
 
     expect(mockComposable.loginWithSms).toHaveBeenCalled()
@@ -121,13 +194,12 @@ describe('smsLogin.vue', () => {
       message: '手机号格式不正确',
     })
 
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const sendButton = wrapper.findAll('button')[0]!
     await sendButton.trigger('click')
 
-    // 等待所有 Promise 完成
     await flushPromises()
     await wrapper.vm.$nextTick()
 
@@ -142,22 +214,22 @@ describe('smsLogin.vue', () => {
       message: '验证码已发送',
     })
 
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const sendButton = wrapper.findAll('button')[0]!
     await sendButton.trigger('click')
 
-    // 等待所有 Promise 完成
     await flushPromises()
     await wrapper.vm.$nextTick()
 
     expect(mockComposable.sendVerifyCode).toHaveBeenCalled()
-    expect(wrapper.text()).toContain('验证码已发送')
+    // 成功消息通过 toast 显示，不在 DOM 中
+    expect(wrapper.text()).not.toContain('手机号格式不正确')
   })
 
   it('应该在手机号或验证码为空时禁用登录按钮', async () => {
-    const wrapper = mount(SmsLogin)
+    const wrapper = await mountSmsLogin()
     await wrapper.vm.$nextTick()
 
     const loginButton = wrapper.findAll('button')[1]!

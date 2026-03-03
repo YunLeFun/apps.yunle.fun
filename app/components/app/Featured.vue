@@ -1,26 +1,20 @@
 <script lang="ts" setup>
-import type { YlfAppInfo } from '~~/packages/types'
 import { IonButton } from '@ionic/vue'
+
+const props = withDefaults(defineProps<Props>(), { managed: false })
 
 const router = useRouter()
 
-// 今日推荐应用
-const featuredApp = ref<YlfAppInfo>({
-  id: '1003',
-  code: 'fitness-pro',
-  name: 'Fitness Pro',
-  description: '专业健身教练，定制您的训练计划。AI 智能分析，个性化训练方案',
-  emoji: '💪',
-  color: '#FF3B30',
-  url: '/apps/fitness-pro',
-  category: '健康健身',
-  rating: 4.9,
-  downloads: '50万+',
-  size: '125.8 MB',
-  age: '12+',
-  subtitle: '编辑精选',
-  tagline: '让健身更科学',
-})
+interface Props {
+  /** 是否由父组件提供数据（避免重复加载） */
+  managed?: boolean
+}
+const { featuredApp, loadFeatured } = useDiscovery()
+
+// 非 managed 模式下自行加载
+if (!props.managed) {
+  onMounted(() => loadFeatured())
+}
 
 function openAppDetail() {
   router.push(`/app/${featuredApp.value.id}`)

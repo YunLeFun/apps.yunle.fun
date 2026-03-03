@@ -2,12 +2,15 @@
 /**
  * Home Page - 云居主页
  *
- * @description
- * 展示用户的应用桌面，支持点击打开应用、长按显示菜单、扫码等功能
+ * 展示用户的 Home Screen，支持：
+ * - 最近使用区域（默认 4 个，可展开查看更多）
+ * - 主体 Home Screen（翻页 + 拖拽排序）
+ * - 底部 Dock 常用栏
+ * - 长按编辑模式
  */
 
 import type { YlfAppInfo } from '~~/packages/types'
-import type { DockItem } from '~/components/layout/Dock.vue'
+import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   IonButton,
@@ -21,25 +24,51 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { add, addCircleOutline, downloadOutline, qrCodeOutline } from 'ionicons/icons'
-
-import { homeApps } from '~/constants/apps'
-import { cloudOneApp } from '~/constants/apps/builtin'
+import { ALL_APPS, homeApps } from '~/constants/apps'
+import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
 
 definePageMeta({
   alias: ['/', '/home'],
 })
 
 const router = useRouter()
-const appStore = useAppStore()
+const homeScreenStore = useHomeScreenStore()
+const { loadFromCloud, recordRecentUse, uninstallApp, updateDock } = useHomeScreen()
+
 const searchQuery = ref('')
-const showMenu = ref(false)
-const menuPosition = ref({ x: 0, y: 0 })
+const showAllRecent = ref(false)
+
+// ==================== 初始化 ====================
+
+onMounted(async () => {
+  // 用静态数据初始化 Home Screen（首次使用时）
+  homeScreenStore.initWithDefaults(homeApps.value)
+
+  // 异步加载云端数据
+  loadFromCloud()
+})
+
+// ==================== 最近使用 ====================
+
+const displayRecentApps = computed(() => {
+  const recent = homeScreenStore.recentApps
+  if (recent.length === 0)
+    return []
+
+  const limit = showAllRecent.value ? recent.length : RECENT_DEFAULT_DISPLAY
+  return recent.slice(0, limit).map((r) => {
+    const app = ALL_APPS.find(a => a.id === r.appId || a.code === r.appId)
+    return app || null
+  }).filter((a): a is YlfAppInfo => a !== null)
+})
+
+const hasMoreRecent = computed(() => homeScreenStore.recentApps.length > RECENT_DEFAULT_DISPLAY)
 
 // ==================== 顶部菜单 ====================
 
-/**
- * 打开顶部下拉菜单
- */
+const showMenu = ref(false)
+const menuPosition = ref({ x: 0, y: 0 })
+
 function openMenu(event: MouseEvent) {
   event.stopPropagation()
   const target = event.currentTarget as HTMLElement
@@ -51,9 +80,6 @@ function openMenu(event: MouseEvent) {
   showMenu.value = true
 }
 
-/**
- * 关闭顶部菜单
- */
 function closeMenu() {
   showMenu.value = false
 }
@@ -63,9 +89,6 @@ function closeMenu() {
 const { showScanner, openScanner, closeScanner } = useScanner()
 const { handleScanResult } = useScanResult()
 
-/**
- * 扫一扫
- */
 async function handleScan() {
   closeMenu()
   const result = await openScanner()
@@ -74,71 +97,51 @@ async function handleScan() {
   }
 }
 
-/**
- * 添加应用
- */
 function handleAddApp() {
   closeMenu()
-  router.push('/apps')
+  router.push('/tabs/apps')
 }
 
-/**
- * 下载应用
- */
 function handleDownload() {
   closeMenu()
-  // TODO: 实现下载应用功能
 }
 
-// ==================== 应用交互 ====================
+// ==================== 桌面交互 ====================
 
-const selectedApp = ref<YlfAppInfo | null>(null)
-const showContextMenuOverlay = ref(false)
+/** 打开应用 */
+function handleOpenApp(app: YlfAppInfo, installed: InstalledApp) {
+  recordRecentUse(installed.appId, installed.source)
 
-/**
- * 处理长按事件
- */
-function handleLongPress(app: YlfAppInfo, _event: PointerEvent | TouchEvent) {
-  selectedApp.value = app
-  showContextMenuOverlay.value = true
-
-  // 触发触觉反馈
-  try {
-    Haptics.impact({ style: ImpactStyle.Medium })
+  if (app.callback) {
+    app.callback()
   }
-  catch (error) {
-    console.warn('Haptic feedback failed:', error)
+  else if (app.url) {
+    if (app.url.startsWith('http')) {
+      openInAppBrowser(app.url)
+    }
+    else {
+      router.push(app.url)
+    }
   }
 }
 
-// ==================== Dock 配置 ====================
+/** 长按进入编辑模式 */
+function handleLongPress() {
+  homeScreenStore.enterEditMode()
+  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+}
 
-const dockItems: DockItem[] = [
-  {
-    path: '/tabs/home',
-    emoji: '📱',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    label: '云居',
-  },
-  {
-    path: '/tabs/discovery',
-    emoji: '🧭',
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    label: '发现',
-  },
-  {
-    path: '/tabs/apps',
-    emoji: '🎨',
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    label: '工坊',
-  },
-  {
-    path: '/tabs/me',
-    emoji: '👤',
-    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    label: '我的',
-  },
-]
+/** 从 Home Screen 移除应用 */
+function handleRemoveApp(installed: InstalledApp) {
+  uninstallApp(installed.appId)
+}
+
+/** 点击空白区域退出编辑模式 */
+function handleContentClick() {
+  if (homeScreenStore.isEditMode) {
+    homeScreenStore.exitEditMode()
+  }
+}
 </script>
 
 <template>
@@ -148,7 +151,10 @@ const dockItems: DockItem[] = [
       <IonToolbar>
         <IonTitle>云居</IonTitle>
         <IonButtons slot="end">
-          <IonButton @click="openMenu">
+          <IonButton v-if="homeScreenStore.isEditMode" @click="homeScreenStore.exitEditMode()">
+            完成
+          </IonButton>
+          <IonButton v-else @click="openMenu">
             <IonIcon slot="icon-only" :icon="add" />
           </IonButton>
         </IonButtons>
@@ -193,42 +199,53 @@ const dockItems: DockItem[] = [
       </div>
     </IonHeader>
 
-    <IonContent class="phone-desktop">
+    <IonContent class="phone-homescreen" @click="handleContentClick">
       <!-- 最近使用 -->
-      <div v-if="appStore.recentApps.length > 0" class="recent-section">
+      <div v-if="displayRecentApps.length > 0" class="recent-section">
         <div class="section-header px-5.5">
           <ion-note class="text-black/60 dark:text-white/60">
-            最近使用的云 APP
+            最近使用
+          </ion-note>
+          <ion-note
+            v-if="hasMoreRecent"
+            class="cursor-pointer text-sm text-[#007aff]"
+            @click="showAllRecent = !showAllRecent"
+          >
+            {{ showAllRecent ? '收起' : '更多' }}
           </ion-note>
         </div>
         <div class="recent-apps px-5 py-3">
           <AppItem
-            v-for="app in appStore.recentApps"
+            v-for="app in displayRecentApps"
             :key="app.id"
             :app="app"
           />
         </div>
       </div>
 
-      <!-- 应用网格 -->
-      <div class="px-5.5">
+      <!-- 主体 Home Screen -->
+      <div class="px-5.5 pt-2">
         <ion-note class="text-black/60 dark:text-white/60">
-          常用的云 APP
+          我的云应用
         </ion-note>
       </div>
-      <AppGrid
-        :apps="homeApps"
-        @long-press="handleLongPress"
-      >
-        <template #pre>
-          <AppIcon
-            :app="cloudOneApp"
-          />
-        </template>
-      </AppGrid>
 
-      <!-- 底部 Dock 导航栏 -->
-      <LayoutDock :items="dockItems" />
+      <AppHomeScreenGrid
+        :pages="homeScreenStore.pagedApps"
+        :edit-mode="homeScreenStore.isEditMode"
+        @open="handleOpenApp"
+        @remove="handleRemoveApp"
+        @long-press="handleLongPress"
+      />
+
+      <!-- 底部 Dock 常用栏 -->
+      <AppHomeScreenDock
+        :apps="homeScreenStore.dockApps"
+        :edit-mode="homeScreenStore.isEditMode"
+        @open="handleOpenApp"
+        @remove="handleRemoveApp"
+        @update:apps="updateDock"
+      />
 
       <!-- 扫码界面 -->
       <ScannerBarcode
@@ -242,7 +259,7 @@ const dockItems: DockItem[] = [
 </template>
 
 <style scoped>
-.dark .phone-desktop {
+.dark .phone-homescreen {
   --background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
 }
 
@@ -271,20 +288,8 @@ const dockItems: DockItem[] = [
   display: none;
 }
 
-.recent-apps :deep(.app-icon) {
+.recent-apps :deep(.app-icon-item) {
   flex-shrink: 0;
-}
-
-/* ==================== 扫码时隐藏背景 ==================== */
-:global(body.scanner-active) {
-  background: transparent !important;
-}
-
-:global(body.scanner-active) ion-app,
-:global(body.scanner-active) ion-page,
-:global(body.scanner-active) ion-content {
-  background: transparent !important;
-  --background: transparent !important;
 }
 
 /* ==================== 下拉菜单 ==================== */
@@ -362,29 +367,15 @@ const dockItems: DockItem[] = [
   }
 }
 
-/* ==================== 滚动条美化 ==================== */
-.phone-desktop::-webkit-scrollbar {
-  width: 4px;
+/* ==================== 扫码隐藏背景 ==================== */
+:global(body.scanner-active) {
+  background: transparent !important;
 }
 
-.phone-desktop::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.phone-desktop::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-}
-
-.dark .phone-desktop::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.phone-desktop::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.dark .phone-desktop::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+:global(body.scanner-active) ion-app,
+:global(body.scanner-active) ion-page,
+:global(body.scanner-active) ion-content {
+  background: transparent !important;
+  --background: transparent !important;
 }
 </style>

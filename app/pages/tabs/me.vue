@@ -73,7 +73,7 @@ function navigateTo(path: string) {
         <k-list-item
           link
           :title="userInfo.nickname || '云乐坊用户'"
-          subtitle="查看个人资料"
+          footer="查看个人资料"
           inner-class="k-list-item-vcenter"
           @click="navigateTo('/user/profile')"
         >
@@ -126,21 +126,9 @@ function navigateTo(path: string) {
             </span>
           </template>
         </k-list-item>
-
-        <k-list-item
-          link
-          title="关于"
-          @click="navigateTo('/about')"
-        >
-          <template #media>
-            <span class="ios-icon-box ios-icon-blue">
-              <IonIcon :icon="informationCircle" />
-            </span>
-          </template>
-        </k-list-item>
       </k-list>
 
-      <!-- 帮助 & 反馈 -->
+      <!-- 帮助 & 反馈 & 关于 -->
       <k-list strong inset>
         <k-list-item
           link
@@ -162,6 +150,18 @@ function navigateTo(path: string) {
           <template #media>
             <span class="ios-icon-box ios-icon-orange">
               <IonIcon :icon="chatbubbleEllipsesOutline" />
+            </span>
+          </template>
+        </k-list-item>
+
+        <k-list-item
+          link
+          title="关于"
+          @click="navigateTo('/about')"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="informationCircle" />
             </span>
           </template>
         </k-list-item>

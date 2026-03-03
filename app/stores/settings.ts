@@ -3,30 +3,39 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 
+/** 所有 localStorage 的 key 前缀 */
+const STORAGE_KEYS = [
+  'ylf_theme_mode',
+  'ylf_developer_mode',
+  'ylf_api_environment',
+  'ylf:homescreen-apps',
+  'ylf:dock-apps',
+  'ylf:recent-apps',
+  'ylf:recent-apps-v2',
+  'ylf:homescreen-sync-at',
+  'ylf:cloud-sync-enabled',
+  'ylf:cloud-auto-sync',
+] as const
+
 export const useSettingsStore = defineStore('settings', () => {
-  // 使用 Cookie 存储主题设置
+  // ==================== 主题设置 ====================
+
   const themeMode = useStorage<ThemeMode>('ylf_theme_mode', 'system')
-  // @nuxtjs/color-mode
   const colorMode = useColorMode()
 
-  // 应用主题设置
   function applyTheme(mode: ThemeMode) {
     themeMode.value = mode
 
     if (mode === 'system') {
-      // 跟随系统
       colorMode.preference = 'system'
     }
     else {
-      // 固定模式
       colorMode.preference = mode
     }
 
-    // 立即更新 DOM 类名以确保主题生效
     if (import.meta.client) {
       const html = document.documentElement
       if (mode === 'system') {
-        // 检测系统主题
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
         html.classList.toggle('dark', prefersDark)
       }
@@ -36,12 +45,10 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  // 初始化时应用保存的主题
   function initTheme() {
     applyTheme(themeMode.value)
   }
 
-  // 获取当前实际的主题（考虑系统设置）
   const currentTheme = computed(() => {
     if (themeMode.value === 'system') {
       return colorMode.value
@@ -49,7 +56,6 @@ export const useSettingsStore = defineStore('settings', () => {
     return themeMode.value
   })
 
-  // 监听系统主题变化（仅在跟随系统模式下）
   if (import.meta.client) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     mediaQuery.addEventListener('change', (e) => {
@@ -60,11 +66,56 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
+  // ==================== 云同步设置 ====================
+
+  /** 云同步开关（总开关，关闭后不会与 CloudBase 进行任何同步） */
+  const cloudSyncEnabled = useStorage<boolean>('ylf:cloud-sync-enabled', true)
+  /** 自动同步开关（开启后本地变更自动同步到云端） */
+  const cloudAutoSync = useStorage<boolean>('ylf:cloud-auto-sync', true)
+
+  // ==================== 存储空间 ====================
+
+  /** 计算本地存储已用空间（字节） */
+  function getLocalStorageUsage(): { used: number, keys: number } {
+    if (!import.meta.client)
+      return { used: 0, keys: 0 }
+
+    let totalSize = 0
+    let keyCount = 0
+
+    for (const key of STORAGE_KEYS) {
+      const value = localStorage.getItem(key)
+      if (value !== null) {
+        totalSize += key.length + value.length
+        keyCount++
+      }
+    }
+
+    return { used: totalSize * 2, keys: keyCount } // UTF-16 编码，每字符 2 字节
+  }
+
+  /** 清除所有应用本地缓存（不含认证信息） */
+  function clearLocalStorage() {
+    if (!import.meta.client)
+      return
+
+    for (const key of STORAGE_KEYS) {
+      localStorage.removeItem(key)
+    }
+  }
+
   return {
+    // 主题
     themeMode,
     currentTheme,
     applyTheme,
     initTheme,
+    // 云同步
+    cloudSyncEnabled,
+    cloudAutoSync,
+    // 存储
+    getLocalStorageUsage,
+    clearLocalStorage,
   }
 })
 

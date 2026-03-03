@@ -1,38 +1,18 @@
 <script lang="ts" setup>
 import type { YlfAppInfo } from '~~/packages/types'
-import { IonButton, IonIcon } from '@ionic/vue'
-import { chevronForward, star, starOutline } from 'ionicons/icons'
-import { openInAppBrowser } from '~/composables/useBrowser'
-import { ALL_APPS } from '~/constants/apps'
-
-interface Props {
-  selectedCategory?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  selectedCategory: '全部',
-})
+import { IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner } from '@ionic/vue'
+import { star, starOutline } from 'ionicons/icons'
 
 const router = useRouter()
-const allApps = ref<YlfAppInfo[]>(ALL_APPS)
-
-// 根据选中的分类筛选应用
-const apps = computed(() => {
-  if (props.selectedCategory === '全部') {
-    return allApps.value
-  }
-  return allApps.value.filter(app => app.category === props.selectedCategory)
-})
+const { apps, loading, hasMore, initialized, loadMore } = useWorkshop()
 
 function openAppDetail(app: YlfAppInfo) {
   router.push(`/app/${app.id}`)
 }
 
 function renderStars(rating?: number) {
-  if (!rating) {
+  if (!rating)
     return []
-  }
-
   const stars = []
   const fullStars = Math.floor(rating)
   for (let i = 0; i < 5; i++) {
@@ -41,27 +21,23 @@ function renderStars(rating?: number) {
   return stars
 }
 
-function openAppLink(app: YlfAppInfo) {
-  // window.open(app.url, '_blank')
-
-  openInAppBrowser(app.url)
+async function handleInfiniteScroll(event: CustomEvent) {
+  loadMore()
+  // 等待加载结束
+  await nextTick()
+  ;(event.target as HTMLIonInfiniteScrollElement).complete()
 }
 </script>
 
 <template>
   <div class="app-store-list">
-    <!-- 应用列表 -->
-    <div>
-      <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-xl font-bold">
-          {{ props.selectedCategory === '全部' ? '精选应用' : props.selectedCategory }}
-        </h2>
-        <IonButton fill="clear" size="small">
-          查看全部
-          <IonIcon slot="end" :icon="chevronForward" />
-        </IonButton>
-      </div>
+    <!-- 加载中骨架 -->
+    <div v-if="loading && !initialized" class="py-8 text-center">
+      <IonSpinner name="crescent" />
+    </div>
 
+    <!-- 应用列表 -->
+    <template v-else>
       <div v-if="apps.length > 0" class="flex flex-col">
         <div
           v-for="(app, index) in apps"
@@ -76,7 +52,7 @@ function openAppLink(app: YlfAppInfo) {
               class="app-icon h-16 w-16 flex flex-shrink-0 items-center justify-center text-3xl shadow-sm"
               :style="{ backgroundColor: app.color }"
             >
-              {{ app.icon }}
+              {{ app.icon || app.emoji }}
             </div>
 
             <!-- 应用信息 -->
@@ -88,7 +64,7 @@ function openAppLink(app: YlfAppInfo) {
                 {{ app.description }}
               </div>
               <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <div class="flex items-center gap-0.5">
+                <div v-if="app.rating" class="flex items-center gap-0.5">
                   <IonIcon
                     v-for="(starIcon, idx) in renderStars(app.rating)"
                     :key="idx"
@@ -98,33 +74,35 @@ function openAppLink(app: YlfAppInfo) {
                   />
                   <span class="ml-1">{{ app.rating }}</span>
                 </div>
-                <span>·</span>
+                <span v-if="app.rating && app.category">·</span>
                 <span>{{ app.category }}</span>
               </div>
             </div>
 
-            <!-- 获取按钮 -->
-            <IonButton
-              fill="solid"
-              size="small"
-              color="light"
-              class="get-button flex-shrink-0"
-              style="--border-radius: 14px; font-weight: 600; min-width: 72px"
-              @click.stop="openAppLink(app)"
-            >
-              获取
-            </IonButton>
+            <!-- 安装按钮 -->
+            <AppInstallButton :app-id="app.code || app.id" source="static" />
           </div>
         </div>
       </div>
 
       <!-- 空状态 -->
       <div v-else class="py-12 text-center">
-        <p class="text-gray-500 dark:text-gray-400">
+        <p class="text-lg text-gray-400 dark:text-gray-500">
           暂无应用
         </p>
+        <p class="mt-1 text-sm text-gray-400 dark:text-gray-600">
+          换个关键词试试吧
+        </p>
       </div>
-    </div>
+
+      <!-- 无限滚动 -->
+      <IonInfiniteScroll
+        v-if="hasMore && apps.length > 0"
+        @ion-infinite="handleInfiniteScroll"
+      >
+        <IonInfiniteScrollContent loading-spinner="crescent" />
+      </IonInfiniteScroll>
+    </template>
   </div>
 </template>
 

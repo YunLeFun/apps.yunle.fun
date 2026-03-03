@@ -33,7 +33,7 @@ export type AppFormData = ReturnType<typeof createEmptyForm>
 export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref<AppRecord | null>) {
   const router = useRouter()
   const toast = useToast()
-  const { user } = useCloudbaseAuth()
+  const userStore = useUserStore()
   const { createApp, updateApp, isSlugTaken } = useApps()
 
   const form = reactive(createEmptyForm())
@@ -256,7 +256,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   }
 
   async function handleSubmit() {
-    if (!user.value) {
+    if (!userStore.isLoggedIn) {
       toast.showWarning('请先登录')
       router.push('/login')
       return
@@ -308,6 +308,8 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
         toast.showSuccess('保存成功')
         // 更新快照
         initialFormSnapshot.value = JSON.stringify(form)
+        // 返回详情页（使用可能已更新的 slug）
+        router.replace(`/apps/${form.slug}`)
       }
     }
     catch (err: unknown) {

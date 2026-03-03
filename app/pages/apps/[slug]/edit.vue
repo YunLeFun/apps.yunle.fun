@@ -23,11 +23,11 @@ import { checkmark } from 'ionicons/icons'
 
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
 const { getMyAppBySlug } = useApps()
 
 const slug = computed(() => (route.params as { slug?: string }).slug ?? '')
 const loading = ref(true)
+const loadError = ref('')
 const appData = ref<AppRecord | null>(null)
 
 const {
@@ -44,19 +44,22 @@ const {
 async function loadApp() {
   try {
     loading.value = true
+    loadError.value = ''
     appData.value = await getMyAppBySlug(slug.value)
     if (!appData.value) {
-      toast.showError('应用不存在或无权访问')
-      router.replace('/apps/my')
+      loadError.value = '应用不存在或无权访问'
     }
   }
   catch {
-    toast.showError('加载失败')
-    router.replace('/apps/my')
+    loadError.value = '加载失败，请稍后重试'
   }
   finally {
     loading.value = false
   }
+}
+
+function goBack() {
+  router.replace('/apps/my')
 }
 
 onMounted(loadApp)
@@ -83,6 +86,24 @@ onMounted(loadApp)
       <!-- 加载中 -->
       <div v-if="loading" class="flex justify-center pt-20">
         <IonSpinner name="crescent" />
+      </div>
+
+      <!-- 加载失败 -->
+      <div v-else-if="loadError" class="error-state">
+        <div class="error-icon">
+          😵
+        </div>
+        <p class="error-title">
+          {{ loadError }}
+        </p>
+        <div class="error-actions">
+          <IonButton fill="outline" shape="round" @click="loadApp">
+            重试
+          </IonButton>
+          <IonButton fill="clear" shape="round" @click="goBack">
+            返回列表
+          </IonButton>
+        </div>
       </div>
 
       <form v-else @submit.prevent="handleSubmit">
@@ -235,6 +256,34 @@ onMounted(loadApp)
 </template>
 
 <style scoped>
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 80px 24px 0;
+}
+
+.error-icon {
+  font-size: 48px;
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.error-title {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  text-align: center;
+}
+
+.error-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .section-header {
   padding: 24px 20px 6px;
   font-size: 13px;

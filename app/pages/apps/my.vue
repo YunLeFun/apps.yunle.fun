@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import type { AppRecord } from '~/types/app'
 import {
-  actionSheetController,
+  alertController,
   IonBackButton,
   IonButton,
   IonButtons,
-  IonChip,
   IonContent,
   IonHeader,
   IonIcon,
+  IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
+  IonLabel,
+  IonList,
   IonPage,
   IonRefresher,
   IonRefresherContent,
@@ -17,7 +22,12 @@ import {
   IonToolbar,
   onIonViewWillEnter,
 } from '@ionic/vue'
-import { add, chevronForward, ellipsisHorizontal, globe, logoGithub, pencil, trash } from 'ionicons/icons'
+import {
+  add,
+  createOutline,
+  globeOutline,
+  trashOutline,
+} from 'ionicons/icons'
 import { DEFAULT_EMOJI } from '~/types/app'
 
 const router = useRouter()
@@ -48,57 +58,45 @@ async function handleRefresh(event: CustomEvent) {
   ;(event.target as HTMLIonRefresherElement).complete()
 }
 
-async function showAppActions(app: AppRecord) {
-  const buttons: any[] = [
-    {
-      text: '编辑',
-      icon: pencil,
-      handler: () => {
-        router.push(`/apps/${app.slug}/edit`)
+function viewApp(app: AppRecord) {
+  router.push(`/apps/${app.slug}`)
+}
+
+function editApp(app: AppRecord, slidingItem?: any) {
+  slidingItem?.close()
+  router.push(`/apps/${app.slug}/edit`)
+}
+
+function openApp(app: AppRecord, slidingItem?: any) {
+  slidingItem?.close()
+  if (app.websiteUrl)
+    openInAppBrowser(app.websiteUrl)
+}
+
+async function confirmDeleteApp(app: AppRecord, slidingItem?: any) {
+  slidingItem?.close()
+  const alert = await alertController.create({
+    header: '删除应用',
+    message: `确定要删除「${app.name}」吗？此操作不可撤销。`,
+    buttons: [
+      { text: '取消', role: 'cancel' },
+      {
+        text: '删除',
+        role: 'destructive',
+        handler: async () => {
+          try {
+            await deleteApp(app._id)
+            myApps.value = myApps.value.filter(a => a._id !== app._id)
+            toast.showSuccess('已删除')
+          }
+          catch {
+            toast.showError('删除失败')
+          }
+        },
       },
-    },
-  ]
-
-  if (app.websiteUrl) {
-    buttons.push({
-      text: '打开网站',
-      icon: globe,
-      handler: () => { window.open(app.websiteUrl, '_blank') },
-    })
-  }
-
-  if (app.githubRepo) {
-    buttons.push({
-      text: 'GitHub 仓库',
-      icon: logoGithub,
-      handler: () => { window.open(`https://github.com/${app.githubRepo}`, '_blank') },
-    })
-  }
-
-  buttons.push(
-    {
-      text: '删除',
-      role: 'destructive',
-      icon: trash,
-      handler: async () => {
-        try {
-          await deleteApp(app._id)
-          myApps.value = myApps.value.filter(a => a._id !== app._id)
-          toast.showSuccess('已删除')
-        }
-        catch {
-          toast.showError('删除失败')
-        }
-      },
-    },
-    { text: '取消', role: 'cancel' },
-  )
-
-  const actionSheet = await actionSheetController.create({
-    header: app.name,
-    buttons,
+    ],
   })
-  await actionSheet.present()
+  await alert.present()
 }
 
 function formatDate(ts: number) {
@@ -162,6 +160,12 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
 
       <!-- 未登录 -->
       <div v-if="!userStore.isLoggedIn" class="empty-state">
+        <div class="empty-icon">
+          🔒
+        </div>
+        <p class="empty-title">
+          登录后管理你的应用
+        </p>
         <p class="empty-text">
           登录后可以创建和管理你的应用
         </p>
@@ -180,8 +184,11 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
         <div class="empty-icon">
           📦
         </div>
+        <p class="empty-title">
+          还没有应用
+        </p>
         <p class="empty-text">
-          还没有应用，创建一个吧
+          创建你的第一个应用吧
         </p>
         <IonButton fill="solid" shape="round" @click="router.push('/apps/new')">
           创建应用
@@ -189,70 +196,48 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
       </div>
 
       <!-- 应用列表 -->
-      <div v-else class="app-list">
-        <div
-          v-for="app in myApps"
-          :key="app._id"
-          class="app-card"
-          @click="router.push(`/apps/${app.slug}/edit`)"
-        >
-          <div class="app-card-main">
+      <IonList v-else inset class="app-list">
+        <IonItemSliding v-for="app in myApps" :key="app._id">
+          <IonItem button :detail="true" class="app-item" @click="viewApp(app)">
             <!-- 图标 -->
-            <div class="app-card-icon" :style="{ backgroundColor: app.themeColor || '#007AFF' }">
-              <img
-                v-if="app.logo"
-                :src="app.logo"
-                alt=""
-                class="h-full w-full object-cover"
-              >
+            <div slot="start" class="app-icon" :style="{ backgroundColor: app.themeColor || '#007AFF' }">
+              <img v-if="app.logo" :src="app.logo" alt="" class="h-full w-full object-cover">
               <span v-else>{{ app.emoji || DEFAULT_EMOJI }}</span>
             </div>
 
-            <!-- 信息 -->
-            <div class="app-card-info">
-              <div class="app-card-header">
-                <h3 class="app-card-name">
-                  {{ app.name }}
-                </h3>
+            <IonLabel>
+              <h2 class="app-name">
+                {{ app.name }}
                 <span v-if="!app.isPublic" class="private-badge">私有</span>
-              </div>
-              <p v-if="app.description" class="app-card-desc">
+              </h2>
+              <p v-if="app.description">
                 {{ app.description }}
               </p>
-              <div class="app-card-meta">
-                <IonChip v-if="app.category" class="meta-chip">
-                  {{ app.category }}
-                </IonChip>
+              <p class="app-meta">
+                <span v-if="app.category" class="meta-category">{{ app.category }}</span>
                 <span class="meta-date">{{ formatDate(app.updatedAt || app.createdAt) }}</span>
-              </div>
-            </div>
+              </p>
+            </IonLabel>
+          </IonItem>
 
-            <!-- 操作 -->
-            <div class="app-card-actions">
-              <button class="action-more" @click.stop="showAppActions(app)">
-                <IonIcon :icon="ellipsisHorizontal" />
-              </button>
-              <IonIcon :icon="chevronForward" class="action-chevron" />
-            </div>
-          </div>
-
-          <!-- 标签行 -->
-          <div v-if="app.tags && app.tags.length" class="app-card-tags">
-            <span
-              v-for="tag in app.tags.slice(0, 5)"
-              :key="tag"
-              class="tag-badge"
-            >
-              {{ tag }}
-            </span>
-            <span v-if="app.tags.length > 5" class="tag-more">+{{ app.tags.length - 5 }}</span>
-          </div>
-        </div>
-      </div>
+          <!-- 左滑操作 -->
+          <IonItemOptions side="end">
+            <IonItemOption v-if="app.websiteUrl" color="primary" @click="openApp(app, $event.target?.closest('ion-item-sliding') as any)">
+              <IonIcon slot="icon-only" :icon="globeOutline" />
+            </IonItemOption>
+            <IonItemOption color="warning" @click="editApp(app, $event.target?.closest('ion-item-sliding') as any)">
+              <IonIcon slot="icon-only" :icon="createOutline" />
+            </IonItemOption>
+            <IonItemOption color="danger" @click="confirmDeleteApp(app, $event.target?.closest('ion-item-sliding') as any)">
+              <IonIcon slot="icon-only" :icon="trashOutline" />
+            </IonItemOption>
+          </IonItemOptions>
+        </IonItemSliding>
+      </IonList>
 
       <!-- 底部统计 -->
       <div v-if="userStore.isLoggedIn && myApps.length > 0" class="list-footer">
-        共 {{ myApps.length }} 个应用
+        共 {{ myApps.length }} 个应用 · 左滑查看更多操作
       </div>
     </IonContent>
   </IonPage>
@@ -265,88 +250,68 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   padding: 80px 24px 0;
 }
 
 .empty-icon {
-  font-size: 48px;
+  font-size: 56px;
   opacity: 0.3;
+  margin-bottom: 4px;
+}
+
+.empty-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .empty-text {
   text-align: center;
   font-size: 15px;
   opacity: 0.5;
+  margin: 0 0 8px;
 }
 
-/* 应用列表 */
+/* 列表 */
 .app-list {
-  padding: 8px 16px 0;
+  margin-top: 8px;
 }
 
-.app-card {
-  background: var(--ion-item-background, var(--ion-background-color, #fff));
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-  -webkit-tap-highlight-color: transparent;
+.app-item {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
 }
 
-.app-card:active {
-  transform: scale(0.98);
-}
-
-.app-card-main {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.app-card-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 13px;
-  flex-shrink: 0;
+.app-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 24px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
   position: relative;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  margin-inline-end: 12px;
 }
 
-.app-card-icon::after {
+.app-icon::after {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 13px;
+  border-radius: 12px;
   box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
   pointer-events: none;
 }
 
-.app-card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.app-card-header {
+.app-name {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.app-card-name {
-  font-size: 16px;
   font-weight: 600;
-  line-height: 1.3;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .private-badge {
@@ -357,117 +322,32 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
   background: rgba(142, 142, 147, 0.12);
   color: var(--ion-color-medium);
   flex-shrink: 0;
+  vertical-align: middle;
 }
 
-.app-card-desc {
-  font-size: 13px;
-  color: var(--ion-color-medium);
-  margin: 2px 0 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-card-meta {
+.app-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
-.meta-chip {
-  --background: rgba(0, 122, 255, 0.08);
-  --color: var(--ion-color-primary);
-  font-size: 11px;
+.meta-category {
+  font-size: 12px;
   font-weight: 500;
-  height: 22px;
-  margin: 0;
-  padding: 0 8px;
+  color: var(--ion-color-primary);
 }
 
 .meta-date {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ion-color-medium);
   opacity: 0.7;
 }
 
-.app-card-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-top: 2px;
-  flex-shrink: 0;
-}
-
-.action-more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(142, 142, 147, 0.08);
-  color: var(--ion-color-medium);
-  font-size: 18px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.action-more:active {
-  background: rgba(142, 142, 147, 0.16);
-}
-
-.action-chevron {
-  font-size: 16px;
-  color: var(--ion-color-medium);
-  opacity: 0.4;
-}
-
-/* 标签行 */
-.app-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 0.5px solid rgba(142, 142, 147, 0.12);
-}
-
-.tag-badge {
-  font-size: 11px;
-  font-weight: 400;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: rgba(142, 142, 147, 0.08);
-  color: var(--ion-color-medium);
-}
-
-.tag-more {
-  font-size: 11px;
-  color: var(--ion-color-medium);
-  opacity: 0.6;
-  padding: 2px 4px;
-}
-
 .list-footer {
-  padding: 8px 24px 32px;
+  padding: 12px 24px 32px;
   text-align: center;
   font-size: 12px;
   opacity: 0.4;
-}
-
-/* 暗色适配 */
-.dark .app-card {
-  background: var(--ion-item-background, #1c1c1e);
-}
-
-.dark .action-more {
-  background: rgba(118, 118, 128, 0.16);
-}
-
-.dark .tag-badge {
-  background: rgba(118, 118, 128, 0.16);
 }
 </style>

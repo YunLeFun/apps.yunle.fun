@@ -10,8 +10,8 @@ import {
   kList,
   kListItem,
 } from 'konsta/vue'
-import { APP_CHANGELOG } from '~/constants'
 import { config } from '~/config'
+import { APP_CHANGELOG } from '~/constants'
 
 const appVersion = '0.0.1'
 

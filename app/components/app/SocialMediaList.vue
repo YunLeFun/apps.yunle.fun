@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { actionSheetController } from '@ionic/vue'
 import {
   kBlockTitle,
   kList,
   kListItem,
 } from 'konsta/vue'
-import { actionSheetController } from '@ionic/vue'
 import { YLF_SOCIAL_MEDIA } from '~/constants'
 
 const toast = useToast()
@@ -12,7 +12,8 @@ const toast = useToast()
 type SocialItem = typeof YLF_SOCIAL_MEDIA[number]
 
 function openLink(url: string) {
-  if (!url) return
+  if (!url)
+    return
   window.open(url, '_blank')
 }
 

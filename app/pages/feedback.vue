@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
+import { actionSheetController } from '@ionic/vue'
 import {
   chatbubbleEllipsesOutline,
   mailOutline,
@@ -10,8 +12,6 @@ import {
   kList,
   kListItem,
 } from 'konsta/vue'
-import { actionSheetController } from '@ionic/vue'
-import { Capacitor } from '@capacitor/core'
 import { config } from '~/config'
 import { YLF_CONTACT } from '~/constants'
 

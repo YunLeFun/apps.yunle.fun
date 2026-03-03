@@ -1,87 +1,20 @@
 <script lang="ts" setup>
 import type { YlfAppInfo } from '~~/packages/types'
-import { IonButton } from '@ionic/vue'
+
+const props = withDefaults(defineProps<Props>(), { managed: false })
 
 const router = useRouter()
 
-// 本周热门应用排行榜
-const weeklyChartApps = ref<YlfAppInfo[]>([
-  {
-    id: '2001',
-    code: 'music-master',
-    name: 'Music Master',
-    description: '专业音乐制作工具，支持多轨录音和混音',
-    icon: '🎵',
-    emoji: '🎵',
-    color: '#FF2D55',
-    url: '/app/music-master',
-    category: '音乐',
-    rating: 4.8,
-    downloads: '100万+',
-    size: '156.2 MB',
-    age: '4+',
-  },
-  {
-    id: '2002',
-    code: 'photo-editor-pro',
-    name: 'Photo Editor Pro',
-    description: '强大的图片编辑工具，AI 智能修图',
-    icon: '📷',
-    emoji: '📷',
-    color: '#5856D6',
-    url: '/app/photo-editor-pro',
-    category: '摄影与录像',
-    rating: 4.9,
-    downloads: '200万+',
-    size: '98.5 MB',
-    age: '4+',
-  },
-  {
-    id: '2003',
-    code: 'task-manager',
-    name: 'Task Manager',
-    description: '高效任务管理，让工作井井有条',
-    icon: '✅',
-    emoji: '✅',
-    color: '#34C759',
-    url: '/app/task-manager',
-    category: '效率',
-    rating: 4.7,
-    downloads: '80万+',
-    size: '45.3 MB',
-    age: '4+',
-  },
-  {
-    id: '2004',
-    code: 'language-learn',
-    name: 'Language Learn',
-    description: '轻松学习多国语言，AI 对话练习',
-    icon: '🌍',
-    emoji: '🌍',
-    color: '#FF9500',
-    url: '/app/language-learn',
-    category: '教育',
-    rating: 4.8,
-    downloads: '150万+',
-    size: '112.7 MB',
-    age: '4+',
-  },
-  {
-    id: '2005',
-    code: 'meditation-plus',
-    name: 'Meditation Plus',
-    description: '冥想放松，改善睡眠质量',
-    icon: '🧘',
-    emoji: '🧘',
-    color: '#30B0C7',
-    url: '/app/meditation-plus',
-    category: '健康健身',
-    rating: 4.9,
-    downloads: '120万+',
-    size: '67.8 MB',
-    age: '4+',
-  },
-])
+interface Props {
+  /** 是否由父组件提供数据（避免重复加载） */
+  managed?: boolean
+}
+const { weeklyApps, loadWeeklyChart } = useDiscovery()
+
+// 非 managed 模式下自行加载
+if (!props.managed) {
+  onMounted(() => loadWeeklyChart())
+}
 
 function openAppDetail(app: YlfAppInfo) {
   router.push(`/app/${app.id}`)
@@ -105,7 +38,7 @@ function viewAllChart() {
       </div>
       <div class="chart-list">
         <div
-          v-for="(app) in weeklyChartApps"
+          v-for="app in weeklyApps"
           :key="app.id"
           class="chart-item"
           @click="openAppDetail(app)"
@@ -131,16 +64,9 @@ function viewAllChart() {
             </div>
           </div>
 
-          <!-- 获取按钮 -->
+          <!-- 安装按钮 -->
           <div class="app-action">
-            <IonButton
-              fill="clear"
-              size="small"
-              color="primary"
-              @click.stop="openAppDetail(app)"
-            >
-              获取
-            </IonButton>
+            <AppInstallButton :app-id="app.code || app.id" source="static" />
           </div>
         </div>
       </div>

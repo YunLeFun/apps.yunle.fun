@@ -1,0 +1,19 @@
+/* Hero image sizing */
+.VPHero .VPImage {
+  max-width: 180px;
+  max-height: 180px;
+}
+
+@media (min-width: 640px) {
+  .VPHero .VPImage {
+    max-width: 220px;
+    max-height: 220px;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero .VPImage {
+    max-width: 280px;
+    max-height: 280px;
+  }
+}

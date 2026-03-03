@@ -7,7 +7,8 @@ import {
 import { YLF_WEBSITES } from '~/constants'
 
 function openLink(url: string) {
-  if (!url) return
+  if (!url)
+    return
   window.open(url, '_blank')
 }
 </script>

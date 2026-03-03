@@ -15,20 +15,23 @@ import {
 } from '@ionic/vue'
 import { personCircleOutline } from 'ionicons/icons'
 
-const searchQuery = ref('')
-const selectedCategory = ref('全部')
+const {
+  searchQuery,
+  selectedCategory,
+  categories,
+  changeCategory,
+  debouncedSearch,
+  queryApps,
+} = useWorkshop()
 
-// 分类列表
-const categories = [
-  { id: 'all', name: '全部', icon: '📱' },
-  { id: 'health', name: '健康健身', icon: '💪' },
-  { id: 'photo', name: '摄影与录像', icon: '📷' },
-  { id: 'music', name: '音乐', icon: '🎵' },
-  { id: 'productivity', name: '效率', icon: '✅' },
-]
+onMounted(() => queryApps(true))
 
 function handleSegmentChange(event: CustomEvent) {
-  selectedCategory.value = event.detail.value
+  changeCategory(event.detail.value)
+}
+
+function handleSearchInput() {
+  debouncedSearch()
 }
 </script>
 
@@ -40,7 +43,7 @@ function handleSegmentChange(event: CustomEvent) {
           工坊
         </IonTitle>
         <IonButtons slot="end">
-          <IonButton>
+          <IonButton router-link="/tabs/me">
             <IonIcon slot="icon-only" :icon="personCircleOutline" />
           </IonButton>
         </IonButtons>
@@ -55,6 +58,8 @@ function handleSegmentChange(event: CustomEvent) {
           show-cancel-button="focus"
           class="app-store-searchbar"
           mode="ios"
+          @ion-input="handleSearchInput"
+          @ion-clear="handleSearchInput"
         />
       </IonToolbar>
 
@@ -82,7 +87,7 @@ function handleSegmentChange(event: CustomEvent) {
 
     <IonContent :fullscreen="true">
       <div class="content-wrapper">
-        <AppList :selected-category="selectedCategory" />
+        <AppList />
       </div>
     </IonContent>
   </IonPage>

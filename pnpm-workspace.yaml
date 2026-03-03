@@ -3,7 +3,11 @@ shellEmulator: true
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
-  - 'rollup@2.80.0'
+  - rollup@2.80.0
+  - vite@5.4.21
+
+packages:
+  - docs
 
 overrides:
   semver@<7.0.0: '>=7.7.4'

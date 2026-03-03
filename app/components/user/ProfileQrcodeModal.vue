@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import QRCode from 'qrcode'
 import { kButton } from 'konsta/vue'
+import QRCode from 'qrcode'
 
 const props = defineProps<{
   open: boolean
@@ -20,7 +20,8 @@ const qrcodeDataUrl = ref('')
 const canvasRef = ref<HTMLCanvasElement>()
 
 const profileUrl = computed(() => {
-  if (!props.userId) return ''
+  if (!props.userId)
+    return ''
   return `https://www.yunle.fun/user/${props.userId}`
 })
 
@@ -46,11 +47,13 @@ watch(() => props.open, async (val) => {
  * 保存名片为图片
  */
 async function saveCard() {
-  if (!canvasRef.value) return
+  if (!canvasRef.value)
+    return
 
   const canvas = canvasRef.value
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
+  if (!ctx)
+    return
 
   const width = 340
   const height = 440

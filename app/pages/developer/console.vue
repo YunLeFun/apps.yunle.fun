@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LogLevel } from '~/stores/console'
-import { actionSheetController } from '@ionic/vue'
+import { actionSheetController, IonContent } from '@ionic/vue'
 import {
   closeOutline,
   funnelOutline,
@@ -17,7 +17,8 @@ const toast = useToast()
 const activeFilter = ref<LogLevel | 'all'>('all')
 
 const filteredLogs = computed(() => {
-  if (activeFilter.value === 'all') return consoleStore.logs
+  if (activeFilter.value === 'all')
+    return consoleStore.logs
   return consoleStore.logs.filter(l => l.level === activeFilter.value)
 })
 

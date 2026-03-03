@@ -66,26 +66,26 @@ CloudBase 安全规则引擎要求 **`where` 条件必须能让引擎推导出�
 
 ```typescript
 // ✅ 查自己的数据 — where 含 _openid
-.where({ _openid: userId })
+db.collection('apps').where({ _openid: userId })
 
 // ✅ 查公开数据 — where 含 isPublic: true
-.where({ isPublic: true })
+db.collection('apps').where({ isPublic: true })
 
 // ✅ 组合条件 — 按 slug 查公开应用
-.where({ slug: 'xxx', isPublic: true })
+db.collection('apps').where({ slug: 'xxx', isPublic: true })
 
 // ✅ 组合条件 — 按 slug 查自己的应用
-.where({ slug: 'xxx', _openid: userId })
+db.collection('apps').where({ slug: 'xxx', _openid: userId })
 ```
 
 **非法查询模式：**
 
 ```typescript
 // ❌ 仅按 slug 查询 — 引擎无法判断结果是否有读权限
-.where({ slug: 'xxx' })
+db.collection('apps').where({ slug: 'xxx' })
 
 // ❌ 按任意非权限字段查询
-.where({ category: 'game' })
+db.collection('apps').where({ category: 'game' })
 ```
 
 ## 查询模式
@@ -156,6 +156,53 @@ await db.collection('apps').add({
 })
 ```
 
+## 公开应用查询模式（工坊页面）
+
+### 按分类查询公开应用
+
+```typescript
+db.collection('apps')
+  .where({ isPublic: true, category: '工具' })
+  .orderBy('updatedAt', 'desc')
+  .skip(offset)
+  .limit(20)
+  .get()
+```
+
+### 搜索公开应用
+
+```typescript
+db.collection('apps')
+  .where({
+    isPublic: true,
+    name: db.RegExp({ regexp: keyword, options: 'i' }),
+  })
+  .limit(20)
+  .get()
+```
+
+### 查询所有公开应用（分页）
+
+```typescript
+db.collection('apps')
+  .where({ isPublic: true })
+  .orderBy('updatedAt', 'desc')
+  .skip(offset)
+  .limit(20)
+  .get()
+```
+
+### 根据多个 ID 批量查询
+
+```typescript
+db.collection('apps')
+  .where({
+    _id: _.in(appIds),
+    isPublic: true,
+  })
+  .get()
+```
+
 ## 类型定义
 
 文件：`app/types/app.ts`
@@ -186,7 +233,7 @@ interface AppRecord {
 
 优先级：`logo` > `emoji` > 默认 emoji `📱`
 
-```
+```text
 有 logo URL → 展示 logo 图片（圆角矩形裁剪）
 无 logo → 展示 emoji 字符
 无 emoji → 展示默认 📱
@@ -196,7 +243,7 @@ interface AppRecord {
 
 ### 预设主题色
 
-```
+```text
 #007AFF  iOS 蓝
 #34C759  iOS 绿
 #FF9500  iOS 橙

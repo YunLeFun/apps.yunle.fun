@@ -37,7 +37,7 @@ export function useProfileEdit() {
       day: 'numeric',
     })
   })
-  const avatarInitial = computed(() => (displayName.value || '云')[0])
+  const avatarInitial = computed(() => (displayName.value || '云').charAt(0))
   const isGitHubBound = computed(() => user.value?.providers?.includes('github'))
   const isWeChatBound = computed(() => user.value?.providers?.includes('wx_open'))
   const isPhoneBound = computed(() => !!user.value?.phone)

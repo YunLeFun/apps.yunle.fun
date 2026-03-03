@@ -24,12 +24,34 @@ let _id = 0
 
 // 安全的 CSS 属性白名单（防止 XSS）
 const SAFE_CSS_PROPS = new Set([
-  'color', 'background', 'background-color', 'font-size', 'font-weight',
-  'font-style', 'font-family', 'text-decoration', 'text-transform',
-  'padding', 'padding-left', 'padding-right', 'padding-top', 'padding-bottom',
-  'margin', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom',
-  'border', 'border-radius', 'border-color', 'border-width', 'border-style',
-  'line-height', 'letter-spacing', 'display', 'inline-size',
+  'color',
+  'background',
+  'background-color',
+  'font-size',
+  'font-weight',
+  'font-style',
+  'font-family',
+  'text-decoration',
+  'text-transform',
+  'padding',
+  'padding-left',
+  'padding-right',
+  'padding-top',
+  'padding-bottom',
+  'margin',
+  'margin-left',
+  'margin-right',
+  'margin-top',
+  'margin-bottom',
+  'border',
+  'border-radius',
+  'border-color',
+  'border-width',
+  'border-style',
+  'line-height',
+  'letter-spacing',
+  'display',
+  'inline-size',
 ])
 
 /** 过滤 CSS 样式，只保留安全属性 */
@@ -39,7 +61,8 @@ function sanitizeStyle(css: string): string {
     .map(s => s.trim())
     .filter((s) => {
       const colonIdx = s.indexOf(':')
-      if (colonIdx === -1) return false
+      if (colonIdx === -1)
+        return false
       const prop = s.slice(0, colonIdx).trim().toLowerCase()
       return SAFE_CSS_PROPS.has(prop)
     })
@@ -48,9 +71,12 @@ function sanitizeStyle(css: string): string {
 
 /** 将任意值序列化为字符串 */
 function stringifyArg(arg: any): string {
-  if (arg === null) return 'null'
-  if (arg === undefined) return 'undefined'
-  if (typeof arg === 'string') return arg
+  if (arg === null)
+    return 'null'
+  if (arg === undefined)
+    return 'undefined'
+  if (typeof arg === 'string')
+    return arg
   try {
     return JSON.stringify(arg, null, 2)
   }
@@ -64,7 +90,8 @@ function stringifyArg(arg: any): string {
  * 模拟 Chrome DevTools 的行为
  */
 function parseArgs(args: any[]): { segments: LogSegment[], plain: string } {
-  if (args.length === 0) return { segments: [], plain: '' }
+  if (args.length === 0)
+    return { segments: [], plain: '' }
 
   const first = args[0]
 
@@ -75,7 +102,7 @@ function parseArgs(args: any[]): { segments: LogSegment[], plain: string } {
   }
 
   const segments: LogSegment[] = []
-  let plainParts: string[] = []
+  const plainParts: string[] = []
   let argIdx = 1
   let currentStyle: string | undefined
 
@@ -169,11 +196,11 @@ export const useConsoleStore = defineStore('console', () => {
 
   // 保存原始 console 方法
   const _originals: Record<LogLevel, (...args: any[]) => void> = {
-    log: console.log.bind(console),
-    info: console.info.bind(console),
+    log: console.log.bind(console), // eslint-disable-line no-console
+    info: console.info.bind(console), // eslint-disable-line no-console
     warn: console.warn.bind(console),
     error: console.error.bind(console),
-    debug: console.debug.bind(console),
+    debug: console.debug.bind(console), // eslint-disable-line no-console
   }
 
   function addLog(level: LogLevel, args: any[]) {
@@ -192,12 +219,12 @@ export const useConsoleStore = defineStore('console', () => {
   }
 
   function startCapture() {
-    if (capturing.value) return
+    if (capturing.value)
+      return
     capturing.value = true
 
     const levels: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug']
     for (const level of levels) {
-      // eslint-disable-next-line no-console
       ;(console as any)[level] = (...args: any[]) => {
         _originals[level](...args) // 仍输出到真实 console
         addLog(level, args)
@@ -206,12 +233,12 @@ export const useConsoleStore = defineStore('console', () => {
   }
 
   function stopCapture() {
-    if (!capturing.value) return
+    if (!capturing.value)
+      return
     capturing.value = false
 
     const levels: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug']
     for (const level of levels) {
-      // eslint-disable-next-line no-console
       ;(console as any)[level] = _originals[level]
     }
   }

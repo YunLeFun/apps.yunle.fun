@@ -149,8 +149,12 @@ function clearAll() {
 }
 
 @keyframes wobble {
-  0% { transform: rotate(-1deg); }
-  100% { transform: rotate(1deg); }
+  0% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(1deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

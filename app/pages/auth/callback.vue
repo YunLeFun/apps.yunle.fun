@@ -2,6 +2,10 @@
 /**
  * OAuth 回调处理页
  * 处理 GitHub/微信 OAuth 登录回调
+ *
+ * 两种模式：
+ * 1. Web 端：SDK detectSessionInUrl 自动处理 → checkAuthStatus
+ * 2. 原生 App（state 以 'app-' 开头）：把 code+state 通过 deeplink 传回 App
  */
 import {
   IonBackButton,
@@ -15,6 +19,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { checkmarkCircle, closeCircle } from 'ionicons/icons'
+import { NATIVE_OAUTH_STATE_PREFIX } from '~/composables/auth/useCloudbaseOAuth'
 
 const router = useRouter()
 const { checkAuthStatus, isAuthenticated, user } = useCloudbaseAuth()
@@ -23,11 +28,59 @@ const toast = useToast()
 const status = ref<'checking' | 'success' | 'error'>('checking')
 const message = ref('正在处理中...')
 
-onMounted(async () => {
-  try {
-    // CloudBase SDK detectSessionInUrl: true 会自动处理 URL 中的 OAuth 回调参数
-    await new Promise(resolve => setTimeout(resolve, 500))
+/**
+ * 检测是否来自原生 App 的 OAuth 回调
+ * 如果是，通过 deeplink 把 code+state 传回 App
+ */
+function handleNativeAppCallback(): boolean {
+  const params = new URLSearchParams(window.location.search)
+  const code = params.get('code')
+  const state = params.get('state')
 
+  if (!state?.startsWith(NATIVE_OAUTH_STATE_PREFIX) || !code)
+    return false
+
+  // 来自原生 App，通过 deeplink 传回 code+state
+  message.value = '正在返回应用...'
+  const deeplink = `yunlefun://auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+  window.location.href = deeplink
+
+  // 如果 deeplink 没有立即关闭页面，显示提示
+  setTimeout(() => {
+    status.value = 'success'
+    message.value = '授权成功，请返回云乐坊 App'
+  }, 1500)
+
+  return true
+}
+
+onMounted(async () => {
+  // 先检查是否是原生 App 的回调
+  if (handleNativeAppCallback())
+    return
+
+  // Web 端正常处理
+  try {
+    // 等待 CloudBase SDK 的 detectSessionInUrl 自动处理 URL 中的 OAuth 回调参数
+    // SDK 会检测 code + state 参数，自动完成 token 交换
+    // 给 SDK 足够时间完成初始化和 session 交换
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    await checkAuthStatus()
+
+    if (isAuthenticated.value && user.value) {
+      status.value = 'success'
+      message.value = '登录成功！正在跳转...'
+      toast.showSuccess(`欢迎回来，${user.value.nickname || user.value.login}！`)
+
+      setTimeout(() => {
+        router.push('/tabs/me')
+      }, 1000)
+      return
+    }
+
+    // 如果首次检查未成功，可能 SDK 还在处理中，再等一下重试
+    await new Promise(resolve => setTimeout(resolve, 1500))
     await checkAuthStatus()
 
     if (isAuthenticated.value && user.value) {

@@ -29,6 +29,9 @@ export function useCloudbase() {
     region: config.public.cloudbaseRegion as string || undefined,
     accessKey: config.public.cloudbaseAccessKey as string || undefined,
     persistence: 'local' as const,
+    // 开启 OAuth 回调自动检测：SDK 会在页面加载时检测 URL 中的 code + state 参数，
+    // 自动完成 OAuth token 交换（signInWithOAuth / linkIdentity 回调均依赖此配置）
+    auth: { detectSessionInUrl: true },
   } as any)
   const auth: TcbAuth = app.auth({ persistence: 'local' })
 

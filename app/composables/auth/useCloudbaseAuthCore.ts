@@ -219,6 +219,33 @@ export function useCloudbaseAuthCore() {
   }
 
   /**
+   * 监听 CloudBase Auth 状态变更
+   * 处理 OAuth 登录成功 / 绑定身份完成等事件
+   */
+  const setupAuthListener = () => {
+    if (!import.meta.client)
+      return
+    try {
+      auth.onAuthStateChange((event: string, _session: unknown, _info?: Record<string, unknown>) => {
+        if (event === 'BIND_IDENTITY') {
+          // 绑定第三方身份（如微信）完成，刷新用户数据以更新 providers 列表
+          fetchUser()
+        }
+        else if (event === 'SIGNED_IN') {
+          // OAuth 登录成功，刷新用户数据
+          fetchUser()
+        }
+      })
+    }
+    catch (err) {
+      console.warn('[Auth] 监听状态变更失败:', err)
+    }
+  }
+
+  // 初始化时自动设置监听
+  setupAuthListener()
+
+  /**
    * 更新用户信息（昵称、描述、性别等）
    */
   const updateUserInfo = async (params: {

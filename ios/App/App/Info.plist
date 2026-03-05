@@ -32,7 +32,16 @@
 				<string>wx925d6e320d64f30a</string>
 			</array>
 		</dict>
-		<dict/>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>yunlefun</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>yunlefun</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>

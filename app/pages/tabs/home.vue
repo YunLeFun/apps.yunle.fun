@@ -36,7 +36,6 @@ const homeScreenStore = useHomeScreenStore()
 const { loadFromCloud, recordRecentUse, uninstallApp, updateDock, finishEditing } = useHomeScreen()
 
 const searchQuery = ref('')
-const showAllRecent = ref(false)
 
 // ==================== 初始化 ====================
 
@@ -55,8 +54,7 @@ const displayRecentApps = computed(() => {
   if (recent.length === 0)
     return []
 
-  const limit = showAllRecent.value ? recent.length : RECENT_DEFAULT_DISPLAY
-  return recent.slice(0, limit).map((r) => {
+  return recent.slice(0, RECENT_DEFAULT_DISPLAY).map((r) => {
     const app = ALL_APPS.find(a => a.id === r.appId || a.slug === r.appId)
     return app || null
   }).filter((a): a is YlfAppInfo => a !== null)
@@ -209,12 +207,12 @@ function handleContentClick() {
           <ion-note
             v-if="hasMoreRecent"
             class="cursor-pointer text-sm text-[#007aff]"
-            @click="showAllRecent = !showAllRecent"
+            @click="router.push('/recent')"
           >
-            {{ showAllRecent ? '收起' : '更多' }}
+            更多
           </ion-note>
         </div>
-        <div class="recent-apps px-5 py-3">
+        <div class="recent-apps">
           <AppItem
             v-for="app in displayRecentApps"
             :key="app.id"
@@ -275,21 +273,23 @@ function handleContentClick() {
 }
 
 .recent-apps {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  margin-bottom: 8px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.recent-apps::-webkit-scrollbar {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 12px 20px;
 }
 
 .recent-apps :deep(.app-icon-item) {
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .recent-apps {
+    gap: 16px;
+    padding: 12px 16px;
+  }
 }
 
 /* ==================== 下拉菜单 ==================== */

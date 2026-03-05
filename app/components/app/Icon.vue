@@ -47,15 +47,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 /**
  * 获取徽章数字
- * 如果提供了 badgeCount 则使用，否则随机生成
  */
 const displayBadge = computed(() => {
   if (!props.showBadge)
     return null
-  if (props.badgeCount !== null)
-    return props.badgeCount
-  // 随机生成徽章（30% 概率显示）
-  return Math.random() > 0.7 ? Math.floor(Math.random() * 99) + 1 : null
+  return props.badgeCount
 })
 
 /**

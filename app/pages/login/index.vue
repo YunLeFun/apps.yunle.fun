@@ -404,7 +404,7 @@ async function handleVerifySignupOtp() {
 
           <!-- 第三方登录 - 图标模式 -->
           <div class="auth-social-icons">
-            <button class="auth-social-circle" :disabled="loading" @click="loginWithGitHub()">
+            <button class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
               <IonIcon :icon="logoGithub" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">GitHub</span>
             </button>
@@ -553,10 +553,10 @@ async function handleVerifySignupOtp() {
   letter-spacing: -0.5px;
 }
 
-// iOS Segmented Control
+// iOS Segmented Control — 对齐 UISegmentedControl 原生规范
 .auth-segment {
   display: flex;
-  background: var(--ion-color-light, #f2f2f7);
+  background: #e5e5ea; // iOS systemGray5，与 #f2f2f6 页面背景形成清晰对比
   border-radius: 9px;
   padding: 2px;
   margin: 0 16px 20px;
@@ -581,10 +581,10 @@ async function handleVerifySignupOtp() {
   -webkit-tap-highlight-color: transparent;
 
   &.active {
-    background: var(--ion-background-color, #fff);
+    background: #fff; // 固定纯白，不受 --ion-background-color 重写影响
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.04),
-      0 3px 8px rgba(0, 0, 0, 0.04);
+      0 0 0.5px rgba(0, 0, 0, 0.04),
+      0 1px 4px rgba(0, 0, 0, 0.12); // iOS 原生阴影层级
 
     .dark & {
       background: #636366;
@@ -798,7 +798,7 @@ async function handleVerifySignupOtp() {
   padding: 12px;
   border-radius: 50%;
   font-size: 28px;
-  background: var(--ion-color-light, #f2f2f7);
+  background: #e5e5ea; // iOS systemGray5，与 #f2f2f6 页面背景形成清晰对比
   color: var(--ion-text-color, #000);
 
   .dark & {
@@ -806,8 +806,21 @@ async function handleVerifySignupOtp() {
     color: #fff;
   }
 
+  // 微信 — 品牌绿底白图标
   .auth-social-circle--wechat & {
-    color: #07c160;
+    background: #07c160;
+    color: #fff;
+  }
+}
+
+// GitHub — 深色底白图标
+.auth-social-circle--github .auth-social-circle-icon {
+  background: #24292f;
+  color: #fff;
+
+  .dark & {
+    background: #f0f0f0;
+    color: #24292f;
   }
 }
 

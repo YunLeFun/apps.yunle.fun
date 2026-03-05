@@ -85,10 +85,56 @@ function handleAppClick(installed: InstalledApp) {
   }
 }
 
-/** 长按进入编辑 */
+/** 长按进入编辑（兼容 iOS 真机） */
+const LONG_PRESS_DELAY = 500
+const LONG_PRESS_MOVE_THRESHOLD = 10
+
+let longPressTimer: ReturnType<typeof setTimeout> | null = null
+let startX = 0
+let startY = 0
+
+function clearLongPressTimer() {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+}
+
 function handleLongPress() {
   Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
   emit('longPress')
+}
+
+function onPointerDown(e: PointerEvent) {
+  // 编辑模式下不需要再触发长按
+  if (props.editMode)
+    return
+  startX = e.clientX
+  startY = e.clientY
+  clearLongPressTimer()
+  longPressTimer = setTimeout(() => {
+    longPressTimer = null
+    handleLongPress()
+  }, LONG_PRESS_DELAY)
+}
+
+function onPointerMove(e: PointerEvent) {
+  if (!longPressTimer)
+    return
+  const dx = e.clientX - startX
+  const dy = e.clientY - startY
+  // 手指移动超过阈值则取消长按
+  if (Math.abs(dx) > LONG_PRESS_MOVE_THRESHOLD || Math.abs(dy) > LONG_PRESS_MOVE_THRESHOLD) {
+    clearLongPressTimer()
+  }
+}
+
+function onPointerUp() {
+  clearLongPressTimer()
+}
+
+function onPointerCancel() {
+  clearLongPressTimer()
 }
 </script>
 
@@ -120,7 +166,11 @@ function handleLongPress() {
             class="hs-grid-item"
             :class="{ 'edit-wobble': editMode }"
             @click="handleAppClick(element)"
-            @contextmenu.prevent="handleLongPress"
+            @pointerdown="onPointerDown"
+            @pointermove="onPointerMove"
+            @pointerup="onPointerUp"
+            @pointercancel="onPointerCancel"
+            @contextmenu.prevent
           >
             <!-- 删除按钮（编辑模式） -->
             <button
@@ -203,6 +253,10 @@ function handleLongPress() {
   display: flex;
   flex-direction: column;
   align-items: center;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pan-x pan-y;
 }
 
 /* ==================== 编辑模式抖动动画 ==================== */

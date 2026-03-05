@@ -101,6 +101,16 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     }
   }
 
+  /** 从最近使用中移除单个应用 */
+  function removeRecentApp(appId: string) {
+    recentApps.value = recentApps.value.filter(a => a.appId !== appId)
+  }
+
+  /** 清空最近使用 */
+  function clearRecentApps() {
+    recentApps.value = []
+  }
+
   // ==================== 编辑模式 ====================
 
   function enterEditMode() {
@@ -180,6 +190,8 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     updateInstalledApps,
     updateDockApps,
     addRecentApp,
+    removeRecentApp,
+    clearRecentApps,
     enterEditMode,
     exitEditMode,
     markPendingChanges,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonButton, IonIcon } from '@ionic/vue'
-import { closeOutline, flashlightOutline } from 'ionicons/icons'
+import { closeOutline, flashlightOutline, imagesOutline } from 'ionicons/icons'
 
 const props = defineProps<{
   isVisible: boolean
@@ -10,6 +10,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   cancel: []
   result: [content: string]
+  pickAlbum: []
 }>()
 
 const flashlightOn = ref(false)
@@ -36,6 +37,10 @@ watch(() => props.isVisible, async (visible) => {
 function handleCancel() {
   stopWebScan()
   emit('cancel')
+}
+
+function handlePickAlbum() {
+  emit('pickAlbum')
 }
 
 function toggleFlashlight() {
@@ -79,7 +84,10 @@ onUnmounted(() => {
 
       <!-- 底部操作栏 -->
       <div class="scan-actions">
-        <IonButton fill="clear" color="light" @click="handleCancel">
+        <IonButton fill="clear" color="light" @click="handlePickAlbum">
+          <IonIcon slot="icon-only" :icon="imagesOutline" />
+        </IonButton>
+        <IonButton fill="clear" color="light" class="scan-close-btn" @click="handleCancel">
           <IonIcon slot="icon-only" :icon="closeOutline" />
         </IonButton>
         <IonButton v-if="showFlashlight" fill="clear" color="light" @click="toggleFlashlight">
@@ -210,7 +218,7 @@ onUnmounted(() => {
 
 .scan-actions {
   display: flex;
-  gap: 40px;
+  gap: 32px;
   align-items: center;
   justify-content: center;
   padding: 20px 0;
@@ -218,7 +226,11 @@ onUnmounted(() => {
   ion-button {
     --padding-start: 16px;
     --padding-end: 16px;
-    font-size: 28px;
+    font-size: 24px;
+  }
+
+  .scan-close-btn {
+    font-size: 32px;
   }
 }
 </style>

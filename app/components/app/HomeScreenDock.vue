@@ -25,7 +25,7 @@ const emit = defineEmits<{
   'update:apps': [apps: InstalledApp[]]
   'open': [app: YlfAppInfo, installed: InstalledApp]
   'remove': [installed: InstalledApp]
-  'longPress': [app: InstalledApp, position: { x: number, y: number }]
+  'longPress': [app: InstalledApp, position: { x: number, y: number }, iconRect: DOMRect]
 }>()
 
 /** 解析应用信息 */
@@ -60,6 +60,7 @@ let longPressTimer: ReturnType<typeof setTimeout> | null = null
 let startX = 0
 let startY = 0
 let longPressApp: InstalledApp | null = null
+let longPressElement: HTMLElement | null = null
 
 function clearLongPressTimer() {
   if (longPressTimer) {
@@ -74,11 +75,13 @@ function onPointerDown(e: PointerEvent, app: InstalledApp) {
   startX = e.clientX
   startY = e.clientY
   longPressApp = app
+  longPressElement = (e.currentTarget as HTMLElement) || null
   clearLongPressTimer()
   longPressTimer = setTimeout(() => {
     longPressTimer = null
     Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
-    emit('longPress', longPressApp!, { x: startX, y: startY })
+    const iconRect = longPressElement!.getBoundingClientRect()
+    emit('longPress', longPressApp!, { x: startX, y: startY }, iconRect)
   }, LONG_PRESS_DELAY)
 }
 
@@ -107,8 +110,13 @@ function onPointerCancel() {
       <VueDraggable
         v-model="dockApps"
         :disabled="!editMode"
-        :animation="200"
+        :animation="250"
+        :delay="0"
+        :delay-on-touch-only="false"
+        :force-fallback="true"
+        :fallback-tolerance="3"
         ghost-class="dock-ghost"
+        chosen-class="dock-chosen"
         class="dock-items"
         @end="onDragEnd"
       >
@@ -154,21 +162,30 @@ function onPointerCancel() {
 
 <style scoped>
 .hs-dock {
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
-  padding: 8px 16px 16px;
+  /* 与 Grid 的 padding 左右对齐 */
+  padding: 8px 20px 16px;
+  z-index: 100;
+  pointer-events: none;
 }
 
 .dock-container {
+  pointer-events: auto;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   border-radius: 20px;
-  padding: 8px 16px;
+  padding: 8px 12px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.12),
     0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  /* 宽度撑满与 Grid 对齐 */
+  width: 100%;
 }
 
 .dark .dock-container {
@@ -180,7 +197,11 @@ function onPointerCancel() {
 
 .dock-items {
   display: flex;
+  /* 与 Grid 的 gap 一致 */
   gap: 20px;
+  justify-content: center;
+  align-items: center;
+  min-height: 64px;
 }
 
 .dock-item {
@@ -238,17 +259,26 @@ function onPointerCancel() {
   background: #3a3a3c;
 }
 
-/* ==================== 编辑抖动 ==================== */
+/* ==================== 编辑抖动（iOS 仿真） ==================== */
 .edit-wobble {
-  animation: wobble 0.3s ease-in-out infinite alternate;
+  animation: wobble 0.115s ease-in-out infinite alternate;
+}
+
+.edit-wobble:nth-child(2n) {
+  animation-delay: -0.04s;
+  animation-direction: alternate-reverse;
+}
+
+.edit-wobble:nth-child(3n) {
+  animation-delay: -0.07s;
 }
 
 @keyframes wobble {
   0% {
-    transform: rotate(-1deg);
+    transform: rotate(-1.2deg);
   }
   100% {
-    transform: rotate(1deg);
+    transform: rotate(1.2deg);
   }
 }
 
@@ -278,13 +308,25 @@ function onPointerCancel() {
 }
 
 .dock-ghost {
-  opacity: 0.3;
+  opacity: 0;
+}
+
+.dock-chosen {
+  animation: none !important;
+  transform: scale(1.1);
+  z-index: 100;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
 }
 
 /* ==================== 响应式 ==================== */
 @media (max-width: 480px) {
+  .hs-dock {
+    padding: 8px 16px 16px;
+  }
+
   .dock-items {
     gap: 16px;
+    min-height: 60px;
   }
 
   .dock-icon {

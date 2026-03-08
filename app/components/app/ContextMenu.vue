@@ -2,11 +2,10 @@
 /**
  * AppContextMenu - iOS 风格应用上下文菜单
  *
- * 长按应用图标时显示的操作菜单，模拟 iOS 主屏幕长按效果：
- * - 毛玻璃背景圆角卡片
- * - 文字标签 + 右侧图标（iOS SF Symbols 布局）
- * - 文字使用系统色（黑/白），危险操作用红色
- * - 分隔线贯穿整行
+ * 长按应用图标时：
+ * - 背景模糊遮罩
+ * - 被长按的应用图标浮于遮罩之上（带缩放动画 + 抖动）
+ * - 菜单卡片出现在浮动图标下方
  */
 
 import type { YlfAppInfo } from '~~/packages/types'
@@ -15,6 +14,8 @@ interface Props {
   visible: boolean
   position: { x: number, y: number }
   app?: YlfAppInfo | null
+  /** 长按图标的原始位置和尺寸 */
+  iconRect?: { x: number, y: number, width: number, height: number } | null
 }
 
 const props = defineProps<Props>()
@@ -23,24 +24,83 @@ const emit = defineEmits<{
   share: []
   remove: []
   close: []
+  /** 拖拽浮动图标 → 关闭菜单进入编辑模式 */
+  dragStart: []
 }>()
 
 const MENU_WIDTH = 250
-const MENU_HEIGHT = 164
 const MARGIN = 12
+/** 图标与菜单之间的间距 */
+const ICON_MENU_GAP = 8
+/** 判定为拖拽的移动阈值 (px) */
+const DRAG_THRESHOLD = 6
 
-const menuRef = ref<HTMLElement | null>(null)
+/** 浮动图标拖拽检测 */
+let iconTouchStartX = 0
+let iconTouchStartY = 0
 
-/** 计算菜单位置，居中于手指位置上方 */
+function onIconPointerDown(e: PointerEvent) {
+  iconTouchStartX = e.clientX
+  iconTouchStartY = e.clientY
+}
+
+function onIconPointerMove(e: PointerEvent) {
+  const dx = e.clientX - iconTouchStartX
+  const dy = e.clientY - iconTouchStartY
+  if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+    emit('dragStart')
+  }
+}
+
+/** 浮动图标样式 */
+const iconStyle = computed(() => {
+  if (!props.iconRect)
+    return null
+  const { x, y, width, height } = props.iconRect
+  return {
+    position: 'fixed' as const,
+    left: `${x}px`,
+    top: `${y}px`,
+    width: `${width}px`,
+    height: `${height}px`,
+    zIndex: 100001,
+  }
+})
+
+/** 菜单位置：紧贴浮动图标下方，水平居中于图标 */
 const menuStyle = computed(() => {
-  const { x, y } = props.position
   const vw = typeof window !== 'undefined' ? window.innerWidth : 375
   const vh = typeof window !== 'undefined' ? window.innerHeight : 812
 
-  // 菜单出现在长按点上方，水平居中于手指
-  const left = Math.min(Math.max(x - MENU_WIDTH / 2, MARGIN), vw - MENU_WIDTH - MARGIN)
-  const top = Math.min(Math.max(y - MENU_HEIGHT - 20, MARGIN), vh - MENU_HEIGHT - MARGIN)
+  if (props.iconRect) {
+    const { x, y, width, height } = props.iconRect
+    const iconCenterX = x + width / 2
+    const menuTop = y + height + ICON_MENU_GAP
 
+    let left = iconCenterX - MENU_WIDTH / 2
+    left = Math.min(Math.max(left, MARGIN), vw - MENU_WIDTH - MARGIN)
+
+    // 如果菜单会超出底部，改为放在图标上方
+    const menuEl = document.querySelector('.ctx-menu') as HTMLElement | null
+    const menuHeight = menuEl?.offsetHeight ?? 164
+    let top = menuTop
+    if (menuTop + menuHeight > vh - MARGIN) {
+      top = y - menuHeight - ICON_MENU_GAP
+      if (top < MARGIN)
+        top = MARGIN
+    }
+
+    return {
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${MENU_WIDTH}px`,
+    }
+  }
+
+  // fallback：无 iconRect 时用 position
+  const { x, y } = props.position
+  const left = Math.min(Math.max(x - MENU_WIDTH / 2, MARGIN), vw - MENU_WIDTH - MARGIN)
+  const top = Math.min(Math.max(y + 10, MARGIN), vh - 164 - MARGIN)
   return {
     left: `${left}px`,
     top: `${top}px`,
@@ -71,12 +131,28 @@ function onOverlayClick() {
         @click.self="onOverlayClick"
         @contextmenu.prevent
       >
+        <!-- 浮动的应用图标预览（可拖拽） -->
         <div
-          ref="menuRef"
+          v-if="app && iconStyle"
+          class="ctx-floating-icon"
+          :style="iconStyle"
+          @pointerdown.stop="onIconPointerDown"
+          @pointermove="onIconPointerMove"
+          @contextmenu.prevent
+        >
+          <AppIconBox
+            :icon="app.icon"
+            :emoji="app.emoji"
+            :color="app.color"
+            :label="app.name"
+          />
+        </div>
+
+        <!-- 菜单卡片 -->
+        <div
           class="ctx-menu"
           :style="menuStyle"
         >
-          <!-- 编辑主屏幕 -->
           <button class="ctx-item" @click="handleAction('editHomeScreen')">
             <span class="ctx-label">编辑主屏幕</span>
             <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -88,7 +164,6 @@ function onOverlayClick() {
 
           <div class="ctx-divider" />
 
-          <!-- 分享 App -->
           <button class="ctx-item" @click="handleAction('share')">
             <span class="ctx-label">分享 App</span>
             <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -100,7 +175,6 @@ function onOverlayClick() {
 
           <div class="ctx-divider" />
 
-          <!-- 移除 App -->
           <button class="ctx-item ctx-item--danger" @click="handleAction('remove')">
             <span class="ctx-label">移除 App</span>
             <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -122,10 +196,28 @@ function onOverlayClick() {
   inset: 0;
   z-index: 99999;
   background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
+/* ==================== 浮动图标 ==================== */
+.ctx-floating-icon {
+  z-index: 100001;
+  animation: ctx-wobble 0.115s ease-in-out infinite alternate;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+
+@keyframes ctx-wobble {
+  0% { transform: rotate(-1.2deg) scale(1.05); }
+  100% { transform: rotate(1.2deg) scale(1.05); }
+}
+
+/* ==================== 菜单卡片 ==================== */
 .ctx-menu {
   position: fixed;
   background: rgba(255, 255, 255, 0.85);
@@ -136,6 +228,7 @@ function onOverlayClick() {
     0 8px 32px rgba(0, 0, 0, 0.18),
     0 0 0 0.33px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  z-index: 100000;
 }
 
 .dark .ctx-menu {
@@ -215,14 +308,29 @@ function onOverlayClick() {
   background: rgba(84, 84, 88, 0.65);
 }
 
-/* ==================== 动画 ==================== */
+/* ==================== 进入/离开动画 ==================== */
 .ctx-menu-enter-active {
+  transition: opacity 0.2s ease;
+}
+
+.ctx-menu-enter-active .ctx-menu {
   transition:
     opacity 0.2s ease,
-    transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1.1);
+}
+
+.ctx-menu-enter-active .ctx-floating-icon {
+  transition:
+    opacity 0.15s ease,
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1.1);
 }
 
 .ctx-menu-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.ctx-menu-leave-active .ctx-menu,
+.ctx-menu-leave-active .ctx-floating-icon {
   transition:
     opacity 0.15s ease,
     transform 0.15s ease;
@@ -233,8 +341,13 @@ function onOverlayClick() {
 }
 
 .ctx-menu-enter-from .ctx-menu {
-  transform: scale(0.85);
   opacity: 0;
+  transform: scale(0.85);
+}
+
+.ctx-menu-enter-from .ctx-floating-icon {
+  opacity: 0;
+  transform: scale(0.7);
 }
 
 .ctx-menu-leave-to {
@@ -242,14 +355,27 @@ function onOverlayClick() {
 }
 
 .ctx-menu-leave-to .ctx-menu {
-  transform: scale(0.95);
   opacity: 0;
+  transform: scale(0.95);
+}
+
+.ctx-menu-leave-to .ctx-floating-icon {
+  opacity: 0;
+  transform: scale(0.9);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ctx-menu-enter-active,
-  .ctx-menu-leave-active {
+  .ctx-menu-leave-active,
+  .ctx-menu-enter-active .ctx-menu,
+  .ctx-menu-leave-active .ctx-menu,
+  .ctx-menu-enter-active .ctx-floating-icon,
+  .ctx-menu-leave-active .ctx-floating-icon {
     transition: none;
+  }
+
+  .ctx-floating-icon {
+    animation: none;
   }
 }
 </style>

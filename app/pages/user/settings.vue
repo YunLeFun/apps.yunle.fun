@@ -4,6 +4,7 @@ import {
   IonAlert,
 } from '@ionic/vue'
 import {
+  appsOutline,
   cloudDoneOutline,
   cloudOutline,
   moonOutline,
@@ -164,6 +165,27 @@ async function handleManualSync() {
           「自动」将跟随系统外观设置
         </p>
       </k-block>
+
+      <!-- 主屏幕 -->
+      <k-block-title>主屏幕</k-block-title>
+      <k-list strong inset>
+        <k-list-item
+          title="显示 Dock 栏"
+          footer="在主屏幕底部显示常用应用栏"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-purple">
+              <IonIcon :icon="appsOutline" />
+            </span>
+          </template>
+          <template #after>
+            <k-toggle
+              :checked="settingsStore.dockVisible"
+              @change="settingsStore.dockVisible = !settingsStore.dockVisible"
+            />
+          </template>
+        </k-list-item>
+      </k-list>
 
       <!-- 云同步 -->
       <k-block-title>云同步</k-block-title>

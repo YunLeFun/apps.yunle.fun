@@ -33,10 +33,14 @@ definePageMeta({
 
 const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
+const settingsStore = useSettingsStore()
 const { loadFromCloud, recordRecentUse, uninstallApp, updateDock, finishEditing } = useHomeScreen()
 const { shareApp } = useAppActions()
 
 const searchQuery = ref('')
+
+/** Dock 是否可见（设置开启或编辑模式下） */
+const showDock = computed(() => settingsStore.dockVisible || homeScreenStore.isEditMode)
 
 // ==================== 初始化 ====================
 
@@ -85,12 +89,20 @@ function closeMenu() {
 
 // ==================== 扫码功能 ====================
 
-const { showScanner, openScanner, closeScanner } = useScanner()
+const { showScanner, openScanner, scanFromAlbum, closeScanner } = useScanner()
 const { handleScanResult } = useScanResult()
 
 async function handleScan() {
   closeMenu()
   const result = await openScanner()
+  if (result) {
+    handleScanResult(result)
+  }
+}
+
+async function handleScanFromAlbum() {
+  closeScanner()
+  const result = await scanFromAlbum()
   if (result) {
     handleScanResult(result)
   }
@@ -128,6 +140,7 @@ function handleOpenApp(app: YlfAppInfo, installed: InstalledApp) {
 const contextMenuVisible = ref(false)
 const contextMenuPosition = ref({ x: 0, y: 0 })
 const contextMenuApp = ref<InstalledApp | null>(null)
+const contextMenuIconRect = ref<{ x: number, y: number, width: number, height: number } | null>(null)
 
 /** 解析 InstalledApp 为 YlfAppInfo */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
@@ -135,10 +148,11 @@ function resolveApp(installed: InstalledApp): YlfAppInfo | null {
 }
 
 /** 长按处理：应用 → 上下文菜单，空白 → 编辑模式 */
-function handleLongPress(app: InstalledApp | null, position: { x: number, y: number }) {
+function handleLongPress(app: InstalledApp | null, position: { x: number, y: number }, iconRect: DOMRect | null) {
   if (app) {
     contextMenuApp.value = app
     contextMenuPosition.value = position
+    contextMenuIconRect.value = iconRect ? { x: iconRect.x, y: iconRect.y, width: iconRect.width, height: iconRect.height } : null
     contextMenuVisible.value = true
   }
   else {
@@ -148,9 +162,10 @@ function handleLongPress(app: InstalledApp | null, position: { x: number, y: num
 }
 
 /** Dock 长按处理 */
-function handleDockLongPress(app: InstalledApp, position: { x: number, y: number }) {
+function handleDockLongPress(app: InstalledApp, position: { x: number, y: number }, iconRect: DOMRect) {
   contextMenuApp.value = app
   contextMenuPosition.value = position
+  contextMenuIconRect.value = { x: iconRect.x, y: iconRect.y, width: iconRect.width, height: iconRect.height }
   contextMenuVisible.value = true
 }
 
@@ -158,10 +173,18 @@ function handleDockLongPress(app: InstalledApp, position: { x: number, y: number
 function closeContextMenu() {
   contextMenuVisible.value = false
   contextMenuApp.value = null
+  contextMenuIconRect.value = null
 }
 
 /** 上下文菜单 - 编辑主屏幕 */
 function handleContextEditHomeScreen() {
+  closeContextMenu()
+  homeScreenStore.enterEditMode()
+  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+}
+
+/** 上下文菜单 - 拖拽浮动图标 → 进入编辑模式 */
+function handleContextDragStart() {
   closeContextMenu()
   homeScreenStore.enterEditMode()
   Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
@@ -255,7 +278,11 @@ function handleContentClick() {
       </div>
     </IonHeader>
 
-    <IonContent class="phone-homescreen" @click="handleContentClick">
+    <IonContent
+      class="phone-homescreen"
+      :class="{ 'has-dock': showDock }"
+      @click="handleContentClick"
+    >
       <!-- 最近使用 -->
       <div v-if="displayRecentApps.length > 0" class="recent-section">
         <div class="section-header px-5.5">
@@ -294,34 +321,38 @@ function handleContentClick() {
         @long-press="handleLongPress"
       />
 
-      <!-- 底部 Dock 常用栏 -->
-      <AppHomeScreenDock
-        :apps="homeScreenStore.dockApps"
-        :edit-mode="homeScreenStore.isEditMode"
-        @open="handleOpenApp"
-        @remove="handleRemoveApp"
-        @update:apps="updateDock"
-        @long-press="handleDockLongPress"
-      />
-
       <!-- 扫码界面 -->
       <ScannerBarcode
         :is-visible="showScanner"
         :show-flashlight="true"
         @cancel="closeScanner"
         @result="handleScanResult"
+        @pick-album="handleScanFromAlbum"
       />
     </IonContent>
+
+    <!-- 底部 Dock 常用栏：固定在屏幕底部，类似 iOS Home Screen -->
+    <AppHomeScreenDock
+      v-if="showDock"
+      :apps="homeScreenStore.dockApps"
+      :edit-mode="homeScreenStore.isEditMode"
+      @open="handleOpenApp"
+      @remove="handleRemoveApp"
+      @update:apps="updateDock"
+      @long-press="handleDockLongPress"
+    />
 
     <!-- 应用上下文菜单（Teleport to body，不受 IonContent 影响） -->
     <AppContextMenu
       :visible="contextMenuVisible"
       :position="contextMenuPosition"
       :app="contextMenuApp ? resolveApp(contextMenuApp) : null"
+      :icon-rect="contextMenuIconRect"
       @edit-home-screen="handleContextEditHomeScreen"
       @share="handleContextShare"
       @remove="handleContextRemove"
       @close="closeContextMenu"
+      @drag-start="handleContextDragStart"
     />
   </IonPage>
 </template>
@@ -329,6 +360,11 @@ function handleContentClick() {
 <style scoped>
 .dark .phone-homescreen {
   --background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+}
+
+/* Dock 显示时，内容区底部留出空间避免遮挡 */
+.phone-homescreen.has-dock {
+  --padding-bottom: 104px;
 }
 
 /* ==================== 最近使用区域 ==================== */

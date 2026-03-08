@@ -55,6 +55,9 @@ withDefaults(defineProps<Props>(), {
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .app-icon-box {
@@ -108,6 +111,9 @@ withDefaults(defineProps<Props>(), {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .app-label {
@@ -124,6 +130,8 @@ withDefaults(defineProps<Props>(), {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   white-space: normal;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .dark .app-label {

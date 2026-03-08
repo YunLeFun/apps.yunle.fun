@@ -57,12 +57,20 @@ const activeMarketName = computed(() => {
 })
 
 // 扫码添加第三方市场
-const { showScanner, openScanner, closeScanner } = useScanner()
+const { showScanner, openScanner, scanFromAlbum, closeScanner } = useScanner()
 const { handleScanResult } = useMarketScan()
 
 async function handleMarketScan() {
   popoverOpen.value = false
   const result = await openScanner()
+  if (result) {
+    handleScanResult(result)
+  }
+}
+
+async function handleMarketScanFromAlbum() {
+  closeScanner()
+  const result = await scanFromAlbum()
   if (result) {
     handleScanResult(result)
   }
@@ -194,6 +202,7 @@ function handleSearchInput() {
         :show-flashlight="true"
         @cancel="closeScanner"
         @result="handleScanResult"
+        @pick-album="handleMarketScanFromAlbum"
       />
     </IonContent>
   </IonPage>

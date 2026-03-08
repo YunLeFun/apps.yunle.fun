@@ -24,7 +24,7 @@ const emit = defineEmits<{
   'update:pages': [pages: InstalledApp[][]]
   'open': [app: YlfAppInfo, installed: InstalledApp]
   'remove': [installed: InstalledApp]
-  'longPress': [app: InstalledApp | null, position: { x: number, y: number }]
+  'longPress': [app: InstalledApp | null, position: { x: number, y: number }, iconRect: DOMRect | null]
 }>()
 
 const homeScreenStore = useHomeScreenStore()
@@ -38,9 +38,15 @@ function resolveApp(installed: InstalledApp): YlfAppInfo | null {
   return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
 }
 
-/** 获取当前页应用列表（可拖拽的 model） */
-const pageModels = computed(() =>
-  props.pages.map(page => [...page]),
+/** 可拖拽的 model —— 必须是可写 ref，computed 只读会导致拖拽写入被丢弃 */
+const pageModels = ref<InstalledApp[][]>([])
+
+watch(
+  () => props.pages,
+  (pages) => {
+    pageModels.value = pages.map(page => [...page])
+  },
+  { immediate: true, deep: true },
 )
 
 /** 拖拽结束时更新 */
@@ -93,6 +99,7 @@ let longPressTimer: ReturnType<typeof setTimeout> | null = null
 let startX = 0
 let startY = 0
 let longPressApp: InstalledApp | null = null
+let longPressElement: HTMLElement | null = null
 
 function clearLongPressTimer() {
   if (longPressTimer) {
@@ -103,16 +110,24 @@ function clearLongPressTimer() {
 
 function handleLongPress(app: InstalledApp | null, x: number, y: number) {
   Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
-  emit('longPress', app, { x, y })
+  const iconRect = longPressElement?.getBoundingClientRect() ?? null
+  emit('longPress', app, { x, y }, iconRect)
 }
 
 function onPointerDown(e: PointerEvent, app: InstalledApp | null = null) {
-  // 编辑模式下不需要再触发长按
+  // 编辑模式下让事件继续冒泡，SortableJS 需要捕获来发起拖拽
   if (props.editMode)
     return
+
+  // 非编辑模式：应用图标上的 pointerdown 需要阻止冒泡到 .hs-page，
+  // 避免同时触发空白区域的长按检测
+  if (app)
+    e.stopPropagation()
+
   startX = e.clientX
   startY = e.clientY
   longPressApp = app
+  longPressElement = (e.currentTarget as HTMLElement) || null
   clearLongPressTimer()
   longPressTimer = setTimeout(() => {
     longPressTimer = null
@@ -160,9 +175,14 @@ function onPointerCancel() {
         <VueDraggable
           v-model="pageModels[pageIndex]!"
           :disabled="!editMode"
-          :animation="200"
+          :animation="250"
+          :delay="0"
+          :delay-on-touch-only="false"
+          :force-fallback="true"
+          :fallback-tolerance="3"
           ghost-class="hs-ghost"
           drag-class="hs-drag"
+          chosen-class="hs-chosen"
           class="hs-grid"
           @end="onDragEnd"
         >
@@ -172,7 +192,7 @@ function onPointerCancel() {
             class="hs-grid-item"
             :class="{ 'edit-wobble': editMode }"
             @click="handleAppClick(element)"
-            @pointerdown.stop="onPointerDown($event, element)"
+            @pointerdown="onPointerDown($event, element)"
             @pointermove="onPointerMove"
             @pointerup="onPointerUp"
             @pointercancel="onPointerCancel"
@@ -192,7 +212,6 @@ function onPointerCancel() {
               v-if="resolveApp(element)"
               :app="resolveApp(element)!"
               :show-badge="false"
-              @pointerdown.prevent
             />
             <!-- 未解析的应用占位 -->
             <AppIconBox
@@ -262,29 +281,42 @@ function onPointerCancel() {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  touch-action: pan-x pan-y;
+  touch-action: none;
 }
 
-/* ==================== 编辑模式抖动动画 ==================== */
+/* ==================== 编辑模式抖动动画（iOS 仿真） ==================== */
+/*
+ * iOS 真实参数：约 0.115s 半周期，±1.2deg 旋转角度
+ * 通过 nth-child 错开相位，模拟"随机感"
+ */
 .edit-wobble {
-  animation: wobble 0.3s ease-in-out infinite alternate;
+  animation: wobble 0.115s ease-in-out infinite alternate;
 }
 
 .edit-wobble:nth-child(2n) {
-  animation-delay: 0.1s;
+  animation-delay: -0.04s;
   animation-direction: alternate-reverse;
 }
 
 .edit-wobble:nth-child(3n) {
-  animation-delay: 0.15s;
+  animation-delay: -0.07s;
+}
+
+.edit-wobble:nth-child(5n) {
+  animation-delay: -0.02s;
+  animation-direction: alternate-reverse;
+}
+
+.edit-wobble:nth-child(7n) {
+  animation-delay: -0.09s;
 }
 
 @keyframes wobble {
   0% {
-    transform: rotate(-1deg);
+    transform: rotate(-1.2deg);
   }
   100% {
-    transform: rotate(1deg);
+    transform: rotate(1.2deg);
   }
 }
 
@@ -313,15 +345,24 @@ function onPointerCancel() {
   line-height: 1;
 }
 
-/* ==================== 拖拽样式 ==================== */
+/* ==================== 拖拽样式（iOS 风格） ==================== */
 .hs-ghost {
-  opacity: 0.3;
+  opacity: 0;
+}
+
+.hs-chosen {
+  animation: none !important;
+  transform: scale(1.1);
+  z-index: 100;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 .hs-drag {
-  opacity: 0.8;
+  opacity: 1;
   transform: scale(1.1);
   z-index: 100;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
 }
 
 /* ==================== 页码指示器 ==================== */

@@ -15,6 +15,7 @@ const STORAGE_KEYS = [
   'ylf:homescreen-sync-at',
   'ylf:cloud-sync-enabled',
   'ylf:cloud-auto-sync',
+  'ylf:dock-visible',
 ] as const
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -73,6 +74,11 @@ export const useSettingsStore = defineStore('settings', () => {
   /** 自动同步开关（开启后本地变更自动同步到云端） */
   const cloudAutoSync = useStorage<boolean>('ylf:cloud-auto-sync', true)
 
+  // ==================== 主屏幕设置 ====================
+
+  /** 是否显示 Dock 栏（默认隐藏） */
+  const dockVisible = useStorage<boolean>('ylf:dock-visible', false)
+
   // ==================== 存储空间 ====================
 
   /** 计算本地存储已用空间（字节） */
@@ -113,6 +119,8 @@ export const useSettingsStore = defineStore('settings', () => {
     // 云同步
     cloudSyncEnabled,
     cloudAutoSync,
+    // 主屏幕
+    dockVisible,
     // 存储
     getLocalStorageUsage,
     clearLocalStorage,

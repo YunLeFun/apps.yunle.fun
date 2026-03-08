@@ -5,6 +5,7 @@
  */
 import type { CloudbaseUser, TcbRawUser, YlfUserInfo } from '@yunlefun/auth'
 import { getErrorMessage, mapCloudbaseUser } from '@yunlefun/auth'
+import { useAccountsStore } from '~/stores/accounts'
 
 /** Token 过期时间存储 key */
 const TOKEN_EXPIRY_KEY = 'ylf_token_expiry'
@@ -226,14 +227,26 @@ export function useCloudbaseAuthCore() {
     if (!import.meta.client)
       return
     try {
-      auth.onAuthStateChange((event: string, _session: unknown, _info?: Record<string, unknown>) => {
+      auth.onAuthStateChange((event: string, _session: unknown, info?: Record<string, unknown>) => {
         if (event === 'BIND_IDENTITY') {
           // 绑定第三方身份（如微信）完成，刷新用户数据以更新 providers 列表
           fetchUser()
         }
         else if (event === 'SIGNED_IN') {
-          // OAuth 登录成功，刷新用户数据
-          fetchUser()
+          // OAuth 登录成功，刷新用户数据并保存账号
+          fetchUser().then(() => {
+            if (user.value) {
+              const accountsStore = useAccountsStore()
+              // 尝试从回调信息或用户 providers 推断登录方式
+              const provider = (info?.provider as string) || ''
+              const method = provider.includes('github')
+                ? 'github'
+                : provider.includes('wechat')
+                  ? 'wechat'
+                  : undefined
+              accountsStore.saveAccount(userStore.userInfo, method)
+            }
+          })
         }
       })
     }

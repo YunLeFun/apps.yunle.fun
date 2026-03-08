@@ -14,6 +14,7 @@ import {
 import { isValidEmail, isValidPhone, useCountdown } from '@yunlefun/auth'
 import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icons'
 import { config } from '~/config'
+import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
 
 const {
   sendPhoneOtp,
@@ -30,6 +31,7 @@ const {
 } = useCloudbaseAuth()
 
 const router = useRouter()
+const accountsStore = useAccountsStore()
 
 watch(isAuthenticated, (value) => {
   if (value) {
@@ -41,9 +43,12 @@ watch(isAuthenticated, (value) => {
 type PageMode = 'login' | 'signup'
 const pageMode = ref<PageMode>('login')
 
+// 登录方式配置
+const loginTabs = getEnabledLoginTabs()
+
 // 登录方式切换
 type LoginMode = 'phone' | 'email' | 'password'
-const loginMode = ref<LoginMode>('phone')
+const loginMode = ref<LoginMode>(loginTabs[0]?.key as LoginMode || 'phone')
 
 // 手机号登录状态
 const phone = ref('')
@@ -78,11 +83,16 @@ const signupData = ref<TcbSignUpData | null>(null)
 const signupCodeSent = ref(false)
 const { remaining: signupCountdown, isActive: signupCountdownActive, start: startSignupCountdown } = useCountdown()
 
-// 恢复上次密码登录的账号
+// 恢复上次登录信息
 onMounted(() => {
+  // 恢复上次密码登录的账号
   const saved = localStorage.getItem(LAST_PASSWORD_ACCOUNT_KEY)
   if (saved)
     passwordAccount.value = saved
+
+  // 恢复上次手机号
+  if (accountsStore.lastPhone)
+    phone.value = accountsStore.lastPhone
 })
 
 // 校验
@@ -100,6 +110,8 @@ async function handleSendPhoneOtp() {
   if (!phoneValid.value)
     return
   try {
+    // 记住手机号
+    accountsStore.rememberPhone(phone.value)
     phoneOtpData.value = await sendPhoneOtp(phone.value)
     phoneCodeSent.value = true
     startPhoneCountdown()
@@ -112,6 +124,8 @@ async function handleVerifyPhoneOtp() {
     return
   try {
     await verifyPhoneOtp(phoneOtpData.value, phoneOtpCode.value)
+    // 登录成功后保存账号
+    afterLoginSuccess('phone')
   }
   catch {}
 }
@@ -133,6 +147,7 @@ async function handleVerifyEmailOtp() {
     return
   try {
     await verifyEmailOtp(emailOtpData.value, emailOtpCode.value)
+    afterLoginSuccess('email')
   }
   catch {}
 }
@@ -152,6 +167,7 @@ async function handlePasswordLogin() {
     await signInWithPassword(params)
     // 登录成功，记住账号
     localStorage.setItem(LAST_PASSWORD_ACCOUNT_KEY, passwordAccount.value)
+    afterLoginSuccess('password')
   }
   catch {}
 }
@@ -173,8 +189,19 @@ async function handleVerifySignupOtp() {
     return
   try {
     await verifySignUpOtp(signupData.value, signupOtpCode.value)
+    afterLoginSuccess('phone')
   }
   catch {}
+}
+
+/**
+ * 登录/注册成功后保存账号信息
+ */
+function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | 'wechat') {
+  const userStore = useUserStore()
+  if (userStore.userInfo) {
+    accountsStore.saveAccount(userStore.userInfo, method)
+  }
 }
 </script>
 
@@ -204,33 +231,21 @@ async function handleVerifySignupOtp() {
 
         <!-- ===== 登录模式 ===== -->
         <template v-if="pageMode === 'login'">
-          <!-- Segmented Control -->
-          <div class="auth-segment">
+          <!-- Segmented Control（根据开关配置动态渲染） -->
+          <div v-if="loginTabs.length > 1" class="auth-segment">
             <button
+              v-for="tab in loginTabs"
+              :key="tab.key"
               class="auth-segment-btn"
-              :class="{ active: loginMode === 'phone' }"
-              @click="loginMode = 'phone'"
+              :class="{ active: loginMode === tab.key }"
+              @click="loginMode = tab.key as LoginMode"
             >
-              手机号
-            </button>
-            <button
-              class="auth-segment-btn"
-              :class="{ active: loginMode === 'email' }"
-              @click="loginMode = 'email'"
-            >
-              邮箱
-            </button>
-            <button
-              class="auth-segment-btn"
-              :class="{ active: loginMode === 'password' }"
-              @click="loginMode = 'password'"
-            >
-              密码
+              {{ tab.label }}
             </button>
           </div>
 
           <!-- 手机号登录 -->
-          <div v-if="loginMode === 'phone'" class="auth-form">
+          <div v-if="loginMode === 'phone' && authMethods.phoneOtp" class="auth-form">
             <div class="auth-card">
               <div class="auth-card-row">
                 <span class="auth-area-code">+86</span>
@@ -290,7 +305,7 @@ async function handleVerifySignupOtp() {
           </div>
 
           <!-- 邮箱登录 -->
-          <div v-else-if="loginMode === 'email'" class="auth-form">
+          <div v-else-if="loginMode === 'email' && authMethods.emailOtp" class="auth-form">
             <div class="auth-card">
               <div class="auth-card-row">
                 <input
@@ -398,24 +413,24 @@ async function handleVerifySignupOtp() {
           </form>
 
           <!-- 分割线 -->
-          <div class="auth-divider">
+          <div v-if="hasEnabledOAuthProviders()" class="auth-divider">
             <span class="auth-divider-text">其他登录方式</span>
           </div>
 
           <!-- 第三方登录 - 图标模式 -->
-          <div class="auth-social-icons">
-            <button class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
+          <div v-if="hasEnabledOAuthProviders()" class="auth-social-icons">
+            <button v-if="authMethods.github" class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
               <IonIcon :icon="logoGithub" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">GitHub</span>
             </button>
-            <button class="auth-social-circle auth-social-circle--wechat" :disabled="loading" @click="loginWithWeChat()">
+            <button v-if="authMethods.wechat" class="auth-social-circle auth-social-circle--wechat" :disabled="loading" @click="loginWithWeChat()">
               <IonIcon :icon="logoWechat" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">微信</span>
             </button>
           </div>
 
           <!-- 注册入口 -->
-          <div class="auth-footer">
+          <div v-if="authMethods.phoneSignup" class="auth-footer">
             <p class="auth-footer-switch">
               还没有账号？
               <button class="auth-link-btn" @click="switchMode('signup')">
@@ -426,7 +441,7 @@ async function handleVerifySignupOtp() {
         </template>
 
         <!-- ===== 注册模式 ===== -->
-        <template v-else>
+        <template v-if="pageMode === 'signup' && authMethods.phoneSignup">
           <div class="auth-form">
             <div class="auth-card">
               <div class="auth-card-row">

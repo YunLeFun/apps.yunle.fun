@@ -24,7 +24,7 @@ const emit = defineEmits<{
   'update:pages': [pages: InstalledApp[][]]
   'open': [app: YlfAppInfo, installed: InstalledApp]
   'remove': [installed: InstalledApp]
-  'longPress': []
+  'longPress': [app: InstalledApp | null, position: { x: number, y: number }]
 }>()
 
 const homeScreenStore = useHomeScreenStore()
@@ -92,6 +92,7 @@ const LONG_PRESS_MOVE_THRESHOLD = 10
 let longPressTimer: ReturnType<typeof setTimeout> | null = null
 let startX = 0
 let startY = 0
+let longPressApp: InstalledApp | null = null
 
 function clearLongPressTimer() {
   if (longPressTimer) {
@@ -100,21 +101,22 @@ function clearLongPressTimer() {
   }
 }
 
-function handleLongPress() {
+function handleLongPress(app: InstalledApp | null, x: number, y: number) {
   Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
-  emit('longPress')
+  emit('longPress', app, { x, y })
 }
 
-function onPointerDown(e: PointerEvent) {
+function onPointerDown(e: PointerEvent, app: InstalledApp | null = null) {
   // 编辑模式下不需要再触发长按
   if (props.editMode)
     return
   startX = e.clientX
   startY = e.clientY
+  longPressApp = app
   clearLongPressTimer()
   longPressTimer = setTimeout(() => {
     longPressTimer = null
-    handleLongPress()
+    handleLongPress(longPressApp, startX, startY)
   }, LONG_PRESS_DELAY)
 }
 
@@ -150,6 +152,10 @@ function onPointerCancel() {
         v-for="(page, pageIndex) in pages"
         :key="pageIndex"
         class="hs-page"
+        @pointerdown="onPointerDown($event, null)"
+        @pointermove="onPointerMove"
+        @pointerup="onPointerUp"
+        @pointercancel="onPointerCancel"
       >
         <VueDraggable
           v-model="pageModels[pageIndex]!"
@@ -166,7 +172,7 @@ function onPointerCancel() {
             class="hs-grid-item"
             :class="{ 'edit-wobble': editMode }"
             @click="handleAppClick(element)"
-            @pointerdown="onPointerDown"
+            @pointerdown.stop="onPointerDown($event, element)"
             @pointermove="onPointerMove"
             @pointerup="onPointerUp"
             @pointercancel="onPointerCancel"

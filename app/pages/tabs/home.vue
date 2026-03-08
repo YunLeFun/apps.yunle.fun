@@ -34,6 +34,7 @@ definePageMeta({
 const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
 const { loadFromCloud, recordRecentUse, uninstallApp, updateDock, finishEditing } = useHomeScreen()
+const { shareApp } = useAppActions()
 
 const searchQuery = ref('')
 
@@ -123,10 +124,67 @@ function handleOpenApp(app: YlfAppInfo, installed: InstalledApp) {
   }
 }
 
-/** 长按进入编辑模式 */
-function handleLongPress() {
+/** 长按上下文菜单 */
+const contextMenuVisible = ref(false)
+const contextMenuPosition = ref({ x: 0, y: 0 })
+const contextMenuApp = ref<InstalledApp | null>(null)
+
+/** 解析 InstalledApp 为 YlfAppInfo */
+function resolveApp(installed: InstalledApp): YlfAppInfo | null {
+  return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
+}
+
+/** 长按处理：应用 → 上下文菜单，空白 → 编辑模式 */
+function handleLongPress(app: InstalledApp | null, position: { x: number, y: number }) {
+  if (app) {
+    contextMenuApp.value = app
+    contextMenuPosition.value = position
+    contextMenuVisible.value = true
+  }
+  else {
+    homeScreenStore.enterEditMode()
+    Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+  }
+}
+
+/** Dock 长按处理 */
+function handleDockLongPress(app: InstalledApp, position: { x: number, y: number }) {
+  contextMenuApp.value = app
+  contextMenuPosition.value = position
+  contextMenuVisible.value = true
+}
+
+/** 关闭上下文菜单 */
+function closeContextMenu() {
+  contextMenuVisible.value = false
+  contextMenuApp.value = null
+}
+
+/** 上下文菜单 - 编辑主屏幕 */
+function handleContextEditHomeScreen() {
+  closeContextMenu()
   homeScreenStore.enterEditMode()
   Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+}
+
+/** 上下文菜单 - 分享 */
+function handleContextShare() {
+  const app = contextMenuApp.value
+  closeContextMenu()
+  if (app) {
+    const resolved = resolveApp(app)
+    if (resolved)
+      shareApp(resolved)
+  }
+}
+
+/** 上下文菜单 - 移除 */
+function handleContextRemove() {
+  const app = contextMenuApp.value
+  closeContextMenu()
+  if (app) {
+    uninstallApp(app.appId)
+  }
 }
 
 /** 从 Home Screen 移除应用 */
@@ -243,6 +301,7 @@ function handleContentClick() {
         @open="handleOpenApp"
         @remove="handleRemoveApp"
         @update:apps="updateDock"
+        @long-press="handleDockLongPress"
       />
 
       <!-- 扫码界面 -->
@@ -253,6 +312,17 @@ function handleContentClick() {
         @result="handleScanResult"
       />
     </IonContent>
+
+    <!-- 应用上下文菜单（Teleport to body，不受 IonContent 影响） -->
+    <AppContextMenu
+      :visible="contextMenuVisible"
+      :position="contextMenuPosition"
+      :app="contextMenuApp ? resolveApp(contextMenuApp) : null"
+      @edit-home-screen="handleContextEditHomeScreen"
+      @share="handleContextShare"
+      @remove="handleContextRemove"
+      @close="closeContextMenu"
+    />
   </IonPage>
 </template>
 

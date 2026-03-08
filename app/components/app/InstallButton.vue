@@ -49,10 +49,11 @@ function handleClick() {
 
 <template>
   <IonButton
-    :fill="installed ? 'solid' : 'solid'"
+    fill="solid"
     size="small"
     :color="installed ? 'primary' : 'light'"
     class="install-btn"
+    :class="{ 'install-btn--open': installed }"
     @click.stop="handleClick"
   >
     {{ installed ? '打开' : '获取' }}
@@ -61,12 +62,46 @@ function handleClick() {
 
 <style scoped>
 .install-btn {
-  --border-radius: 14px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  font-weight: 600;
+  --border-radius: 100px;
+  --padding-start: 18px;
+  --padding-end: 18px;
+  --box-shadow: none;
+  font-weight: 700;
   font-size: 15px;
   min-width: 72px;
-  height: 32px;
+  height: 28px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+/* 「获取」态：浅灰胶囊底 + 蓝字，对齐 App Store */
+.install-btn:not(.install-btn--open) {
+  --background: rgba(120, 120, 128, 0.12);
+  --background-hover: rgba(120, 120, 128, 0.18);
+  --background-activated: rgba(120, 120, 128, 0.24);
+  --color: #007aff;
+}
+
+/* 暗黑模式「获取」 */
+:global(.dark) .install-btn:not(.install-btn--open) {
+  --background: rgba(118, 118, 128, 0.24);
+  --background-hover: rgba(118, 118, 128, 0.32);
+  --background-activated: rgba(118, 118, 128, 0.4);
+  --color: #0a84ff;
+}
+
+/* 「打开」态：蓝色实心胶囊 + 白字 */
+.install-btn--open {
+  --background: #007aff;
+  --background-hover: #0071e3;
+  --background-activated: #0064cc;
+  --color: #ffffff;
+}
+
+:global(.dark) .install-btn--open {
+  --background: #0a84ff;
+  --background-hover: #0077ed;
+  --background-activated: #006adb;
+  --color: #ffffff;
 }
 </style>

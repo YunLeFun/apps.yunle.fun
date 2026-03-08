@@ -14,7 +14,8 @@ export default defineNuxtPlugin(() => {
     return
 
   App.addListener('appUrlOpen', async ({ url }) => {
-    console.log('[Deeplink] 收到 URL:', url)
+    // eslint-disable-next-line no-console
+    console.debug('[Deeplink] 收到 URL:', url)
 
     try {
       const parsed = new URL(url)

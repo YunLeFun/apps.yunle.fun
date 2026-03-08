@@ -19,6 +19,8 @@ export function useDiscovery() {
   const weeklyApps = useState<YlfAppInfo[]>('discovery:weekly', () => [])
   /** 加载状态 */
   const loading = useState('discovery:loading', () => false)
+  /** 错误信息 */
+  const error = useState<string | null>('discovery:error', () => null)
 
   /** 根据 appId（slug）解析完整应用信息：先查静态列表，再查 CloudBase */
   async function resolveApp(appId: string): Promise<YlfAppInfo | null> {
@@ -67,33 +69,38 @@ export function useDiscovery() {
 
   /** 加载今日推荐 */
   async function loadFeatured() {
-    const now = Date.now()
-    const { data } = await db
-      .collection('featured_apps')
-      .where({
-        isActive: true,
-        type: 'daily',
-        startDate: _.lte(now),
-        endDate: _.gte(now),
-      })
-      .orderBy('sortOrder', 'asc')
-      .limit(1)
-      .get()
+    try {
+      const now = Date.now()
+      const { data } = await db
+        .collection('featured_apps')
+        .where({
+          isActive: true,
+          type: 'daily',
+          startDate: _.lte(now),
+          endDate: _.gte(now),
+        })
+        .orderBy('sortOrder', 'asc')
+        .limit(1)
+        .get()
 
-    if (data && data.length > 0) {
-      const record = data[0] as FeaturedAppRecord
-      featuredMeta.value = record
-      const resolved = await resolveApp(record.appId)
-      if (resolved) {
-        featuredApp.value = {
-          ...resolved,
-          name: record.title || resolved.name,
-          subtitle: record.subtitle || resolved.subtitle,
-          tagline: record.tagline || resolved.tagline,
-          color: record.coverColor || resolved.color,
+      if (data && data.length > 0) {
+        const record = data[0] as FeaturedAppRecord
+        featuredMeta.value = record
+        const resolved = await resolveApp(record.appId)
+        if (resolved) {
+          featuredApp.value = {
+            ...resolved,
+            name: record.title || resolved.name,
+            subtitle: record.subtitle || resolved.subtitle,
+            tagline: record.tagline || resolved.tagline,
+            color: record.coverColor || resolved.color,
+          }
+          return
         }
-        return
       }
+    }
+    catch (e: any) {
+      console.warn('[Discovery] loadFeatured failed, using fallback:', e?.error || e?.message || e)
     }
     // fallback 到静态数据
     featuredApp.value = FEATURED_APP
@@ -101,20 +108,25 @@ export function useDiscovery() {
 
   /** 加载本周热门 */
   async function loadWeeklyChart() {
-    const weekStart = getWeekStart()
-    const { data } = await db
-      .collection('weekly_charts')
-      .where({ weekStart })
-      .orderBy('rank', 'asc')
-      .limit(10)
-      .get()
+    try {
+      const weekStart = getWeekStart()
+      const { data } = await db
+        .collection('weekly_charts')
+        .where({ weekStart })
+        .orderBy('rank', 'asc')
+        .limit(10)
+        .get()
 
-    if (data && data.length > 0) {
-      const resolved = await Promise.all(
-        (data as WeeklyChartRecord[]).map(record => resolveApp(record.appId)),
-      )
-      weeklyApps.value = resolved.filter((a): a is YlfAppInfo => a !== null)
-      return
+      if (data && data.length > 0) {
+        const resolved = await Promise.all(
+          (data as WeeklyChartRecord[]).map(record => resolveApp(record.appId)),
+        )
+        weeklyApps.value = resolved.filter((a): a is YlfAppInfo => a !== null)
+        return
+      }
+    }
+    catch (e: any) {
+      console.warn('[Discovery] loadWeeklyChart failed, using fallback:', e?.error || e?.message || e)
     }
     // fallback 到静态数据的前 5 个
     weeklyApps.value = ALL_APPS.slice(0, 5)
@@ -123,8 +135,22 @@ export function useDiscovery() {
   /** 加载所有发现页数据 */
   async function loadAll() {
     loading.value = true
-    await Promise.all([loadFeatured(), loadWeeklyChart()])
-    loading.value = false
+    error.value = null
+    try {
+      await Promise.all([loadFeatured(), loadWeeklyChart()])
+    }
+    catch (e: any) {
+      const msg = e?.error_description || e?.error || e?.message || '加载失败'
+      error.value = msg
+      // 确保有 fallback 数据
+      if (!featuredApp.value || featuredApp.value === FEATURED_APP)
+        featuredApp.value = FEATURED_APP
+      if (!weeklyApps.value.length)
+        weeklyApps.value = ALL_APPS.slice(0, 5)
+    }
+    finally {
+      loading.value = false
+    }
   }
 
   return {
@@ -132,6 +158,7 @@ export function useDiscovery() {
     featuredMeta,
     weeklyApps,
     loading,
+    error,
     loadFeatured,
     loadWeeklyChart,
     loadAll,

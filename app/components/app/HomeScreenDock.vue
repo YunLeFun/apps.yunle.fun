@@ -25,6 +25,7 @@ const emit = defineEmits<{
   'update:apps': [apps: InstalledApp[]]
   'open': [app: YlfAppInfo, installed: InstalledApp]
   'remove': [installed: InstalledApp]
+  'longPress': [app: InstalledApp, position: { x: number, y: number }]
 }>()
 
 /** 解析应用信息 */
@@ -50,6 +51,54 @@ function onDragEnd() {
   Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
   emit('update:apps', dockApps.value)
 }
+
+/** 长按检测 */
+const LONG_PRESS_DELAY = 500
+const LONG_PRESS_MOVE_THRESHOLD = 10
+
+let longPressTimer: ReturnType<typeof setTimeout> | null = null
+let startX = 0
+let startY = 0
+let longPressApp: InstalledApp | null = null
+
+function clearLongPressTimer() {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+}
+
+function onPointerDown(e: PointerEvent, app: InstalledApp) {
+  if (props.editMode)
+    return
+  startX = e.clientX
+  startY = e.clientY
+  longPressApp = app
+  clearLongPressTimer()
+  longPressTimer = setTimeout(() => {
+    longPressTimer = null
+    Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+    emit('longPress', longPressApp!, { x: startX, y: startY })
+  }, LONG_PRESS_DELAY)
+}
+
+function onPointerMove(e: PointerEvent) {
+  if (!longPressTimer)
+    return
+  const dx = e.clientX - startX
+  const dy = e.clientY - startY
+  if (Math.abs(dx) > LONG_PRESS_MOVE_THRESHOLD || Math.abs(dy) > LONG_PRESS_MOVE_THRESHOLD) {
+    clearLongPressTimer()
+  }
+}
+
+function onPointerUp() {
+  clearLongPressTimer()
+}
+
+function onPointerCancel() {
+  clearLongPressTimer()
+}
 </script>
 
 <template>
@@ -69,6 +118,11 @@ function onDragEnd() {
           class="dock-item"
           :class="{ 'edit-wobble': editMode }"
           @click="handleClick(element)"
+          @pointerdown="onPointerDown($event, element)"
+          @pointermove="onPointerMove"
+          @pointerup="onPointerUp"
+          @pointercancel="onPointerCancel"
+          @contextmenu.prevent
         >
           <!-- 删除按钮 -->
           <button

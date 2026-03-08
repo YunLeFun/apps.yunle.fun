@@ -19,6 +19,8 @@ export function useWorkshop() {
   const searchQuery = useState('workshop:search', () => '')
   /** 加载状态 */
   const loading = useState('workshop:loading', () => false)
+  /** 错误信息 */
+  const error = useState<string | null>('workshop:error', () => null)
   /** 是否还有更多数据 */
   const hasMore = useState('workshop:hasMore', () => true)
   /** 当前偏移量 */
@@ -58,53 +60,72 @@ export function useWorkshop() {
       return
 
     loading.value = true
+    error.value = null
 
-    // 构建查询条件
-    const where: Record<string, any> = { isPublic: true }
+    try {
+      // 构建查询条件
+      const where: Record<string, any> = { isPublic: true }
 
-    // 分类筛选
-    if (selectedCategory.value !== '全部') {
-      where.category = selectedCategory.value
-    }
+      // 分类筛选
+      if (selectedCategory.value !== '全部') {
+        where.category = selectedCategory.value
+      }
 
-    // 搜索条件
-    if (searchQuery.value.trim()) {
-      where.name = db.RegExp({
-        regexp: searchQuery.value.trim(),
-        options: 'i',
-      })
-    }
+      // 搜索条件
+      if (searchQuery.value.trim()) {
+        where.name = db.RegExp({
+          regexp: searchQuery.value.trim(),
+          options: 'i',
+        })
+      }
 
-    const { data } = await db
-      .collection('apps')
-      .where(where)
-      .orderBy('updatedAt', 'desc')
-      .skip(offset.value)
-      .limit(PAGE_SIZE)
-      .get()
+      const { data } = await db
+        .collection('apps')
+        .where(where)
+        .orderBy('updatedAt', 'desc')
+        .skip(offset.value)
+        .limit(PAGE_SIZE)
+        .get()
 
-    if (data && data.length > 0) {
-      const newApps = (data as AppRecord[]).map(toAppInfo)
-      apps.value = reset ? newApps : [...apps.value, ...newApps]
-      offset.value += data.length
-      hasMore.value = data.length >= PAGE_SIZE
-    }
-    else if (reset) {
-      // CloudBase 无数据时使用静态数据
-      if (!searchQuery.value.trim()) {
-        apps.value = filterStaticApps()
+      if (data && data.length > 0) {
+        const newApps = (data as AppRecord[]).map(toAppInfo)
+        apps.value = reset ? newApps : [...apps.value, ...newApps]
+        offset.value += data.length
+        hasMore.value = data.length >= PAGE_SIZE
+      }
+      else if (reset) {
+        // CloudBase 无数据时使用静态数据
+        if (!searchQuery.value.trim()) {
+          apps.value = filterStaticApps()
+        }
+        else {
+          apps.value = searchStaticApps(searchQuery.value.trim())
+        }
+        hasMore.value = false
       }
       else {
-        apps.value = searchStaticApps(searchQuery.value.trim())
+        hasMore.value = false
+      }
+    }
+    catch (e: any) {
+      console.warn('[Workshop] queryApps failed, using fallback:', e?.error || e?.message || e)
+      const msg = e?.error_description || e?.error || e?.message || '加载失败'
+      error.value = msg
+      // fallback 到静态数据
+      if (reset) {
+        if (!searchQuery.value.trim()) {
+          apps.value = filterStaticApps()
+        }
+        else {
+          apps.value = searchStaticApps(searchQuery.value.trim())
+        }
       }
       hasMore.value = false
     }
-    else {
-      hasMore.value = false
+    finally {
+      loading.value = false
+      initialized.value = true
     }
-
-    loading.value = false
-    initialized.value = true
   }
 
   /** 按分类筛选静态应用（fallback） */
@@ -146,6 +167,7 @@ export function useWorkshop() {
     selectedCategory,
     searchQuery,
     loading,
+    error,
     hasMore,
     categories,
     initialized,

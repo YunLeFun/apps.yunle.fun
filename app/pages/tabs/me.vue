@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, logOut, personCircleOutline, settings } from 'ionicons/icons'
+import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, personCircleOutline, settings, swapHorizontalOutline } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -16,12 +16,11 @@ const router = useRouter()
 
 const userStore = useUserStore()
 const developerStore = useDeveloperStore()
+const accountsStore = useAccountsStore()
 
-const { confirmLogout, isLoggingOut } = useLogout()
-
-function handleLogout() {
-  confirmLogout()
-}
+const otherAccounts = computed(() =>
+  accountsStore.getOtherAccounts(userStore.userInfo?.id),
+)
 
 function goToLoginPage() {
   router.push('/login')
@@ -182,17 +181,17 @@ function navigateTo(path: string) {
         </k-list-item>
       </k-list>
 
-      <!-- 退出登录 -->
+      <!-- 切换账号 / 退出登录 -->
       <k-list v-if="userStore.isLoggedIn" strong inset class="mt-8">
         <k-list-item
           link
-          :title="isLoggingOut ? '退出中...' : '退出登录'"
-          class="k-list-item-destructive"
-          @click="handleLogout"
+          title="切换 / 退出账号"
+          :footer="otherAccounts.length > 0 ? `还有 ${otherAccounts.length} 个已保存的账号` : '管理已登录的账号'"
+          @click="navigateTo('/accounts')"
         >
           <template #media>
-            <span class="ios-icon-box ios-icon-red">
-              <IonIcon :icon="logOut" />
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="swapHorizontalOutline" />
             </span>
           </template>
         </k-list-item>

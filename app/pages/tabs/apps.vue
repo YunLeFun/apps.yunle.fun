@@ -7,13 +7,14 @@ import {
   IonIcon,
   IonLabel,
   IonPage,
+  IonPopover,
   IonSearchbar,
   IonSegment,
   IonSegmentButton,
-  IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { personCircleOutline } from 'ionicons/icons'
+import { addOutline, chevronDownOutline, trashOutline } from 'ionicons/icons'
+import { OFFICIAL_MARKET_ID } from '~/stores/marketSources'
 
 const {
   searchQuery,
@@ -23,6 +24,49 @@ const {
   debouncedSearch,
   queryApps,
 } = useWorkshop()
+
+// 市场切换
+const marketStore = useMarketSourcesStore()
+
+// 下拉菜单
+const popoverOpen = ref(false)
+const popoverEvent = ref<Event>()
+
+function openPopover(e: Event) {
+  popoverEvent.value = e
+  popoverOpen.value = true
+}
+
+function selectSource(id: string) {
+  marketStore.switchSource(id)
+  popoverOpen.value = false
+}
+
+function removeSource(id: string) {
+  marketStore.removeSource(id)
+  // 如果删完了，自动关闭 popover
+  if (marketStore.sources.length === 0)
+    popoverOpen.value = false
+}
+
+/** 当前显示的市场名称 */
+const activeMarketName = computed(() => {
+  if (marketStore.isOfficial)
+    return '工坊'
+  return marketStore.activeSource?.name || '工坊'
+})
+
+// 扫码添加第三方市场
+const { showScanner, openScanner, closeScanner } = useScanner()
+const { handleScanResult } = useMarketScan()
+
+async function handleMarketScan() {
+  popoverOpen.value = false
+  const result = await openScanner()
+  if (result) {
+    handleScanResult(result)
+  }
+}
 
 onMounted(() => queryApps(true))
 
@@ -39,18 +83,68 @@ function handleSearchInput() {
   <IonPage>
     <IonHeader :translucent="true">
       <IonToolbar>
-        <IonTitle>
-          工坊
-        </IonTitle>
-        <IonButtons slot="end">
-          <IonButton router-link="/tabs/me">
-            <IonIcon slot="icon-only" :icon="personCircleOutline" />
+        <!-- 左侧：市场切换下拉菜单 -->
+        <IonButtons slot="start">
+          <IonButton class="market-switcher" @click="openPopover">
+            <span class="market-switcher-label">{{ activeMarketName }}</span>
+            <IonIcon :icon="chevronDownOutline" class="ml-1 text-xs opacity-60" />
           </IonButton>
         </IonButtons>
+
+        <!-- 市场切换弹出菜单 -->
+        <IonPopover
+          :is-open="popoverOpen"
+          :event="popoverEvent"
+          :dismiss-on-select="false"
+          @did-dismiss="popoverOpen = false"
+        >
+          <div class="market-popover">
+            <!-- 官方市场 -->
+            <button
+              class="market-popover-item"
+              :class="{ active: marketStore.isOfficial }"
+              @click="selectSource(OFFICIAL_MARKET_ID)"
+            >
+              <span class="market-popover-icon">☁️</span>
+              <span class="market-popover-name">云乐坊</span>
+              <span v-if="marketStore.isOfficial" class="market-popover-check">✓</span>
+            </button>
+
+            <!-- 分隔线（有第三方市场时） -->
+            <div v-if="marketStore.sources.length > 0" class="market-popover-divider" />
+
+            <!-- 第三方市场列表 -->
+            <div
+              v-for="source in marketStore.sources"
+              :key="source.id"
+              class="market-popover-item"
+              :class="{ active: marketStore.activeSourceId === source.id }"
+            >
+              <button class="flex min-w-0 flex-1 items-center gap-2" @click="selectSource(source.id)">
+                <span class="market-popover-icon">{{ source.icon || '📦' }}</span>
+                <span class="market-popover-name">{{ source.name }}</span>
+                <span v-if="marketStore.activeSourceId === source.id" class="market-popover-check">✓</span>
+              </button>
+              <button
+                class="market-popover-delete"
+                @click.stop="removeSource(source.id)"
+              >
+                <IonIcon :icon="trashOutline" />
+              </button>
+            </div>
+
+            <!-- 扫码添加入口 -->
+            <div class="market-popover-divider" />
+            <button class="market-popover-item market-popover-add" @click="handleMarketScan">
+              <IonIcon :icon="addOutline" class="text-base" />
+              <span>添加应用市场</span>
+            </button>
+          </div>
+        </IonPopover>
       </IonToolbar>
 
-      <!-- 搜索栏工具栏 -->
-      <IonToolbar>
+      <!-- 搜索栏工具栏（仅官方市场） -->
+      <IonToolbar v-if="marketStore.isOfficial">
         <IonSearchbar
           v-model="searchQuery"
           placeholder="游戏、App 等"
@@ -63,8 +157,8 @@ function handleSearchInput() {
         />
       </IonToolbar>
 
-      <!-- 分类筛选工具栏 -->
-      <IonToolbar>
+      <!-- 分类筛选工具栏（仅官方市场） -->
+      <IonToolbar v-if="marketStore.isOfficial">
         <IonSegment
           :value="selectedCategory"
           scrollable
@@ -87,41 +181,121 @@ function handleSearchInput() {
 
     <IonContent :fullscreen="true">
       <div class="content-wrapper">
-        <AppList />
+        <!-- 官方市场 -->
+        <AppList v-if="marketStore.isOfficial" />
+
+        <!-- 第三方市场应用列表 -->
+        <AppMarketSection v-else :source="marketStore.activeSource" />
       </div>
+
+      <!-- 扫码界面 -->
+      <ScannerBarcode
+        :is-visible="showScanner"
+        :show-flashlight="true"
+        @cancel="closeScanner"
+        @result="handleScanResult"
+      />
     </IonContent>
   </IonPage>
 </template>
 
 <style scoped>
-.large-title {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 0.374px;
-  padding-left: 16px;
-  padding-right: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+/* ==================== 市场切换器 ==================== */
+.market-switcher {
+  --padding-start: 12px;
+  --padding-end: 8px;
+  font-weight: 600;
+  font-size: 17px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
-/* 用户头像按钮 */
-.avatar-button {
-  --padding-start: 8px;
-  --padding-end: 16px;
-  --border-radius: 50%;
-  margin: 0;
+.market-switcher-label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.avatar-icon {
-  font-size: 32px;
+/* ==================== 市场弹出菜单 ==================== */
+.market-popover {
+  padding: 6px 0;
+}
+
+.market-popover-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 15px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.market-popover-item:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.market-popover-item.active {
   color: #007aff;
-  transition: opacity 0.2s ease;
 }
 
-.dark .avatar-icon {
-  color: #0a84ff;
+.market-popover-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
+.market-popover-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-popover-check {
+  color: #007aff;
+  font-size: 16px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.market-popover-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: #8e8e93;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.market-popover-delete:hover {
+  color: #ff3b30;
+  background-color: rgba(255, 59, 48, 0.1);
+}
+
+.market-popover-add {
+  color: #007aff;
+}
+
+.market-popover-divider {
+  height: 1px;
+  margin: 4px 16px;
+  background: rgba(60, 60, 67, 0.12);
+}
+
+/* ==================== 搜索栏 ==================== */
 .app-store-searchbar {
   --background: rgba(142, 142, 147, 0.12);
   --border-radius: 10px;
@@ -152,50 +326,12 @@ function handleSearchInput() {
 }
 
 /* ==================== Content 区域 ==================== */
-.app-store-content {
-  --background: #f2f2f7;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-.dark .app-store-content {
-  --background: #000000;
-}
-
-/* Condensed Header（滚动时的大标题） */
-.content-header {
-  --background: transparent;
-}
-
-.condensed-toolbar {
-  --background: transparent;
-  --border-width: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-.condensed-title {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 0.374px;
-  padding-left: 16px;
-  padding-right: 0;
-}
-
 .content-wrapper {
   padding: 0 16px 16px;
 }
 
 /* ==================== 响应式设计 ==================== */
 @media (min-width: 768px) {
-  .large-title {
-    font-size: 40px;
-  }
-
-  .condensed-title {
-    font-size: 40px;
-  }
-
   .content-wrapper {
     max-width: 980px;
     margin: 0 auto;
@@ -210,47 +346,31 @@ function handleSearchInput() {
   }
 }
 
-/* ==================== 动画效果 ==================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.app-store-header {
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* 滚动时的过渡效果 */
-.app-store-header::part(native) {
-  transition:
-    backdrop-filter 0.3s ease,
-    background-color 0.3s ease;
-}
-
 /* ==================== 无障碍优化 ==================== */
 @media (prefers-reduced-motion: reduce) {
-  .app-store-header,
-  .category-segment-button::part(indicator),
   .app-store-searchbar::part(native) {
-    animation: none;
     transition: none;
   }
 }
 
-/* ==================== 触摸反馈优化 ==================== */
-.avatar-button:active {
-  opacity: 0.6;
-  transition: opacity 0.1s ease;
+/* ==================== Dark mode ==================== */
+.dark .market-popover-item:active {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
-.category-segment-button:active {
-  opacity: 0.8;
-  transition: opacity 0.1s ease;
+.dark .market-popover-item.active {
+  color: #0a84ff;
+}
+
+.dark .market-popover-check {
+  color: #0a84ff;
+}
+
+.dark .market-popover-divider {
+  background: rgba(235, 235, 245, 0.15);
+}
+
+.dark .market-popover-add {
+  color: #0a84ff;
 }
 </style>

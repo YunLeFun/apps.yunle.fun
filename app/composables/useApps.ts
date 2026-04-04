@@ -118,6 +118,8 @@ export function useApps() {
    * 根据 slug 获取当前用户自己的应用（不限公开/私有）
    */
   async function getMyAppBySlug(slug: string): Promise<AppRecord | null> {
+    if (!slug)
+      return null
     const uid = await ensureAuth()
     if (!uid)
       return null

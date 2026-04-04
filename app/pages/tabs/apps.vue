@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {
+  actionSheetController,
+  alertController,
   IonButton,
   IonButtons,
   IonContent,
@@ -57,23 +59,68 @@ const activeMarketName = computed(() => {
 })
 
 // 扫码添加第三方市场
-const { showScanner, openScanner, scanFromAlbum, closeScanner } = useScanner()
+const { navigateToScan } = useScanBridge()
 const { handleScanResult } = useMarketScan()
 
-async function handleMarketScan() {
+/** 打开"添加应用市场"ActionSheet：粘贴链接 / 扫码 */
+async function handleAddMarket() {
   popoverOpen.value = false
-  const result = await openScanner()
-  if (result) {
-    handleScanResult(result)
-  }
+
+  const actionSheet = await actionSheetController.create({
+    header: '添加应用市场',
+    buttons: [
+      {
+        text: '📋 粘贴链接',
+        handler: () => {
+          showUrlInputAlert()
+        },
+      },
+      {
+        text: '📷 扫码添加',
+        handler: () => {
+          startScanFlow()
+        },
+      },
+      {
+        text: '取消',
+        role: 'cancel',
+      },
+    ],
+  })
+  await actionSheet.present()
 }
 
-async function handleMarketScanFromAlbum() {
-  closeScanner()
-  const result = await scanFromAlbum()
-  if (result) {
-    handleScanResult(result)
-  }
+/** 弹出输入框让用户手动粘贴市场链接 */
+async function showUrlInputAlert() {
+  const alert = await alertController.create({
+    header: '粘贴市场链接',
+    message: '请输入应用市场的 JSON 数据链接',
+    inputs: [
+      {
+        name: 'url',
+        type: 'url',
+        placeholder: 'https://example.com/market.json',
+      },
+    ],
+    buttons: [
+      { text: '取消', role: 'cancel' },
+      {
+        text: '确认添加',
+        handler: (data) => {
+          const url = data.url?.trim()
+          if (url) {
+            handleScanResult(url)
+          }
+        },
+      },
+    ],
+  })
+  await alert.present()
+}
+
+/** 扫码添加流程 */
+function startScanFlow() {
+  navigateToScan(handleScanResult)
 }
 
 onMounted(() => queryApps(true))
@@ -143,7 +190,7 @@ function handleSearchInput() {
 
             <!-- 扫码添加入口 -->
             <div class="market-popover-divider" />
-            <button class="market-popover-item market-popover-add" @click="handleMarketScan">
+            <button class="market-popover-item market-popover-add" @click="handleAddMarket">
               <IonIcon :icon="addOutline" class="text-base" />
               <span>添加应用市场</span>
             </button>
@@ -195,15 +242,6 @@ function handleSearchInput() {
         <!-- 第三方市场应用列表 -->
         <AppMarketSection v-else :source="marketStore.activeSource" />
       </div>
-
-      <!-- 扫码界面 -->
-      <ScannerBarcode
-        :is-visible="showScanner"
-        :show-flashlight="true"
-        @cancel="closeScanner"
-        @result="handleScanResult"
-        @pick-album="handleMarketScanFromAlbum"
-      />
     </IonContent>
   </IonPage>
 </template>

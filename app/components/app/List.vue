@@ -42,15 +42,15 @@ async function handleInfiniteScroll(event: CustomEvent) {
         <div
           v-for="(app, index) in apps"
           :key="app.id"
-          class="app-list-item cursor-pointer border-b border-gray-200 py-4 transition-opacity dark:border-gray-700 active:opacity-60"
-          :class="{ 'border-b-0': index === apps.length - 1 }"
+          class="app-list-item cursor-pointer py-3"
+          :class="{ 'app-list-item--last': index === apps.length - 1 }"
           @click="openAppDetail(app)"
         >
           <div class="flex items-center gap-3">
             <!-- 应用图标 -->
             <div
-              class="app-icon h-16 w-16 flex flex-shrink-0 items-center justify-center text-3xl shadow-sm"
-              :style="{ backgroundColor: app.color }"
+              class="app-icon h-16 w-16 flex flex-shrink-0 items-center justify-center text-3xl"
+              :style="{ '--app-color': app.color }"
             >
               {{ app.icon || app.emoji }}
             </div>
@@ -86,8 +86,11 @@ async function handleInfiniteScroll(event: CustomEvent) {
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="py-12 text-center">
-        <p class="text-lg text-gray-400 dark:text-gray-500">
+      <div v-else class="py-16 text-center">
+        <div class="mb-3 text-5xl opacity-30">
+          🔍
+        </div>
+        <p class="text-base font-medium text-gray-400 dark:text-gray-500">
           暂无应用
         </p>
         <p class="mt-1 text-sm text-gray-400 dark:text-gray-600">
@@ -111,6 +114,11 @@ async function handleInfiniteScroll(event: CustomEvent) {
   border-radius: 22.5%;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--app-color) 95%, white 5%) 0%,
+    color-mix(in srgb, var(--app-color) 70%, black 30%) 100%
+  );
 }
 
 .app-icon::after {
@@ -122,18 +130,27 @@ async function handleInfiniteScroll(event: CustomEvent) {
   pointer-events: none;
 }
 
-.get-button {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  height: 32px;
-  font-size: 15px;
+/* iOS 风格分隔线：从图标右侧起始 */
+.app-list-item {
+  position: relative;
+  transition: opacity 0.15s ease;
+}
+
+.app-list-item:not(.app-list-item--last)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 76px; /* 图标 64px + gap 12px */
+  right: 0;
+  height: 0.5px;
+  background: var(--ion-border-color, rgba(0, 0, 0, 0.1));
 }
 
 .app-list-item:active {
-  background-color: rgba(0, 0, 0, 0.02);
+  opacity: 0.7;
 }
 
-.dark .app-list-item:active {
-  background-color: rgba(255, 255, 255, 0.05);
+.dark .app-list-item:not(.app-list-item--last)::after {
+  background: rgba(255, 255, 255, 0.1);
 }
 </style>

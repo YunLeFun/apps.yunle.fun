@@ -95,7 +95,7 @@ function navigateTo(path: string) {
             title="我的应用"
             subtitle="创建和管理你的应用"
             inner-class="k-list-item-vcenter"
-            @click="navigateTo('/apps/my')"
+            @click="navigateTo('/workshop')"
           >
             <template #media>
               <span class="ios-icon-box ios-icon-blue">

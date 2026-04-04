@@ -29,12 +29,18 @@ function viewAllChart() {
   <div class="app-weekly-chart">
     <div class="chart-card">
       <div
-        class="chart-header mb-4 cursor-pointer"
+        class="chart-header mb-3 cursor-pointer"
         @click="viewAllChart"
       >
         <h2 class="text-xl font-bold">
           本周热门
         </h2>
+        <div class="chart-header-more">
+          查看全部
+          <svg viewBox="0 0 16 16" fill="none" class="chart-header-arrow">
+            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
       </div>
       <div class="chart-list">
         <div
@@ -46,7 +52,7 @@ function viewAllChart() {
           <!-- 应用图标 -->
           <div
             class="app-icon"
-            :style="{ background: `linear-gradient(135deg, ${app.color}dd 0%, ${app.color}88 100%)` }"
+            :style="{ '--item-color': app.color }"
           >
             <span class="icon-emoji">{{ app.icon || app.emoji }}</span>
           </div>
@@ -75,10 +81,6 @@ function viewAllChart() {
 </template>
 
 <style scoped>
-.text-primary {
-  color: var(--ion-color-primary);
-}
-
 .chart-card {
   background: var(--ion-background-color-step-100);
   border-radius: 16px;
@@ -90,34 +92,53 @@ function viewAllChart() {
 .chart-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+}
+
+.chart-header-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ion-color-primary);
+  cursor: pointer;
+}
+
+.chart-header-arrow {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .chart-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .chart-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
+  padding: 10px 0;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
+  position: relative;
 }
 
-.chart-item:last-child {
-  padding-bottom: 0;
-}
-
-.chart-item:first-child {
-  padding-top: 0;
+/* iOS 风格分隔线：从图标右边缘起始，不延伸到左侧 */
+.chart-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 76px; /* 图标宽64 + gap12 */
+  right: 0;
+  height: 0.5px;
+  background: var(--ion-border-color, rgba(0, 0, 0, 0.1));
 }
 
 .chart-item:active {
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .app-icon {
@@ -128,6 +149,11 @@ function viewAllChart() {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--item-color) 95%, white 5%) 0%,
+    color-mix(in srgb, var(--item-color) 70%, black 30%) 100%
+  );
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -184,8 +210,8 @@ function viewAllChart() {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
 
-  .chart-header {
-    border-bottom-color: var(--ion-background-color-step-200);
+  .chart-item:not(:last-child)::after {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .app-icon {

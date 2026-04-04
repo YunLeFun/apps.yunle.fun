@@ -19,7 +19,7 @@ import {
   IonToggle,
   IonToolbar,
 } from '@ionic/vue'
-import { checkmark } from 'ionicons/icons'
+import { onIonViewWillEnter } from '@ionic/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -49,6 +49,7 @@ async function loadApp() {
     if (!appData.value) {
       loadError.value = '应用不存在或无权访问'
     }
+    initialized.value = true
   }
   catch {
     loadError.value = '加载失败，请稍后重试'
@@ -59,10 +60,20 @@ async function loadApp() {
 }
 
 function goBack() {
-  router.replace('/apps/my')
+  router.replace('/workshop')
 }
 
-onMounted(loadApp)
+const initialized = ref(false)
+
+onIonViewWillEnter(() => {
+  if (slug.value)
+    loadApp()
+})
+
+watch(slug, (val) => {
+  if (val && !initialized.value)
+    loadApp()
+})
 </script>
 
 <template>
@@ -70,7 +81,7 @@ onMounted(loadApp)
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/apps/my" text="返回" />
+          <IonBackButton default-href="/workshop" text="返回" />
         </IonButtons>
         <IonTitle>编辑应用</IonTitle>
         <IonButtons slot="end">

@@ -34,21 +34,41 @@ const router = useRouter()
 const toast = useToast()
 const { getMyAppBySlug, deleteApp } = useApps()
 
+/**
+ * 从路由参数获取 slug
+ * 注意：Ionic 页面栈中 useRoute() 返回全局路由，
+ * 在 onIonViewWillEnter 触发时 route.params 可能尚未同步，
+ * 因此 loadApp 接受显式传入 slug 作为优先值
+ */
 const slug = computed(() => (route.params as { slug?: string }).slug ?? '')
 const loading = ref(true)
 const loadError = ref('')
 const app = ref<AppRecord | null>(null)
-const initialized = ref(false)
+/** 当前页面绑定的 slug（首次解析后锁定） */
+const pageSlug = ref('')
 
-async function loadApp() {
+/** 从 URL 路径中提取 slug：/workshop/{slug} 或 /workshop/{slug}/... */
+function resolveSlugFromUrl(): string {
+  const match = window.location.pathname.match(/\/workshop\/([^/]+)/)
+  return match?.[1] ?? ''
+}
+
+async function loadApp(explicitSlug?: string) {
+  // 优先级：显式传入 > URL 解析 > route.params
+  const currentSlug = explicitSlug || resolveSlugFromUrl() || slug.value
+  if (!currentSlug)
+    return
+
+  pageSlug.value = currentSlug
+
   try {
-    loading.value = !initialized.value
+    app.value = null
+    loading.value = true
     loadError.value = ''
-    app.value = await getMyAppBySlug(slug.value)
+    app.value = await getMyAppBySlug(currentSlug)
     if (!app.value) {
       loadError.value = '应用不存在或无权访问'
     }
-    initialized.value = true
   }
   catch {
     loadError.value = '加载失败，请稍后重试'
@@ -75,8 +95,11 @@ function openBackupUrl() {
 
 function goEdit() {
   if (app.value)
-    router.push(`/apps/${app.value.slug}/edit`)
+    router.push(`/workshop/${app.value.slug}/edit`)
 }
+
+/** 标记列表页需要刷新 */
+const workshopDirty = useState('workshop:dirty', () => false)
 
 async function confirmDelete() {
   if (!app.value)
@@ -93,8 +116,9 @@ async function confirmDelete() {
         handler: async () => {
           try {
             await deleteApp(app.value!._id)
+            workshopDirty.value = true
             toast.showSuccess('已删除')
-            router.replace('/apps/my')
+            router.replace('/workshop')
           }
           catch {
             toast.showError('删除失败')
@@ -114,11 +138,15 @@ function formatDate(ts: number) {
   })
 }
 
-onMounted(loadApp)
-
 onIonViewWillEnter(() => {
-  if (initialized.value)
-    loadApp()
+  // 直接从 URL 解析 slug，不依赖 Vue Router 响应式时序
+  loadApp()
+})
+
+// 兜底：路由参数延迟更新时（如直接刷新），watch 确保触发加载
+watch(slug, (val) => {
+  if (val && val !== pageSlug.value)
+    loadApp(val)
 })
 </script>
 
@@ -127,7 +155,7 @@ onIonViewWillEnter(() => {
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/apps/my" text="返回" />
+          <IonBackButton default-href="/workshop" text="返回" />
         </IonButtons>
         <IonTitle>应用详情</IonTitle>
         <IonButtons slot="end">
@@ -156,7 +184,7 @@ onIonViewWillEnter(() => {
           <IonButton fill="outline" shape="round" @click="loadApp">
             重试
           </IonButton>
-          <IonButton fill="clear" shape="round" @click="router.replace('/apps/my')">
+          <IonButton fill="clear" shape="round" @click="router.replace('/workshop')">
             返回列表
           </IonButton>
         </div>

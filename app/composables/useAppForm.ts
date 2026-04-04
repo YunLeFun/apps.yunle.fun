@@ -281,6 +281,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
 
     try {
       saving.value = true
+      const workshopDirty = useState('workshop:dirty', () => false)
 
       if (mode === 'create') {
         const taken = await isSlugTaken(form.slug)
@@ -291,8 +292,9 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
         await createApp(buildFormData())
         submitted.value = true
         clearDraft()
+        workshopDirty.value = true
         toast.showSuccess('应用创建成功')
-        router.push('/apps/my')
+        router.push('/workshop')
       }
       else {
         // 编辑模式
@@ -309,11 +311,12 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
         }
         await updateApp(existingApp.value._id, buildFormData())
         submitted.value = true
+        workshopDirty.value = true
         toast.showSuccess('保存成功')
         // 更新快照
         initialFormSnapshot.value = JSON.stringify(form)
         // 返回详情页（使用可能已更新的 slug）
-        router.replace(`/apps/${form.slug}`)
+        router.replace(`/workshop/${form.slug}`)
       }
     }
     catch (err: unknown) {

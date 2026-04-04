@@ -1,11 +1,14 @@
 <script setup lang="ts">
 /**
  * InstallButton - 应用安装/打开按钮
- * 未安装：显示「获取」按钮，点击安装到 Home Screen
- * 已安装：显示「打开」按钮，点击直接打开应用
+ *
+ * 参考 iOS App Store 交互规范：
+ * - 未安装：显示「获取」胶囊按钮
+ * - 点击获取：按钮收缩为圆环 loading 动画（模拟下载安装）
+ * - 安装完成：圆环结束，按钮展开为「打开」
+ * - 已安装：显示「打开」按钮，点击直接打开应用
  */
 import type { YlfAppInfo } from '~~/packages/types'
-import { IonButton } from '@ionic/vue'
 
 interface Props {
   /** 完整应用对象（推荐），用于已安装时打开应用 */
@@ -20,6 +23,9 @@ const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
 const { installApp } = useHomeScreen()
 
+/** 安装中（圆环 loading 态） */
+const installing = ref(false)
+
 const resolvedAppId = computed(() => {
   if (props.app)
     return props.app.slug || props.app.id
@@ -29,8 +35,10 @@ const resolvedAppId = computed(() => {
 const installed = computed(() => homeScreenStore.isInstalled(resolvedAppId.value))
 
 function handleClick() {
+  if (installing.value)
+    return
+
   if (installed.value) {
-    // 已安装：打开应用
     if (props.app?.url) {
       if (props.app.url.startsWith('http')) {
         openInAppBrowser(props.app.url)
@@ -41,67 +49,192 @@ function handleClick() {
     }
   }
   else {
-    // 未安装：安装到 Home Screen
-    installApp(resolvedAppId.value)
+    handleInstall()
   }
+}
+
+/** 模拟 App Store 安装流程：收缩 → 圆环 → 展开，同时预加载资源 */
+function handleInstall() {
+  installing.value = true
+
+  // 安装动画期间并行预加载资源，打开时零延迟
+  prefetchAppResources()
+
+  setTimeout(() => {
+    installApp(resolvedAppId.value)
+    installing.value = false
+  }, 600)
+}
+
+/**
+ * 预加载应用资源，利用安装动画的等待时间
+ * - 外部链接：DNS prefetch + preconnect（加速首次打开）
+ * - 内部路由：preloadRouteComponents（预加载组件 chunk）
+ * - 应用详情页：始终预加载 /app/[slug] 路由
+ */
+function prefetchAppResources() {
+  const url = props.app?.url
+  const appId = resolvedAppId.value
+
+  if (url?.startsWith('http')) {
+    // 对外部链接做 DNS 预解析 + 预连接
+    try {
+      const origin = new URL(url).origin
+      appendLinkHint('dns-prefetch', origin)
+      appendLinkHint('preconnect', origin)
+    }
+    catch {}
+  }
+  else if (url) {
+    // 内部路由：预加载路由组件
+    preloadRouteComponents(url)
+  }
+
+  // 始终预加载应用详情页（用户安装后大概率会查看）
+  if (appId) {
+    preloadRouteComponents(`/app/${appId}`)
+  }
+}
+
+/** 向 <head> 插入 link hint（dns-prefetch / preconnect），避免重复 */
+function appendLinkHint(rel: 'dns-prefetch' | 'preconnect', href: string) {
+  if (document.querySelector(`link[rel="${rel}"][href="${href}"]`))
+    return
+  const link = document.createElement('link')
+  link.rel = rel
+  link.href = href
+  document.head.appendChild(link)
 }
 </script>
 
 <template>
-  <IonButton
-    fill="solid"
-    size="small"
-    :color="installed ? 'primary' : 'light'"
+  <button
     class="install-btn"
-    :class="{ 'install-btn--open': installed }"
+    :class="{
+      'install-btn--open': installed,
+      'install-btn--installing': installing,
+    }"
+    :disabled="installing"
     @click.stop="handleClick"
   >
-    {{ installed ? '打开' : '获取' }}
-  </IonButton>
+    <!-- 圆环 loading -->
+    <svg
+      v-if="installing"
+      class="install-btn__spinner"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-dasharray="48 64"
+      />
+    </svg>
+    <!-- 按钮文字 -->
+    <span v-else class="install-btn__label">
+      {{ installed ? '打开' : '获取' }}
+    </span>
+  </button>
 </template>
 
 <style scoped>
 .install-btn {
-  --border-radius: 100px;
-  --padding-start: 18px;
-  --padding-end: 18px;
-  --box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 100px;
   font-weight: 700;
   font-size: 15px;
   min-width: 72px;
   height: 28px;
+  padding: 0 18px;
   letter-spacing: 0.01em;
   text-transform: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: min-width 0.3s ease, padding 0.3s ease, background-color 0.25s ease;
+}
+
+.install-btn:active {
+  opacity: 0.7;
 }
 
 /* 「获取」态：浅灰胶囊底 + 蓝字，对齐 App Store */
-.install-btn:not(.install-btn--open) {
-  --background: rgba(120, 120, 128, 0.12);
-  --background-hover: rgba(120, 120, 128, 0.18);
-  --background-activated: rgba(120, 120, 128, 0.24);
-  --color: #007aff;
+.install-btn:not(.install-btn--open):not(.install-btn--installing) {
+  background: rgba(120, 120, 128, 0.12);
+  color: #007aff;
 }
 
-/* 暗黑模式「获取」 */
-:global(.dark) .install-btn:not(.install-btn--open) {
-  --background: rgba(118, 118, 128, 0.24);
-  --background-hover: rgba(118, 118, 128, 0.32);
-  --background-activated: rgba(118, 118, 128, 0.4);
-  --color: #0a84ff;
+/* 「安装中」态：收缩为圆形，仅显示圆环 */
+.install-btn--installing {
+  min-width: 28px;
+  width: 28px;
+  padding: 0;
+  background: transparent;
+  color: #007aff;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* 「打开」态：蓝色实心胶囊 + 白字 */
 .install-btn--open {
-  --background: #007aff;
-  --background-hover: #0071e3;
-  --background-activated: #0064cc;
-  --color: #ffffff;
+  background: #007aff;
+  color: #ffffff;
+}
+
+.install-btn--open:active {
+  background: #0064cc;
+}
+
+/* 暗黑模式 */
+:global(.dark) .install-btn:not(.install-btn--open):not(.install-btn--installing) {
+  background: rgba(118, 118, 128, 0.24);
+  color: #0a84ff;
+}
+
+:global(.dark) .install-btn--installing {
+  color: #0a84ff;
 }
 
 :global(.dark) .install-btn--open {
-  --background: #0a84ff;
-  --background-hover: #0077ed;
-  --background-activated: #006adb;
-  --color: #ffffff;
+  background: #0a84ff;
+  color: #ffffff;
+}
+
+:global(.dark) .install-btn--open:active {
+  background: #006adb;
+}
+
+/* 旋转圆环 spinner */
+.install-btn__spinner {
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 文字淡入 */
+.install-btn__label {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>

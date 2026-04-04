@@ -25,7 +25,7 @@ defineProps<{
           :class="{ active: activeZone === 'add' }"
         >
           <IonIcon :icon="addCircleOutline" class="drop-icon" />
-          <span class="drop-label">添加到我的</span>
+          <span class="drop-label">拖到此处添加到我的</span>
         </div>
         <div class="drop-divider" />
         <div
@@ -33,7 +33,7 @@ defineProps<{
           :class="{ active: activeZone === 'delete' }"
         >
           <IonIcon :icon="trashOutline" class="drop-icon" />
-          <span class="drop-label">删除</span>
+          <span class="drop-label">拖到此处删除</span>
         </div>
       </div>
     </Transition>
@@ -150,13 +150,13 @@ defineProps<{
   color: #ff453a;
 }
 
-/* Slide-up transition */
+/* Slide-up transition（线性进入，无 bounce） */
 .drop-zone-slide-enter-active {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+  transition: transform 0.25s ease-out, opacity 0.2s ease-out;
 }
 
 .drop-zone-slide-leave-active {
-  transition: transform 0.2s ease, opacity 0.15s ease;
+  transition: transform 0.2s ease-in, opacity 0.15s ease-in;
 }
 
 .drop-zone-slide-enter-from {

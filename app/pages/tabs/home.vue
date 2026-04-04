@@ -119,23 +119,12 @@ function closeMenu() {
 
 // ==================== 扫码功能 ====================
 
-const { showScanner, openScanner, scanFromAlbum, closeScanner } = useScanner()
+const { navigateToScan } = useScanBridge()
 const { handleScanResult } = useScanResult()
 
-async function handleScan() {
+function handleScan() {
   closeMenu()
-  const result = await openScanner()
-  if (result) {
-    handleScanResult(result)
-  }
-}
-
-async function handleScanFromAlbum() {
-  closeScanner()
-  const result = await scanFromAlbum()
-  if (result) {
-    handleScanResult(result)
-  }
+  navigateToScan(handleScanResult)
 }
 
 function handleAddApp() {
@@ -347,14 +336,6 @@ function handleContentClick() {
         @long-press="handleLongPress"
       />
 
-      <!-- 扫码界面 -->
-      <ScannerBarcode
-        :is-visible="showScanner"
-        :show-flashlight="true"
-        @cancel="closeScanner"
-        @result="handleScanResult"
-        @pick-album="handleScanFromAlbum"
-      />
     </IonContent>
 
     <!-- 底部 Dock 常用栏：固定在屏幕底部，类似 iOS Home Screen -->
@@ -524,15 +505,4 @@ function handleContentClick() {
   }
 }
 
-/* ==================== 扫码隐藏背景 ==================== */
-:global(body.scanner-active) {
-  background: transparent !important;
-}
-
-:global(body.scanner-active) ion-app,
-:global(body.scanner-active) ion-page,
-:global(body.scanner-active) ion-content {
-  background: transparent !important;
-  --background: transparent !important;
-}
 </style>

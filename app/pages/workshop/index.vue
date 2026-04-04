@@ -38,12 +38,20 @@ const { getMyApps, deleteApp } = useApps()
 const loading = ref(true)
 const myApps = ref<AppRecord[]>([])
 const initialized = ref(false)
+/** 上次成功获取数据的时间戳 */
+const lastFetchedAt = ref(0)
+/** 数据过期阈值（毫秒），短时间返回不重新查询 */
+const STALE_THRESHOLD = 30_000
+/** 跨页面通信：子页面做了增删改后标记需要刷新 */
+const workshopDirty = useState('workshop:dirty', () => false)
 
 async function fetchMyApps() {
   try {
     loading.value = !initialized.value
     myApps.value = await getMyApps()
     initialized.value = true
+    lastFetchedAt.value = Date.now()
+    workshopDirty.value = false
   }
   catch (err: unknown) {
     toast.showError(err instanceof Error ? err.message : '加载失败')
@@ -59,12 +67,12 @@ async function handleRefresh(event: CustomEvent) {
 }
 
 function viewApp(app: AppRecord) {
-  router.push(`/apps/${app.slug}`)
+  router.push(`/workshop/${app.slug}`)
 }
 
 function editApp(app: AppRecord, slidingItem?: any) {
   slidingItem?.close()
-  router.push(`/apps/${app.slug}/edit`)
+  router.push(`/workshop/${app.slug}/edit`)
 }
 
 function openApp(app: AppRecord, slidingItem?: any) {
@@ -114,7 +122,10 @@ onMounted(() => {
 })
 
 onIonViewWillEnter(() => {
-  if (userStore.isLoggedIn && initialized.value)
+  if (!userStore.isLoggedIn || !initialized.value)
+    return
+  // 子页面标记了数据变更，或超过过期阈值，才重新查询
+  if (workshopDirty.value || Date.now() - lastFetchedAt.value > STALE_THRESHOLD)
     fetchMyApps()
 })
 
@@ -138,7 +149,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
         </IonButtons>
         <IonTitle>我的应用</IonTitle>
         <IonButtons slot="end">
-          <IonButton v-if="userStore.isLoggedIn" @click="router.push('/apps/new')">
+          <IonButton v-if="userStore.isLoggedIn" @click="router.push('/workshop/new')">
             <IonIcon slot="icon-only" :icon="add" />
           </IonButton>
         </IonButtons>
@@ -182,7 +193,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
         <p class="empty-text">
           创建你的第一个应用吧
         </p>
-        <IonButton fill="solid" shape="round" @click="router.push('/apps/new')">
+        <IonButton fill="solid" shape="round" @click="router.push('/workshop/new')">
           创建应用
         </IonButton>
       </div>

@@ -21,7 +21,7 @@ const router = useRouter()
 const guideSteps = [
   { emoji: '🔍', title: '发现应用', desc: '在首页浏览推荐应用，或使用搜索快速找到想要的工具', action: '去首页看看', route: '/tabs/home' },
   { emoji: '🚀', title: '使用应用', desc: '点击应用卡片即可直接使用，无需额外下载安装', action: '浏览应用', route: '/tabs/apps' },
-  { emoji: '⭐', title: '管理收藏', desc: '登录后可收藏喜欢的应用，在"我的应用"中快速访问', action: '我的应用', route: '/apps/my' },
+  { emoji: '⭐', title: '管理收藏', desc: '登录后可收藏喜欢的应用，在"我的应用"中快速访问', action: '我的应用', route: '/workshop' },
   { emoji: '🎨', title: '个性设置', desc: '自定义主题、深色模式等，打造专属体验', action: '去设置', route: '/user/settings' },
 ]
 const showGuide = ref(false)

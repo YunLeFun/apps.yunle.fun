@@ -77,6 +77,9 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
 
     Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
 
+    // 拖拽期间禁用浏览器右键菜单（长按在桌面浏览器会触发 contextmenu）
+    document.addEventListener('contextmenu', preventContextMenu, { capture: true })
+
     // 注册全局事件监听
     document.addEventListener('pointermove', onDragMove, { passive: false })
     document.addEventListener('pointerup', onDragEnd)
@@ -106,6 +109,11 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
 
   function onDragCancel() {
     cancelDrag()
+  }
+
+  /** 阻止右键菜单 */
+  function preventContextMenu(event: Event) {
+    event.preventDefault()
   }
 
   /**
@@ -160,6 +168,7 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
     activeDropZone.value = null
     lastDropZone = null
 
+    document.removeEventListener('contextmenu', preventContextMenu, { capture: true })
     document.removeEventListener('pointermove', onDragMove)
     document.removeEventListener('pointerup', onDragEnd)
     document.removeEventListener('pointercancel', onDragCancel)

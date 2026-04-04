@@ -169,13 +169,6 @@ function handleDockLongPress(app: InstalledApp, position: { x: number, y: number
   contextMenuVisible.value = true
 }
 
-/** 关闭上下文菜单 */
-function closeContextMenu() {
-  contextMenuVisible.value = false
-  contextMenuApp.value = null
-  contextMenuIconRect.value = null
-}
-
 /** 上下文菜单 - 编辑主屏幕 */
 function handleContextEditHomeScreen() {
   closeContextMenu()
@@ -183,11 +176,11 @@ function handleContextEditHomeScreen() {
   Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
 }
 
-/** 上下文菜单 - 拖拽浮动图标 → 进入编辑模式 */
-function handleContextDragStart() {
-  closeContextMenu()
-  homeScreenStore.enterEditMode()
-  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+/** 关闭上下文菜单 */
+function closeContextMenu() {
+  contextMenuVisible.value = false
+  contextMenuApp.value = null
+  contextMenuIconRect.value = null
 }
 
 /** 上下文菜单 - 分享 */
@@ -316,6 +309,7 @@ function handleContentClick() {
       <AppHomeScreenGrid
         :pages="homeScreenStore.pagedApps"
         :edit-mode="homeScreenStore.isEditMode"
+        :hidden-app-id="contextMenuVisible && contextMenuApp ? contextMenuApp.appId : undefined"
         @open="handleOpenApp"
         @remove="handleRemoveApp"
         @long-press="handleLongPress"
@@ -336,6 +330,7 @@ function handleContentClick() {
       v-if="showDock"
       :apps="homeScreenStore.dockApps"
       :edit-mode="homeScreenStore.isEditMode"
+      :hidden-app-id="contextMenuVisible && contextMenuApp ? contextMenuApp.appId : undefined"
       @open="handleOpenApp"
       @remove="handleRemoveApp"
       @update:apps="updateDock"
@@ -352,7 +347,6 @@ function handleContentClick() {
       @share="handleContextShare"
       @remove="handleContextRemove"
       @close="closeContextMenu"
-      @drag-start="handleContextDragStart"
     />
   </IonPage>
 </template>

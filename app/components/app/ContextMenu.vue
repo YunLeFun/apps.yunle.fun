@@ -3,9 +3,9 @@
  * AppContextMenu - iOS 风格应用上下文菜单
  *
  * 长按应用图标时：
- * - 背景模糊遮罩
  * - 被长按的应用图标浮于遮罩之上（带缩放动画 + 抖动）
- * - 菜单卡片出现在浮动图标下方
+ * - 菜单卡片出现在浮动图标旁
+ * - 手指移动超阈值 → 关闭菜单并进入编辑模式（由 SortableJS 接管拖拽排序）
  */
 
 import type { YlfAppInfo } from '~~/packages/types'
@@ -24,36 +24,62 @@ const emit = defineEmits<{
   share: []
   remove: []
   close: []
-  /** 拖拽浮动图标 → 关闭菜单进入编辑模式 */
-  dragStart: []
 }>()
 
 const MENU_WIDTH = 250
 const MARGIN = 12
-/** 图标与菜单之间的间距 */
 const ICON_MENU_GAP = 8
-/** 判定为拖拽的移动阈值 (px) */
-const DRAG_THRESHOLD = 6
+/** 长按后移动超此阈值 → 关闭菜单进入编辑模式 */
+const DRAG_TO_EDIT_THRESHOLD = 10
 
-/** 浮动图标拖拽检测 */
-let iconTouchStartX = 0
-let iconTouchStartY = 0
+// ---------- 长按后移动检测：超阈值即关闭菜单进入编辑模式 ----------
 
-function onIconPointerDown(e: PointerEvent) {
-  iconTouchStartX = e.clientX
-  iconTouchStartY = e.clientY
-}
+let moveBaseX = 0
+let moveBaseY = 0
+let isTracking = false
 
-function onIconPointerMove(e: PointerEvent) {
-  const dx = e.clientX - iconTouchStartX
-  const dy = e.clientY - iconTouchStartY
-  if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-    emit('dragStart')
+function onGlobalPointerMove(e: PointerEvent) {
+  if (!isTracking)
+    return
+  const dx = e.clientX - moveBaseX
+  const dy = e.clientY - moveBaseY
+  if (Math.abs(dx) > DRAG_TO_EDIT_THRESHOLD || Math.abs(dy) > DRAG_TO_EDIT_THRESHOLD) {
+    cleanup()
+    emit('editHomeScreen')
   }
 }
 
-/** 浮动图标样式 */
-const iconStyle = computed(() => {
+function onGlobalPointerUp() {
+  // 松手 → 停止追踪，菜单保持显示
+  isTracking = false
+  document.removeEventListener('pointermove', onGlobalPointerMove)
+  document.removeEventListener('pointerup', onGlobalPointerUp)
+}
+
+function cleanup() {
+  isTracking = false
+  document.removeEventListener('pointermove', onGlobalPointerMove)
+  document.removeEventListener('pointerup', onGlobalPointerUp)
+}
+
+watch(() => props.visible, (v) => {
+  if (v && props.iconRect) {
+    moveBaseX = props.position.x
+    moveBaseY = props.position.y
+    isTracking = true
+    document.addEventListener('pointermove', onGlobalPointerMove)
+    document.addEventListener('pointerup', onGlobalPointerUp)
+  }
+  else {
+    cleanup()
+  }
+})
+
+onUnmounted(cleanup)
+
+// ---------- 浮动图标和菜单位置 ----------
+
+const floatingIconStyle = computed(() => {
   if (!props.iconRect)
     return null
   const { x, y, width, height } = props.iconRect
@@ -67,7 +93,6 @@ const iconStyle = computed(() => {
   }
 })
 
-/** 菜单位置：紧贴浮动图标下方，水平居中于图标 */
 const menuStyle = computed(() => {
   const vw = typeof window !== 'undefined' ? window.innerWidth : 375
   const vh = typeof window !== 'undefined' ? window.innerHeight : 812
@@ -80,7 +105,6 @@ const menuStyle = computed(() => {
     let left = iconCenterX - MENU_WIDTH / 2
     left = Math.min(Math.max(left, MARGIN), vw - MENU_WIDTH - MARGIN)
 
-    // 如果菜单会超出底部，改为放在图标上方
     const menuEl = document.querySelector('.ctx-menu') as HTMLElement | null
     const menuHeight = menuEl?.offsetHeight ?? 164
     let top = menuTop
@@ -97,7 +121,6 @@ const menuStyle = computed(() => {
     }
   }
 
-  // fallback：无 iconRect 时用 position
   const { x, y } = props.position
   const left = Math.min(Math.max(x - MENU_WIDTH / 2, MARGIN), vw - MENU_WIDTH - MARGIN)
   const top = Math.min(Math.max(y + 10, MARGIN), vh - 164 - MARGIN)
@@ -131,13 +154,11 @@ function onOverlayClick() {
         @click.self="onOverlayClick"
         @contextmenu.prevent
       >
-        <!-- 浮动的应用图标预览（可拖拽） -->
+        <!-- 浮动的应用图标预览 -->
         <div
-          v-if="app && iconStyle"
+          v-if="app && floatingIconStyle"
           class="ctx-floating-icon"
-          :style="iconStyle"
-          @pointerdown.stop="onIconPointerDown"
-          @pointermove="onIconPointerMove"
+          :style="floatingIconStyle"
           @contextmenu.prevent
         >
           <AppIconBox
@@ -195,9 +216,9 @@ function onOverlayClick() {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* ==================== 浮动图标 ==================== */
@@ -205,7 +226,6 @@ function onOverlayClick() {
   z-index: 100001;
   animation: ctx-wobble 0.115s ease-in-out infinite alternate;
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
-  cursor: grab;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -213,8 +233,12 @@ function onOverlayClick() {
 }
 
 @keyframes ctx-wobble {
-  0% { transform: rotate(-1.2deg) scale(1.05); }
-  100% { transform: rotate(1.2deg) scale(1.05); }
+  0% {
+    transform: rotate(-1.2deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(1.2deg) scale(1.05);
+  }
 }
 
 /* ==================== 菜单卡片 ==================== */

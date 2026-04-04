@@ -5,6 +5,10 @@ import { DEFAULT_EMOJI, DEFAULT_THEME_COLOR } from '~/types/app'
 
 const DRAFT_KEY = 'app_create_draft'
 const SLUG_REGEX = /^[a-z][a-z0-9-]{1,49}$/
+const TAGS_SPLIT_REGEX = /[,，、\s]+/
+const NON_SLUG_CHARS_REGEX = /[^a-z0-9\u4E00-\u9FFF-]/g
+const MULTIPLE_HYPHENS_REGEX = /-+/g
+const LEADING_TRAILING_HYPHENS_REGEX = /^-|-$/g
 
 function createEmptyForm() {
   return {
@@ -89,7 +93,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       const draft = JSON.parse(raw)
       // 兼容旧版 tags 为字符串的情况
       if (typeof draft.tags === 'string') {
-        draft.tags = draft.tags.split(/[,，、\s]+/).map((t: string) => t.trim()).filter(Boolean)
+        draft.tags = draft.tags.split(TAGS_SPLIT_REGEX).map((t: string) => t.trim()).filter(Boolean)
       }
       Object.assign(form, draft)
       toast.showSuccess('已恢复上次的草稿')
@@ -217,9 +221,9 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
     if (autoSlug.value) {
       const slug = name
         .toLowerCase()
-        .replace(/[^a-z0-9\u4E00-\u9FFF-]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
+        .replace(NON_SLUG_CHARS_REGEX, '-')
+        .replace(MULTIPLE_HYPHENS_REGEX, '-')
+        .replace(LEADING_TRAILING_HYPHENS_REGEX, '')
         .slice(0, 50)
       form.slug = slug
       checkSlugAvailability(slug)

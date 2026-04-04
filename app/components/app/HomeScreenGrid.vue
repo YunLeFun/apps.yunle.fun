@@ -1,7 +1,11 @@
 <script setup lang="ts">
 /**
  * HomeScreenGrid - iOS 风格 Home Screen 网格
- * 基于现有 AppGrid 扩展，支持翻页、拖拽排序、编辑模式
+ *
+ * 交互模型（对齐 iOS 原生行为）：
+ * - 非编辑模式：长按 500ms → 弹出上下文菜单；长按空白区域 → 进入编辑模式
+ * - 编辑模式：SortableJS 启用（delay=0），触摸图标立即可拖拽排序
+ * - 上下文菜单中点击"编辑主屏幕"或手指移动 → 进入编辑模式
  */
 import type { YlfAppInfo } from '~~/packages/types'
 import type { InstalledApp } from '~/types/homeScreen'
@@ -14,6 +18,8 @@ interface Props {
   pages: InstalledApp[][]
   /** 是否编辑模式 */
   editMode?: boolean
+  /** 上下文菜单预览时需要隐藏的应用 ID */
+  hiddenAppId?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -49,13 +55,21 @@ watch(
   { immediate: true, deep: true },
 )
 
+/**
+ * SortableJS 只在编辑模式下启用（delay=0 立即可拖），
+ * 非编辑模式下 disabled，由自定义长按检测触发上下文菜单。
+ */
+
+/** 拖拽开始 */
+function onDragStart() {
+  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+}
+
 /** 拖拽结束时更新 */
 function onDragEnd() {
   const flatApps = pageModels.value.flat()
   homeScreenStore.updateInstalledApps(flatApps)
   homeScreenStore.markPendingChanges()
-
-  // 拖拽触觉反馈
   Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
 }
 
@@ -115,11 +129,11 @@ function handleLongPress(app: InstalledApp | null, x: number, y: number) {
 }
 
 function onPointerDown(e: PointerEvent, app: InstalledApp | null = null) {
-  // 编辑模式下让事件继续冒泡，SortableJS 需要捕获来发起拖拽
+  // 编辑模式下让事件冒泡给 SortableJS 处理拖拽
   if (props.editMode)
     return
 
-  // 非编辑模式：应用图标上的 pointerdown 需要阻止冒泡到 .hs-page，
+  // 非编辑模式：图标上的 pointerdown 阻止冒泡到 .hs-page，
   // 避免同时触发空白区域的长按检测
   if (app)
     e.stopPropagation()
@@ -157,10 +171,11 @@ function onPointerCancel() {
 
 <template>
   <div class="hs-grid-wrapper">
-    <!-- 翻页容器 -->
+    <!-- 翻页容器（编辑模式下禁止滚动，避免与拖拽冲突） -->
     <div
       ref="scrollContainer"
       class="hs-scroll-container"
+      :class="{ 'no-scroll': editMode }"
       @scroll.passive="onScroll"
     >
       <div
@@ -175,27 +190,33 @@ function onPointerCancel() {
         <VueDraggable
           v-model="pageModels[pageIndex]!"
           :disabled="!editMode"
-          :animation="250"
+          :animation="300"
           :delay="0"
-          :delay-on-touch-only="false"
           :force-fallback="true"
+          :fallback-on-body="true"
           :fallback-tolerance="3"
           ghost-class="hs-ghost"
           drag-class="hs-drag"
           chosen-class="hs-chosen"
           class="hs-grid"
+          @start="onDragStart"
           @end="onDragEnd"
         >
           <div
             v-for="element in pageModels[pageIndex]"
             :key="element.appId"
             class="hs-grid-item"
-            :class="{ 'edit-wobble': editMode }"
+            :class="{
+              'edit-wobble': editMode,
+              'hs-hidden': element.appId === hiddenAppId,
+            }"
             @click="handleAppClick(element)"
-            @pointerdown="onPointerDown($event, element)"
-            @pointermove="onPointerMove"
-            @pointerup="onPointerUp"
-            @pointercancel="onPointerCancel"
+            v-on="editMode ? {} : {
+              pointerdown: (e: PointerEvent) => onPointerDown(e, element),
+              pointermove: onPointerMove,
+              pointerup: onPointerUp,
+              pointercancel: onPointerCancel,
+            }"
             @contextmenu.prevent
           >
             <!-- 删除按钮（编辑模式） -->
@@ -254,6 +275,12 @@ function onPointerCancel() {
   -webkit-overflow-scrolling: touch;
 }
 
+/* 编辑模式下禁止滚动，防止与 SortableJS 拖拽冲突 */
+.hs-scroll-container.no-scroll {
+  overflow-x: hidden;
+  scroll-snap-type: none;
+}
+
 .hs-scroll-container::-webkit-scrollbar {
   display: none;
 }
@@ -281,7 +308,11 @@ function onPointerCancel() {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  touch-action: none;
+}
+
+/* 上下文菜单浮动预览时隐藏原始图标（保留占位） */
+.hs-hidden {
+  visibility: hidden;
 }
 
 /* ==================== 编辑模式抖动动画（iOS 仿真） ==================== */
@@ -346,25 +377,34 @@ function onPointerCancel() {
 }
 
 /* ==================== 拖拽样式（iOS 风格） ==================== */
+/* ghost 在原容器内，scoped 生效 */
 .hs-ghost {
   opacity: 0;
 }
+</style>
 
+<!-- 拖拽 clone 挂在 body 上（fallbackOnBody），需要全局样式 -->
+<style>
+/* 选中状态（pointerdown 选中、拖拽前） */
 .hs-chosen {
   animation: none !important;
-  transform: scale(1.1);
   z-index: 100;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
 }
 
+/*
+ * 拖拽中的 clone（fallbackOnBody 挂在 body 上）
+ * 重要：不设 transform，SortableJS 通过 inline style transform: matrix()
+ * 控制 clone 跟随手指。CSS transform 会覆盖 SortableJS 的位移计算。
+ */
 .hs-drag {
-  opacity: 1;
-  transform: scale(1.1);
-  z-index: 100;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
+  opacity: 1 !important;
+  z-index: 100000 !important;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
 }
+</style>
 
+<style scoped>
 /* ==================== 页码指示器 ==================== */
 .page-dots {
   display: flex;

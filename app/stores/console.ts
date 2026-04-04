@@ -2,6 +2,10 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug'
 
+// Console 格式化指令正则（%c, %s, %d, %i, %f, %o, %O, %%）
+const FORMAT_SPECIFIER_REGEX = /%[csdifoO%]/
+const FORMAT_PARSE_REGEX = /%%|%([csdifoO])/g
+
 /** 单个文本片段，可带 CSS 样式 */
 export interface LogSegment {
   text: string
@@ -96,7 +100,7 @@ function parseArgs(args: any[]): { segments: LogSegment[], plain: string } {
   const first = args[0]
 
   // 第一个参数不是字符串，或不含格式化指令 → 简单拼接
-  if (typeof first !== 'string' || !/%[csdifoO%]/.test(first)) {
+  if (typeof first !== 'string' || !FORMAT_SPECIFIER_REGEX.test(first)) {
     const text = args.map(stringifyArg).join(' ')
     return { segments: [{ text }], plain: text }
   }
@@ -107,19 +111,18 @@ function parseArgs(args: any[]): { segments: LogSegment[], plain: string } {
   let currentStyle: string | undefined
 
   // 按 %X 拆分格式化字符串
-  const regex = /%%|%([csdifoO])/g
   let lastIndex = 0
   let match: RegExpExecArray | null
 
   // eslint-disable-next-line no-cond-assign
-  while ((match = regex.exec(first)) !== null) {
+  while ((match = FORMAT_PARSE_REGEX.exec(first)) !== null) {
     // match 前面的文本
     const before = first.slice(lastIndex, match.index)
     if (before) {
       segments.push({ text: before, style: currentStyle })
       plainParts.push(before)
     }
-    lastIndex = regex.lastIndex
+    lastIndex = FORMAT_PARSE_REGEX.lastIndex
 
     if (match[0] === '%%') {
       // 转义的 %

@@ -1,6 +1,9 @@
 import type { AppMarketSource } from '~/types/market'
 import { validateMarketSource } from '~/types/market'
 
+// URL 协议检测正则
+const HTTP_URL_REGEX = /^https?:\/\//i
+
 /**
  * 扫码添加第三方应用市场
  *
@@ -21,7 +24,7 @@ export function useMarketScan() {
     let raw: unknown
 
     // URL 模式：fetch JSON
-    if (/^https?:\/\//i.test(trimmed)) {
+    if (HTTP_URL_REGEX.test(trimmed)) {
       const controller = new AbortController()
       const timer = setTimeout(() => controller.abort(), 10_000)
       try {
@@ -56,7 +59,7 @@ export function useMarketScan() {
     // 补充元数据
     if (!source.id)
       source.id = `market-${Date.now()}`
-    if (/^https?:\/\//i.test(trimmed))
+    if (HTTP_URL_REGEX.test(trimmed))
       source.url = source.url || trimmed
     source.addedAt = source.addedAt || Date.now()
 

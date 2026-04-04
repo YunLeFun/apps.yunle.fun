@@ -59,6 +59,9 @@ export interface TcbRawUser {
   [key: string]: unknown
 }
 
+// 手机号前缀去除正则（+86 空格可选）
+const PHONE_PREFIX_REGEX = /^\+86\s*/
+
 export interface UserIdentity {
   id: string
   name: string
@@ -124,7 +127,7 @@ export function mapCloudbaseUser(cbUser: TcbRawUser): CloudbaseUser | null {
 
   // 手机号: 扁平格式是 phone_number (带 +86 前缀), SDK 是 phone
   const rawPhone = cbUser.phone_number || cbUser.phone || null
-  const phone = rawPhone ? rawPhone.replace(/^\+86\s*/, '') : null
+  const phone = rawPhone ? rawPhone.replace(PHONE_PREFIX_REGEX, '') : null
 
   // 描述: 扁平格式在 meta.description, SDK 在 user_metadata.description
   const description = cbUser.meta?.description

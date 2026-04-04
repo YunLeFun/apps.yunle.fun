@@ -50,7 +50,7 @@ function onCustomInput(e: Event) {
   const input = (e.target as HTMLInputElement).value
   // 使用 Intl.Segmenter 确保只保留一个 grapheme cluster
   const segments = [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(input)]
-  const lastSegment = segments[segments.length - 1]
+  const lastSegment = segments.at(-1)
   if (segments.length > 1 && lastSegment) {
     customInput.value = lastSegment.segment
   }

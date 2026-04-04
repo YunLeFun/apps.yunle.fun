@@ -16,6 +16,9 @@ import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icon
 import { config } from '~/config'
 import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
 
+// 用户名校验正则：小写字母开头，包含字母数字下划线连字符，3-20 字符
+const USERNAME_REGEX = /^[a-z][\w-]{2,19}$/i
+
 const {
   sendPhoneOtp,
   verifyPhoneOtp,
@@ -71,7 +74,7 @@ const passwordValue = ref('')
 const showPassword = ref(false)
 const isPasswordEmail = computed(() => isValidEmail(passwordAccount.value))
 const isPasswordPhone = computed(() => isValidPhone(passwordAccount.value))
-const isPasswordUsername = computed(() => /^[a-z][\w-]{2,19}$/i.test(passwordAccount.value))
+const isPasswordUsername = computed(() => USERNAME_REGEX.test(passwordAccount.value))
 const passwordFormValid = computed(() =>
   (isPasswordEmail.value || isPasswordPhone.value || isPasswordUsername.value) && passwordValue.value.length >= 6,
 )

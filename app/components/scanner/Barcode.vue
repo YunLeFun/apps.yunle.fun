@@ -18,11 +18,14 @@ const flashlightOffOutline = flashlightOutline
 const videoRef = ref<HTMLVideoElement | null>(null)
 const { startScan: startWebScan, stopScan: stopWebScan, isSupported } = useWebBarcodeScan()
 
+let scanAnimationId: number | null = null
+
 // 监听可见性变化
 watch(() => props.isVisible, async (visible) => {
   if (visible && videoRef.value && isSupported()) {
     try {
       await startWebScan(videoRef.value)
+      startQrDetection()
     }
     catch (error) {
       console.error('启动 Web 扫码失败:', error)
@@ -30,11 +33,54 @@ watch(() => props.isVisible, async (visible) => {
     }
   }
   else if (!visible) {
+    stopQrDetection()
     stopWebScan()
   }
 })
 
+/**
+ * 从视频帧中持续检测二维码
+ */
+async function startQrDetection() {
+  const jsQR = (await import('jsqr')).default
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx)
+    return
+
+  function tick() {
+    const video = videoRef.value
+    if (!video || video.readyState < video.HAVE_ENOUGH_DATA) {
+      scanAnimationId = requestAnimationFrame(tick)
+      return
+    }
+
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    ctx!.drawImage(video, 0, 0, canvas.width, canvas.height)
+    const imageData = ctx!.getImageData(0, 0, canvas.width, canvas.height)
+    const result = jsQR(imageData.data, imageData.width, imageData.height)
+
+    if (result?.data) {
+      emit('result', result.data)
+      return
+    }
+
+    scanAnimationId = requestAnimationFrame(tick)
+  }
+
+  scanAnimationId = requestAnimationFrame(tick)
+}
+
+function stopQrDetection() {
+  if (scanAnimationId !== null) {
+    cancelAnimationFrame(scanAnimationId)
+    scanAnimationId = null
+  }
+}
+
 function handleCancel() {
+  stopQrDetection()
   stopWebScan()
   emit('cancel')
 }
@@ -50,6 +96,7 @@ function toggleFlashlight() {
 
 // 组件卸载时清理
 onUnmounted(() => {
+  stopQrDetection()
   stopWebScan()
 })
 </script>

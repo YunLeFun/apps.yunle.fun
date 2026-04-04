@@ -1,6 +1,9 @@
 import { consola } from 'consola'
 import { onUnmounted, ref } from 'vue'
 
+// 手机号格式校验正则（中国大陆）
+const PHONE_REGEX = /^1[3-9]\d{9}$/
+
 /**
  * 短信验证码注册和登录（完整版）
  * 支持新用户注册和已有用户登录
@@ -41,8 +44,7 @@ export function useSmsAuth() {
     }
 
     // 验证手机号格式
-    const phoneRegex = /^1[3-9]\d{9}$/
-    if (!phoneRegex.test(phoneNumber.value)) {
+    if (!PHONE_REGEX.test(phoneNumber.value)) {
       consola.error('手机号格式不正确')
       return { success: false, message: '手机号格式不正确' }
     }

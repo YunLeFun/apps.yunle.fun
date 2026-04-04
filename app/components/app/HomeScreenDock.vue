@@ -15,6 +15,8 @@ interface Props {
   apps: InstalledApp[]
   /** 是否编辑模式 */
   editMode?: boolean
+  /** 上下文菜单预览时需要隐藏的应用 ID */
+  hiddenAppId?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -46,6 +48,15 @@ const dockApps = computed({
   get: () => [...props.apps],
   set: (v) => { emit('update:apps', v) },
 })
+
+const homeScreenStore = useHomeScreenStore()
+
+function onDragStart() {
+  if (!props.editMode) {
+    homeScreenStore.enterEditMode()
+  }
+  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+}
 
 function onDragEnd() {
   Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
@@ -110,21 +121,23 @@ function onPointerCancel() {
       <VueDraggable
         v-model="dockApps"
         :disabled="!editMode"
-        :animation="250"
-        :delay="0"
-        :delay-on-touch-only="false"
+        :animation="300"
+        :delay="editMode ? 0 : 500"
+        :delay-on-touch-only="!editMode"
         :force-fallback="true"
         :fallback-tolerance="3"
         ghost-class="dock-ghost"
         chosen-class="dock-chosen"
+        drag-class="dock-drag"
         class="dock-items"
+        @start="onDragStart"
         @end="onDragEnd"
       >
         <div
           v-for="element in dockApps"
           :key="element.appId"
           class="dock-item"
-          :class="{ 'edit-wobble': editMode }"
+          :class="{ 'edit-wobble': editMode, 'dock-hidden': element.appId === hiddenAppId }"
           @click="handleClick(element)"
           @pointerdown="onPointerDown($event, element)"
           @pointermove="onPointerMove"
@@ -311,11 +324,23 @@ function onPointerCancel() {
   opacity: 0;
 }
 
+/* 上下文菜单浮动预览时隐藏原始图标（保留占位） */
+.dock-hidden {
+  visibility: hidden;
+}
+
 .dock-chosen {
   animation: none !important;
-  transform: scale(1.1);
+  transform: scale(1.15);
   z-index: 100;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+}
+
+.dock-drag {
+  opacity: 1;
+  transform: scale(1.15);
+  z-index: 100;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
 }
 
 /* ==================== 响应式 ==================== */

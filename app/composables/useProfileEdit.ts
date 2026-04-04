@@ -1,5 +1,8 @@
 import { actionSheetController, alertController } from '@ionic/vue'
 
+// 手机号掩码正则：保留前 3 位和后 4 位
+const PHONE_MASK_REGEX = /(\d{3})\d{4}(\d{4})/
+
 export function useProfileEdit() {
   const toast = useToast()
 
@@ -24,7 +27,7 @@ export function useProfileEdit() {
     const phone = user.value?.phone
     if (!phone)
       return '未绑定'
-    return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+    return phone.replace(PHONE_MASK_REGEX, '$1****$2')
   })
   const displayEmail = computed(() => user.value?.email || '未绑定')
   const joinDate = computed(() => {

@@ -1,3 +1,6 @@
+// 应用详情路径匹配正则
+const APP_PATH_REGEX = /\/app\/(\d+)/
+
 /**
  * 扫码结果处理 composable
  *
@@ -19,7 +22,7 @@ export function useScanResult() {
       return
 
     if (content.startsWith('http://') || content.startsWith('https://')) {
-      const appIdMatch = content.match(/\/app\/(\d+)/)
+      const appIdMatch = content.match(APP_PATH_REGEX)
       if (appIdMatch) {
         router.push(`/app/${appIdMatch[1]}`)
         return

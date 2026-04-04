@@ -6,7 +6,7 @@ PODS:
   - CapacitorBarcodeScanner (3.0.2):
     - Capacitor
     - OSBarcodeLib (= 2.0.1)
-  - CapacitorBrowser (8.0.1):
+  - CapacitorBrowser (8.0.2):
     - Capacitor
   - CapacitorCordova (7.4.3)
   - CapacitorHaptics (7.0.2):
@@ -23,7 +23,7 @@ DEPENDENCIES:
   - "Capacitor (from `../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/.pnpm/@capacitor+app@7.1.0_@capacitor+core@7.4.3/node_modules/@capacitor/app`)"
   - "CapacitorBarcodeScanner (from `../../node_modules/.pnpm/@capacitor+barcode-scanner@3.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/barcode-scanner`)"
-  - "CapacitorBrowser (from `../../node_modules/.pnpm/@capacitor+browser@8.0.1_@capacitor+core@7.4.3/node_modules/@capacitor/browser`)"
+  - "CapacitorBrowser (from `../../node_modules/.pnpm/@capacitor+browser@8.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/browser`)"
   - "CapacitorCordova (from `../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../node_modules/.pnpm/@capacitor+haptics@7.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/.pnpm/@capacitor+keyboard@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/keyboard`)"
@@ -42,7 +42,7 @@ EXTERNAL SOURCES:
   CapacitorBarcodeScanner:
     :path: "../../node_modules/.pnpm/@capacitor+barcode-scanner@3.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/barcode-scanner"
   CapacitorBrowser:
-    :path: "../../node_modules/.pnpm/@capacitor+browser@8.0.1_@capacitor+core@7.4.3/node_modules/@capacitor/browser"
+    :path: "../../node_modules/.pnpm/@capacitor+browser@8.0.2_@capacitor+core@7.4.3/node_modules/@capacitor/browser"
   CapacitorCordova:
     :path: "../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios"
   CapacitorHaptics:
@@ -58,7 +58,7 @@ SPEC CHECKSUMS:
   Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
   CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
   CapacitorBarcodeScanner: 421aa419ac63eeb18c7cb94ce280fa22d34e8b0b
-  CapacitorBrowser: e72e572d5dbdbb854fda5950586a2451e981f2d6
+  CapacitorBrowser: 76847841b74c11ccac0a1afae18cf06e3bd59044
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorHaptics: b3fb2869e72c4466e18ce9ccbeb60a3d8723b3d4
   CapacitorKeyboard: 62f36104f26d53d8b3a2a43f2a69fe714f1777d5
@@ -66,6 +66,6 @@ SPEC CHECKSUMS:
   CordovaPlugins: 1c5df9d42d18238e6a61f1cb827d592137a038dd
   OSBarcodeLib: 57987d2eb1f916f701f4554e20e349b3cb83f023
 
-PODFILE CHECKSUM: d640f48e49a4fb1658aafb1febd99f01be38ba1d
+PODFILE CHECKSUM: 0dd00789438d0dab2f2504ba26187e5d495f5706
 
 COCOAPODS: 1.16.2

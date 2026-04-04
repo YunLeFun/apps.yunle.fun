@@ -131,7 +131,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
 
 <template>
   <IonPage>
-    <IonHeader :translucent="true">
+    <IonHeader>
       <IonToolbar>
         <IonButtons slot="start">
           <IonBackButton default-href="/tabs/apps" text="返回" />
@@ -145,15 +145,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
       </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true">
-      <IonHeader collapse="condense">
-        <IonToolbar>
-          <IonTitle size="large">
-            我的应用
-          </IonTitle>
-        </IonToolbar>
-      </IonHeader>
-
+    <IonContent>
       <IonRefresher slot="fixed" @ion-refresh="handleRefresh">
         <IonRefresherContent />
       </IonRefresher>

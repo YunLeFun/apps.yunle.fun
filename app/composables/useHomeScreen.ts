@@ -181,6 +181,12 @@ export function useHomeScreen() {
     autoSyncToCloud()
   }
 
+  /** 从最近使用中移除并自动同步 */
+  function removeRecentApp(appId: string) {
+    homeScreenStore.removeRecentApp(appId)
+    autoSyncToCloud()
+  }
+
   return {
     loadFromCloud,
     syncToCloud,
@@ -189,6 +195,7 @@ export function useHomeScreen() {
     updateOrder,
     updateDock,
     recordRecentUse,
+    removeRecentApp,
     finishEditing,
   }
 }

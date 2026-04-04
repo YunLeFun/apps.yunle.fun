@@ -34,7 +34,7 @@ definePageMeta({
 const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
 const settingsStore = useSettingsStore()
-const { loadFromCloud, recordRecentUse, uninstallApp, updateDock, finishEditing } = useHomeScreen()
+const { loadFromCloud, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing } = useHomeScreen()
 const { shareApp } = useAppActions()
 
 const searchQuery = ref('')
@@ -66,6 +66,36 @@ const displayRecentApps = computed(() => {
 })
 
 const hasMoreRecent = computed(() => homeScreenStore.recentApps.length > RECENT_DEFAULT_DISPLAY)
+
+// ==================== 最近使用拖拽 ====================
+
+const recentDrag = useRecentDrag({
+  onDrop(zone, app) {
+    const appId = app.id || app.slug
+    if (zone === 'add') {
+      installApp(appId)
+    }
+    else if (zone === 'delete') {
+      removeRecentApp(appId)
+    }
+  },
+})
+
+/** 拖拽浮动图标样式 */
+const dragPreviewStyle = computed(() => ({
+  position: 'fixed' as const,
+  left: `${recentDrag.dragPosition.value.x}px`,
+  top: `${recentDrag.dragPosition.value.y}px`,
+  transform: 'translate(-50%, -50%) scale(1.1)',
+  zIndex: 100001,
+  pointerEvents: 'none' as const,
+  filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3))',
+}))
+
+/** 最近使用 - 长按开始拖拽 */
+function handleRecentLongPress(app: YlfAppInfo, event: PointerEvent | TouchEvent) {
+  recentDrag.startDrag(app, event)
+}
 
 // ==================== 顶部菜单 ====================
 
@@ -295,6 +325,8 @@ function handleContentClick() {
             v-for="app in displayRecentApps"
             :key="app.id"
             :app="app"
+            :class="{ 'is-drag-source': recentDrag.isDragging.value && recentDrag.dragApp.value?.id === app.id }"
+            @long-press="handleRecentLongPress"
           />
         </div>
       </div>
@@ -348,6 +380,24 @@ function handleContentClick() {
       @remove="handleContextRemove"
       @close="closeContextMenu"
     />
+
+    <!-- 最近使用拖拽浮动图标 -->
+    <Teleport to="body">
+      <div v-if="recentDrag.isDragging.value && recentDrag.dragApp.value" :style="dragPreviewStyle">
+        <AppIconBox
+          :icon="recentDrag.dragApp.value.icon"
+          :emoji="recentDrag.dragApp.value.emoji"
+          :color="recentDrag.dragApp.value.color"
+          :label="recentDrag.dragApp.value.name"
+        />
+      </div>
+    </Teleport>
+
+    <!-- 最近使用拖拽底部操作栏 -->
+    <AppRecentDropZone
+      :visible="recentDrag.isDragging.value"
+      :active-zone="recentDrag.activeDropZone.value"
+    />
   </IonPage>
 </template>
 
@@ -390,6 +440,13 @@ function handleContentClick() {
     gap: 16px;
     padding: 12px 16px;
   }
+}
+
+/* 拖拽中原始图标变透明 */
+.recent-apps :deep(.is-drag-source) {
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
 /* ==================== 下拉菜单 ==================== */

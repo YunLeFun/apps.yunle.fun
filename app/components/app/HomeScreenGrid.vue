@@ -167,6 +167,57 @@ function onPointerUp() {
 function onPointerCancel() {
   clearLongPressTimer()
 }
+
+/**
+ * Touch 事件兜底：iOS 滚动容器内 pointerdown 可能被 pointercancel 取消，
+ * 用 touchstart/touchmove/touchend/touchcancel 作为空白区域长按的可靠兜底。
+ */
+let touchLongPressTimer: ReturnType<typeof setTimeout> | null = null
+let touchStartX = 0
+let touchStartY = 0
+
+function clearTouchLongPressTimer() {
+  if (touchLongPressTimer) {
+    clearTimeout(touchLongPressTimer)
+    touchLongPressTimer = null
+  }
+}
+
+function onBlankTouchStart(e: TouchEvent) {
+  if (props.editMode)
+    return
+  // 只在空白区域触发（事件直接在 .hs-page 上，不是从子元素冒泡）
+  if (e.target !== e.currentTarget)
+    return
+
+  const touch = e.touches[0]!
+  touchStartX = touch.clientX
+  touchStartY = touch.clientY
+  clearTouchLongPressTimer()
+  touchLongPressTimer = setTimeout(() => {
+    touchLongPressTimer = null
+    handleLongPress(null, touchStartX, touchStartY)
+  }, LONG_PRESS_DELAY)
+}
+
+function onBlankTouchMove(e: TouchEvent) {
+  if (!touchLongPressTimer)
+    return
+  const touch = e.touches[0]!
+  const dx = touch.clientX - touchStartX
+  const dy = touch.clientY - touchStartY
+  if (Math.abs(dx) > LONG_PRESS_MOVE_THRESHOLD || Math.abs(dy) > LONG_PRESS_MOVE_THRESHOLD) {
+    clearTouchLongPressTimer()
+  }
+}
+
+function onBlankTouchEnd() {
+  clearTouchLongPressTimer()
+}
+
+function onBlankTouchCancel() {
+  clearTouchLongPressTimer()
+}
 </script>
 
 <template>
@@ -186,6 +237,10 @@ function onPointerCancel() {
         @pointermove="onPointerMove"
         @pointerup="onPointerUp"
         @pointercancel="onPointerCancel"
+        @touchstart="onBlankTouchStart"
+        @touchmove="onBlankTouchMove"
+        @touchend="onBlankTouchEnd"
+        @touchcancel="onBlankTouchCancel"
       >
         <VueDraggable
           v-model="pageModels[pageIndex]!"

@@ -39,8 +39,8 @@ const { shareApp } = useAppActions()
 
 const searchQuery = ref('')
 
-/** Dock 是否可见（设置开启或编辑模式下） */
-const showDock = computed(() => settingsStore.dockVisible || homeScreenStore.isEditMode)
+/** Dock 是否可见（暂时隐藏，功能未实现） */
+const showDock = computed(() => false)
 
 // ==================== 初始化 ====================
 

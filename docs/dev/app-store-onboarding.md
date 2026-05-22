@@ -103,6 +103,42 @@ App 创建后还要填以下信息才能提交审核，建议提前准备素材�
 - **年龄分级**：通过问卷自评，工坊应用聚合类一般 4+ 即可
 - **App 隐私问卷（Privacy Nutrition Label）**：必须如实声明收集的数据类别
 
+## 本机环境踩坑
+
+### CocoaPods + Ruby 4 编码 bug
+
+如果跑 `pnpm sync` / `pnpm run:ios` 时 `pod install` 报错：
+
+```
+Unicode Normalization not appropriate for ASCII-8BIT (Encoding::CompatibilityError)
+```
+
+原因：Ruby 4.0.1 + CocoaPods 1.16.2 不兼容。
+
+**解决**：在 shell 启动文件（`~/.zshrc` / `~/.profile`）加：
+
+```bash
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+```
+
+或一次性：
+
+```bash
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pnpm sync
+```
+
+### `pnpm deploy` 需要的环境变量
+
+`@yunlefun/deploy` 通过腾讯云 SDK 推送 Docker 镜像。需要在环境中设置：
+
+```bash
+export TENCENT_SECRET_ID=<your-id>
+export TENCENT_SECRET_KEY=<your-key>
+```
+
+CI 中通过 GitHub Actions Secrets 注入。
+
 ## 参考链接
 
 - App Store Connect: <https://appstoreconnect.apple.com>

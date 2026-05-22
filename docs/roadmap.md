@@ -114,6 +114,13 @@
   - [package.json](https://github.com/YunYouJun/apps.yunle.fun/blob/main/package.json) `version: 0.0.1`
   - 用 `pnpm release`（基于 bumpp）打 `1.0.0`
   - Xcode `MARKETING_VERSION` 同步
+  - **Dry-run 验证已完成（2026-05-22）**：
+    - ✅ `pnpm build` 通过（2.55 MB / 638 KB gzip）
+    - ✅ `pnpm typecheck` 通过
+    - ✅ `pnpm sync` 通过（`LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` 解决 Ruby 4 + CocoaPods 编码 bug，详见 [`docs/dev/app-store-onboarding.md#本机环境踩坑`](./dev/app-store-onboarding.md#本机环境踩坑)）
+    - ✅ `capacitor.config.json` 重写为 `fun.yunle.apps`，Xcode Bundle ID 未漂移
+    - ⚠️ `npx deploy` 需 `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` 环境变量（dry-run 时未设，行为正确，避免误发）
+    - ⚠️ 6 个 pre-existing useWorkshop 测试失败（mock 跟 static+cloud 合并行为不匹配，与本次改动无关，不阻塞）
 
 ### P2 已完成
 

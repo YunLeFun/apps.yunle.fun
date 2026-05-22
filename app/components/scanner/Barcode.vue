@@ -13,10 +13,17 @@ const emit = defineEmits<{
   pickAlbum: []
 }>()
 
-const flashlightOn = ref(false)
-const flashlightOffOutline = flashlightOutline
 const videoRef = ref<HTMLVideoElement | null>(null)
-const { startScan: startWebScan, stopScan: stopWebScan, isSupported } = useWebBarcodeScan()
+const { startScan: startWebScan, stopScan: stopWebScan, isSupported, stream } = useWebBarcodeScan()
+
+// 手电筒：基于 W3C MediaStreamTrack.applyConstraints({ torch })
+// 仅当 stream 就绪且设备支持时按钮才会渲染（前置摄像头/不兼容设备自动隐藏）
+const {
+  isSupported: torchSupported,
+  enabled: torchOn,
+  toggle: toggleTorch,
+  check: checkTorch,
+} = useTorch(stream)
 
 let scanAnimationId: number | null = null
 
@@ -25,6 +32,9 @@ watch(() => props.isVisible, async (visible) => {
   if (visible && videoRef.value && isSupported()) {
     try {
       await startWebScan(videoRef.value)
+      // video play 之后再检测一次 torch 能力（首次 immediate watch 时 stream 尚未 play）
+      await nextTick()
+      checkTorch()
       startQrDetection()
     }
     catch (error) {
@@ -89,9 +99,8 @@ function handlePickAlbum() {
   emit('pickAlbum')
 }
 
-function toggleFlashlight() {
-  flashlightOn.value = !flashlightOn.value
-  // TODO: 实现手电筒切换
+async function toggleFlashlight() {
+  await toggleTorch()
 }
 
 // 组件卸载时清理
@@ -137,8 +146,14 @@ onUnmounted(() => {
         <IonButton fill="clear" color="light" class="scan-close-btn" @click="handleCancel">
           <IonIcon slot="icon-only" :icon="closeOutline" />
         </IonButton>
-        <IonButton v-if="showFlashlight" fill="clear" color="light" @click="toggleFlashlight">
-          <IonIcon slot="icon-only" :icon="flashlightOn ? flashlightOutline : flashlightOffOutline" />
+        <IonButton
+          v-if="(showFlashlight ?? true) && torchSupported"
+          fill="clear"
+          :color="torchOn ? 'warning' : 'light'"
+          :aria-label="torchOn ? '关闭手电筒' : '打开手电筒'"
+          @click="toggleFlashlight"
+        >
+          <IonIcon slot="icon-only" :icon="flashlightOutline" />
         </IonButton>
       </div>
     </div>

@@ -64,29 +64,33 @@
   - 登录 CloudBase 控制台 → 数据库 → `apps` 集合 → 安全规则 → 改为 CUSTOM 模式
   - 粘贴上方 read/write 规则
   - 验证：新建应用看不到（status=pending），手动改 status=approved 后可见
-- [ ] **接入错误监控**
-  - 选型推荐 Sentry 免费档（5k errors/月）
-  - 同时上报：未捕获异常、网络 4xx/5xx、关键链路埋点（登录失败、CloudBase 调用失败）
-  - **需要用户提供 Sentry DSN**
+- [ ] **接入错误监控 —— 等用户获取腾讯云 RUM AppID**
+  - 选型决策：**腾讯云 RUM**（免费 100k/月，与 CloudBase 同账号同结算）
+  - 代码侧已完成：[`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts) 预留插件 + [`nuxt.config.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts) runtimeConfig 已加 `rumAppId`
+  - 接入步骤详见 [`docs/dev/rum.md`](./dev/rum.md)
+  - **用户需操作**：到 <https://console.cloud.tencent.com/rum> 创建项目拿 AppID → 填到 `.env.production` 的 `NUXT_PUBLIC_RUM_APP_ID=` → 安装 `pnpm add rum-mp-vue`
 
 ---
 
 ## M3 · 补功能闭环（目标：视产品决策）
 
-> 以下三个功能均处于「文档/UI 承诺但实际未交付」状态，发版前需二选一：要么补完，要么从产品文案中删除。
+### P1 已完成
 
-### P1
+- [x] **底部 Dock 栏**
+  - 实测发现：组件 ([`HomeScreenDock.vue`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/app/HomeScreenDock.vue)) / store (`dockApps`) / 同步链路全部 100% 实现，只是被 `tabs/home.vue:42` 一行 `computed(() => false)` 临时禁用
+  - 启用：`showDock = computed(() => settingsStore.dockVisible)`
+  - 设置页 [`user/settings.vue`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/pages/user/settings.vue) 解除 disabled，接 `settingsStore.dockVisible` v-model
+  - 默认关闭，用户在「设置 → 主屏幕 → 显示 Dock 栏」打开
+- [x] **扫码手电筒切换**
+  - 新增 [`useTorch.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useTorch.ts) 通用 composable —— 基于 W3C `MediaStreamTrack.applyConstraints({ torch })` 标准 API，无第三方依赖
+  - [`Barcode.vue`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/scanner/Barcode.vue) 接入：按钮仅在设备支持时显示（前置摄像头/Firefox 自动隐藏），开关时图标变色
+  - 支持矩阵：Chrome/Edge mobile + iOS Safari 17.4+ + Capacitor WebView，其他平台静默降级
 
-- [ ] **底部 Dock 栏**
-  - 当前 [app/pages/tabs/home.vue:42](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/pages/tabs/home.vue) `showDock = computed(() => false)`
-  - 设置页开关 [app/pages/user/settings.vue:174](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/pages/user/settings.vue) `disabled` + 文案"功能开发中"
-  - 产品定位文档 [docs/product/index.md](./product/index.md) 将其列为云居核心特性
-- [ ] **扫码手电筒切换**
-  - [app/components/scanner/Barcode.vue:94](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/scanner/Barcode.vue) TODO
-  - 弱光场景必需，体验关键
-- [ ] **PC 端微信扫码登录卡片**
-  - [app/components/wx/LoginCard.vue:68](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/wx/LoginCard.vue) TODO
-  - 影响桌面 Web 端登录链路完整性
+### P1 待办
+
+- [ ] **PC 端微信扫码登录卡片**（推迟到 1.x）
+  - [`app/components/wx/LoginCard.vue:68`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/wx/LoginCard.vue) TODO
+  - 用户已确认：可后续再做（手机号/邮箱/密码登录已经覆盖 PC 主链路）
 
 ---
 
@@ -160,9 +164,10 @@
 
 ### 变更记录
 
-| 日期       | 变更                                                                                                                                                                   |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-21 | 初始版本，基于上架前置盘点产出                                                                                                                                         |
-| 2026-05-22 | SIWA 改为可选 fallback，改用 iOS 端隐藏 GitHub 登录策略；隐私政策已外链可访问，降为 P2 内容核对；新增 P0 Bundle ID 不一致项                                            |
-| 2026-05-22 | 完成 4 项 P0：Apple ID 回填 6759859441 / capacitor appId 修正 / GitHub iOS 隐藏 / Info.plist 已在前一日完成；M1 仅剩微信合规 1 项依赖外部审核                          |
-| 2026-05-22 | 完成 M2 Workshop 审核流程 + M4 CI/StatusBar/SEO/README；M2 仅剩错误监控（等 Sentry DSN）+ CloudBase 规则手动同步；M3 三项功能闭环和「bump 版本号」是发版前最后一组待办 |
+| 日期       | 变更                                                                                                                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-21 | 初始版本，基于上架前置盘点产出                                                                                                                                                                          |
+| 2026-05-22 | SIWA 改为可选 fallback，改用 iOS 端隐藏 GitHub 登录策略；隐私政策已外链可访问，降为 P2 内容核对；新增 P0 Bundle ID 不一致项                                                                             |
+| 2026-05-22 | 完成 4 项 P0：Apple ID 回填 6759859441 / capacitor appId 修正 / GitHub iOS 隐藏 / Info.plist 已在前一日完成；M1 仅剩微信合规 1 项依赖外部审核                                                           |
+| 2026-05-22 | 完成 M2 Workshop 审核流程 + M4 CI/StatusBar/SEO/README；M2 仅剩错误监控（等 Sentry DSN）+ CloudBase 规则手动同步；M3 三项功能闭环和「bump 版本号」是发版前最后一组待办                                  |
+| 2026-05-22 | 完成 M3 Dock 启用（发现是死代码 1 行修复）+ 扫码手电筒（新增 useTorch composable）；错误监控选型改为腾讯云 RUM（docs/dev/rum.md + plugin scaffold），等用户拿 AppID；M3 PC 端微信扫码登录确认延后到 1.x |

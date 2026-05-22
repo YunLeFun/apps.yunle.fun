@@ -64,6 +64,7 @@ export default defineConfig({
           { text: '扫码功能', link: '/dev/barcode-scanner' },
           { text: '短信登录', link: '/dev/sms-login' },
           { text: 'App Store 上架手册', link: '/dev/app-store-onboarding' },
+          { text: '错误监控（Tencent RUM）', link: '/dev/rum' },
         ],
       },
       {

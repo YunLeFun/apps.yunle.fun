@@ -171,7 +171,7 @@ async function handleManualSync() {
       <k-list strong inset>
         <k-list-item
           title="显示 Dock 栏"
-          footer="功能开发中，敬请期待"
+          footer="底部固定常用应用栏，长按可拖入/移除"
         >
           <template #media>
             <span class="ios-icon-box ios-icon-purple">
@@ -180,8 +180,8 @@ async function handleManualSync() {
           </template>
           <template #after>
             <k-toggle
-              :checked="false"
-              :disabled="true"
+              :checked="settingsStore.dockVisible"
+              @change="settingsStore.dockVisible = !settingsStore.dockVisible"
             />
           </template>
         </k-list-item>

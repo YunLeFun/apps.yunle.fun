@@ -39,8 +39,8 @@ const { shareApp } = useAppActions()
 
 const searchQuery = ref('')
 
-/** Dock 是否可见（暂时隐藏，功能未实现） */
-const showDock = computed(() => false)
+/** Dock 是否可见（用户在「设置 → 主屏幕 → 显示 Dock 栏」中控制，默认关闭） */
+const showDock = computed(() => settingsStore.dockVisible)
 
 // ==================== 初始化 ====================
 

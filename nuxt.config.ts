@@ -181,6 +181,14 @@ export default defineNuxtConfig({
       wxOpenAppId: 'wx4489293d76593a67',
       // wxOpenRedirectUri: 'https://api.yunle.fun/wx/redirect_uri',
       wxOpenRedirectUri: 'https://www.yunle.fun/login/',
+
+      /**
+       * 腾讯云 RUM（前端性能监控）AppID
+       * 留空则不上报。接入步骤见 docs/dev/rum.md
+       */
+      rumAppId: '',
+      /** RUM 调试日志（仅本地） */
+      rumDebug: false,
     },
   },
 })

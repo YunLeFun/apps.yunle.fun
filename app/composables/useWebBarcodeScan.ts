@@ -95,6 +95,8 @@ export function useWebBarcodeScan() {
 
   return {
     isScanning: readonly(isScanning),
+    /** 当前活跃的 MediaStream（供 useTorch 等外部消费） */
+    stream,
     isSupported,
     startScan,
     stopScan,

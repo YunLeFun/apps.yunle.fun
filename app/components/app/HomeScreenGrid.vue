@@ -425,7 +425,7 @@ function onBlankTouchCancel() {
 }
 
 .delete-icon {
-  color: white;
+  color: #fff;
   font-size: 16px;
   font-weight: 600;
   line-height: 1;
@@ -472,24 +472,17 @@ function onBlankTouchCancel() {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--ylf-label-quaternary);
   border: none;
   padding: 0;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.dark .page-dot {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .page-dot.active {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--ylf-label);
+  opacity: 0.6;
   transform: scale(1.3);
-}
-
-.dark .page-dot.active {
-  background: rgba(255, 255, 255, 0.8);
 }
 
 /* ==================== 响应式 ==================== */

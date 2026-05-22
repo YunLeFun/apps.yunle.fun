@@ -15,7 +15,7 @@ export default defineConfig({
       { text: 'UI 设计', link: '/ui/', activeMatch: '/ui/' },
       { text: '数据库', link: '/database/', activeMatch: '/database/' },
       { text: '开发笔记', link: '/dev/', activeMatch: '/dev/' },
-
+      { text: '路线图', link: '/roadmap', activeMatch: '/roadmap' },
     ],
 
     sidebar: [
@@ -63,6 +63,14 @@ export default defineConfig({
           { text: '认证', link: '/dev/auth' },
           { text: '扫码功能', link: '/dev/barcode-scanner' },
           { text: '短信登录', link: '/dev/sms-login' },
+          { text: 'App Store 上架手册', link: '/dev/app-store-onboarding' },
+        ],
+      },
+      {
+        text: '发布',
+        collapsed: false,
+        items: [
+          { text: '路线图', link: '/roadmap' },
         ],
       },
     ],

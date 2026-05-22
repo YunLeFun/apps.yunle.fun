@@ -7,7 +7,9 @@ const ylfApp = {
 }
 
 const config: CapacitorConfig = {
-  appId: 'apps.yunle.fun',
+  // 必须与 Xcode 工程的 PRODUCT_BUNDLE_IDENTIFIER 以及
+  // public/.well-known/apple-app-site-association 的 appIDs 保持一致
+  appId: 'fun.yunle.apps',
   appName: '云乐坊',
   webDir: '.output/public',
 

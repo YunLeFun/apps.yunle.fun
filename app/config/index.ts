@@ -7,12 +7,12 @@ export const config = {
 
   /**
    * App Store 配置
-   * 上架后将 id 替换为真实 App ID
+   * Apple App ID: https://apps.apple.com/app/id6759859441
    */
   appStore: {
-    id: '000000000',
+    id: '6759859441',
     get url() {
-      return `https://apps.apple.com/app/yunlefun/id${this.id}`
+      return `https://apps.apple.com/app/id${this.id}`
     },
   },
 

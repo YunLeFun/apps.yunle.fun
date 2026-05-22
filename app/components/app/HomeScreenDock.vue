@@ -189,7 +189,7 @@ function onPointerCancel() {
 
 .dock-container {
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.7);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   border-radius: 20px;
@@ -202,7 +202,6 @@ function onPointerCancel() {
 }
 
 .dark .dock-container {
-  background: rgba(28, 28, 30, 0.7);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 0 0 0.5px rgba(255, 255, 255, 0.1);
@@ -265,11 +264,7 @@ function onPointerCancel() {
 }
 
 .placeholder-dock {
-  background: #e5e5ea;
-}
-
-.dark .placeholder-dock {
-  background: #3a3a3c;
+  background: var(--ylf-fill-secondary);
 }
 
 /* ==================== 编辑抖动（iOS 仿真） ==================== */
@@ -314,7 +309,7 @@ function onPointerCancel() {
 }
 
 .delete-icon {
-  color: white;
+  color: #fff;
   font-size: 16px;
   font-weight: 600;
   line-height: 1;

@@ -8,19 +8,9 @@ const items = ref([
     route: '/',
   },
   {
-    label: '项目',
+    label: '工坊',
     icon: 'i-ri-apps-line',
-    items: [
-      {
-        label: 'TODO',
-        icon: 'i-ri-todo-line',
-        route: '/todo',
-      },
-      {
-        label: 'UI Design',
-        icon: 'i-ri-artboard-line',
-      },
-    ],
+    route: '/tabs/apps',
   },
   {
     label: '工作室',

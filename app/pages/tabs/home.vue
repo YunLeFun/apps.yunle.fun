@@ -303,7 +303,7 @@ function handleContentClick() {
           </ion-note>
           <ion-note
             v-if="hasMoreRecent"
-            class="cursor-pointer text-sm text-[#007aff]"
+            class="cursor-pointer text-sm" style="color: var(--ion-color-primary)"
             @click="router.push('/recent')"
           >
             更多
@@ -335,7 +335,6 @@ function handleContentClick() {
         @remove="handleRemoveApp"
         @long-press="handleLongPress"
       />
-
     </IonContent>
 
     <!-- 底部 Dock 常用栏：固定在屏幕底部，类似 iOS Home Screen -->
@@ -384,7 +383,7 @@ function handleContentClick() {
 
 <style scoped>
 .dark .phone-homescreen {
-  --background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+  --background: linear-gradient(180deg, var(--ion-item-background, #1c1c1e) 0%, var(--ion-background-color, #000) 100%);
 }
 
 /* Dock 显示时，内容区底部留出空间避免遮挡 */
@@ -440,7 +439,7 @@ function handleContentClick() {
 
 .dropdown-menu {
   position: fixed;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--ion-item-background);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 12px;
@@ -452,7 +451,6 @@ function handleContentClick() {
 }
 
 .dark .dropdown-menu {
-  background: rgba(28, 28, 30, 0.95);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -462,15 +460,10 @@ function handleContentClick() {
   gap: 12px;
   padding: 14px 16px;
   font-size: 15px;
-  color: #000;
+  color: var(--ion-text-color);
   cursor: pointer;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--ylf-separator);
   transition: background 0.15s ease;
-}
-
-.dark .menu-item {
-  color: #fff;
-  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .menu-item:last-child {
@@ -478,20 +471,12 @@ function handleContentClick() {
 }
 
 .menu-item:active {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.dark .menu-item:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--ylf-fill-quaternary);
 }
 
 .menu-icon {
   font-size: 20px;
-  color: #007aff;
-}
-
-.dark .menu-icon {
-  color: #0a84ff;
+  color: var(--ion-color-primary);
 }
 
 @keyframes slideDown {
@@ -504,5 +489,4 @@ function handleContentClick() {
     transform: translateY(0);
   }
 }
-
 </style>

@@ -158,7 +158,10 @@ function appendLinkHint(rel: 'dns-prefetch' | 'preconnect', href: string) {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: min-width 0.3s ease, padding 0.3s ease, background-color 0.25s ease;
+  transition:
+    min-width 0.3s ease,
+    padding 0.3s ease,
+    background-color 0.25s ease;
 }
 
 .install-btn:active {
@@ -167,8 +170,8 @@ function appendLinkHint(rel: 'dns-prefetch' | 'preconnect', href: string) {
 
 /* 「获取」态：浅灰胶囊底 + 蓝字，对齐 App Store */
 .install-btn:not(.install-btn--open):not(.install-btn--installing) {
-  background: rgba(120, 120, 128, 0.12);
-  color: #007aff;
+  background: var(--ylf-fill-tertiary);
+  color: var(--ion-color-primary);
 }
 
 /* 「安装中」态：收缩为圆形，仅显示圆环 */
@@ -177,38 +180,19 @@ function appendLinkHint(rel: 'dns-prefetch' | 'preconnect', href: string) {
   width: 28px;
   padding: 0;
   background: transparent;
-  color: #007aff;
+  color: var(--ion-color-primary);
   cursor: default;
   pointer-events: none;
 }
 
 /* 「打开」态：蓝色实心胶囊 + 白字 */
 .install-btn--open {
-  background: #007aff;
-  color: #ffffff;
+  background: var(--ion-color-primary);
+  color: #fff;
 }
 
 .install-btn--open:active {
-  background: #0064cc;
-}
-
-/* 暗黑模式 */
-:global(.dark) .install-btn:not(.install-btn--open):not(.install-btn--installing) {
-  background: rgba(118, 118, 128, 0.24);
-  color: #0a84ff;
-}
-
-:global(.dark) .install-btn--installing {
-  color: #0a84ff;
-}
-
-:global(.dark) .install-btn--open {
-  background: #0a84ff;
-  color: #ffffff;
-}
-
-:global(.dark) .install-btn--open:active {
-  background: #006adb;
+  background: var(--ion-color-primary-shade);
 }
 
 /* 旋转圆环 spinner */

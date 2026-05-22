@@ -90,12 +90,8 @@ withDefaults(defineProps<Props>(), {
 
 /* 占位模式 */
 .app-icon-box.is-placeholder {
-  background: #e5e5ea;
+  background: var(--ylf-fill-secondary);
   box-shadow: none;
-}
-
-.dark .app-icon-box.is-placeholder {
-  background: #3a3a3c;
 }
 
 .app-icon-img {
@@ -119,7 +115,7 @@ withDefaults(defineProps<Props>(), {
 .app-label {
   font-size: var(--app-label-size);
   font-weight: 500;
-  color: #000;
+  color: var(--ion-text-color);
   text-align: center;
   line-height: 1.3;
   max-width: var(--app-icon-size);
@@ -134,12 +130,8 @@ withDefaults(defineProps<Props>(), {
   user-select: none;
 }
 
-.dark .app-label {
-  color: #fff;
-}
-
 .is-placeholder + .app-label {
-  color: #999;
+  color: var(--ion-color-medium);
   white-space: nowrap;
   display: block;
   -webkit-line-clamp: unset;

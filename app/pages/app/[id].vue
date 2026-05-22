@@ -72,8 +72,11 @@ function openApp() {
 }
 
 // 分享应用
-function shareApp() {
-  // TODO: 实现分享功能
+const { shareApp: shareAppAction } = useAppActions()
+async function shareApp() {
+  if (!appData.value)
+    return
+  await shareAppAction(appData.value)
 }
 </script>
 
@@ -373,11 +376,7 @@ function shareApp() {
 
 <style scoped>
 .app-detail-content {
-  --background: #f2f2f7;
-}
-
-.dark .app-detail-content {
-  --background: #000000;
+  --background: var(--ion-background-color);
 }
 
 .app-detail-container {
@@ -388,13 +387,9 @@ function shareApp() {
 
 /* 应用头部 */
 .app-header {
-  background: white;
+  background: var(--ion-item-background);
   padding: 20px;
   margin-bottom: 8px;
-}
-
-.dark .app-header {
-  background: #1c1c1e;
 }
 
 .app-header-content {
@@ -441,7 +436,7 @@ function shareApp() {
 
 .app-category {
   font-size: 15px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   margin: 0;
 }
 
@@ -461,17 +456,17 @@ function shareApp() {
 .rating-number {
   font-size: 15px;
   font-weight: 600;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
 }
 
 .star-icon {
   font-size: 12px;
-  color: #ffcc00;
+  color: var(--ylf-color-yellow);
 }
 
 .rating-count {
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
 }
 
 .get-button-large {
@@ -488,11 +483,7 @@ function shareApp() {
   align-items: center;
   justify-content: space-around;
   padding-top: 16px;
-  border-top: 0.5px solid rgba(60, 60, 67, 0.18);
-}
-
-.dark .app-info-bar {
-  border-top-color: rgba(84, 84, 88, 0.48);
+  border-top: 0.5px solid var(--ylf-separator);
 }
 
 .info-item {
@@ -503,13 +494,13 @@ function shareApp() {
 .info-value {
   font-size: 15px;
   font-weight: 600;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   margin-bottom: 2px;
 }
 
 .info-label {
   font-size: 11px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -517,22 +508,14 @@ function shareApp() {
 .info-divider {
   width: 0.5px;
   height: 32px;
-  background: rgba(60, 60, 67, 0.18);
-}
-
-.dark .info-divider {
-  background: rgba(84, 84, 88, 0.48);
+  background: var(--ylf-separator);
 }
 
 /* 通用区块样式 */
 .section {
-  background: white;
+  background: var(--ion-item-background);
   padding: 20px;
   margin-bottom: 8px;
-}
-
-.dark .section {
-  background: #1c1c1e;
 }
 
 .section-header {
@@ -553,7 +536,7 @@ function shareApp() {
 .more-btn {
   background: none;
   border: none;
-  color: #007aff;
+  color: var(--ion-color-primary);
   font-size: 15px;
   font-weight: 400;
   cursor: pointer;
@@ -564,18 +547,14 @@ function shareApp() {
 }
 
 .section-content {
-  color: #000;
-}
-
-.dark .section-content {
-  color: #fff;
+  color: var(--ion-text-color);
 }
 
 .version-info {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   margin-bottom: 12px;
 }
 
@@ -609,7 +588,7 @@ function shareApp() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   font-size: 18px;
   font-weight: 600;
 }
@@ -626,12 +605,8 @@ function shareApp() {
   display: flex;
   gap: 24px;
   padding: 16px 0;
-  border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+  border-bottom: 0.5px solid var(--ylf-separator);
   margin-bottom: 16px;
-}
-
-.dark .rating-summary {
-  border-bottom-color: rgba(84, 84, 88, 0.48);
 }
 
 .rating-score {
@@ -648,7 +623,7 @@ function shareApp() {
 
 .score-label {
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   margin-bottom: 8px;
 }
 
@@ -661,12 +636,12 @@ function shareApp() {
 
 .star-icon-small {
   font-size: 10px;
-  color: #ffcc00;
+  color: var(--ylf-color-yellow);
 }
 
 .rating-count-small {
   font-size: 11px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
 }
 
 .rating-bars {
@@ -685,25 +660,21 @@ function shareApp() {
 
 .bar-star {
   font-size: 10px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   flex-shrink: 0;
 }
 
 .bar-container {
   flex: 1;
   height: 6px;
-  background: rgba(60, 60, 67, 0.12);
+  background: var(--ylf-fill-tertiary);
   border-radius: 3px;
   overflow: hidden;
 }
 
-.dark .bar-container {
-  background: rgba(84, 84, 88, 0.24);
-}
-
 .bar-fill {
   height: 100%;
-  background: #8e8e93;
+  background: var(--ion-color-medium);
   border-radius: 3px;
 }
 
@@ -716,16 +687,12 @@ function shareApp() {
 
 .review-item {
   padding-bottom: 20px;
-  border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+  border-bottom: 0.5px solid var(--ylf-separator);
 }
 
 .review-item:last-child {
   border-bottom: none;
   padding-bottom: 0;
-}
-
-.dark .review-item {
-  border-bottom-color: rgba(84, 84, 88, 0.48);
 }
 
 .review-header {
@@ -745,8 +712,8 @@ function shareApp() {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  background: #8e8e93;
-  color: white;
+  background: var(--ion-color-medium);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -772,12 +739,12 @@ function shareApp() {
 
 .review-star {
   font-size: 10px;
-  color: #ffcc00;
+  color: var(--ylf-color-yellow);
 }
 
 .review-date {
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
 }
 
 .review-content {
@@ -793,7 +760,7 @@ function shareApp() {
 .review-text {
   font-size: 15px;
   line-height: 1.5;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   margin: 0;
 }
 
@@ -808,20 +775,16 @@ function shareApp() {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+  border-bottom: 0.5px solid var(--ylf-separator);
 }
 
 .info-row:last-child {
   border-bottom: none;
 }
 
-.dark .info-row {
-  border-bottom-color: rgba(84, 84, 88, 0.48);
-}
-
 .info-row-label {
   font-size: 15px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
 }
 
 .info-row-value {
@@ -842,23 +805,19 @@ function shareApp() {
 
 .info-sub {
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
 }
 
 .chevron-icon {
   font-size: 14px;
-  color: #c7c7cc;
+  color: var(--ylf-label-tertiary);
 }
 
 /* ==================== 骨架屏 ==================== */
 .skeleton-pulse {
-  background: rgba(60, 60, 67, 0.12);
+  background: var(--ylf-fill-tertiary);
   border-radius: 8px;
   animation: pulse 1.5s ease-in-out infinite;
-}
-
-.dark .skeleton-pulse {
-  background: rgba(84, 84, 88, 0.24);
 }
 
 .skeleton-line {

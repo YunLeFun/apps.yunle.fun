@@ -54,15 +54,10 @@ defineProps<{
   padding-bottom: env(safe-area-inset-bottom, 0);
 
   /* 毛玻璃背景 */
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--ion-toolbar-background);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-}
-
-.dark .recent-drop-zone {
-  background: rgba(28, 28, 30, 0.85);
-  border-top-color: rgba(255, 255, 255, 0.1);
+  border-top: 0.5px solid var(--ylf-separator);
 }
 
 .drop-action {
@@ -83,48 +78,30 @@ defineProps<{
 }
 
 .drop-action.add-action.active {
-  background: rgba(0, 122, 255, 0.15);
-}
-
-.dark .drop-action.add-action.active {
-  background: rgba(10, 132, 255, 0.2);
+  background: rgba(var(--ion-color-primary-rgb), 0.15);
 }
 
 .drop-action.delete-action.active {
-  background: rgba(255, 59, 48, 0.15);
-}
-
-.dark .drop-action.delete-action.active {
-  background: rgba(255, 69, 58, 0.2);
+  background: rgba(var(--ion-color-danger-rgb), 0.15);
 }
 
 .drop-divider {
   width: 0.5px;
   height: 48px;
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--ylf-separator);
   flex-shrink: 0;
-}
-
-.dark .drop-divider {
-  background: rgba(255, 255, 255, 0.12);
 }
 
 .drop-icon {
   font-size: 28px;
-  color: #007aff;
-  transition: color 0.2s ease, transform 0.2s ease;
+  color: var(--ion-color-primary);
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .delete-action .drop-icon {
-  color: #ff3b30;
-}
-
-.dark .drop-icon {
-  color: #0a84ff;
-}
-
-.dark .delete-action .drop-icon {
-  color: #ff453a;
+  color: var(--ion-color-danger);
 }
 
 .drop-action.active .drop-icon {
@@ -134,29 +111,25 @@ defineProps<{
 .drop-label {
   font-size: 12px;
   font-weight: 600;
-  color: #007aff;
+  color: var(--ion-color-primary);
   transition: color 0.2s ease;
 }
 
 .delete-action .drop-label {
-  color: #ff3b30;
-}
-
-.dark .drop-label {
-  color: #0a84ff;
-}
-
-.dark .delete-action .drop-label {
-  color: #ff453a;
+  color: var(--ion-color-danger);
 }
 
 /* Slide-up transition（线性进入，无 bounce） */
 .drop-zone-slide-enter-active {
-  transition: transform 0.25s ease-out, opacity 0.2s ease-out;
+  transition:
+    transform 0.25s ease-out,
+    opacity 0.2s ease-out;
 }
 
 .drop-zone-slide-leave-active {
-  transition: transform 0.2s ease-in, opacity 0.15s ease-in;
+  transition:
+    transform 0.2s ease-in,
+    opacity 0.15s ease-in;
 }
 
 .drop-zone-slide-enter-from {

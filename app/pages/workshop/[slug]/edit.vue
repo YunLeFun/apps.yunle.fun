@@ -18,8 +18,9 @@ import {
   IonTitle,
   IonToggle,
   IonToolbar,
+  onIonViewWillEnter,
 } from '@ionic/vue'
-import { onIonViewWillEnter } from '@ionic/vue'
+import { checkmark } from 'ionicons/icons'
 
 const route = useRoute()
 const router = useRouter()

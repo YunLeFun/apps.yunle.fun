@@ -244,7 +244,7 @@ function onOverlayClick() {
 /* ==================== 菜单卡片 ==================== */
 .ctx-menu {
   position: fixed;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--ion-item-background);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border-radius: 14px;
@@ -256,7 +256,6 @@ function onOverlayClick() {
 }
 
 .dark .ctx-menu {
-  background: rgba(44, 44, 46, 0.85);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.55),
     0 0 0 0.33px rgba(255, 255, 255, 0.08);
@@ -275,29 +274,17 @@ function onOverlayClick() {
   font-size: 17px;
   line-height: 22px;
   letter-spacing: -0.4px;
-  color: #000;
+  color: var(--ion-text-color);
   -webkit-tap-highlight-color: transparent;
   transition: background 0.1s ease;
 }
 
-.dark .ctx-item {
-  color: #fff;
-}
-
 .ctx-item:active {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-.dark .ctx-item:active {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--ylf-fill-quaternary);
 }
 
 .ctx-item--danger {
-  color: #ff3b30;
-}
-
-.dark .ctx-item--danger {
-  color: #ff453a;
+  color: var(--ion-color-danger);
 }
 
 .ctx-label {
@@ -314,22 +301,14 @@ function onOverlayClick() {
 
 .ctx-item--danger .ctx-icon {
   opacity: 1;
-  color: #ff3b30;
-}
-
-.dark .ctx-item--danger .ctx-icon {
-  color: #ff453a;
+  color: var(--ion-color-danger);
 }
 
 /* ==================== 分隔线 ==================== */
 .ctx-divider {
   height: 0.33px;
-  background: rgba(60, 60, 67, 0.29);
+  background: var(--ylf-separator);
   margin: 0;
-}
-
-.dark .ctx-divider {
-  background: rgba(84, 84, 88, 0.65);
 }
 
 /* ==================== 进入/离开动画 ==================== */

@@ -574,14 +574,10 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
 // iOS Segmented Control — 对齐 UISegmentedControl 原生规范
 .auth-segment {
   display: flex;
-  background: #e5e5ea; // iOS systemGray5，与 #f2f2f6 页面背景形成清晰对比
+  background: var(--ylf-fill-secondary); // iOS systemGray5 等价语义色
   border-radius: 9px;
   padding: 2px;
   margin: 0 16px 20px;
-
-  .dark & {
-    background: #39393d;
-  }
 }
 
 .auth-segment-btn {
@@ -623,14 +619,10 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
 
 // iOS Grouped Card — 浅色模式白色卡片 + 页面灰色背景形成区分（iOS 标准分组列表风格）
 .auth-card {
-  background: #fff;
+  background: var(--ion-item-background);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 16px;
-
-  .dark & {
-    background: var(--ion-card-background, #1c1c1e);
-  }
 }
 
 .auth-card-row {
@@ -643,23 +635,15 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
 .auth-card-divider {
   width: 1px;
   height: 20px;
-  background: rgba(60, 60, 67, 0.18);
+  background: var(--ylf-separator);
   margin: 0 12px 0 8px;
   flex-shrink: 0;
-
-  .dark & {
-    background: rgba(255, 255, 255, 0.15);
-  }
 }
 
 .auth-card-separator {
   height: 0.5px;
-  background: rgba(60, 60, 67, 0.18);
+  background: var(--ylf-separator);
   margin-left: 16px;
-
-  .dark & {
-    background: rgba(255, 255, 255, 0.1);
-  }
 }
 
 .auth-area-code {
@@ -768,11 +752,7 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
     content: '';
     flex: 1;
     height: 0.5px;
-    background: rgba(0, 0, 0, 0.1);
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.1);
-    }
+    background: var(--ylf-separator);
   }
 }
 
@@ -816,22 +796,17 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
   padding: 12px;
   border-radius: 50%;
   font-size: 28px;
-  background: #e5e5ea; // iOS systemGray5，与 #f2f2f6 页面背景形成清晰对比
-  color: var(--ion-text-color, #000);
-
-  .dark & {
-    background: #2c2c2e;
-    color: #fff;
-  }
+  background: var(--ylf-fill-secondary);
+  color: var(--ion-text-color);
 
   // 微信 — 品牌绿底白图标
   .auth-social-circle--wechat & {
-    background: #07c160;
+    background: var(--c-brand-wx);
     color: #fff;
   }
 }
 
-// GitHub — 深色底白图标
+// GitHub — 深色底白图标（深色模式反相）
 .auth-social-circle--github .auth-social-circle-icon {
   background: #24292f;
   color: #fff;

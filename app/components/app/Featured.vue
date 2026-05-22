@@ -282,7 +282,9 @@ const todayDateStr = computed(() => {
   box-shadow:
     0 1px 4px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
   letter-spacing: -0.1px;
 }
 

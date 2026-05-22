@@ -7,6 +7,56 @@
   --app-icon-radius: 16px;
   --app-label-size: 12px;
   --app-emoji-size: 32px;
+
+  /* ===========================================================
+   * iOS 系统标签色（语义化文本/分隔线，浅色模式）
+   * 参考 Apple HIG - System Colors
+   * 优先使用 --ion-* 变量；这里补 iOS 没覆盖的灰阶与扩展色
+   * =========================================================== */
+  --ylf-label: #000000;
+  --ylf-label-secondary: #3c3c4399; /* rgba(60,60,67,0.6) */
+  --ylf-label-tertiary: #3c3c434c; /* rgba(60,60,67,0.3) */
+  --ylf-label-quaternary: #3c3c432e; /* rgba(60,60,67,0.18) */
+
+  --ylf-separator: #3c3c4349; /* rgba(60,60,67,0.29) */
+  --ylf-separator-opaque: #c6c6c8;
+
+  --ylf-fill: #78788033; /* rgba(120,120,128,0.2) */
+  --ylf-fill-secondary: #78788028; /* rgba(120,120,128,0.16) */
+  --ylf-fill-tertiary: #7676801e; /* rgba(118,118,128,0.12) */
+  --ylf-fill-quaternary: #74748014; /* rgba(116,116,128,0.08) */
+
+  /* iOS 扩展色（Ionic 默认调色板没有的） */
+  --ylf-color-purple: #af52de;
+  --ylf-color-pink: #ff2d55;
+  --ylf-color-teal: #5ac8fa;
+  --ylf-color-indigo: #5856d6;
+  --ylf-color-yellow: #ffcc00;
+  --ylf-color-cyan: #00c7be;
+}
+
+/* 深色模式（与 .ion-palette-dark 同步） */
+.ion-palette-dark,
+.dark {
+  --ylf-label: #ffffff;
+  --ylf-label-secondary: #ebebf599;
+  --ylf-label-tertiary: #ebebf54c;
+  --ylf-label-quaternary: #ebebf528;
+
+  --ylf-separator: #54545899;
+  --ylf-separator-opaque: #38383a;
+
+  --ylf-fill: #7878805c;
+  --ylf-fill-secondary: #78788052;
+  --ylf-fill-tertiary: #7676803d;
+  --ylf-fill-quaternary: #7676802e;
+
+  --ylf-color-purple: #bf5af2;
+  --ylf-color-pink: #ff375f;
+  --ylf-color-teal: #64d2ff;
+  --ylf-color-indigo: #5e5ce6;
+  --ylf-color-yellow: #ffd60a;
+  --ylf-color-cyan: #6ac4dc;
 }
 
 @media (max-width: 480px) {

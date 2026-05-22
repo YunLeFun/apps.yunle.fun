@@ -284,11 +284,11 @@ function handleSearchInput() {
 }
 
 .market-popover-item:active {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--ylf-fill-quaternary);
 }
 
 .market-popover-item.active {
-  color: #007aff;
+  color: var(--ion-color-primary);
 }
 
 .market-popover-icon {
@@ -307,7 +307,7 @@ function handleSearchInput() {
 }
 
 .market-popover-check {
-  color: #007aff;
+  color: var(--ion-color-primary);
   font-size: 16px;
   font-weight: 600;
   flex-shrink: 0;
@@ -320,7 +320,7 @@ function handleSearchInput() {
   padding: 4px;
   border: none;
   background: none;
-  color: #8e8e93;
+  color: var(--ion-color-medium);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s;
@@ -328,29 +328,29 @@ function handleSearchInput() {
 }
 
 .market-popover-delete:hover {
-  color: #ff3b30;
-  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--ion-color-danger);
+  background-color: rgba(var(--ion-color-danger-rgb), 0.1);
 }
 
 .market-popover-add {
-  color: #007aff;
+  color: var(--ion-color-primary);
 }
 
 .market-popover-divider {
   height: 1px;
   margin: 4px 16px;
-  background: rgba(60, 60, 67, 0.12);
+  background: var(--ylf-fill-tertiary);
 }
 
 /* ==================== 搜索栏 ==================== */
 .app-store-searchbar {
-  --background: rgba(142, 142, 147, 0.12);
+  --background: var(--ylf-fill-tertiary);
   --border-radius: 10px;
   --box-shadow: none;
-  --cancel-button-color: #007aff;
-  --placeholder-color: rgba(60, 60, 67, 0.6);
-  --icon-color: rgba(60, 60, 67, 0.6);
-  --clear-button-color: rgba(60, 60, 67, 0.6);
+  --cancel-button-color: var(--ion-color-primary);
+  --placeholder-color: var(--ylf-label-secondary);
+  --icon-color: var(--ylf-label-secondary);
+  --clear-button-color: var(--ylf-label-secondary);
   padding: 0 16px;
   font-size: 17px;
   font-weight: 400;
@@ -362,14 +362,7 @@ function handleSearchInput() {
 }
 
 .app-store-searchbar::part(native):focus-within {
-  --background: rgba(142, 142, 147, 0.18);
-}
-
-.dark .app-store-searchbar {
-  --background: rgba(118, 118, 128, 0.24);
-  --placeholder-color: rgba(235, 235, 245, 0.6);
-  --icon-color: rgba(235, 235, 245, 0.6);
-  --clear-button-color: rgba(235, 235, 245, 0.6);
+  --background: var(--ylf-fill-secondary);
 }
 
 /* ==================== Content 区域 ==================== */
@@ -400,24 +393,6 @@ function handleSearchInput() {
   }
 }
 
-/* ==================== Dark mode ==================== */
-.dark .market-popover-item:active {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.dark .market-popover-item.active {
-  color: #0a84ff;
-}
-
-.dark .market-popover-check {
-  color: #0a84ff;
-}
-
-.dark .market-popover-divider {
-  background: rgba(235, 235, 245, 0.15);
-}
-
-.dark .market-popover-add {
-  color: #0a84ff;
-}
+/* Dark mode 不再需要单独覆盖 —— 所有颜色已经通过 CSS 变量
+   在浅/深色之间自动切换（见 css-vars.css 与 Ionic 调色板） */
 </style>

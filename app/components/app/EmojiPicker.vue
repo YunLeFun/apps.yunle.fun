@@ -155,7 +155,7 @@ function onCustomInput(e: Event) {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(142, 142, 147, 0.08);
+  background: var(--ylf-fill-quaternary);
   border: none;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -168,12 +168,12 @@ function onCustomInput(e: Event) {
 }
 
 .emoji-btn--active {
-  background: rgba(0, 122, 255, 0.12);
+  background: rgba(var(--ion-color-primary-rgb), 0.12);
   box-shadow: 0 0 0 2.5px var(--ion-color-primary);
 }
 
 .emoji-btn--custom {
-  border: 1.5px dashed rgba(142, 142, 147, 0.3);
+  border: 1.5px dashed var(--ylf-label-tertiary);
   background: transparent;
 }
 
@@ -187,7 +187,7 @@ function onCustomInput(e: Event) {
   border-radius: 14px;
   border: none;
   background: var(--ion-color-primary);
-  color: white;
+  color: #fff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -196,19 +196,6 @@ function onCustomInput(e: Event) {
 
 .confirm-btn:active {
   opacity: 0.8;
-}
-
-.dark .emoji-btn {
-  background: rgba(118, 118, 128, 0.16);
-}
-
-.dark .emoji-btn--active {
-  background: rgba(10, 132, 255, 0.2);
-}
-
-.dark .emoji-btn--custom {
-  border-color: rgba(118, 118, 128, 0.3);
-  background: transparent;
 }
 
 /* 展开动画 */

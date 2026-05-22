@@ -27,12 +27,12 @@ Home Screen 的拖拽排序基于 [SortableJS](https://sortablejs.github.io/Sort
 
 ### 关键设计决策
 
-| 决策 | 选择 | 原因 |
-|------|------|------|
-| 拖拽引擎 | SortableJS（vue-draggable-plus） | 成熟库，内置 FLIP 让位动画、触屏优化、性能优化 |
-| 拖拽模式 | `force-fallback: true` + `fallback-on-body: true` | fallback 模式创建 clone 跟随手指；挂到 body 避免被 `overflow: hidden` 裁剪 |
-| 编辑/非编辑切换 | SortableJS `:disabled="!editMode"` | 非编辑模式下 SortableJS 完全不干预事件流 |
-| 长按检测 | 自定义 `setTimeout` 500ms | 非编辑模式下使用，与 SortableJS 互斥，避免事件竞争 |
+| 决策            | 选择                                              | 原因                                                                       |
+| --------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| 拖拽引擎        | SortableJS（vue-draggable-plus）                  | 成熟库，内置 FLIP 让位动画、触屏优化、性能优化                             |
+| 拖拽模式        | `force-fallback: true` + `fallback-on-body: true` | fallback 模式创建 clone 跟随手指；挂到 body 避免被 `overflow: hidden` 裁剪 |
+| 编辑/非编辑切换 | SortableJS `:disabled="!editMode"`                | 非编辑模式下 SortableJS 完全不干预事件流                                   |
+| 长按检测        | 自定义 `setTimeout` 500ms                         | 非编辑模式下使用，与 SortableJS 互斥，避免事件竞争                         |
 
 ## ⚠️ 关键约束（踩坑记录）
 
@@ -96,17 +96,19 @@ Home Screen 的拖拽排序基于 [SortableJS](https://sortablejs.github.io/Sort
 ### 6. 上下文菜单浮动图标隐藏原始图标用 `visibility: hidden`
 
 ```css
-.hs-hidden { visibility: hidden; }  /* ✅ 保留占位空间 */
+.hs-hidden {
+  visibility: hidden;
+} /* ✅ 保留占位空间 */
 /* display: none 会导致布局跳动 */
 ```
 
 ## 文件清单
 
-| 文件 | 职责 |
-|------|------|
-| `app/components/app/HomeScreenGrid.vue` | Grid 网格 + SortableJS 拖拽 + 长按检测 |
-| `app/components/app/HomeScreenDock.vue` | Dock 常用栏 + 拖拽排序 |
-| `app/components/app/ContextMenu.vue` | 上下文菜单（纯 UI，不含拖拽逻辑） |
-| `app/pages/tabs/home.vue` | 页面编排，连接 Grid/Dock/ContextMenu |
-| `app/stores/homeScreen.ts` | Home Screen 状态（editMode、installedApps、dockApps） |
-| `test/unit/contextMenuDrag.test.ts` | 交互状态机和 CSS 约束的单元测试 |
+| 文件                                    | 职责                                                  |
+| --------------------------------------- | ----------------------------------------------------- |
+| `app/components/app/HomeScreenGrid.vue` | Grid 网格 + SortableJS 拖拽 + 长按检测                |
+| `app/components/app/HomeScreenDock.vue` | Dock 常用栏 + 拖拽排序                                |
+| `app/components/app/ContextMenu.vue`    | 上下文菜单（纯 UI，不含拖拽逻辑）                     |
+| `app/pages/tabs/home.vue`               | 页面编排，连接 Grid/Dock/ContextMenu                  |
+| `app/stores/homeScreen.ts`              | Home Screen 状态（editMode、installedApps、dockApps） |
+| `test/unit/contextMenuDrag.test.ts`     | 交互状态机和 CSS 约束的单元测试                       |

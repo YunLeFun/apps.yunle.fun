@@ -120,7 +120,8 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
    * 更新拖拽位置并检测 drop zone
    */
   function updateDragPosition(event: PointerEvent | TouchEvent) {
-    if (!isDragging.value) return
+    if (!isDragging.value)
+      return
 
     const pos = getEventPosition(event)
     dragPosition.value = pos

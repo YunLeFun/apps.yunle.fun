@@ -6,9 +6,19 @@
 
 ## 总判定
 
-当前状态：**Web canary（dev.yunle.fun）可用，正式发布 / App Store 上架前仍有硬阻塞**。
+**代码侧 release-ready（2026-05-22）**。
 
-预计排期 4 个 milestone，完成 M1 即可启动 TestFlight 内测。
+剩余阻塞全部是**外部依赖**：
+
+- ICP 备案（工信部）
+- og-image.png + iOS Splash Light/Dark（设计师交付）
+- 隐私政策内容核对（人工对照清单跑一遍）
+
+满足任一条件即可发版：
+
+- **仅 Web 发版**：跑 `pnpm release` 即可（需配 `TENCENT_SECRET_ID`/`KEY`）
+- **iOS TestFlight 内测**：跑 `pnpm sync` + `pnpm build:ios`（需 `LANG=en_US.UTF-8`）
+- **App Store 正式上架**：等 ICP 备案 + 设计交付齐
 
 ---
 
@@ -36,10 +46,18 @@
 
 ### P0 待办
 
-- [ ] **WeChat 登录 iOS 上架合规**
-  - 当前微信 `appId = wx925d6e320d64f30a`，需要在腾讯开放平台完成 iOS 应用审核
-  - 校验 [public/.well-known/apple-app-site-association](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/.well-known/apple-app-site-association) 的 `paths` 覆盖 `capacitor.config.ts` 的 `universalLink: 'https://www.yunle.fun/app/'`
-  - 注意：[app/config/auth.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/config/auth.ts) 当前 `baseAuthMethods.wechat = false`，腾讯开放平台审核通过后再改为 `true`
+> **M1 已全部完成** ✅。原先的「WeChat 登录 iOS 上架合规」P0 已移到 1.x backlog（见下文）。
+
+### 1.x backlog（推迟到首版上线后）
+
+- [ ] **WeChat 登录 iOS 上架合规**（**v1.0 不做**，原因如下）
+  - 当前 [`app/config/auth.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/config/auth.ts) `wechat: false`，登录页 WeChat 按钮不渲染
+  - `cordova-plugin-wechat` SDK 已 bundle 但 dormant，不触发就不会报错
+  - 没有任何 `wx.*` 调用入口暴露给用户 → 没有合规风险
+  - 1.x 决定开 WeChat 登录时再做：
+    1. 腾讯开放平台 <https://open.weixin.qq.com> 提交 iOS 应用审核
+    2. 用 `wx925d6e320d64f30a` 这个 appId 关联 Bundle ID `fun.yunle.apps` + Universal Link `https://www.yunle.fun/app/`
+    3. 审核通过后把 `baseAuthMethods.wechat` 改为 `true`
 
 ---
 
@@ -181,3 +199,5 @@
 | 2026-05-22 | 完成 4 项 P0：Apple ID 回填 6759859441 / capacitor appId 修正 / GitHub iOS 隐藏 / Info.plist 已在前一日完成；M1 仅剩微信合规 1 项依赖外部审核                                                           |
 | 2026-05-22 | 完成 M2 Workshop 审核流程 + M4 CI/StatusBar/SEO/README；M2 仅剩错误监控（等 Sentry DSN）+ CloudBase 规则手动同步；M3 三项功能闭环和「bump 版本号」是发版前最后一组待办                                  |
 | 2026-05-22 | 完成 M3 Dock 启用（发现是死代码 1 行修复）+ 扫码手电筒（新增 useTorch composable）；错误监控选型改为腾讯云 RUM（docs/dev/rum.md + plugin scaffold），等用户拿 AppID；M3 PC 端微信扫码登录确认延后到 1.x |
+| 2026-05-22 | 接入腾讯云 RUM（aegis-web-sdk + AppID nG8jRFK2e30nRrle5R）；通过 CloudBase MCP 自动应用 4 个集合的安全规则；release dry-run 全链路通过                                                                  |
+| 2026-05-22 | 确认 v1.0 不需要微信开放平台审核（wechat: false，按钮不渲染，SDK dormant）；M1 全部清零；总判定改为「代码侧 release-ready」，剩余阻塞全是外部依赖（备案 / 设计 / 隐私页核对）                           |

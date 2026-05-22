@@ -1,0 +1,6 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "featured_apps",
+  "permission": "READONLY"
+}

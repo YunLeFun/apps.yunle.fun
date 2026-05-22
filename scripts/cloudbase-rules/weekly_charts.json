@@ -1,0 +1,6 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "weekly_charts",
+  "permission": "READONLY"
+}

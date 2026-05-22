@@ -60,10 +60,13 @@
 
 ### P1 待办
 
-- [ ] **CloudBase 控制台手动同步安全规则**（一次性操作）
-  - 完整可粘贴的规则 + 验证清单见 [`docs/dev/cloudbase-rules.md`](./dev/cloudbase-rules.md)
-  - 覆盖集合：`apps` / `user_home_screens` / `featured_apps` / `weekly_charts`
-  - 控制台已打开：<https://console.cloud.tencent.com/tcb/database>
+- [x] **CloudBase 安全规则同步**（已通过 MCP 自动应用）
+  - 通过 CloudBase MCP 一次性应用到生产环境 `yunlefun-8g7ybcxc7345c490`
+  - `apps` / `user_home_screens` 用 CUSTOM 拆分 read/create/update/delete 四元组
+  - `featured_apps` / `weekly_charts` 用 READONLY 内置预设（运营在控制台写）
+  - 规则源文件版本化存放于 [`scripts/cloudbase-rules/`](https://github.com/YunYouJun/apps.yunle.fun/tree/main/scripts/cloudbase-rules)
+  - 一键重放命令：`bash scripts/cloudbase-rules/apply.sh`
+  - 详细文档：[`docs/dev/cloudbase-rules.md`](./dev/cloudbase-rules.md)
 
 ### P1 已完成
 

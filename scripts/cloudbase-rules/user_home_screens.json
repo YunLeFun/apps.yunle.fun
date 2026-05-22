@@ -1,0 +1,7 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "user_home_screens",
+  "permission": "CUSTOM",
+  "securityRule": "{\"read\":\"auth.uid == doc._openid\",\"create\":\"auth.uid != null && auth.loginType != 'ANONYMOUS'\",\"update\":\"auth.uid == doc._openid\",\"delete\":\"auth.uid == doc._openid\"}"
+}

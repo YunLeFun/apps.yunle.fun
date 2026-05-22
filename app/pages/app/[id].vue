@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  actionSheetController,
   IonBackButton,
   IonButton,
   IonButtons,
@@ -9,7 +10,8 @@ import {
   IonPage,
   IonToolbar,
 } from '@ionic/vue'
-import { chevronForward, share, star, starOutline } from 'ionicons/icons'
+import { chevronForward, ellipsisHorizontal, share, star, starOutline } from 'ionicons/icons'
+import { YLF_CONTACT } from '~/constants/links'
 
 const route = useRoute()
 const router = useRouter()
@@ -78,6 +80,38 @@ async function shareApp() {
     return
   await shareAppAction(appData.value)
 }
+
+/**
+ * 应用详情更多操作菜单（举报 / 复制链接）
+ *
+ * App Store 审核指南 1.2 要求 UGC 内容必须提供举报入口
+ * 当前简化为 mailto 链接，后续 M2 阶段可接 CloudBase reports 集合
+ */
+async function openMoreMenu() {
+  const app = appData.value
+  if (!app)
+    return
+  const subject = encodeURIComponent(`举报应用：${app.name}（${app.slug || app.id}）`)
+  const body = encodeURIComponent(
+    `应用名称：${app.name}\n应用 ID：${app.id}\n应用 slug：${app.slug || ''}\n网址：${app.url || ''}\n\n举报原因（请说明）：\n`,
+  )
+  const reportMailto = `mailto:${YLF_CONTACT.support.email}?subject=${subject}&body=${body}`
+
+  const sheet = await actionSheetController.create({
+    header: app.name,
+    buttons: [
+      {
+        text: '举报此应用',
+        role: 'destructive',
+        handler: () => {
+          window.location.href = reportMailto
+        },
+      },
+      { text: '取消', role: 'cancel' },
+    ],
+  })
+  await sheet.present()
+}
 </script>
 
 <template>
@@ -90,6 +124,9 @@ async function shareApp() {
         <IonButtons slot="end">
           <IonButton @click="shareApp">
             <IonIcon slot="icon-only" :icon="share" />
+          </IonButton>
+          <IonButton aria-label="更多" @click="openMoreMenu">
+            <IonIcon slot="icon-only" :icon="ellipsisHorizontal" />
           </IonButton>
         </IonButtons>
       </IonToolbar>

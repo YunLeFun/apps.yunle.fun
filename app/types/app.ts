@@ -32,6 +32,18 @@ export const APP_CATEGORIES = [
   { label: '其他', icon: '📦' },
 ] as const
 
+/**
+ * 应用审核状态
+ *
+ * - `pending`：等待审核（新创建或重新提交后默认状态）
+ * - `approved`：审核通过，配合 `isPublic: true` 才会在工坊/寻乐对所有人可见
+ * - `rejected`：审核被拒，用户可在工坊看到 `rejectedReason` 后修改重新提交
+ */
+export type AppStatus = 'pending' | 'approved' | 'rejected'
+
+/** 默认审核状态 */
+export const DEFAULT_APP_STATUS: AppStatus = 'pending'
+
 /** 应用数据模型 - 对应 CloudBase NoSQL 集合 `apps` */
 export interface AppRecord {
   /** 文档 ID（CloudBase 自动生成） */
@@ -62,8 +74,14 @@ export interface AppRecord {
   category?: string
   /** 标签 */
   tags?: string[]
-  /** 是否公开 */
+  /** 用户是否愿意公开（默认 false；与 status=approved 同时满足才会真正对外可见） */
   isPublic: boolean
+  /** 审核状态（必填，默认 pending） */
+  status: AppStatus
+  /** 拒绝原因（仅 status=rejected 时有值） */
+  rejectedReason?: string
+  /** 最近一次审核时间戳 */
+  reviewedAt?: number
   /** 创建时间 */
   createdAt: number
   /** 更新时间 */

@@ -243,7 +243,7 @@ watch(slug, (val) => {
               <IonLabel>
                 <h3>公开应用</h3>
                 <p class="text-xs text---ion-color-medium">
-                  公开后其他用户可查看此应用
+                  保存后将重新进入审核队列，通过后才会公开可见
                 </p>
               </IonLabel>
             </IonToggle>

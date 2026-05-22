@@ -45,16 +45,29 @@
 
 ## M2 · 补安全 / 内容审核（目标：3 天）
 
-### P1
+### P1 已完成
 
-- [ ] **Workshop 应用审核流程**
-  - 现状：[app/composables/useAppForm.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useAppForm.ts) 提交时默认 `isPublic: true`，CloudBase 规则 `isPublic == true || auth.uid == doc._openid` 即所有人可读
-  - 用户提交后立即对全平台可见 → 色情/钓鱼/违规外链风险
-  - 改造：默认 `isPublic: false`，加 `status: 'pending' | 'approved' | 'rejected'` 字段；后台审核通过才公开
-  - 加举报入口（IAPP 必备）
+- [x] **Workshop 应用审核流程**
+  - 数据模型新增 `status: 'pending' | 'approved' | 'rejected'`、`rejectedReason`、`reviewedAt`（[app/types/app.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/types/app.ts)）
+  - 表单默认 `isPublic: false`，创建强制 `status: 'pending'`，更新会重置为 `pending`（[useAppForm.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useAppForm.ts) + [useApps.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useApps.ts)）
+  - 公开查询（useApps / useWorkshop / useDiscovery / useAppDetail）全部加 `status: 'approved'` 过滤
+  - 我的应用列表显示「审核中 / 已拒绝」状态徽章及拒绝原因
+  - 应用详情页加「举报此应用」入口（mailto 模板，自动带应用信息）
+- [x] **CloudBase 安全规则文档化**（用户需手动同步到控制台）
+  - read: `(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid`
+  - write: `auth.uid == doc._openid`
+  - 详见 [useApps.ts 头部注释](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useApps.ts)
+
+### P1 待办
+
+- [ ] **CloudBase 控制台手动同步安全规则**（一次性操作）
+  - 登录 CloudBase 控制台 → 数据库 → `apps` 集合 → 安全规则 → 改为 CUSTOM 模式
+  - 粘贴上方 read/write 规则
+  - 验证：新建应用看不到（status=pending），手动改 status=approved 后可见
 - [ ] **接入错误监控**
   - 选型推荐 Sentry 免费档（5k errors/月）
   - 同时上报：未捕获异常、网络 4xx/5xx、关键链路埋点（登录失败、CloudBase 调用失败）
+  - **需要用户提供 Sentry DSN**
 
 ---
 
@@ -79,18 +92,32 @@
 
 ## M4 · 发版 dry-run（目标：2 天）
 
-### P1
+### P1 已完成
 
-- [ ] **CI 补 test job**
-  - 当前 [.github/workflows/ci.yml](https://github.com/YunYouJun/apps.yunle.fun/blob/main/.github/workflows/ci.yml) 只跑 lint + typecheck
-  - `test/unit/` 下有 7 个套件未在 CI 跑，合入有静默回归风险
-  - 补 `pnpm test:unit` job
-- [ ] **bump 版本号**
+- [x] **CI 补 test job**
+  - [.github/workflows/ci.yml](https://github.com/YunYouJun/apps.yunle.fun/blob/main/.github/workflows/ci.yml) 增加 `test` job 跑 `pnpm test:unit`
+  - 同时升级 actions 到 v4 + pnpm/action-setup v4 + 使用 `--frozen-lockfile`
+
+### P1 待办
+
+- [ ] **bump 版本号**（**发版最后一步**）
   - [package.json](https://github.com/YunYouJun/apps.yunle.fun/blob/main/package.json) `version: 0.0.1`
   - 用 `pnpm release`（基于 bumpp）打 `1.0.0`
   - Xcode `MARKETING_VERSION` 同步
 
-### P2
+### P2 已完成
+
+- [x] **iOS StatusBar / Splash 显式配置**
+  - [capacitor.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/capacitor.config.ts) 添加 `StatusBar`（style: DEFAULT, overlaysWebView: true）和 `SplashScreen` 配置
+- [x] **SEO + 分享卡**
+  - [nuxt.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts) `app.head` 补 Open Graph + Twitter Card + theme-color
+  - [public/robots.txt](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/robots.txt) 加 sitemap 引用 + Disallow 私有路由
+  - [public/sitemap.xml](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/sitemap.xml) 新增基础站点地图（三大 Tab + 静态页）
+  - **TODO**：放一张 1200×630 的 `public/og-image.png` 分享封面（设计交付物）
+- [x] **README 完善**
+  - 加徽章、架构图、命令表、目录结构说明、贡献流程
+
+### P2 待办
 
 - [ ] **核对外链隐私政策 / 服务条款内容覆盖范围**
   - URL 已验证可访问：<https://www.yunle.fun/docs/privacy-policy>、<https://www.yunle.fun/docs/terms-of-service>
@@ -100,18 +127,12 @@
     - 数据存储位置（CloudBase 上海机房，符合数据本地化）
     - 第三方 SDK（CloudBase JS SDK、Capacitor、微信 SDK；GitHub OAuth 仅 Web）
     - 用户权利（注销账号、导出/删除数据、申诉邮箱）
-- [ ] **iOS StatusBar 显式配置**
-  - [capacitor.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/capacitor.config.ts) 当前只配了 `Keyboard`，没配 `StatusBar`
-  - 某些页面状态栏文字/背景可能撞色
 - [ ] **iOS Splash 多套素材**
   - 当前 `ios/App/App/Assets.xcassets/Splash.imageset/` 仅有单张 2732×2732，建议 Light/Dark 分别一套
-- [ ] **SEO + 分享卡**
-  - [public/robots.txt](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/robots.txt) 只 `Allow: /`，没 sitemap
-  - [nuxt.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts) `app.head` 缺 Open Graph / Twitter Card → 分享到微信/X 无预览图
 - [ ] **ICP 备案 / App Store 中国区备案号**
   - `yunle.fun` 域名在国内提供服务通常需要工信部备案；App Store 中国区 2023-09 起强制要求备案号
-- [ ] **README 完善**
-  - [README.md](https://github.com/YunYouJun/apps.yunle.fun/blob/main/README.md) 当前 ~10 行命令清单，缺截图、架构图、贡献指南
+- [ ] **设计交付：`public/og-image.png`**
+  - 1200×630px，社交分享/微信预览用
 
 ---
 
@@ -139,8 +160,9 @@
 
 ### 变更记录
 
-| 日期       | 变更                                                                                                                                          |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-21 | 初始版本，基于上架前置盘点产出                                                                                                                |
-| 2026-05-22 | SIWA 改为可选 fallback，改用 iOS 端隐藏 GitHub 登录策略；隐私政策已外链可访问，降为 P2 内容核对；新增 P0 Bundle ID 不一致项                   |
-| 2026-05-22 | 完成 4 项 P0：Apple ID 回填 6759859441 / capacitor appId 修正 / GitHub iOS 隐藏 / Info.plist 已在前一日完成；M1 仅剩微信合规 1 项依赖外部审核 |
+| 日期       | 变更                                                                                                                                                                   |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-21 | 初始版本，基于上架前置盘点产出                                                                                                                                         |
+| 2026-05-22 | SIWA 改为可选 fallback，改用 iOS 端隐藏 GitHub 登录策略；隐私政策已外链可访问，降为 P2 内容核对；新增 P0 Bundle ID 不一致项                                            |
+| 2026-05-22 | 完成 4 项 P0：Apple ID 回填 6759859441 / capacitor appId 修正 / GitHub iOS 隐藏 / Info.plist 已在前一日完成；M1 仅剩微信合规 1 项依赖外部审核                          |
+| 2026-05-22 | 完成 M2 Workshop 审核流程 + M4 CI/StatusBar/SEO/README；M2 仅剩错误监控（等 Sentry DSN）+ CloudBase 规则手动同步；M3 三项功能闭环和「bump 版本号」是发版前最后一组待办 |

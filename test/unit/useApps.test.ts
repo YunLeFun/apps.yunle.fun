@@ -262,7 +262,7 @@ describe('useApps', () => {
       const result = await getPublicAppBySlug('public-app')
 
       expect(result).toEqual(app)
-      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ slug: 'public-app', isPublic: true })
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ slug: 'public-app', isPublic: true, status: 'approved' })
       expect(mockAuth.getSession).not.toHaveBeenCalled()
     })
   })
@@ -323,6 +323,7 @@ describe('useApps', () => {
           name: 'New App',
           slug: 'new-app',
           isPublic: true,
+          status: 'pending',
           ownerLogin: 'testuser',
         }),
       )

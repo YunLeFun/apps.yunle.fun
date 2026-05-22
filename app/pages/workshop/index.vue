@@ -114,6 +114,15 @@ function formatDate(ts: number) {
   })
 }
 
+function statusLabel(status: AppRecord['status']) {
+  switch (status) {
+    case 'pending': return '审核中'
+    case 'rejected': return '已拒绝'
+    case 'approved': return ''
+    default: return ''
+  }
+}
+
 onMounted(() => {
   if (userStore.isLoggedIn)
     fetchMyApps()
@@ -212,9 +221,17 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
               <h2 class="app-name">
                 {{ app.name }}
                 <span v-if="!app.isPublic" class="private-badge">私有</span>
+                <span
+                  v-if="app.status && app.status !== 'approved'"
+                  class="status-badge"
+                  :class="`status-badge--${app.status}`"
+                >{{ statusLabel(app.status) }}</span>
               </h2>
               <p v-if="app.description">
                 {{ app.description }}
+              </p>
+              <p v-if="app.status === 'rejected' && app.rejectedReason" class="reject-reason">
+                被拒原因：{{ app.rejectedReason }}
               </p>
               <p class="app-meta">
                 <span v-if="app.category" class="meta-category">{{ app.category }}</span>
@@ -322,10 +339,35 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
   font-weight: 500;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(142, 142, 147, 0.12);
+  background: var(--ylf-fill-tertiary);
   color: var(--ion-color-medium);
   flex-shrink: 0;
   vertical-align: middle;
+}
+
+.status-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.status-badge--pending {
+  background: rgba(var(--ion-color-warning-rgb), 0.16);
+  color: var(--ion-color-warning-shade);
+}
+
+.status-badge--rejected {
+  background: rgba(var(--ion-color-danger-rgb), 0.16);
+  color: var(--ion-color-danger);
+}
+
+.reject-reason {
+  font-size: 12px;
+  color: var(--ion-color-danger);
+  margin: 4px 0 0;
 }
 
 .app-meta {

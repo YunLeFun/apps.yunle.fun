@@ -54,7 +54,7 @@ describe('useWorkshop', () => {
       await queryApps(true)
 
       expect(mockDbSetup.db.collection).toHaveBeenCalledWith('apps')
-      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ isPublic: true })
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ isPublic: true, status: 'approved' })
       expect(apps.value).toHaveLength(2)
       expect(apps.value[0].id).toBe('c1')
       expect(apps.value[0].name).toBe('Cloud App 1')
@@ -80,6 +80,7 @@ describe('useWorkshop', () => {
 
       expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({
         isPublic: true,
+        status: 'approved',
         category: '工具',
       })
     })
@@ -94,6 +95,7 @@ describe('useWorkshop', () => {
       expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith(
         expect.objectContaining({
           isPublic: true,
+          status: 'approved',
           name: expect.any(Object),
         }),
       )

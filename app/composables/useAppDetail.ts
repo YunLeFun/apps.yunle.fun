@@ -126,21 +126,21 @@ export function useAppDetail(appId: MaybeRef<string>) {
     }
   }
 
-  /** 按 _id 查询公开应用 */
+  /** 按 _id 查询公开应用（需 isPublic + status=approved 双重满足） */
   async function queryPublicAppById(id: string): Promise<AppRecord | null> {
     const { data } = await db
       .collection('apps')
-      .where({ _id: id, isPublic: true })
+      .where({ _id: id, isPublic: true, status: 'approved' })
       .limit(1)
       .get()
     return (data as AppRecord[])?.[0] || null
   }
 
-  /** 按 slug 查询公开应用 */
+  /** 按 slug 查询公开应用（需 isPublic + status=approved 双重满足） */
   async function queryPublicAppBySlug(slug: string): Promise<AppRecord | null> {
     const { data } = await db
       .collection('apps')
-      .where({ slug, isPublic: true })
+      .where({ slug, isPublic: true, status: 'approved' })
       .limit(1)
       .get()
     return (data as AppRecord[])?.[0] || null

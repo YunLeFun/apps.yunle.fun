@@ -1,2 +1,15 @@
 User-agent: *
 Allow: /
+
+# 私有路由不索引（避免登录态/编辑态被爬）
+Disallow: /tabs/me
+Disallow: /workshop/new
+Disallow: /workshop/*/edit
+Disallow: /user/
+Disallow: /accounts/
+Disallow: /developer/
+Disallow: /scan
+Disallow: /login
+Disallow: /auth/
+
+Sitemap: https://www.yunle.fun/sitemap.xml

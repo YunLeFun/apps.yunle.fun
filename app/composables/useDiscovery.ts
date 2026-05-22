@@ -33,7 +33,7 @@ export function useDiscovery() {
     try {
       const { data } = await db
         .collection('apps')
-        .where({ slug: appId, isPublic: true })
+        .where({ slug: appId, isPublic: true, status: 'approved' })
         .limit(1)
         .get()
       if (!data || data.length === 0)

@@ -1,4 +1,5 @@
 import type { AppRecord, CreateAppForm } from '~/types/app'
+import { DEFAULT_APP_STATUS } from '~/types/app'
 
 const COLLECTION = 'apps'
 
@@ -6,13 +7,13 @@ const COLLECTION = 'apps'
  * 应用数据管理 composable
  * 基于 CloudBase NoSQL 数据库
  *
- * 安全规则（CUSTOM）：
- *   read:  "doc.isPublic == true || auth.uid == doc._openid"
+ * 安全规则（CUSTOM）—— 上线前需要在 CloudBase 控制台同步更新：
+ *   read:  "(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid"
  *   write: "auth.uid == doc._openid"
  *
  * where 查询必须包含安全规则可推导的条件：
  *   - 查自己的数据 → where 含 _openid
- *   - 查公开数据   → where 含 isPublic == true
+ *   - 查公开数据   → where 同时含 isPublic == true 与 status == 'approved'
  */
 export function useApps() {
   const { app, auth } = useCloudbase()
@@ -103,12 +104,12 @@ export function useApps() {
 
   /**
    * 根据 slug 获取公开应用详情
-   * 安全规则要求 where 中必须包含 isPublic: true 才能查询非本人数据
+   * 安全规则要求 where 中必须同时包含 isPublic: true 与 status: 'approved' 才能查询非本人数据
    */
   async function getPublicAppBySlug(slug: string): Promise<AppRecord | null> {
     const { data } = await db
       .collection(COLLECTION)
-      .where({ slug, isPublic: true })
+      .where({ slug, isPublic: true, status: 'approved' })
       .limit(1)
       .get()
     return (data as AppRecord[])[0] || null
@@ -144,6 +145,9 @@ export function useApps() {
   /**
    * 创建应用，返回新文档 ID
    * _openid 由 CloudBase 服务端自动注入
+   *
+   * 新创建的应用默认 status='pending'，即使用户勾选了 isPublic
+   * 也需要审核通过（status 改为 'approved'）后才会真正对外公开
    */
   async function createApp(form: CreateAppForm): Promise<string> {
     const uid = await ensureAuth()
@@ -165,6 +169,7 @@ export function useApps() {
       category: form.category || '',
       tags: form.tags || [],
       isPublic: form.isPublic,
+      status: DEFAULT_APP_STATUS,
       createdAt: now,
       updatedAt: now,
     }) as unknown as { id: string }
@@ -173,10 +178,16 @@ export function useApps() {
 
   /**
    * 更新应用
+   *
+   * 用户编辑会把 status 重置为 'pending' 并清空 rejectedReason，
+   * 触发重新审核（与 App Store「重新提交」逻辑一致）
    */
   async function updateApp(id: string, updates: Partial<CreateAppForm>): Promise<void> {
     await db.collection(COLLECTION).doc(id).update({
       ...updates,
+      status: DEFAULT_APP_STATUS,
+      rejectedReason: '',
+      reviewedAt: 0,
       updatedAt: Date.now(),
     })
   }
@@ -190,11 +201,13 @@ export function useApps() {
 
   /**
    * 检查 slug 是否已被占用（在本人数据 + 公开数据中查找）
+   * 注意：未审核通过的应用对查询本人不冲突，但若已被他人提交（无论审核与否）仍视为占用，
+   * 避免审核期间多人提交同一 slug
    */
   async function isSlugTaken(slug: string): Promise<boolean> {
     const { data: publicData } = await db
       .collection(COLLECTION)
-      .where({ slug, isPublic: true })
+      .where({ slug, isPublic: true, status: 'approved' })
       .limit(1)
       .get()
     if ((publicData as AppRecord[]).length > 0)

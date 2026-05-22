@@ -23,7 +23,9 @@ function createEmptyForm() {
     themeColor: DEFAULT_THEME_COLOR,
     category: '',
     tags: [] as string[],
-    isPublic: true,
+    // 默认不公开 —— 用户提交后即使勾了 isPublic，也需要审核通过才会真对外可见
+    // 详见 app/types/app.ts AppStatus
+    isPublic: false,
   }
 }
 

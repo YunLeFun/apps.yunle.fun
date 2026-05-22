@@ -115,6 +115,23 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'viewport-fit=cover, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' },
         { name: 'description', content: appDescription },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        // Open Graph（微信内分享卡片 / 通用爬虫）
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: '云乐坊' },
+        { property: 'og:title', content: '云乐坊 · 云应用聚合平台' },
+        { property: 'og:description', content: appDescription },
+        { property: 'og:image', content: 'https://www.yunle.fun/og-image.png' },
+        { property: 'og:url', content: 'https://www.yunle.fun' },
+        { property: 'og:locale', content: 'zh_CN' },
+        // Twitter / X Card
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: '云乐坊 · 云应用聚合平台' },
+        { name: 'twitter:description', content: appDescription },
+        { name: 'twitter:image', content: 'https://www.yunle.fun/og-image.png' },
+        { name: 'twitter:site', content: '@yunlefun' },
+        // 浏览器顶栏主题色
+        { name: 'theme-color', content: '#007AFF', media: '(prefers-color-scheme: light)' },
+        { name: 'theme-color', content: '#0A84FF', media: '(prefers-color-scheme: dark)' },
       ],
     },
   },

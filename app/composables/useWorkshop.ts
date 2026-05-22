@@ -90,7 +90,7 @@ export function useWorkshop() {
       return
 
     try {
-      const where: Record<string, any> = { isPublic: true }
+      const where: Record<string, any> = { isPublic: true, status: 'approved' }
 
       if (selectedCategory.value !== '全部') {
         where.category = selectedCategory.value

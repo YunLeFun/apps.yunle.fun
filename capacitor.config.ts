@@ -36,6 +36,22 @@ const config: CapacitorConfig = {
       // 跟随系统深色/浅色模式
       style: 'DEFAULT',
     },
+    StatusBar: {
+      // 状态栏样式跟随系统深色/浅色模式（DEFAULT = adaptive）
+      style: 'DEFAULT',
+      // 不强制覆盖 WebView，保留 viewport-fit=cover 的安全区
+      overlaysWebView: true,
+    },
+    SplashScreen: {
+      // 启动屏在原生壳层立即隐藏，避免出现长时间白屏（Web 内自行做加载状态）
+      launchShowDuration: 1000,
+      launchAutoHide: true,
+      backgroundColor: '#ffffffff',
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
   },
 }
 

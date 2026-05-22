@@ -177,7 +177,7 @@ const {
               <IonLabel>
                 <h3>公开应用</h3>
                 <p class="text-xs" style="color: var(--ion-color-medium)">
-                  公开后其他用户可查看此应用
+                  提交后将进入审核队列，通过后才会在工坊/寻乐对所有人可见
                 </p>
               </IonLabel>
             </IonToggle>

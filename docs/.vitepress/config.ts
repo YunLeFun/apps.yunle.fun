@@ -66,6 +66,7 @@ export default defineConfig({
           { text: 'App Store 上架手册', link: '/dev/app-store-onboarding' },
           { text: 'CloudBase 安全规则', link: '/dev/cloudbase-rules' },
           { text: '错误监控（Tencent RUM）', link: '/dev/rum' },
+          { text: '隐私政策核对清单', link: '/dev/privacy-checklist' },
         ],
       },
       {

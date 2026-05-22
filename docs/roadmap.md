@@ -129,11 +129,8 @@
 - [ ] **核对外链隐私政策 / 服务条款内容覆盖范围**
   - URL 已验证可访问：<https://www.yunle.fun/docs/privacy-policy>、<https://www.yunle.fun/docs/terms-of-service>
   - App Store Connect 接受外链，无需在 App 内单独生成
-  - 内容核查清单：
-    - 收集的数据类型（手机号、微信 openid/unionid、设备 ID、应用使用日志）
-    - 数据存储位置（CloudBase 上海机房，符合数据本地化）
-    - 第三方 SDK（CloudBase JS SDK、Capacitor、微信 SDK；GitHub OAuth 仅 Web）
-    - 用户权利（注销账号、导出/删除数据、申诉邮箱）
+  - **完整核对清单见 [`docs/dev/privacy-checklist.md`](./dev/privacy-checklist.md)**
+  - 已用 `open` 帮用户在浏览器打开两个页面，需要用户人工核对清单逐项打勾
 - [ ] **iOS Splash 多套素材**
   - 当前 `ios/App/App/Assets.xcassets/Splash.imageset/` 仅有单张 2732×2732，建议 Light/Dark 分别一套
 - [ ] **ICP 备案 / App Store 中国区备案号**

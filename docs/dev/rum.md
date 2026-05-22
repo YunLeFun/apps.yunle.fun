@@ -28,45 +28,35 @@
 
 4. 创建后在「项目详情」页面拿到 **AppID**（一串数字，例如 `L00000ABCD`）
 
-## 接入步骤（代码端）
+## 接入状态（已完成）
 
-> 注：当前代码库已经预留 [`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts)，只需要补 AppID 即可启用。
+✅ 当前接入 SDK：`aegis-web-sdk@latest`（腾讯官方 Web 端 SDK）
+✅ 默认 AppID 已写入 `nuxt.config.ts`：`nG8jRFK2e30nRrle5R`（线上 `yunle.fun` 项目）
+✅ Plugin 已启用：[`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts)
+✅ 自动绑定 `uin`：用户登录后自动用 `userStore.userInfo.id` 标记，便于按用户聚合错误
 
-### 1. 安装 SDK
+## 如果要切换 AppID（多环境）
 
-```bash
-pnpm add rum-mp-vue  # 等价于 Sentry browser SDK
-```
-
-> 或者 `pnpm add aegis-web-sdk` —— 腾讯历史名称，与 RUM 同一套，二选一。本项目推荐 `rum-mp-vue` 因为它原生支持 Vue 3 + Capture Pinia state。
-
-### 2. 在 `nuxt.config.ts` `runtimeConfig.public` 加配置
-
-> 已在仓库内完成，参考即可：
-
-```ts
-export default defineNuxtConfig({
-  runtimeConfig: {
-    public: {
-      // 腾讯云 RUM AppID（留空则不上报）
-      rumAppId: '',
-      // 本地调试时改 true 可看到上报日志
-      rumDebug: false,
-    },
-  },
-})
-```
-
-### 3. 启用 plugin
-
-打开 [`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts)，把 AppID 填到 `.env.production` 或直接环境变量：
+通过环境变量覆盖默认值：
 
 ```bash
-# .env.production
-NUXT_PUBLIC_RUM_APP_ID=L00000ABCD
+# .env.production —— 生产环境
+NUXT_PUBLIC_RUM_APP_ID=nG8jRFK2e30nRrle5R
+
+# .env.staging —— 灰度环境（建议新建独立项目避免污染线上数据）
+NUXT_PUBLIC_RUM_APP_ID=<staging-app-id>
+
+# 关闭上报
+NUXT_PUBLIC_RUM_APP_ID=
 ```
 
-plugin 检测到 `rumAppId` 非空就会自动启动上报。
+## SDK 选型说明
+
+| SDK                 | 状态        | 备注                                 |
+| ------------------- | ----------- | ------------------------------------ |
+| **`aegis-web-sdk`** | ✅ 当前使用 | 腾讯官方 Web SDK，最稳定，文档最全   |
+| `rum-mp-vue`        | ⚪ 备选     | Vue 3 友好但社区更小，未来可考虑迁移 |
+| `aegis-mp-sdk`      | ❌ 不适用   | 小程序专用                           |
 
 ## 上报内容（默认配置）
 

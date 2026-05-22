@@ -1,3 +1,4 @@
+import Aegis from 'aegis-web-sdk'
 import consola from 'consola'
 
 /**
@@ -6,52 +7,61 @@ import consola from 'consola'
  * 接入步骤详见 docs/dev/rum.md
  *
  * 启用条件：
- *   - 环境变量 NUXT_PUBLIC_RUM_APP_ID 非空
- *   - 安装了 rum-mp-vue 依赖（按需，未安装则 plugin 安静跳过）
+ *   - 环境变量 NUXT_PUBLIC_RUM_APP_ID 非空（默认已填线上 AppID）
  *
  * 默认行为：
- *   - 上报 JS 异常 / 资源错误 / Web Vitals / PV / 用户操作链路
- *   - 不上报 PII（用户 ID 默认不带，需要业务代码主动 setUid）
+ *   - 上报 JS 异常 / unhandledrejection / 资源加载错误
+ *   - 上报接口测速、静态资源测速、Web Vitals、SPA pv
+ *   - 用户登录后自动用 userStore.userInfo.id 作为 uin，便于按用户聚合错误
  *
- * 关闭：直接清空 NUXT_PUBLIC_RUM_APP_ID 即可
+ * 关闭：清空 `nuxt.config.ts` 的 `runtimeConfig.public.rumAppId` 即可
  */
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const appId = (config.public as any).rumAppId as string | undefined
   const debug = (config.public as any).rumDebug === true
 
   if (!appId) {
     if (debug)
-      consola.info('[RUM] disabled: NUXT_PUBLIC_RUM_APP_ID 未配置')
+      consola.info('[RUM] disabled: rumAppId 未配置')
     return
   }
 
   try {
-    // 按需加载，避免没接入时增加包体积
-    // @ts-expect-error 包未安装时 vite 会在构建时跳过，运行时也走 catch
-    const mod = await import('rum-mp-vue')
-    const Aegis = mod.default ?? mod
-
-    const rum = new Aegis({
+    const aegis = new Aegis({
       id: appId,
       uin: '',
-      reportApiSpeed: true,
-      reportAssetSpeed: true,
-      spa: true,
+      reportApiSpeed: true, // 接口测速
+      reportAssetSpeed: true, // 静态资源测速
+      spa: true, // SPA pv 自动追踪
       hostUrl: 'https://rumt-zh.com',
-      pvUrl: location.origin + location.pathname,
+      // 环境标记，便于在 RUM 控制台过滤
       env: import.meta.dev ? 'dev' : 'production',
+    } as any)
+
+    // 用户登录态变化时同步 uin（用于按用户聚合错误）
+    const userStore = useUserStore()
+    watchEffect(() => {
+      const uid = userStore.userInfo?.id
+      if (uid) {
+        try {
+          aegis.setConfig?.({ uin: uid })
+        }
+        catch {
+          // setConfig 在某些 SDK 版本叫别的名，静默忽略
+        }
+      }
     })
 
-    // 暴露到全局供业务代码使用（auth/cloudbase 调用失败时手动上报）
+    // 暴露到全局，业务代码可手动 captureException / captureMessage
     if (typeof window !== 'undefined') {
-      ;(window as any).$rum = rum
+      ;(window as any).$rum = aegis
     }
 
     if (debug)
       consola.info('[RUM] initialized with appId', appId)
   }
   catch (err) {
-    consola.warn('[RUM] init skipped:', (err as Error).message)
+    consola.warn('[RUM] init failed:', (err as Error).message)
   }
 })

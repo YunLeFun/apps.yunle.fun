@@ -61,14 +61,17 @@
 ### P1 待办
 
 - [ ] **CloudBase 控制台手动同步安全规则**（一次性操作）
-  - 登录 CloudBase 控制台 → 数据库 → `apps` 集合 → 安全规则 → 改为 CUSTOM 模式
-  - 粘贴上方 read/write 规则
-  - 验证：新建应用看不到（status=pending），手动改 status=approved 后可见
-- [ ] **接入错误监控 —— 等用户获取腾讯云 RUM AppID**
-  - 选型决策：**腾讯云 RUM**（免费 100k/月，与 CloudBase 同账号同结算）
-  - 代码侧已完成：[`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts) 预留插件 + [`nuxt.config.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts) runtimeConfig 已加 `rumAppId`
-  - 接入步骤详见 [`docs/dev/rum.md`](./dev/rum.md)
-  - **用户需操作**：到 <https://console.cloud.tencent.com/rum> 创建项目拿 AppID → 填到 `.env.production` 的 `NUXT_PUBLIC_RUM_APP_ID=` → 安装 `pnpm add rum-mp-vue`
+  - 完整可粘贴的规则 + 验证清单见 [`docs/dev/cloudbase-rules.md`](./dev/cloudbase-rules.md)
+  - 覆盖集合：`apps` / `user_home_screens` / `featured_apps` / `weekly_charts`
+  - 控制台已打开：<https://console.cloud.tencent.com/tcb/database>
+
+### P1 已完成
+
+- [x] **接入腾讯云 RUM 错误监控**
+  - 安装 `aegis-web-sdk`，AppID `nG8jRFK2e30nRrle5R` 已写入 [`nuxt.config.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts)
+  - [`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts) 用户登录后自动 setConfig({ uin })，便于按用户聚合错误
+  - 上报项：JS 异常 + 资源 4xx/5xx + 接口测速 + Web Vitals + SPA pv
+  - 验证：发版后到 <https://console.cloud.tencent.com/rum> 看上报数据
 
 ---
 

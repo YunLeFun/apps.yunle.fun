@@ -184,9 +184,10 @@ export default defineNuxtConfig({
 
       /**
        * 腾讯云 RUM（前端性能监控）AppID
-       * 留空则不上报。接入步骤见 docs/dev/rum.md
+       * 接入步骤见 docs/dev/rum.md
+       * 可通过环境变量 NUXT_PUBLIC_RUM_APP_ID 覆盖
        */
-      rumAppId: '',
+      rumAppId: 'nG8jRFK2e30nRrle5R',
       /** RUM 调试日志（仅本地） */
       rumDebug: false,
     },

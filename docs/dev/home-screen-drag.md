@@ -58,12 +58,16 @@ Home Screen 的拖拽排序基于 [SortableJS](https://sortablejs.github.io/Sort
 ```vue
 <!-- ❌ scoped 样式无法匹配 body 上的 clone -->
 <style scoped>
-.hs-drag { ... }
+.hs-drag {
+  /* ... */
+}
 </style>
 
 <!-- ✅ 全局样式匹配 fallbackOnBody 的 clone -->
 <style>
-.hs-drag { ... }
+.hs-drag {
+  /* ... */
+}
 </style>
 ```
 

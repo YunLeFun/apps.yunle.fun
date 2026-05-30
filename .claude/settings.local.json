@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git check-ignore *)",
+      "Bash(curl -ks -L -o /tmp/privacy.html -w \"%{http_code} %{url_effective} size=%{size_download}\\\\n\" \"https://www.yunle.fun/docs/privacy-policy\")",
+      "Bash(curl -ks -L -o /tmp/terms.html -w \"%{http_code} %{url_effective} size=%{size_download}\\\\n\" \"https://www.yunle.fun/docs/terms-of-service\")",
+      "Bash(grep -oE \"<title>[^<]+</title>|<h1[^>]*>[^<]+</h1>\" /tmp/privacy.html | head -5; echo \"---\"; grep -oE \"<title>[^<]+</title>|<h1[^>]*>[^<]+</h1>\" /tmp/terms.html | head -5; echo \"---\"; grep -oE \"data-id=\\\\\"[^\\\\\"]+\\\\\"\" /tmp/privacy.html | head -3)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm lint *)",
+      "Bash(npx eslint *)"
+    ]
+  }
+}

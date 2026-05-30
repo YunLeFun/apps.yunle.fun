@@ -30,6 +30,7 @@ const slug = computed(() => (route.params as { slug?: string }).slug ?? '')
 const loading = ref(true)
 const loadError = ref('')
 const appData = ref<AppRecord | null>(null)
+const initialized = ref(false)
 
 const {
   form,
@@ -63,8 +64,6 @@ async function loadApp() {
 function goBack() {
   router.replace('/workshop')
 }
-
-const initialized = ref(false)
 
 onIonViewWillEnter(() => {
   if (slug.value)

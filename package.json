@@ -2,7 +2,7 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.33.4",
+  "packageManager": "pnpm@10.34.1",
   "scripts": {
     "build": "nuxt build",
     "deploy": "npx deploy",
@@ -44,7 +44,7 @@
     "aegis-web-sdk": "^1.41.13",
     "cordova-plugin-wechat": "^3.1.0",
     "jsqr": "^1.4.0",
-    "konsta": "^5.0.9",
+    "konsta": "^5.1.0",
     "ofetch": "^1.5.1",
     "vconsole": "^3.15.1",
     "vue-draggable-plus": "^0.6.1"
@@ -52,10 +52,10 @@
   "devDependencies": {
     "@antfu/eslint-config": "^8.3.0",
     "@capacitor/cli": "7.4.3",
-    "@cloudbase/js-sdk": "^3.3.10",
+    "@cloudbase/js-sdk": "^3.3.13",
     "@iconify-json/carbon": "^1.2.22",
     "@iconify-json/ri": "^1.2.10",
-    "@iconify-json/simple-icons": "^1.2.83",
+    "@iconify-json/simple-icons": "^1.2.84",
     "@iconify-json/twemoji": "^1.2.5",
     "@nuxt/devtools": "^3.2.4",
     "@nuxt/eslint": "^1.15.2",
@@ -67,8 +67,8 @@
     "@playwright/test": "^1.60.0",
     "@tailwindcss/vite": "^4.3.0",
     "@types/qrcode": "^1.5.6",
-    "@unocss/eslint-config": "^66.6.8",
-    "@unocss/nuxt": "^66.6.8",
+    "@unocss/eslint-config": "^66.7.0",
+    "@unocss/nuxt": "^66.7.0",
     "@vite-pwa/nuxt": "^1.1.1",
     "@vitest/coverage-v8": "^4.1.7",
     "@vue/test-utils": "^2.4.10",
@@ -78,7 +78,7 @@
     "@yunlefun/toolkit": "^0.1.2",
     "@yunlefun/vue": "^0.1.1",
     "consola": "^3.4.2",
-    "eslint": "^10.4.0",
+    "eslint": "^10.4.1",
     "eslint-plugin-format": "^2.0.1",
     "happy-dom": "^20.9.0",
     "jsdom": "^29.1.1",
@@ -86,10 +86,10 @@
     "nuxt-auth-utils": "^0.5.29",
     "pinia": "^3.0.4",
     "qrcode": "^1.5.4",
-    "sass": "^1.99.0",
+    "sass": "^1.100.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.7",
-    "vue-tsc": "^3.3.1"
+    "vue-tsc": "^3.3.3"
   }
 }

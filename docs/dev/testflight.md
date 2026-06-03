@@ -4,32 +4,47 @@
 
 ## 当前进度（2026-06-03）
 
+所有签名 / 账号 / 证书障碍**已全部清除**，只剩最后一步打包上传：
+
 - ✅ webapp build + `cap sync` 通过
 - ✅ iOS 26.5 SDK 已安装，`xcodebuild archive` 成功 → 产出 `ios/App/App.xcarchive`
-- ✅ **PLA 协议已同意**（否则 export 不会成功）
-- ✅ **Apple Distribution 证书已可用**：实测签名为 `Apple Distribution: Lan Yang (QT792GAY4C)`
-  - 注：`security find-identity -v -p codesigning` 可能列不出它，因为 Xcode automatic signing 把它放在单独 keychain，但导出时实际可用。
-- ⏳ **最后一步：app-store-connect 导出 + 上传 —— 需要 ASC API Key**
-  - 直接跑 automatic signing 的 app-store 导出会报
-    `No provider associated with App Store Connect user`（Xcode 账号 session 无法认证到 ASC 拉 App Store provisioning profile）
-  - **解法**：用 App Store Connect API Key 认证导出 + 上传，一步到位。
+- ✅ **PLA 协议已同意**
+- ✅ **Apple Distribution 证书可用**（cloud-managed，实测签名 `Apple Distribution: Lan Yang (QT792GAY4C)`）
+- ✅ **App Store provisioning profile 存在**：`iOS Team Store Provisioning Profile: fun.yunle.apps`（UUID `c0add50e-…`）
+- ✅ **Admin 级 ASC API Key 认证通过**：能连 ASC 拉到 app（6759859441 / fun.yunle.apps / 云乐坊 / v1.0），所有 framework 证书评估 `errors: (null)`
+- ⛔ **命令行 `xcodebuild -exportArchive` 卡在 `IDEDistributionPackagingStep: "Copy failed"`**
+  - 这是 **Xcode 26 命令行导出的已知 bug**，发生在签名全部通过之后的打包步骤，与代码 / 证书 / 账号无关
+  - 对比：ad-hoc（`release-testing` method）导出走不同打包路径，**不触发**此 bug；但 ad-hoc 包不能上 TestFlight
+  - 磁盘空间、权限均已排除
 
-### 一键脚本（拿到 API Key 后）
+### ✅ 绕过方案：Xcode Organizer GUI 上传（已为你打开）
+
+Organizer 的打包实现与命令行不同，能绕过 `Copy failed`。archive 已复制到标准目录并在 Organizer 打开：
+
+1. Xcode → **Window → Organizer**（⌥⌘O），左侧选 **Archives**
+2. 选中最新的 **「云乐坊」** archive（2026-06-03）
+3. 右侧点 **「Distribute App」**
+4. 选 **「App Store Connect」** → Next
+5. 选 **「Upload」** → Next
+6. 签名选 **「Automatically manage signing」** → Next
+7. 确认信息 → **「Upload」**
+8. 等进度条走完，提示 **「Upload Successful」**
+
+> GUI 会用已登录的 Apple ID session + cloud signing 自动处理证书/profile，全程几乎不用做选择。
+
+### 命令行一键脚本（留作 Xcode bug 修复后/CI 用）
+
+[`scripts/ios-testflight.sh`](../../scripts/ios-testflight.sh)：
 
 ```bash
-# 1. 到 https://appstoreconnect.apple.com/access/api 创建 Key（Access 选 App Manager）
-#    下载 .p8 到 ~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8
-# 2. 设置三个变量
-export ASC_KEY_ID=<10位 Key ID>
-export ASC_ISSUER_ID=<UUID Issuer ID>
+export ASC_KEY_ID=<Admin Key ID>
+export ASC_ISSUER_ID=<Issuer ID>
 export ASC_KEY_P8=~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8
-# 3. 一键导出 + 上传（脚本会复用已有 App.xcarchive）
 bash scripts/ios-testflight.sh
 ```
 
-脚本 [`scripts/ios-testflight.sh`](../../scripts/ios-testflight.sh) 会：生成带 API Key 认证的 ExportOptions → 导出 app-store .ipa → 校验是 Distribution 签名 → `xcrun altool` 上传到 TestFlight。
-
-> ⚠️ Access 级别要 **App Manager** 或更高（Developer 级别能 export 但上传可能权限不足）。
+> ⚠️ cloud signing 需 **Admin** 级 API Key（App Manager 会报 `Cloud signing permission error`）。
+> ⚠️ 当前 Xcode 26 下此脚本会撞 `Copy failed`，待 Apple 修复后可用；现阶段用上面的 Organizer GUI。
 
 ## 一、构建 .ipa（本地）
 

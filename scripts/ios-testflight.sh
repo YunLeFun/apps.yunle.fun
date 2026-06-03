@@ -40,7 +40,7 @@ if [ ! -f "$ASC_KEY_P8" ]; then
   exit 1
 fi
 
-echo "==> 生成 ExportOptions.plist（app-store-connect + API Key 认证）"
+echo "==> 生成 ExportOptions.plist（app-store-connect，automatic + cloud signing）"
 mkdir -p "$EXPORT_DIR"
 cat > "$EXPORT_DIR/ExportOptions.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -59,21 +59,19 @@ cat > "$EXPORT_DIR/ExportOptions.plist" <<EOF
 	<string>QT792GAY4C</string>
 	<key>uploadSymbols</key>
 	<true/>
-	<key>authenticationKeyID</key>
-	<string>${ASC_KEY_ID}</string>
-	<key>authenticationKeyIssuerID</key>
-	<string>${ASC_ISSUER_ID}</string>
-	<key>authenticationKeyPath</key>
-	<string>${ASC_KEY_P8}</string>
 </dict>
 </plist>
 EOF
 
-echo "==> 导出 .ipa"
+echo "==> 导出 .ipa（API Key 认证走命令行参数，需 Admin 级 key 做 cloud signing）"
 xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" \
   -exportPath "$EXPORT_DIR" \
-  -exportOptionsPlist "$EXPORT_DIR/ExportOptions.plist"
+  -exportOptionsPlist "$EXPORT_DIR/ExportOptions.plist" \
+  -allowProvisioningUpdates \
+  -authenticationKeyPath "$ASC_KEY_P8" \
+  -authenticationKeyID "$ASC_KEY_ID" \
+  -authenticationKeyIssuerID "$ASC_ISSUER_ID"
 
 IPA="$EXPORT_DIR/App.ipa"
 if [ ! -f "$IPA" ]; then

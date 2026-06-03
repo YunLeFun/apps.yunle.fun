@@ -25,9 +25,18 @@ Delivery UUID: 23541d7f-9f67-4d57-98af-4fb99f0e6abb
 
 **根因**（实测定位，**不是** Xcode bug，也不是代码问题）：
 
-> ExportOptions 里 `stripSwiftSymbols=true` 和/或 `uploadSymbols=true`，在 Xcode 26 的
-> packaging 阶段处理 Swift 符号 / 收集 dSYM 时触发 `Copy failed`。
+> ExportOptions 里 `uploadSymbols=true`（含 `stripSwiftSymbols`），在 Xcode 26 的
+> packaging 阶段收集 dSYM 符号时触发 `Copy failed`。
 > **把这两个改成 `false` 后 export 立刻成功。**
+
+铁证（`IDEDistributionPipeline.log`）：
+
+```
+Running /usr/bin/rsync '-8aPhhE' '…/XcodeDistPipeline.~~~/Symbols' '--link-dest' …
+Step "IDEDistributionCreateIPAStep" failed with error "Copy failed"
+```
+
+失败步骤是 `IDEDistributionCreateIPAStep` 用 **rsync 复制 `Symbols` 目录**（`--link-dest` 硬链接）时失败 —— `Symbols` 目录正是 `uploadSymbols=true` 收集的 dSYM。关掉它就不生成该目录，自然不触发。
 
 排查路径（供未来参考）：
 

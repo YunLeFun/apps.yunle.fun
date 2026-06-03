@@ -30,7 +30,8 @@
     "dev:ios": "cap run ios -l --port=8080",
     "run:ios": "cap run ios",
     "run:ios:build": "nuxt build && cap sync && cap run ios",
-    "build:ios": "cap build ios --xcode-export-method release-testing --xcode-team-id QT792GAY4C"
+    "build:ios": "cap build ios --xcode-export-method app-store-connect --xcode-team-id QT792GAY4C",
+    "build:ios:adhoc": "cap build ios --xcode-export-method release-testing --xcode-team-id QT792GAY4C"
   },
   "dependencies": {
     "@capacitor/app": "7.1.0",

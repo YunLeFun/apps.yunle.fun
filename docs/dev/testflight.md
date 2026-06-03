@@ -6,14 +6,30 @@
 
 - ✅ webapp build + `cap sync` 通过
 - ✅ iOS 26.5 SDK 已安装，`xcodebuild archive` 成功 → 产出 `ios/App/App.xcarchive`
-- ⏳ **export 卡在两个账号侧问题（需在浏览器/Xcode 操作）**：
-  1. `PLA Update available` —— Apple Developer 账号有新的 **Program License Agreement** 待同意。
-     打开 <https://developer.apple.com/account> → 顶部若有黄条提示同意协议，点同意。
-  2. `No signing certificate "iOS Distribution" found` —— 缺 **Apple Distribution** 证书。
-     最简单：Xcode → Settings → Accounts → 选中 Team → Manage Certificates → ➕ → **Apple Distribution**。
-     （或在 <https://developer.apple.com/account/resources/certificates/list> 手动创建并下载双击安装。）
-- ⏳ 解决上面两步后重跑 `pnpm build:ios` 即可产出 `ios/App/output/App.ipa`
-- ⏳ 然后按「二、上传到 App Store Connect」走（需 ASC API Key）
+- ✅ **PLA 协议已同意**（否则 export 不会成功）
+- ✅ **Apple Distribution 证书已可用**：实测签名为 `Apple Distribution: Lan Yang (QT792GAY4C)`
+  - 注：`security find-identity -v -p codesigning` 可能列不出它，因为 Xcode automatic signing 把它放在单独 keychain，但导出时实际可用。
+- ⏳ **最后一步：app-store-connect 导出 + 上传 —— 需要 ASC API Key**
+  - 直接跑 automatic signing 的 app-store 导出会报
+    `No provider associated with App Store Connect user`（Xcode 账号 session 无法认证到 ASC 拉 App Store provisioning profile）
+  - **解法**：用 App Store Connect API Key 认证导出 + 上传，一步到位。
+
+### 一键脚本（拿到 API Key 后）
+
+```bash
+# 1. 到 https://appstoreconnect.apple.com/access/api 创建 Key（Access 选 App Manager）
+#    下载 .p8 到 ~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8
+# 2. 设置三个变量
+export ASC_KEY_ID=<10位 Key ID>
+export ASC_ISSUER_ID=<UUID Issuer ID>
+export ASC_KEY_P8=~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8
+# 3. 一键导出 + 上传（脚本会复用已有 App.xcarchive）
+bash scripts/ios-testflight.sh
+```
+
+脚本 [`scripts/ios-testflight.sh`](../../scripts/ios-testflight.sh) 会：生成带 API Key 认证的 ExportOptions → 导出 app-store .ipa → 校验是 Distribution 签名 → `xcrun altool` 上传到 TestFlight。
+
+> ⚠️ Access 级别要 **App Manager** 或更高（Developer 级别能 export 但上传可能权限不足）。
 
 ## 一、构建 .ipa（本地）
 

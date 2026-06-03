@@ -2,49 +2,70 @@
 
 > 本文记录从代码到 TestFlight 内测的完整链路，含本机环境踩坑。
 
-## 当前进度（2026-06-03）
+## ✅ 首次上传成功记录（2026-06-03）
 
-所有签名 / 账号 / 证书障碍**已全部清除**，只剩最后一步打包上传：
+云乐坊 v1.0 已通过命令行成功上传 TestFlight：
 
-- ✅ webapp build + `cap sync` 通过
-- ✅ iOS 26.5 SDK 已安装，`xcodebuild archive` 成功 → 产出 `ios/App/App.xcarchive`
-- ✅ **PLA 协议已同意**
-- ✅ **Apple Distribution 证书可用**（cloud-managed，实测签名 `Apple Distribution: Lan Yang (QT792GAY4C)`）
-- ✅ **App Store provisioning profile 存在**：`iOS Team Store Provisioning Profile: fun.yunle.apps`（UUID `c0add50e-…`）
-- ✅ **Admin 级 ASC API Key 认证通过**：能连 ASC 拉到 app（6759859441 / fun.yunle.apps / 云乐坊 / v1.0），所有 framework 证书评估 `errors: (null)`
-- ⛔ **命令行 `xcodebuild -exportArchive` 卡在 `IDEDistributionPackagingStep: "Copy failed"`**
-  - 这是 **Xcode 26 命令行导出的已知 bug**，发生在签名全部通过之后的打包步骤，与代码 / 证书 / 账号无关
-  - 对比：ad-hoc（`release-testing` method）导出走不同打包路径，**不触发**此 bug；但 ad-hoc 包不能上 TestFlight
-  - 磁盘空间、权限均已排除
+```
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: 23541d7f-9f67-4d57-98af-4fb99f0e6abb
+```
 
-### ✅ 绕过方案：Xcode Organizer GUI 上传（已为你打开）
+完整通路（每一步实测）：
 
-Organizer 的打包实现与命令行不同，能绕过 `Copy failed`。archive 已复制到标准目录并在 Organizer 打开：
+- ✅ webapp build + `cap sync`
+- ✅ iOS 26.5 SDK，`xcodebuild archive` → `ios/App/App.xcarchive`
+- ✅ PLA 协议同意
+- ✅ Apple Distribution 证书（cloud-managed）：签名 `Apple Distribution: Lan Yang (QT792GAY4C)`
+- ✅ App Store profile：`iOS Team Store Provisioning Profile: fun.yunle.apps`
+- ✅ Admin 级 ASC API Key 认证
+- ✅ `xcrun altool --upload-app` 上传成功
 
-1. Xcode → **Window → Organizer**（⌥⌘O），左侧选 **Archives**
-2. 选中最新的 **「云乐坊」** archive（2026-06-03）
-3. 右侧点 **「Distribute App」**
-4. 选 **「App Store Connect」** → Next
-5. 选 **「Upload」** → Next
-6. 签名选 **「Automatically manage signing」** → Next
-7. 确认信息 → **「Upload」**
-8. 等进度条走完，提示 **「Upload Successful」**
+### ⚠️ 关键踩坑：`IDEDistributionPackagingStep: "Copy failed"`
 
-> GUI 会用已登录的 Apple ID session + cloud signing 自动处理证书/profile，全程几乎不用做选择。
+**根因**（实测定位，**不是** Xcode bug，也不是代码问题）：
 
-### 命令行一键脚本（留作 Xcode bug 修复后/CI 用）
+> ExportOptions 里 `stripSwiftSymbols=true` 和/或 `uploadSymbols=true`，在 Xcode 26 的
+> packaging 阶段处理 Swift 符号 / 收集 dSYM 时触发 `Copy failed`。
+> **把这两个改成 `false` 后 export 立刻成功。**
 
-[`scripts/ios-testflight.sh`](../../scripts/ios-testflight.sh)：
+排查路径（供未来参考）：
+
+- `ditto` 复制整个 `App.app` 成功 → 排除 app bundle 文件问题
+- 10 个 framework + 11 个 dSYM 完整、无坏符号链接、无残留 Headers/Modules → 排除结构问题
+- 磁盘空间充足、PLA/证书/profile/API Key 全部就绪 → 排除账号问题
+- 唯一变量是符号处理选项 → 关掉后通过 ✅
+
+**代价**：dSYM 不随包上传，App Store Connect / RUM 的崩溃日志不会自动符号化。
+影响很小，且可后续单独补传：
 
 ```bash
+# 可选：单独上传 dSYM 做崩溃符号化
+xcrun altool --upload-symbols --type ios \
+  --file ios/App/App.xcarchive/dSYMs \
+  --apiKey <KEY_ID> --apiIssuer <ISSUER_ID>
+```
+
+### 命令行一键脚本
+
+[`scripts/ios-testflight.sh`](../../scripts/ios-testflight.sh) 已固化上述修复（symbols=false），后续重新发版直接：
+
+```bash
+# 0. 先出 archive（首次或代码变更后）
+LANG=en_US.UTF-8 pnpm build:ios   # 若 Copy failed 见上文，脚本里已 symbols=false
+# 或仅复用已有 archive，跳到下面
+
 export ASC_KEY_ID=<Admin Key ID>
 export ASC_ISSUER_ID=<Issuer ID>
 export ASC_KEY_P8=~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8
-bash scripts/ios-testflight.sh
+bash scripts/ios-testflight.sh   # 导出 .ipa → 校验签名 → altool 上传
 ```
 
 > ⚠️ cloud signing 需 **Admin** 级 API Key（App Manager 会报 `Cloud signing permission error`）。
-> ⚠️ 当前 Xcode 26 下此脚本会撞 `Copy failed`，待 Apple 修复后可用；现阶段用上面的 Organizer GUI。
+
+> 注：`pnpm build:ios`（cap build）内部仍可能用默认 symbols=true 而 Copy failed。
+> 当前 archive 已存在，推荐直接跑 `scripts/ios-testflight.sh` 复用 archive 导出上传。
+> 若要让 `cap build` 也不踩坑，需在 Xcode scheme 或 cap 的 ExportOptions 模板里关 symbols。
 
 ## 一、构建 .ipa（本地）
 

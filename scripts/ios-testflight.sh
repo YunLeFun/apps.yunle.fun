@@ -53,12 +53,18 @@ cat > "$EXPORT_DIR/ExportOptions.plist" <<EOF
 	<string>app-store-connect</string>
 	<key>signingStyle</key>
 	<string>automatic</string>
+	<!--
+	  关键：Xcode 26 下 stripSwiftSymbols/uploadSymbols=true 会在 packaging
+	  阶段触发 "IDEDistributionPackagingStep: Copy failed"。
+	  关掉后 export 正常。代价：dSYM 不随包上传，崩溃日志符号化缺失，
+	  可后续用 `xcrun altool --upload-symbols` 或 RUM 单独补传，不影响上架。
+	-->
 	<key>stripSwiftSymbols</key>
-	<true/>
+	<false/>
+	<key>uploadSymbols</key>
+	<false/>
 	<key>teamID</key>
 	<string>QT792GAY4C</string>
-	<key>uploadSymbols</key>
-	<true/>
 </dict>
 </plist>
 EOF

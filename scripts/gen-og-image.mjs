@@ -1,8 +1,8 @@
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 // 生成社交分享封面 public/og-image.png (1200×630)
 // 用法：node scripts/gen-og-image.mjs
 import { chromium } from 'playwright'
-import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const out = resolve(__dirname, '../public/og-image.png')
@@ -15,9 +15,15 @@ const logo = `<svg viewBox="0 0 128 128" fill="#fff" xmlns="http://www.w3.org/20
 </svg>`
 
 const apps = [
-  ['#007AFF', '🏠'], ['#34C759', '🔍'], ['#FF9500', '🏗️'],
-  ['#5856D6', '☁️'], ['#FF3B30', '📱'], ['#AF52DE', '🎮'],
-  ['#00C7BE', '📚'], ['#FF2D55', '🎨'], ['#FFD60A', '⚡'],
+  ['#007AFF', '🏠'],
+  ['#34C759', '🔍'],
+  ['#FF9500', '🏗️'],
+  ['#5856D6', '☁️'],
+  ['#FF3B30', '📱'],
+  ['#AF52DE', '🎮'],
+  ['#00C7BE', '📚'],
+  ['#FF2D55', '🎨'],
+  ['#FFD60A', '⚡'],
 ]
 
 const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>

@@ -2,13 +2,47 @@
 
 > 本文记录从代码到 TestFlight 内测的完整链路，含本机环境踩坑。
 
-## ✅ 首次上传成功记录（2026-06-03）
+## ✅ 上传成功记录
 
-云乐坊 v1.0 已通过命令行成功上传 TestFlight：
+| 时间       | 版本      | build  | Delivery UUID                          |
+| ---------- | --------- | ------ | -------------------------------------- |
+| 2026-06-03 | 1.0       | 1      | 23541d7f-…（首次打通流程，后改版本号） |
+| 2026-06-04 | **0.1.0** | **67** | 5a473656-534d-45ad-9ff5-7cd957be673e   |
+
+> 当前以 **0.1.0 (build 67)** 为准（pre-release 语义）。1.0 那个 build 可在
+> ASC TestFlight 里手动 expire/删除（非必须，TestFlight 允许多版本号共存）。
+
+## 版本号管理（自动对齐）
+
+iOS 版本号与 `package.json` 自动对齐，**只需改 `package.json` 一处**：
+
+- `MARKETING_VERSION` (CFBundleShortVersionString) ← `package.json` 的 `version`
+- `CURRENT_PROJECT_VERSION` (CFBundleVersion / build 号) ← `git rev-list --count HEAD`（单调递增）
+
+```bash
+pnpm sync:version   # 手动同步一次
+pnpm build:ios      # prebuild:ios 钩子会自动先同步
+```
+
+实现：[`scripts/sync-ios-version.sh`](../../scripts/ios-testflight.sh) 用 `sed` 改 `project.pbxproj`
+的 build setting，`Info.plist` 保持 `$(MARKETING_VERSION)`/`$(CURRENT_PROJECT_VERSION)` 引用（单一数据源）。
+
+发新版只需：
+
+```bash
+pnpm release        # bumpp 改 package.json version + tag
+# 或手动改 package.json version，然后：
+pnpm build:ios      # 自动同步版本号 + 出 archive
+bash scripts/ios-testflight.sh   # 导出 .ipa + 上传
+```
+
+---
+
+完整通路（每一步实测）：
 
 ```
 UPLOAD SUCCEEDED with no errors
-Delivery UUID: 23541d7f-9f67-4d57-98af-4fb99f0e6abb
+Delivery UUID: 5a473656-534d-45ad-9ff5-7cd957be673e
 ```
 
 完整通路（每一步实测）：

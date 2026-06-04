@@ -16,7 +16,9 @@
 #   - Info.plist 保持 CFBundleShortVersionString=$(MARKETING_VERSION)、
 #     CFBundleVersion=$(CURRENT_PROJECT_VERSION)，build setting 是唯一数据源
 #
-# 已接入 package.json 的 `prebuild:ios`，跑 `pnpm build:ios` 时自动执行。
+# 已串联进 package.json 的 `build:ios`（`pnpm sync:version && cap build ...`），
+# 跑 `pnpm build:ios` 时自动先执行。
+# （不用 prebuild 钩子，因为 pnpm 默认 enable-pre-post-scripts=false 不触发 pre/post）
 
 set -euo pipefail
 

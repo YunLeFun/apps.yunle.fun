@@ -21,7 +21,7 @@ iOS 版本号与 `package.json` 自动对齐，**只需改 `package.json` 一处
 
 ```bash
 pnpm sync:version   # 手动同步一次
-pnpm build:ios      # prebuild:ios 钩子会自动先同步
+pnpm build:ios      # build:ios 已串联 sync:version，自动先同步版本号
 ```
 
 实现：[`scripts/sync-ios-version.sh`](../../scripts/ios-testflight.sh) 用 `sed` 改 `project.pbxproj`

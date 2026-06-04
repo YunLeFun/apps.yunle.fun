@@ -11,7 +11,38 @@ packages:
   - docs
 
 overrides:
+  # 安全漏洞修复：钉死传递依赖到已修复版本（2026-06-04，详见 docs/dev/dependency-security.md）
+  # 键按字母升序排列（eslint yaml/sort-keys 要求）
+  '@babel/plugin-transform-modules-systemjs': ^7.29.7 # 任意代码生成（workbox > babel）
+  '@protobufjs/utf8': ^1.1.1 # overlong UTF-8 decoding（飞书 SDK）
+  '@xmldom/xmldom': ^0.8.13 # XML 注入 / DoS（@capacitor/cli > plist）
+  axios: ^1.17.0 # SSRF / 原型污染 / MITM（@yunlefun/deploy、tencentcloud-sdk）
+  basic-ftp: ^5.3.1 # CRLF 注入 / DoS（@nuxtjs/ionic > @ionic/cli）
+  brace-expansion@<1.1.13: ^1.1.13 # DoS（minimatch v1 链）
+  brace-expansion@>=2.0.0 <2.0.3: ^2.0.3 # DoS（minimatch v2 链）
+  brace-expansion@>=5.0.0 <5.0.6: ^5.0.6 # DoS（typescript-eslint minimatch 链）
+  defu: ^6.1.7 # 原型污染（@nuxt/devtools > @nuxt/kit）
+  fast-uri: ^3.1.2 # 路径穿越 / host 混淆（unocss webpack > ajv）
+  flatted: ^3.4.2 # 原型污染 / DoS（eslint flat-cache）
+  follow-redirects: ^1.16.0 # 跨域 header 泄露（axios）
+  h3: ^1.15.11 # SSE 注入 / 路径穿越（@nuxt/eslint > config-inspector）
+  ip-address: ^10.1.1 # Address6 XSS（@nuxtjs/ionic > socks）
+  js-cookie: ^3.0.8 # 原型劫持（@vue/test-utils > js-beautify）
+  lodash: ^4.18.1 # 代码注入 / 原型污染（@cloudbase/js-sdk，运行时）
+  picomatch@<2.3.2: ^2.3.2 # ReDoS（workbox 链）
+  picomatch@>=4.0.0 <4.0.4: ^4.0.4 # ReDoS（typescript-eslint 链）
+  postcss: ^8.5.10 # CSS stringify XSS（vite）
+  protobufjs: ^7.6.2 # critical 任意代码执行（@yunlefun/deploy > 飞书 SDK）
+  qs: ^6.15.2 # DoS（@nuxtjs/ionic > superagent）
   semver@<7.0.0: '>=7.7.4'
+  serialize-javascript: ^7.0.5 # RCE（webpack 链，本项目用 vite 未触发）
+  shelljs: ^0.8.5 # 提权（cordova-plugin-wechat）
+  simple-git: ^3.36.0 # RCE（@nuxt/devtools）
+  tar: ^7.5.16 # 路径穿越 / 符号链接（@capacitor/cli、node-pre-gyp）
+  tmp: ^0.2.7 # 路径穿越（@nuxtjs/ionic > inquirer）
+  unhead: ^2.1.13 # useHeadSafe XSS 绕过（@nuxtjs/ionic > @unhead/vue）
+  ws: ^8.21.0 # 未初始化内存泄露（@cloudbase/js-sdk，运行时）
+  yaml: ^2.8.3 # 栈溢出（@antfu/eslint-config > eslint-plugin-pnpm）
 ignoredBuiltDependencies:
   - esbuild
 

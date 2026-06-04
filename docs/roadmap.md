@@ -126,19 +126,15 @@
   - [.github/workflows/ci.yml](https://github.com/YunYouJun/apps.yunle.fun/blob/main/.github/workflows/ci.yml) 增加 `test` job 跑 `pnpm test:unit`
   - 同时升级 actions 到 v4 + pnpm/action-setup v4 + 使用 `--frozen-lockfile`
 
-### P1 待办
+### P1 已完成
 
-- [ ] **bump 版本号**（**发版最后一步**）
-  - [package.json](https://github.com/YunYouJun/apps.yunle.fun/blob/main/package.json) `version: 0.0.1`
-  - 用 `pnpm release`（基于 bumpp）打 `1.0.0`
-  - Xcode `MARKETING_VERSION` 同步
-  - **Dry-run 验证已完成（2026-05-22）**：
-    - ✅ `pnpm build` 通过（2.55 MB / 638 KB gzip）
-    - ✅ `pnpm typecheck` 通过
-    - ✅ `pnpm sync` 通过（`LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` 解决 Ruby 4 + CocoaPods 编码 bug，详见 [`docs/dev/app-store-onboarding.md#本机环境踩坑`](./dev/app-store-onboarding.md#本机环境踩坑)）
-    - ✅ `capacitor.config.json` 重写为 `fun.yunle.apps`，Xcode Bundle ID 未漂移
-    - ⚠️ `npx deploy` 需 `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` 环境变量（dry-run 时未设，行为正确，避免误发）
-    - ⚠️ 6 个 pre-existing useWorkshop 测试失败（mock 跟 static+cloud 合并行为不匹配，与本次改动无关，不阻塞）
+- [x] **bump 版本号 + iOS TestFlight 上架**
+  - `package.json` version → `0.1.0`（pre-release 语义）
+  - iOS `MARKETING_VERSION=0.1.0` / `CURRENT_PROJECT_VERSION=67`，与 package.json 自动对齐
+    （[`scripts/sync-ios-version.sh`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/scripts/sync-ios-version.sh) + `prebuild:ios` 钩子）
+  - git tag `v0.1.0`
+  - ✅ **已成功上传 TestFlight**（build 67，Delivery UUID 5a473656-…）
+  - 踩坑与完整流程见 [`docs/dev/testflight.md`](./dev/testflight.md)（关键：`uploadSymbols=false` 绕过 Xcode 26 的 Copy failed）
 
 ### P2 已完成
 
@@ -148,9 +144,12 @@
   - [nuxt.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts) `app.head` 补 Open Graph + Twitter Card + theme-color
   - [public/robots.txt](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/robots.txt) 加 sitemap 引用 + Disallow 私有路由
   - [public/sitemap.xml](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/sitemap.xml) 新增基础站点地图（三大 Tab + 静态页）
-  - **TODO**：放一张 1200×630 的 `public/og-image.png` 分享封面（设计交付物）
+  - ✅ `public/og-image.png` 已生成（1200×630，品牌渐变 + logo + iOS app 网格），脚本 [`scripts/gen-og-image.mjs`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/scripts/gen-og-image.mjs)（playwright 渲染，可重新生成）
 - [x] **README 完善**
   - 加徽章、架构图、命令表、目录结构说明、贡献流程
+- [x] **iOS Splash Light/Dark 两套**
+  - 新增 `splash-dark.png`（深色底 + 品牌蓝 logo，rsvg-convert 生成）
+  - `Splash.imageset/Contents.json` 配 `luminosity: dark` 自动切换，暗色模式不再全白刺眼
 
 ### P2 待办
 
@@ -159,12 +158,8 @@
   - App Store Connect 接受外链，无需在 App 内单独生成
   - **完整核对清单见 [`docs/dev/privacy-checklist.md`](./dev/privacy-checklist.md)**
   - 已用 `open` 帮用户在浏览器打开两个页面，需要用户人工核对清单逐项打勾
-- [ ] **iOS Splash 多套素材**
-  - 当前 `ios/App/App/Assets.xcassets/Splash.imageset/` 仅有单张 2732×2732，建议 Light/Dark 分别一套
-- [ ] **ICP 备案 / App Store 中国区备案号**
+- [ ] **ICP 备案 / App Store 中国区备案号**（**纯外部，需用户办理**）
   - `yunle.fun` 域名在国内提供服务通常需要工信部备案；App Store 中国区 2023-09 起强制要求备案号
-- [ ] **设计交付：`public/og-image.png`**
-  - 1200×630px，社交分享/微信预览用
 
 ---
 

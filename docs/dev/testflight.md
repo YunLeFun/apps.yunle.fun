@@ -40,13 +40,6 @@ bash scripts/ios-testflight.sh   # 导出 .ipa + 上传
 
 完整通路（每一步实测）：
 
-```
-UPLOAD SUCCEEDED with no errors
-Delivery UUID: 5a473656-534d-45ad-9ff5-7cd957be673e
-```
-
-完整通路（每一步实测）：
-
 - ✅ webapp build + `cap sync`
 - ✅ iOS 26.5 SDK，`xcodebuild archive` → `ios/App/App.xcarchive`
 - ✅ PLA 协议同意

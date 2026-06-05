@@ -1,6 +1,6 @@
 # 依赖安全（pnpm audit）
 
-记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-06-04**。
+记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-06-05**。
 
 ## 现状
 
@@ -47,16 +47,17 @@ pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build
 
 ## 剩余风险（3 个 moderate，已接受）
 
-剩余 3 项全部位于 **`@yunlefun/deploy`（部署工具，devDependency）** 的依赖链里，
-**只在 `pnpm deploy` / `pnpm release` 时、在维护者本机执行**，不进入 App 运行时、
-不进入构建产物、也不在 CI 测试路径上。无法在本仓库通过 override 安全修复，需在
-`@yunlefun/deploy` 上游升级，故暂时接受：
+剩余 3 项都在 **构建 / 文档 / 部署工具链**里，**不进入 App 运行时、不进入构建产物、
+也不在 App 的测试路径上**，实际可利用性接近于零，暂时接受：
 
-| 包                 | 链路                                                  | 为何暂不修                                                                                                                   | 实际风险                                                                                  |
-| ------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `vite <=6.4.1`     | `@yunlefun/deploy > vite-node@2 > vite@5.4.21`        | `vite-node@2` 仅支持 `vite@^5`，补丁在 `vite>=6.4.2`（跨大版本）。`vite@5.4.21` 已在本仓库 `trustPolicyExclude` 中显式接受。 | 漏洞需运行 vite dev server 才可触发；此处 vite-node 仅用于加载配置文件，不起 dev server。 |
-| `esbuild <=0.24.2` | `@yunlefun/deploy > vite-node@2 > vite@5 > esbuild`   | 被上面的 vite@5 锁定（vite@5 依赖 `esbuild@^0.21`）。                                                                        | 同上，仅影响 esbuild dev server，部署链不暴露。                                           |
-| `uuid <11.1.1`     | `@yunlefun/deploy > tencentcloud-sdk-nodejs > uuid@9` | 补丁仅在 `uuid@11`（ESM-only），会破坏 CJS 的腾讯云 SDK。                                                                    | 仅当向 v3/v5/v6 传入 `buf` 时触发；SDK 生成随机 UUID 不传 `buf`。                         |
+| 包                 | 链路                                                  | 为何暂不修                                                                                                       | 实际风险                                                                                |
+| ------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `vite <=6.4.1`     | `docs > vitepress@1.6.4 > vite@5.4.21`                | VitePress 1.x（最新稳定 1.6.4）锁死 `vite@5`，补丁在 `vite>=6.4.2`（跨大版本），需升到 VitePress 2（仍 alpha）。 | 漏洞需运行 vite dev server 才可触发；仅文档站本地/CI 构建用，不对外暴露。               |
+| `esbuild <=0.24.2` | `docs > vitepress > vite@5 > esbuild`                 | 被上面的 vite@5 锁定（vite@5 依赖 `esbuild@^0.21`）。                                                            | 同上，仅 esbuild dev server，文档构建链不暴露。                                         |
+| `uuid <11.1.1`     | `@yunlefun/deploy > tencentcloud-sdk-nodejs > uuid@9` | 补丁仅在 `uuid@11`（ESM-only），会破坏 CJS 的腾讯云 SDK；最新版腾讯云 SDK 仍用 `uuid@9`。                        | 仅当向 v3/v5/v6 传入 `buf` 时触发；SDK 生成随机 UUID 不传 `buf`，部署时维护者本机执行。 |
 
-**彻底修复方式**：在 `@yunlefun/deploy` 包内将 `vite-node` 升到 `^3`（带 vite 6/7），
-并等 `tencentcloud-sdk-nodejs` 升级 `uuid`。届时删除本文「剩余风险」即可。
+> 历史：`vite`/`esbuild` 早先还经由 `@yunlefun/deploy > vite-node` 引入；`@yunlefun/deploy@0.0.12`
+> 已移除未使用的 `vite-node`（并把 `cilicili` 内联、lark 升级），该来源已消除，现仅剩 VitePress 这条。
+
+**后续彻底修复**：文档站升级到 VitePress 2（带 vite 6/7）后可消除 `vite`/`esbuild`；
+`uuid` 待 `tencentcloud-sdk-nodejs` 上游升级。届时更新本表即可。

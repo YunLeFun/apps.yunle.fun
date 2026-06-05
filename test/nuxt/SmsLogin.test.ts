@@ -2,6 +2,18 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 
+// @cloudbase/js-sdk 的 ESM 产物（@cloudbase/app/dist/esm/index.node.js）使用无扩展名子路径
+// import，在 Nuxt 测试环境下会被外部化并触发 Node 原生 ESM 解析失败。组件测试已 mock
+// useSmsAuth，运行时并不真正用到 SDK，这里 mock 掉模块以打断该 import 链。
+vi.mock('@cloudbase/js-sdk', () => ({
+  default: {
+    init: () => ({
+      auth: () => ({}),
+      database: () => ({}),
+    }),
+  },
+}))
+
 // 创建可控的 mock 状态
 function createMockComposable() {
   const phoneNumber = ref('')

@@ -1,4 +1,61 @@
+import type { YlfAppInfo } from '~~/packages/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+// --- Mock ~/constants/apps ---
+// 用可控的小集合替换 ALL_APPS，便于精确断言「静态优先 + CloudBase 后台合并」分页逻辑。
+// mockApps 是稳定引用，setMockApps 原地替换内容，import 绑定始终指向同一数组。
+const { mockApps, mockCategories } = vi.hoisted(() => ({
+  mockApps: [] as YlfAppInfo[],
+  mockCategories: [
+    { id: 'all', name: '全部', icon: '📱' },
+    { id: 'interesting', name: '整活', icon: '🤣' },
+    { id: 'tools', name: '工具', icon: '🔧' },
+    { id: 'design', name: '设计', icon: '🎨' },
+  ],
+}))
+
+vi.mock('~/constants/apps', () => ({
+  ALL_APPS: mockApps,
+  APP_CATEGORIES: mockCategories,
+}))
+
+function setMockApps(apps: YlfAppInfo[]) {
+  mockApps.length = 0
+  mockApps.push(...apps)
+}
+
+/** 构造一个静态应用（YlfAppInfo） */
+function makeApp(slug: string, category: string): YlfAppInfo {
+  return {
+    id: slug,
+    slug,
+    name: `App ${slug}`,
+    description: `desc ${slug}`,
+    emoji: '📱',
+    color: '#000000',
+    url: `https://example.com/${slug}`,
+    category,
+  }
+}
+
+/** 构造一条 CloudBase 原始记录（AppRecord 形态） */
+function makeDbApp(slug: string, updatedAt: number) {
+  return {
+    _id: slug,
+    slug,
+    name: `Cloud ${slug}`,
+    description: '',
+    category: '整活',
+    isPublic: true,
+    status: 'approved',
+    updatedAt,
+  }
+}
+
+/** 等待所有微任务结算（后台 fetchDbPage 的 get + 合并完成） */
+function flushPromises() {
+  return new Promise(resolve => setTimeout(resolve, 0))
+}
 
 // --- Mock helpers ---
 
@@ -35,6 +92,13 @@ describe('useWorkshop', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockDbSetup = createMockDb()
+    // 默认静态集合：覆盖各分类，满足「回退到静态数据」相关断言
+    setMockApps([
+      makeApp('joke-1', '整活'),
+      makeApp('joke-2', '整活'),
+      makeApp('tool-1', '工具'),
+      makeApp('design-1', '设计'),
+    ])
   })
 
   async function loadWorkshop() {
@@ -42,29 +106,35 @@ describe('useWorkshop', () => {
     return useWorkshop()
   }
 
-  // NOTE: 下方若干 `it.skip` 测试针对的是 useWorkshop 的【旧实现】（纯 CloudBase 分页，cloud limit 20，
-  // 首屏直接 = cloud 数据）。当前实现已重构为「静态 ALL_APPS 优先 + CloudBase 后台去重合并」分页
-  // （cloud limit 50；首屏来自 static，cloud 异步补充，需 loadMore 才显示）。
-  // 这些测试的契约已过时、与新实现根本矛盾，需 mock ALL_APPS + 重设异步时序断言后重写。
-  // 临时 skip 以保持 CI 绿；重写跟踪见「重写 useWorkshop 单元测试」任务。
-
   describe('queryApps', () => {
-    it.skip('首次加载从 CloudBase 查询公开应用', async () => {
-      const cloudApps = [
-        { _id: 'c1', name: 'Cloud App 1', slug: 'cloud-1', description: 'Desc 1', isPublic: true, category: '工具', updatedAt: 1000 },
-        { _id: 'c2', name: 'Cloud App 2', slug: 'cloud-2', description: 'Desc 2', isPublic: true, category: '工具', updatedAt: 900 },
-      ]
+    it('首屏来自静态数据，CloudBase 后台以 limit 50 去重合并', async () => {
+      // 静态 3 条，cloud 返回 2 条不同 slug
+      setMockApps([
+        makeApp('s1', '整活'),
+        makeApp('s2', '整活'),
+        makeApp('s3', '整活'),
+      ])
+      const cloudApps = [makeDbApp('cloud-1', 1000), makeDbApp('cloud-2', 900)]
       mockDbSetup.mockCollection.get.mockResolvedValue({ data: cloudApps })
 
-      const { queryApps, apps, initialized } = await loadWorkshop()
+      const { queryApps, apps, loadMore, initialized } = await loadWorkshop()
       await queryApps(true)
 
+      // 首屏：仅静态数据，cloud 尚未进入展示
+      expect(apps.value.map(a => a.slug)).toEqual(['s1', 's2', 's3'])
+      expect(initialized.value).toBe(true)
+
+      // cloud 查询契约：where / collection / limit=50（不是旧实现的 20）
       expect(mockDbSetup.db.collection).toHaveBeenCalledWith('apps')
       expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ isPublic: true, status: 'approved' })
-      expect(apps.value).toHaveLength(2)
-      expect(apps.value[0].id).toBe('c1')
-      expect(apps.value[0].name).toBe('Cloud App 1')
-      expect(initialized.value).toBe(true)
+      expect(mockDbSetup.mockCollection.limit).toHaveBeenCalledWith(50)
+
+      // 等后台合并完成，loadMore 才会展示 cloud 数据
+      await flushPromises()
+      loadMore()
+      await flushPromises()
+
+      expect(apps.value.map(a => a.slug)).toEqual(['s1', 's2', 's3', 'cloud-1', 'cloud-2'])
     })
 
     it('cloudBase 无数据时回退到静态 ALL_APPS', async () => {
@@ -107,72 +177,49 @@ describe('useWorkshop', () => {
       )
     })
 
-    it.skip('分页查询带正确的 skip 和 limit', async () => {
-      const page1 = Array.from({ length: 20 }, (_, i) => ({
-        _id: `p1-${i}`,
-        name: `App ${i}`,
-        slug: `app-${i}`,
-        description: '',
-        isPublic: true,
-        updatedAt: 1000 - i,
-      }))
+    it('cloudBase 分页查询使用 skip=0 与 limit=50', async () => {
+      // 静态置空，专注 cloud 查询契约
+      setMockApps([])
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
 
-      mockDbSetup.mockCollection.get.mockResolvedValue({ data: page1 })
-
-      const { queryApps, apps, hasMore } = await loadWorkshop()
+      const { queryApps } = await loadWorkshop()
       await queryApps(true)
 
+      expect(mockDbSetup.mockCollection.skip).toHaveBeenCalledWith(0)
+      expect(mockDbSetup.mockCollection.limit).toHaveBeenCalledWith(50)
+    })
+
+    it('loadMore 从候选列表切出下一页并追加', async () => {
+      // 静态 25 条 → 首屏展示 PAGE_SIZE(20)，loadMore 再展示剩余 5 条
+      setMockApps(Array.from({ length: 25 }, (_, i) => makeApp(`s${i}`, '整活')))
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
+
+      const { queryApps, apps, hasMore, loadMore } = await loadWorkshop()
+      await queryApps(true)
       expect(apps.value).toHaveLength(20)
       expect(hasMore.value).toBe(true)
-      expect(mockDbSetup.mockCollection.skip).toHaveBeenCalledWith(0)
-      expect(mockDbSetup.mockCollection.limit).toHaveBeenCalledWith(20)
-    })
 
-    it.skip('加载更多时追加数据', async () => {
-      const page1 = Array.from({ length: 20 }, (_, i) => ({
-        _id: `p1-${i}`,
-        name: `App ${i}`,
-        slug: `app-${i}`,
-        description: '',
-        isPublic: true,
-        updatedAt: 1000,
-      }))
-      const page2 = Array.from({ length: 5 }, (_, i) => ({
-        _id: `p2-${i}`,
-        name: `App P2 ${i}`,
-        slug: `app-p2-${i}`,
-        description: '',
-        isPublic: true,
-        updatedAt: 900,
-      }))
+      await flushPromises() // cloud 无数据，dbFetched=true
+      loadMore()
+      await flushPromises()
 
-      mockDbSetup.mockCollection.get
-        .mockResolvedValueOnce({ data: page1 })
-        .mockResolvedValueOnce({ data: page2 })
-
-      const { queryApps, apps, hasMore } = await loadWorkshop()
-      await queryApps(true) // 第一页
-      expect(apps.value).toHaveLength(20)
-
-      await queryApps(false) // 第二页
       expect(apps.value).toHaveLength(25)
-      expect(hasMore.value).toBe(false) // 不足 20 条，无更多
+      expect(hasMore.value).toBe(false)
     })
 
-    it.skip('reset=true 时清空旧数据', async () => {
-      mockDbSetup.mockCollection.get.mockResolvedValue({
-        data: [{ _id: 'new', name: 'New', slug: 'new', description: '', isPublic: true, updatedAt: 1 }],
-      })
+    it('reset=true 时清空旧数据并以静态数据重新填充', async () => {
+      setMockApps([makeApp('s1', '整活'), makeApp('s2', '整活')])
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
 
       const { queryApps, apps } = await loadWorkshop()
 
       // 模拟已有旧数据
-      apps.value = [{ id: 'old', name: 'Old' } as any]
+      apps.value = [{ id: 'old', slug: 'old', name: 'Old' } as any]
 
       await queryApps(true)
 
-      expect(apps.value).toHaveLength(1)
-      expect(apps.value[0].id).toBe('new')
+      expect(apps.value.map(a => a.slug)).toEqual(['s1', 's2'])
+      expect(apps.value.find(a => a.slug === 'old')).toBeUndefined()
     })
   })
 
@@ -192,40 +239,56 @@ describe('useWorkshop', () => {
   })
 
   describe('loadMore', () => {
-    it.skip('有更多数据时触发查询', async () => {
-      const page1 = Array.from({ length: 20 }, (_, i) => ({
-        _id: `${i}`,
-        name: `App ${i}`,
-        slug: `a-${i}`,
-        description: '',
-        isPublic: true,
-        updatedAt: 1,
-      }))
+    it('候选耗尽且 CloudBase 仍有数据时触发下一页 DB 查询', async () => {
+      // 纯 CloudBase 分页场景：静态置空
+      setMockApps([])
+      // 首页满页（=DB_PAGE_SIZE 50）→ dbFetched 保持 false，表示仍有下一页
+      const dbPage1 = Array.from({ length: 50 }, (_, i) => makeDbApp(`a${i}`, 1000 - i))
+      const dbPage2 = Array.from({ length: 5 }, (_, i) => makeDbApp(`b${i}`, 500 - i))
       mockDbSetup.mockCollection.get
-        .mockResolvedValueOnce({ data: page1 })
-        .mockResolvedValueOnce({ data: [] })
+        .mockResolvedValueOnce({ data: dbPage1 })
+        .mockResolvedValueOnce({ data: dbPage2 })
 
-      const { queryApps, loadMore } = await loadWorkshop()
+      const { queryApps, loadMore, hasMore, apps } = await loadWorkshop()
       await queryApps(true)
-      await loadMore()
+      await flushPromises()
+      expect(mockDbSetup.mockCollection.get).toHaveBeenCalledTimes(1)
 
-      // loadMore 调用了第二次 get
+      // 连续 loadMore 切片展示候选；剩余不足一页且 cloud 未拉完时触发第二次 DB 查询
+      while (hasMore.value && mockDbSetup.mockCollection.get.mock.calls.length < 2) {
+        loadMore()
+        await flushPromises()
+      }
+
       expect(mockDbSetup.mockCollection.get).toHaveBeenCalledTimes(2)
+      // 第二次查询 skip 推进到首页末尾（dbOffset=50）
+      expect(mockDbSetup.mockCollection.skip).toHaveBeenLastCalledWith(50)
+      expect(apps.value).toHaveLength(55)
     })
 
-    it.skip('无更多数据时不触发查询', async () => {
-      mockDbSetup.mockCollection.get.mockResolvedValue({
-        data: [{ _id: '1', name: 'A', slug: 'a', description: '', isPublic: true, updatedAt: 1 }],
-      })
+    it('无更多数据时不触发查询', async () => {
+      setMockApps([
+        makeApp('s1', '整活'),
+        makeApp('s2', '整活'),
+        makeApp('s3', '整活'),
+      ])
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] }) // cloud 无数据
 
-      const { queryApps, loadMore, hasMore } = await loadWorkshop()
+      const { queryApps, loadMore, hasMore, apps } = await loadWorkshop()
       await queryApps(true)
+      await flushPromises()
+      expect(apps.value).toHaveLength(3)
+      expect(mockDbSetup.mockCollection.get).toHaveBeenCalledTimes(1)
 
-      // 只有 1 条 < 20，hasMore = false
+      // 候选已展示完 + CloudBase 已拉完 → 这次 loadMore 收敛 hasMore=false（不再触发 DB 查询）
+      loadMore()
+      await flushPromises()
       expect(hasMore.value).toBe(false)
+      expect(mockDbSetup.mockCollection.get).toHaveBeenCalledTimes(1)
 
-      await loadMore()
-      // 不应该额外调用 get
+      // hasMore=false 后再 loadMore 不应触发任何查询
+      loadMore()
+      await flushPromises()
       expect(mockDbSetup.mockCollection.get).toHaveBeenCalledTimes(1)
     })
   })

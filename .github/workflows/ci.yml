@@ -57,3 +57,6 @@ jobs:
 
       - name: Unit tests
         run: pnpm run test:unit
+
+      - name: Nuxt tests
+        run: pnpm run test:nuxt

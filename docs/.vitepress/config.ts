@@ -68,6 +68,7 @@ export default defineConfig({
           { text: 'CloudBase 安全规则', link: '/dev/cloudbase-rules' },
           { text: '错误监控（Tencent RUM）', link: '/dev/rum' },
           { text: '隐私政策核对清单', link: '/dev/privacy-checklist' },
+          { text: '依赖安全（pnpm audit）', link: '/dev/dependency-security' },
         ],
       },
       {

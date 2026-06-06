@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 export type DropZoneType = 'add' | 'delete' | null

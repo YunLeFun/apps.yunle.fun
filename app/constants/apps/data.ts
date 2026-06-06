@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 
 export const homeApps = ref<YlfAppInfo[]>([
   {

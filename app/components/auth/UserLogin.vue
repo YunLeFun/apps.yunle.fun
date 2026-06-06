@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import { IonCardContent } from '@ionic/vue'
 
 const appInfo = ref<YlfAppInfo>()

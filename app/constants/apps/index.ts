@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 
 /**
  * 应用分类定义

@@ -8,7 +8,7 @@
  * - 安装完成：圆环结束，按钮展开为「打开」
  * - 已安装：显示「打开」按钮，点击直接打开应用
  */
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 
 interface Props {
   /** 完整应用对象（推荐），用于已安装时打开应用 */

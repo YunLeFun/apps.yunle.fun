@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import { consola } from 'consola'
 import { homeApps } from '~/constants/apps'
 

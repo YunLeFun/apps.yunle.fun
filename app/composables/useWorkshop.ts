@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppRecord } from '~/types/app'
 import { useDebounceFn } from '@vueuse/core'
 import { ALL_APPS, APP_CATEGORIES } from '~/constants/apps'

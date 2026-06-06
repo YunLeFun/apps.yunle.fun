@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import { IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner } from '@ionic/vue'
 import { star, starOutline } from 'ionicons/icons'
 

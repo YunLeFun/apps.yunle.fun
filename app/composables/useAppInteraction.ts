@@ -20,8 +20,8 @@
  * ```
  */
 
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { Ref } from 'vue'
-import type { YlfAppInfo } from '~~/packages/types'
 import { Haptics } from '@capacitor/haptics'
 
 export interface AppInteractionOptions {

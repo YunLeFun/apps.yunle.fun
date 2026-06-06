@@ -5,7 +5,7 @@
  * 支持编辑模式：删除单条记录 / 清空全部
  */
 
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import {
   IonBackButton,
   IonButton,

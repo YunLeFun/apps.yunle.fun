@@ -64,6 +64,9 @@ importers:
       '@capacitor/status-bar':
         specifier: 7.0.3
         version: 7.0.3(@capacitor/core@7.4.3)
+      '@yunlefun/types':
+        specifier: ^0.0.1
+        version: 0.0.1
       aegis-web-sdk:
         specifier: ^1.41.13
         version: 1.41.13
@@ -4357,6 +4360,9 @@ packages:
 
   '@yunlefun/toolkit@0.1.2':
     resolution: {integrity: sha512-ylvcwBCABVSl6N2nqicCDwtttx1d5LShkAxzRahZHneHjzFhishazPTLl6lZigMEWpejUeJc1D22HI+a/Rf5Rg==}
+
+  '@yunlefun/types@0.0.1':
+    resolution: {integrity: sha512-96a71lMXwDLc8FtjgN8sMsF9DmnrkIJsfcZA5piKanDnH/lUbBQ/HwBT6+fHH+qPRL+C4H2iu9Mgrs97CyzeZQ==}
 
   '@yunlefun/utils@0.1.2':
     resolution: {integrity: sha512-Veaa5bENBxV73ICvQM1dByOJO85v7BfJ56JyUqMVw9JjVTphiqJRFl1X/cmxXv4JHdbLLg/yLgB7MMZgFX0klA==}
@@ -14077,6 +14083,8 @@ snapshots:
     transitivePeerDependencies:
       - '@vueuse/core'
       - vue
+
+  '@yunlefun/types@0.0.1': {}
 
   '@yunlefun/utils@0.1.2': {}
 

@@ -8,7 +8,6 @@ export default defineNuxtConfig({
 
   alias: {
     '@yunlefun/auth': path.resolve(__dirname, './packages/auth/src/index.ts'),
-    '@yunlefun/types': path.resolve(__dirname, './packages/types/index.ts'),
   },
 
   devServer: {

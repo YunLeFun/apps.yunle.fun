@@ -17,7 +17,7 @@
  * ```
  */
 
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 
 interface Props {
   /** 应用列表 */

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppMarketSource } from '~/types/market'
 
 defineProps<{

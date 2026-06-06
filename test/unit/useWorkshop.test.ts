@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // --- Mock ~/constants/apps ---

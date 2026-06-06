@@ -4,7 +4,7 @@
  * 基于 LayoutDock 改造，从路由导航改为应用 Dock
  * 固定 4 个常用应用，仅显示图标不显示名称
  */
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'

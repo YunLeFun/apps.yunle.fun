@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { FeaturedAppRecord, WeeklyChartRecord } from '~/types/homeScreen'
 import { ALL_APPS, FEATURED_APP } from '~/constants/apps'
 

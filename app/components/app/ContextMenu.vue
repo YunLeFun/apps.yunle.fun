@@ -8,7 +8,7 @@
  * - 手指移动超阈值 → 关闭菜单并进入编辑模式（由 SortableJS 接管拖拽排序）
  */
 
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 
 interface Props {
   visible: boolean

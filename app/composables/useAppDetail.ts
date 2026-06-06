@@ -1,4 +1,4 @@
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppRecord } from '~/types/app'
 import { ALL_APPS, getAppById } from '~/constants/apps'
 

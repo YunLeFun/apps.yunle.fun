@@ -7,7 +7,7 @@
  * - 编辑模式：SortableJS 启用（delay=0），触摸图标立即可拖拽排序
  * - 上下文菜单中点击"编辑主屏幕"或手指移动 → 进入编辑模式
  */
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'

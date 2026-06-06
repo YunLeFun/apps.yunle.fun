@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YlfAppInfo } from '~~/packages/types'
+import type { YlfAppInfo } from '@yunlefun/types'
 import { vOnLongPress } from '@vueuse/components'
 
 const props = defineProps<{

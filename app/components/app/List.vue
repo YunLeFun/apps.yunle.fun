@@ -52,7 +52,15 @@ async function handleInfiniteScroll(event: CustomEvent) {
               class="app-icon h-16 w-16 flex flex-shrink-0 items-center justify-center text-3xl"
               :style="{ '--app-color': app.color }"
             >
-              {{ app.icon || app.emoji }}
+              <img
+                v-if="app.icon && (app.icon.startsWith('/') || app.icon.startsWith('http'))"
+                :src="app.icon"
+                :alt="app.name"
+                class="h-full w-full rounded-[inherit] object-cover"
+              >
+              <template v-else>
+                {{ app.icon || app.emoji }}
+              </template>
             </div>
 
             <!-- 应用信息 -->

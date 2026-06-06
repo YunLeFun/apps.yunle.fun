@@ -18,12 +18,16 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
   IonPage,
+  IonPopover,
   IonSearchbar,
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { add, addCircleOutline, downloadOutline, qrCodeOutline } from 'ionicons/icons'
+import { add, addCircleOutline, qrCodeOutline, searchOutline } from 'ionicons/icons'
 import { ALL_APPS, homeApps } from '~/constants/apps'
 import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
 
@@ -34,13 +38,34 @@ definePageMeta({
 const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
 const settingsStore = useSettingsStore()
-const { loadFromCloud, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing } = useHomeScreen()
+const userStore = useUserStore()
+const { loadFromCloud, reloadForAccount, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing } = useHomeScreen()
 const { shareApp } = useAppActions()
+const { openApp } = useOpenApp()
 
 const searchQuery = ref('')
 
 /** Dock 是否可见（用户在「设置 → 主屏幕 → 显示 Dock 栏」中控制，默认关闭） */
 const showDock = computed(() => settingsStore.dockVisible)
+
+// ==================== 搜索 ====================
+
+/** 是否处于搜索状态（有非空关键词） */
+const isSearching = computed(() => searchQuery.value.trim().length > 0)
+
+/** 搜索结果：在全部应用中按名称 / 描述 / 分类匹配 */
+const searchResults = computed<YlfAppInfo[]>(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q)
+    return []
+  return ALL_APPS.filter((app) => {
+    return [app.name, app.description, app.category, app.tagline]
+      .some(field => field?.toLowerCase().includes(q))
+  })
+})
+
+/** 主屏幕是否为空（无已安装应用且非搜索态时展示空状态引导） */
+const isHomeEmpty = computed(() => homeScreenStore.installedApps.length === 0)
 
 // ==================== 初始化 ====================
 
@@ -50,6 +75,12 @@ onMounted(async () => {
 
   // 异步加载云端数据
   loadFromCloud()
+})
+
+// 切换账号 / 登入登出时，强制按新账号重新拉取云端数据
+watch(() => userStore.userInfo?.id, (newId, oldId) => {
+  if (newId && newId !== oldId)
+    reloadForAccount()
 })
 
 // ==================== 最近使用 ====================
@@ -100,16 +131,10 @@ function handleRecentLongPress(app: YlfAppInfo, event: PointerEvent | TouchEvent
 // ==================== 顶部菜单 ====================
 
 const showMenu = ref(false)
-const menuPosition = ref({ x: 0, y: 0 })
+const menuEvent = ref<Event | undefined>()
 
 function openMenu(event: MouseEvent) {
-  event.stopPropagation()
-  const target = event.currentTarget as HTMLElement
-  const rect = target.getBoundingClientRect()
-  menuPosition.value = {
-    x: rect.right - 180 - 8,
-    y: rect.bottom + 8,
-  }
+  menuEvent.value = event
   showMenu.value = true
 }
 
@@ -132,27 +157,13 @@ function handleAddApp() {
   router.push('/tabs/apps')
 }
 
-function handleDownload() {
-  closeMenu()
-}
-
 // ==================== 桌面交互 ====================
 
-/** 打开应用 */
-function handleOpenApp(app: YlfAppInfo, installed: InstalledApp) {
-  recordRecentUse(installed.appId)
-
-  if (app.callback) {
-    app.callback()
-  }
-  else if (app.url) {
-    if (app.url.startsWith('http')) {
-      openInAppBrowser(app.url)
-    }
-    else {
-      router.push(app.url)
-    }
-  }
+/** 打开应用（统一走 useOpenApp，含会员 / 云币门控；仅成功打开才计入最近使用） */
+async function handleOpenApp(app: YlfAppInfo, installed: InstalledApp) {
+  const opened = await openApp(app)
+  if (opened)
+    recordRecentUse(installed.appId)
 }
 
 /** 长按上下文菜单 */
@@ -259,82 +270,118 @@ function handleContentClick() {
           mode="ios"
         />
       </IonToolbar>
-
-      <!-- 下拉菜单 -->
-      <div
-        v-if="showMenu"
-        class="menu-overlay"
-        @click="closeMenu"
-      >
-        <div
-          class="dropdown-menu"
-          :style="{
-            left: `${menuPosition.x}px`,
-            top: `${menuPosition.y}px`,
-          }"
-          @click.stop
-        >
-          <div class="menu-item" @click="handleScan">
-            <IonIcon :icon="qrCodeOutline" class="menu-icon" />
-            <span>扫一扫</span>
-          </div>
-          <div class="menu-item" @click="handleAddApp">
-            <IonIcon :icon="addCircleOutline" class="menu-icon" />
-            <span>添加应用</span>
-          </div>
-          <div class="menu-item" @click="handleDownload">
-            <IonIcon :icon="downloadOutline" class="menu-icon" />
-            <span>下载应用</span>
-          </div>
-        </div>
-      </div>
     </IonHeader>
+
+    <!-- 顶部「+」下拉菜单（Ionic IonPopover，自动处理定位 / 边界 / 暗黑 / 安全区） -->
+    <IonPopover
+      :is-open="showMenu"
+      :event="menuEvent"
+      :dismiss-on-select="true"
+      :show-backdrop="false"
+      @did-dismiss="closeMenu"
+    >
+      <IonContent>
+        <IonList lines="full">
+          <IonItem button :detail="false" @click="handleScan">
+            <IonIcon slot="start" :icon="qrCodeOutline" />
+            <IonLabel>扫一扫</IonLabel>
+          </IonItem>
+          <IonItem button :detail="false" @click="handleAddApp">
+            <IonIcon slot="start" :icon="addCircleOutline" />
+            <IonLabel>添加应用</IonLabel>
+          </IonItem>
+        </IonList>
+      </IonContent>
+    </IonPopover>
 
     <IonContent
       class="phone-homescreen"
       :class="{ 'has-dock': showDock }"
       @click="handleContentClick"
     >
-      <!-- 最近使用 -->
-      <div v-if="displayRecentApps.length > 0" class="recent-section">
-        <div class="section-header px-5.5">
+      <!-- 搜索结果 -->
+      <template v-if="isSearching">
+        <div class="px-5.5 pt-4">
           <ion-note class="text-black/60 dark:text-white/60">
-            最近使用
-          </ion-note>
-          <ion-note
-            v-if="hasMoreRecent"
-            class="cursor-pointer text-sm" style="color: var(--ion-color-primary)"
-            @click="router.push('/recent')"
-          >
-            更多
+            搜索结果（{{ searchResults.length }}）
           </ion-note>
         </div>
-        <div class="recent-apps">
+        <div v-if="searchResults.length > 0" class="recent-apps">
           <AppItem
-            v-for="app in displayRecentApps"
-            :key="app.id"
+            v-for="app in searchResults"
+            :key="app.id || app.slug"
             :app="app"
-            :class="{ 'is-drag-source': recentDrag.isDragging.value && recentDrag.dragApp.value?.id === app.id }"
-            @long-press="handleRecentLongPress"
           />
         </div>
-      </div>
+        <div v-else class="empty-state">
+          <IonIcon :icon="searchOutline" class="empty-icon" />
+          <p class="empty-title">
+            未找到「{{ searchQuery.trim() }}」相关应用
+          </p>
+          <p class="empty-desc">
+            换个关键词，或前往工坊浏览全部应用
+          </p>
+        </div>
+      </template>
 
-      <!-- 主体 Home Screen -->
-      <div class="px-5.5 pt-2">
-        <ion-note class="text-black/60 dark:text-white/60">
-          我的云应用
-        </ion-note>
-      </div>
+      <!-- 正常布局（非搜索态） -->
+      <template v-else>
+        <!-- 最近使用 -->
+        <div v-if="displayRecentApps.length > 0" class="recent-section">
+          <div class="section-header px-5.5">
+            <ion-note class="text-black/60 dark:text-white/60">
+              最近使用
+            </ion-note>
+            <ion-note
+              v-if="hasMoreRecent"
+              class="cursor-pointer text-sm" style="color: var(--ion-color-primary)"
+              @click="router.push('/recent')"
+            >
+              更多
+            </ion-note>
+          </div>
+          <div class="recent-apps">
+            <AppItem
+              v-for="app in displayRecentApps"
+              :key="app.id"
+              :app="app"
+              :class="{ 'is-drag-source': recentDrag.isDragging.value && recentDrag.dragApp.value?.id === app.id }"
+              @long-press="handleRecentLongPress"
+            />
+          </div>
+        </div>
 
-      <AppHomeScreenGrid
-        :pages="homeScreenStore.pagedApps"
-        :edit-mode="homeScreenStore.isEditMode"
-        :hidden-app-id="contextMenuVisible && contextMenuApp ? contextMenuApp.appId : undefined"
-        @open="handleOpenApp"
-        @remove="handleRemoveApp"
-        @long-press="handleLongPress"
-      />
+        <!-- 主体 Home Screen -->
+        <div class="px-5.5 pt-2">
+          <ion-note class="text-black/60 dark:text-white/60">
+            我的云应用
+          </ion-note>
+        </div>
+
+        <!-- 空状态引导 -->
+        <div v-if="isHomeEmpty" class="empty-state">
+          <IonIcon :icon="addCircleOutline" class="empty-icon" />
+          <p class="empty-title">
+            还没有添加任何应用
+          </p>
+          <p class="empty-desc">
+            去工坊挑选喜欢的应用，添加到你的云居桌面
+          </p>
+          <IonButton size="small" @click="handleAddApp">
+            前往工坊
+          </IonButton>
+        </div>
+
+        <AppHomeScreenGrid
+          v-else
+          :pages="homeScreenStore.pagedApps"
+          :edit-mode="homeScreenStore.isEditMode"
+          :hidden-app-id="contextMenuVisible && contextMenuApp ? contextMenuApp.appId : undefined"
+          @open="handleOpenApp"
+          @remove="handleRemoveApp"
+          @long-press="handleLongPress"
+        />
+      </template>
     </IonContent>
 
     <!-- 底部 Dock 常用栏：固定在屏幕底部，类似 iOS Home Screen -->
@@ -429,64 +476,38 @@ function handleContentClick() {
   transition: opacity 0.2s ease;
 }
 
-/* ==================== 下拉菜单 ==================== */
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: transparent;
-}
-
-.dropdown-menu {
-  position: fixed;
-  background: var(--ion-item-background);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  min-width: 180px;
-  z-index: 10000;
-  animation: slideDown 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.dark .dropdown-menu {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.menu-item {
+/* ==================== 空状态 ==================== */
+.empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  font-size: 15px;
+  justify-content: center;
+  text-align: center;
+  padding: 56px 32px;
+  gap: 8px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: var(--ion-color-medium);
+  opacity: 0.5;
+  margin-bottom: 4px;
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
   color: var(--ion-text-color);
-  cursor: pointer;
-  border-bottom: 1px solid var(--ylf-separator);
-  transition: background 0.15s ease;
 }
 
-.menu-item:last-child {
-  border-bottom: none;
+.empty-desc {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin-bottom: 8px;
 }
 
-.menu-item:active {
-  background: var(--ylf-fill-quaternary);
-}
-
-.menu-icon {
-  font-size: 20px;
-  color: var(--ion-color-primary);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ==================== 顶部下拉菜单（IonPopover）==================== */
+ion-popover {
+  --width: 200px;
 }
 </style>

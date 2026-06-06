@@ -136,16 +136,29 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
 
   // ==================== 同步 ====================
 
-  /** 从 CloudBase 数据恢复 Home Screen */
-  function restoreFromCloud(config: HomeScreenConfig, docId: string) {
+  /**
+   * 从 CloudBase 数据恢复 Home Screen
+   *
+   * @param config 云端 Home Screen 配置
+   * @param docId 云端文档 ID
+   * @param force 强制覆盖本地（用于切换账号：此时本地 lastSyncAt 属于上一个账号，
+   *   不能再用 updatedAt 比较，否则新账号的数据会被旧账号的时间戳挡住）
+   */
+  function restoreFromCloud(config: HomeScreenConfig, docId: string, force = false) {
     cloudDocId.value = docId
-    // 仅当云端数据更新时才覆盖本地
-    if (config.updatedAt > lastSyncAt.value) {
+    // 仅当云端数据更新（或强制）时才覆盖本地
+    if (force || config.updatedAt > lastSyncAt.value) {
       installedApps.value = config.installedApps
       dockApps.value = config.dockApps
       recentApps.value = config.recentApps
       lastSyncAt.value = config.updatedAt
     }
+  }
+
+  /** 切换账号时重置云同步状态（清空文档关联与同步时间，避免跨账号串数据） */
+  function resetCloudState() {
+    cloudDocId.value = null
+    lastSyncAt.value = 0
   }
 
   /** 获取当前 Home Screen 配置（用于同步到 CloudBase） */
@@ -197,6 +210,7 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     markPendingChanges,
     consumePendingChanges,
     restoreFromCloud,
+    resetCloudState,
     getHomeScreenConfig,
     initWithDefaults,
   }

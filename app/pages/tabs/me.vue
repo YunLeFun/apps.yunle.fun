@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, personCircleOutline, settings, swapHorizontalOutline } from 'ionicons/icons'
+import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, personCircleOutline, settings, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -17,10 +17,16 @@ const router = useRouter()
 const userStore = useUserStore()
 const developerStore = useDeveloperStore()
 const accountsStore = useAccountsStore()
+const { balance, isMember, refresh: refreshAccount } = useCoin()
 
 const otherAccounts = computed(() =>
   accountsStore.getOtherAccounts(userStore.userInfo?.id),
 )
+
+onMounted(() => {
+  if (userStore.isLoggedIn)
+    refreshAccount()
+})
 
 function goToLoginPage() {
   router.push('/login')
@@ -84,6 +90,25 @@ function navigateTo(path: string) {
                   {{ (userInfo.nickname || '云')[0] }}
                 </span>
               </div>
+            </template>
+          </k-list-item>
+        </k-list>
+
+        <!-- 钱包（登录后可见） -->
+        <k-list v-if="userStore.isLoggedIn" strong inset>
+          <k-list-item
+            link
+            title="钱包"
+            :footer="isMember ? '会员有效中' : '云币 & 会员'"
+            @click="navigateTo('/wallet')"
+          >
+            <template #media>
+              <span class="ios-icon-box ios-icon-orange">
+                <IonIcon :icon="walletOutline" />
+              </span>
+            </template>
+            <template #after>
+              <span class="wallet-balance">{{ balance }} 云币</span>
             </template>
           </k-list-item>
         </k-list>
@@ -207,5 +232,12 @@ function navigateTo(path: string) {
 /* 退出/切换账号组与上方保持更大间距 */
 .me-signout-list {
   margin-top: 32px !important;
+}
+
+/* 钱包余额展示 */
+.wallet-balance {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ion-color-warning, #ff9f0a);
 }
 </style>

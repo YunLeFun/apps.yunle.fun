@@ -10,24 +10,13 @@ const emit = defineEmits<{
   longPress: [app: YlfAppInfo, event: PointerEvent | TouchEvent]
 }>()
 
-const router = useRouter()
+const { openApp } = useOpenApp()
 
 /**
- * 处理点击
+ * 处理点击（统一走 useOpenApp，含会员 / 云币门控）
  */
 function handleClick() {
-  if (props.app.callback) {
-    props.app.callback()
-  }
-  else if (props.app.url) {
-    const url = props.app.url
-    if (url.startsWith('http')) {
-      openInAppBrowser(url)
-    }
-    else {
-      router.push(url)
-    }
-  }
+  openApp(props.app)
 }
 
 const isLongPressed = ref(false)

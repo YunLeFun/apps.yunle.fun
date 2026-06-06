@@ -60,6 +60,7 @@ function createMockHomeScreenStore() {
     markPendingChanges: vi.fn(),
     consumePendingChanges: vi.fn(() => false),
     restoreFromCloud: vi.fn(),
+    resetCloudState: vi.fn(),
     getHomeScreenConfig: vi.fn(() => ({
       installedApps: [{ appId: 'app-1' }],
       dockApps: [],
@@ -91,6 +92,12 @@ vi.stubGlobal('useCloudbase', () => ({
 vi.stubGlobal('useUserStore', () => mockUserStore)
 vi.stubGlobal('useHomeScreenStore', () => mockHomeScreenStore)
 vi.stubGlobal('useSettingsStore', () => mockSettingsStore)
+vi.stubGlobal('useToast', () => ({
+  showSuccess: vi.fn(),
+  showError: vi.fn(),
+  showWarning: vi.fn(),
+  showInfo: vi.fn(),
+}))
 
 // Mock useDebounceFn to execute immediately
 vi.mock('@vueuse/core', () => ({
@@ -338,6 +345,7 @@ describe('useHomeScreen', () => {
           updatedAt: cloudDoc.updatedAt,
         },
         'doc-abc',
+        false,
       )
     })
 
@@ -366,6 +374,7 @@ describe('useHomeScreen', () => {
           updatedAt: 0,
         },
         'doc-x',
+        false,
       )
     })
 

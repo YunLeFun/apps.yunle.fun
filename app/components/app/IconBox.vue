@@ -8,7 +8,7 @@
  */
 
 interface Props {
-  /** 图标图片 URL */
+  /** 图标图片 URL（路径或 http 开头）；非图片值会被忽略，回退到 emoji */
   icon?: string
   /** Emoji 字符 */
   emoji?: string
@@ -20,13 +20,16 @@ interface Props {
   placeholder?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   icon: '',
   emoji: '📱',
   color: '',
   label: '',
   placeholder: false,
 })
+
+/** 仅当 icon 是图片路径（/ 或 http 开头）时才作为图片渲染，否则回退 emoji */
+const isImageIcon = computed(() => props.icon.startsWith('/') || props.icon.startsWith('http'))
 </script>
 
 <template>
@@ -37,8 +40,8 @@ withDefaults(defineProps<Props>(), {
       :style="color ? { backgroundColor: color } : undefined"
     >
       <slot name="icon">
-        <img v-if="icon" :src="icon" alt="应用图标" class="app-icon-img">
-        <span v-else class="app-emoji">{{ emoji }}</span>
+        <img v-if="isImageIcon" :src="icon" alt="应用图标" class="app-icon-img">
+        <span v-else class="app-emoji">{{ icon || emoji }}</span>
       </slot>
       <slot name="badge" />
     </div>

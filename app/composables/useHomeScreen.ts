@@ -12,6 +12,7 @@ export function useHomeScreen() {
   const { app, auth } = useCloudbase()
   const homeScreenStore = useHomeScreenStore()
   const userStore = useUserStore()
+  const { showError } = useToast()
   const db = app.database()
 
   /**
@@ -57,8 +58,12 @@ export function useHomeScreen() {
     }
   }
 
-  /** 从 CloudBase 加载 Home Screen 数据 */
-  async function loadFromCloud() {
+  /**
+   * 从 CloudBase 加载 Home Screen 数据
+   *
+   * @param force 强制覆盖本地（切换账号时使用）
+   */
+  async function loadFromCloud(force = false) {
     const uid = await ensureAuth()
     if (!uid)
       return
@@ -77,12 +82,22 @@ export function useHomeScreen() {
           dockApps: doc.dockApps || [],
           recentApps: doc.recentApps || [],
           updatedAt: doc.updatedAt || 0,
-        }, doc._id)
+        }, doc._id, force)
       }
     }
     catch (e) {
       consola.error('[HomeScreen] loadFromCloud failed:', e)
+      showError('云端数据加载失败，请检查网络')
     }
+  }
+
+  /**
+   * 切换账号后重新加载云端数据：先重置同步状态，再强制覆盖本地，
+   * 避免上一个账号的 lastSyncAt 挡住新账号数据。
+   */
+  async function reloadForAccount() {
+    homeScreenStore.resetCloudState()
+    await loadFromCloud(true)
   }
 
   const settingsStore = useSettingsStore()
@@ -126,6 +141,7 @@ export function useHomeScreen() {
     }
     catch (e) {
       consola.error('[HomeScreen] syncToCloud failed:', e)
+      showError('云同步失败，变更已保存在本地')
     }
     finally {
       homeScreenStore.isSyncing = false
@@ -189,6 +205,7 @@ export function useHomeScreen() {
 
   return {
     loadFromCloud,
+    reloadForAccount,
     syncToCloud,
     installApp,
     uninstallApp,

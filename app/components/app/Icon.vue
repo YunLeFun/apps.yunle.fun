@@ -55,6 +55,17 @@ const displayBadge = computed(() => {
 })
 
 /**
+ * 付费 / 会员门控角标：会员专属显示锁，按次付费显示云币标记
+ */
+const gateMarker = computed<{ text: string, cls: string } | null>(() => {
+  if (props.app.requiresMembership)
+    return { text: '会员', cls: 'gate-member' }
+  if ((props.app.coinCost ?? 0) > 0)
+    return { text: `${props.app.coinCost}币`, cls: 'gate-coin' }
+  return null
+})
+
+/**
  * 是否按下
  */
 const isPressed = ref(false)
@@ -103,6 +114,11 @@ const appIconClasses = computed(() => {
         </div>
       </template>
     </AppIconBox>
+
+    <!-- 付费 / 会员门控角标 -->
+    <span v-if="gateMarker" class="gate-marker" :class="gateMarker.cls">
+      {{ gateMarker.text }}
+    </span>
   </div>
 </template>
 
@@ -153,6 +169,34 @@ const appIconClasses = computed(() => {
 
 .dark .badge {
   border-color: #1c1c1e;
+}
+
+/* ==================== 付费 / 会员门控角标 ==================== */
+.gate-marker {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+  border: 1.5px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.dark .gate-marker {
+  border-color: #1c1c1e;
+}
+
+.gate-marker.gate-coin {
+  background: #ff9f0a;
+}
+
+.gate-marker.gate-member {
+  background: linear-gradient(135deg, #ffb340, #ff8a00);
 }
 
 /* ==================== 无障碍优化 ==================== */

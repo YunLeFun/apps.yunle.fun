@@ -154,4 +154,15 @@ export const homeApps = ref<YlfAppInfo[]>([
     url: '/app/donate',
     category: '捐赠',
   },
+  {
+    id: '18',
+    slug: 'air-conditioner',
+    name: '云空调',
+    emoji: '❄️',
+    color: '#0096FF',
+    url: 'https://ac.yunyoujun.cn',
+    category: '整活',
+    description: '便携小空调，为你的夏日带去清凉！',
+    tagline: '随时随地打开空调',
+  },
 ])

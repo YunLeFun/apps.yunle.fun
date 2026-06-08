@@ -13,12 +13,12 @@ export default defineEventHandler((event) => {
   if (query.id === '2') {
     appInfo = {
       id: '2',
-      color: 'orange',
-      icon: 'https://cook.yunyoujun.cn/favicon.svg',
+      themeColor: 'orange',
+      logo: 'https://cook.yunyoujun.cn/favicon.svg',
       name: '食用手册',
       slug: 'cook',
       emoji: '🍳',
-      url: 'https://cook.yunyoujun.cn',
+      websiteUrl: 'https://cook.yunyoujun.cn',
     }
 
     return {

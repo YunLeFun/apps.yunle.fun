@@ -157,10 +157,10 @@ function onPointerCancel() {
           <div
             v-if="resolveApp(element)"
             class="dock-icon"
-            :style="{ backgroundColor: resolveApp(element)!.color }"
+            :style="{ backgroundColor: resolveApp(element)!.themeColor }"
           >
-            <div v-if="resolveApp(element)!.icon" class="dock-img">
-              <img :src="resolveApp(element)!.icon" alt="">
+            <div v-if="resolveApp(element)!.logo" class="dock-img">
+              <img :src="resolveApp(element)!.logo" alt="">
             </div>
             <span v-else class="dock-emoji">{{ resolveApp(element)!.emoji }}</span>
           </div>

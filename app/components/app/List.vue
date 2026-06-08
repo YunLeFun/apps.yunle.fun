@@ -50,16 +50,16 @@ async function handleInfiniteScroll(event: CustomEvent) {
             <!-- 应用图标 -->
             <div
               class="app-icon h-16 w-16 flex flex-shrink-0 items-center justify-center text-3xl"
-              :style="{ '--app-color': app.color }"
+              :style="{ '--app-color': app.themeColor }"
             >
               <img
-                v-if="app.icon && (app.icon.startsWith('/') || app.icon.startsWith('http'))"
-                :src="app.icon"
+                v-if="app.logo && (app.logo.startsWith('/') || app.logo.startsWith('http'))"
+                :src="app.logo"
                 :alt="app.name"
                 class="h-full w-full rounded-[inherit] object-cover"
               >
               <template v-else>
-                {{ app.icon || app.emoji }}
+                {{ app.logo || app.emoji }}
               </template>
             </div>
 

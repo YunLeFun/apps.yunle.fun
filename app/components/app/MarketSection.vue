@@ -7,8 +7,8 @@ defineProps<{
 }>()
 
 function openApp(app: YlfAppInfo) {
-  if (app.url) {
-    openInAppBrowser(app.url)
+  if (app.websiteUrl) {
+    openInAppBrowser(app.websiteUrl)
   }
 }
 </script>
@@ -32,9 +32,9 @@ function openApp(app: YlfAppInfo) {
         <div class="flex items-center gap-3">
           <div
             class="app-icon h-16 w-16 flex shrink-0 items-center justify-center text-3xl shadow-sm"
-            :style="{ backgroundColor: app.color || '#e5e7eb' }"
+            :style="{ backgroundColor: app.themeColor || '#e5e7eb' }"
           >
-            {{ app.icon || app.emoji || '📦' }}
+            {{ app.logo || app.emoji || '📦' }}
           </div>
           <div class="min-w-0 flex flex-1 flex-col gap-1">
             <div class="truncate text-base font-medium">

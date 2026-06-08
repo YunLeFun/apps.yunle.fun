@@ -52,9 +52,9 @@ function viewAllChart() {
           <!-- 应用图标 -->
           <div
             class="app-icon"
-            :style="{ '--item-color': app.color }"
+            :style="{ '--item-color': app.themeColor }"
           >
-            <span class="icon-emoji">{{ app.icon || app.emoji }}</span>
+            <span class="icon-emoji">{{ app.logo || app.emoji }}</span>
           </div>
 
           <!-- 应用信息 -->

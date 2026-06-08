@@ -44,7 +44,7 @@ const todayDateStr = computed(() => {
       <!-- 卡片主体 -->
       <div
         class="featured-body relative overflow-hidden"
-        :style="{ '--app-color': featuredApp.color }"
+        :style="{ '--app-color': featuredApp.themeColor }"
       >
         <!-- 背景渐变层 -->
         <div class="featured-bg" />

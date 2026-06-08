@@ -162,9 +162,9 @@ function onOverlayClick() {
           @contextmenu.prevent
         >
           <AppIconBox
-            :icon="app.icon"
+            :icon="app.logo"
             :emoji="app.emoji"
-            :color="app.color"
+            :color="app.themeColor"
             :label="app.name"
           />
         </div>

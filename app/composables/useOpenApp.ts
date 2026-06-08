@@ -37,11 +37,11 @@ export function useOpenApp() {
     if (app.callback) {
       app.callback()
     }
-    else if (app.url) {
-      if (app.url.startsWith('http'))
-        openInAppBrowser(app.url)
+    else if (app.websiteUrl) {
+      if (app.websiteUrl.startsWith('http'))
+        openInAppBrowser(app.websiteUrl)
       else
-        router.push(app.url)
+        router.push(app.websiteUrl)
     }
   }
 

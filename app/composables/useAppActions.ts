@@ -15,8 +15,8 @@ export function useAppActions() {
     appStore.addRecentApp(app)
 
     // 打开应用
-    if (app.url) {
-      openInAppBrowser(app.url)
+    if (app.websiteUrl) {
+      openInAppBrowser(app.websiteUrl)
     }
   }
 

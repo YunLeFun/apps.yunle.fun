@@ -14,14 +14,14 @@ defineProps<{
         正在为以下应用登录
       </p>
       <a
-        :href="appInfo.url"
+        :href="appInfo.websiteUrl"
         target="_blank"
         class="inline-block"
       >
         <IonChip color="primary" class="text-base">
-          <IonAvatar v-if="appInfo.icon">
+          <IonAvatar v-if="appInfo.logo">
             <img
-              :src="appInfo.icon"
+              :src="appInfo.logo"
               alt="icon"
             >
           </IonAvatar>

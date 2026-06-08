@@ -35,9 +35,9 @@ const displayData = computed(() => {
   return {
     ...appData.value,
     screenshots: [
-      { id: 1, color: appData.value.color, title: '主界面' },
-      { id: 2, color: appData.value.color, title: '功能展示' },
-      { id: 3, color: appData.value.color, title: '详细信息' },
+      { id: 1, color: appData.value.themeColor, title: '主界面' },
+      { id: 2, color: appData.value.themeColor, title: '功能展示' },
+      { id: 3, color: appData.value.themeColor, title: '详细信息' },
     ],
     reviews: [
       {
@@ -63,13 +63,13 @@ function renderStars(rating: number = 0) {
 
 // 打开应用
 function openApp() {
-  if (!displayData.value?.url)
+  if (!displayData.value?.websiteUrl)
     return
-  if (displayData.value.url.startsWith('http')) {
-    openInAppBrowser(displayData.value.url)
+  if (displayData.value.websiteUrl.startsWith('http')) {
+    openInAppBrowser(displayData.value.websiteUrl)
   }
   else {
-    router.push(displayData.value.url)
+    router.push(displayData.value.websiteUrl)
   }
 }
 
@@ -93,7 +93,7 @@ async function openMoreMenu() {
     return
   const subject = encodeURIComponent(`举报应用：${app.name}（${app.slug || app.id}）`)
   const body = encodeURIComponent(
-    `应用名称：${app.name}\n应用 ID：${app.id}\n应用 slug：${app.slug || ''}\n网址：${app.url || ''}\n\n举报原因（请说明）：\n`,
+    `应用名称：${app.name}\n应用 ID：${app.id}\n应用 slug：${app.slug || ''}\n网址：${app.websiteUrl || ''}\n\n举报原因（请说明）：\n`,
   )
   const reportMailto = `mailto:${YLF_CONTACT.support.email}?subject=${subject}&body=${body}`
 
@@ -155,9 +155,9 @@ async function openMoreMenu() {
           <div class="app-header-content">
             <div
               class="app-icon-large"
-              :style="{ backgroundColor: displayData.color }"
+              :style="{ backgroundColor: displayData.themeColor }"
             >
-              {{ displayData.emoji || displayData.icon }}
+              {{ displayData.emoji || displayData.logo }}
             </div>
 
             <div class="app-header-info">

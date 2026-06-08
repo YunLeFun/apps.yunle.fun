@@ -102,9 +102,9 @@ const appIconClasses = computed(() => {
     @pointerout="clearPressed"
   >
     <AppIconBox
-      :icon="app.icon"
+      :icon="app.logo"
       :emoji="app.emoji"
-      :color="app.color"
+      :color="app.themeColor"
       :label="app.name"
       :style="interactionStyle"
     >

@@ -39,12 +39,12 @@ function handleClick() {
     return
 
   if (installed.value) {
-    if (props.app?.url) {
-      if (props.app.url.startsWith('http')) {
-        openInAppBrowser(props.app.url)
+    if (props.app?.websiteUrl) {
+      if (props.app.websiteUrl.startsWith('http')) {
+        openInAppBrowser(props.app.websiteUrl)
       }
       else {
-        router.push(props.app.url)
+        router.push(props.app.websiteUrl)
       }
     }
   }
@@ -73,7 +73,7 @@ function handleInstall() {
  * - 应用详情页：始终预加载 /app/[slug] 路由
  */
 function prefetchAppResources() {
-  const url = props.app?.url
+  const url = props.app?.websiteUrl
   const appId = resolvedAppId.value
 
   if (url?.startsWith('http')) {

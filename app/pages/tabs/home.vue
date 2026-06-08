@@ -412,9 +412,9 @@ function handleContentClick() {
     <Teleport to="body">
       <div v-if="recentDrag.isDragging.value && recentDrag.dragApp.value" :style="dragPreviewStyle">
         <AppIconBox
-          :icon="recentDrag.dragApp.value.icon"
+          :icon="recentDrag.dragApp.value.logo"
           :emoji="recentDrag.dragApp.value.emoji"
-          :color="recentDrag.dragApp.value.color"
+          :color="recentDrag.dragApp.value.themeColor"
           :label="recentDrag.dragApp.value.name"
         />
       </div>

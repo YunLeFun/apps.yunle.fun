@@ -123,15 +123,15 @@
 - apps.yunle.fun 依赖 bump 到 `^0.0.2`，21 个源码文件改完旧字段引用，常量数据 key 同步重命名；`pnpm typecheck`（忽略遗留 `src/`）与 `pnpm lint` 均通过。
 - 避坑：`AppCategory.icon`（分类图标）、`[id].vue` 的 screenshot `.color`、`constants/links.ts` 的链接对象均与 `YlfAppInfo` 无关，保持不动。
 
-### Phase 1 — 灌数据迁移脚本（低风险，半天）✅ 可立即做
+### Phase 1 — 灌数据迁移脚本 ✅ 已完成
 
-目的：把 38 个第一方应用写入 `apps` 集合，**立刻解决运营平台选不到第一方应用的缺口**，且是后两步前提。
+目的：把 38 个第一方应用写入 `apps` 集合，**解决运营平台选不到第一方应用的缺口**，且是后两步前提。
 
-- 脚本位置：`scripts/migrate-builtin-apps.ts`（Node + `@cloudbase/node-sdk`，admin 凭据，与 admin 钱包同 env）。
-- **幂等**：按 `slug` 先查后写（存在则 `update`，不存在则 `add`），避免唯一索引 `idx_slug_unique` 撞错、可重复执行。
-- 写入字段：`name/slug/description/emoji/category` + `themeColor(=color)/websiteUrl(=url)/logo(=icon)`，统一 `isPublic:true, status:'approved', ownerLogin:'YunYouJun', tags:[]`，`createdAt/updatedAt=now`。
-- `_openid` 归属见 §10。
-- 验收：admin「寻乐运营」精选/热门下拉能搜到全部 38 个应用。
+- 脚本：`admin/scripts/migrate-builtin-apps.ts`（`@cloudbase/node-sdk` + admin 凭据；`pnpm seed:apps`，支持 `DRY_RUN=1` 预演）。跨仓库 import apps.yunle.fun 的 `ALL_APPS`（保持数据 DRY；`data.ts` 的 Nuxt `ref()` 用 globalThis 桩绕过）。
+- **幂等**：按 `slug` 先查后写（存在则 `update`、否则 `add`），可重复执行。
+- 写入：`name/slug/description/emoji/category` + `themeColor/websiteUrl/logo` + 展示用 `rating/downloads/size/age`，统一 `isPublic:true, status:'approved', ownerLogin:'YunYouJun', tags:[]`。`_openid` = `1978032370372050944`（仅 `add` 时写入，不覆盖既有归属）。
+- 执行结果：**新增 37 + 更新 1（`cook` 同 slug 既存）**，集合内 approved+public = **38**。`AppRecord` 已补 `rating?/downloads?/size?/age?` 可选字段。
+- ⚠️ `cook` 既存文档被更新为规范数据，但其 `_openid` 保留原值（未覆盖）；如需归一到第一方 uid 可单独处理。
 
 ### Phase 2 — admin「应用管理」模块（中等）
 

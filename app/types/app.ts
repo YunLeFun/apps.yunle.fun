@@ -74,6 +74,14 @@ export interface AppRecord {
   category?: string
   /** 标签 */
   tags?: string[]
+  /** 评分（展示用，0-5；当前为运营预设，后续可接真实数据） */
+  rating?: number
+  /** 下载量文案（展示用，如「10万+」） */
+  downloads?: string
+  /** 应用大小文案（展示用，如「2.5 MB」） */
+  size?: string
+  /** 年龄分级文案（展示用，如「4+」） */
+  age?: string
   /** 用户是否愿意公开（默认 false；与 status=approved 同时满足才会真正对外可见） */
   isPublic: boolean
   /** 审核状态（必填，默认 pending） */

@@ -13,7 +13,8 @@ export default nuxt(
       },
     },
     {
-      ignores: ['ios', 'android', '.codebuddy/**/*.md', 'CODEBUDDY.md'],
+      // generated.ts 由 admin gen:apps-snapshot 生成，不参与 lint
+      ignores: ['ios', 'android', '.codebuddy/**/*.md', 'CODEBUDDY.md', 'app/constants/apps/generated.ts'],
     },
   ),
 )

@@ -10,10 +10,19 @@
 
 import type { YlfAppInfo } from '@yunlefun/types'
 
+interface IconPreview {
+  icon?: string
+  emoji?: string
+  color?: string
+  label?: string
+  placeholder?: boolean
+}
+
 interface Props {
   visible: boolean
   position: { x: number, y: number }
   app?: YlfAppInfo | null
+  preview?: IconPreview | null
   /** 长按图标的原始位置和尺寸 */
   iconRect?: { x: number, y: number, width: number, height: number } | null
 }
@@ -78,6 +87,22 @@ watch(() => props.visible, (v) => {
 onUnmounted(cleanup)
 
 // ---------- 浮动图标和菜单位置 ----------
+
+const floatingPreview = computed<IconPreview | null>(() => {
+  if (props.app) {
+    return {
+      icon: props.app.logo,
+      emoji: props.app.emoji,
+      color: props.app.themeColor,
+      label: props.app.name,
+      placeholder: false,
+    }
+  }
+
+  return props.preview ?? null
+})
+
+const canShare = computed(() => Boolean(props.app))
 
 const floatingIconStyle = computed(() => {
   if (!props.iconRect)
@@ -156,16 +181,17 @@ function onOverlayClick() {
       >
         <!-- 浮动的应用图标预览 -->
         <div
-          v-if="app && floatingIconStyle"
+          v-if="floatingPreview && floatingIconStyle"
           class="ctx-floating-icon"
           :style="floatingIconStyle"
           @contextmenu.prevent
         >
           <AppIconBox
-            :icon="app.logo"
-            :emoji="app.emoji"
-            :color="app.themeColor"
-            :label="app.name"
+            :icon="floatingPreview.icon"
+            :emoji="floatingPreview.emoji"
+            :color="floatingPreview.color"
+            :label="floatingPreview.label"
+            :placeholder="floatingPreview.placeholder"
           />
         </div>
 
@@ -183,9 +209,9 @@ function onOverlayClick() {
             </svg>
           </button>
 
-          <div class="ctx-divider" />
+          <div v-if="canShare" class="ctx-divider" />
 
-          <button class="ctx-item" @click="handleAction('share')">
+          <button v-if="canShare" class="ctx-item" @click="handleAction('share')">
             <span class="ctx-label">分享 App</span>
             <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
@@ -216,9 +242,9 @@ function onOverlayClick() {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 /* ==================== 浮动图标 ==================== */
@@ -245,20 +271,25 @@ function onOverlayClick() {
 .ctx-menu {
   position: fixed;
   background: var(--ion-item-background);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  background: color-mix(in srgb, var(--ion-item-background) 78%, transparent);
+  backdrop-filter: blur(34px) saturate(190%) brightness(1.06);
+  -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.06);
   border-radius: 14px;
+  border: 0.5px solid rgba(255, 255, 255, 0.24);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.18),
-    0 0 0 0.33px rgba(0, 0, 0, 0.06);
+    0 18px 42px rgba(0, 0, 0, 0.2),
+    0 3px 10px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
   overflow: hidden;
   z-index: 100000;
 }
 
 .dark .ctx-menu {
+  border-color: rgba(255, 255, 255, 0.12);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.55),
-    0 0 0 0.33px rgba(255, 255, 255, 0.08);
+    0 18px 42px rgba(0, 0, 0, 0.62),
+    0 3px 10px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
 }
 
 /* ==================== 菜单项 ==================== */

@@ -39,7 +39,7 @@ const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
 const settingsStore = useSettingsStore()
 const userStore = useUserStore()
-const { loadFromCloud, reloadForAccount, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing } = useHomeScreen()
+const { loadFromCloud, reloadForAccount, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing, syncToCloud } = useHomeScreen()
 const { shareApp } = useAppActions()
 const { openApp } = useOpenApp()
 const { catalog, getApp, ensureLoaded } = useAppCatalog()
@@ -65,20 +65,23 @@ const searchResults = computed<YlfAppInfo[]>(() => {
   })
 })
 
-/** 主屏幕是否为空（无已安装应用且非搜索态时展示空状态引导） */
-const isHomeEmpty = computed(() => homeScreenStore.installedApps.length === 0)
-
 // ==================== 初始化 ====================
 
 onMounted(async () => {
-  // 用静态数据初始化 Home Screen（首次使用时）
-  homeScreenStore.initWithDefaults(homeApps.value)
-
   // 确保应用目录已加载（集合优先，内置兜底）
-  ensureLoaded()
+  await ensureLoaded()
+  const changedBeforeCloud = normalizeHomeScreenApps()
+
+  // 用可解析的静态数据初始化 Home Screen（首次使用时）
+  initDefaultHomeScreen()
 
   // 异步加载云端数据
-  loadFromCloud()
+  await loadFromCloud()
+  const changedAfterCloud = normalizeHomeScreenApps()
+  initDefaultHomeScreen()
+
+  if (changedBeforeCloud || changedAfterCloud)
+    syncToCloud()
 })
 
 // 切换账号 / 登入登出时，强制按新账号重新拉取云端数据
@@ -179,6 +182,112 @@ const contextMenuIconRect = ref<{ x: number, y: number, width: number, height: n
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
   return getApp(installed.appId) ?? null
 }
+
+const legacyHomeAppIdMap = computed(() => {
+  const map = new Map<string, string>()
+  for (const app of homeApps.value) {
+    const canonicalId = app.slug || app.id
+    if (app.id && canonicalId && app.id !== canonicalId)
+      map.set(app.id, canonicalId)
+  }
+  return map
+})
+
+function getDefaultHomeApps() {
+  return homeApps.value.filter((app) => {
+    const appId = app.slug || app.id
+    return Boolean(appId && getApp(appId))
+  })
+}
+
+function initDefaultHomeScreen() {
+  if (homeScreenStore.installedApps.length > 0)
+    return
+  homeScreenStore.initWithDefaults(getDefaultHomeApps())
+}
+
+function normalizeAppList(apps: InstalledApp[]) {
+  const seen = new Set<string>()
+  const normalized: InstalledApp[] = []
+  let changed = false
+
+  for (const app of apps) {
+    const rawAppId = app.appId?.trim()
+    const migratedAppId = rawAppId ? legacyHomeAppIdMap.value.get(rawAppId) : undefined
+    const appId = migratedAppId || rawAppId
+
+    if (!appId || !getApp(appId) || seen.has(appId)) {
+      changed = true
+      continue
+    }
+
+    if (appId !== app.appId)
+      changed = true
+
+    seen.add(appId)
+    normalized.push({ appId })
+  }
+
+  return { normalized, changed: changed || normalized.length !== apps.length }
+}
+
+function normalizeHomeScreenApps() {
+  const installed = normalizeAppList(homeScreenStore.installedApps)
+  const dock = normalizeAppList(homeScreenStore.dockApps)
+
+  if (installed.changed)
+    homeScreenStore.updateInstalledApps(installed.normalized)
+  if (dock.changed)
+    homeScreenStore.updateDockApps(dock.normalized)
+
+  return installed.changed || dock.changed
+}
+
+const visibleHomeScreenPages = computed(() => {
+  const pages = homeScreenStore.pagedApps
+    .map(page => page.filter(app => Boolean(resolveApp(app))))
+    .filter(page => page.length > 0)
+
+  return pages.length > 0 ? pages : [[]]
+})
+
+const visibleDockApps = computed(() => homeScreenStore.dockApps.filter(app => Boolean(resolveApp(app))))
+
+/** 主屏幕是否为空（无可解析应用且非搜索态时展示空状态引导） */
+const isHomeEmpty = computed(() => visibleHomeScreenPages.value.every(page => page.length === 0))
+
+const contextMenuResolvedApp = computed(() => contextMenuApp.value
+  ? resolveApp(contextMenuApp.value)
+  : null)
+
+const contextMenuPreview = computed(() => {
+  if (!contextMenuApp.value)
+    return null
+
+  if (contextMenuResolvedApp.value) {
+    return {
+      icon: contextMenuResolvedApp.value.logo,
+      emoji: contextMenuResolvedApp.value.emoji,
+      color: contextMenuResolvedApp.value.themeColor,
+      label: contextMenuResolvedApp.value.name,
+      placeholder: false,
+    }
+  }
+
+  return {
+    icon: '',
+    emoji: '📱',
+    color: '',
+    label: contextMenuApp.value.appId,
+    placeholder: true,
+  }
+})
+
+const contextMenuHiddenAppId = computed(() => (
+  contextMenuVisible.value && contextMenuIconRect.value && contextMenuPreview.value && contextMenuApp.value
+    ? contextMenuApp.value.appId
+    : undefined
+))
 
 /** 长按处理：应用 → 上下文菜单，空白 → 编辑模式 */
 function handleLongPress(app: InstalledApp | null, position: { x: number, y: number }, iconRect: DOMRect | null) {
@@ -377,9 +486,9 @@ function handleContentClick() {
 
         <AppHomeScreenGrid
           v-else
-          :pages="homeScreenStore.pagedApps"
+          :pages="visibleHomeScreenPages"
           :edit-mode="homeScreenStore.isEditMode"
-          :hidden-app-id="contextMenuVisible && contextMenuApp ? contextMenuApp.appId : undefined"
+          :hidden-app-id="contextMenuHiddenAppId"
           @open="handleOpenApp"
           @remove="handleRemoveApp"
           @long-press="handleLongPress"
@@ -389,10 +498,10 @@ function handleContentClick() {
 
     <!-- 底部 Dock 常用栏：固定在屏幕底部，类似 iOS Home Screen -->
     <AppHomeScreenDock
-      v-if="showDock"
-      :apps="homeScreenStore.dockApps"
+      v-if="showDock && visibleDockApps.length > 0"
+      :apps="visibleDockApps"
       :edit-mode="homeScreenStore.isEditMode"
-      :hidden-app-id="contextMenuVisible && contextMenuApp ? contextMenuApp.appId : undefined"
+      :hidden-app-id="contextMenuHiddenAppId"
       @open="handleOpenApp"
       @remove="handleRemoveApp"
       @update:apps="updateDock"
@@ -403,7 +512,8 @@ function handleContentClick() {
     <AppContextMenu
       :visible="contextMenuVisible"
       :position="contextMenuPosition"
-      :app="contextMenuApp ? resolveApp(contextMenuApp) : null"
+      :app="contextMenuResolvedApp"
+      :preview="contextMenuPreview"
       :icon-rect="contextMenuIconRect"
       @edit-home-screen="handleContextEditHomeScreen"
       @share="handleContextShare"

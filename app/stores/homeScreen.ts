@@ -176,9 +176,16 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     if (installedApps.value.length > 0)
       return // 已有数据不覆盖
 
-    installedApps.value = apps.map(app => ({
-      appId: app.id || app.slug,
-    }))
+    const seen = new Set<string>()
+    installedApps.value = apps.reduce<InstalledApp[]>((list, app) => {
+      const appId = app.slug || app.id
+      if (!appId || seen.has(appId))
+        return list
+
+      seen.add(appId)
+      list.push({ appId })
+      return list
+    }, [])
   }
 
   return {

@@ -28,7 +28,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { add, addCircleOutline, qrCodeOutline, searchOutline } from 'ionicons/icons'
-import { ALL_APPS, homeApps } from '~/constants/apps'
+import { homeApps } from '~/constants/apps'
 import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
 
 definePageMeta({
@@ -42,6 +42,7 @@ const userStore = useUserStore()
 const { loadFromCloud, reloadForAccount, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing } = useHomeScreen()
 const { shareApp } = useAppActions()
 const { openApp } = useOpenApp()
+const { catalog, getApp, ensureLoaded } = useAppCatalog()
 
 const searchQuery = ref('')
 
@@ -58,7 +59,7 @@ const searchResults = computed<YlfAppInfo[]>(() => {
   const q = searchQuery.value.trim().toLowerCase()
   if (!q)
     return []
-  return ALL_APPS.filter((app) => {
+  return catalog.value.filter((app) => {
     return [app.name, app.description, app.category, app.tagline]
       .some(field => field?.toLowerCase().includes(q))
   })
@@ -72,6 +73,9 @@ const isHomeEmpty = computed(() => homeScreenStore.installedApps.length === 0)
 onMounted(async () => {
   // 用静态数据初始化 Home Screen（首次使用时）
   homeScreenStore.initWithDefaults(homeApps.value)
+
+  // 确保应用目录已加载（集合优先，内置兜底）
+  ensureLoaded()
 
   // 异步加载云端数据
   loadFromCloud()
@@ -91,8 +95,7 @@ const displayRecentApps = computed(() => {
     return []
 
   return recent.slice(0, RECENT_DEFAULT_DISPLAY).map((r) => {
-    const app = ALL_APPS.find(a => a.id === r.appId || a.slug === r.appId)
-    return app || null
+    return getApp(r.appId) || null
   }).filter((a): a is YlfAppInfo => a !== null)
 })
 
@@ -172,9 +175,9 @@ const contextMenuPosition = ref({ x: 0, y: 0 })
 const contextMenuApp = ref<InstalledApp | null>(null)
 const contextMenuIconRect = ref<{ x: number, y: number, width: number, height: number } | null>(null)
 
-/** 解析 InstalledApp 为 YlfAppInfo */
+/** 解析 InstalledApp 为 YlfAppInfo（集合优先，内置兜底） */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
-  return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
+  return getApp(installed.appId) ?? null
 }
 
 /** 长按处理：应用 → 上下文菜单，空白 → 编辑模式 */

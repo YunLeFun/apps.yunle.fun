@@ -16,18 +16,22 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { ALL_APPS } from '~/constants/apps'
 
 const homeScreenStore = useHomeScreenStore()
+const { getApp, ensureLoaded } = useAppCatalog()
 const isEditMode = ref(false)
 
 const allRecentApps = computed(() => {
   return homeScreenStore.recentApps
     .map((r) => {
-      const app = ALL_APPS.find(a => a.id === r.appId || a.slug === r.appId)
+      const app = getApp(r.appId)
       return app ? { ...app, _recentAppId: r.appId } : null
     })
     .filter((a): a is YlfAppInfo & { _recentAppId: string } => a !== null)
+})
+
+onMounted(() => {
+  ensureLoaded()
 })
 
 function toggleEdit() {

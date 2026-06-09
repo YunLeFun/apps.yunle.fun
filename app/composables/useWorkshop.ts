@@ -1,15 +1,15 @@
 import type { YlfAppInfo } from '@yunlefun/types'
-import type { AppRecord } from '~/types/app'
 import { useDebounceFn } from '@vueuse/core'
-import { ALL_APPS, APP_CATEGORIES } from '~/constants/apps'
+import { APP_CATEGORIES } from '~/constants/apps'
 
 /**
  * 工坊数据 composable
- * 静态应用为主数据源（支持客户端分页），CloudBase 公开应用去重追加
+ *
+ * 候选数据源统一走 useAppCatalog().catalog（集合优先 + 内置兜底已在 catalog 内部合并），
+ * 本 composable 只负责分类筛选、搜索与客户端分页。
  */
 export function useWorkshop() {
-  const { app } = useCloudbase()
-  const db = app.database()
+  const { catalog, ensureLoaded } = useAppCatalog()
 
   /** 应用列表（当前已展示的） */
   const apps = useState<YlfAppInfo[]>('workshop:apps', () => [])
@@ -29,38 +29,19 @@ export function useWorkshop() {
   const initialized = useState('workshop:initialized', () => false)
 
   /**
-   * 全量候选列表（静态 + CloudBase 去重合并）
+   * 全量候选列表（来自 catalog，含分类 + 搜索过滤）
    * 重置查询时重新构建，懒加载时直接从这里取
    */
   const allCandidates = useState<YlfAppInfo[]>('workshop:candidates', () => [])
   /** 已从 allCandidates 展示到第几条 */
   const displayOffset = useState('workshop:displayOffset', () => 0)
-  /** CloudBase 是否已拉取完毕 */
-  const dbFetched = useState('workshop:dbFetched', () => false)
-  /** CloudBase 分页偏移 */
-  const dbOffset = useState('workshop:dbOffset', () => 0)
 
   /** 分类列表 */
   const categories = APP_CATEGORIES
 
-  /** 将 AppRecord 转为 YlfAppInfo */
-  function toAppInfo(record: AppRecord): YlfAppInfo {
-    return {
-      id: record._id,
-      slug: record.slug,
-      name: record.name,
-      description: record.description,
-      emoji: record.emoji || '📱',
-      themeColor: record.themeColor || '#007AFF',
-      logo: record.logo || undefined,
-      websiteUrl: record.websiteUrl || '',
-      category: record.category,
-    }
-  }
-
-  /** 获取当前分类 + 搜索词过滤后的静态应用列表 */
+  /** 获取当前分类 + 搜索词过滤后的候选应用列表（数据源为 catalog） */
   function getFilteredStaticApps(): YlfAppInfo[] {
-    let list = ALL_APPS
+    let list = catalog.value
 
     if (selectedCategory.value !== '全部') {
       list = list.filter(a => a.category === selectedCategory.value)
@@ -77,58 +58,6 @@ export function useWorkshop() {
     return list
   }
 
-  /** 将 CloudBase 数据去重追加到 allCandidates（以 slug 为唯一标识） */
-  function mergeDbApps(dbApps: YlfAppInfo[]) {
-    const existingSlugs = new Set(allCandidates.value.map(a => a.slug || a.id))
-    const newApps = dbApps.filter(a => !existingSlugs.has(a.slug || a.id))
-    allCandidates.value = [...allCandidates.value, ...newApps]
-  }
-
-  /** 从 CloudBase 后台拉取一批数据并合并（不阻塞 UI） */
-  async function fetchDbPage() {
-    if (dbFetched.value)
-      return
-
-    try {
-      const where: Record<string, any> = { isPublic: true, status: 'approved' }
-
-      if (selectedCategory.value !== '全部') {
-        where.category = selectedCategory.value
-      }
-
-      const keyword = searchQuery.value.trim()
-      if (keyword) {
-        where.name = db.RegExp({ regexp: keyword, options: 'i' })
-      }
-
-      const DB_PAGE_SIZE = 50
-      const { data } = await db
-        .collection('apps')
-        .where(where)
-        .orderBy('updatedAt', 'desc')
-        .skip(dbOffset.value)
-        .limit(DB_PAGE_SIZE)
-        .get()
-
-      if (data && data.length > 0) {
-        const newApps = (data as AppRecord[]).map(toAppInfo)
-        mergeDbApps(newApps)
-        dbOffset.value += data.length
-
-        if (data.length < DB_PAGE_SIZE) {
-          dbFetched.value = true
-        }
-      }
-      else {
-        dbFetched.value = true
-      }
-    }
-    catch (e: any) {
-      console.warn('[Workshop] fetchDbPage failed:', e?.error || e?.message || e)
-      dbFetched.value = true
-    }
-  }
-
   /** 展示 allCandidates 中的下一页 */
   function showNextPage() {
     const nextSlice = allCandidates.value.slice(
@@ -138,8 +67,8 @@ export function useWorkshop() {
     apps.value = [...apps.value, ...nextSlice]
     displayOffset.value += nextSlice.length
 
-    // 判断是否还有更多：候选列表未展示完，或 CloudBase 还没拉完
-    hasMore.value = displayOffset.value < allCandidates.value.length || !dbFetched.value
+    // 候选列表未展示完则还有更多
+    hasMore.value = displayOffset.value < allCandidates.value.length
   }
 
   /** 查询应用（reset=true 重置并重新加载，reset=false 加载更多） */
@@ -150,8 +79,6 @@ export function useWorkshop() {
       allCandidates.value = []
       displayOffset.value = 0
       hasMore.value = true
-      dbFetched.value = false
-      dbOffset.value = 0
       error.value = null
     }
 
@@ -162,19 +89,12 @@ export function useWorkshop() {
 
     try {
       if (reset) {
-        // 先用静态数据填充候选列表，立即展示第一页
+        // 确保 catalog 已加载（集合优先，内置兜底），再构建候选列表
+        await ensureLoaded()
         allCandidates.value = getFilteredStaticApps()
         showNextPage()
-
-        // 后台拉取 CloudBase 数据（不阻塞首屏）
-        fetchDbPage().catch(() => {})
       }
       else {
-        // 懒加载：如候选列表当前页不够，先尝试从 CloudBase 补充
-        const remaining = allCandidates.value.length - displayOffset.value
-        if (remaining < PAGE_SIZE && !dbFetched.value) {
-          await fetchDbPage()
-        }
         showNextPage()
       }
     }

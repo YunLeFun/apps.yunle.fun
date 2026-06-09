@@ -1,6 +1,5 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppRecord } from '~/types/app'
-import { ALL_APPS, getAppById } from '~/constants/apps'
 
 /**
  * 应用详情扩展数据
@@ -68,14 +67,16 @@ function recordToDetailData(record: AppRecord): AppDetailData {
 /**
  * 应用详情页数据获取 composable
  *
- * 采用静态优先 + CloudBase 补充的两级查找策略：
- * 1. 先在 ALL_APPS 中通过 id/slug 匹配（同步）
+ * 采用「集合优先 + CloudBase 直查兜底」的两级查找策略：
+ * 1. 先确保应用目录已加载，再用 catalog 通过 id/slug 匹配（集合优先，内置兜底）
  * 2. 未命中则通过 CloudBase where({ _id, isPublic: true }) 按文档 ID 查询
  * 3. 仍未命中则按 where({ slug, isPublic: true }) 查询
+ *    （用于公开目录之外 / 属主自己的应用）
  */
 export function useAppDetail(appId: MaybeRef<string>) {
   const { app: cloudbaseApp } = useCloudbase()
   const db = cloudbaseApp.database()
+  const { getApp, ensureLoaded } = useAppCatalog()
 
   const appData = ref<AppDetailData | null>(null)
   const loading = ref(true)
@@ -92,11 +93,11 @@ export function useAppDetail(appId: MaybeRef<string>) {
     loading.value = true
     error.value = null
 
-    // 1. 静态数据查找
-    const staticApp = getAppById(id)
-      || ALL_APPS.find(a => a.slug === id)
-    if (staticApp) {
-      appData.value = toDetailData(staticApp)
+    // 1. 应用目录查找（集合优先，内置兜底）
+    await ensureLoaded()
+    const catalogApp = getApp(id)
+    if (catalogApp) {
+      appData.value = toDetailData(catalogApp)
       loading.value = false
       return
     }

@@ -11,7 +11,6 @@ import type { YlfAppInfo } from '@yunlefun/types'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'
-import { ALL_APPS } from '~/constants/apps'
 
 interface Props {
   /** 分页后的应用列表 */
@@ -34,15 +33,20 @@ const emit = defineEmits<{
 }>()
 
 const homeScreenStore = useHomeScreenStore()
+const { getApp, ensureLoaded } = useAppCatalog()
 const currentPage = computed({
   get: () => homeScreenStore.currentPage,
   set: (v) => { homeScreenStore.currentPage = v },
 })
 
-/** 解析应用完整信息 */
+/** 解析应用完整信息（集合优先，内置兜底） */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
-  return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
+  return getApp(installed.appId) ?? null
 }
+
+onMounted(() => {
+  ensureLoaded()
+})
 
 /** 可拖拽的 model —— 必须是可写 ref，computed 只读会导致拖拽写入被丢弃 */
 const pageModels = ref<InstalledApp[][]>([])

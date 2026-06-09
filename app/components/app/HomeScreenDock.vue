@@ -8,7 +8,6 @@ import type { YlfAppInfo } from '@yunlefun/types'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'
-import { ALL_APPS } from '~/constants/apps'
 
 interface Props {
   /** Dock 应用列表 */
@@ -30,10 +29,16 @@ const emit = defineEmits<{
   'longPress': [app: InstalledApp, position: { x: number, y: number }, iconRect: DOMRect]
 }>()
 
-/** 解析应用信息 */
+const { getApp, ensureLoaded } = useAppCatalog()
+
+/** 解析应用信息（集合优先，内置兜底） */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
-  return ALL_APPS.find(a => a.id === installed.appId || a.slug === installed.appId) || null
+  return getApp(installed.appId) ?? null
 }
+
+onMounted(() => {
+  ensureLoaded()
+})
 
 function handleClick(installed: InstalledApp) {
   if (props.editMode)

@@ -10,6 +10,7 @@ export function useDiscovery() {
   const { app } = useCloudbase()
   const db = app.database()
   const _ = db.command
+  const { getApp, ensureLoaded } = useAppCatalog()
 
   /** 今日推荐应用 */
   const featuredApp = useState<YlfAppInfo>('discovery:featured', () => FEATURED_APP)
@@ -22,39 +23,9 @@ export function useDiscovery() {
   /** 错误信息 */
   const error = useState<string | null>('discovery:error', () => null)
 
-  /** 根据 appId（slug）解析完整应用信息：先查静态列表，再查 CloudBase */
-  async function resolveApp(appId: string): Promise<YlfAppInfo | null> {
-    // 先从静态列表查找
-    const staticApp = ALL_APPS.find(a => a.id === appId || a.slug === appId)
-    if (staticApp)
-      return staticApp
-
-    // 静态列表未命中，查 CloudBase
-    try {
-      const { data } = await db
-        .collection('apps')
-        .where({ slug: appId, isPublic: true, status: 'approved' })
-        .limit(1)
-        .get()
-      if (!data || data.length === 0)
-        return null
-      const record = data[0] as any
-      return {
-        id: record._id,
-        slug: record.slug,
-        name: record.name,
-        description: record.description,
-        emoji: record.emoji || '📱',
-        themeColor: record.themeColor || '#007AFF',
-        logo: record.logo || undefined,
-        websiteUrl: record.websiteUrl || '',
-        category: record.category,
-        rating: record.rating,
-      }
-    }
-    catch {
-      return null
-    }
+  /** 根据 appId（slug/id）解析完整应用信息（集合优先，内置兜底，由 catalog 内部保证） */
+  function resolveApp(appId: string): YlfAppInfo | null {
+    return getApp(appId) ?? null
   }
 
   /** 计算当周周一 00:00 时间戳 */
@@ -86,7 +57,7 @@ export function useDiscovery() {
       if (data && data.length > 0) {
         const record = data[0] as FeaturedAppRecord
         featuredMeta.value = record
-        const resolved = await resolveApp(record.appId)
+        const resolved = resolveApp(record.appId)
         if (resolved) {
           featuredApp.value = {
             ...resolved,
@@ -118,9 +89,7 @@ export function useDiscovery() {
         .get()
 
       if (data && data.length > 0) {
-        const resolved = await Promise.all(
-          (data as WeeklyChartRecord[]).map(record => resolveApp(record.appId)),
-        )
+        const resolved = (data as WeeklyChartRecord[]).map(record => resolveApp(record.appId))
         weeklyApps.value = resolved.filter((a): a is YlfAppInfo => a !== null)
         return
       }
@@ -137,6 +106,8 @@ export function useDiscovery() {
     loading.value = true
     error.value = null
     try {
+      // 确保应用目录已加载（集合优先，内置兜底），再解析 featured/weekly
+      await ensureLoaded()
       await Promise.all([loadFeatured(), loadWeeklyChart()])
     }
     catch (e: any) {

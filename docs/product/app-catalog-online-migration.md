@@ -133,28 +133,28 @@
 - 执行结果：**新增 37 + 更新 1（`cook` 同 slug 既存）**，集合内 approved+public = **38**。`AppRecord` 已补 `rating?/downloads?/size?/age?` 可选字段。
 - ⚠️ `cook` 既存文档被更新为规范数据，但其 `_openid` 保留原值（未覆盖）；如需归一到第一方 uid 可单独处理。
 
-### Phase 2 — admin「应用管理」模块（中等）
+### Phase 2 — admin「应用管理」模块 ✅ 已完成
 
-目的：做出「线上为准」的控制台（集合现在没人管）。仿 admin 钱包/运营模块结构：
+「线上为准」的控制台已落地（admin，仿钱包/运营模块）：
 
-- `server/api/apps/{list,upsert,delete,review}.post.ts`（管理端 SDK 直接读写，写接口 `requireUserSession`）。
-- `app/pages/apps/index.vue`：列表（按 status 过滤）+ 审核 pending（approve/reject + `rejectedReason`/`reviewedAt`）+ CRUD。
-- 菜单挂到「寻乐运营」或「业务运维」下。
+- `server/api/apps/{list,stats,review,upsert,delete}`（管理端 SDK 直接读写，写接口 `requireUserSession` + 审核人审计）。
+- `app/pages/apps/index.vue`：状态 Tab（待审/已通过/已驳回/全部）+ 待审角标 + 统计；审核 approve/reject（`rejectedReason`/`reviewedAt`/`reviewedBy`）+ 新建/编辑/删除/公开切换；slug 唯一校验。
+- 菜单挂在「寻乐运营」下。`server/types/apps.ts` 镜像 `AppRecord`/`AppStatus`。
 
-### Phase 3 — 前端在线化（较大，核心）
+### Phase 3 — 前端在线化 ✅ 已完成（核心）
 
-- 新增 `composables/useAppCatalog.ts`：统一目录出口，实现 §4 三层数据流 + localStorage 缓存（带 TTL/版本）。
-- 新增构建时快照生成 `scripts/gen-app-snapshot.ts`：查集合 approved+public → 生成 `app/constants/apps/generated.ts`；接入 `prebuild`（CI 联网能力见 §10）。
-- **翻转解析优先级**：`resolveApp`/`useAppDetail` 改为缓存/集合优先、内置快照兜底。
-- 改造 §3.3 的 8 个引用点：从 `import { ALL_APPS }` 改为 `useAppCatalog()`；`getAppById/getAppsByCategory` 基于目录数据重写。
-- `FEATURED_APP` 兜底改为「快照里第一个」或保留一个常量兜底。
+- ✅ `composables/useAppCatalog.ts`：统一目录出口，三层数据流（集合 → localStorage 缓存 → 内置快照 ALL_APPS），`ensureLoaded`/`getApp`/`getByCategory`，失败静默降级。`utils/appRecord.ts` 抽出 `recordToAppInfo`。
+- ✅ **翻转解析优先级**：`useDiscovery`/`useAppDetail`/`useWorkshop` 改为 catalog（集合优先）+ 内置兜底；详情页保留 CloudBase 直查兜底（属主可看自己未公开应用）。
+- ✅ 改造全部引用点（discovery、appDetail、workshop、HomeScreenGrid/Dock、recent、home）从 `import { ALL_APPS }` 改为 `useAppCatalog()`；workshop 移除冗余 db-append（catalog 已合并集合），客户端分页/搜索/分类行为不变。
+- ⏳ **延后**：构建时快照生成 `scripts/gen-app-snapshot.ts` + 接入 `prebuild`（§10 Q4 CI 联网未定）。当前以 `ALL_APPS` 作内置快照（已与集合一致，Phase 1 即源自它），未自动再生成。
+- 验证：`pnpm typecheck` / `pnpm lint` 均通过；离线兜底由 catalog 默认值（ALL_APPS）保证。
 
-### Phase 4 — 清理与回归
+### Phase 4 — 清理与回归（剩余）
 
-- `ALL_APPS` 由「手维护」退化为「生成快照」；删除手维护数组。
-- `builtin.ts`（系统外壳应用）**保持静态**，明确与目录分离。
+- ⏳ `ALL_APPS` 退化为「生成快照」并删手维护数组——依赖上面延后的快照生成脚本。
+- `builtin.ts`（系统外壳应用）**保持静态**，已与目录分离。
 - `data.ts` 的 `homeApps` 演示数据按需清理。
-- 回归重点：**离线启动**、**弱网首屏**、桌面已安装应用解析、工坊搜索/分类、详情页直达、深链。
+- 回归重点：**离线启动**、**弱网首屏**、桌面已安装应用解析、工坊搜索/分类、详情页直达、深链（建议真机/dev 走查一遍）。
 
 ## 7. 风险与回滚
 

@@ -104,24 +104,25 @@ const iconBoxStyle = computed(() => props.color
 }
 
 .app-icon-box.style-liquid-glass {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.28)), var(--ylf-fill-secondary);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.14) 62%), var(--ylf-fill-secondary);
   box-shadow:
-    0 14px 24px rgba(0, 0, 0, 0.14),
-    0 3px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.48);
-  backdrop-filter: blur(18px) saturate(170%);
-  -webkit-backdrop-filter: blur(18px) saturate(170%);
+    0 10px 22px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
 
 .app-icon-box.style-liquid-glass.has-color {
   background: var(--app-icon-color);
   background:
-    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.52), transparent 34%),
+    radial-gradient(130% 90% at 25% -12%, rgba(255, 255, 255, 0.3), transparent 52%),
     linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--app-icon-color) 74%, white 26%) 0%,
-      color-mix(in srgb, var(--app-icon-color) 88%, black 12%) 58%,
-      color-mix(in srgb, var(--app-icon-color) 72%, black 28%) 100%
+      160deg,
+      color-mix(in srgb, var(--app-icon-color) 88%, white 12%) 0%,
+      var(--app-icon-color) 52%,
+      color-mix(in srgb, var(--app-icon-color) 80%, black 20%) 100%
     );
 }
 
@@ -132,31 +133,36 @@ const iconBoxStyle = computed(() => props.color
   z-index: 1;
   border-radius: calc(var(--app-icon-radius) - 1px);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.62), transparent 42%),
-    linear-gradient(335deg, rgba(255, 255, 255, 0.18), transparent 45%);
-  opacity: 0.78;
+    linear-gradient(168deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.05) 38%, transparent 58%),
+    radial-gradient(90% 56% at 50% 118%, rgba(255, 255, 255, 0.14), transparent 64%);
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
 .dark .app-icon-box.style-liquid-glass {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05)), var(--ylf-fill-secondary);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 62%), var(--ylf-fill-secondary);
   box-shadow:
-    0 16px 28px rgba(0, 0, 0, 0.42),
-    0 3px 9px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 12px 24px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .dark .app-icon-box.style-liquid-glass.has-color {
   background: var(--app-icon-color);
   background:
-    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.36), transparent 34%),
+    radial-gradient(130% 90% at 25% -12%, rgba(255, 255, 255, 0.18), transparent 52%),
     linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--app-icon-color) 68%, white 32%) 0%,
-      color-mix(in srgb, var(--app-icon-color) 78%, black 22%) 62%,
-      color-mix(in srgb, var(--app-icon-color) 58%, black 42%) 100%
+      160deg,
+      color-mix(in srgb, var(--app-icon-color) 84%, white 16%) 0%,
+      color-mix(in srgb, var(--app-icon-color) 92%, black 8%) 55%,
+      color-mix(in srgb, var(--app-icon-color) 66%, black 34%) 100%
     );
+}
+
+.dark .app-icon-box.style-liquid-glass::before {
+  background:
+    linear-gradient(168deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 38%, transparent 58%),
+    radial-gradient(90% 56% at 50% 118%, rgba(255, 255, 255, 0.08), transparent 64%);
 }
 
 .app-icon-box.style-liquid-glass::after {
@@ -166,9 +172,10 @@ const iconBoxStyle = computed(() => props.color
   z-index: 3;
   border-radius: var(--app-icon-radius);
   box-shadow:
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.34),
-    inset 0 -18px 26px rgba(0, 0, 0, 0.12),
-    inset 0 0 24px rgba(255, 255, 255, 0.08);
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.28),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.32),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 -10px 16px rgba(0, 0, 0, 0.08);
   pointer-events: none;
 }
 
@@ -229,7 +236,7 @@ const iconBoxStyle = computed(() => props.color
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.18)) drop-shadow(0 5px 8px rgba(0, 0, 0, 0.24));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;

@@ -50,6 +50,16 @@ NUXT_PUBLIC_RUM_APP_ID=<staging-app-id>
 NUXT_PUBLIC_RUM_APP_ID=
 ```
 
+## 本地开发
+
+本地开发（`nuxt dev`）默认**不初始化、不上报**，避免消耗免费额度、污染线上数据。
+
+需要在本地联调 RUM 本身时，可强制开启（同时会打印调试日志）：
+
+```bash
+NUXT_PUBLIC_RUM_DEBUG=true
+```
+
 ## SDK 选型说明
 
 | SDK                 | 状态        | 备注                                 |

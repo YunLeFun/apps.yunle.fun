@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ReviewSummary } from '~/types/review'
 import {
   actionSheetController,
   IonBackButton,
@@ -11,14 +12,37 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { chevronForward, ellipsisHorizontal, share, star, starOutline } from 'ionicons/icons'
-import { YLF_CONTACT } from '~/constants/links'
 
 const route = useRoute()
 const router = useRouter()
-const appId = computed(() => (route.params as any).id as string)
+
+function resolveAppIdFromUrl(): string {
+  if (!import.meta.client)
+    return ''
+  const pathId = window.location.pathname.match(/\/app\/([^/]+)/)?.[1]
+  return pathId ? decodeURIComponent(pathId) : ''
+}
+
+const appId = computed(() => {
+  const routeId = route.params.id
+  const paramId = Array.isArray(routeId) ? routeId[0] : routeId
+  if (paramId)
+    return paramId
+
+  return resolveAppIdFromUrl()
+})
+const appReportOpen = ref(false)
+const reviewSummary = ref<ReviewSummary | null>(null)
 
 // 使用 useAppDetail composable 获取应用数据
 const { appData, loading, error, refresh } = useAppDetail(appId)
+
+const reviewAppKey = computed(() => appData.value?.slug || appData.value?.id || '')
+const displayRating = computed(() => {
+  if (reviewSummary.value && reviewSummary.value.count > 0)
+    return reviewSummary.value.average
+  return appData.value?.rating || 0
+})
 
 // 扩展展示数据
 const displayData = computed(() => {
@@ -51,16 +75,6 @@ const displayData = computed(() => {
           .join(' · ') || '更多信息持续完善中',
       },
     ],
-    reviews: [
-      {
-        id: 1,
-        user: '云游君',
-        rating: 5,
-        title: '非常好用的应用',
-        content: '界面简洁美观，功能强大。强烈推荐！',
-        date: '2天前',
-      },
-    ],
   }
 })
 
@@ -86,6 +100,10 @@ function renderStars(rating: number = 0) {
   return stars
 }
 
+function formatRating(rating: number) {
+  return Number.isInteger(rating) ? String(rating) : rating.toFixed(1)
+}
+
 // 打开应用
 function openApp() {
   if (!displayData.value?.websiteUrl)
@@ -107,20 +125,14 @@ async function shareApp() {
 }
 
 /**
- * 应用详情更多操作菜单（举报 / 复制链接）
+ * 应用详情更多操作菜单（举报）
  *
  * App Store 审核指南 1.2 要求 UGC 内容必须提供举报入口
- * 当前简化为 mailto 链接，后续 M2 阶段可接 CloudBase reports 集合
  */
 async function openMoreMenu() {
   const app = appData.value
   if (!app)
     return
-  const subject = encodeURIComponent(`举报应用：${app.name}（${app.slug || app.id}）`)
-  const body = encodeURIComponent(
-    `应用名称：${app.name}\n应用 ID：${app.id}\n应用 slug：${app.slug || ''}\n网址：${app.websiteUrl || ''}\n\n举报原因（请说明）：\n`,
-  )
-  const reportMailto = `mailto:${YLF_CONTACT.support.email}?subject=${subject}&body=${body}`
 
   const sheet = await actionSheetController.create({
     header: app.name,
@@ -129,7 +141,7 @@ async function openMoreMenu() {
         text: '举报此应用',
         role: 'destructive',
         handler: () => {
-          window.location.href = reportMailto
+          appReportOpen.value = true
         },
       },
       { text: '取消', role: 'cancel' },
@@ -195,11 +207,11 @@ async function openMoreMenu() {
               </p>
 
               <!-- 评分信息 -->
-              <div v-if="displayData.rating" class="app-rating-row">
+              <div v-if="displayRating" class="app-rating-row">
                 <div class="rating-stars">
-                  <span class="rating-number">{{ displayData.rating }}</span>
+                  <span class="rating-number">{{ formatRating(displayRating) }}</span>
                   <IonIcon
-                    v-for="(starIcon, idx) in renderStars(displayData.rating)"
+                    v-for="(starIcon, idx) in renderStars(displayRating)"
                     :key="idx"
                     :icon="starIcon"
                     class="star-icon"
@@ -216,15 +228,15 @@ async function openMoreMenu() {
 
           <!-- 应用信息栏 -->
           <div class="app-info-bar">
-            <div v-if="displayData.rating" class="info-item">
+            <div v-if="displayRating" class="info-item">
               <div class="info-value">
-                {{ displayData.rating }}
+                {{ formatRating(displayRating) }}
               </div>
               <div class="info-label">
                 评分
               </div>
             </div>
-            <div v-if="displayData.rating && (displayData.age || displayData.downloads)" class="info-divider" />
+            <div v-if="displayRating && (displayData.age || displayData.downloads)" class="info-divider" />
             <div v-if="displayData.age" class="info-item">
               <div class="info-value">
                 {{ displayData.age }}
@@ -242,7 +254,7 @@ async function openMoreMenu() {
                 下载量
               </div>
             </div>
-            <div v-if="displayData.downloads || displayData.age || displayData.rating" class="info-divider" />
+            <div v-if="displayData.downloads || displayData.age || displayRating" class="info-divider" />
             <div class="info-item">
               <div class="info-value">
                 {{ displayData.developer }}
@@ -320,83 +332,11 @@ async function openMoreMenu() {
           </div>
         </div>
 
-        <!-- 评分与评论 -->
-        <div v-if="displayData.rating" class="section">
-          <div class="section-header">
-            <h2 class="section-title">
-              评分与评论
-            </h2>
-            <button class="see-all-btn">
-              查看全部
-              <IonIcon :icon="chevronForward" />
-            </button>
-          </div>
-
-          <div class="rating-summary">
-            <div class="rating-score">
-              <div class="score-number">
-                {{ displayData.rating }}
-              </div>
-              <div class="score-label">
-                满分 5 分
-              </div>
-              <div class="rating-stars-small">
-                <IonIcon
-                  v-for="(starIcon, idx) in renderStars(displayData.rating)"
-                  :key="idx"
-                  :icon="starIcon"
-                  class="star-icon-small"
-                />
-              </div>
-            </div>
-
-            <div class="rating-bars">
-              <div v-for="i in 5" :key="i" class="rating-bar-row">
-                <IonIcon :icon="star" class="bar-star" />
-                <div class="bar-container">
-                  <div class="bar-fill" :style="{ width: `${(6 - i) * 18}%` }" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 评论列表 -->
-          <div class="reviews-list">
-            <div v-for="review in displayData.reviews" :key="review.id" class="review-item">
-              <div class="review-header">
-                <div class="reviewer-info">
-                  <div class="reviewer-avatar">
-                    {{ review.user.charAt(0) }}
-                  </div>
-                  <div class="reviewer-details">
-                    <div class="reviewer-name">
-                      {{ review.user }}
-                    </div>
-                    <div class="review-stars">
-                      <IonIcon
-                        v-for="(starIcon, idx) in renderStars(review.rating)"
-                        :key="idx"
-                        :icon="starIcon"
-                        class="review-star"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div class="review-date">
-                  {{ review.date }}
-                </div>
-              </div>
-              <div class="review-content">
-                <h4 class="review-title">
-                  {{ review.title }}
-                </h4>
-                <p class="review-text">
-                  {{ review.content }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AppReviewSection
+          :app-key="reviewAppKey"
+          :fallback-rating="displayData.rating"
+          @summary="reviewSummary = $event"
+        />
 
         <!-- 信息 -->
         <div class="section">
@@ -444,6 +384,14 @@ async function openMoreMenu() {
             </div>
           </div>
         </div>
+
+        <AppReportSheet
+          :is-open="appReportOpen"
+          target-type="app"
+          :target-id="reviewAppKey"
+          :app-key="reviewAppKey"
+          @close="appReportOpen = false"
+        />
       </div>
 
       <div v-else class="app-detail-container">

@@ -1,0 +1,7 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "app_reports",
+  "permission": "CUSTOM",
+  "securityRule": "{\"read\":false,\"create\":false,\"update\":false,\"delete\":false}"
+}

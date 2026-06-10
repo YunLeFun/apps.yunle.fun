@@ -8,6 +8,7 @@ import consola from 'consola'
  *
  * 启用条件：
  *   - 环境变量 NUXT_PUBLIC_RUM_APP_ID 非空（默认已填线上 AppID）
+ *   - 非本地开发环境（本地默认不上报；设 NUXT_PUBLIC_RUM_DEBUG=true 可强制开启用于联调）
  *
  * 默认行为：
  *   - 上报 JS 异常 / unhandledrejection / 资源加载错误
@@ -24,6 +25,11 @@ export default defineNuxtPlugin(() => {
   if (!appId) {
     if (debug)
       consola.info('[RUM] disabled: rumAppId 未配置')
+    return
+  }
+
+  // 本地开发默认不上报，避免消耗免费额度、污染线上数据；rumDebug=true 时强制开启用于联调
+  if (import.meta.dev && !debug) {
     return
   }
 

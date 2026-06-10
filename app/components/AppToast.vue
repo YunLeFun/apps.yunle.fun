@@ -31,7 +31,13 @@ const iconColor = computed(() => {
 </script>
 
 <template>
-  <k-toast position="center" :opened="opened">
+  <k-toast
+    class="app-toast app-toast--top"
+    position="center"
+    :opened="opened"
+    role="status"
+    aria-live="polite"
+  >
     <div class="flex items-center gap-2 shrink">
       <IonIcon :icon="icon" :class="iconColor" class="text-lg shrink-0" />
       <span class="text-sm">{{ message }}</span>
@@ -43,3 +49,15 @@ const iconColor = computed(() => {
     </template>
   </k-toast>
 </template>
+
+<style scoped>
+.app-toast--top {
+  top: calc(var(--ion-safe-area-top, env(safe-area-inset-top, 0px)) + 12px) !important;
+  bottom: auto !important;
+}
+
+.app-toast--top.translate-y-full {
+  --tw-translate-y: -100% !important;
+  translate: 0 -100% !important;
+}
+</style>

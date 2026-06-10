@@ -174,10 +174,15 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    tencentApiSecretId: '',
+    tencentApiSecretKey: '',
+    tmsRegion: 'ap-guangzhou',
+    tmsBizType: '',
     public: {
       tcbEnvId: '',
       cloudbaseRegion: '',
       cloudbaseAccessKey: '',
+      apiBaseUrl: '',
 
       wxOpenAppId: 'wx4489293d76593a67',
       // wxOpenRedirectUri: 'https://api.yunle.fun/wx/redirect_uri',

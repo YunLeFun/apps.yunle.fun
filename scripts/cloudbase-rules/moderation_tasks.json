@@ -1,0 +1,7 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "moderation_tasks",
+  "permission": "CUSTOM",
+  "securityRule": "{\"read\":false,\"create\":false,\"update\":false,\"delete\":false}"
+}

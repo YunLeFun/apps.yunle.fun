@@ -30,7 +30,10 @@ pnpm audit                      # 查看完整列表
 
 - `protobufjs ^7.6.2` — critical 任意代码执行（飞书 SDK 带的，仅部署用）
 - `axios ^1.17.0` — 多个 SSRF / 原型污染 / MITM
-- `tar ^7.5.16` — node-tar 多个路径穿越 / 符号链接（Capacitor CLI、node-pre-gyp）
+- `tar ^7.5.16` — node-tar 多个路径穿越 / 符号链接（Capacitor CLI、node-pre-gyp）。
+  注意：`@capacitor/cli` < 7.5.0 按 tar v6 API 调用，在此 override 下 `cap sync` 会报
+  `Cannot read properties of undefined (reading 'extract')`，需保持 `@capacitor/cli >= 7.5.0`
+  （其 tar 依赖已升至 ^7.5.3）。
 - `shelljs ^0.8.5`、`@xmldom/xmldom ^0.8.13`、`serialize-javascript ^7.0.5`、
   `flatted ^3.4.2`、`h3 ^1.15.11`、`picomatch`、`lodash ^4.18.1`、`ws ^8.21.0`、
   `defu`、`simple-git`、`basic-ftp`、`fast-uri`、`js-cookie`、`tmp`、

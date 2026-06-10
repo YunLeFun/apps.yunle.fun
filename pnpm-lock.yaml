@@ -5,36 +5,36 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  semver@<7.0.0: '>=7.7.4'
-  protobufjs: ^7.6.2
-  '@protobufjs/utf8': ^1.1.1
-  axios: ^1.17.0
-  tar: ^7.5.16
-  shelljs: ^0.8.5
-  '@xmldom/xmldom': ^0.8.13
-  serialize-javascript: ^7.0.5
-  flatted: ^3.4.2
-  h3: ^1.15.11
-  picomatch@<2.3.2: ^2.3.2
-  picomatch@>=4.0.0 <4.0.4: ^4.0.4
-  lodash: ^4.18.1
-  defu: ^6.1.7
-  basic-ftp: ^5.3.1
-  simple-git: ^3.36.0
-  fast-uri: ^3.1.2
-  js-cookie: ^3.0.8
-  tmp: ^0.2.7
-  ws: ^8.21.0
   '@babel/plugin-transform-modules-systemjs': ^7.29.7
-  unhead: ^2.1.13
-  ip-address: ^10.1.1
-  qs: ^6.15.2
-  yaml: ^2.8.3
-  follow-redirects: ^1.16.0
-  postcss: ^8.5.10
+  '@protobufjs/utf8': ^1.1.1
+  '@xmldom/xmldom': ^0.8.13
+  axios: ^1.17.0
+  basic-ftp: ^5.3.1
   brace-expansion@<1.1.13: ^1.1.13
   brace-expansion@>=2.0.0 <2.0.3: ^2.0.3
   brace-expansion@>=5.0.0 <5.0.6: ^5.0.6
+  defu: ^6.1.7
+  fast-uri: ^3.1.2
+  flatted: ^3.4.2
+  follow-redirects: ^1.16.0
+  h3: ^1.15.11
+  ip-address: ^10.1.1
+  js-cookie: ^3.0.8
+  lodash: ^4.18.1
+  picomatch@<2.3.2: ^2.3.2
+  picomatch@>=4.0.0 <4.0.4: ^4.0.4
+  postcss: ^8.5.10
+  protobufjs: ^7.6.2
+  qs: ^6.15.2
+  semver@<7.0.0: '>=7.7.4'
+  serialize-javascript: ^7.0.5
+  shelljs: ^0.8.5
+  simple-git: ^3.36.0
+  tar: ^7.5.16
+  tmp: ^0.2.7
+  unhead: ^2.1.13
+  ws: ^8.21.0
+  yaml: ^2.8.3
 
 importers:
 
@@ -42,28 +42,31 @@ importers:
     dependencies:
       '@capacitor/app':
         specifier: 7.1.0
-        version: 7.1.0(@capacitor/core@7.4.3)
+        version: 7.1.0(@capacitor/core@7.6.6)
       '@capacitor/barcode-scanner':
         specifier: ^3.0.2
-        version: 3.0.2(@capacitor/core@7.4.3)
+        version: 3.0.2(@capacitor/core@7.6.6)
       '@capacitor/browser':
         specifier: ^8.0.3
-        version: 8.0.3(@capacitor/core@7.4.3)
+        version: 8.0.3(@capacitor/core@7.6.6)
       '@capacitor/core':
-        specifier: 7.4.3
-        version: 7.4.3
+        specifier: 7.6.6
+        version: 7.6.6
       '@capacitor/haptics':
         specifier: 7.0.2
-        version: 7.0.2(@capacitor/core@7.4.3)
+        version: 7.0.2(@capacitor/core@7.6.6)
       '@capacitor/ios':
-        specifier: 7.4.3
-        version: 7.4.3(@capacitor/core@7.4.3)
+        specifier: 7.6.6
+        version: 7.6.6(@capacitor/core@7.6.6)
       '@capacitor/keyboard':
         specifier: 7.0.3
-        version: 7.0.3(@capacitor/core@7.4.3)
+        version: 7.0.3(@capacitor/core@7.6.6)
       '@capacitor/status-bar':
         specifier: 7.0.3
-        version: 7.0.3(@capacitor/core@7.4.3)
+        version: 7.0.3(@capacitor/core@7.6.6)
+      '@cloudbase/node-sdk':
+        specifier: ^3.18.1
+        version: 3.18.1
       '@yunlefun/types':
         specifier: ^0.1.0
         version: 0.1.0
@@ -82,6 +85,9 @@ importers:
       ofetch:
         specifier: ^1.5.1
         version: 1.5.1
+      tencentcloud-sdk-nodejs-tms:
+        specifier: ^4.1.240
+        version: 4.1.240
       vconsole:
         specifier: ^3.15.1
         version: 3.15.1
@@ -93,11 +99,11 @@ importers:
         specifier: ^8.3.0
         version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.4.1(jiti@2.7.0))(typescript@5.9.3))(@typescript-eslint/typescript-estree@8.60.0(typescript@5.9.3))(@typescript-eslint/utils@8.60.0(eslint@10.4.1(jiti@2.7.0))(typescript@5.9.3))(@unocss/eslint-plugin@66.7.0(eslint@10.4.1(jiti@2.7.0))(typescript@5.9.3))(@vue/compiler-sfc@3.5.35)(eslint-plugin-format@2.0.1(eslint@10.4.1(jiti@2.7.0)))(eslint@10.4.1(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@5.9.3))(typescript@5.9.3)(vitest@4.1.7)
       '@capacitor/cli':
-        specifier: 7.4.3
-        version: 7.4.3
+        specifier: 7.6.6
+        version: 7.6.6
       '@cloudbase/js-sdk':
         specifier: ^3.3.13
-        version: 3.3.13(ws@8.21.0)
+        version: 3.3.13(@cloudbase/signature-nodejs@2.2.0)(jsonwebtoken@9.0.3)(ws@8.21.0)
       '@iconify-json/carbon':
         specifier: ^1.2.22
         version: 1.2.22
@@ -1031,23 +1037,23 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/cli@7.4.3':
-    resolution: {integrity: sha512-SWozpdDgrbQ/ry1nIapugDFvE9z+l22BmU/+fpgL2Zv5487hGdXvCX5+1SluuFBP3IPpx6b4LjsKnBigyJoUWg==}
+  '@capacitor/cli@7.6.6':
+    resolution: {integrity: sha512-gZm1c40trhPKi4r6cGdgd/WaW20+yunq5XEmWm/ylHzG6Qd72gAxarihIdXptoxTz4rs9JIU6f60EnTNncvXeQ==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
-  '@capacitor/core@7.4.3':
-    resolution: {integrity: sha512-wCWr8fQ9Wxn0466vPg7nMn0tivbNVjNy1yL4GvDSIZuZx7UpU2HeVGNe9QjN/quEd+YLRFeKEBLBw619VqUiNg==}
+  '@capacitor/core@7.6.6':
+    resolution: {integrity: sha512-TCxNTpi9bWlM31n8hkLKGrugDGcgJpSqafpDoEEn/Hj6KWxjxes7m0ASfrZ2pOmsqMNGjE6bYGZr905CueVAIw==}
 
   '@capacitor/haptics@7.0.2':
     resolution: {integrity: sha512-vqfeEM6s2zMgLjpITCTUIy7P/hadq/Gr5E/RClFgMJPB41Y5FsqOKD+j85/uwh8N2cf/aWaPeXUmjnTzJbEB2g==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/ios@7.4.3':
-    resolution: {integrity: sha512-VNm7cHODgh3KK/4ZC2rXU9gBlvHii/mYFLI+XMXwq24nhB679QxHhz+pUuI7PatYoM2q4MAL0NR/dRgehKCaSA==}
+  '@capacitor/ios@7.6.6':
+    resolution: {integrity: sha512-IjryNsqjYTs+YbVeIg/hpwgKtbEIMcUOblr75pdNSuE4bA++CgO2avqQi0cyviUHoaSa7e8L2hqvwNzghfor6g==}
     peerDependencies:
-      '@capacitor/core': ^7.4.0
+      '@capacitor/core': ^7.6.0
 
   '@capacitor/keyboard@7.0.3':
     resolution: {integrity: sha512-BIBKjmky5rOYNhvYhNeDi0MMvjwYZ6YF9JoCYcGKvKY+XLJKtezsEL78XfOlgWZBkbfR8uq3tzktY6PqgoYLKA==}
@@ -1091,6 +1097,9 @@ packages:
   '@cloudbase/adapter-wx_mp@1.3.1':
     resolution: {integrity: sha512-rS0N1aD1a0zc421ds17/HzM4RChQ6T2ixMz87bhPJ1yveqJt/KUqYxiXJDWhZ803wwTmJs8aqNkgugsNusNhbg==}
 
+  '@cloudbase/ai@2.23.0':
+    resolution: {integrity: sha512-0cXwq+LZHgA0vfSUudvcM0r1jZRyQmN+Dco6Dluw2djS1G0VnIlIiP276ToivCCNS83W5lvv7PKqspY+SeAj/A==}
+
   '@cloudbase/ai@3.3.13':
     resolution: {integrity: sha512-6mYxLw8XVOPh1tIugqAlJstibE5VL2BO62BQBtz6lzc/bicva3xnaz9T6f6h9t43hbmT+8XIO9flBzADw2Vgow==}
 
@@ -1099,6 +1108,9 @@ packages:
 
   '@cloudbase/apis@3.3.13':
     resolution: {integrity: sha512-jkpr99ywF7PS8M/PB9phDHs5WHkz4KHaO0+QDrG2z6ySltyxWyWT6bjTHeqlncL5xgHgBgTTU7z32qOG/yRlZg==}
+
+  '@cloudbase/app@2.23.0':
+    resolution: {integrity: sha512-H7KMKhzv4sVv7OpIkjh77DFQKY395aQ9NeScdTvYXD2b2u201YHKVprLaVRgP4N4kNj+xAH6WeA1bEM1OSzZaQ==}
 
   '@cloudbase/app@3.3.13':
     resolution: {integrity: sha512-MbzkBaOyL2ptehJGub691YV2VJdPwtigaoSlj25lnu9G1y3QmPe+KPugwugSTK9ZaU5aamb7wJabcan6NGiN0Q==}
@@ -1123,6 +1135,9 @@ packages:
   '@cloudbase/database@0.12.1':
     resolution: {integrity: sha512-SLZ1j0t6IIkTNdXnqIvLZLHNARtLREIuXP/TuR17Fssa00KYCkm3HS6gkEx3ve7qf6VH79G3vpTD4ODKq4efLA==}
 
+  '@cloudbase/database@1.4.3':
+    resolution: {integrity: sha512-JzmdsGjy9LwzSQQ0Fv4OlNHNK61BRXdJSembTpy4408AQA3q2Ip3N5eB3v9OpAlFMvP/6MGmOQ/ZuUPKfJddJA==}
+
   '@cloudbase/functions@3.3.13':
     resolution: {integrity: sha512-/dXLZYOXcKOJn4WK3i3LujH3auw8+jrO+7PMrFa/1YsyoVUa+iY0OOZreSiVTNfSQkaaHiDt4KEy28HzMnxlGg==}
 
@@ -1135,6 +1150,10 @@ packages:
   '@cloudbase/mysql@3.3.13':
     resolution: {integrity: sha512-TiDNXy41XsalWeJESSLer36QLn/s73rUw6gEudvZUnlUDWZWw5gqK/w+xGULLsdfX8pGb3pmVudEAmRgBrK2Gg==}
 
+  '@cloudbase/node-sdk@3.18.1':
+    resolution: {integrity: sha512-2EpGWY/DjvDzt8riCoeV9lTtispIfug2v9iiS7xouZZB95AjsQ+kywd86rMntIZ1qRzUCjbcbJn4+QCMWobgQQ==}
+    engines: {node: '>=12'}
+
   '@cloudbase/oauth@3.3.13':
     resolution: {integrity: sha512-x8FsIl1HNITj3D9REuEtpwhdpXnUfoapWiOECrW6Mp8sgKO2+zdCB6uF/oqfLp4Q3r5hlXHqsKl51eQg5mMDNg==}
     peerDependencies:
@@ -1143,11 +1162,17 @@ packages:
   '@cloudbase/realtime@3.3.13':
     resolution: {integrity: sha512-KXvi2TphLqW8eJbowa1SmdZBWWK4d8I88VxRftRx2qVWawpwGKZTup37m4h+zaOJY0RlaW4AkZ+9VFXW5FpjsQ==}
 
+  '@cloudbase/signature-nodejs@2.2.0':
+    resolution: {integrity: sha512-2y2rieOpJNnBA2MW7sLJKek3iFOjgr8TNicw5qjBkcdVczLR0cFzxMhip75NLCwarFTIAONE3oeNxoQ19eVHcA==}
+
   '@cloudbase/storage@3.3.13':
     resolution: {integrity: sha512-BFx1mAub/Vdm4Eb8BDYHuYEoU8PxY8J/DXIfIn0YUgV7SFFnQSVLOh/vn2yylAgtHOODsYJJxTPmOe25yUsh2Q==}
 
   '@cloudbase/types@2.20.3':
     resolution: {integrity: sha512-oBFj5hJ4eFc32OoOiE8UopL5lDacZReg56yNlbPGhoRLGbNe2Wk4QV+VeIo2n/TtVzo6Ctb7hQGmJ+peECIiuQ==}
+
+  '@cloudbase/types@2.23.0':
+    resolution: {integrity: sha512-FvqO+lspbzJWAL/fI2QwC2/HVgj523jxdqtWMjDF9ghiZ+JBIb2edLb1tbH5OhiMTvL9CW22Vl/0RJd93vR5ew==}
 
   '@cloudbase/types@3.3.13':
     resolution: {integrity: sha512-AJ/qoiKZTwfJzl8KssZjqDkOF6YNGzNBNuCYe/NmEe+XOOdd7b1K6yB933ORJXvqOph4umk+POcLCiOKXG1Fow==}
@@ -1155,8 +1180,14 @@ packages:
   '@cloudbase/utilities@2.20.3':
     resolution: {integrity: sha512-SjRok91CfqiEHk1Mjzc9uW61CewssW3c8pjs+EPHb2et/C764W5mt3Gr2SP5yEw23X1HS50uNHXfWZu7ZbG4AQ==}
 
+  '@cloudbase/utilities@2.23.0':
+    resolution: {integrity: sha512-J+1TYH3Pbyn2GY0QamvFdzFoxZcPvvkDMaE2ivUdTiXg2LfxOO0RMYMv89afKagrtiZTN4hKCIV7rpAfgrDmzQ==}
+
   '@cloudbase/utilities@3.3.13':
     resolution: {integrity: sha512-cf+8Kg0SZG+IllnGyt+R7LyopClSKp6iNPYkfJGoWkSuBwaFc1ZRFgb8C1gMfVlZrxjyRATKuu7CWIZq2zrtPQ==}
+
+  '@cloudbase/wx-cloud-client-sdk@1.7.1':
+    resolution: {integrity: sha512-NzLOoYDAeoRh2lRjCtvr6yXu4KPVHqZtPxyv70e+3b2+dZIDE5S5gtU8daE7xS5u4TwPqKB/E2vmgRTYOsCS9w==}
 
   '@cloudbase/wx-cloud-client-sdk@1.8.6-beta.1':
     resolution: {integrity: sha512-KHu2Pe11Cgu+AZJ7kNZtsana0nG/1xpj1vsaydkMpVLnmdfWNk4PttkItpTPHxhhd1Saxvn3ztj+j5QxzaNtqg==}
@@ -3546,6 +3577,10 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tootallnate/once@2.0.1':
+    resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
+    engines: {node: '>= 10'}
+
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
@@ -3554,6 +3589,9 @@ packages:
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
+
+  '@types/clone@2.1.4':
+    resolution: {integrity: sha512-NKRWaEGaVGVLnGLB2GazvDaZnyweW9FJLLFL5LhywGJB3aqGMT9R/EUoJoSRP4nzofYnZysuDmrEJtJdAqUOtQ==}
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
@@ -4693,6 +4731,10 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
+  bson@4.7.2:
+    resolution: {integrity: sha512-Ry9wCtIZ5kGqkJoi6aD8KjxFZEx78guTQDnpXWiNthsxzrxAK/i8E6pCHAIZTbaEFWcOCvbecMukfK7XUvyLpQ==}
+    engines: {node: '>=6.9.0'}
+
   bson@7.2.0:
     resolution: {integrity: sha512-YCEo7KjMlbNlyHhz7zAZNDpIpQbd+wOEHJYezv0nMYTn4x31eIUM2yomNNubclAt63dObUzKHWsBLJ9QcZNSnQ==}
     engines: {node: '>=20.19.0'}
@@ -4704,8 +4746,14 @@ packages:
     resolution: {integrity: sha512-Db1SbgBS/fg/392AblrMJk97KggmvYhr4pB5ZIMTWtaivCPMWLkmb7m21cJvpvgK+J3nsU2CmmixNBZx4vFj/w==}
     engines: {node: '>=8.0.0'}
 
+  buffer-equal-constant-time@1.0.1:
+    resolution: {integrity: sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==}
+
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
+  buffer@5.7.1:
+    resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
@@ -4862,6 +4910,10 @@ packages:
   cliui@9.0.1:
     resolution: {integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==}
     engines: {node: '>=20'}
+
+  clone@2.1.2:
+    resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
+    engines: {node: '>=0.8'}
 
   cloudflare@3.5.0:
     resolution: {integrity: sha512-sIRZ4K2WQf8tZ74gZGan3u6+50VY1cB6uNc9XIGGLQa7Ti/nrvvadirm8EPVFlQMG11PUXPsX1Buheh4MPLiew==}
@@ -5253,6 +5305,9 @@ packages:
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
+
+  ecdsa-sig-formatter@1.0.11:
+    resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
 
   editorconfig@1.0.7:
     resolution: {integrity: sha512-e0GOtq/aTQhVdNyDU9e02+wz9oDDM+SIOQxWME2QRjzRX5yyLAuHDE+0aE8vHb9XRC8XD37eO2u57+F09JqFhw==}
@@ -6184,6 +6239,10 @@ packages:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
 
+  http-proxy-agent@5.0.0:
+    resolution: {integrity: sha512-n2hY8YdoRE1i7r6M0w9DIw5GgZN0G25P8zLCRQ8rjXtTU3vsNFBI/vWK/UIeE6g5MUUz6avwAPXmL6Fy9D/90w==}
+    engines: {node: '>= 6'}
+
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
@@ -6265,6 +6324,10 @@ packages:
 
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
+
+  ini@2.0.0:
+    resolution: {integrity: sha512-7PnF4oN3CvZF23ADhA5wRaYEQpJ8qygSkbtTXWBeXWXmEVRXK+1ITciHWwHhsjv1TmW0MgacIv6hEi5pX5NQdA==}
+    engines: {node: '>=10'}
 
   ini@4.1.1:
     resolution: {integrity: sha512-QQnnxNyfvmHFIsj7gkPcYymR8Jdw/o7mp5ZFihxn6h8Ci6fh3Dx4E1gPjpQEpIuPo9XVNY/ZUwh4BPMjGyL01g==}
@@ -6626,8 +6689,18 @@ packages:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
 
+  jsonwebtoken@9.0.3:
+    resolution: {integrity: sha512-MT/xP0CrubFRNLNKvxJ2BYfy53Zkm++5bX9dtuPbqAeQpTVe0MQTFhao8+Cp//EmJp244xt6Drw/GVEGCUj40g==}
+    engines: {node: '>=12', npm: '>=6'}
+
   jsqr@1.4.0:
     resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
+
+  jwa@2.0.1:
+    resolution: {integrity: sha512-hRF04fqJIP8Abbkq5NKGN0Bbr3JxlQ+qhZufXVr0DvujKy93ZCbXZMHDL4EOtodSbCWxOqR8MS1tXA5hwqCXDg==}
+
+  jws@4.0.1:
+    resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
 
   jwt-decode@3.1.2:
     resolution: {integrity: sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==}
@@ -6803,6 +6876,9 @@ packages:
   lodash.assign@3.2.0:
     resolution: {integrity: sha512-/VVxzgGBmbphasTg51FrztxQJ/VgAUpol6zmJuSVSGcNg4g7FA4z7rQV8Ovr9V3vFBNWZhvKWHfpAytjTVUfFA==}
 
+  lodash.clonedeep@4.5.0:
+    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
+
   lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
 
@@ -6812,11 +6888,29 @@ packages:
   lodash.identity@3.0.0:
     resolution: {integrity: sha512-AupTIzdLQxJS5wIYUQlgGyk2XRTfGXA+MCghDHqZk0pzUNYvd3EESS6dkChNauNYVIutcb0dfHw1ri9Q1yPV8Q==}
 
+  lodash.includes@4.3.0:
+    resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
+
   lodash.isarguments@3.1.0:
     resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
 
   lodash.isarray@3.0.4:
     resolution: {integrity: sha512-JwObCrNJuT0Nnbuecmqr5DgtuBppuCvGD9lxjFpAzwnVtdGoDQ1zig+5W8k5/6Gcn0gZ3936HDAlGd28i7sOGQ==}
+
+  lodash.isboolean@3.0.3:
+    resolution: {integrity: sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==}
+
+  lodash.isinteger@4.0.4:
+    resolution: {integrity: sha512-DBwtEWN2caHQ9/imiNeEA5ys1JoRtRfY3d7V9wkqtbycnAmTvRRmbHKDV4a0EYc678/dia0jrte4tjYwVBaZUA==}
+
+  lodash.isnumber@3.0.3:
+    resolution: {integrity: sha512-QYqzpfwO3/CWf3XP+Z+tkQsfaLL/EnUlXWVkIk5FUPc4sBdTehEqZONuyRt2P67PXAk+NXmTBcc97zw9t1FQrw==}
+
+  lodash.isplainobject@4.0.6:
+    resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
+
+  lodash.isstring@4.0.1:
+    resolution: {integrity: sha512-0wJxfxH1wgO3GrbuP+dTTk7op+6L41QCXbGINEmD+ny/G/eCqGzxyCsh7159S+mgDDcoarnBw6PC1PS5+wUGgw==}
 
   lodash.keys@3.1.2:
     resolution: {integrity: sha512-CuBsapFjcubOGMn3VD+24HOAPxM79tH+V6ivJL3CHYjtrawauDJHUk//Yew9Hvc6e9rbCrURGk8z6PC+8WJBfQ==}
@@ -6827,17 +6921,26 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
+  lodash.once@4.1.1:
+    resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
+
   lodash.pickby@4.6.0:
     resolution: {integrity: sha512-AZV+GsS/6ckvPOVQPXSiFFacKvKB4kOQu6ynt9wz0F3LO4R9Ij4K1ddYsIytDpSgLz88JHd9P+oaLeej5/Sl7Q==}
 
   lodash.restparam@3.6.1:
     resolution: {integrity: sha512-L4/arjjuq4noiUJpt3yS6KIKDtJwNe2fIYgMqyYYKoeIfV1iEqvPwhCx23o+R9dzouGihDAPN1dTIRWa7zk8tw==}
 
+  lodash.set@4.3.2:
+    resolution: {integrity: sha512-4hNPN5jlm/N/HLMCO43v8BXKq9Z7QdAGc/VGrRD61w8gN9g/6jF9A4L1pbUgBLCffi0w9VsXfTOij5x8iTyFvg==}
+
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
 
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
+
+  lodash.unset@4.5.2:
+    resolution: {integrity: sha512-bwKX88k2JhCV9D1vtE8+naDKlLiGrSmf8zi/Y9ivFHwbmRfA8RxS/aVJ+sIht2XOwqoNr4xUPUkGZpc1sHFEKg==}
 
   lodash@4.18.1:
     resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
@@ -6850,10 +6953,6 @@ packages:
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
-
-  lru-cache@11.2.6:
-    resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
-    engines: {node: 20 || >=22}
 
   lru-cache@11.3.6:
     resolution: {integrity: sha512-Gf/KoL3C/MlI7Bt0PGI9I+TeTC/I6r/csU58N4BSNc4lppLBeKsOdFYkK+dX0ABDUMJNfCHTyPpzwwO21Awd3A==}
@@ -7839,6 +7938,9 @@ packages:
   pump@3.0.4:
     resolution: {integrity: sha512-VS7sjc6KR7e1ukRFhQSY5LM2uBWAUPiOPa/A3mkKmiMwSmRFUITt0xuj+/lesgnCv+dPIEYlkzrcyXgquIHMcA==}
 
+  punycode@1.4.1:
+    resolution: {integrity: sha512-jmYNElW7yvO7TV33CjSmvSiE2yco3bV2czu/OzDKdMNVZQWfxCblURLhf+47syQRBntjfLdd/H0egrzIG+oaFQ==}
+
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -7991,6 +8093,10 @@ packages:
 
   retry@0.12.0:
     resolution: {integrity: sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==}
+    engines: {node: '>= 4'}
+
+  retry@0.13.1:
+    resolution: {integrity: sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg==}
     engines: {node: '>= 4'}
 
   reusify@1.1.0:
@@ -8495,6 +8601,14 @@ packages:
     resolution: {integrity: sha512-G13vtMYPT/J8A4X2SjdtBTphZlrp1gKv6hZiOjw14RCWg6GbHuQBGtjlx75xLbYV/wEc0D7G5K4rxKP/cXk8Bw==}
     engines: {node: '>=10'}
 
+  tencentcloud-sdk-nodejs-common@4.1.220:
+    resolution: {integrity: sha512-FlRJzgFYqSz1blKyN39Jhy/WdK3VuyFkn2+naKJfpwWcSpLF0F9AqSzPAtgorb5/Ezs8sLmFSCuaqFcCw+uIWw==}
+    engines: {node: '>=10'}
+
+  tencentcloud-sdk-nodejs-tms@4.1.240:
+    resolution: {integrity: sha512-x7P5X0OmS0DWPYPTu+gI3okCmOX7mW7kyjl8ogQ/GxRvh+WmX2/CFw39K84KEj6VO72aVZbUNORlE5uehDzLiw==}
+    engines: {node: '>=10'}
+
   tencentcloud-sdk-nodejs@4.1.188:
     resolution: {integrity: sha512-zRmxUcWgQEqFQkE/uuRpLWoCes0NsZ63LMrViBvYg5sphnTR6QRw8JFK8WHWF6rN8a68l5PzNaasNRUGS16dWQ==}
     engines: {node: '>=10'}
@@ -8927,6 +9041,10 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  url@0.11.4:
+    resolution: {integrity: sha512-oCwdVC7mTuWiPyjLUz/COz5TLk6wgp0RCsN+wHZ2Ekneac9w8uuV0njcbbie2ME+Vs+d6duwmYuR3HgQXs1fOg==}
+    engines: {node: '>= 0.4'}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -10491,20 +10609,20 @@ snapshots:
     dependencies:
       css-tree: 3.2.1
 
-  '@capacitor/app@7.1.0(@capacitor/core@7.4.3)':
+  '@capacitor/app@7.1.0(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
 
-  '@capacitor/barcode-scanner@3.0.2(@capacitor/core@7.4.3)':
+  '@capacitor/barcode-scanner@3.0.2(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
       html5-qrcode: 2.3.8
 
-  '@capacitor/browser@8.0.3(@capacitor/core@7.4.3)':
+  '@capacitor/browser@8.0.3(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
 
-  '@capacitor/cli@7.4.3':
+  '@capacitor/cli@7.6.6':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8
       '@ionic/utils-subprocess': 3.0.1
@@ -10519,32 +10637,32 @@ snapshots:
       plist: 3.1.0
       prompts: 2.4.2
       rimraf: 6.1.3
-      semver: 7.7.4
+      semver: 7.8.0
       tar: 7.5.16
       tslib: 2.8.1
       xml2js: 0.6.2
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@7.4.3':
+  '@capacitor/core@7.6.6':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/haptics@7.0.2(@capacitor/core@7.4.3)':
+  '@capacitor/haptics@7.0.2(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
 
-  '@capacitor/ios@7.4.3(@capacitor/core@7.4.3)':
+  '@capacitor/ios@7.6.6(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
 
-  '@capacitor/keyboard@7.0.3(@capacitor/core@7.4.3)':
+  '@capacitor/keyboard@7.0.3(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
 
-  '@capacitor/status-bar@7.0.3(@capacitor/core@7.4.3)':
+  '@capacitor/status-bar@7.0.3(@capacitor/core@7.6.6)':
     dependencies:
-      '@capacitor/core': 7.4.3
+      '@capacitor/core': 7.6.6
 
   '@clack/core@1.0.1':
     dependencies:
@@ -10597,6 +10715,14 @@ snapshots:
       '@cloudbase/adapter-interface': 0.7.1
       web-streams-polyfill: 4.2.0
 
+  '@cloudbase/ai@2.23.0':
+    dependencies:
+      '@cloudbase/types': 2.23.0
+      '@cloudbase/utilities': 2.23.0
+      '@mattiasbuelens/web-streams-adapter': 0.1.0
+      text-encoding-shim: 1.0.5
+      web-streams-polyfill: 4.2.0
+
   '@cloudbase/ai@3.3.13':
     dependencies:
       '@cloudbase/types': 3.3.13
@@ -10615,13 +10741,22 @@ snapshots:
       '@cloudbase/types': 3.3.13
       '@cloudbase/utilities': 3.3.13
 
-  '@cloudbase/app@3.3.13(ws@8.21.0)':
+  '@cloudbase/app@2.23.0':
+    dependencies:
+      '@cloudbase/adapter-interface': 0.7.1
+      '@cloudbase/adapter-wx_mp': 1.3.1
+      '@cloudbase/types': 2.23.0
+      '@cloudbase/utilities': 2.23.0
+
+  '@cloudbase/app@3.3.13(@cloudbase/signature-nodejs@2.2.0)(jsonwebtoken@9.0.3)(ws@8.21.0)':
     dependencies:
       '@cloudbase/adapter-interface': 0.7.1
       '@cloudbase/adapter-wx_mp': 1.3.1
       '@cloudbase/types': 3.3.13
       '@cloudbase/utilities': 3.3.13
     optionalDependencies:
+      '@cloudbase/signature-nodejs': 2.2.0
+      jsonwebtoken: 9.0.3
       ws: 8.21.0
 
   '@cloudbase/auth@3.3.13':
@@ -10640,6 +10775,13 @@ snapshots:
     dependencies:
       bson: 7.2.0
 
+  '@cloudbase/database@1.4.3':
+    dependencies:
+      bson: 4.7.2
+      lodash.clonedeep: 4.5.0
+      lodash.set: 4.3.2
+      lodash.unset: 4.5.2
+
   '@cloudbase/functions@3.3.13':
     dependencies:
       '@cloudbase/adapter-interface': 0.7.1
@@ -10647,13 +10789,13 @@ snapshots:
       '@cloudbase/types': 3.3.13
       '@cloudbase/utilities': 3.3.13
 
-  '@cloudbase/js-sdk@3.3.13(ws@8.21.0)':
+  '@cloudbase/js-sdk@3.3.13(@cloudbase/signature-nodejs@2.2.0)(jsonwebtoken@9.0.3)(ws@8.21.0)':
     dependencies:
       '@cloudbase/adapter-interface': 0.7.1
       '@cloudbase/ai': 3.3.13
       '@cloudbase/analytics': 3.3.13
       '@cloudbase/apis': 3.3.13
-      '@cloudbase/app': 3.3.13(ws@8.21.0)
+      '@cloudbase/app': 3.3.13(@cloudbase/signature-nodejs@2.2.0)(jsonwebtoken@9.0.3)(ws@8.21.0)
       '@cloudbase/auth': 3.3.13
       '@cloudbase/cloudrun': 3.3.13
       '@cloudbase/database': 0.12.1
@@ -10681,6 +10823,30 @@ snapshots:
       '@cloudbase/utilities': 2.20.3
       '@cloudbase/wx-cloud-client-sdk': 1.8.6-beta.1
 
+  '@cloudbase/node-sdk@3.18.1':
+    dependencies:
+      '@cloudbase/ai': 2.23.0
+      '@cloudbase/app': 2.23.0
+      '@cloudbase/database': 1.4.3
+      '@cloudbase/signature-nodejs': 2.2.0
+      '@cloudbase/types': 2.23.0
+      '@cloudbase/wx-cloud-client-sdk': 1.7.1
+      agentkeepalive: 4.6.0
+      axios: 1.17.0
+      form-data: 4.0.5
+      http-proxy-agent: 5.0.0
+      https-proxy-agent: 5.0.1
+      jsonwebtoken: 9.0.3
+      retry: 0.13.1
+      web-streams-polyfill: 4.2.0
+      ws: 8.21.0
+      xml2js: 0.6.2
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - supports-color
+      - utf-8-validate
+
   '@cloudbase/oauth@3.3.13(@cloudbase/utilities@3.3.13)':
     dependencies:
       '@cloudbase/utilities': 3.3.13
@@ -10690,12 +10856,23 @@ snapshots:
       '@cloudbase/types': 3.3.13
       lodash: 4.18.1
 
+  '@cloudbase/signature-nodejs@2.2.0':
+    dependencies:
+      '@types/clone': 2.1.4
+      clone: 2.1.2
+      is-stream: 2.0.1
+      url: 0.11.4
+
   '@cloudbase/storage@3.3.13':
     dependencies:
       '@cloudbase/types': 3.3.13
       '@cloudbase/utilities': 3.3.13
 
   '@cloudbase/types@2.20.3':
+    dependencies:
+      '@cloudbase/adapter-interface': 0.7.1
+
+  '@cloudbase/types@2.23.0':
     dependencies:
       '@cloudbase/adapter-interface': 0.7.1
 
@@ -10709,11 +10886,21 @@ snapshots:
       '@cloudbase/types': 2.20.3
       jwt-decode: 3.1.2
 
+  '@cloudbase/utilities@2.23.0':
+    dependencies:
+      '@cloudbase/adapter-interface': 0.7.1
+      '@cloudbase/types': 2.23.0
+      jwt-decode: 3.1.2
+
   '@cloudbase/utilities@3.3.13':
     dependencies:
       '@cloudbase/adapter-interface': 0.7.1
       '@cloudbase/types': 3.3.13
       jwt-decode: 3.1.2
+
+  '@cloudbase/wx-cloud-client-sdk@1.7.1':
+    dependencies:
+      core-js-pure: 3.48.0
 
   '@cloudbase/wx-cloud-client-sdk@1.8.6-beta.1':
     dependencies:
@@ -11277,7 +11464,7 @@ snapshots:
       open: 7.4.2
       os-name: 4.0.1
       proxy-agent: 6.5.0
-      semver: 7.7.4
+      semver: 7.8.0
       split2: 3.2.2
       ssh-config: 1.1.6
       stream-combiner2: 1.1.1
@@ -12054,8 +12241,8 @@ snapshots:
 
   '@nuxtjs/ionic@1.0.2(@stencil/core@4.43.2)(magicast@0.5.2)(vue-router@4.6.4(vue@3.5.35(typescript@5.9.3)))(vue@3.5.35(typescript@5.9.3))':
     dependencies:
-      '@capacitor/cli': 7.4.3
-      '@capacitor/core': 7.4.3
+      '@capacitor/cli': 7.6.6
+      '@capacitor/core': 7.6.6
       '@ionic/cli': 7.2.1
       '@ionic/vue': 8.7.18(@stencil/core@4.43.2)(vue-router@4.6.4(vue@3.5.35(typescript@5.9.3)))(vue@3.5.35(typescript@5.9.3))
       '@ionic/vue-router': 8.7.18(@stencil/core@4.43.2)(vue-router@4.6.4(vue@3.5.35(typescript@5.9.3)))(vue@3.5.35(typescript@5.9.3))
@@ -12970,6 +13157,8 @@ snapshots:
       tailwindcss: 4.3.0
       vite: 7.3.3(@types/node@25.3.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.46.0)(yaml@2.9.0)
 
+  '@tootallnate/once@2.0.1': {}
+
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@tybys/wasm-util@0.10.1':
@@ -12981,6 +13170,8 @@ snapshots:
     dependencies:
       '@types/deep-eql': 4.0.2
       assertion-error: 2.0.1
+
+  '@types/clone@2.1.4': {}
 
   '@types/debug@4.1.12':
     dependencies:
@@ -13236,7 +13427,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.56.1
       debug: 4.4.3
       minimatch: 10.2.4
-      semver: 7.7.4
+      semver: 7.8.0
       tinyglobby: 0.2.15
       ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -14425,13 +14616,24 @@ snapshots:
       node-releases: 2.0.38
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
+  bson@4.7.2:
+    dependencies:
+      buffer: 5.7.1
+
   bson@7.2.0: {}
 
   buffer-crc32@0.2.13: {}
 
   buffer-crc32@1.0.0: {}
 
+  buffer-equal-constant-time@1.0.1: {}
+
   buffer-from@1.1.2: {}
+
+  buffer@5.7.1:
+    dependencies:
+      base64-js: 1.5.1
+      ieee754: 1.2.1
 
   buffer@6.0.3:
     dependencies:
@@ -14600,6 +14802,8 @@ snapshots:
       string-width: 7.2.0
       strip-ansi: 7.2.0
       wrap-ansi: 9.0.2
+
+  clone@2.1.2: {}
 
   cloudflare@3.5.0:
     dependencies:
@@ -14954,6 +15158,10 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
+  ecdsa-sig-formatter@1.0.11:
+    dependencies:
+      safe-buffer: 5.2.1
+
   editorconfig@1.0.7:
     dependencies:
       '@one-ini/wasm': 0.1.1
@@ -15198,7 +15406,7 @@ snapshots:
   eslint-compat-utils@0.5.1(eslint@10.4.1(jiti@2.7.0)):
     dependencies:
       eslint: 10.4.1(jiti@2.7.0)
-      semver: 7.7.4
+      semver: 7.8.0
 
   eslint-config-flat-gitignore@2.2.1(eslint@10.4.1(jiti@2.7.0)):
     dependencies:
@@ -16149,6 +16357,14 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
+  http-proxy-agent@5.0.0:
+    dependencies:
+      '@tootallnate/once': 2.0.1
+      agent-base: 6.0.2
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
@@ -16222,6 +16438,8 @@ snapshots:
   inherits@2.0.4: {}
 
   ini@1.3.8: {}
+
+  ini@2.0.0: {}
 
   ini@4.1.1: {}
 
@@ -16578,7 +16796,31 @@ snapshots:
 
   jsonpointer@5.0.1: {}
 
+  jsonwebtoken@9.0.3:
+    dependencies:
+      jws: 4.0.1
+      lodash.includes: 4.3.0
+      lodash.isboolean: 3.0.3
+      lodash.isinteger: 4.0.4
+      lodash.isnumber: 3.0.3
+      lodash.isplainobject: 4.0.6
+      lodash.isstring: 4.0.1
+      lodash.once: 4.1.1
+      ms: 2.1.3
+      semver: 7.8.0
+
   jsqr@1.4.0: {}
+
+  jwa@2.0.1:
+    dependencies:
+      buffer-equal-constant-time: 1.0.1
+      ecdsa-sig-formatter: 1.0.11
+      safe-buffer: 5.2.1
+
+  jws@4.0.1:
+    dependencies:
+      jwa: 2.0.1
+      safe-buffer: 5.2.1
 
   jwt-decode@3.1.2: {}
 
@@ -16745,15 +16987,29 @@ snapshots:
       lodash._createassigner: 3.1.1
       lodash.keys: 3.1.2
 
+  lodash.clonedeep@4.5.0: {}
+
   lodash.debounce@4.0.8: {}
 
   lodash.defaults@4.2.0: {}
 
   lodash.identity@3.0.0: {}
 
+  lodash.includes@4.3.0: {}
+
   lodash.isarguments@3.1.0: {}
 
   lodash.isarray@3.0.4: {}
+
+  lodash.isboolean@3.0.3: {}
+
+  lodash.isinteger@4.0.4: {}
+
+  lodash.isnumber@3.0.3: {}
+
+  lodash.isplainobject@4.0.6: {}
+
+  lodash.isstring@4.0.1: {}
 
   lodash.keys@3.1.2:
     dependencies:
@@ -16765,13 +17021,19 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
+  lodash.once@4.1.1: {}
+
   lodash.pickby@4.6.0: {}
 
   lodash.restparam@3.6.1: {}
 
+  lodash.set@4.3.2: {}
+
   lodash.sortby@4.7.0: {}
 
   lodash.uniq@4.5.0: {}
+
+  lodash.unset@4.5.2: {}
 
   lodash@4.18.1: {}
 
@@ -16780,8 +17042,6 @@ snapshots:
   longest-streak@3.1.0: {}
 
   lru-cache@10.4.3: {}
-
-  lru-cache@11.2.6: {}
 
   lru-cache@11.3.6: {}
 
@@ -17921,7 +18181,7 @@ snapshots:
 
   path-scurry@2.0.2:
     dependencies:
-      lru-cache: 11.2.6
+      lru-cache: 11.3.6
       minipass: 7.1.3
 
   pathe@1.1.2: {}
@@ -18237,6 +18497,8 @@ snapshots:
       end-of-stream: 1.4.5
       once: 1.4.0
 
+  punycode@1.4.1: {}
+
   punycode@2.3.1: {}
 
   qrcode@1.5.4:
@@ -18402,6 +18664,8 @@ snapshots:
       signal-exit: 3.0.7
 
   retry@0.12.0: {}
+
+  retry@0.13.1: {}
 
   reusify@1.1.0: {}
 
@@ -19008,6 +19272,29 @@ snapshots:
       type-fest: 0.16.0
       unique-string: 2.0.0
 
+  tencentcloud-sdk-nodejs-common@4.1.220:
+    dependencies:
+      form-data: 3.0.4
+      get-stream: 6.0.1
+      https-proxy-agent: 5.0.1
+      ini: 2.0.0
+      is-stream: 2.0.1
+      json-bigint: 1.0.0
+      node-fetch: 2.7.0
+      tslib: 1.13.0
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  tencentcloud-sdk-nodejs-tms@4.1.240:
+    dependencies:
+      tencentcloud-sdk-nodejs-common: 4.1.220
+      tslib: 1.13.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
   tencentcloud-sdk-nodejs@4.1.188:
     dependencies:
       form-data: 3.0.4
@@ -19467,6 +19754,11 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  url@0.11.4:
+    dependencies:
+      punycode: 1.4.1
+      qs: 6.15.2
 
   util-deprecate@1.0.2: {}
 

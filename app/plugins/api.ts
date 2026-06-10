@@ -1,38 +1,49 @@
+import { Capacitor } from '@capacitor/core'
+import { NATIVE_API_BASE_URL } from '~/constants/api'
+
 export default defineNuxtPlugin((nuxtApp) => {
   const userStore = useUserStore()
+  const config = useRuntimeConfig()
+
+  /**
+   * 打包进原生壳后页面 origin 是 capacitor://localhost（无 Nitro server），
+   * /api 默认回退到线上 Web 部署；live reload（cap run -l，origin 为局域网
+   * dev server）不回退，仍走同源的本地 Nitro。
+   */
+  const isPackagedNative = typeof window !== 'undefined'
+    && Capacitor.isNativePlatform()
+    && window.location.hostname === 'localhost'
+  const baseURL = config.public.apiBaseUrl
+    || (isPackagedNative ? NATIVE_API_BASE_URL : undefined)
 
   const api = $fetch.create({
+    baseURL,
+    // 401 时先在 onResponseError 中刷新 token，再由 ofetch 自动重试一次
+    // （重试会重新走 onRequest，自动带上刷新后的 token）
+    retry: 1,
+    retryStatusCodes: [401],
     onRequest({ options }) {
       if (userStore.accessToken) {
         options.headers.set('Authorization', `Bearer ${userStore.accessToken}`)
       }
     },
-    async onResponseError({ request, options, response }) {
-      if (response.status === 401) {
-        // 尝试通过 refresh token 刷新 access_token
-        try {
-          const { ensureValidToken } = useCloudbaseAuth()
-          const refreshed = await ensureValidToken()
-          if (refreshed) {
-            // token 已刷新，用新 token 重试原请求
-            const retryHeaders = new Headers(options.headers)
-            retryHeaders.set('Authorization', `Bearer ${userStore.accessToken}`)
-            const retryResponse = await $fetch.raw(request, {
-              ...options,
-              headers: retryHeaders,
-              method: options.method as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-            })
-            // 将重试结果写回 response（ofetch 会使用此数据）
-            Object.defineProperty(response, '_data', { value: retryResponse._data })
-            return
-          }
-        }
-        catch (err) {
-          console.error('[API] Token 刷新失败:', err)
-        }
-        // 刷新失败，跳转登录页
-        await nuxtApp.runWithContext(() => navigateTo('/login'))
+    async onResponseError({ options, response }) {
+      if (response.status !== 401)
+        return
+
+      // 尝试通过 refresh token 刷新 access_token
+      try {
+        const { ensureValidToken } = useCloudbaseAuth()
+        if (await ensureValidToken())
+          return
       }
+      catch (err) {
+        console.error('[API] Token 刷新失败:', err)
+      }
+
+      // 刷新失败：取消重试，跳转登录页
+      options.retry = false
+      await nuxtApp.runWithContext(() => navigateTo('/login'))
     },
   })
 

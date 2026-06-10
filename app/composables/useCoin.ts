@@ -73,6 +73,28 @@ export function useCoin() {
     return result
   }
 
+  /**
+   * 兜底对账：让服务端把当前用户卡在 pending 的订单逐一向微信核对并补发权益。
+   *
+   * 用于「支付成功但前端轮询窗口已关闭 / 异步回调漏达」的自愈：进入钱包页或
+   * 从 www 支付页返回 App 时调用一次，把漏发的云币 / 会员补回来。
+   */
+  async function reconcileOrders(): Promise<{ reconciled: number, paid: number }> {
+    if (!userStore.isLoggedIn || !app)
+      return { reconciled: 0, paid: 0 }
+    try {
+      const res = await app.callFunction({
+        name: 'wxpay-order',
+        data: { action: 'reconcileOrders' },
+      })
+      return res.result as { reconciled: number, paid: number }
+    }
+    catch (err) {
+      consola.warn('[useCoin] reconcile failed:', err)
+      return { reconciled: 0, paid: 0 }
+    }
+  }
+
   /** 云币流水分页（按时间倒序） */
   async function listTransactions(params: { skip?: number, limit?: number } = {}): Promise<{
     items: CoinTransaction[]
@@ -110,6 +132,7 @@ export function useCoin() {
     error: readonly(error),
     refresh,
     deduct,
+    reconcileOrders,
     listTransactions,
   }
 }

@@ -1,6 +1,8 @@
 import type { YlfAppInfo } from '@yunlefun/types'
+import { yunHomeApp } from './builtin'
 
 export const homeApps = ref<YlfAppInfo[]>([
+  yunHomeApp,
   {
     id: '1',
     slug: 'valaxy',

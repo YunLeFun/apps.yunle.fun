@@ -44,7 +44,7 @@
     "@capacitor/ios": "7.4.3",
     "@capacitor/keyboard": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
-    "@yunlefun/types": "^0.0.2",
+    "@yunlefun/types": "^0.1.0",
     "aegis-web-sdk": "^1.41.13",
     "cordova-plugin-wechat": "^3.1.0",
     "jsqr": "^1.4.0",

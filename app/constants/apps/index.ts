@@ -1,4 +1,5 @@
 import type { YlfAppInfo } from '@yunlefun/types'
+import { yunHomeApp } from './builtin'
 import { GENERATED_APPS } from './generated'
 
 /**
@@ -18,6 +19,7 @@ export const APP_CATEGORIES: AppCategory[] = [
   { id: 'interesting', name: '整活', icon: '🤣' },
   { id: 'applets', name: '应用', icon: '📱' },
   { id: 'tools', name: '工具', icon: '🔧' },
+  { id: 'life', name: '生活', icon: '🏠' },
   { id: 'design', name: '设计', icon: '🎨' },
   { id: 'plugins', name: '插件', icon: '🔌' },
   { id: 'lab', name: '实验', icon: '🧪' },
@@ -48,7 +50,22 @@ export const FEATURED_APP: YlfAppInfo = {
 /**
  * 所有应用列表
  */
-export const ALL_APPS: YlfAppInfo[] = GENERATED_APPS
+export const FIRST_PARTY_FALLBACK_APPS: YlfAppInfo[] = [
+  yunHomeApp,
+]
+
+function mergeFallbackApps(seed: YlfAppInfo[], fallback: YlfAppInfo[]) {
+  const map = new Map<string, YlfAppInfo>()
+  for (const app of seed)
+    map.set(app.slug, app)
+  for (const app of fallback) {
+    if (!map.has(app.slug))
+      map.set(app.slug, app)
+  }
+  return [...map.values()]
+}
+
+export const ALL_APPS: YlfAppInfo[] = mergeFallbackApps(GENERATED_APPS, FIRST_PARTY_FALLBACK_APPS)
 
 /**
  * 根据分类获取应用列表

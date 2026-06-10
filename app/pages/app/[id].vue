@@ -18,26 +18,38 @@ const router = useRouter()
 const appId = computed(() => (route.params as any).id as string)
 
 // 使用 useAppDetail composable 获取应用数据
-const { appData, loading, error } = useAppDetail(appId)
-
-// 加载完成后，如果应用不存在则跳转
-watch([loading, error], ([isLoading, err]) => {
-  if (!isLoading && err && !appData.value) {
-    router.push('/tabs/apps')
-  }
-})
+const { appData, loading, error, refresh } = useAppDetail(appId)
 
 // 扩展展示数据
 const displayData = computed(() => {
   if (!appData.value)
     return null
 
+  const urlHost = getUrlHost(appData.value.websiteUrl)
+
   return {
     ...appData.value,
-    screenshots: [
-      { id: 1, color: appData.value.themeColor, title: '主界面' },
-      { id: 2, color: appData.value.themeColor, title: '功能展示' },
-      { id: 3, color: appData.value.themeColor, title: '详细信息' },
+    previewPanels: [
+      {
+        id: 'overview',
+        eyebrow: appData.value.category || '应用',
+        title: appData.value.name,
+        body: appData.value.description || appData.value.tagline || '打开应用，开始体验。',
+      },
+      {
+        id: 'launch',
+        eyebrow: '立即访问',
+        title: urlHost || '站内应用',
+        body: appData.value.websiteUrl || '应用暂未配置打开地址',
+      },
+      {
+        id: 'meta',
+        eyebrow: appData.value.developer,
+        title: `${appData.value.rating ?? '新'} 评分`,
+        body: [appData.value.downloads, appData.value.size, appData.value.age]
+          .filter(Boolean)
+          .join(' · ') || '更多信息持续完善中',
+      },
     ],
     reviews: [
       {
@@ -51,6 +63,19 @@ const displayData = computed(() => {
     ],
   }
 })
+
+function getUrlHost(url?: string) {
+  if (!url)
+    return ''
+  if (!url.startsWith('http'))
+    return 'yunle.fun'
+  try {
+    return new URL(url).host
+  }
+  catch {
+    return url
+  }
+}
 
 function renderStars(rating: number = 0) {
   const stars = []
@@ -157,7 +182,8 @@ async function openMoreMenu() {
               class="app-icon-large"
               :style="{ backgroundColor: displayData.themeColor }"
             >
-              {{ displayData.emoji || displayData.logo }}
+              <img v-if="displayData.logo" :src="displayData.logo" alt="" class="app-icon-large-img">
+              <span v-else>{{ displayData.emoji }}</span>
             </div>
 
             <div class="app-header-info">
@@ -256,13 +282,25 @@ async function openMoreMenu() {
           </h2>
           <div class="screenshots-container">
             <div
-              v-for="screenshot in displayData.screenshots"
-              :key="screenshot.id"
-              class="screenshot-item"
-              :style="{ backgroundColor: screenshot.color }"
+              v-for="panel in displayData.previewPanels"
+              :key="panel.id"
+              class="screenshot-item preview-panel"
+              :style="{ '--preview-color': displayData.themeColor }"
             >
-              <div class="screenshot-placeholder">
-                {{ screenshot.title }}
+              <div class="preview-panel-orb">
+                <img v-if="displayData.logo" :src="displayData.logo" alt="" class="preview-panel-logo">
+                <span v-else>{{ displayData.emoji }}</span>
+              </div>
+              <div class="preview-panel-content">
+                <div class="preview-panel-eyebrow">
+                  {{ panel.eyebrow }}
+                </div>
+                <div class="preview-panel-title">
+                  {{ panel.title }}
+                </div>
+                <p class="preview-panel-body">
+                  {{ panel.body }}
+                </p>
               </div>
             </div>
           </div>
@@ -407,6 +445,28 @@ async function openMoreMenu() {
           </div>
         </div>
       </div>
+
+      <div v-else class="app-detail-container">
+        <div class="detail-empty-state">
+          <div class="detail-empty-icon">
+            {{ appData?.emoji || '📱' }}
+          </div>
+          <h1 class="detail-empty-title">
+            {{ error || '应用详情暂不可用' }}
+          </h1>
+          <p class="detail-empty-desc">
+            当前应用数据没有成功加载，请稍后重试，或返回工坊浏览其他应用。
+          </p>
+          <div class="detail-empty-actions">
+            <IonButton size="small" @click="refresh()">
+              重新加载
+            </IonButton>
+            <IonButton size="small" fill="clear" @click="router.push('/tabs/apps')">
+              返回工坊
+            </IonButton>
+          </div>
+        </div>
+      </div>
     </IonContent>
   </IonPage>
 </template>
@@ -420,6 +480,49 @@ async function openMoreMenu() {
   max-width: 980px;
   margin: 0 auto;
   padding-bottom: 40px;
+}
+
+.detail-empty-state {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.detail-empty-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ylf-fill-secondary);
+  font-size: 36px;
+}
+
+.detail-empty-title {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.detail-empty-desc {
+  max-width: 320px;
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.detail-empty-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 /* 应用头部 */
@@ -446,6 +549,7 @@ async function openMoreMenu() {
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: relative;
+  overflow: hidden;
 }
 
 .app-icon-large::after {
@@ -454,6 +558,13 @@ async function openMoreMenu() {
   inset: 0;
   border-radius: 27px;
   box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.app-icon-large-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .app-header-info {
@@ -621,13 +732,92 @@ async function openMoreMenu() {
   height: 498px;
   border-radius: 16px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
+  display: flex;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.42), transparent 28%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--preview-color) 82%, white 18%),
+      color-mix(in srgb, var(--preview-color) 76%, black 24%)
+    );
+}
+
+.screenshot-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.28),
+    inset 0 -80px 110px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+}
+
+.preview-panel {
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.preview-panel-orb {
+  width: 82px;
+  height: 82px;
+  border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.18);
+  border: 0.5px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  font-size: 42px;
+}
+
+.preview-panel-logo {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.preview-panel-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.preview-panel-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.76;
+}
+
+.preview-panel-title {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.08;
+}
+
+.preview-panel-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  opacity: 0.86;
+  overflow-wrap: anywhere;
 }
 
 .description-text {

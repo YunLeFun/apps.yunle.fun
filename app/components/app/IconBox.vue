@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { AppIconStyle } from '~/stores/settings'
+
 /**
  * AppIconBox - 应用图标盒子（纯展示）
  *
@@ -18,6 +20,8 @@ interface Props {
   label?: string
   /** 是否为占位模式（灰色背景） */
   placeholder?: boolean
+  /** 可选覆盖图标风格；默认读取外观设置 */
+  styleMode?: AppIconStyle
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -26,15 +30,20 @@ const props = withDefaults(defineProps<Props>(), {
   color: '',
   label: '',
   placeholder: false,
+  styleMode: undefined,
 })
+
+const settingsStore = useSettingsStore()
 
 /** 仅当 icon 是图片路径（/ 或 http 开头）时才作为图片渲染，否则回退 emoji */
 const isImageIcon = computed(() => props.icon.startsWith('/') || props.icon.startsWith('http'))
+const currentStyleMode = computed(() => props.styleMode ?? settingsStore.appIconStyle)
 
 const iconBoxClasses = computed(() => ({
   'has-color': Boolean(props.color) && !props.placeholder,
   'has-image': isImageIcon.value,
   'is-placeholder': props.placeholder,
+  [`style-${currentStyleMode.value}`]: true,
 }))
 
 const iconBoxStyle = computed(() => props.color
@@ -83,6 +92,18 @@ const iconBoxStyle = computed(() => props.color
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  background: var(--ylf-fill-secondary);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.app-icon-box.style-liquid-glass {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.28)), var(--ylf-fill-secondary);
   box-shadow:
     0 14px 24px rgba(0, 0, 0, 0.14),
@@ -90,13 +111,9 @@ const iconBoxStyle = computed(() => props.color
     inset 0 1px 0 rgba(255, 255, 255, 0.48);
   backdrop-filter: blur(18px) saturate(170%);
   -webkit-backdrop-filter: blur(18px) saturate(170%);
-  will-change: transform, box-shadow;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
-.app-icon-box.has-color {
+.app-icon-box.style-liquid-glass.has-color {
   background: var(--app-icon-color);
   background:
     radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.52), transparent 34%),
@@ -108,7 +125,7 @@ const iconBoxStyle = computed(() => props.color
     );
 }
 
-.app-icon-box::before {
+.app-icon-box.style-liquid-glass::before {
   content: '';
   position: absolute;
   inset: 1px;
@@ -122,7 +139,7 @@ const iconBoxStyle = computed(() => props.color
   mix-blend-mode: screen;
 }
 
-.dark .app-icon-box {
+.dark .app-icon-box.style-liquid-glass {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05)), var(--ylf-fill-secondary);
   box-shadow:
     0 16px 28px rgba(0, 0, 0, 0.42),
@@ -130,7 +147,7 @@ const iconBoxStyle = computed(() => props.color
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-.dark .app-icon-box.has-color {
+.dark .app-icon-box.style-liquid-glass.has-color {
   background: var(--app-icon-color);
   background:
     radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.36), transparent 34%),
@@ -142,7 +159,7 @@ const iconBoxStyle = computed(() => props.color
     );
 }
 
-.app-icon-box::after {
+.app-icon-box.style-liquid-glass::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -155,8 +172,40 @@ const iconBoxStyle = computed(() => props.color
   pointer-events: none;
 }
 
+.app-icon-box.style-flat-color {
+  background: var(--ylf-fill-secondary);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+}
+
+.app-icon-box.style-flat-color.has-color {
+  background: var(--app-icon-color);
+}
+
+.app-icon-box.style-flat-color.has-image {
+  background: transparent;
+}
+
+.dark .app-icon-box.style-flat-color {
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+.dark .app-icon-box.style-flat-color.has-color {
+  background: color-mix(in srgb, var(--app-icon-color) 88%, black 12%);
+}
+
 /* 占位模式 */
 .app-icon-box.is-placeholder {
+  background: var(--ylf-fill-secondary);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+.app-icon-box.style-liquid-glass.is-placeholder {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)), var(--ylf-fill-secondary);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
@@ -186,8 +235,12 @@ const iconBoxStyle = computed(() => props.color
   -webkit-touch-callout: none;
 }
 
-.app-icon-box.has-image::before,
-.app-icon-box.has-image::after {
+.app-icon-box.style-flat-color .app-emoji {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
+}
+
+.app-icon-box.style-liquid-glass.has-image::before,
+.app-icon-box.style-liquid-glass.has-image::after {
   opacity: 0.32;
 }
 

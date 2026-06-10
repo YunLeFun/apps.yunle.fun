@@ -4,6 +4,7 @@
  *
  * 目前支持：
  * - yunlefun://auth/callback?code=xxx&state=xxx → OAuth 登录回调
+ * - yunlefun://wallet → 钱包页（www 支付成功后「返回云乐坊」备用回流）
  */
 import { App } from '@capacitor/app'
 import { Browser } from '@capacitor/browser'
@@ -33,6 +34,12 @@ export default defineNuxtPlugin(() => {
           const { handleNativeOAuthCallback } = useCloudbaseAuth()
           await handleNativeOAuthCallback(code, state)
         }
+      }
+
+      // yunlefun://wallet → 回到钱包页（页面 onMounted 会自动对账刷新）
+      if (parsed.hostname === 'wallet') {
+        await Browser.close().catch(() => {})
+        useRouter().push('/wallet')
       }
     }
     catch (err) {

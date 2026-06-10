@@ -159,19 +159,13 @@ function onPointerCancel() {
             <span class="delete-icon">−</span>
           </button>
 
-          <div
+          <AppIconBox
             v-if="resolveApp(element)"
-            class="dock-icon"
-            :style="{ backgroundColor: resolveApp(element)!.themeColor }"
-          >
-            <div v-if="resolveApp(element)!.logo" class="dock-img">
-              <img :src="resolveApp(element)!.logo" alt="">
-            </div>
-            <span v-else class="dock-emoji">{{ resolveApp(element)!.emoji }}</span>
-          </div>
-          <div v-else class="dock-icon placeholder-dock">
-            <span class="dock-emoji">📱</span>
-          </div>
+            :icon="resolveApp(element)!.logo"
+            :emoji="resolveApp(element)!.emoji"
+            :color="resolveApp(element)!.themeColor"
+          />
+          <AppIconBox v-else placeholder />
         </div>
       </VueDraggable>
     </div>
@@ -213,6 +207,10 @@ function onPointerCancel() {
 }
 
 .dock-items {
+  --app-icon-size: 64px;
+  --app-icon-radius: 16px;
+  --app-emoji-size: 32px;
+
   display: flex;
   /* 与 Grid 的 gap 一致 */
   gap: 20px;
@@ -229,47 +227,6 @@ function onPointerCancel() {
 
 .dock-item:active {
   transform: scale(0.85);
-}
-
-.dock-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-  position: relative;
-  overflow: hidden;
-}
-
-.dock-icon::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
-  pointer-events: none;
-}
-
-.dark .dock-icon {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-}
-
-.dock-emoji {
-  font-size: 32px;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-}
-
-.dock-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.placeholder-dock {
-  background: var(--ylf-fill-secondary);
 }
 
 /* ==================== 编辑抖动（iOS 仿真） ==================== */
@@ -350,18 +307,12 @@ function onPointerCancel() {
   }
 
   .dock-items {
+    --app-icon-size: 60px;
+    --app-icon-radius: 14px;
+    --app-emoji-size: 28px;
+
     gap: 16px;
     min-height: 60px;
-  }
-
-  .dock-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 14px;
-  }
-
-  .dock-emoji {
-    font-size: 28px;
   }
 }
 

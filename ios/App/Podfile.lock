@@ -18,6 +18,8 @@ PODS:
   - CordovaPlugins (7.4.3):
     - CapacitorCordova
   - OSBarcodeLib (2.0.1)
+  - YunlefunCapacitorStorekit (0.1.0):
+    - Capacitor
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/.pnpm/@capacitor+ios@7.4.3_@capacitor+core@7.4.3/node_modules/@capacitor/ios`)"
@@ -29,6 +31,7 @@ DEPENDENCIES:
   - "CapacitorKeyboard (from `../../node_modules/.pnpm/@capacitor+keyboard@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/keyboard`)"
   - "CapacitorStatusBar (from `../../node_modules/.pnpm/@capacitor+status-bar@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/status-bar`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
+  - YunlefunCapacitorStorekit (from `../../packages/capacitor-storekit`)
 
 SPEC REPOS:
   trunk:
@@ -53,6 +56,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/.pnpm/@capacitor+status-bar@7.0.3_@capacitor+core@7.4.3/node_modules/@capacitor/status-bar"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
+  YunlefunCapacitorStorekit:
+    :path: "../../packages/capacitor-storekit"
 
 SPEC CHECKSUMS:
   Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
@@ -65,7 +70,8 @@ SPEC CHECKSUMS:
   CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
   CordovaPlugins: 1c5df9d42d18238e6a61f1cb827d592137a038dd
   OSBarcodeLib: 57987d2eb1f916f701f4554e20e349b3cb83f023
+  YunlefunCapacitorStorekit: 1431b6f6bffde6bc66117ebb4cc012cecdf36bb7
 
-PODFILE CHECKSUM: 05d802244a9591d5158250567b1464102f3731a0
+PODFILE CHECKSUM: 2b81fbcf5d89e94ee0644332708920a4b05d2ea8
 
 COCOAPODS: 1.16.2

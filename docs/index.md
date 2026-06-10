@@ -46,3 +46,7 @@ features:
     title: 云端同步
     details: CloudBase 云端数据同步，多设备桌面配置自动同步
 ---
+
+## 文档边界
+
+本站文档服务 `apps.yunle.fun` 的产品设计与工程实现。对外开发者接入、API/SDK、应用提交规范、审核标准、支付/云币/会员/SSO 等稳定公开内容，应整理到 `docs.yunle.fun`；内部规划和跨仓库决策放在 `wiki.yunle.fun`。

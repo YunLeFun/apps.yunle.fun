@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { CoinTransaction } from '@yunlefun/types'
+import type { CoinPackId, CoinTransaction } from '@yunlefun/types'
 import {
   IonBackButton,
   IonButtons,
   IonContent,
   IonHeader,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonPage,
   IonRefresher,
   IonRefresherContent,
@@ -12,7 +14,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { COIN_TX_TYPE_NAMES, formatCoin, PLAN_NAMES } from '@yunlefun/types'
+import { COIN_PACKS, COIN_RATE_FEN, COIN_TX_TYPE_NAMES, formatCoin, formatPrice, IAP_COIN_PRODUCTS, PLAN_NAMES } from '@yunlefun/types'
 import {
   diamondOutline,
   ribbonOutline,
@@ -26,28 +28,83 @@ import {
   kListItem,
 } from 'konsta/vue'
 
-/** www 充值 / 开通会员页（App 端跳转过去完成支付） */
-const WWW_WALLET_URL = 'https://www.yunle.fun/wallet'
-const WWW_PRICING_URL = 'https://www.yunle.fun/pricing'
-
 const userStore = useUserStore()
 const router = useRouter()
-const { account, balance, membership, isMember, loading, refresh, listTransactions } = useCoin()
+const { account, balance, membership, isMember, loading, refresh, reconcileOrders, listTransactions } = useCoin()
 
+const { channel, canPurchase, goRecharge } = usePaymentChannel({
+  // 从 www 支付页回到 App：兜底对账 + 刷新余额与流水
+  onReturn: () => reconcileAndRefresh(),
+})
+const iap = useIap()
+
+/** iOS 充值包（App Store 本地化价；商品未就绪时整体隐藏，见审核 3.1.1） */
+const iapCoinPacks = computed(() =>
+  (Object.keys(COIN_PACKS) as CoinPackId[])
+    .map((packId) => {
+      const product = iap.findProduct(IAP_COIN_PRODUCTS[packId])
+      return product
+        ? { packId, coin: COIN_PACKS[packId].coin, priceText: product.displayPrice }
+        : null
+    })
+    .filter(pack => pack !== null),
+)
+
+async function handleIapRecharge(packId: CoinPackId) {
+  const ok = await iap.purchase(IAP_COIN_PRODUCTS[packId])
+  if (ok) {
+    showIonicToast('充值已到账')
+    iap.reset()
+    await loadTransactions(true)
+  }
+  else if (iap.phase.value === 'fail') {
+    showIonicToast(iap.errorMessage.value || '购买失败，请稍后重试', 'danger')
+    iap.reset()
+  }
+}
+
+/** 余额等价人民币（1 云币 = 10 分） */
+const balanceEquivText = computed(() =>
+  `≈ ${formatPrice(balance.value * COIN_RATE_FEN)} · 100 云币 = 10 元`,
+)
+
+// 流水分页（按时间倒序，nextSkip 为 null 表示没有更多）
 const transactions = ref<CoinTransaction[]>([])
 const txLoading = ref(false)
+const nextSkip = ref<number | null>(0)
+const hasMore = computed(() => nextSkip.value !== null)
 
-async function loadTransactions() {
-  if (!userStore.isLoggedIn)
+async function loadTransactions(reset = false) {
+  if (txLoading.value)
+    return
+  if (reset) {
+    transactions.value = []
+    nextSkip.value = 0
+  }
+  if (nextSkip.value === null || !userStore.isLoggedIn)
     return
   txLoading.value = true
   try {
-    const { items } = await listTransactions({ limit: 20 })
-    transactions.value = items
+    const { items, nextSkip: ns } = await listTransactions({ skip: nextSkip.value, limit: 20 })
+    transactions.value.push(...items)
+    nextSkip.value = ns
   }
   finally {
     txLoading.value = false
   }
+}
+
+async function loadMore(event: CustomEvent) {
+  await loadTransactions()
+  ;(event.target as HTMLIonInfiniteScrollElement).complete()
+}
+
+/** 兜底对账（补发漏到账的订单）+ 全量刷新 */
+async function reconcileAndRefresh() {
+  const { paid } = await reconcileOrders()
+  await Promise.all([refresh(), loadTransactions(true)])
+  if (paid > 0)
+    showIonicToast(`已为你补发到账：${paid} 笔支付已确认入账`)
 }
 
 onMounted(async () => {
@@ -55,37 +112,26 @@ onMounted(async () => {
     router.replace('/login')
     return
   }
-  await refresh()
-  await loadTransactions()
+  if (channel === 'ios-iap') {
+    await iap.loadProducts()
+    const settled = await iap.processUnfinished()
+    if (settled > 0)
+      showIonicToast('购买已到账')
+  }
+  await reconcileAndRefresh()
 })
 
 async function handleRefresh(event: CustomEvent) {
-  await Promise.all([refresh(), loadTransactions()])
+  await Promise.all([refresh(), loadTransactions(true)])
   ;(event.target as HTMLIonRefresherElement).complete()
 }
 
-function goRecharge() {
-  openInAppBrowser(WWW_WALLET_URL)
-}
-
 function goMembership() {
-  openInAppBrowser(WWW_PRICING_URL)
+  router.push('/membership')
 }
 
 /** 会员到期日期展示 */
-const memberExpireText = computed(() => {
-  const expireAt = membership.value?.expireAt
-  if (!expireAt)
-    return ''
-  const d = new Date(expireAt)
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} 到期`
-})
-
-function formatTxTime(ts: number): string {
-  const d = new Date(ts)
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
+const memberExpireText = computed(() => formatExpireDate(membership.value?.expireAt))
 </script>
 
 <template>
@@ -124,10 +170,41 @@ function formatTxTime(ts: number): string {
             {{ balance }}
           </template>
         </div>
-        <k-button rounded class="recharge-btn" @click="goRecharge">
+        <div class="balance-equiv">
+          {{ balanceEquivText }}
+        </div>
+        <!-- Web：跳 www 微信支付；iOS：站内 IAP（见下方充值包） -->
+        <k-button v-if="canPurchase" rounded class="recharge-btn" @click="goRecharge">
           充值云币
         </k-button>
       </k-block>
+
+      <!-- iOS 充值包（App Store 内购；商品未就绪时整体隐藏，审核 3.1.1 不可降级为外部支付） -->
+      <template v-if="channel === 'ios-iap' && iapCoinPacks.length > 0">
+        <k-block-title>充值云币</k-block-title>
+        <k-block strong inset>
+          <div class="iap-pack-grid">
+            <button
+              v-for="pack in iapCoinPacks"
+              :key="pack.packId"
+              type="button"
+              class="iap-pack-card"
+              :disabled="iap.purchasing.value"
+              @click="handleIapRecharge(pack.packId)"
+            >
+              <div class="iap-pack-coin">
+                {{ pack.coin }}
+              </div>
+              <div class="iap-pack-unit">
+                云币
+              </div>
+              <div class="iap-pack-price">
+                {{ pack.priceText }}
+              </div>
+            </button>
+          </div>
+        </k-block>
+      </template>
 
       <!-- 会员状态 -->
       <k-block-title>会员</k-block-title>
@@ -177,6 +254,10 @@ function formatTxTime(ts: number): string {
       <k-block v-else strong inset class="text-center opacity-50">
         暂无流水记录
       </k-block>
+
+      <IonInfiniteScroll :disabled="!hasMore" threshold="100px" @ion-infinite="loadMore">
+        <IonInfiniteScrollContent loading-spinner="crescent" loading-text="加载中…" />
+      </IonInfiniteScroll>
     </IonContent>
   </IonPage>
 </template>
@@ -201,8 +282,14 @@ function formatTxTime(ts: number): string {
   font-size: 44px;
   font-weight: 700;
   line-height: 1.2;
-  margin: 8px 0 16px;
+  margin: 8px 0 4px;
   color: var(--ion-text-color);
+}
+
+.balance-equiv {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-bottom: 16px;
 }
 
 .recharge-btn {
@@ -230,5 +317,41 @@ function formatTxTime(ts: number): string {
   display: flex;
   justify-content: center;
   padding: 24px;
+}
+
+/* iOS IAP 充值包 */
+.iap-pack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.iap-pack-card {
+  border: 1.5px solid var(--ion-color-step-200, #e5e5ea);
+  border-radius: 14px;
+  padding: 14px 8px 10px;
+  text-align: center;
+  background: transparent;
+}
+
+.iap-pack-card:disabled {
+  opacity: 0.5;
+}
+
+.iap-pack-coin {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.iap-pack-unit {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.iap-pack-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ion-color-primary, #007aff);
+  margin-top: 6px;
 }
 </style>

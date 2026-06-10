@@ -8,6 +8,7 @@ export default defineNuxtConfig({
 
   alias: {
     '@yunlefun/auth': path.resolve(__dirname, './packages/auth/src/index.ts'),
+    '@yunlefun/capacitor-storekit': path.resolve(__dirname, './packages/capacitor-storekit/src/index.ts'),
   },
 
   devServer: {

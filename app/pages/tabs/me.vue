@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, personCircleOutline, settings, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
+import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, personCircleOutline, ribbonOutline, settings, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -99,7 +99,7 @@ function navigateTo(path: string) {
           <k-list-item
             link
             title="钱包"
-            :footer="isMember ? '会员有效中' : '云币 & 会员'"
+            footer="云币 & 流水"
             @click="navigateTo('/wallet')"
           >
             <template #media>
@@ -109,6 +109,22 @@ function navigateTo(path: string) {
             </template>
             <template #after>
               <span class="wallet-balance">{{ balance }} 云币</span>
+            </template>
+          </k-list-item>
+
+          <k-list-item
+            link
+            title="会员"
+            :footer="isMember ? '会员有效中' : '解锁更多权益'"
+            @click="navigateTo('/membership')"
+          >
+            <template #media>
+              <span class="ios-icon-box ios-icon-purple">
+                <IonIcon :icon="ribbonOutline" />
+              </span>
+            </template>
+            <template #after>
+              <span v-if="isMember" class="member-active-badge">有效</span>
             </template>
           </k-list-item>
         </k-list>
@@ -239,5 +255,12 @@ function navigateTo(path: string) {
   font-size: 15px;
   font-weight: 600;
   color: var(--ion-color-warning, #ff9f0a);
+}
+
+/* 会员有效徽标 */
+.member-active-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-success, #2dd36f);
 }
 </style>

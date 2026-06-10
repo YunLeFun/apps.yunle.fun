@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ThemeMode } from '~/stores/settings'
+import type { AppIconStyle, ThemeMode } from '~/stores/settings'
 import {
   IonAlert,
 } from '@ionic/vue'
@@ -7,9 +7,11 @@ import {
   appsOutline,
   cloudDoneOutline,
   cloudOutline,
+  colorPaletteOutline,
   moonOutline,
   phonePortraitOutline,
   serverOutline,
+  sparklesOutline,
   sunnyOutline,
   syncOutline,
   trashOutline,
@@ -29,10 +31,16 @@ const homeScreenStore = useHomeScreenStore()
 const userStore = useUserStore()
 
 const selectedTheme = ref<ThemeMode>(settingsStore.themeMode)
+const selectedAppIconStyle = ref<AppIconStyle>(settingsStore.appIconStyle)
 
 function selectTheme(value: ThemeMode) {
   selectedTheme.value = value
   settingsStore.applyTheme(value)
+}
+
+function selectAppIconStyle(value: AppIconStyle) {
+  selectedAppIconStyle.value = value
+  settingsStore.setAppIconStyle(value)
 }
 
 onMounted(() => {
@@ -163,6 +171,32 @@ async function handleManualSync() {
         </k-segmented>
         <p class="text-xs text-center mt-3 opacity-50">
           「自动」将跟随系统外观设置
+        </p>
+      </k-block>
+
+      <k-block strong inset class="theme-block">
+        <k-segmented strong class="theme-segment">
+          <k-segmented-button
+            :active="selectedAppIconStyle === 'liquid-glass'"
+            @click="selectAppIconStyle('liquid-glass')"
+          >
+            <div class="flex flex-col items-center gap-1 py-2">
+              <IonIcon :icon="sparklesOutline" class="text-lg" />
+              <span class="text-xs">液态玻璃</span>
+            </div>
+          </k-segmented-button>
+          <k-segmented-button
+            :active="selectedAppIconStyle === 'flat-color'"
+            @click="selectAppIconStyle('flat-color')"
+          >
+            <div class="flex flex-col items-center gap-1 py-2">
+              <IonIcon :icon="colorPaletteOutline" class="text-lg" />
+              <span class="text-xs">平铺色彩</span>
+            </div>
+          </k-segmented-button>
+        </k-segmented>
+        <p class="text-xs text-center mt-3 opacity-50">
+          控制主屏幕、Dock 与长按预览的应用图标外观
         </p>
       </k-block>
 

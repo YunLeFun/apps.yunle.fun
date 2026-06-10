@@ -9,3 +9,19 @@ export const cloudOneApp: YlfAppInfo = {
   category: '应用',
   slug: 'random',
 }
+
+export const yunHomeApp: YlfAppInfo = {
+  id: 'yun-home',
+  slug: 'yun-home',
+  name: 'Yun Home',
+  description: '云端智能家居市场与设备控制台',
+  emoji: '🏠',
+  themeColor: '#0096FF',
+  websiteUrl: 'https://home.yunle.fun',
+  category: '生活',
+  rating: 4.8,
+  downloads: '内测中',
+  size: '1.8 MB',
+  age: '4+',
+  tagline: '管理你的云端智能家居',
+}

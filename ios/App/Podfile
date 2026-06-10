@@ -23,6 +23,8 @@ end
 target 'App' do
   capacitor_pods
   # Add your Pods here
+  # 本地 StoreKit 2 内购插件（packages/capacitor-storekit，非 npm 包，cap sync 不会自动管理）
+  pod 'YunlefunCapacitorStorekit', :path => '../../packages/capacitor-storekit'
 end
 
 post_install do |installer|

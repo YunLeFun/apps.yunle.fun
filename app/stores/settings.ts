@@ -2,10 +2,12 @@ import { useStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
+export type AppIconStyle = 'liquid-glass' | 'flat-color'
 
 /** 所有 localStorage 的 key 前缀 */
 const STORAGE_KEYS = [
   'ylf_theme_mode',
+  'ylf_icon_style',
   'ylf_developer_mode',
   'ylf_api_environment',
   'ylf:homescreen-apps',
@@ -67,6 +69,15 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
+  // ==================== 外观设置 ====================
+
+  /** 主屏幕应用图标风格 */
+  const appIconStyle = useStorage<AppIconStyle>('ylf_icon_style', 'liquid-glass')
+
+  function setAppIconStyle(style: AppIconStyle) {
+    appIconStyle.value = style
+  }
+
   // ==================== 云同步设置 ====================
 
   /** 云同步开关（总开关，关闭后不会与 CloudBase 进行任何同步） */
@@ -116,6 +127,9 @@ export const useSettingsStore = defineStore('settings', () => {
     currentTheme,
     applyTheme,
     initTheme,
+    // 外观
+    appIconStyle,
+    setAppIconStyle,
     // 云同步
     cloudSyncEnabled,
     cloudAutoSync,

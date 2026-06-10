@@ -45,7 +45,7 @@ function makeApp(overrides: Record<string, unknown> = {}) {
     name: 'Demo',
     color: '#000',
     emoji: '🎯',
-    url: 'https://demo.example.com',
+    websiteUrl: 'https://demo.example.com',
     ...overrides,
   } as any
 }
@@ -125,7 +125,7 @@ describe('useOpenApp', () => {
 
   it('站内路由应用通过 router.push 打开', async () => {
     const { openApp } = useOpenApp()
-    const opened = await openApp(makeApp({ url: '/tabs/apps' }))
+    const opened = await openApp(makeApp({ websiteUrl: '/tabs/apps' }))
     expect(opened).toBe(true)
     expect(mockPush).toHaveBeenCalledWith('/tabs/apps')
   })

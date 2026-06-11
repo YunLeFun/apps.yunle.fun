@@ -120,8 +120,8 @@ async function confirmDelete() {
             toast.showSuccess('已删除')
             router.replace('/workshop')
           }
-          catch {
-            toast.showError('删除失败')
+          catch (err: unknown) {
+            toast.showError(err instanceof Error ? err.message : '删除失败')
           }
         },
       },

@@ -3,13 +3,23 @@ import { DEFAULT_APP_STATUS } from '~/types/app'
 
 const COLLECTION = 'apps'
 
+interface CloudBaseWriteResult {
+  updated?: number
+  deleted?: number
+  code?: string
+  message?: string
+  msg?: string
+}
+
 /**
  * 应用数据管理 composable
  * 基于 CloudBase NoSQL 数据库
  *
  * 安全规则（CUSTOM）—— 上线前需要在 CloudBase 控制台同步更新：
  *   read:  "(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid"
- *   write: "auth.uid == doc._openid"
+ *   create: "auth.uid != null && auth.loginType != 'ANONYMOUS'"
+ *   update: "auth.uid == doc._openid"
+ *   delete: "auth.uid == doc._openid"
  *
  * where 查询必须包含安全规则可推导的条件：
  *   - 查自己的数据 → where 含 _openid
@@ -183,20 +193,45 @@ export function useApps() {
    * 触发重新审核（与 App Store「重新提交」逻辑一致）
    */
   async function updateApp(id: string, updates: Partial<CreateAppForm>): Promise<void> {
-    await db.collection(COLLECTION).doc(id).update({
-      ...updates,
-      status: DEFAULT_APP_STATUS,
-      rejectedReason: '',
-      reviewedAt: 0,
-      updatedAt: Date.now(),
-    })
+    const uid = await ensureAuth()
+    if (!uid)
+      throw new Error('请先登录')
+
+    const res = await db.collection(COLLECTION)
+      .where({ _id: id, _openid: uid })
+      .update({
+        ...updates,
+        status: DEFAULT_APP_STATUS,
+        rejectedReason: '',
+        reviewedAt: 0,
+        updatedAt: Date.now(),
+      }) as unknown as CloudBaseWriteResult
+
+    if (res.code)
+      throw new Error(res.message || res.msg || res.code)
+
+    if (!res.updated)
+      throw new Error('应用不存在或无权更新')
   }
 
   /**
    * 删除应用
    */
   async function deleteApp(id: string): Promise<void> {
-    await db.collection(COLLECTION).doc(id).remove()
+    const uid = await ensureAuth()
+    if (!uid)
+      throw new Error('请先登录')
+
+    const res = await db
+      .collection(COLLECTION)
+      .where({ _id: id, _openid: uid })
+      .remove() as unknown as CloudBaseWriteResult
+
+    if (res.code)
+      throw new Error(res.message || res.msg || res.code)
+
+    if (!res.deleted)
+      throw new Error('应用不存在或无权删除')
   }
 
   /**

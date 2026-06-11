@@ -15,6 +15,8 @@ function createMockDb() {
     limit: vi.fn().mockReturnThis(),
     get: vi.fn(),
     add: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
     doc: vi.fn(() => mockDoc),
   }
   const db = {
@@ -363,7 +365,11 @@ describe('useApps', () => {
 
   describe('updateApp', () => {
     it('成功更新应用并设置 updatedAt', async () => {
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'user-123', nickname: 'test' },
+      })
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const before = Date.now()
       const { updateApp } = useApps()
@@ -371,23 +377,103 @@ describe('useApps', () => {
       const after = Date.now()
 
       expect(mockDbSetup.db.collection).toHaveBeenCalledWith('apps')
-      expect(mockDbSetup.mockCollection.doc).toHaveBeenCalledWith('doc-1')
-      const updateCall = mockDbSetup.mockDoc.update.mock.calls[0][0]
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ _id: 'doc-1', _openid: 'user-123' })
+      expect(mockDbSetup.mockCollection.doc).not.toHaveBeenCalled()
+      const updateCall = mockDbSetup.mockCollection.update.mock.calls[0][0]
       expect(updateCall.name).toBe('Updated Name')
       expect(updateCall.updatedAt).toBeGreaterThanOrEqual(before)
       expect(updateCall.updatedAt).toBeLessThanOrEqual(after)
     })
+
+    it('未登录时拒绝更新', async () => {
+      mockUserStore = createMockUserStore()
+      mockAuth.getSession.mockResolvedValue({ data: null, error: { message: 'no session' } })
+
+      const { updateApp } = useApps()
+
+      await expect(updateApp('doc-1', { name: 'Updated Name' })).rejects.toThrow('请先登录')
+      expect(mockDbSetup.mockCollection.update).not.toHaveBeenCalled()
+    })
+
+    it('没有更新到文档时提示无权更新或应用不存在', async () => {
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'user-123', nickname: 'test' },
+      })
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 0 })
+
+      const { updateApp } = useApps()
+
+      await expect(updateApp('doc-1', { name: 'Updated Name' })).rejects.toThrow('应用不存在或无权更新')
+    })
+
+    it('cloudbase 返回错误码时转为更新异常', async () => {
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'user-123', nickname: 'test' },
+      })
+      mockDbSetup.mockCollection.update.mockResolvedValue({
+        code: 'DATABASE_PERMISSION_DENIED',
+        message: 'permission denied',
+      })
+
+      const { updateApp } = useApps()
+
+      await expect(updateApp('doc-1', { name: 'Updated Name' })).rejects.toThrow('permission denied')
+    })
   })
 
   describe('deleteApp', () => {
-    it('成功删除应用', async () => {
-      mockDbSetup.mockDoc.remove.mockResolvedValue({})
+    it('成功删除当前用户自己的应用', async () => {
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'user-123', nickname: 'test' },
+      })
+      mockDbSetup.mockCollection.remove.mockResolvedValue({ deleted: 1 })
 
       const { deleteApp } = useApps()
       await deleteApp('doc-1')
 
-      expect(mockDbSetup.mockCollection.doc).toHaveBeenCalledWith('doc-1')
-      expect(mockDbSetup.mockDoc.remove).toHaveBeenCalled()
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ _id: 'doc-1', _openid: 'user-123' })
+      expect(mockDbSetup.mockCollection.remove).toHaveBeenCalled()
+      expect(mockDbSetup.mockCollection.doc).not.toHaveBeenCalled()
+    })
+
+    it('未登录时拒绝删除', async () => {
+      mockUserStore = createMockUserStore()
+      mockAuth.getSession.mockResolvedValue({ data: null, error: { message: 'no session' } })
+
+      const { deleteApp } = useApps()
+
+      await expect(deleteApp('doc-1')).rejects.toThrow('请先登录')
+      expect(mockDbSetup.mockCollection.remove).not.toHaveBeenCalled()
+    })
+
+    it('没有删除到文档时提示无权删除或应用不存在', async () => {
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'user-123', nickname: 'test' },
+      })
+      mockDbSetup.mockCollection.remove.mockResolvedValue({ deleted: 0 })
+
+      const { deleteApp } = useApps()
+
+      await expect(deleteApp('doc-1')).rejects.toThrow('应用不存在或无权删除')
+    })
+
+    it('cloudbase 返回错误码时转为删除异常', async () => {
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'user-123', nickname: 'test' },
+      })
+      mockDbSetup.mockCollection.remove.mockResolvedValue({
+        code: 'DATABASE_PERMISSION_DENIED',
+        message: 'permission denied',
+      })
+
+      const { deleteApp } = useApps()
+
+      await expect(deleteApp('doc-1')).rejects.toThrow('permission denied')
     })
   })
 

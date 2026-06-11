@@ -97,8 +97,8 @@ async function confirmDeleteApp(app: AppRecord, slidingItem?: any) {
             myApps.value = myApps.value.filter(a => a._id !== app._id)
             toast.showSuccess('已删除')
           }
-          catch {
-            toast.showError('删除失败')
+          catch (err: unknown) {
+            toast.showError(err instanceof Error ? err.message : '删除失败')
           }
         },
       },

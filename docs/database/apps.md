@@ -47,15 +47,19 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 
 ```json
 {
-  "read": "doc.isPublic == true || auth.uid == doc._openid",
-  "write": "auth.uid == doc._openid"
+  "read": "(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid",
+  "create": "auth.uid != null && auth.loginType != 'ANONYMOUS'",
+  "update": "auth.uid == doc._openid",
+  "delete": "auth.uid == doc._openid"
 }
 ```
 
-| 操作 | 权限                                           |
-| ---- | ---------------------------------------------- |
-| 读取 | 公开应用所有登录用户可读；私有应用仅创建者可读 |
-| 写入 | 仅创建者可创建/修改/删除                       |
+| 操作 | 权限                                                     |
+| ---- | -------------------------------------------------------- |
+| 读取 | 公开且审核通过的应用所有人可读；所有者可读自己的应用     |
+| 创建 | 已登录且非匿名用户可创建，`_openid` 由 CloudBase 自动注入 |
+| 更新 | 仅创建者可更新                                           |
+| 删除 | 仅创建者可删除                                           |
 
 ### 安全规则对 `where` 查询的约束
 
@@ -68,11 +72,11 @@ CloudBase 安全规则引擎要求 **`where` 条件必须能让引擎推导出�
 // ✅ 查自己的数据 — where 含 _openid
 db.collection('apps').where({ _openid: userId })
 
-// ✅ 查公开数据 — where 含 isPublic: true
-db.collection('apps').where({ isPublic: true })
+// ✅ 查公开数据 — where 含 isPublic: true 与 status: 'approved'
+db.collection('apps').where({ isPublic: true, status: 'approved' })
 
 // ✅ 组合条件 — 按 slug 查公开应用
-db.collection('apps').where({ slug: 'xxx', isPublic: true })
+db.collection('apps').where({ slug: 'xxx', isPublic: true, status: 'approved' })
 
 // ✅ 组合条件 — 按 slug 查自己的应用
 db.collection('apps').where({ slug: 'xxx', _openid: userId })
@@ -99,6 +103,16 @@ db.collection('apps')
   .get()
 ```
 
+### 删除自己的应用
+
+删除时同时带上 `_id` 与 `_openid`，让安全规则可以从查询条件推导出文档归属。
+
+```typescript
+db.collection('apps')
+  .where({ _id: appId, _openid: userId })
+  .remove()
+```
+
 ### 按 slug 查应用
 
 需要分两步：先查自己的（含私有），再查公开的。
@@ -114,7 +128,7 @@ if (data.length > 0)
 
 // 2. 再查公开的
 const { data: pub } = await db.collection('apps')
-  .where({ slug, isPublic: true })
+  .where({ slug, isPublic: true, status: 'approved' })
   .limit(1)
   .get()
 return pub[0] || null
@@ -128,7 +142,7 @@ return pub[0] || null
 ```typescript
 // 客户端预检（不能覆盖他人私有数据）
 const pub = await db.collection('apps')
-  .where({ slug, isPublic: true })
+  .where({ slug, isPublic: true, status: 'approved' })
   .limit(1)
   .get()
 const my = await db.collection('apps')
@@ -162,7 +176,7 @@ await db.collection('apps').add({
 
 ```typescript
 db.collection('apps')
-  .where({ isPublic: true, category: '工具' })
+  .where({ isPublic: true, status: 'approved', category: '工具' })
   .orderBy('updatedAt', 'desc')
   .skip(offset)
   .limit(20)
@@ -175,6 +189,7 @@ db.collection('apps')
 db.collection('apps')
   .where({
     isPublic: true,
+    status: 'approved',
     name: db.RegExp({ regexp: keyword, options: 'i' }),
   })
   .limit(20)
@@ -185,7 +200,7 @@ db.collection('apps')
 
 ```typescript
 db.collection('apps')
-  .where({ isPublic: true })
+  .where({ isPublic: true, status: 'approved' })
   .orderBy('updatedAt', 'desc')
   .skip(offset)
   .limit(20)
@@ -199,6 +214,7 @@ db.collection('apps')
   .where({
     _id: _.in(appIds),
     isPublic: true,
+    status: 'approved',
   })
   .get()
 ```

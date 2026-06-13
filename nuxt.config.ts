@@ -1,6 +1,8 @@
 import path from 'node:path'
+import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import { defineNuxtConfig } from 'nuxt/config'
+import { DEFAULT_CLOUDBASE_ENV_ID } from './app/constants/cloudbase'
 import { appDescription } from './app/constants/index'
 
 export default defineNuxtConfig({
@@ -174,12 +176,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
     tencentApiSecretId: '',
     tencentApiSecretKey: '',
     tmsRegion: 'ap-guangzhou',
     tmsBizType: '',
+    jsapiAuthAllowedOrigins: process.env.NUXT_JSAPI_AUTH_ALLOWED_ORIGINS || 'https://*.yunle.fun,https://*.yunyoujun.cn',
     public: {
-      tcbEnvId: '',
+      tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
       cloudbaseRegion: '',
       cloudbaseAccessKey: '',
       apiBaseUrl: '',

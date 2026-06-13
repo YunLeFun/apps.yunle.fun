@@ -1,6 +1,7 @@
 import type { AppRecord } from '~/types/app'
 import type { ReviewModerationInfo, ReviewRecord, SubmitReviewResponse } from '~/types/review'
 import { createError, readBody } from 'h3'
+import { recomputeAppRating } from '../../utils/app-rating'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
 import { buildModerationContent, logModerationTask, moderateText } from '../../utils/moderation'
@@ -99,6 +100,9 @@ export default defineEventHandler(async (event) => {
       createdAt: now,
     }
   }
+
+  // 去规范化回写应用评分聚合（列表展示用），失败不阻断评论提交
+  await recomputeAppRating(db, input.appKey, app._id).catch(() => {})
 
   const data: SubmitReviewResponse = {
     status,

@@ -5,48 +5,6 @@ import type { YlfAppInfo } from '@yunlefun/types'
 
 export const GENERATED_APPS: YlfAppInfo[] = [
   {
-    "id": "yun-leetcode",
-    "slug": "yun-leetcode",
-    "name": "Yun LeetCode",
-    "emoji": "💻",
-    "themeColor": "#ffa116",
-    "websiteUrl": "https://leetcode.yunyoujun.cn",
-    "description": "云游君的 LeetCode 题解",
-    "category": "其他",
-    "rating": 4.8,
-    "downloads": "15万+",
-    "size": "3.5 MB",
-    "age": "12+"
-  },
-  {
-    "id": "yun-memo",
-    "slug": "yun-memo",
-    "name": "Yun Memo",
-    "emoji": "📝",
-    "themeColor": "#ffd93d",
-    "websiteUrl": "https://memo.yunyoujun.cn",
-    "description": "云游君的备忘录",
-    "category": "其他",
-    "rating": 4.6,
-    "downloads": "5万+",
-    "size": "1.8 MB",
-    "age": "4+"
-  },
-  {
-    "id": "yun-gal",
-    "slug": "yun-gal",
-    "name": "Yun Gal",
-    "emoji": "🎮",
-    "themeColor": "#ff69b4",
-    "websiteUrl": "https://gal.yunyoujun.cn",
-    "description": "云游君的 Galgame 列表",
-    "category": "其他",
-    "rating": 4.7,
-    "downloads": "8万+",
-    "size": "2.5 MB",
-    "age": "18+"
-  },
-  {
     "id": "cdn",
     "slug": "cdn",
     "name": "CDN",
@@ -56,8 +14,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "我的 CDN，基于 GitHub + jsDelivr",
     "category": "其他",
     "rating": 4.5,
-    "downloads": "100万+",
-    "size": "500 KB",
     "age": "4+"
   },
   {
@@ -70,22 +26,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "赞助者列表",
     "category": "参与",
     "rating": 4.9,
-    "downloads": "10万+",
-    "size": "1.2 MB",
-    "age": "4+"
-  },
-  {
-    "id": "vitepress-theme-sakura",
-    "slug": "vitepress-theme-sakura",
-    "name": "VitePress Theme Sakura",
-    "emoji": "🌸",
-    "themeColor": "#ffb7c5",
-    "websiteUrl": "https://github.com/flaribbit/vitepress-theme-sakura",
-    "description": "VitePress 樱花主题",
-    "category": "参与",
-    "rating": 4.6,
-    "downloads": "3万+",
-    "size": "2.8 MB",
     "age": "4+"
   },
   {
@@ -98,22 +38,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "Valaxy 云游君主题",
     "category": "参与",
     "rating": 4.7,
-    "downloads": "5万+",
-    "size": "3.2 MB",
-    "age": "4+"
-  },
-  {
-    "id": "vite-pwa",
-    "slug": "vite-pwa",
-    "name": "Vite PWA",
-    "emoji": "⚡",
-    "themeColor": "#646cff",
-    "websiteUrl": "https://vite-pwa-org.netlify.app/",
-    "description": "Vite PWA 插件，Zero Config",
-    "category": "参与",
-    "rating": 4.8,
-    "downloads": "200万+",
-    "size": "1.5 MB",
     "age": "4+"
   },
   {
@@ -126,8 +50,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "Vue 3 最流行的组件库之一，Core Team Member",
     "category": "参与",
     "rating": 4.9,
-    "downloads": "500万+",
-    "size": "8.5 MB",
     "age": "4+"
   },
   {
@@ -140,8 +62,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "手写一个高斯模糊",
     "category": "实验",
     "rating": 4.4,
-    "downloads": "3万+",
-    "size": "1.5 MB",
     "age": "12+"
   },
   {
@@ -154,8 +74,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "WebGL 辐射度渲染实现",
     "category": "实验",
     "rating": 4.5,
-    "downloads": "5万+",
-    "size": "2.8 MB",
     "age": "12+"
   },
   {
@@ -168,8 +86,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "可以在任意地方使用的 GitHub Corner 挂件",
     "category": "插件",
     "rating": 4.6,
-    "downloads": "12万+",
-    "size": "300 KB",
     "age": "4+"
   },
   {
@@ -182,8 +98,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "可视化 Mock 数据管理，支持 TS 热更新",
     "category": "插件",
     "rating": 4.7,
-    "downloads": "8万+",
-    "size": "1.2 MB",
     "age": "4+"
   },
   {
@@ -196,8 +110,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "Unplugin 插件，加载 GLSL 语法，支持 Webpack/Vite/Rollup/Rspack",
     "category": "插件",
     "rating": 4.8,
-    "downloads": "10万+",
-    "size": "500 KB",
     "age": "4+"
   },
   {
@@ -210,8 +122,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "爆裂吧！取名自惠惠的爆裂魔法，放一些前端动效的实现",
     "category": "设计",
     "rating": 4.7,
-    "downloads": "18万+",
-    "size": "2.5 MB",
     "age": "4+"
   },
   {
@@ -224,8 +134,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "纯 Markdown CSS，支持多种主题",
     "category": "设计",
     "rating": 4.8,
-    "downloads": "25万+",
-    "size": "800 KB",
     "age": "4+"
   },
   {
@@ -238,8 +146,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "刀剑神域-序列之争 AUGMA AR UI 组件库",
     "category": "设计",
     "rating": 4.6,
-    "downloads": "10万+",
-    "size": "3.8 MB",
     "age": "12+"
   },
   {
@@ -252,8 +158,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "明日方舟 UI 组件库",
     "category": "设计",
     "rating": 4.7,
-    "downloads": "15万+",
-    "size": "4.5 MB",
     "age": "12+"
   },
   {
@@ -266,8 +170,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "我的博客主题，也就是 yunyoujun.cn 你所看到的样式和各类功能",
     "category": "设计",
     "rating": 4.9,
-    "downloads": "30万+",
-    "size": "5.2 MB",
     "age": "4+"
   },
   {
@@ -281,8 +183,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "logo": "/normal-puppy-logo.webp",
     "category": "设计",
     "rating": 5,
-    "downloads": "1万+",
-    "size": "2.0 MB",
     "age": "4+"
   },
   {
@@ -295,8 +195,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "最小依赖的 NPM 源管理器",
     "category": "工具",
     "rating": 4.8,
-    "downloads": "20万+",
-    "size": "300 KB",
     "age": "4+"
   },
   {
@@ -309,8 +207,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "可在线编辑的 Web 简历，斩获 BAT Offer 未尝败绩",
     "category": "工具",
     "rating": 4.9,
-    "downloads": "50万+",
-    "size": "1.8 MB",
     "age": "4+"
   },
   {
@@ -323,8 +219,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "使用 mirai-ts 构建的 Node 端机器人框架",
     "category": "工具",
     "rating": 4.7,
-    "downloads": "12万+",
-    "size": "3.2 MB",
     "age": "12+"
   },
   {
@@ -337,8 +231,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "Mirai（QQ 机器人）TypeScript SDK",
     "category": "工具",
     "rating": 4.8,
-    "downloads": "15万+",
-    "size": "2.8 MB",
     "age": "12+"
   },
   {
@@ -351,8 +243,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "基于 Pixi.js 的绘图工具 + AI LCM",
     "category": "工具",
     "rating": 4.6,
-    "downloads": "8万+",
-    "size": "3.5 MB",
     "age": "4+"
   },
   {
@@ -365,8 +255,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "基于 git 提供更多交互式快捷操作",
     "category": "工具",
     "rating": 4.7,
-    "downloads": "5万+",
-    "size": "500 KB",
     "age": "4+"
   },
   {
@@ -379,8 +267,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "新一代静态博客框架",
     "category": "应用",
     "rating": 4.9,
-    "downloads": "10万+",
-    "size": "2.5 MB",
     "age": "4+"
   },
   {
@@ -393,8 +279,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "祝你生日快乐！可以改链接参数来替换寿星名称",
     "category": "应用",
     "rating": 4.8,
-    "downloads": "30万+",
-    "size": "1.2 MB",
     "age": "4+"
   },
   {
@@ -407,8 +291,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "去往这个世界上最遥远的地方。此后，不管你如何前进，都在回家的路上",
     "category": "应用",
     "rating": 4.9,
-    "downloads": "12万+",
-    "size": "1.5 MB",
     "age": "4+"
   },
   {
@@ -421,8 +303,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "在线图片转字符画",
     "category": "应用",
     "rating": 4.5,
-    "downloads": "18万+",
-    "size": "2.1 MB",
     "age": "4+"
   },
   {
@@ -435,8 +315,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "基于 K-Means 色彩聚类提取主题色",
     "category": "应用",
     "rating": 4.6,
-    "downloads": "20万+",
-    "size": "1.8 MB",
     "age": "4+"
   },
   {
@@ -449,8 +327,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "AI 春联生成器，让 AI 帮你写春联",
     "category": "应用",
     "rating": 4.7,
-    "downloads": "35万+",
-    "size": "2.8 MB",
     "age": "4+"
   },
   {
@@ -463,8 +339,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "好的，今天我们来做菜！可以根据所选食材筛选菜谱",
     "category": "应用",
     "rating": 4.8,
-    "downloads": "40万+",
-    "size": "3.2 MB",
     "age": "4+"
   },
   {
@@ -477,8 +351,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "经典聊天记录橱窗，生成聊天记录，小丑模拟器",
     "category": "整活",
     "rating": 4.4,
-    "downloads": "25万+",
-    "size": "1.5 MB",
     "age": "12+"
   },
   {
@@ -491,8 +363,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "基于 JSNES 与 Vue 实现的红白机 FC",
     "category": "整活",
     "rating": 4.5,
-    "downloads": "15万+",
-    "size": "5.8 MB",
     "age": "4+"
   },
   {
@@ -505,8 +375,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "电风扇，便携夏日小风扇！纯 CSS 编写，小空调的前辈",
     "category": "整活",
     "rating": 4.6,
-    "downloads": "20万+",
-    "size": "500 KB",
     "age": "4+"
   },
   {
@@ -519,8 +387,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "我很可爱，请给我钱！直白的绅士钓鱼网站",
     "category": "整活",
     "rating": 4.7,
-    "downloads": "30万+",
-    "size": "800 KB",
     "age": "12+"
   },
   {
@@ -533,8 +399,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "云空调，便携小空调！其实是个冷笑话，随身携带的毫无制冷效果的仿真小空调",
     "category": "整活",
     "rating": 4.8,
-    "downloads": "50万+",
-    "size": "1.2 MB",
     "age": "4+"
   }
 ]

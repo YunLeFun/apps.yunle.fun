@@ -23,6 +23,7 @@ export default defineConfig({
         text: '指南',
         items: [
           { text: '快速开始', link: '/guide/getting-started' },
+          { text: 'JSAPI 接入（window.ylf）', link: '/guide/jsapi' },
         ],
       },
       {
@@ -35,6 +36,7 @@ export default defineConfig({
           { text: '云居 - Home Screen', link: '/product/home' },
           { text: '寻乐 - Discovery', link: '/product/discovery' },
           { text: '工坊 - Workshop', link: '/product/workshop' },
+          { text: '互动指标（收藏/访问/有用/投币）', link: '/product/app-engagement-metrics' },
         ],
       },
       {
@@ -62,7 +64,9 @@ export default defineConfig({
           { text: '概览', link: '/dev/' },
           { text: '认证', link: '/dev/auth' },
           { text: '扫码功能', link: '/dev/barcode-scanner' },
+          { text: '沉浸式内嵌浏览器', link: '/dev/in-app-browser' },
           { text: '短信登录', link: '/dev/sms-login' },
+          { text: 'Home Screen 拖拽排序', link: '/dev/home-screen-drag' },
           { text: 'App Store 上架手册', link: '/dev/app-store-onboarding' },
           { text: 'TestFlight 内测上架', link: '/dev/testflight' },
           { text: 'CloudBase 安全规则', link: '/dev/cloudbase-rules' },

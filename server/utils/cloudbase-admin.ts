@@ -1,5 +1,6 @@
 import type { CloudBase, ICloudBaseConfig } from '@cloudbase/node-sdk'
 import { createRequire } from 'node:module'
+import { resolveCloudbaseAdminInitConfig } from './cloudbase-config'
 
 interface CloudbaseModule {
   init: (config?: ICloudBaseConfig) => CloudBase
@@ -17,7 +18,7 @@ function loadCloudbase(): CloudbaseModule {
 }
 
 type CloudbaseAdminApp = CloudBase
-type CloudbaseAdminDb = ReturnType<CloudbaseAdminApp['database']>
+export type CloudbaseAdminDb = ReturnType<CloudbaseAdminApp['database']>
 
 let cachedApp: CloudbaseAdminApp | null = null
 let cachedDb: CloudbaseAdminDb | null = null
@@ -25,33 +26,14 @@ let cachedKey = ''
 
 export function useCloudbaseAdmin(): { app: CloudbaseAdminApp, db: CloudbaseAdminDb } {
   const config = useRuntimeConfig()
-  const env = config.public.tcbEnvId
-  const secretId = config.tencentApiSecretId
-  const secretKey = config.tencentApiSecretKey
+  const initConfig = resolveCloudbaseAdminInitConfig(config)
 
-  if (!env) {
-    throw createError({
-      statusCode: 500,
-      message: 'CloudBase 环境未配置',
-    })
-  }
-  if (!secretId || !secretKey) {
-    throw createError({
-      statusCode: 500,
-      message: 'CloudBase 管理端凭证未配置',
-    })
-  }
-
-  const cacheKey = `${env}:${secretId}`
+  const cacheKey = `${String(initConfig.env || '')}:${initConfig.secretId || 'default'}`
   if (cachedApp && cachedDb && cachedKey === cacheKey) {
     return { app: cachedApp, db: cachedDb }
   }
 
-  cachedApp = loadCloudbase().init({
-    env,
-    secretId,
-    secretKey,
-  })
+  cachedApp = loadCloudbase().init(initConfig)
   cachedDb = cachedApp.database()
   cachedKey = cacheKey
 

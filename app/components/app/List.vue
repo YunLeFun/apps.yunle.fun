@@ -48,20 +48,13 @@ async function handleInfiniteScroll(event: CustomEvent) {
         >
           <div class="flex items-center gap-3">
             <!-- 应用图标 -->
-            <div
-              class="app-icon h-16 w-16 flex flex-shrink-0 items-center justify-center text-3xl"
-              :style="{ '--app-color': app.themeColor }"
-            >
-              <img
-                v-if="app.logo && (app.logo.startsWith('/') || app.logo.startsWith('http'))"
-                :src="app.logo"
-                :alt="app.name"
-                class="h-full w-full rounded-[inherit] object-cover"
-              >
-              <template v-else>
-                {{ app.logo || app.emoji }}
-              </template>
-            </div>
+            <AppIconBox
+              class="flex-shrink-0"
+              :icon="app.logo"
+              :emoji="app.emoji"
+              :color="app.themeColor"
+              size="md"
+            />
 
             <!-- 应用信息 -->
             <div class="min-w-0 flex flex-1 flex-col gap-1">
@@ -72,7 +65,8 @@ async function handleInfiniteScroll(event: CustomEvent) {
                 {{ app.description }}
               </div>
               <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <div v-if="app.rating" class="flex items-center gap-0.5">
+                <!-- 仅在有真实评分（ratingCount>0）时展示星级，避免显示写死的假分 -->
+                <div v-if="app.ratingCount && app.rating" class="flex items-center gap-0.5">
                   <IonIcon
                     v-for="(starIcon, idx) in renderStars(app.rating)"
                     :key="idx"
@@ -82,7 +76,7 @@ async function handleInfiniteScroll(event: CustomEvent) {
                   />
                   <span class="ml-1">{{ app.rating }}</span>
                 </div>
-                <span v-if="app.rating && app.category">·</span>
+                <span v-if="app.ratingCount && app.rating && app.category">·</span>
                 <span>{{ app.category }}</span>
               </div>
             </div>
@@ -118,26 +112,6 @@ async function handleInfiniteScroll(event: CustomEvent) {
 </template>
 
 <style scoped>
-.app-icon {
-  border-radius: 22.5%;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--app-color) 95%, white 5%) 0%,
-    color-mix(in srgb, var(--app-color) 70%, black 30%) 100%
-  );
-}
-
-.app-icon::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 22.5%;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-}
-
 /* iOS 风格分隔线：从图标右侧起始 */
 .app-list-item {
   position: relative;

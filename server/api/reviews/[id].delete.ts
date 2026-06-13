@@ -1,5 +1,6 @@
 import type { ReviewRecord } from '~/types/review'
 import { createError, getRouterParam } from 'h3'
+import { recomputeAppRating } from '../../utils/app-rating'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
 
@@ -34,15 +35,22 @@ export default defineEventHandler(async (event) => {
   }
 
   await collection.doc(id).remove()
+
+  // 删除后重算应用评分聚合，失败不阻断
+  if (review.appKey)
+    await recomputeAppRating(db, review.appKey, review.appId).catch(() => {})
+
   return { code: 0 }
 })
 
-function normalizeReviewRecord(value: unknown): Pick<ReviewRecord, '_id' | 'uid'> | null {
+function normalizeReviewRecord(value: unknown): Pick<ReviewRecord, '_id' | 'uid' | 'appKey' | 'appId'> | null {
   if (!isRecord(value))
     return null
   const _id = stringProp(value, '_id')
   const uid = stringProp(value, 'uid')
-  return _id && uid ? { _id, uid } : null
+  return _id && uid
+    ? { _id, uid, appKey: stringProp(value, 'appKey') || '', appId: stringProp(value, 'appId') || '' }
+    : null
 }
 
 function stringProp(value: Record<string, unknown>, key: string): string | undefined {

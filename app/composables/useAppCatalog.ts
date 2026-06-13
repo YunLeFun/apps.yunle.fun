@@ -133,5 +133,17 @@ export function useAppCatalog() {
     return catalog.value.filter(a => a.category === category)
   }
 
-  return { catalog, loading, loaded, ensureLoaded, getApp, getByCategory }
+  /**
+   * 按开发者（ownerLogin）聚合应用。
+   *
+   * 仅匹配目录中已回填 developer 的项（运行时从集合拉取后由 recordToAppInfo 写入）；
+   * 离线 / 未加载时内置快照无 developer，返回空数组（调用方据此隐藏入口）。
+   */
+  function getAppsByDeveloper(login: string): YlfAppInfo[] {
+    if (!login)
+      return []
+    return catalog.value.filter(a => a.developer === login)
+  }
+
+  return { catalog, loading, loaded, ensureLoaded, getApp, getByCategory, getAppsByDeveloper }
 }

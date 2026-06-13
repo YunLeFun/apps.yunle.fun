@@ -40,8 +40,6 @@ export const FEATURED_APP: YlfAppInfo = {
   websiteUrl: 'https://valaxy.yyj.moe',
   category: '应用',
   rating: 4.9,
-  downloads: '10万+',
-  size: '2.5 MB',
   age: '4+',
   subtitle: '编辑精选',
   tagline: '新一代静态博客框架',

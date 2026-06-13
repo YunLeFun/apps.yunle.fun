@@ -29,12 +29,14 @@ export interface AppDetailData extends YlfAppInfo {
 function toDetailData(app: YlfAppInfo, extra?: Partial<AppDetailData>): AppDetailData {
   return {
     ...app,
-    developer: extra?.developer ?? 'YunYouJun',
+    // 优先级：显式传入 > 目录回填的 developer（ownerLogin）> 站点默认
+    developer: extra?.developer ?? app.developer ?? 'YunYouJun',
     version: extra?.version ?? '1.0.0',
     updateDate: extra?.updateDate ?? '',
     whatsNew: extra?.whatsNew ?? '',
     languages: extra?.languages ?? ['简体中文', 'English'],
-    compatibility: extra?.compatibility ?? 'iOS 16.0+',
+    // 目录应用本质是网页，按网页应用而非原生 iOS 描述运行环境
+    compatibility: extra?.compatibility ?? '需要联网 · 现代浏览器',
     githubRepo: extra?.githubRepo,
     tags: extra?.tags,
   }

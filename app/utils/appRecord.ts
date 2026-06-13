@@ -19,10 +19,15 @@ export function recordToAppInfo(record: AppRecord): YlfAppInfo {
     themeColor: record.themeColor || '#007AFF',
     logo: record.logo || undefined,
     websiteUrl: record.websiteUrl || '',
+    trustedHosts: record.trustedHosts,
     category: record.category,
     rating: record.rating,
-    downloads: record.downloads,
-    size: record.size,
+    ratingCount: record.ratingCount,
     age: record.age,
+    screenshots: record.screenshots,
+    developer: record.ownerLogin || undefined,
+    developerName: record.developerName || undefined,
+    coinCost: record.coinCost,
+    requiresMembership: record.requiresMembership,
   }
 }

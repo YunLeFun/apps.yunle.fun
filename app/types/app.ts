@@ -62,6 +62,8 @@ export interface AppRecord {
   githubRepo?: string
   /** 应用网页链接 */
   websiteUrl?: string
+  /** 授信 JSAPI 域名（可注册域，子域自动匹配；仅审核通过的应用配置） */
+  trustedHosts?: string[]
   /** 备用链接 */
   backupUrl?: string
   /** 自定义 Logo 图片 URL（优先于 emoji 展示） */
@@ -74,14 +76,26 @@ export interface AppRecord {
   category?: string
   /** 标签 */
   tags?: string[]
-  /** 评分（展示用，0-5；当前为运营预设，后续可接真实数据） */
+  /**
+   * 评分（0-5）。真实来源为评论系统聚合（reviewSummary）；
+   * 此字段仅作列表展示的去规范化缓存，详情页一律以评论实时聚合为准。
+   * 由服务端在评论发布/删除时回写（见 server/utils/app-rating.ts）。
+   */
   rating?: number
-  /** 下载量文案（展示用，如「10万+」） */
-  downloads?: string
-  /** 应用大小文案（展示用，如「2.5 MB」） */
-  size?: string
+  /** 评分人数（已发布评论数）。与 rating 同为评论聚合缓存；为 0 / 缺省表示暂无真实评分 */
+  ratingCount?: number
+  /** 评分聚合最近回写时间戳 */
+  ratingUpdatedAt?: number
   /** 年龄分级文案（展示用，如「4+」） */
   age?: string
+  /** 应用截图 URL 列表（预览区真实截图；缺省回退占位面板） */
+  screenshots?: string[]
+  /** 开发者展示名（中文名等；缺省回退 ownerLogin / GitHub 资料） */
+  developerName?: string
+  /** 按次/一次性消费的云币数量（>0 表示付费应用，用于「App 内购买项目」展示与门控） */
+  coinCost?: number
+  /** 是否会员专属（用于「会员专属」展示与门控） */
+  requiresMembership?: boolean
   /** 用户是否愿意公开（默认 false；与 status=approved 同时满足才会真正对外可见） */
   isPublic: boolean
   /** 审核状态（必填，默认 pending） */
@@ -103,6 +117,7 @@ export interface CreateAppForm {
   description?: string
   githubRepo?: string
   websiteUrl?: string
+  trustedHosts?: string[]
   backupUrl?: string
   logo?: string
   emoji?: string

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { ReviewPublic, ReviewRecord, ReviewSummary } from '~/types/review'
+import { Haptics, NotificationType } from '@capacitor/haptics'
 import { IonButton, IonIcon, IonSpinner } from '@ionic/vue'
 import { chatbubbleEllipsesOutline, star, starOutline } from 'ionicons/icons'
 
 const props = defineProps<{
   appKey: string
-  fallbackRating?: number
+  appName?: string
+  appIcon?: string
 }>()
 
 const emit = defineEmits<{
@@ -31,15 +33,20 @@ const router = useRouter()
 const toast = useToast()
 const userStore = useUserStore()
 
-const displayAverage = computed(() => summary.value.count > 0 ? summary.value.average : props.fallbackRating || 0)
+// 评分一律以真实评论为准：无评论时为 0，展示「新」而非运营预设分
+const displayAverage = computed(() => summary.value.count > 0 ? summary.value.average : 0)
 const hasReviews = computed(() => reviews.value.length > 0)
 
 watch(summary, value => emit('summary', value), { deep: true, immediate: true })
 
 async function handleSubmit(input: { rating: number, title?: string, content: string }) {
   const result = await submitReview(input)
-  if (result)
+  if (result) {
+    Haptics.notification({
+      type: result.status === 'rejected' ? NotificationType.Error : NotificationType.Success,
+    }).catch(() => {})
     formOpen.value = false
+  }
 }
 
 async function openReviewForm() {
@@ -148,6 +155,8 @@ function barWidth(starValue: 1 | 2 | 3 | 4 | 5) {
       :is-open="formOpen"
       :review="myReview"
       :submitting="submitting"
+      :app-name="appName"
+      :app-icon="appIcon"
       @close="formOpen = false"
       @submit="handleSubmit"
     />

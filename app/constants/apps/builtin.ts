@@ -20,8 +20,6 @@ export const yunHomeApp: YlfAppInfo = {
   websiteUrl: 'https://home.yunle.fun',
   category: '生活',
   rating: 4.8,
-  downloads: '内测中',
-  size: '1.8 MB',
   age: '4+',
   tagline: '管理你的云端智能家居',
 }

@@ -1,5 +1,6 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { alertController } from '@ionic/vue'
+import { useStorage } from '@vueuse/core'
 import consola from 'consola'
 
 /**
@@ -7,7 +8,9 @@ import consola from 'consola'
  *
  * 收口了原本散落在 home.vue 和 AppItem.vue 的打开逻辑，并在打开前做门控：
  * - `requiresMembership`：会员专属应用，非会员引导去开通
- * - `coinCost > 0`：按次扣费应用，**会员免扣**，非会员确认后扣云币
+ * - `coinCost > 0`：付费应用，**一次购买永久使用**，会员免购。
+ *   服务端以 `bizId = purchase:{appKey}` 幂等去重，同一用户重复购买不会重复扣费；
+ *   本地已购缓存仅用于跳过确认弹窗，丢失后重走购买流程也只会命中 dedupe。
  *
  * 未登录用户访问付费 / 会员应用时引导去登录。
  */
@@ -16,6 +19,9 @@ export function useOpenApp() {
   const userStore = useUserStore()
   const { account, balance, isMember, refresh, deduct } = useCoin()
   const { showError, showSuccess } = useToast()
+
+  /** 已购应用本地缓存（仅用于免确认直接打开，真实凭证以服务端 bizId 幂等记录为准） */
+  const purchasedApps = useStorage<string[]>('ylf:purchased-apps', [])
 
   /** 通用确认弹窗，返回用户是否点了确认 */
   async function confirm(header: string, message: string, okText = '确定'): Promise<boolean> {
@@ -38,10 +44,27 @@ export function useOpenApp() {
       app.callback()
     }
     else if (app.websiteUrl) {
-      if (app.websiteUrl.startsWith('http'))
-        openInAppBrowser(app.websiteUrl)
-      else
+      if (app.websiteUrl.startsWith('http')) {
+        openInAppBrowser(app.websiteUrl, {
+          title: app.name,
+          displayMode: app.displayMode,
+          app: {
+            id: app.id || app.slug,
+            slug: app.slug,
+            name: app.name,
+            emoji: app.emoji,
+            logo: app.logo,
+            themeColor: app.themeColor,
+            description: app.description,
+            category: app.category,
+            rating: app.rating,
+          },
+          trustedHosts: app.trustedHosts,
+        })
+      }
+      else {
         router.push(app.websiteUrl)
+      }
     }
   }
 
@@ -80,33 +103,39 @@ export function useOpenApp() {
       return false
     }
 
-    // 按次扣费（会员免扣）
+    // 付费应用：一次购买永久使用（会员免购）
     const cost = app.coinCost ?? 0
-    if (cost > 0 && !isMember.value) {
+    const appKey = app.id || app.slug
+    if (cost > 0 && !isMember.value && !purchasedApps.value.includes(appKey)) {
       if (balance.value < cost) {
-        const ok = await confirm('云币不足', `打开「${app.name}」需 ${cost} 云币，当前余额 ${balance.value} 云币。`, '去充值')
+        const ok = await confirm('云币不足', `购买「${app.name}」需 ${cost} 云币，当前余额 ${balance.value} 云币。`, '去充值')
         if (ok)
           router.push('/wallet')
         return false
       }
 
-      const ok = await confirm('确认消费', `打开「${app.name}」将消费 ${cost} 云币（当前余额 ${balance.value} 云币）。`, '确认打开')
+      const ok = await confirm(
+        '购买应用',
+        `「${app.name}」为付费应用，购买需 ${cost} 云币（一次购买，永久使用）。当前余额 ${balance.value} 云币。`,
+        '确认购买',
+      )
       if (!ok)
         return false
 
       try {
-        await deduct({
-          appId: app.id || app.slug,
+        const result = await deduct({
+          appId: appKey,
           amount: cost,
-          // 每次打开都是一次独立消费，bizId 唯一
-          bizId: `open:${app.id || app.slug}:${Date.now()}`,
-          meta: { scene: 'open-app', name: app.name },
+          // 固定 bizId：同一用户对同一应用只会成功扣费一次（服务端幂等）
+          bizId: `purchase:${appKey}`,
+          meta: { scene: 'purchase-app', name: app.name },
         })
-        showSuccess(`已消费 ${cost} 云币`)
+        showSuccess(result.deduped ? '你已拥有该应用，未重复扣费' : `已购买「${app.name}」`)
+        purchasedApps.value = [...purchasedApps.value, appKey]
       }
       catch (e) {
-        consola.error('[useOpenApp] deduct failed:', e)
-        showError('扣费失败，请稍后再试')
+        consola.error('[useOpenApp] purchase failed:', e)
+        showError('购买失败，请稍后再试')
         return false
       }
     }

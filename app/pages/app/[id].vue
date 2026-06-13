@@ -11,10 +11,11 @@ import {
   IonPage,
   IonToolbar,
 } from '@ionic/vue'
-import { chevronForward, ellipsisHorizontal, share, star, starOutline } from 'ionicons/icons'
+import { chevronForward, ellipsisHorizontal, globeOutline, share } from 'ionicons/icons'
 
 const route = useRoute()
 const router = useRouter()
+const { ensureLoaded, getAppsByDeveloper } = useAppCatalog()
 
 function resolveAppIdFromUrl(): string {
   if (!import.meta.client)
@@ -38,11 +39,10 @@ const reviewSummary = ref<ReviewSummary | null>(null)
 const { appData, loading, error, refresh } = useAppDetail(appId)
 
 const reviewAppKey = computed(() => appData.value?.slug || appData.value?.id || '')
-const displayRating = computed(() => {
-  if (reviewSummary.value && reviewSummary.value.count > 0)
-    return reviewSummary.value.average
-  return appData.value?.rating || 0
-})
+// 评分一律以真实评论聚合为准：无评论显示「暂无评分」，不再回退运营预设
+const hasRating = computed(() => (reviewSummary.value?.count ?? 0) > 0)
+const ratingCount = computed(() => reviewSummary.value?.count ?? 0)
+const displayRating = computed(() => (hasRating.value ? reviewSummary.value!.average : 0))
 
 // 扩展展示数据
 const displayData = computed(() => {
@@ -68,11 +68,9 @@ const displayData = computed(() => {
       },
       {
         id: 'meta',
-        eyebrow: appData.value.developer,
-        title: `${appData.value.rating ?? '新'} 评分`,
-        body: [appData.value.downloads, appData.value.size, appData.value.age]
-          .filter(Boolean)
-          .join(' · ') || '更多信息持续完善中',
+        eyebrow: appData.value.developer || '开发者',
+        title: '了解更多',
+        body: appData.value.tagline || appData.value.description || '打开应用，开始体验。',
       },
     ],
   }
@@ -91,29 +89,76 @@ function getUrlHost(url?: string) {
   }
 }
 
-function renderStars(rating: number = 0) {
-  const stars = []
-  const fullStars = Math.floor(rating)
-  for (let i = 0; i < 5; i++) {
-    stars.push(i < fullStars ? star : starOutline)
-  }
-  return stars
+// 头部副标题：优先标语，回退分类
+const subtitle = computed(() => displayData.value?.tagline || displayData.value?.category || '网页应用')
+
+// 开发者：'Unknown' / 空 视为不可跳转
+const developer = computed(() => displayData.value?.developer || '')
+const developerActive = computed(() => Boolean(developer.value) && developer.value !== 'Unknown')
+
+// 开发者展示名：应用记录 developerName > GitHub 资料 name > 登录名
+const { profile: devProfile } = useGithubProfile(developer)
+const developerDisplay = computed(() =>
+  displayData.value?.developerName || devProfile.value?.name || developer.value,
+)
+
+// 网站域名（信息区「网站」行展示）
+const websiteHost = computed(() => getUrlHost(displayData.value?.websiteUrl))
+
+// 真实截图（预览区），缺省回退占位面板
+const screenshots = computed(() => displayData.value?.screenshots ?? [])
+
+// App 内购买项目 / 会员专属 / 价格
+const coinCost = computed(() => displayData.value?.coinCost ?? 0)
+const requiresMembership = computed(() => displayData.value?.requiresMembership === true)
+const hasIap = computed(() => coinCost.value > 0 || requiresMembership.value)
+const priceText = computed(() => {
+  if (coinCost.value > 0)
+    return `${coinCost.value} 云币`
+  if (requiresMembership.value)
+    return '会员专属'
+  return '免费'
+})
+
+// 同一开发者的其他应用（排除当前应用）
+const otherApps = computed(() => {
+  if (!developerActive.value)
+    return []
+  return getAppsByDeveloper(developer.value)
+    .filter(a => a.slug !== displayData.value?.slug && a.id !== displayData.value?.id)
+    .slice(0, 12)
+})
+
+// 目录用于「其他 App」聚合，确保运行时已从集合回填 developer
+onMounted(() => ensureLoaded())
+
+function goDeveloper() {
+  if (developerActive.value)
+    router.push(`/developer/${encodeURIComponent(developer.value)}`)
+}
+
+function goApp(app: { id: string, slug: string }) {
+  router.push(`/app/${app.slug || app.id}`)
+}
+
+// 在内置浏览器中打开应用网站
+function openWebsite() {
+  const url = displayData.value?.websiteUrl
+  if (!url || !url.startsWith('http'))
+    return
+  openInAppBrowser(url, { trustedHosts: displayData.value?.trustedHosts })
+}
+
+// 打开 GitHub 仓库
+function openGithub() {
+  const repo = displayData.value?.githubRepo
+  if (!repo)
+    return
+  openInAppBrowser(`https://github.com/${repo}`)
 }
 
 function formatRating(rating: number) {
   return Number.isInteger(rating) ? String(rating) : rating.toFixed(1)
-}
-
-// 打开应用
-function openApp() {
-  if (!displayData.value?.websiteUrl)
-    return
-  if (displayData.value.websiteUrl.startsWith('http')) {
-    openInAppBrowser(displayData.value.websiteUrl)
-  }
-  else {
-    router.push(displayData.value.websiteUrl)
-  }
 }
 
 // 分享应用
@@ -176,12 +221,12 @@ async function openMoreMenu() {
           <div class="app-header-content">
             <div class="app-icon-large skeleton-pulse" />
             <div class="app-header-info">
-              <div class="skeleton-line skeleton-pulse" style="width: 60%; height: 22px;" />
-              <div class="skeleton-line skeleton-pulse" style="width: 40%; height: 15px;" />
-              <div class="skeleton-line skeleton-pulse" style="width: 50%; height: 14px;" />
+              <div class="skeleton-line skeleton-pulse" style="width: 70%; height: 22px;" />
+              <div class="skeleton-line skeleton-pulse" style="width: 45%; height: 15px;" />
+              <div class="skeleton-line skeleton-pulse" style="width: 40%; height: 14px;" />
             </div>
+            <div class="skeleton-button skeleton-pulse" />
           </div>
-          <div class="skeleton-button skeleton-pulse" />
         </div>
       </div>
 
@@ -190,53 +235,53 @@ async function openMoreMenu() {
         <!-- 应用头部信息 -->
         <div class="app-header">
           <div class="app-header-content">
-            <div
-              class="app-icon-large"
-              :style="{ backgroundColor: displayData.themeColor }"
-            >
-              <img v-if="displayData.logo" :src="displayData.logo" alt="" class="app-icon-large-img">
-              <span v-else>{{ displayData.emoji }}</span>
-            </div>
+            <AppIconBox
+              class="app-header-icon flex-shrink-0"
+              :icon="displayData.logo"
+              :emoji="displayData.emoji"
+              :color="displayData.themeColor"
+              size="xl"
+            />
 
             <div class="app-header-info">
               <h1 class="app-name">
                 {{ displayData.name }}
               </h1>
-              <p class="app-category">
-                {{ displayData.category || '应用' }}
+              <p class="app-subtitle">
+                {{ subtitle }}
               </p>
+              <button
+                v-if="developerActive"
+                type="button"
+                class="app-developer-link"
+                @click="goDeveloper"
+              >
+                <span class="truncate">{{ developerDisplay }}</span>
+                <IonIcon :icon="chevronForward" class="developer-link-chevron" />
+              </button>
+              <p v-else class="app-developer-static">
+                {{ developerDisplay || '未知开发者' }}
+              </p>
+            </div>
 
-              <!-- 评分信息 -->
-              <div v-if="displayRating" class="app-rating-row">
-                <div class="rating-stars">
-                  <span class="rating-number">{{ formatRating(displayRating) }}</span>
-                  <IonIcon
-                    v-for="(starIcon, idx) in renderStars(displayRating)"
-                    :key="idx"
-                    :icon="starIcon"
-                    class="star-icon"
-                  />
-                </div>
-              </div>
+            <!-- 获取 → 打开（与列表同款按钮），置于图标右侧 -->
+            <div class="app-header-action">
+              <AppInstallButton :app="displayData" />
+              <span v-if="hasIap" class="app-iap-hint">{{ priceText }}</span>
             </div>
           </div>
 
-          <!-- 获取/打开按钮 -->
-          <IonButton expand="block" class="get-button-large" @click="openApp">
-            打开应用
-          </IonButton>
-
           <!-- 应用信息栏 -->
           <div class="app-info-bar">
-            <div v-if="displayRating" class="info-item">
+            <div class="info-item">
               <div class="info-value">
-                {{ formatRating(displayRating) }}
+                {{ hasRating ? formatRating(displayRating) : '暂无' }}
               </div>
               <div class="info-label">
-                评分
+                {{ hasRating ? `${ratingCount} 评分` : '评分' }}
               </div>
             </div>
-            <div v-if="displayRating && (displayData.age || displayData.downloads)" class="info-divider" />
+            <div v-if="displayData.age" class="info-divider" />
             <div v-if="displayData.age" class="info-item">
               <div class="info-value">
                 {{ displayData.age }}
@@ -245,24 +290,20 @@ async function openMoreMenu() {
                 年龄
               </div>
             </div>
-            <div v-if="displayData.age && displayData.downloads" class="info-divider" />
-            <div v-if="displayData.downloads" class="info-item">
-              <div class="info-value">
-                {{ displayData.downloads }}
-              </div>
-              <div class="info-label">
-                下载量
-              </div>
-            </div>
-            <div v-if="displayData.downloads || displayData.age || displayRating" class="info-divider" />
-            <div class="info-item">
-              <div class="info-value">
-                {{ displayData.developer }}
+            <div class="info-divider" />
+            <button
+              type="button"
+              class="info-item info-item-btn"
+              :class="{ 'info-item--tappable': developerActive }"
+              @click="goDeveloper"
+            >
+              <div class="info-value info-value-clip">
+                {{ developerDisplay || '—' }}
               </div>
               <div class="info-label">
                 开发者
               </div>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -293,28 +334,46 @@ async function openMoreMenu() {
             预览
           </h2>
           <div class="screenshots-container">
-            <div
-              v-for="panel in displayData.previewPanels"
-              :key="panel.id"
-              class="screenshot-item preview-panel"
-              :style="{ '--preview-color': displayData.themeColor }"
-            >
-              <div class="preview-panel-orb">
-                <img v-if="displayData.logo" :src="displayData.logo" alt="" class="preview-panel-logo">
-                <span v-else>{{ displayData.emoji }}</span>
+            <!-- 真实截图优先 -->
+            <template v-if="screenshots.length">
+              <div
+                v-for="(src, i) in screenshots"
+                :key="i"
+                class="screenshot-shot"
+              >
+                <img
+                  :src="src"
+                  :alt="`${displayData.name} 截图 ${i + 1}`"
+                  loading="lazy"
+                  class="screenshot-img"
+                >
               </div>
-              <div class="preview-panel-content">
-                <div class="preview-panel-eyebrow">
-                  {{ panel.eyebrow }}
+            </template>
+            <!-- 无截图时回退占位面板 -->
+            <template v-else>
+              <div
+                v-for="panel in displayData.previewPanels"
+                :key="panel.id"
+                class="screenshot-item preview-panel"
+                :style="{ '--preview-color': displayData.themeColor }"
+              >
+                <div class="preview-panel-orb">
+                  <img v-if="displayData.logo" :src="displayData.logo" alt="" class="preview-panel-logo">
+                  <span v-else>{{ displayData.emoji }}</span>
                 </div>
-                <div class="preview-panel-title">
-                  {{ panel.title }}
+                <div class="preview-panel-content">
+                  <div class="preview-panel-eyebrow">
+                    {{ panel.eyebrow }}
+                  </div>
+                  <div class="preview-panel-title">
+                    {{ panel.title }}
+                  </div>
+                  <p class="preview-panel-body">
+                    {{ panel.body }}
+                  </p>
                 </div>
-                <p class="preview-panel-body">
-                  {{ panel.body }}
-                </p>
               </div>
-            </div>
+            </template>
           </div>
         </div>
 
@@ -334,7 +393,8 @@ async function openMoreMenu() {
 
         <AppReviewSection
           :app-key="reviewAppKey"
-          :fallback-rating="displayData.rating"
+          :app-name="displayData.name"
+          :app-icon="displayData.logo"
           @summary="reviewSummary = $event"
         />
 
@@ -344,17 +404,30 @@ async function openMoreMenu() {
             信息
           </h2>
           <div class="info-list">
-            <div class="info-row">
+            <button
+              type="button"
+              class="info-row info-row-btn"
+              :class="{ 'info-row--tappable': developerActive }"
+              @click="goDeveloper"
+            >
               <span class="info-row-label">开发者</span>
-              <div class="info-row-value">
-                <span>{{ displayData.developer }}</span>
-                <IonIcon :icon="chevronForward" class="chevron-icon" />
+              <div class="info-row-value" :class="{ 'info-row-value--link': developerActive }">
+                <span class="truncate">{{ developerDisplay || '未知' }}</span>
+                <IonIcon v-if="developerActive" :icon="chevronForward" class="chevron-icon" />
               </div>
-            </div>
-            <div v-if="displayData.size" class="info-row">
-              <span class="info-row-label">大小</span>
-              <span class="info-row-value">{{ displayData.size }}</span>
-            </div>
+            </button>
+            <button
+              v-if="websiteHost && displayData.websiteUrl?.startsWith('http')"
+              type="button"
+              class="info-row info-row-btn info-row--tappable"
+              @click="openWebsite"
+            >
+              <span class="info-row-label">网站</span>
+              <div class="info-row-value info-row-value--link">
+                <span class="truncate">{{ websiteHost }}</span>
+                <IonIcon :icon="globeOutline" class="chevron-icon" />
+              </div>
+            </button>
             <div v-if="displayData.category" class="info-row">
               <span class="info-row-label">类别</span>
               <span class="info-row-value">{{ displayData.category }}</span>
@@ -373,15 +446,55 @@ async function openMoreMenu() {
             </div>
             <div class="info-row">
               <span class="info-row-label">价格</span>
-              <span class="info-row-value">免费</span>
+              <span class="info-row-value">{{ priceText }}</span>
             </div>
-            <div v-if="displayData.githubRepo" class="info-row">
+            <div v-if="hasIap" class="info-row">
+              <span class="info-row-label">App 内购买项目</span>
+              <span class="info-row-value">{{ requiresMembership ? '会员专属' : '是' }}</span>
+            </div>
+            <button
+              v-if="displayData.githubRepo"
+              type="button"
+              class="info-row info-row-btn info-row--tappable"
+              @click="openGithub"
+            >
               <span class="info-row-label">源代码</span>
-              <div class="info-row-value">
+              <div class="info-row-value info-row-value--link">
                 <span>GitHub</span>
                 <IonIcon :icon="chevronForward" class="chevron-icon" />
               </div>
-            </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 来自同一开发者的其他应用 -->
+        <div v-if="otherApps.length" class="section">
+          <div class="section-header">
+            <h2 class="section-title">
+              其他 App
+            </h2>
+            <button type="button" class="see-all-btn" @click="goDeveloper">
+              {{ developerDisplay }}
+              <IonIcon :icon="chevronForward" />
+            </button>
+          </div>
+          <div class="other-apps-row">
+            <button
+              v-for="a in otherApps"
+              :key="a.id"
+              type="button"
+              class="other-app-card"
+              @click="goApp(a)"
+            >
+              <AppIconBox
+                :icon="a.logo"
+                :emoji="a.emoji"
+                :color="a.themeColor"
+                size="md"
+              />
+              <span class="other-app-name">{{ a.name }}</span>
+              <span class="other-app-cat">{{ a.category || '应用' }}</span>
+            </button>
           </div>
         </div>
 
@@ -483,36 +596,16 @@ async function openMoreMenu() {
 .app-header-content {
   display: flex;
   gap: 16px;
+  align-items: center;
   margin-bottom: 16px;
 }
 
+/* 骨架屏占位（实际图标由 AppIconBox size="xl" 渲染，尺寸保持一致） */
 .app-icon-large {
   width: 120px;
   height: 120px;
   border-radius: 27px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 64px;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.app-icon-large::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 27px;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-}
-
-.app-icon-large-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .app-header-info {
@@ -520,58 +613,87 @@ async function openMoreMenu() {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .app-name {
   font-size: 22px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.22;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.app-category {
-  font-size: 15px;
+.app-subtitle {
+  font-size: 14px;
   color: var(--ion-color-medium);
   margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.app-rating-row {
-  display: flex;
+/* 开发者链接（App Store 蓝色可点击售卖方） */
+.app-developer-link {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  padding: 3px 0 0;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 1px;
+  max-width: 100%;
+  color: var(--ion-color-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.rating-stars {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.app-developer-link .truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.rating-number {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ion-color-medium);
+.app-developer-link:active {
+  opacity: 0.6;
 }
 
-.star-icon {
-  font-size: 12px;
-  color: var(--ylf-color-yellow);
+.developer-link-chevron {
+  font-size: 13px;
+  flex-shrink: 0;
 }
 
-.rating-count {
+.app-developer-static {
+  margin: 3px 0 0;
   font-size: 13px;
   color: var(--ion-color-medium);
 }
 
-.get-button-large {
-  --border-radius: 14px;
-  --padding-top: 10px;
-  --padding-bottom: 10px;
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 16px;
+/* 操作行：紧凑胶囊「打开」+ 分享图标（替代原全宽大按钮） */
+/* 获取/打开 按钮列（图标右侧，列表同款 AppInstallButton） */
+.app-header-action {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.app-iap-hint {
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ion-color-medium);
+  white-space: nowrap;
 }
 
 .app-info-bar {
@@ -585,6 +707,30 @@ async function openMoreMenu() {
 .info-item {
   text-align: center;
   flex: 1;
+  min-width: 0;
+}
+
+/* 信息栏中作为按钮的单元（开发者）需要重置原生按钮样式 */
+.info-item-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: default;
+}
+
+.info-item--tappable {
+  cursor: pointer;
+}
+
+.info-item--tappable .info-value {
+  color: var(--ion-color-primary);
+}
+
+.info-item--tappable:active {
+  opacity: 0.6;
 }
 
 .info-value {
@@ -592,6 +738,13 @@ async function openMoreMenu() {
   font-weight: 600;
   color: var(--ion-color-medium);
   margin-bottom: 2px;
+}
+
+.info-value-clip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .info-label {
@@ -604,6 +757,7 @@ async function openMoreMenu() {
 .info-divider {
   width: 0.5px;
   height: 32px;
+  flex-shrink: 0;
   background: var(--ylf-separator);
 }
 
@@ -673,6 +827,32 @@ async function openMoreMenu() {
 
 .screenshots-container::-webkit-scrollbar {
   display: none;
+}
+
+/* 真实截图（自适应宽高比，统一卡片高度） */
+.screenshot-shot {
+  height: 460px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--ylf-fill-secondary);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.14),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+}
+
+.dark .screenshot-shot {
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+.screenshot-img {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 82vw;
+  object-fit: cover;
 }
 
 .screenshot-item {
@@ -957,9 +1137,32 @@ async function openMoreMenu() {
   border-bottom: none;
 }
 
+/* 可点击信息行（开发者 / 网站 / 源代码）需要重置原生按钮样式 */
+.info-row-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  background: none;
+  border: 0;
+  border-bottom: 0.5px solid var(--ylf-separator);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: default;
+}
+
+.info-row--tappable {
+  cursor: pointer;
+}
+
+.info-row--tappable:active {
+  opacity: 0.55;
+}
+
 .info-row-label {
   font-size: 15px;
   color: var(--ion-color-medium);
+  flex-shrink: 0;
 }
 
 .info-row-value {
@@ -968,6 +1171,18 @@ async function openMoreMenu() {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+  margin-left: 16px;
+}
+
+.info-row-value--link {
+  color: var(--ion-color-primary);
+}
+
+.info-row-value .truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .info-row-value-multi {
@@ -988,6 +1203,62 @@ async function openMoreMenu() {
   color: var(--ylf-label-tertiary);
 }
 
+/* ==================== 开发者的其他 App ==================== */
+.other-apps-row {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 4px 0 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.other-apps-row::-webkit-scrollbar {
+  display: none;
+}
+
+.other-app-card {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.other-app-card:active {
+  opacity: 0.6;
+}
+
+.other-app-name {
+  max-width: 64px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--ion-text-color);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.other-app-cat {
+  max-width: 64px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--ion-color-medium);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ==================== 骨架屏 ==================== */
 .skeleton-pulse {
   background: var(--ylf-fill-tertiary);
@@ -1001,9 +1272,10 @@ async function openMoreMenu() {
 }
 
 .skeleton-button {
-  height: 44px;
-  border-radius: 14px;
-  margin-bottom: 16px;
+  flex-shrink: 0;
+  width: 72px;
+  height: 28px;
+  border-radius: 100px;
 }
 
 @keyframes pulse {

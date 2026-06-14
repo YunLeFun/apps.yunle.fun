@@ -19,11 +19,10 @@ if (import.meta.client) {
   const { checkAuthStatus, ensureValidToken } = useCloudbaseAuth()
   const userStore = useUserStore()
 
-  // 应用启动时：如果有缓存的登录态，检查并刷新 token
+  // 应用启动时：无条件检查会话。cookie 可能在原生壳重启/更新后丢失，
+  // 但 CloudBase refresh_token（localStorage）仍在时可恢复登录态，不能以 isLoggedIn 把门
   onMounted(async () => {
-    if (userStore.isLoggedIn) {
-      await checkAuthStatus()
-    }
+    await checkAuthStatus()
   })
 
   // 应用从后台恢复时：检查 token 有效性并自动刷新

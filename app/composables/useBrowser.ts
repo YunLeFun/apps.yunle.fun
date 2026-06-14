@@ -70,7 +70,7 @@ interface InAppWebViewPlugin {
   listSessions: () => Promise<{ sessions: BackgroundSession[] }>
   /** 彻底结束并释放指定会话（按 key 传入） */
   endSession: (options: { id: string }) => Promise<void>
-  addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>) & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'sessionsChanged', handler: (data: { sessions: BackgroundSession[] }) => void) => Promise<PluginListenerHandle>)
+  addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>) & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'sessionsChanged', handler: (data: { sessions: BackgroundSession[] }) => void) => Promise<PluginListenerHandle>) & ((event: 'browserMinimized', handler: (data: { name: string }) => void) => Promise<PluginListenerHandle>)
   removeAllListeners: () => Promise<void>
 }
 

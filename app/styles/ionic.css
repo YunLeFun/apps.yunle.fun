@@ -46,6 +46,38 @@ ion-tab-bar {
   padding-bottom: var(--ion-safe-area-bottom);
 }
 
+/*
+ * Shadow DOM ::slotted 的盒模型属性（margin/padding）在部分 WebView/Chromium
+ * 中不生效（color/display 等可继承属性正常），导致 ion-item / ion-button 内
+ * slot 图标与文字贴在一起。在 light DOM 按 Ionic iOS 默认值显式声明；
+ * document 层样式优先级高于 ::slotted，在 ::slotted 正常的环境中值相同、无副作用。
+ */
+ion-item > [slot='start'] {
+  margin-inline: 0 16px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+ion-item > ion-icon[slot='start'],
+ion-item > ion-icon[slot='end'] {
+  margin-top: 7px;
+  margin-bottom: 7px;
+}
+
+ion-item > ion-label {
+  margin-inline: 0 8px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+ion-button > ion-icon[slot='start'] {
+  margin-inline: 0 0.3em;
+}
+
+ion-button > ion-icon[slot='end'] {
+  margin-inline: 0.4em 0;
+}
+
 /* PC 端内容区最大宽度限制，移动端不受影响 */
 @media (min-width: 768px) {
   ion-content::part(scroll) {

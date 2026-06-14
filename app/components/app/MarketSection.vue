@@ -8,7 +8,7 @@ defineProps<{
 
 function openApp(app: YlfAppInfo) {
   if (app.websiteUrl) {
-    openInAppBrowser(app.websiteUrl)
+    openInAppBrowser(app.websiteUrl, { trustedHosts: app.trustedHosts })
   }
 }
 </script>
@@ -30,12 +30,13 @@ function openApp(app: YlfAppInfo) {
         @click="openApp(app)"
       >
         <div class="flex items-center gap-3">
-          <div
-            class="app-icon h-16 w-16 flex shrink-0 items-center justify-center text-3xl shadow-sm"
-            :style="{ backgroundColor: app.themeColor || '#e5e7eb' }"
-          >
-            {{ app.logo || app.emoji || '📦' }}
-          </div>
+          <AppIconBox
+            class="shrink-0"
+            :icon="app.logo"
+            :emoji="app.emoji || '📦'"
+            :color="app.themeColor"
+            size="md"
+          />
           <div class="min-w-0 flex flex-1 flex-col gap-1">
             <div class="truncate text-base font-medium">
               {{ app.name }}
@@ -64,21 +65,6 @@ function openApp(app: YlfAppInfo) {
 </template>
 
 <style scoped>
-.app-icon {
-  border-radius: 22.5%;
-  position: relative;
-  overflow: hidden;
-}
-
-.app-icon::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 22.5%;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-}
-
 .app-list-item:active {
   background-color: rgba(0, 0, 0, 0.02);
 }

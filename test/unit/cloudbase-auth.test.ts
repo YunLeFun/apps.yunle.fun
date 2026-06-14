@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import { Buffer } from 'node:buffer'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEFAULT_CLOUDBASE_ENV_ID } from '../../app/constants/cloudbase'
 
 function makeToken(payload: Record<string, unknown>) {
   const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url')
@@ -63,6 +64,34 @@ describe('cloudbase auth utils', () => {
     })
     await expect(tryGetCloudbaseUser(makeEvent(token))).resolves.toEqual(expect.objectContaining({ uid: 'uid-1' }))
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to the default CloudBase env id when runtime config is empty', async () => {
+    vi.stubGlobal('useRuntimeConfig', () => ({
+      public: { tcbEnvId: '' },
+    }))
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        sub: 'uid-1',
+      }),
+    } as unknown as Response)
+
+    const { tryGetCloudbaseUser } = await import('../../server/utils/cloudbase-auth')
+    const token = makeToken({ exp: Math.floor(Date.now() / 1000) + 3600 })
+    await expect(tryGetCloudbaseUser(makeEvent(token))).resolves.toEqual({
+      uid: 'uid-1',
+      name: undefined,
+      picture: undefined,
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://${DEFAULT_CLOUDBASE_ENV_ID}.api.tcloudbasegateway.com/auth/v1/user/me`,
+      expect.objectContaining({
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    )
   })
 
   it('throws real 401 from requireCloudbaseUser when invalid', async () => {

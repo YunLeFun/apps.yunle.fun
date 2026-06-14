@@ -4,25 +4,26 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 
 ## 字段定义
 
-| 字段          | 类型       | 必填 | 说明                                         |
-| ------------- | ---------- | ---- | -------------------------------------------- |
-| `_id`         | `string`   | 自动 | 文档 ID，CloudBase 自动生成                  |
-| `_openid`     | `string`   | 自动 | 创建者用户 ID，服务端自动注入                |
-| `ownerLogin`  | `string`   | 是   | 所有者用户名，用于展示                       |
-| `name`        | `string`   | 是   | 应用名称                                     |
-| `slug`        | `string`   | 是   | URL 标识符，全局唯一（唯一索引约束）         |
-| `description` | `string`   | 否   | 应用描述                                     |
-| `githubRepo`  | `string`   | 否   | GitHub 仓库，格式 `owner/repo`               |
-| `websiteUrl`  | `string`   | 否   | 应用网址                                     |
-| `backupUrl`   | `string`   | 否   | 备用链接                                     |
-| `logo`        | `string`   | 否   | 自定义 Logo 图片 URL（优先于 emoji 展示）    |
-| `emoji`       | `string`   | 否   | 应用 emoji 图标（无 logo 时展示，默认 `📱`） |
-| `themeColor`  | `string`   | 否   | 主题色，十六进制色值（默认 `#007AFF`）       |
-| `category`    | `string`   | 否   | 分类                                         |
-| `tags`        | `string[]` | 否   | 标签列表                                     |
-| `isPublic`    | `boolean`  | 是   | 是否公开可见                                 |
-| `createdAt`   | `number`   | 是   | 创建时间戳（ms）                             |
-| `updatedAt`   | `number`   | 是   | 更新时间戳（ms）                             |
+| 字段           | 类型       | 必填 | 说明                                         |
+| -------------- | ---------- | ---- | -------------------------------------------- |
+| `_id`          | `string`   | 自动 | 文档 ID，CloudBase 自动生成                  |
+| `_openid`      | `string`   | 自动 | 创建者用户 ID，服务端自动注入                |
+| `ownerLogin`   | `string`   | 是   | 所有者用户名，用于展示                       |
+| `name`         | `string`   | 是   | 应用名称                                     |
+| `slug`         | `string`   | 是   | URL 标识符，全局唯一（唯一索引约束）         |
+| `description`  | `string`   | 否   | 应用描述                                     |
+| `githubRepo`   | `string`   | 否   | GitHub 仓库，格式 `owner/repo`               |
+| `websiteUrl`   | `string`   | 否   | 应用网址                                     |
+| `trustedHosts` | `string[]` | 否   | 授信 JSAPI 域名，仅审核通过后配置            |
+| `backupUrl`    | `string`   | 否   | 备用链接                                     |
+| `logo`         | `string`   | 否   | 自定义 Logo 图片 URL（优先于 emoji 展示）    |
+| `emoji`        | `string`   | 否   | 应用 emoji 图标（无 logo 时展示，默认 `📱`） |
+| `themeColor`   | `string`   | 否   | 主题色，十六进制色值（默认 `#007AFF`）       |
+| `category`     | `string`   | 否   | 分类                                         |
+| `tags`         | `string[]` | 否   | 标签列表                                     |
+| `isPublic`     | `boolean`  | 是   | 是否公开可见                                 |
+| `createdAt`    | `number`   | 是   | 创建时间戳（ms）                             |
+| `updatedAt`    | `number`   | 是   | 更新时间戳（ms）                             |
 
 ## `_openid` 机制
 
@@ -233,6 +234,7 @@ interface AppRecord {
   description?: string
   githubRepo?: string
   websiteUrl?: string
+  trustedHosts?: string[]
   backupUrl?: string
   logo?: string
   emoji?: string

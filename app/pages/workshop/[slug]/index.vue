@@ -80,7 +80,7 @@ async function loadApp(explicitSlug?: string) {
 
 function openWebsite() {
   if (app.value?.websiteUrl)
-    openInAppBrowser(app.value.websiteUrl)
+    openInAppBrowser(app.value.websiteUrl, { trustedHosts: app.value.trustedHosts })
 }
 
 function openGitHub() {
@@ -90,7 +90,7 @@ function openGitHub() {
 
 function openBackupUrl() {
   if (app.value?.backupUrl)
-    openInAppBrowser(app.value.backupUrl)
+    openInAppBrowser(app.value.backupUrl, { trustedHosts: app.value.trustedHosts })
 }
 
 function goEdit() {

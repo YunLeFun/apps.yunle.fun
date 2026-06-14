@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import type { AppIconStyle, ThemeMode } from '~/stores/settings'
+import type { AppIconStyle, InAppBrowserMode, ThemeMode } from '~/stores/settings'
+import { Capacitor } from '@capacitor/core'
 import {
   IonAlert,
 } from '@ionic/vue'
 import {
   appsOutline,
+  chevronBackOutline,
   cloudDoneOutline,
   cloudOutline,
-  colorPaletteOutline,
+  ellipsisHorizontalOutline,
   moonOutline,
+  openOutline,
   phonePortraitOutline,
   serverOutline,
-  sparklesOutline,
+  shareOutline,
   sunnyOutline,
   syncOutline,
   trashOutline,
@@ -25,6 +28,7 @@ import {
   kSegmentedButton,
   kToggle,
 } from 'konsta/vue'
+import { APP_ICON_STYLE_OPTIONS } from '~/stores/settings'
 
 const settingsStore = useSettingsStore()
 const homeScreenStore = useHomeScreenStore()
@@ -41,6 +45,15 @@ function selectTheme(value: ThemeMode) {
 function selectAppIconStyle(value: AppIconStyle) {
   selectedAppIconStyle.value = value
   settingsStore.setAppIconStyle(value)
+}
+
+const isIOS = import.meta.client && Capacitor.getPlatform() === 'ios'
+
+const selectedBrowserMode = ref<InAppBrowserMode>(settingsStore.inAppBrowserMode)
+
+function selectBrowserMode(value: InAppBrowserMode) {
+  selectedBrowserMode.value = value
+  settingsStore.inAppBrowserMode = value
 }
 
 onMounted(() => {
@@ -177,28 +190,94 @@ async function handleManualSync() {
       <k-block strong inset class="theme-block">
         <k-segmented strong class="theme-segment">
           <k-segmented-button
-            :active="selectedAppIconStyle === 'liquid-glass'"
-            @click="selectAppIconStyle('liquid-glass')"
+            v-for="option in APP_ICON_STYLE_OPTIONS"
+            :key="option.value"
+            :active="selectedAppIconStyle === option.value"
+            @click="selectAppIconStyle(option.value)"
           >
-            <div class="flex flex-col items-center gap-1 py-2">
-              <IonIcon :icon="sparklesOutline" class="text-lg" />
-              <span class="text-xs">液态玻璃</span>
-            </div>
-          </k-segmented-button>
-          <k-segmented-button
-            :active="selectedAppIconStyle === 'flat-color'"
-            @click="selectAppIconStyle('flat-color')"
-          >
-            <div class="flex flex-col items-center gap-1 py-2">
-              <IonIcon :icon="colorPaletteOutline" class="text-lg" />
-              <span class="text-xs">平铺色彩</span>
+            <div class="flex flex-col items-center gap-1.5 py-2">
+              <AppIconBox
+                class="icon-style-preview"
+                emoji="🎨"
+                color="#007AFF"
+                :style-mode="option.value"
+              />
+              <span class="text-xs">{{ option.label }}</span>
             </div>
           </k-segmented-button>
         </k-segmented>
         <p class="text-xs text-center mt-3 opacity-50">
-          控制主屏幕、Dock 与长按预览的应用图标外观
+          应用图标外观，全站统一生效
         </p>
       </k-block>
+
+      <!-- 网页浏览器（仅 iOS） -->
+      <k-block v-if="isIOS" strong inset class="theme-block">
+        <k-segmented strong class="theme-segment">
+          <k-segmented-button
+            :active="selectedBrowserMode === 'titlebar'"
+            @click="selectBrowserMode('titlebar')"
+          >
+            <div class="flex flex-col items-center gap-1.5 py-2">
+              <div class="bmp-card">
+                <div class="bmp-bar bmp-bar--themed">
+                  <IonIcon :icon="chevronBackOutline" class="bmp-icon bmp-icon--on-theme" />
+                  <span class="bmp-title bmp-title--on-theme">今天来做菜</span>
+                  <IonIcon :icon="ellipsisHorizontalOutline" class="bmp-icon bmp-icon--on-theme" />
+                </div>
+                <div class="bmp-lines">
+                  <div class="bmp-line" />
+                  <div class="bmp-line bmp-line--s" />
+                </div>
+              </div>
+              <span class="text-xs">标题栏模式</span>
+            </div>
+          </k-segmented-button>
+          <k-segmented-button
+            :active="selectedBrowserMode === 'system'"
+            @click="selectBrowserMode('system')"
+          >
+            <div class="flex flex-col items-center gap-1.5 py-2">
+              <div class="bmp-card">
+                <div class="bmp-bar bmp-bar--safari">
+                  <span class="bmp-done">完成</span>
+                  <span class="bmp-url">cook.yunyoujun.cn</span>
+                  <IonIcon :icon="shareOutline" class="bmp-icon bmp-icon--blue" />
+                </div>
+                <div class="bmp-lines">
+                  <div class="bmp-line" />
+                  <div class="bmp-line bmp-line--s" />
+                </div>
+              </div>
+              <span class="text-xs">手机内置</span>
+            </div>
+          </k-segmented-button>
+        </k-segmented>
+        <p class="text-xs text-center mt-3 opacity-50">
+          网页浏览器样式 · 沉浸模式由官方应用自动启用
+        </p>
+      </k-block>
+
+      <!-- 外链打开方式（仅沉浸/标题栏模式生效） -->
+      <k-list v-if="isIOS && selectedBrowserMode !== 'system'" strong inset>
+        <k-list-item
+          title="外链跳出 App 打开"
+          footer="在 App 内浏览器打开其他网站的链接时，跳出到手机默认浏览器；关闭后在 App 内以系统浏览器视图打开"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-orange">
+              <IonIcon :icon="openOutline" />
+            </span>
+          </template>
+          <template #after>
+            <k-toggle
+              :checked="settingsStore.externalLinkMode === 'default-browser'"
+              @change="settingsStore.externalLinkMode
+                = settingsStore.externalLinkMode === 'default-browser' ? 'safari-view' : 'default-browser'"
+            />
+          </template>
+        </k-list-item>
+      </k-list>
 
       <!-- 主屏幕 -->
       <k-block-title>主屏幕</k-block-title>
@@ -323,8 +402,139 @@ async function handleManualSync() {
   padding-right: 0 !important;
 }
 
+/* 图标风格选项的迷你预览 */
+.icon-style-preview {
+  --app-icon-size: 32px;
+  --app-icon-radius: 9px;
+  --app-emoji-size: 16px;
+}
+
 .theme-segment :deep(button) {
   height: auto !important;
   overflow: visible !important;
+}
+
+/* 浏览器模式迷你预览（内嵌在 segmented button 中） */
+.bmp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 88px;
+  height: 42px;
+  border-radius: 8px;
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.bmp-bar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 6px 4px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.bmp-bar--safari {
+  justify-content: space-between;
+}
+
+.bmp-icon {
+  font-size: 10px;
+  flex-shrink: 0;
+  color: var(--ion-color-medium, #888);
+}
+
+.bmp-icon--blue {
+  color: var(--ion-color-primary, #007aff);
+}
+
+.bmp-title {
+  flex: 1;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bmp-done {
+  font-size: 8px;
+  color: var(--ion-color-primary, #007aff);
+  white-space: nowrap;
+}
+
+.bmp-url {
+  flex: 1;
+  margin: 0 3px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 7px;
+  color: var(--ion-color-medium, #888);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 标题栏模式：顶栏自动套用应用主题色（预览用主色示意），文字/图标转白 */
+.bmp-bar--themed {
+  background: var(--ion-color-primary, #007aff);
+  border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+
+.bmp-icon--on-theme {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.bmp-title--on-theme {
+  color: #fff;
+}
+
+.bmp-lines {
+  flex: 1;
+  padding: 5px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.bmp-line {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.bmp-line--s {
+  width: 55%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bmp-card {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .bmp-bar {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .bmp-url {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .bmp-line {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Dark mode: segmented selected state — subtle highlight + white text (native iOS feel) */
+:global(.dark) .theme-segment :deep(.k-segmented-strong-button-active) {
+  color: white;
+}
+
+:global(.dark) .theme-block :deep(.k-segmented > span:last-child) {
+  background: rgba(255, 255, 255, 0.2) !important;
 }
 </style>

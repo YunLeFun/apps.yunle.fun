@@ -4,7 +4,7 @@
 
 ## Context
 
-详情页 [app/pages/app/[id].vue](app/pages/app/[id].vue) 的「评分与评论」UI 已完整存在（323-399 行），但数据是硬编码假数据（54-63 行）；`YlfAppInfo.rating` 目前是运营预设伪指标。本计划落地真实的评分评论系统：评论/举报文本统一接入腾讯云文本内容安全（TMS），**服务端审核后写入**——`Pass` 公开、`Review` 待审、`Block` 拒绝。敏感词库在腾讯云控制台维护（官方不支持 API 管理自定义屏蔽词），代码只读 BizType 环境变量。
+详情页 `app/pages/app/[id].vue` 的「评分与评论」UI 已完整存在（323-399 行），但数据是硬编码假数据（54-63 行）；`YlfAppInfo.rating` 目前是运营预设伪指标。本计划落地真实的评分评论系统：评论/举报文本统一接入腾讯云文本内容安全（TMS），**服务端审核后写入**——`Pass` 公开、`Review` 待审、`Block` 拒绝。敏感词库在腾讯云控制台维护（官方不支持 API 管理自定义屏蔽词），代码只读 BizType 环境变量。
 
 **关键架构事实**（执行前必读）：
 - Nuxt 4 `ssr: false` SPA，但生产部署为 Node server（腾讯云 SCF 容器，[deploy.config.ts](deploy.config.ts)），`server/api/*` 路由生产可用。
@@ -206,7 +206,7 @@ state：`summary / reviews / myReview / loading / error`。方法：`load()`（`
 - `ReviewItem.vue`：单条评论（头像/星/标题/内容/相对时间）+ 举报入口。
 - `ReportSheet.vue`：举报理由 actionSheet → 可选 detail → submitReport。
 
-### 4.4 [app/pages/app/[id].vue](app/pages/app/[id].vue) 改造
+### 4.4 `app/pages/app/[id].vue` 改造
 
 - 删 54-63 行假 reviews 数据。
 - 323-399 行评分评论 section 替换为 `<AppReviewSection :app-key="appData.slug || appData.id" />`；无评论显示空态「成为第一个评论的人」；`summary.count > 0` 时头部评分用真实均分，否则回落运营预设 `rating`。
@@ -253,3 +253,5 @@ handler 保持薄壳不直接测。静态检查：`pnpm typecheck`、`pnpm lint`
 - Capacitor iOS 原生壳完整支持（仅预留 `apiBaseUrl`，CORS 与原生联调另开任务）。
 - 评论分页（limit 50 + 预留 query 参数）、聚合计数冷写回、admin 审核后台 UI、图片审核。
 - @yunlefun/types 迁移（类型先放本仓库 app/types/review.ts）。
+
+> 后续进展（2026-06）：上表「admin 审核后台 UI」已在 `ylf/admin` 仓库落地（评论审核 + 举报处理双 Tab，举报列表会 join 回显被举报内容快照——评论正文/评分/状态/作者、应用名称/图标）；本仓库已补充用户侧「我的举报」反馈页（`/user/reports` + `GET /api/reports`，经管理端 SDK 鉴权代理，仅下发对举报人安全的字段，不含机审/处理人/处理备注）。两者独立于本方案的初始交付范围。

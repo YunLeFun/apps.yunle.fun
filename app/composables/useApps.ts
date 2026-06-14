@@ -172,6 +172,7 @@ export function useApps() {
       description: form.description || '',
       githubRepo: form.githubRepo || '',
       websiteUrl: form.websiteUrl || '',
+      trustedHosts: form.trustedHosts || [],
       backupUrl: form.backupUrl || '',
       logo: form.logo || '',
       emoji: form.emoji || '',

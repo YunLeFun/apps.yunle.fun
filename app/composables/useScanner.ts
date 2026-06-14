@@ -7,6 +7,10 @@
  * - 支持从相册选择图片解码二维码
  * - 用户主动取消时静默处理，不抛错
  */
+import { Capacitor } from '@capacitor/core'
+
+type AlbumImageSource = File | string
+
 export function useScanner() {
   const showScanner = ref(false)
   const { showError, showWarning } = useToast()
@@ -27,13 +31,20 @@ export function useScanner() {
    */
   async function scanFromAlbum(): Promise<string | null> {
     try {
-      const file = await pickImageFile()
-      if (!file)
+      const imageSource = await pickPhotoLibraryImageSource()
+      if (!imageSource)
         return null
 
-      const imageData = await loadImageData(file)
       const jsQR = (await import('jsqr')).default
-      const result = jsQR(imageData.data, imageData.width, imageData.height)
+
+      // 先用降采样图识别（大图直接解码慢且成功率低），失败再回退原图
+      const downscaled = await loadImageData(imageSource, 1280)
+      let result = jsQR(downscaled.imageData.data, downscaled.imageData.width, downscaled.imageData.height)
+
+      if (!result?.data && downscaled.wasScaled) {
+        const full = await loadImageData(imageSource)
+        result = jsQR(full.imageData.data, full.imageData.width, full.imageData.height)
+      }
 
       if (result?.data) {
         return result.data
@@ -68,6 +79,40 @@ export function useScanner() {
   }
 }
 
+async function pickPhotoLibraryImageSource(): Promise<AlbumImageSource | null> {
+  if (!Capacitor.isNativePlatform())
+    return pickImageFile()
+
+  try {
+    return await pickNativePhotoLibraryImageSource()
+  }
+  catch (error) {
+    if (isPhotoPickerCancel(error))
+      return null
+
+    throw error
+  }
+}
+
+async function pickNativePhotoLibraryImageSource(): Promise<string | null> {
+  const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+  const photo = await Camera.getPhoto({
+    resultType: CameraResultType.Uri,
+    source: CameraSource.Photos,
+    allowEditing: false,
+    quality: 100,
+    correctOrientation: true,
+    presentationStyle: 'fullscreen',
+  })
+
+  return photo.webPath ?? null
+}
+
+function isPhotoPickerCancel(error: unknown): boolean {
+  const message = String((error as any)?.message || error).toLowerCase()
+  return message.includes('cancel') || message.includes('dismiss') || message.includes('no image')
+}
+
 /**
  * 弹出系统文件选择器，限定图片类型
  * 用户取消时返回 null
@@ -79,23 +124,34 @@ function pickImageFile(): Promise<File | null> {
     input.accept = 'image/*'
     input.style.display = 'none'
 
-    input.addEventListener('change', () => {
-      const file = input.files?.[0] ?? null
-      input.remove()
-      resolve(file)
-    })
-
-    // 用户取消文件选择时 change 不触发，通过 focus 回退检测
+    // 老 WebView 无 cancel 事件时的兜底：窗口重获焦点后长延迟判定取消。
+    // iOS 选图后系统需要导出/转码（HEIC 等），change 可能晚于 focus 数秒到达，
+    // 延迟必须足够长；change 先到时 settle 已处理（幂等）。
     const handleFocus = () => {
       setTimeout(() => {
-        if (!input.files?.length) {
-          input.remove()
-          resolve(null)
-        }
-        window.removeEventListener('focus', handleFocus)
-      }, 300)
+        if (!input.files?.length)
+          settle(null)
+      }, 5000)
     }
-    window.addEventListener('focus', handleFocus)
+
+    let settled = false
+    function settle(file: File | null) {
+      if (settled)
+        return
+      settled = true
+      window.removeEventListener('focus', handleFocus)
+      input.remove()
+      resolve(file)
+    }
+
+    input.addEventListener('change', () => {
+      settle(input.files?.[0] ?? null)
+    })
+
+    // 现代浏览器（iOS 16.4+ / Chrome 113+）取消选择时触发标准 cancel 事件
+    input.addEventListener('cancel', () => settle(null))
+    if (!('oncancel' in input))
+      window.addEventListener('focus', handleFocus, { once: true })
 
     document.body.appendChild(input)
     input.click()
@@ -104,23 +160,37 @@ function pickImageFile(): Promise<File | null> {
 
 /**
  * 将图片文件加载为 ImageData（RGBA 像素数据）
+ * @param source 图片文件或可加载的图片 URL
+ * @param maxDimension 最长边上限，超出时等比缩小（不传则按原尺寸）
  */
-function loadImageData(file: File): Promise<ImageData> {
+function loadImageData(source: AlbumImageSource, maxDimension?: number): Promise<{ imageData: ImageData, wasScaled: boolean }> {
   return new Promise((resolve, reject) => {
     const img = new Image()
+    const shouldRevokeUrl = source instanceof File
+    const url = shouldRevokeUrl ? URL.createObjectURL(source) : source
     img.onload = () => {
+      if (shouldRevokeUrl)
+        URL.revokeObjectURL(url)
+      const scale = maxDimension ? Math.min(1, maxDimension / Math.max(img.width, img.height)) : 1
+      const width = Math.max(1, Math.round(img.width * scale))
+      const height = Math.max(1, Math.round(img.height * scale))
+
       const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
+      canvas.width = width
+      canvas.height = height
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         reject(new Error('无法创建 Canvas 上下文'))
         return
       }
-      ctx.drawImage(img, 0, 0)
-      resolve(ctx.getImageData(0, 0, img.width, img.height))
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve({ imageData: ctx.getImageData(0, 0, width, height), wasScaled: scale < 1 })
     }
-    img.onerror = () => reject(new Error('图片加载失败'))
-    img.src = URL.createObjectURL(file)
+    img.onerror = () => {
+      if (shouldRevokeUrl)
+        URL.revokeObjectURL(url)
+      reject(new Error('图片加载失败'))
+    }
+    img.src = url
   })
 }

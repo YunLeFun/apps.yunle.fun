@@ -31,10 +31,6 @@ import { add, addCircleOutline, qrCodeOutline, searchOutline } from 'ionicons/ic
 import { homeApps } from '~/constants/apps'
 import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
 
-definePageMeta({
-  alias: ['/', '/home'],
-})
-
 const router = useRouter()
 const homeScreenStore = useHomeScreenStore()
 const settingsStore = useSettingsStore()
@@ -363,6 +359,9 @@ function handleContentClick() {
     <!-- Ionic 标准 Header -->
     <IonHeader :translucent="true">
       <IonToolbar>
+        <IonButtons slot="start">
+          <AppRunningEntry />
+        </IonButtons>
         <IonTitle>云居</IonTitle>
         <IonButtons slot="end">
           <IonButton v-if="homeScreenStore.isEditMode" @click="finishEditing()">

@@ -22,16 +22,18 @@ export function useAppReviews(appKey: MaybeRefOrGetter<string | undefined>, opti
   const toast = useToast()
   const userStore = useUserStore()
 
-  const summary = ref<ReviewSummary>({
-    average: 0,
-    count: 0,
-    distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-  })
+  const summary = ref<ReviewSummary>(createEmptySummary())
   const reviews = ref<ReviewListResponse['reviews']>([])
   const myReview = ref<ReviewRecord | null>(null)
   const loading = ref(false)
   const submitting = ref(false)
   const error = ref<string | null>(null)
+
+  function resetReviews() {
+    summary.value = createEmptySummary()
+    reviews.value = []
+    myReview.value = null
+  }
 
   async function load() {
     const key = toValue(appKey)
@@ -49,7 +51,8 @@ export function useAppReviews(appKey: MaybeRefOrGetter<string | undefined>, opti
     }
     catch (err) {
       console.warn('[reviews] load failed', err)
-      error.value = '评论暂不可用，请稍后重试'
+      resetReviews()
+      error.value = null
     }
     finally {
       loading.value = false
@@ -154,6 +157,14 @@ export function useAppReviews(appKey: MaybeRefOrGetter<string | undefined>, opti
     submitReview,
     deleteMyReview,
     submitReport,
+  }
+}
+
+function createEmptySummary(): ReviewSummary {
+  return {
+    average: 0,
+    count: 0,
+    distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
   }
 }
 

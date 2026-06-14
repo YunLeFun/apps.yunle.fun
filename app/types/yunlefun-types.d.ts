@@ -23,30 +23,12 @@ declare module '@yunlefun/types' {
     trustedHosts?: string[]
 
     /**
-     * 开发者标识（对应 CloudBase apps 集合 `ownerLogin`，通常为 GitHub 登录名）。
-     *
-     * 用于「开发者主页」与「该开发者的其他 App」聚合；内置快照可能缺省，
-     * 运行时从集合拉取后由 recordToAppInfo 回填。
+     * 官方认证标记：true 时在详情页 / 列表的应用名旁展示蓝色认证标（✓）。
+     * 由平台核验背书，仅第一方 / 官方上架应用标记。
      */
-    developer?: string
+    official?: boolean
 
-    /**
-     * 开发者展示名（中文名等）。缺省回退 GitHub 资料的 name，再回退 developer 登录名。
-     * 待 @yunlefun/types 收编后删除此处声明。
-     */
-    developerName?: string
-
-    /**
-     * 应用截图 URL 列表，用于详情页预览区展示真实截图；缺省回退占位面板。
-     * 待 @yunlefun/types 收编后删除此处声明。
-     */
-    screenshots?: string[]
-
-    /**
-     * 评分人数（已发布评论数），与 rating 同为评论聚合缓存。
-     * 列表据此判断是否有真实评分（为 0 / 缺省则不展示评分）。
-     * 待 @yunlefun/types 收编后删除此处声明。
-     */
-    ratingCount?: number
+    // developer / developerName / screenshots / ratingCount 已随 @yunlefun/types@0.2.0 收编，移除增补。
+    // displayMode / trustedHosts 仍为 apps 专属（内嵌浏览器），保留于此。
   }
 }

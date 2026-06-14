@@ -5,6 +5,7 @@
  * 固定 4 个常用应用，仅显示图标不显示名称
  */
 import type { YlfAppInfo } from '@yunlefun/types'
+import type { UseDraggableReturn } from 'vue-draggable-plus'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'
@@ -55,6 +56,22 @@ const dockApps = computed({
 })
 
 const homeScreenStore = useHomeScreenStore()
+
+/**
+ * Sortable 手动初始化（:immediate="false" + start($el)），
+ * 原因同 HomeScreenGrid：HMR 全量重载时 VueDraggable 内部模板 ref
+ * 可能丢失 owner，自动初始化会报 "Root element not found" 且拖拽静默失效。
+ */
+type DraggableInstance = UseDraggableReturn & { $el?: unknown }
+
+const draggableRef = ref<DraggableInstance | null>(null)
+
+onMounted(async () => {
+  await nextTick()
+  const draggable = draggableRef.value
+  if (draggable && draggable.$el instanceof HTMLElement)
+    draggable.start(draggable.$el)
+})
 
 function onDragStart() {
   if (!props.editMode) {
@@ -124,7 +141,9 @@ function onPointerCancel() {
   <div class="hs-dock">
     <div class="dock-container">
       <VueDraggable
+        ref="draggableRef"
         v-model="dockApps"
+        :immediate="false"
         :disabled="!editMode"
         :animation="300"
         :delay="editMode ? 0 : 500"

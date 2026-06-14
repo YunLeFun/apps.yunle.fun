@@ -50,12 +50,13 @@ function viewAllChart() {
           @click="openAppDetail(app)"
         >
           <!-- 应用图标 -->
-          <div
-            class="app-icon"
-            :style="{ '--item-color': app.themeColor }"
-          >
-            <span class="icon-emoji">{{ app.logo || app.emoji }}</span>
-          </div>
+          <AppIconBox
+            class="chart-icon"
+            :icon="app.logo"
+            :emoji="app.emoji"
+            :color="app.themeColor"
+            size="md"
+          />
 
           <!-- 应用信息 -->
           <div class="app-info">
@@ -141,24 +142,8 @@ function viewAllChart() {
   opacity: 0.7;
 }
 
-.app-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.chart-icon {
   flex-shrink: 0;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--item-color) 95%, white 5%) 0%,
-    color-mix(in srgb, var(--item-color) 70%, black 30%) 100%
-  );
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.icon-emoji {
-  font-size: 32px;
 }
 
 .app-info {
@@ -212,10 +197,6 @@ function viewAllChart() {
 
   .chart-item:not(:last-child)::after {
     background: rgba(255, 255, 255, 0.1);
-  }
-
-  .app-icon {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 }
 </style>

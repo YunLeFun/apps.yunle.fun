@@ -78,7 +78,7 @@ function editApp(app: AppRecord, slidingItem?: any) {
 function openApp(app: AppRecord, slidingItem?: any) {
   slidingItem?.close()
   if (app.websiteUrl)
-    openInAppBrowser(app.websiteUrl)
+    openInAppBrowser(app.websiteUrl, { trustedHosts: app.trustedHosts })
 }
 
 async function confirmDeleteApp(app: AppRecord, slidingItem?: any) {
@@ -212,10 +212,14 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
         <IonItemSliding v-for="app in myApps" :key="app._id">
           <IonItem button :detail="true" class="app-item" @click="viewApp(app)">
             <!-- 图标 -->
-            <div slot="start" class="app-icon" :style="{ backgroundColor: app.themeColor || '#007AFF' }">
-              <img v-if="app.logo" :src="app.logo" alt="" class="h-full w-full object-cover">
-              <span v-else>{{ app.emoji || DEFAULT_EMOJI }}</span>
-            </div>
+            <AppIconBox
+              slot="start"
+              class="workshop-app-icon"
+              :icon="app.logo"
+              :emoji="app.emoji || DEFAULT_EMOJI"
+              :color="app.themeColor || '#007AFF'"
+              size="list"
+            />
 
             <IonLabel>
               <h2 class="app-name">
@@ -303,28 +307,9 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
   --padding-bottom: 10px;
 }
 
-.app-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  overflow: hidden;
+.workshop-app-icon {
   flex-shrink: 0;
-  position: relative;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   margin-inline-end: 12px;
-}
-
-.app-icon::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
-  pointer-events: none;
 }
 
 .app-name {

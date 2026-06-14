@@ -11,6 +11,7 @@ function createMockDb() {
   }
   const mockCollection = {
     where: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
     get: vi.fn(),
     add: vi.fn(),
@@ -336,6 +337,7 @@ describe('useHomeScreen', () => {
 
       expect(mockDbSetup.db.collection).toHaveBeenCalledWith('user_home_screens')
       expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ _openid: 'user-123' })
+      expect(mockDbSetup.mockCollection.orderBy).toHaveBeenCalledWith('updatedAt', 'desc')
       expect(mockDbSetup.mockCollection.limit).toHaveBeenCalledWith(1)
       expect(mockHomeScreenStore.restoreFromCloud).toHaveBeenCalledWith(
         {
@@ -432,8 +434,9 @@ describe('useHomeScreen', () => {
       expect(mockHomeScreenStore.isSyncing).toBe(false)
     })
 
-    it('无 cloudDocId 时执行 add 并保存返回的 id', async () => {
+    it('无 cloudDocId 且云端无文档时执行 add 并保存返回的 id', async () => {
       mockHomeScreenStore.cloudDocId = null
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
       mockDbSetup.mockCollection.add.mockResolvedValue({ id: 'new-doc-id' })
 
       const { syncToCloud } = useHomeScreen()
@@ -450,6 +453,32 @@ describe('useHomeScreen', () => {
         }),
       )
       expect(mockHomeScreenStore.cloudDocId).toBe('new-doc-id')
+    })
+
+    it('无 cloudDocId 但云端已有文档时复用该文档执行 update（upsert，不产生重复文档）', async () => {
+      mockHomeScreenStore.cloudDocId = null
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [{ _id: 'found-doc' }] })
+      mockDbSetup.mockDoc.update.mockResolvedValue({ updated: 1 })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      expect(mockDbSetup.mockCollection.doc).toHaveBeenCalledWith('found-doc')
+      expect(mockDbSetup.mockDoc.update).toHaveBeenCalled()
+      expect(mockDbSetup.mockCollection.add).not.toHaveBeenCalled()
+      expect(mockHomeScreenStore.cloudDocId).toBe('found-doc')
+    })
+
+    it('update 命中 0 条（云端文档已删除）时回退到 add', async () => {
+      mockHomeScreenStore.cloudDocId = 'stale-doc'
+      mockDbSetup.mockDoc.update.mockResolvedValue({ updated: 0 })
+      mockDbSetup.mockCollection.add.mockResolvedValue({ id: 'recreated-doc' })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      expect(mockDbSetup.mockCollection.add).toHaveBeenCalled()
+      expect(mockHomeScreenStore.cloudDocId).toBe('recreated-doc')
     })
 
     it('云同步关闭时不执行', async () => {
@@ -489,6 +518,7 @@ describe('useHomeScreen', () => {
 
     it('add 失败时 isSyncing 恢复为 false', async () => {
       mockHomeScreenStore.cloudDocId = null
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
       mockDbSetup.mockCollection.add.mockRejectedValue(new Error('DB error'))
 
       const { syncToCloud } = useHomeScreen()

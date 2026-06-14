@@ -6,13 +6,38 @@
 import type { CloudbaseUser, TcbRawUser, YlfUserInfo } from '@yunlefun/auth'
 import { getErrorMessage, mapCloudbaseUser } from '@yunlefun/auth'
 import { useAccountsStore } from '~/stores/accounts'
+import { classifyAuthError, isBeyondSessionRecovery, serializeAuthError } from '~/utils/auth-session'
 
 /** Token 过期时间存储 key */
 const TOKEN_EXPIRY_KEY = 'ylf_token_expiry'
 /** 提前刷新的时间余量（毫秒），提前 5 分钟刷新 */
 const REFRESH_AHEAD_MS = 5 * 60 * 1000
 
+/**
+ * 刷新结果三态：
+ * - ok：刷新成功，持有有效 token
+ * - invalid：refresh token 确已失效/撤销，需要重新登录
+ * - transient：临时失败（网络不可达、超时、服务端 5xx 等），应保留登录态稍后重试
+ */
+type RefreshResult = 'ok' | 'invalid' | 'transient'
+
+/**
+ * 单例：刷新锁、auth 状态监听、user 状态都必须全局唯一。
+ * 多实例会导致并发 getSession 触发 refresh_token 轮换竞态（旧 token 被消费后
+ * 另一实例再用即 invalid_grant），以及 onAuthStateChange 重复注册。
+ */
 export function useCloudbaseAuthCore() {
+  const nuxtApp = useNuxtApp()
+  const cached = nuxtApp._cloudbaseAuthCore as ReturnType<typeof createCloudbaseAuthCore> | undefined
+  if (cached)
+    return cached
+
+  const core = createCloudbaseAuthCore()
+  nuxtApp._cloudbaseAuthCore = core
+  return core
+}
+
+function createCloudbaseAuthCore() {
   const { auth } = useCloudbase()
   const router = useRouter()
   const toast = useToast()
@@ -24,7 +49,7 @@ export function useCloudbaseAuthCore() {
   const isAuthenticated = computed(() => !!user.value)
 
   /** 是否正在刷新 token（防止并发刷新） */
-  let refreshingPromise: Promise<boolean> | null = null
+  let refreshingPromise: Promise<RefreshResult> | null = null
 
   const clearAuth = () => {
     user.value = null
@@ -32,6 +57,18 @@ export function useCloudbaseAuthCore() {
     if (import.meta.client) {
       localStorage.removeItem(TOKEN_EXPIRY_KEY)
     }
+  }
+
+  /**
+   * 凭证确已失效：同时清除内存态与业务登录态（cookie + localStorage 镜像）。
+   * 两套登录态必须一起清，否则 UI 维持"已登录"但所有请求 401 的悬空状态。
+   */
+  const invalidateAuth = (stage: string, err?: unknown) => {
+    // 本就未登录的冷启动 SDK 也会返回 unauthenticated 类错误，属常态，不打告警
+    if (userStore.isLoggedIn || user.value)
+      console.warn(`[Auth] ${stage}: 登录凭证已失效，清除登录态`, err ? serializeAuthError(err) : '')
+    clearAuth()
+    userStore.logout()
   }
 
   /**
@@ -85,9 +122,8 @@ export function useCloudbaseAuthCore() {
   /**
    * 刷新 session（通过 CloudBase SDK 内部的 refresh token 机制）
    * CloudBase JS SDK 的 getSession() 内部会自动使用 refresh_token 获取新的 access_token
-   * 返回是否刷新成功
    */
-  const refreshSession = async (): Promise<boolean> => {
+  const refreshSessionDetailed = async (): Promise<RefreshResult> => {
     // 防止并发刷新
     if (refreshingPromise)
       return refreshingPromise
@@ -95,9 +131,16 @@ export function useCloudbaseAuthCore() {
     refreshingPromise = (async () => {
       try {
         const { data, error: sessionError } = await auth.getSession()
-        if (sessionError || !data?.session?.access_token) {
-          console.warn('[Auth] refresh token 刷新失败，需要重新登录')
-          return false
+        if (sessionError) {
+          const kind = classifyAuthError(sessionError)
+          // 完整记录原始错误码，用于线上校准 INVALID_CODES 分类表
+          console.warn(`[Auth] 刷新 session 失败(${kind}):`, JSON.stringify(serializeAuthError(sessionError)))
+          return kind
+        }
+        if (!data?.session?.access_token) {
+          // 无错误但也无会话：本地没有可用凭证
+          console.warn('[Auth] 无可用会话，需要重新登录')
+          return 'invalid'
         }
         // 刷新成功，更新过期时间
         saveTokenExpiry(data.session.expires_in)
@@ -108,11 +151,11 @@ export function useCloudbaseAuthCore() {
         else {
           userStore.login(data.session.access_token, userStore.userInfo)
         }
-        return true
+        return 'ok'
       }
       catch (err) {
-        console.error('[Auth] 刷新 session 异常:', err)
-        return false
+        console.error('[Auth] 刷新 session 异常:', JSON.stringify(serializeAuthError(err)))
+        return classifyAuthError(err)
       }
       finally {
         refreshingPromise = null
@@ -122,27 +165,37 @@ export function useCloudbaseAuthCore() {
     return refreshingPromise
   }
 
+  /** 刷新 session，返回是否刷新成功 */
+  const refreshSession = async (): Promise<boolean> =>
+    (await refreshSessionDetailed()) === 'ok'
+
+  /**
+   * 临时失败但 token 过期已超出恢复窗口：refresh_token 必然失效，
+   * 不能让"永远 transient"导致悬空登录态无限滞留
+   */
+  const isExpiredBeyondRecovery = () => isBeyondSessionRecovery(getTokenExpiry())
+
   /**
    * 确保当前持有有效的 access_token
    * - 如果 token 即将过期或已过期，自动通过 refresh_token 刷新
-   * - 刷新失败时返回 false（需要引导用户重新登录）
+   * - force：服务端已明确拒绝当前 token（如 401），本地过期记录不可信，必须真刷一次
+   * - 仅在凭证确已失效时清除登录态；临时失败（网络等）保留状态稍后重试
    */
-  const ensureValidToken = async (): Promise<boolean> => {
+  const ensureValidToken = async (opts: { force?: boolean } = {}): Promise<boolean> => {
     if (!import.meta.client)
       return false
 
-    if (!isTokenExpiringSoon()) {
+    if (!opts.force && !isTokenExpiringSoon()) {
       return true // token 仍有效
     }
 
     console.warn('[Auth] Token 即将过期或已过期，尝试刷新...')
-    const success = await refreshSession()
-    if (!success) {
-      console.warn('[Auth] Token 刷新失败，清除认证状态')
-      clearAuth()
-      userStore.logout()
-    }
-    return success
+    const result = await refreshSessionDetailed()
+    if (result === 'invalid')
+      invalidateAuth('ensureValidToken')
+    else if (result === 'transient' && isExpiredBeyondRecovery())
+      invalidateAuth('ensureValidToken', new Error('token 过期已超出 refresh_token 有效期'))
+    return result === 'ok'
   }
 
   const fetchUser = async () => {
@@ -152,19 +205,25 @@ export function useCloudbaseAuthCore() {
 
       // 获取 session（SDK 内部会自动用 refresh_token 刷新过期的 access_token）
       const { data: sessionData, error: sessionError } = await auth.getSession()
-      if (sessionError || !sessionData?.session) {
-        clearAuth()
+      if (sessionError) {
+        if (classifyAuthError(sessionError) === 'invalid')
+          invalidateAuth('fetchUser', sessionError)
         return null
       }
 
-      const accessToken = sessionData.session.access_token
-      if (!accessToken) {
-        clearAuth()
+      const session = sessionData?.session
+      const accessToken = session?.access_token
+      if (!session || !accessToken) {
+        // 无错误但无会话：SDK 本地没有凭证，业务登录态若还在则是悬空状态
+        if (userStore.isLoggedIn)
+          invalidateAuth('fetchUser(no-session)')
+        else
+          clearAuth()
         return null
       }
 
       // 记录 token 过期时间
-      saveTokenExpiry(sessionData.session.expires_in)
+      saveTokenExpiry(session.expires_in)
 
       // 使用 HTTP API /user/me 获取完整用户数据（包含 providers/password/meta 等完整字段）
       const config = useRuntimeConfig()
@@ -177,7 +236,8 @@ export function useCloudbaseAuthCore() {
         // fallback 到 SDK getUser
         const { data, error: authError } = await auth.getUser()
         if (authError || !data?.user) {
-          clearAuth()
+          if (authError && classifyAuthError(authError) === 'invalid')
+            invalidateAuth('fetchUser(getUser)', authError)
           return null
         }
         user.value = mapCloudbaseUser(data.user as unknown as TcbRawUser)
@@ -197,7 +257,9 @@ export function useCloudbaseAuthCore() {
     catch (err: unknown) {
       console.error('获取用户信息失败:', err)
       error.value = getErrorMessage(err)
-      clearAuth()
+      // 网络等临时故障保留登录态，仅凭证确已失效时清除
+      if (classifyAuthError(err) === 'invalid')
+        invalidateAuth('fetchUser', err)
       return null
     }
     finally {
@@ -208,14 +270,31 @@ export function useCloudbaseAuthCore() {
   const checkAuthStatus = async () => {
     try {
       // getSession() 内部会自动用 refresh_token 刷新过期的 access_token
-      const { data } = await auth.getSession()
-      if (data?.session) {
-        saveTokenExpiry(data.session.expires_in)
-        await fetchUser()
+      const { data, error: sessionError } = await auth.getSession()
+      if (sessionError) {
+        const kind = classifyAuthError(sessionError)
+        if (kind === 'invalid' || isExpiredBeyondRecovery())
+          invalidateAuth('checkAuthStatus', sessionError)
+        else
+          console.warn('[Auth] checkAuthStatus 刷新临时失败，保留登录态:', JSON.stringify(serializeAuthError(sessionError)))
+        return
       }
+      if (!data?.session?.access_token) {
+        // 无错误但无会话：SDK 本地没有凭证（如 WKWebView 清掉 localStorage）。
+        // 业务登录态（cookie/镜像）若仍显示已登录则是悬空状态——access_token
+        // 最长 2 小时后必死且无从刷新，立即清除，不让 UI 停留在假登录态
+        if (userStore.isLoggedIn)
+          invalidateAuth('checkAuthStatus(no-session)')
+        return
+      }
+      saveTokenExpiry(data.session.expires_in)
+      await fetchUser()
     }
-    catch {
-      // CloudBase 未登录或 refresh_token 已过期
+    catch (err) {
+      if (classifyAuthError(err) === 'invalid')
+        invalidateAuth('checkAuthStatus', err)
+      else
+        console.warn('[Auth] checkAuthStatus 未恢复会话:', JSON.stringify(serializeAuthError(err)))
     }
   }
 

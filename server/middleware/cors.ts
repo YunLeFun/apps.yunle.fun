@@ -9,7 +9,11 @@ export default defineEventHandler((event) => {
   if (!event.path.startsWith('/api/'))
     return
 
-  const allowOrigin = resolveCorsOrigin(getRequestHeader(event, 'origin'))
+  const config = useRuntimeConfig()
+  const jsapiAllowedOrigins = event.path.startsWith('/api/jsapi/auth/')
+    ? String(config.jsapiAuthAllowedOrigins || '')
+    : undefined
+  const allowOrigin = resolveCorsOrigin(getRequestHeader(event, 'origin'), { jsapiAllowedOrigins })
   if (!allowOrigin)
     return
 

@@ -83,3 +83,33 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   privacy: '隐私泄露',
   other: '其他',
 }
+
+export type ReportStatus = 'open' | 'resolved' | 'dismissed'
+
+export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
+  open: '待处理',
+  resolved: '已处理',
+  dismissed: '已忽略',
+}
+
+/**
+ * 「我的举报」列表项：用户视角，仅暴露对举报人安全的字段，
+ * 不含机审结果 / 处理人 / 处理备注等内部审核信息。
+ */
+export interface MyReportItem {
+  _id: string
+  targetType: 'app' | 'review'
+  targetId: string
+  appKey?: string
+  /** 关联应用名称（服务端按 appKey 回填，缺省回退展示 slug）。 */
+  appName?: string
+  reason: ReportReason
+  detail?: string
+  status: ReportStatus
+  createdAt: number
+  handledAt?: number
+}
+
+export interface MyReportListResponse {
+  reports: MyReportItem[]
+}

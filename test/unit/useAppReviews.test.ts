@@ -42,6 +42,32 @@ describe('useAppReviews', () => {
     expect(reviews.reviews.value).toHaveLength(1)
   })
 
+  it('falls back to empty reviews when public loading fails', async () => {
+    mockApi
+      .mockResolvedValueOnce({
+        code: 0,
+        data: {
+          summary: { average: 4.5, count: 2, distribution: { 1: 0, 2: 0, 3: 0, 4: 1, 5: 1 } },
+          reviews: [{ _id: 'r1', appKey: 'cook', authorName: 'A', rating: 5, content: 'x', createdAt: 1, updatedAt: 1 }],
+          myReview: { _id: 'r2', status: 'pending' },
+        },
+      })
+      .mockRejectedValueOnce({ data: { message: 'CloudBase 环境未配置' } })
+    const reviews = useAppReviews(ref('cook'))
+
+    await reviews.load()
+    await reviews.load()
+
+    expect(reviews.error.value).toBeNull()
+    expect(reviews.summary.value).toEqual({
+      average: 0,
+      count: 0,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+    })
+    expect(reviews.reviews.value).toEqual([])
+    expect(reviews.myReview.value).toBeNull()
+  })
+
   it('redirects unauthenticated users before submit', async () => {
     mockUserStore.isLoggedIn = false
     const reviews = useAppReviews(ref('cook'))

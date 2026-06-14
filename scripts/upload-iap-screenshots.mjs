@@ -19,7 +19,8 @@ let _jwt = null
 let _exp = 0
 function getJwt() {
   const now = Math.floor(Date.now() / 1000)
-  if (_jwt && now < _exp - 60) return _jwt
+  if (_jwt && now < _exp - 60)
+    return _jwt
   const pk = readFileSync(KEY_PATH, 'utf8')
   const h = Buffer.from(JSON.stringify({ alg: 'ES256', kid: KEY_ID, typ: 'JWT' })).toString('base64url')
   const p = Buffer.from(JSON.stringify({ iss: ISSUER_ID, iat: now, exp: now + 1200, aud: 'appstoreconnect-v1' })).toString('base64url')
@@ -34,11 +35,12 @@ function getJwt() {
 async function api(path, opts = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...opts,
-    headers: { Authorization: `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
+    headers: { 'Authorization': `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
   })
   const text = await res.text()
   let body = {}
-  try { body = text ? JSON.parse(text) : {} } catch { /* non-json */ }
+  try { body = text ? JSON.parse(text) : {} }
+  catch { /* non-json */ }
   if (!res.ok) {
     const m = body.errors?.map(e => `${e.code}: ${e.detail}`).join('; ') ?? `${res.status} ${text.slice(0, 200)}`
     throw new Error(m)
@@ -73,8 +75,8 @@ function makePng(w, h, [r, g, b]) {
   const ihdr = Buffer.alloc(13)
   ihdr.writeUInt32BE(w, 0)
   ihdr.writeUInt32BE(h, 4)
-  ihdr[8] = 8        // bit depth
-  ihdr[9] = 2        // color type RGB
+  ihdr[8] = 8 // bit depth
+  ihdr[9] = 2 // color type RGB
   // rest 0
   const row = Buffer.alloc(1 + w * 3)
   for (let x = 0; x < w; x++) {
@@ -82,7 +84,7 @@ function makePng(w, h, [r, g, b]) {
     row[1 + x * 3 + 1] = g
     row[1 + x * 3 + 2] = b
   }
-  const raw = Buffer.concat(Array.from({ length: h }, () => row))
+  const raw = Buffer.concat(Array.from({ length: h }).fill(row))
   const idat = deflateSync(raw, { level: 9 })
   return Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
@@ -123,7 +125,8 @@ async function uploadScreenshot(iapId, productId, png) {
     for (const hh of op.requestHeaders || []) headers[hh.name] = hh.value
     const slice = png.subarray(op.offset, op.offset + op.length)
     const up = await fetch(op.url, { method: op.method, headers, body: slice })
-    if (!up.ok) throw new Error(`upload chunk failed: ${up.status} ${await up.text()}`)
+    if (!up.ok)
+      throw new Error(`upload chunk failed: ${up.status} ${await up.text()}`)
   }
 
   // 3) 提交（commit），带源文件 MD5
@@ -156,11 +159,12 @@ async function main() {
       }
       await uploadScreenshot(id, pid, png)
       console.log('✓ 截图已上传')
-    } catch (e) {
+    }
+    catch (e) {
       console.log(`✗ ${e.message}`)
     }
   }
   console.log('\n等待几秒让 Apple 处理，再查状态：node scripts/check-iap-state.mjs')
 }
 
-main().catch(e => { console.error(e); process.exit(1) })
+main().catch((e) => { console.error(e); process.exit(1) })

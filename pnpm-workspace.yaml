@@ -1,9 +1,13 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
+trustPolicyExclude:
+  - rollup@2.80.0
+  - vite@5.4.21
+  - chokidar@4.0.3
 packages:
   - docs
-ignoredBuiltDependencies:
-  - esbuild
-onlyBuiltDependencies:
-  - unrs-resolver
 overrides:
   # 安全漏洞修复：钉死传递依赖到已修复版本（2026-06-04，详见 docs/dev/dependency-security.md）
   # 键按字母升序排列（eslint yaml/sort-keys 要求）
@@ -39,11 +43,7 @@ overrides:
   yaml: ^2.9.0 # 栈溢出（@antfu/eslint-config > eslint-plugin-pnpm）
 patchedDependencies:
   cordova-plugin-wechat@3.1.0: patches/cordova-plugin-wechat@3.1.0.patch
-shellEmulator: true
-
-trustPolicy: no-downgrade
-
-trustPolicyExclude:
-  - rollup@2.80.0
-  - vite@5.4.21
-  - chokidar@4.0.3
+ignoredBuiltDependencies:
+  - esbuild
+onlyBuiltDependencies:
+  - unrs-resolver

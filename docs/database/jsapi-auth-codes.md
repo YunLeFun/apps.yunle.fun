@@ -5,18 +5,18 @@
 
 ## 字段
 
-| 字段         | 类型       | 说明                              |
-| ------------ | ---------- | --------------------------------- |
-| `codeHash`   | `string`   | 授权码 SHA-256，永不保存明文 code |
-| `uid`        | `string`   | CloudBase Auth 用户 ID            |
-| `user`       | `object`   | 兑换时返回的最小用户快照          |
-| `appId`      | `string`   | 发起 JSAPI 的应用 ID              |
-| `origin`     | `string`   | 发起 JSAPI 的页面 origin          |
-| `scope`      | `string[]` | 授权范围，默认 `profile`          |
+| 字段         | 类型       | 说明                                                        |
+| ------------ | ---------- | ----------------------------------------------------------- |
+| `codeHash`   | `string`   | 授权码 SHA-256，永不保存明文 code                           |
+| `uid`        | `string`   | CloudBase Auth 用户 ID                                      |
+| `user`       | `object`   | 兑换时返回的最小用户快照                                    |
+| `appId`      | `string`   | 发起 JSAPI 的应用 ID                                        |
+| `origin`     | `string`   | 发起 JSAPI 的页面 origin                                    |
+| `scope`      | `string[]` | 授权范围，默认 `profile`                                    |
 | `session`    | `object`   | 可选，`cloudbase:session` scope 下的 CloudBase session 快照 |
-| `createdAt`  | `number`   | 创建时间戳                        |
-| `expiresAt`  | `number`   | 过期时间戳，默认 5 分钟           |
-| `consumedAt` | `number`   | 兑换时间戳，`0` 表示未使用        |
+| `createdAt`  | `number`   | 创建时间戳                                                  |
+| `expiresAt`  | `number`   | 过期时间戳，默认 5 分钟                                     |
+| `consumedAt` | `number`   | 兑换时间戳，`0` 表示未使用                                  |
 
 ## 约束
 

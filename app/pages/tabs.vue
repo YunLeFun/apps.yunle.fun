@@ -9,10 +9,6 @@ import {
   IonTabs,
 } from '@ionic/vue'
 import { apps, compass, home, person } from 'ionicons/icons'
-
-definePageMeta({
-  alias: ['/'],
-})
 </script>
 
 <template>

@@ -1,3 +1,5 @@
+import { isAllowedOrigin, readOriginRules } from './origin-rules'
+
 /**
  * /api 跨域白名单
  *
@@ -17,11 +19,17 @@ const NATIVE_APP_ORIGINS = new Set([
 
 const LOCAL_DEV_ORIGIN_RE = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/
 
+interface ResolveCorsOriginOptions {
+  jsapiAllowedOrigins?: string
+}
+
 /** 返回应写入 Access-Control-Allow-Origin 的值；不放行则返回 null */
-export function resolveCorsOrigin(origin: string | undefined): string | null {
+export function resolveCorsOrigin(origin: string | undefined, options: ResolveCorsOriginOptions = {}): string | null {
   if (!origin)
     return null
   if (NATIVE_APP_ORIGINS.has(origin) || LOCAL_DEV_ORIGIN_RE.test(origin))
+    return origin
+  if (options.jsapiAllowedOrigins && isAllowedOrigin(origin, readOriginRules(options.jsapiAllowedOrigins)))
     return origin
   return null
 }

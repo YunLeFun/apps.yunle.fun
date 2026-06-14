@@ -68,7 +68,13 @@ describe('useOpenApp', () => {
     const { openApp } = useOpenApp()
     const opened = await openApp(makeApp())
     expect(opened).toBe(true)
-    expect(mockOpenInAppBrowser).toHaveBeenCalledWith('https://demo.example.com')
+    expect(mockOpenInAppBrowser).toHaveBeenCalledWith(
+      'https://demo.example.com',
+      expect.objectContaining({
+        title: 'Demo',
+        app: expect.objectContaining({ id: 'demo', name: 'Demo' }),
+      }),
+    )
     expect(mockDeduct).not.toHaveBeenCalled()
   })
 
@@ -80,11 +86,37 @@ describe('useOpenApp', () => {
     expect(mockPush).toHaveBeenCalledWith('/wallet')
   })
 
-  it('付费应用：非会员余额充足，确认后扣云币并打开', async () => {
+  it('付费应用：非会员余额充足，确认后按固定 bizId 购买并打开', async () => {
     const { openApp } = useOpenApp()
     const opened = await openApp(makeApp({ coinCost: 10 }))
     expect(opened).toBe(true)
-    expect(mockDeduct).toHaveBeenCalledWith(expect.objectContaining({ appId: 'demo', amount: 10 }))
+    expect(mockDeduct).toHaveBeenCalledWith(expect.objectContaining({
+      appId: 'demo',
+      amount: 10,
+      // 一次买断：bizId 固定，服务端幂等去重
+      bizId: 'purchase:demo',
+    }))
+    expect(mockOpenInAppBrowser).toHaveBeenCalled()
+  })
+
+  it('付费应用：已购后再次打开不再弹窗、不再扣费', async () => {
+    const { openApp } = useOpenApp()
+    await openApp(makeApp({ coinCost: 10 }))
+    expect(mockDeduct).toHaveBeenCalledTimes(1)
+
+    // 第二次打开：即使用户会取消弹窗，也应直接放行（说明根本没有弹窗）
+    alertRole = 'cancel'
+    const opened = await openApp(makeApp({ coinCost: 10 }))
+    expect(opened).toBe(true)
+    expect(mockDeduct).toHaveBeenCalledTimes(1)
+    expect(mockOpenInAppBrowser).toHaveBeenCalledTimes(2)
+  })
+
+  it('付费应用：服务端 dedupe（已在其他设备购买）时照常打开', async () => {
+    mockDeduct.mockResolvedValueOnce({ balance: 100, deduped: true })
+    const { openApp } = useOpenApp()
+    const opened = await openApp(makeApp({ coinCost: 10 }))
+    expect(opened).toBe(true)
     expect(mockOpenInAppBrowser).toHaveBeenCalled()
   })
 
@@ -121,6 +153,15 @@ describe('useOpenApp', () => {
     const opened = await openApp(makeApp({ coinCost: 10 }))
     expect(opened).toBe(false)
     expect(mockPush).toHaveBeenCalledWith('/login')
+  })
+
+  it('应用目录声明的浏览形态透传给浏览器', async () => {
+    const { openApp } = useOpenApp()
+    await openApp(makeApp({ displayMode: 'titlebar' }))
+    expect(mockOpenInAppBrowser).toHaveBeenCalledWith(
+      'https://demo.example.com',
+      expect.objectContaining({ displayMode: 'titlebar' }),
+    )
   })
 
   it('站内路由应用通过 router.push 打开', async () => {

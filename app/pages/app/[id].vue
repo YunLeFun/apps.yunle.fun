@@ -129,8 +129,23 @@ const otherApps = computed(() => {
     .slice(0, 12)
 })
 
+// 嵌入态：详情页被原生容器以 sheet 盖在应用之上打开（window.ylf 注入）
+const isEmbedded = ref(false)
+
 // 目录用于「其他 App」聚合，确保运行时已从集合回填 developer
-onMounted(() => ensureLoaded())
+onMounted(() => {
+  ensureLoaded()
+  isEmbedded.value = typeof window !== 'undefined' && Boolean((window as any).ylf?.inYunleApp)
+  // 从「查看评价」入口进来时定位到评价区
+  if (typeof window !== 'undefined' && window.location.hash === '#reviews') {
+    nextTick(() => document.getElementById('app-reviews')?.scrollIntoView({ block: 'start' }))
+  }
+})
+
+// 嵌入态「回到应用」：收起详情 sheet 回到下层应用容器
+function backToApp() {
+  ;(window as any).ylf?.invoke?.('close')
+}
 
 function goDeveloper() {
   if (developerActive.value)
@@ -244,9 +259,12 @@ async function openMoreMenu() {
             />
 
             <div class="app-header-info">
-              <h1 class="app-name">
-                {{ displayData.name }}
-              </h1>
+              <div class="app-name-row">
+                <h1 class="app-name">
+                  {{ displayData.name }}
+                </h1>
+                <AppVerifiedBadge v-if="displayData.official" size="20px" />
+              </div>
               <p class="app-subtitle">
                 {{ subtitle }}
               </p>
@@ -264,10 +282,15 @@ async function openMoreMenu() {
               </p>
             </div>
 
-            <!-- 获取 → 打开（与列表同款按钮），置于图标右侧 -->
+            <!-- 获取 → 打开（与列表同款按钮），置于图标右侧；嵌入态改「回到应用」 -->
             <div class="app-header-action">
-              <AppInstallButton :app="displayData" />
-              <span v-if="hasIap" class="app-iap-hint">{{ priceText }}</span>
+              <IonButton v-if="isEmbedded" size="small" shape="round" @click="backToApp">
+                回到应用
+              </IonButton>
+              <template v-else>
+                <AppInstallButton :app="displayData" />
+                <span v-if="hasIap" class="app-iap-hint">{{ priceText }}</span>
+              </template>
             </div>
           </div>
 
@@ -392,6 +415,7 @@ async function openMoreMenu() {
         </div>
 
         <AppReviewSection
+          id="app-reviews"
           :app-key="reviewAppKey"
           :app-name="displayData.name"
           :app-icon="displayData.logo"
@@ -417,7 +441,7 @@ async function openMoreMenu() {
               </div>
             </button>
             <button
-              v-if="websiteHost && displayData.websiteUrl?.startsWith('http')"
+              v-if="!isEmbedded && websiteHost && displayData.websiteUrl?.startsWith('http')"
               type="button"
               class="info-row info-row-btn info-row--tappable"
               @click="openWebsite"
@@ -616,11 +640,19 @@ async function openMoreMenu() {
   gap: 3px;
 }
 
+.app-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
 .app-name {
   font-size: 22px;
   font-weight: 700;
   line-height: 1.22;
   margin: 0;
+  min-width: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;

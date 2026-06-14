@@ -8,6 +8,7 @@
  * - 上下文菜单中点击"编辑主屏幕"或手指移动 → 进入编辑模式
  */
 import type { YlfAppInfo } from '@yunlefun/types'
+import type { UseDraggableReturn } from 'vue-draggable-plus'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'
@@ -63,6 +64,40 @@ watch(
  * SortableJS 只在编辑模式下启用（delay=0 立即可拖），
  * 非编辑模式下 disabled，由自定义长按检测触发上下文菜单。
  */
+
+/**
+ * Sortable 手动初始化（:immediate="false" + start($el)）。
+ *
+ * HMR 全量重载时 VueDraggable 内部模板 ref 可能丢失 owner
+ * （Vue warn: "Missing ref owner context. ref cannot be used on hoisted vnodes"），
+ * 库的自动初始化会报 "Root element not found" 且 Sortable 静默未创建、拖拽失效。
+ * vnode.el 的赋值不受该问题影响，因此挂载后取实例 $el 显式传给 start()，
+ * 完全绕开库内部的模板 ref。
+ */
+type DraggableInstance = UseDraggableReturn & { $el?: unknown }
+
+const draggableRefs = ref<(DraggableInstance | null)[]>([])
+const startedDraggables = new WeakSet<DraggableInstance>()
+
+function setDraggableRef(index: number, instance: unknown) {
+  draggableRefs.value[index] = instance as DraggableInstance | null
+}
+
+async function initSortables() {
+  await nextTick()
+  for (const draggable of draggableRefs.value) {
+    if (!draggable || startedDraggables.has(draggable))
+      continue
+    if (draggable.$el instanceof HTMLElement) {
+      draggable.start(draggable.$el)
+      startedDraggables.add(draggable)
+    }
+  }
+}
+
+onMounted(initSortables)
+// 页数增长时为新挂载的 VueDraggable 实例补初始化
+watch(() => props.pages.length, initSortables)
 
 /** 拖拽开始 */
 function onDragStart() {
@@ -247,7 +282,9 @@ function onBlankTouchCancel() {
         @touchcancel="onBlankTouchCancel"
       >
         <VueDraggable
+          :ref="(inst: unknown) => setDraggableRef(pageIndex, inst)"
           v-model="pageModels[pageIndex]!"
+          :immediate="false"
           :disabled="!editMode"
           :animation="300"
           :delay="0"

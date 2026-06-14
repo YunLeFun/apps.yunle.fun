@@ -22,6 +22,14 @@ interface Props {
   placeholder?: boolean
   /** 可选覆盖图标风格；默认读取外观设置 */
   styleMode?: AppIconStyle
+  /**
+   * 尺寸预设：
+   * - grid：跟随全局响应式 CSS 变量（主屏幕网格，默认）
+   * - list：48px，紧凑列表（工坊）
+   * - md：64px，常规列表/卡片（排行榜、应用列表）
+   * - xl：120px，详情页大图标
+   */
+  size?: 'grid' | 'list' | 'md' | 'xl'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -31,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: false,
   styleMode: undefined,
+  size: 'grid',
 })
 
 const settingsStore = useSettingsStore()
@@ -52,7 +61,7 @@ const iconBoxStyle = computed(() => props.color
 </script>
 
 <template>
-  <div class="app-icon-box-wrap">
+  <div class="app-icon-box-wrap" :class="size !== 'grid' ? `size-${size}` : undefined">
     <div
       class="app-icon-box"
       :class="iconBoxClasses"
@@ -64,7 +73,7 @@ const iconBoxStyle = computed(() => props.color
       </slot>
       <slot name="badge" />
     </div>
-    <div v-if="label" class="app-label">
+    <div v-if="label" class="app-label" :title="label">
       {{ label }}
     </div>
     <slot name="label" />
@@ -80,6 +89,25 @@ const iconBoxStyle = computed(() => props.color
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+}
+
+/* ==================== 尺寸预设 ==================== */
+.app-icon-box-wrap.size-list {
+  --app-icon-size: 48px;
+  --app-icon-radius: 12px;
+  --app-emoji-size: 24px;
+}
+
+.app-icon-box-wrap.size-md {
+  --app-icon-size: 64px;
+  --app-icon-radius: 14px;
+  --app-emoji-size: 32px;
+}
+
+.app-icon-box-wrap.size-xl {
+  --app-icon-size: 120px;
+  --app-icon-radius: 27px;
+  --app-emoji-size: 64px;
 }
 
 .app-icon-box {
@@ -204,6 +232,78 @@ const iconBoxStyle = computed(() => props.color
   background: color-mix(in srgb, var(--app-icon-color) 88%, black 12%);
 }
 
+/* ==================== 渐变立体风格 ==================== */
+.app-icon-box.style-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.1)), var(--ylf-fill-secondary);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+}
+
+.app-icon-box.style-gradient.has-color {
+  background: var(--app-icon-color);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--app-icon-color) 95%, white 5%) 0%,
+    color-mix(in srgb, var(--app-icon-color) 70%, black 30%) 100%
+  );
+}
+
+.app-icon-box.style-gradient.has-image {
+  background: transparent;
+}
+
+.dark .app-icon-box.style-gradient {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== 极简描边风格 ==================== */
+.app-icon-box.style-minimal {
+  background: var(--ion-background-color, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ion-text-color, #000) 14%, transparent);
+}
+
+.app-icon-box.style-minimal.has-color {
+  background: color-mix(in srgb, var(--app-icon-color) 10%, var(--ion-background-color, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-icon-color) 45%, transparent);
+}
+
+.app-icon-box.style-minimal.has-image {
+  background: transparent;
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--ion-text-color, #000) 12%, transparent);
+}
+
+.app-icon-box.style-minimal .app-emoji {
+  filter: none;
+}
+
+.dark .app-icon-box.style-minimal.has-color {
+  background: color-mix(in srgb, var(--app-icon-color) 18%, var(--ion-background-color, #000));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-icon-color) 55%, transparent);
+}
+
+/* ==================== 小尺寸阴影降级 ====================
+   列表等小尺寸场景下淡化液态玻璃的厚重阴影并禁用模糊（视觉 + 性能），
+   置于深色规则之后以保证两种模式下同时生效 */
+.size-list .app-icon-box.style-liquid-glass,
+.size-md .app-icon-box.style-liquid-glass {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.size-list .app-icon-box.style-liquid-glass::after,
+.size-md .app-icon-box.style-liquid-glass::after {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.32),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.06);
+}
+
 /* 占位模式 */
 .app-icon-box.is-placeholder {
   background: var(--ylf-fill-secondary);
@@ -261,23 +361,16 @@ const iconBoxStyle = computed(() => props.color
   color: var(--ion-text-color);
   text-align: center;
   line-height: 1.3;
+  /* 应用名称单行展示，超出省略号（与 iOS 启动台一致，不换行） */
   max-width: var(--app-icon-size);
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  white-space: normal;
+  white-space: nowrap;
   -webkit-user-select: none;
   user-select: none;
 }
 
 .is-placeholder + .app-label {
   color: var(--ion-color-medium);
-  white-space: nowrap;
-  display: block;
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
 }
 </style>

@@ -65,9 +65,12 @@ const todayDateStr = computed(() => {
           <div class="featured-main">
             <!-- 应用图标 -->
             <div class="featured-icon-wrap">
-              <div class="featured-icon">
-                {{ featuredApp.emoji }}
-              </div>
+              <AppIconBox
+                :icon="featuredApp.logo"
+                :emoji="featuredApp.emoji"
+                :color="featuredApp.themeColor"
+                size="md"
+              />
             </div>
 
             <!-- 文字信息 -->
@@ -206,29 +209,17 @@ const todayDateStr = computed(() => {
   padding: 10px 0 4px;
 }
 
-/* ── 图标 ── */
+/* ── 图标 ──
+   白色玻璃外框保证图标在主题色卡片背景上有足够对比 */
 .featured-icon-wrap {
   flex-shrink: 0;
   padding: 3px;
-  border-radius: 22px;
+  border-radius: 17px;
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.featured-icon {
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  font-size: 36px;
-  line-height: 1;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* ── 文字信息 ── */

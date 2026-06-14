@@ -14,7 +14,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { COIN_PACKS, COIN_RATE_FEN, COIN_TX_TYPE_NAMES, formatCoin, formatPrice, IAP_COIN_PRODUCTS, PLAN_NAMES } from '@yunlefun/types'
+import { COIN_PACKS, COIN_RATE_FEN, formatCoin, formatPrice, IAP_COIN_PRODUCTS, PLAN_NAMES } from '@yunlefun/types'
 import {
   diamondOutline,
   ribbonOutline,
@@ -236,7 +236,7 @@ const memberExpireText = computed(() => formatExpireDate(membership.value?.expir
         <k-list-item
           v-for="tx in transactions"
           :key="tx._id"
-          :title="COIN_TX_TYPE_NAMES[tx.type]"
+          :title="formatTxTitle(tx)"
           :footer="formatTxTime(tx.createdAt)"
         >
           <template #media>

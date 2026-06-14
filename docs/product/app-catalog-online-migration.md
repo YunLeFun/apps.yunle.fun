@@ -108,7 +108,7 @@
 | `id`            | （弱化）     | 业务主键统一用 `slug`；`_id` 仅作文档主键                   |
 
 规范字段全集（前端 `YlfAppInfo` 与集合 `AppRecord` 一致）：
-`slug`(业务主键) · `name` · `description` · `emoji` · `themeColor` · `logo` · `websiteUrl` · `backupUrl` · `category` · `tags` · `githubRepo` · `rating?` · `downloads?` · `size?` · `age?`（展示用，保留作未来扩展）；
+`slug`(业务主键) · `name` · `description` · `emoji` · `themeColor` · `logo` · `websiteUrl` · `trustedHosts?` · `backupUrl` · `category` · `tags` · `githubRepo` · `rating?` · `downloads?` · `size?` · `age?`（展示用，保留作未来扩展）；
 持久化专属：`_id` · `_openid` · `ownerLogin` · `isPublic` · `status` · `rejectedReason?` · `reviewedAt?` · `createdAt` · `updatedAt`。
 
 对齐后保留一个 `recordToAppInfo(record)` 薄封装：仅做 `logo>emoji>📱`、`themeColor` 默认值等兜底，不再改字段名。

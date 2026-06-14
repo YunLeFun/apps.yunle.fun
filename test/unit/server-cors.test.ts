@@ -23,4 +23,14 @@ describe('resolveCorsOrigin', () => {
     expect(resolveCorsOrigin('http://localhost.evil.com:8001')).toBeNull()
     expect(resolveCorsOrigin('capacitor://evil.com')).toBeNull()
   })
+
+  it('allows configured JSAPI auth origins only when provided', () => {
+    expect(resolveCorsOrigin('https://gmm.yunyoujun.cn')).toBeNull()
+    expect(resolveCorsOrigin('https://gmm.yunyoujun.cn', {
+      jsapiAllowedOrigins: 'https://*.yunyoujun.cn',
+    })).toBe('https://gmm.yunyoujun.cn')
+    expect(resolveCorsOrigin('http://gmm.yunyoujun.cn', {
+      jsapiAllowedOrigins: 'https://*.yunyoujun.cn',
+    })).toBeNull()
+  })
 })

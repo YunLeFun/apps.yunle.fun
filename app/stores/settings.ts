@@ -2,7 +2,27 @@ import { useStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
-export type AppIconStyle = 'liquid-glass' | 'flat-color'
+export type AppIconStyle = 'liquid-glass' | 'flat-color' | 'gradient' | 'minimal'
+/**
+ * iOS 内嵌浏览器模式（用户可在设置中选择）：
+ * titlebar = 标题栏视图（顶部固定导航栏，自动套用应用主题色，右上角单菜单按钮，底部仍铺满）；
+ * system = 手机内置浏览器（SFSafariViewController）。
+ *
+ * 沉浸视图（全屏平铺 + 悬浮胶囊）不再作为用户全局选项，仅由官方应用经目录声明
+ * `YlfAppInfo.displayMode = 'immersive'` 启用（详见 docs/dev/in-app-browser.md）；
+ * 故打开时透传给原生的 displayMode 仍可能是 'immersive'，但它来自应用声明而非此设置。
+ */
+export type InAppBrowserMode = 'titlebar' | 'system'
+/** 沉浸/标题栏模式内点击跨站外链的打开方式：safari-view = App 内系统浏览器视图（不跳出）；default-browser = 跳出到手机默认浏览器 */
+export type ExternalLinkMode = 'safari-view' | 'default-browser'
+
+/** 应用图标风格选项（设置页渲染用） */
+export const APP_ICON_STYLE_OPTIONS: { value: AppIconStyle, label: string }[] = [
+  { value: 'liquid-glass', label: '液态玻璃' },
+  { value: 'flat-color', label: '平铺色彩' },
+  { value: 'gradient', label: '渐变立体' },
+  { value: 'minimal', label: '极简描边' },
+]
 
 /** 所有 localStorage 的 key 前缀 */
 const STORAGE_KEYS = [
@@ -18,6 +38,9 @@ const STORAGE_KEYS = [
   'ylf:cloud-sync-enabled',
   'ylf:cloud-auto-sync',
   'ylf:dock-visible',
+  'ylf:in-app-browser-mode',
+  'ylf:external-link-mode',
+  'ylf:purchased-apps',
 ] as const
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -85,6 +108,17 @@ export const useSettingsStore = defineStore('settings', () => {
   /** 自动同步开关（开启后本地变更自动同步到云端） */
   const cloudAutoSync = useStorage<boolean>('ylf:cloud-auto-sync', true)
 
+  // ==================== 浏览设置 ====================
+
+  /** iOS 内嵌浏览器模式（默认标题栏视图；沉浸模式已下线为官方应用专属） */
+  const inAppBrowserMode = useStorage<InAppBrowserMode>('ylf:in-app-browser-mode', 'titlebar')
+  // 迁移：老用户曾选过已下线的「沉浸模式」，回落到标题栏（沉浸现仅由应用声明启用）
+  if ((inAppBrowserMode.value as string) === 'immersive')
+    inAppBrowserMode.value = 'titlebar'
+
+  /** 沉浸模式内跨站外链的打开方式（默认 App 内系统浏览器视图，不跳出） */
+  const externalLinkMode = useStorage<ExternalLinkMode>('ylf:external-link-mode', 'safari-view')
+
   // ==================== 主屏幕设置 ====================
 
   /** 是否显示 Dock 栏（默认隐藏） */
@@ -130,6 +164,9 @@ export const useSettingsStore = defineStore('settings', () => {
     // 外观
     appIconStyle,
     setAppIconStyle,
+    // 浏览
+    inAppBrowserMode,
+    externalLinkMode,
     // 云同步
     cloudSyncEnabled,
     cloudAutoSync,

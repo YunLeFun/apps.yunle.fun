@@ -24,7 +24,7 @@ pnpm sync:version   # 手动同步一次
 pnpm build:ios      # build:ios 已串联 sync:version，自动先同步版本号
 ```
 
-实现：[`scripts/sync-ios-version.sh`](../../scripts/ios-testflight.sh) 用 `sed` 改 `project.pbxproj`
+实现：`scripts/sync-ios-version.sh` 用 `sed` 改 `project.pbxproj`
 的 build setting，`Info.plist` 保持 `$(MARKETING_VERSION)`/`$(CURRENT_PROJECT_VERSION)` 引用（单一数据源）。
 
 发新版只需：
@@ -84,7 +84,7 @@ xcrun altool --upload-symbols --type ios \
 
 ### 命令行一键脚本
 
-[`scripts/ios-testflight.sh`](../../scripts/ios-testflight.sh) 已固化上述修复（symbols=false），后续重新发版直接：
+`scripts/ios-testflight.sh` 已固化上述修复（symbols=false），后续重新发版直接：
 
 ```bash
 # 0. 先出 archive（首次或代码变更后）
@@ -223,7 +223,7 @@ xcrun altool --upload-app \
 | `iOS xx.x is not installed`                       | Xcode 没装匹配的 iOS Platform    | Xcode → Settings → Components 下载                                                                     |
 | `CoreSimulator is out of date`                    | Xcode 和 macOS 子组件失步        | SoftwareUpdate + `sudo xcodebuild -runFirstLaunch`                                                     |
 | `No Apple Distribution certificate`               | Keychain 里只有 Development 证书 | Xcode → Settings → Accounts → Manage Certs → ➕ Apple Distribution                                     |
-| 上传时 `ERROR ITMS-90683: Missing Purpose String` | Info.plist 没声明权限用途        | 已在 [`ios/App/App/Info.plist`](../../ios/App/App/Info.plist) 添加 NSCameraUsage / NSPhotoLibraryUsage |
+| 上传时 `ERROR ITMS-90683: Missing Purpose String` | Info.plist 没声明权限用途        | 已在 `ios/App/App/Info.plist` 添加 NSCameraUsage / NSPhotoLibraryUsage |
 | 上传时 `ITMS-90713: Missing Info.plist value`     | 缺 ITSAppUsesNonExemptEncryption | 已在 Info.plist 中设为 false                                                                           |
 | TestFlight 显示 `Invalid Binary`                  | bitcode / 架构问题               | 当前已用 arm64 only，无 bitcode（Xcode 15+ 已默认关闭）                                                |
 

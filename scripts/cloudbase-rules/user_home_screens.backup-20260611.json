@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "c1f7ac5f69a720cd001395b874ba1889",
+    "createdAt": 1772559160689,
+    "dockApps": [],
+    "installedApps": [],
+    "recentApps": [],
+    "updatedAt": 1772559160689
+  },
+  {
+    "_id": "c1f7ac5f69a720cd001395b908501a4a",
+    "_openid": "1978032370372050944",
+    "createdAt": 1772559160689,
+    "dockApps": [],
+    "installedApps": [
+      {
+        "appId": "4",
+        "sortOrder": 0
+      },
+      {
+        "appId": "6",
+        "sortOrder": 1
+      },
+      {
+        "appId": "14",
+        "sortOrder": 2
+      },
+      {
+        "appId": "17",
+        "sortOrder": 3
+      },
+      {
+        "appId": "test",
+        "sortOrder": 4
+      },
+      {
+        "appId": "cook",
+        "sortOrder": 5
+      }
+    ],
+    "recentApps": [],
+    "updatedAt": 1772559160689
+  }
+]

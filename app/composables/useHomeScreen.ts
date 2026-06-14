@@ -69,9 +69,11 @@ export function useHomeScreen() {
       return
 
     try {
+      // 按 updatedAt 倒序取最新文档：历史 bug 可能产生过同一用户的多份文档
       const { data } = await db
         .collection(COLLECTION)
         .where({ _openid: uid })
+        .orderBy('updatedAt', 'desc')
         .limit(1)
         .get()
 
@@ -113,26 +115,43 @@ export function useHomeScreen() {
 
     homeScreenStore.isSyncing = true
     const config = homeScreenStore.getHomeScreenConfig()
+    const payload = {
+      installedApps: config.installedApps,
+      dockApps: config.dockApps,
+      recentApps: config.recentApps,
+      updatedAt: config.updatedAt,
+    }
 
     try {
-      if (homeScreenStore.cloudDocId) {
-        await db.collection(COLLECTION)
-          .doc(homeScreenStore.cloudDocId)
-          .update({
-            installedApps: config.installedApps,
-            dockApps: config.dockApps,
-            recentApps: config.recentApps,
-            updatedAt: config.updatedAt,
-          })
+      // 重启后 cloudDocId 为空：先按 _openid 查找既有文档，避免重复创建（upsert）
+      if (!homeScreenStore.cloudDocId) {
+        const { data } = await db
+          .collection(COLLECTION)
+          .where({ _openid: uid })
+          .orderBy('updatedAt', 'desc')
+          .limit(1)
+          .get()
+        if (data && data.length > 0)
+          homeScreenStore.cloudDocId = (data[0] as { _id: string })._id
       }
-      else {
+
+      let needCreate = !homeScreenStore.cloudDocId
+      if (homeScreenStore.cloudDocId) {
+        const res = await db.collection(COLLECTION)
+          .doc(homeScreenStore.cloudDocId)
+          .update(payload) as unknown as { updated?: number }
+        // 云端文档已被删除（updated=0）时回退到新建
+        if (res?.updated === 0) {
+          homeScreenStore.cloudDocId = null
+          needCreate = true
+        }
+      }
+
+      if (needCreate) {
         const res = await db.collection(COLLECTION).add({
           _openid: uid,
-          installedApps: config.installedApps,
-          dockApps: config.dockApps,
-          recentApps: config.recentApps,
+          ...payload,
           createdAt: Date.now(),
-          updatedAt: config.updatedAt,
         }) as unknown as { id: string }
         homeScreenStore.cloudDocId = res.id
       }

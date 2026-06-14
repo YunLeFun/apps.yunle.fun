@@ -1,0 +1,33 @@
+diff --git a/plugin.xml b/plugin.xml
+index 0e9dc333c8fc6938f69b76b4dc8c9c1619441433..4e0f5dc1b4cc3e14cf09882fd7fa98624c6a23cd 100644
+--- a/plugin.xml
++++ b/plugin.xml
+@@ -69,11 +69,8 @@
+         <header-file src="src/ios/AppDelegate+Wechat.h" />
+         <source-file src="src/ios/AppDelegate+Wechat.m" />
+ 
+-        <!-- Wechat Official -->
+-        <header-file src="src/ios/libs/OpenSDK1.8.6.2/WXApi.h" />
+-        <header-file src="src/ios/libs/OpenSDK1.8.6.2/WXApiObject.h" />
+-        <header-file src="src/ios/libs/OpenSDK1.8.6.2/WechatAuthSDK.h" />
+-        <source-file src="src/ios/libs/OpenSDK1.8.6.2/libWeChatSDK.a" framework="true" />
++        <!-- Wechat Official: XCFramework via CocoaPods (includes arm64-simulator slice) -->
++        <framework src="WechatOpenSDK-XCFramework" type="podspec" spec="~> 2.0.5" />
+ 
+         <!-- Other required frameworks -->
+         <framework src="libz.tbd" />
+diff --git a/src/ios/CDVWechat.h b/src/ios/CDVWechat.h
+index b55f806e45c9934f51fbfd4eb0769c079e9aec79..f36c8a88314a97c6e5eaaf909888d1e9b49b3bbb 100644
+--- a/src/ios/CDVWechat.h
++++ b/src/ios/CDVWechat.h
+@@ -7,8 +7,8 @@
+ //
+ 
+ #import <Cordova/CDV.h>
+-#import "WXApi.h"
+-#import "WXApiObject.h"
++#import <WechatOpenSDK/WXApi.h>
++#import <WechatOpenSDK/WXApiObject.h>
+ 
+ enum  CDVWechatSharingType {
+     CDVWXSharingTypeApp = 1,

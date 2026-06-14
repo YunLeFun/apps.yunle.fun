@@ -8,6 +8,7 @@ export const cloudOneApp: YlfAppInfo = {
   themeColor: '#0078e7',
   category: '应用',
   slug: 'random',
+  official: true,
 }
 
 export const yunHomeApp: YlfAppInfo = {
@@ -22,4 +23,5 @@ export const yunHomeApp: YlfAppInfo = {
   rating: 4.8,
   age: '4+',
   tagline: '管理你的云端智能家居',
+  official: true,
 }

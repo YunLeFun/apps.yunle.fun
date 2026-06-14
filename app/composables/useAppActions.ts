@@ -16,7 +16,7 @@ export function useAppActions() {
 
     // 打开应用
     if (app.websiteUrl) {
-      openInAppBrowser(app.websiteUrl)
+      openInAppBrowser(app.websiteUrl, { trustedHosts: app.trustedHosts })
     }
   }
 

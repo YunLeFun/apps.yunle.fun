@@ -1,12 +1,49 @@
 import type { AccountSnapshot, CoinTransaction } from '@yunlefun/types'
 import consola from 'consola'
 
+/** 账户快照本地缓存：启动时先展示上次余额，避免「0 → 真实值」闪烁 */
+const ACCOUNT_CACHE_KEY = 'ylf_coin_account'
+
+interface AccountCache {
+  userId: string
+  account: AccountSnapshot
+}
+
+function readAccountCache(userId: string | undefined): AccountSnapshot | null {
+  if (!import.meta.client || !userId)
+    return null
+  try {
+    const raw = localStorage.getItem(ACCOUNT_CACHE_KEY)
+    if (!raw)
+      return null
+    const cache = JSON.parse(raw) as AccountCache
+    // 缓存随用户绑定，避免切换账号后展示上一账号的余额
+    return cache.userId === userId ? cache.account : null
+  }
+  catch {
+    return null
+  }
+}
+
+function writeAccountCache(userId: string | undefined, account: AccountSnapshot | null) {
+  if (!import.meta.client)
+    return
+  try {
+    if (userId && account)
+      localStorage.setItem(ACCOUNT_CACHE_KEY, JSON.stringify({ userId, account } satisfies AccountCache))
+    else
+      localStorage.removeItem(ACCOUNT_CACHE_KEY)
+  }
+  catch {}
+}
+
 /**
  * 平台账户 composable（云币余额 + 会员状态 + 流水）。
  *
  * - 对接 www.yunle.fun 已部署的 `account-api` 云函数（共用同一 CloudBase 环境）
  * - 全局共享：通过 useState 在多个组件间复用同一份账户快照
  * - 与登录态联动：用户变化时自动刷新 / 清空
+ * - 本地缓存兜底：快照按用户写入 localStorage，下次启动先展示再后台刷新
  *
  * 充值 / 开通会员的下单流程仍在 www 完成，App 端只读账户 + 按次扣费。
  */
@@ -14,7 +51,7 @@ export function useCoin() {
   const { app } = useCloudbase()
   const userStore = useUserStore()
 
-  const account = useState<AccountSnapshot | null>('coin_account', () => null)
+  const account = useState<AccountSnapshot | null>('coin_account', () => readAccountCache(userStore.userInfo?.id))
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -36,6 +73,7 @@ export function useCoin() {
         data: { action: 'getAccount' },
       })
       account.value = res.result as AccountSnapshot
+      writeAccountCache(userStore.userInfo?.id, account.value)
       return account.value
     }
     catch (err) {
@@ -68,8 +106,10 @@ export function useCoin() {
     })
     const result = res.result as { balance: number, deduped: boolean }
     // 同步本地余额
-    if (account.value)
+    if (account.value) {
       account.value = { ...account.value, coin: result.balance }
+      writeAccountCache(userStore.userInfo?.id, account.value)
+    }
     return result
   }
 
@@ -114,10 +154,15 @@ export function useCoin() {
     () => userStore.userInfo?.id,
     (newId, oldId) => {
       if (newId !== oldId) {
-        if (newId)
+        if (newId) {
+          // 先丢弃上一账号的余额（尝试命中新账号缓存），再后台刷新
+          account.value = readAccountCache(newId)
           refresh()
-        else
+        }
+        else {
           account.value = null
+          writeAccountCache(undefined, null)
+        }
       }
     },
     { immediate: false },

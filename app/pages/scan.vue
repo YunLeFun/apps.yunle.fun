@@ -9,7 +9,8 @@
  * - 相册 → 复用 useScanner 的 scanFromAlbum()
  */
 
-import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue'
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue'
+import { chevronBackOutline } from 'ionicons/icons'
 
 const { resolveScan, cancelScan } = useScanBridge()
 const { scanFromAlbum } = useScanner()
@@ -35,7 +36,11 @@ async function handlePickAlbum() {
     <IonHeader class="scan-header">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/" text="返回" @click.prevent="handleCancel" />
+          <!-- 不用 IonBackButton：其内置返回导航会与 cancelScan() 的 router.back() 叠加造成双重返回 -->
+          <IonButton @click="handleCancel">
+            <IonIcon slot="start" :icon="chevronBackOutline" />
+            返回
+          </IonButton>
         </IonButtons>
         <IonTitle>
           扫一扫
@@ -44,9 +49,11 @@ async function handlePickAlbum() {
     </IonHeader>
 
     <IonContent :fullscreen="true" class="scan-page-content">
+      <!-- 头部已有「返回」，不再显示底部取消按钮，避免同一动作双入口 -->
       <ScannerBarcode
         :is-visible="true"
         :show-flashlight="true"
+        :show-close="false"
         @cancel="handleCancel"
         @result="handleResult"
         @pick-album="handlePickAlbum"

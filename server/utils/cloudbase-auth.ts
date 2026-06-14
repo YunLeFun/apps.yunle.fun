@@ -2,6 +2,7 @@ import type { H3Event } from 'h3'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 import { createError, getRequestHeader } from 'h3'
+import { resolveCloudbaseEnvId } from './cloudbase-config'
 
 interface CachedAuthUser {
   user: ServerAuthUser
@@ -87,13 +88,7 @@ async function verifyCloudbaseUser(event: H3Event): Promise<ServerAuthUser | nul
     return cached.user
 
   const config = useRuntimeConfig()
-  const envId = config.public.tcbEnvId
-  if (!envId) {
-    throw createError({
-      statusCode: 500,
-      message: 'CloudBase 环境未配置',
-    })
-  }
+  const envId = resolveCloudbaseEnvId(config)
 
   const endpoint = `https://${envId}.api.tcloudbasegateway.com/auth/v1/user/me`
   let response: Response

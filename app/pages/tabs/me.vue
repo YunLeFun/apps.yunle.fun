@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { apps, chatbubbleEllipsesOutline, codeSlashOutline, helpCircleOutline, informationCircle, personCircleOutline, ribbonOutline, settings, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
+import { apps, chatbubbleEllipsesOutline, codeSlashOutline, flagOutline, helpCircleOutline, informationCircle, personCircleOutline, ribbonOutline, settings, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -17,7 +17,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const developerStore = useDeveloperStore()
 const accountsStore = useAccountsStore()
-const { balance, isMember, refresh: refreshAccount } = useCoin()
+const { account, balance, isMember, refresh: refreshAccount } = useCoin()
 
 const otherAccounts = computed(() =>
   accountsStore.getOtherAccounts(userStore.userInfo?.id),
@@ -108,7 +108,8 @@ function navigateTo(path: string) {
               </span>
             </template>
             <template #after>
-              <span class="wallet-balance">{{ balance }} 云币</span>
+              <span v-if="account" class="wallet-balance">{{ balance }} 云币</span>
+              <span v-else class="wallet-balance-skeleton" />
             </template>
           </k-list-item>
 
@@ -129,7 +130,7 @@ function navigateTo(path: string) {
           </k-list-item>
         </k-list>
 
-        <!-- 我的应用（登录后可见） -->
+        <!-- 我的应用 / 我的举报（登录后可见） -->
         <k-list v-if="userStore.isLoggedIn" strong inset>
           <k-list-item
             link
@@ -141,6 +142,20 @@ function navigateTo(path: string) {
             <template #media>
               <span class="ios-icon-box ios-icon-blue">
                 <IonIcon :icon="apps" />
+              </span>
+            </template>
+          </k-list-item>
+
+          <k-list-item
+            link
+            title="我的举报"
+            subtitle="查看举报处理进度"
+            inner-class="k-list-item-vcenter"
+            @click="navigateTo('/user/reports')"
+          >
+            <template #media>
+              <span class="ios-icon-box ios-icon-red">
+                <IonIcon :icon="flagOutline" />
               </span>
             </template>
           </k-list-item>
@@ -255,6 +270,26 @@ function navigateTo(path: string) {
   font-size: 15px;
   font-weight: 600;
   color: var(--ion-color-warning, #ff9f0a);
+}
+
+/* 余额骨架占位（仅本地无缓存的首次加载出现） */
+.wallet-balance-skeleton {
+  display: inline-block;
+  width: 64px;
+  height: 16px;
+  border-radius: 6px;
+  background: var(--ylf-fill-tertiary);
+  animation: wallet-balance-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes wallet-balance-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* 会员有效徽标 */

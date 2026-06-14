@@ -4,8 +4,8 @@
  * 运行：node scripts/set-iap-pricing.mjs
  */
 
-import { createSign } from 'crypto'
-import { readFileSync } from 'fs'
+import { createSign } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 
 const KEY_ID = '3BCG9ZYMR8'
 const ISSUER_ID = '73b700d9-9661-417c-bfa4-0ceedd7a38e2'
@@ -14,9 +14,9 @@ const BASE_URL = 'https://api.appstoreconnect.apple.com'
 
 // IDs from the creation run
 const PRODUCTS = [
-  { iapId: '6779227213', productId: 'coin_100',    priceY: '12'  },
-  { iapId: '6779227233', productId: 'coin_500',    priceY: '58'  },
-  { iapId: '6779227444', productId: 'coin_1000',   priceY: '108' },
+  { iapId: '6779227213', productId: 'coin_100', priceY: '12' },
+  { iapId: '6779227233', productId: 'coin_500', priceY: '58' },
+  { iapId: '6779227444', productId: 'coin_1000', priceY: '108' },
   { iapId: '6779227282', productId: 'member_month', priceY: '12' },
   { iapId: '6779227518', productId: 'member_year', priceY: '118' },
 ]
@@ -26,7 +26,8 @@ let _jwtExp = 0
 
 function getJwt() {
   const now = Math.floor(Date.now() / 1000)
-  if (_jwt && now < _jwtExp - 60) return _jwt
+  if (_jwt && now < _jwtExp - 60)
+    return _jwt
   const privateKey = readFileSync(KEY_PATH, 'utf8')
   const header = Buffer.from(JSON.stringify({ alg: 'ES256', kid: KEY_ID, typ: 'JWT' })).toString('base64url')
   const payload = Buffer.from(JSON.stringify({ iss: ISSUER_ID, iat: now, exp: now + 1200, aud: 'appstoreconnect-v1' })).toString('base64url')
@@ -42,7 +43,7 @@ function getJwt() {
 async function api(path, opts = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...opts,
-    headers: { Authorization: `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
+    headers: { 'Authorization': `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
   })
   const text = await res.text()
   let body
@@ -62,7 +63,8 @@ async function fetchAllPricePoints(iapId) {
     const res = await api(path)
     all.push(...res.data)
     path = res.links?.next ? res.links.next.replace(BASE_URL, '') : null
-    if (path) console.log(`      paginating… (${all.length} so far)`)
+    if (path)
+      console.log(`      paginating… (${all.length} so far)`)
   }
   return all
 }
@@ -73,14 +75,14 @@ async function setPrice(p) {
   const pps = await fetchAllPricePoints(p.iapId)
   console.log(`    fetched ${pps.length} price points`)
 
-  const target = parseFloat(p.priceY)
-  const match = pps.find(pp => Math.abs(parseFloat(pp.attributes?.customerPrice ?? 'NaN') - target) < 0.01)
+  const target = Number.parseFloat(p.priceY)
+  const match = pps.find(pp => Math.abs(Number.parseFloat(pp.attributes?.customerPrice ?? 'NaN') - target) < 0.01)
 
   if (!match) {
     // Show the closest values
     const sorted = [...pps].sort((a, b) =>
-      Math.abs(parseFloat(a.attributes?.customerPrice) - target)
-      - Math.abs(parseFloat(b.attributes?.customerPrice) - target)
+      Math.abs(Number.parseFloat(a.attributes?.customerPrice) - target)
+      - Math.abs(Number.parseFloat(b.attributes?.customerPrice) - target),
     )
     const near = sorted.slice(0, 5).map(pp => pp.attributes?.customerPrice).join(', ')
     console.log(`    ⚠ ¥${p.priceY} not found. Nearest: ${near}`)

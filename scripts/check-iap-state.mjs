@@ -23,4 +23,5 @@ const r = await fetch(`https://api.appstoreconnect.apple.com/v1/apps/${APP_ID}/i
 const d = await r.json()
 for (const x of d.data || [])
   console.log(x.attributes.productId.padEnd(32), x.attributes.state)
-if (d.errors) console.log(JSON.stringify(d.errors, null, 2))
+if (d.errors)
+  console.log(JSON.stringify(d.errors, null, 2))

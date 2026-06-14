@@ -17,7 +17,8 @@ let _jwt = null
 let _exp = 0
 function getJwt() {
   const now = Math.floor(Date.now() / 1000)
-  if (_jwt && now < _exp - 60) return _jwt
+  if (_jwt && now < _exp - 60)
+    return _jwt
   const pk = readFileSync(KEY_PATH, 'utf8')
   const h = Buffer.from(JSON.stringify({ alg: 'ES256', kid: KEY_ID, typ: 'JWT' })).toString('base64url')
   const p = Buffer.from(JSON.stringify({ iss: ISSUER_ID, iat: now, exp: now + 1200, aud: 'appstoreconnect-v1' })).toString('base64url')
@@ -34,18 +35,21 @@ async function api(path, opts = {}) {
     try {
       const res = await fetch(`${BASE}${path}`, {
         ...opts,
-        headers: { Authorization: `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
+        headers: { 'Authorization': `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
       })
       const text = await res.text()
       let body = {}
-      try { body = text ? JSON.parse(text) : {} } catch { /* */ }
+      try { body = text ? JSON.parse(text) : {} }
+      catch { /* */ }
       if (!res.ok) {
         const m = body.errors?.map(e => `${e.code}: ${e.detail}`).join('; ') ?? `${res.status} ${text.slice(0, 200)}`
         throw new Error(m)
       }
       return body
-    } catch (e) {
-      if (i === 3) throw e
+    }
+    catch (e) {
+      if (i === 3)
+        throw e
       await new Promise(r => setTimeout(r, 800))
     }
   }
@@ -101,7 +105,8 @@ async function main() {
         }),
       })
       console.log('✓ 全区域可售')
-    } catch (e) {
+    }
+    catch (e) {
       console.log(`✗ ${e.message}`)
     }
   }

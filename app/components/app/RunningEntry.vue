@@ -7,6 +7,9 @@
  */
 import { IonButton, IonIcon, IonPopover } from '@ionic/vue'
 import { copyOutline } from 'ionicons/icons'
+// 显式同步导入（不走自动导入）：避免 Nuxt 测试环境下该组件异步 import
+// 在环境拆除后才 resolve（EnvironmentTeardownError，CI 时序相关）
+import RunningPanel from './RunningPanel.vue'
 
 const { sessions } = useBackgroundSessions()
 
@@ -37,7 +40,7 @@ function openPanel(e: Event) {
     style="--width: 264px;"
     @did-dismiss="open = false"
   >
-    <AppRunningPanel @close="open = false" />
+    <RunningPanel v-if="open" @close="open = false" />
   </IonPopover>
 </template>
 

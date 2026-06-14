@@ -4,8 +4,8 @@
  * 运行：node scripts/create-iap-products.mjs
  */
 
-import { createSign } from 'crypto'
-import { readFileSync } from 'fs'
+import { createSign } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 
 const KEY_ID = '3BCG9ZYMR8'
 const ISSUER_ID = '73b700d9-9661-417c-bfa4-0ceedd7a38e2'
@@ -61,12 +61,16 @@ let _jwtExp = 0
 
 function getJwt() {
   const now = Math.floor(Date.now() / 1000)
-  if (_jwt && now < _jwtExp - 60) return _jwt
+  if (_jwt && now < _jwtExp - 60)
+    return _jwt
 
   const privateKey = readFileSync(KEY_PATH, 'utf8')
   const header = Buffer.from(JSON.stringify({ alg: 'ES256', kid: KEY_ID, typ: 'JWT' })).toString('base64url')
   const payload = Buffer.from(JSON.stringify({
-    iss: ISSUER_ID, iat: now, exp: now + 1200, aud: 'appstoreconnect-v1',
+    iss: ISSUER_ID,
+    iat: now,
+    exp: now + 1200,
+    aud: 'appstoreconnect-v1',
   })).toString('base64url')
 
   const sign = createSign('SHA256')
@@ -82,7 +86,7 @@ function getJwt() {
 async function api(path, opts = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...opts,
-    headers: { Authorization: `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
+    headers: { 'Authorization': `Bearer ${getJwt()}`, 'Content-Type': 'application/json', ...opts.headers },
   })
   const text = await res.text()
   let body
@@ -97,7 +101,8 @@ async function api(path, opts = {}) {
 
 async function getAppId() {
   const { data } = await api(`/v1/apps?filter[bundleId]=${BUNDLE_ID}&fields[apps]=bundleId,name`)
-  if (!data[0]) throw new Error(`App "${BUNDLE_ID}" not found — is it created in ASC?`)
+  if (!data[0])
+    throw new Error(`App "${BUNDLE_ID}" not found — is it created in ASC?`)
   console.log(`  App: ${data[0].attributes.name}  id=${data[0].id}`)
   return data[0].id
 }
@@ -116,7 +121,8 @@ async function createProduct(appId, p) {
     })
     console.log(`    ✓ Created  id=${data.id}`)
     return data.id
-  } catch (e) {
+  }
+  catch (e) {
     // If already exists, try to find it
     if (e.message.includes('already exists') || e.message.includes('DUPLICATE')) {
       console.log(`    ℹ Already exists, fetching existing...`)
@@ -158,14 +164,15 @@ async function setPricing(iapId, p) {
   let pps
   try {
     pps = await fetchAllPricePoints(iapId)
-  } catch (e) {
+  }
+  catch (e) {
     console.log(`    ⚠ Could not fetch price points: ${e.message}`)
     console.log(`      → Set price ¥${p.priceY} manually in ASC`)
     return
   }
 
-  const target = parseFloat(p.priceY)
-  const match = pps.find(pp => Math.abs(parseFloat(pp.attributes?.customerPrice ?? 'NaN') - target) < 0.01)
+  const target = Number.parseFloat(p.priceY)
+  const match = pps.find(pp => Math.abs(Number.parseFloat(pp.attributes?.customerPrice ?? 'NaN') - target) < 0.01)
 
   if (!match) {
     console.log(`    ⚠ ¥${p.priceY} not found in ${pps.length} price points`)
@@ -211,7 +218,8 @@ async function main() {
       const iapId = await createProduct(appId, p)
       await addLocalizations(iapId, p)
       await setPricing(iapId, p)
-    } catch (e) {
+    }
+    catch (e) {
       console.error(`    ✗ ${e.message}`)
     }
   }

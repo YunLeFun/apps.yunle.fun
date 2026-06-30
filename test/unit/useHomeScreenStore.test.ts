@@ -6,7 +6,6 @@ import type { HomeScreenConfig, InstalledApp, RecentApp } from '../../app/types/
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   DOCK_MAX_APPS,
-  HOME_SCREEN_PAGE_SIZE,
   RECENT_MAX_APPS,
 } from '../../app/types/homeScreen'
 
@@ -20,22 +19,8 @@ function createStore() {
   const recentApps = ref<RecentApp[]>([])
   const lastSyncAt = ref(0)
   const isEditMode = ref(false)
-  const currentPage = ref(0)
   const isSyncing = ref(false)
   const cloudDocId = ref<string | null>(null)
-
-  const pagedApps = computed(() => {
-    const pages: InstalledApp[][] = []
-    const apps = installedApps.value
-    for (let i = 0; i < apps.length; i += HOME_SCREEN_PAGE_SIZE) {
-      pages.push(apps.slice(i, i + HOME_SCREEN_PAGE_SIZE))
-    }
-    if (pages.length === 0)
-      pages.push([])
-    return pages
-  })
-
-  const totalPages = computed(() => pagedApps.value.length)
 
   function isInstalled(appId: string): boolean {
     return installedApps.value.some(a => a.appId === appId)
@@ -112,11 +97,8 @@ function createStore() {
     recentApps,
     lastSyncAt,
     isEditMode,
-    currentPage,
     isSyncing,
     cloudDocId,
-    pagedApps,
-    totalPages,
     installApp,
     uninstallApp,
     isInstalled,
@@ -277,39 +259,6 @@ describe('useHomeScreenStore', () => {
       const after = Date.now()
       expect(store.recentApps.value[0].usedAt).toBeGreaterThanOrEqual(before)
       expect(store.recentApps.value[0].usedAt).toBeLessThanOrEqual(after)
-    })
-  })
-
-  // ==================== 分页 ====================
-
-  describe('pagedApps', () => {
-    it('空数据返回一个空页', () => {
-      expect(store.pagedApps.value).toHaveLength(1)
-      expect(store.pagedApps.value[0]).toEqual([])
-    })
-
-    it('少于一页时返回单页', () => {
-      store.installedApps.value = Array.from({ length: 5 }, (_, i) => ({
-        appId: `app-${i}`,
-      }))
-      expect(store.pagedApps.value).toHaveLength(1)
-      expect(store.pagedApps.value[0]).toHaveLength(5)
-    })
-
-    it('超过一页时正确分页', () => {
-      store.installedApps.value = Array.from({ length: HOME_SCREEN_PAGE_SIZE + 5 }, (_, i) => ({
-        appId: `app-${i}`,
-      }))
-      expect(store.pagedApps.value).toHaveLength(2)
-      expect(store.pagedApps.value[0]).toHaveLength(HOME_SCREEN_PAGE_SIZE)
-      expect(store.pagedApps.value[1]).toHaveLength(5)
-    })
-
-    it('totalPages 与 pagedApps 长度一致', () => {
-      store.installedApps.value = Array.from({ length: HOME_SCREEN_PAGE_SIZE * 3 }, (_, i) => ({
-        appId: `app-${i}`,
-      }))
-      expect(store.totalPages.value).toBe(3)
     })
   })
 

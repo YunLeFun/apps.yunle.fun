@@ -47,6 +47,23 @@ ion-tab-bar {
 }
 
 /*
+ * IonSearchbar already renders its own clear button. Chromium/WebKit also
+ * adds a native cancel control for <input type="search">, which can produce
+ * two visible clear buttons on web.
+ */
+ion-searchbar .searchbar-input::-webkit-search-decoration,
+ion-searchbar .searchbar-input::-webkit-search-cancel-button,
+ion-searchbar .searchbar-input::-webkit-search-results-button,
+ion-searchbar .searchbar-input::-webkit-search-results-decoration {
+  display: none;
+  width: 0;
+  height: 0;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/*
  * Shadow DOM ::slotted 的盒模型属性（margin/padding）在部分 WebView/Chromium
  * 中不生效（color/display 等可继承属性正常），导致 ion-item / ion-button 内
  * slot 图标与文字贴在一起。在 light DOM 按 Ionic iOS 默认值显式声明；

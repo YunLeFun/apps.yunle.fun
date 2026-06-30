@@ -85,7 +85,9 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
       toast.showSuccess(`欢迎回来，${core.user.value?.nickname || core.user.value?.login || ''}！`)
 
       // 4. 跳转到个人页
-      core.router.push('/tabs/me')
+      // 用 replace 而非 push：从非 tabs 页进入 tab 子路由时，push 会把 me.vue 叠在
+      // 根 outlet 栈上而不重新进入 tabs 外壳，导致底部 IonTabBar 不渲染
+      core.router.replace('/tabs/me')
     }
     catch (err: unknown) {
       console.error('原生 OAuth 回调处理失败:', err)

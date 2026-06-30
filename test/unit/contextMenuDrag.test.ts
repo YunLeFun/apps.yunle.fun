@@ -338,9 +338,10 @@ describe('homeScreenGrid: CSS 约束守卫', () => {
     expect(gridItemMatch).not.toContain('touch-action')
   })
 
-  it('编辑模式下滚动容器有 no-scroll class', () => {
-    expect(GRID_VUE).toContain('no-scroll')
-    expect(GRID_VUE).toContain('overflow-x: hidden')
+  it('网格容器保持纵向滚动布局约束', () => {
+    expect(GRID_VUE).toContain('class="hs-grid-wrapper"')
+    expect(GRID_VUE).toMatch(/\.hs-grid-wrapper\s*\{[^}]*min-height:\s*100%/)
+    expect(GRID_VUE).toContain('grid-template-columns: repeat(4, 1fr)')
   })
 })
 

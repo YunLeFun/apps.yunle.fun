@@ -72,9 +72,6 @@ export interface WeeklyChartRecord {
   updatedAt: number
 }
 
-/** Home Screen 每页的应用数量 (4列 x 6行) */
-export const HOME_SCREEN_PAGE_SIZE = 24
-
 /** Dock 最大应用数量 */
 export const DOCK_MAX_APPS = 4
 

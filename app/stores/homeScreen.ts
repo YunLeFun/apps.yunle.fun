@@ -2,7 +2,7 @@ import type { YlfAppInfo } from '@yunlefun/types'
 import type { HomeScreenConfig, InstalledApp, RecentApp } from '~/types/homeScreen'
 import { useStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import { DOCK_MAX_APPS, HOME_SCREEN_PAGE_SIZE, RECENT_MAX_APPS } from '~/types/homeScreen'
+import { DOCK_MAX_APPS, RECENT_MAX_APPS } from '~/types/homeScreen'
 
 /**
  * Home Screen 状态 Store
@@ -22,30 +22,10 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
   const isEditMode = ref(false)
   /** 编辑模式期间是否有待同步的变更 */
   const hasPendingChanges = ref(false)
-  /** 当前页码（0-based） */
-  const currentPage = ref(0)
   /** 是否正在同步到 CloudBase */
   const isSyncing = ref(false)
   /** CloudBase 文档 ID */
   const cloudDocId = ref<string | null>(null)
-
-  // ==================== 计算属性 ====================
-
-  /** 分页后的 Home Screen 应用 */
-  const pagedApps = computed(() => {
-    const pages: InstalledApp[][] = []
-    const apps = installedApps.value
-    for (let i = 0; i < apps.length; i += HOME_SCREEN_PAGE_SIZE) {
-      pages.push(apps.slice(i, i + HOME_SCREEN_PAGE_SIZE))
-    }
-    // 至少保留一个空页
-    if (pages.length === 0)
-      pages.push([])
-    return pages
-  })
-
-  /** 总页数 */
-  const totalPages = computed(() => pagedApps.value.length)
 
   // ==================== 安装/卸载 ====================
 
@@ -197,12 +177,8 @@ export const useHomeScreenStore = defineStore('homeScreen', () => {
     // 运行时状态
     isEditMode,
     hasPendingChanges,
-    currentPage,
     isSyncing,
     cloudDocId,
-    // 计算属性
-    pagedApps,
-    totalPages,
     // 方法
     installApp,
     uninstallApp,

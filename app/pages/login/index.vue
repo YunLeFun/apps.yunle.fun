@@ -38,7 +38,9 @@ const accountsStore = useAccountsStore()
 
 watch(isAuthenticated, (value) => {
   if (value) {
-    router.push('/tabs/me')
+    // 用 replace 而非 push：登录页在 tabs 之外，push 进入 tab 子路由会把 me.vue
+    // 叠在根 outlet 栈上而不重新进入 tabs 外壳，导致底部 IonTabBar 不渲染
+    router.replace('/tabs/me')
   }
 }, { immediate: true })
 

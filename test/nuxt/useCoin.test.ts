@@ -1,6 +1,6 @@
 import type { AccountSnapshot } from '@yunlefun/types'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // @cloudbase/js-sdk 的 ESM 产物在 Nuxt 测试环境下解析失败（见 SmsLogin.test.ts），
 // useCoin 不直接使用 SDK，mock 掉模块以打断 import 链
@@ -30,6 +30,11 @@ mockNuxtImport('useUserStore', () => () => ({
     return mockUser
   },
 }))
+
+beforeAll(async () => {
+  await useRouter().isReady()
+  await import('~/pages/tabs/home.vue')
+})
 
 function makeSnapshot(coin: number): AccountSnapshot {
   return {

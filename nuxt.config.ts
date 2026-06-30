@@ -7,6 +7,7 @@ import { appDescription } from './app/constants/index'
 
 export default defineNuxtConfig({
   ssr: false,
+  srcDir: 'app',
 
   alias: {
     '@yunlefun/auth': path.resolve(__dirname, './packages/auth/src/index.ts'),
@@ -48,6 +49,7 @@ export default defineNuxtConfig({
     '~/styles/scss/vars.scss',
     '~/styles/scss/index.scss',
     '~/styles/scss/override.scss',
+    'markstream-vue/index.css',
 
     /**
      * Ionic 结构样式 — large title (collapse="condense") 等组件布局所需
@@ -184,8 +186,10 @@ export default defineNuxtConfig({
     jsapiAuthAllowedOrigins: process.env.NUXT_JSAPI_AUTH_ALLOWED_ORIGINS || 'https://*.yunle.fun,https://*.yunyoujun.cn',
     public: {
       tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
-      cloudbaseRegion: '',
-      cloudbaseAccessKey: '',
+      cloudbaseRegion: process.env.NUXT_PUBLIC_CLOUDBASE_REGION || '',
+      cloudbaseAccessKey: process.env.NUXT_PUBLIC_CLOUDBASE_ACCESS_KEY || '',
+      agentBotId: process.env.NUXT_PUBLIC_AGENT_BOT_ID || 'agent-yunlefun-1g1ef4a470aefe98',
+      agentRequestTimeoutMs: Number(process.env.NUXT_PUBLIC_AGENT_REQUEST_TIMEOUT_MS || 60000),
       apiBaseUrl: '',
 
       wxOpenAppId: 'wx4489293d76593a67',

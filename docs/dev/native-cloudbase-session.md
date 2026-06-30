@@ -17,7 +17,7 @@
 
 ### 1) 注入 JS（`setupJSBridge` 的 `window.ylf` 字面量里，`getAuthCode` 之后加一行）
 
-```js
+```text
 getCloudbaseSession: function (options) { return invoke('getCloudbaseSession', options || {}) },
 ```
 

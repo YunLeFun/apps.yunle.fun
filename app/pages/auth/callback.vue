@@ -74,7 +74,7 @@ onMounted(async () => {
       toast.showSuccess(`欢迎回来，${user.value.nickname || user.value.login}！`)
 
       setTimeout(() => {
-        router.push('/tabs/me')
+        router.replace('/tabs/me')
       }, 1000)
       return
     }
@@ -89,7 +89,7 @@ onMounted(async () => {
       toast.showSuccess(`欢迎回来，${user.value.nickname || user.value.login}！`)
 
       setTimeout(() => {
-        router.push('/tabs/me')
+        router.replace('/tabs/me')
       }, 1000)
       return
     }

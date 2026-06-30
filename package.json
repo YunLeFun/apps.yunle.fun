@@ -52,6 +52,7 @@
     "cordova-plugin-wechat": "^3.1.0",
     "jsqr": "^1.4.0",
     "konsta": "^5.1.0",
+    "markstream-vue": "^1.0.4",
     "ofetch": "^1.5.1",
     "tencentcloud-sdk-nodejs-tms": "^4.1.240",
     "vconsole": "^3.15.1",

@@ -9,6 +9,8 @@ import {
   IonTabs,
 } from '@ionic/vue'
 import { apps, compass, home, person } from 'ionicons/icons'
+
+const agentScreenOpen = useState('agent:screen-open', () => false)
 </script>
 
 <template>
@@ -18,7 +20,7 @@ import { apps, compass, home, person } from 'ionicons/icons'
       <IonRouterOutlet />
 
       <!-- 底部标签栏 -->
-      <IonTabBar slot="bottom">
+      <IonTabBar v-show="!agentScreenOpen" slot="bottom">
         <IonTabButton tab="home" href="/tabs/home">
           <IonIcon :icon="home" />
           <IonLabel>云居</IonLabel>

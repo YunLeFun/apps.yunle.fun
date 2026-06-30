@@ -43,7 +43,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
         throw new Error(verifyError.message || '验证码验证失败')
       await fetchUser()
       toast.showSuccess('登录成功，欢迎回来！')
-      await router.push('/tabs/me')
+      await router.replace('/tabs/me')
     }
     catch (err: unknown) {
       console.error('验证失败:', err)
@@ -88,7 +88,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
         throw new Error(verifyError.message || '验证码验证失败')
       await fetchUser()
       toast.showSuccess('登录成功，欢迎回来！')
-      await router.push('/tabs/me')
+      await router.replace('/tabs/me')
     }
     catch (err: unknown) {
       console.error('邮箱验证失败:', err)
@@ -133,7 +133,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
         throw new Error(verifyError.message || '验证码验证失败')
       await fetchUser()
       toast.showSuccess('注册成功，欢迎加入！')
-      await router.push('/tabs/me')
+      await router.replace('/tabs/me')
     }
     catch (err: unknown) {
       console.error('注册验证失败:', err)
@@ -155,7 +155,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
         throw new Error(signInError.message || '密码登录失败')
       await fetchUser()
       toast.showSuccess('登录成功，欢迎回来！')
-      await router.push('/tabs/me')
+      await router.replace('/tabs/me')
     }
     catch (err: unknown) {
       console.error('密码登录失败:', err)

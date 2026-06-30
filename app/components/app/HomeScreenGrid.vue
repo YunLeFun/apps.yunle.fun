@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /**
- * HomeScreenGrid - iOS 风格 Home Screen 网格
+ * HomeScreenGrid - 主屏应用网格（纵向滚动）
  *
  * 交互模型（对齐 iOS 原生行为）：
- * - 非编辑模式：长按 500ms → 弹出上下文菜单；长按空白区域 → 进入编辑模式
+ * - 非编辑模式：长按 500ms 图标 → 弹出上下文菜单；长按空白区域 → 进入编辑模式
  * - 编辑模式：SortableJS 启用（delay=0），触摸图标立即可拖拽排序
- * - 上下文菜单中点击"编辑主屏幕"或手指移动 → 进入编辑模式
+ * - 整个应用列表随外层内容区纵向滚动（不再横向翻页）
  */
 import type { YlfAppInfo } from '@yunlefun/types'
 import type { UseDraggableReturn } from 'vue-draggable-plus'
@@ -14,8 +14,8 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { VueDraggable } from 'vue-draggable-plus'
 
 interface Props {
-  /** 分页后的应用列表 */
-  pages: InstalledApp[][]
+  /** 已安装应用列表（单一纵向列表，可拖拽排序） */
+  apps: InstalledApp[]
   /** 是否编辑模式 */
   editMode?: boolean
   /** 上下文菜单预览时需要隐藏的应用 ID */
@@ -27,18 +27,13 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'update:pages': [pages: InstalledApp[][]]
-  'open': [app: YlfAppInfo, installed: InstalledApp]
-  'remove': [installed: InstalledApp]
-  'longPress': [app: InstalledApp | null, position: { x: number, y: number }, iconRect: DOMRect | null]
+  open: [app: YlfAppInfo, installed: InstalledApp]
+  remove: [installed: InstalledApp]
+  longPress: [app: InstalledApp | null, position: { x: number, y: number }, iconRect: DOMRect | null]
 }>()
 
 const homeScreenStore = useHomeScreenStore()
 const { getApp, ensureLoaded } = useAppCatalog()
-const currentPage = computed({
-  get: () => homeScreenStore.currentPage,
-  set: (v) => { homeScreenStore.currentPage = v },
-})
 
 /** 解析应用完整信息（集合优先，内置兜底） */
 function resolveApp(installed: InstalledApp): YlfAppInfo | null {
@@ -49,21 +44,16 @@ onMounted(() => {
   ensureLoaded()
 })
 
-/** 可拖拽的 model —— 必须是可写 ref，computed 只读会导致拖拽写入被丢弃 */
-const pageModels = ref<InstalledApp[][]>([])
+/** 可拖拽的扁平 model —— 必须是可写 ref，computed 只读会导致拖拽写入被丢弃 */
+const gridModel = ref<InstalledApp[]>([])
 
 watch(
-  () => props.pages,
-  (pages) => {
-    pageModels.value = pages.map(page => [...page])
+  () => props.apps,
+  (apps) => {
+    gridModel.value = apps.map(app => ({ ...app }))
   },
   { immediate: true, deep: true },
 )
-
-/**
- * SortableJS 只在编辑模式下启用（delay=0 立即可拖），
- * 非编辑模式下 disabled，由自定义长按检测触发上下文菜单。
- */
 
 /**
  * Sortable 手动初始化（:immediate="false" + start($el)）。
@@ -76,28 +66,25 @@ watch(
  */
 type DraggableInstance = UseDraggableReturn & { $el?: unknown }
 
-const draggableRefs = ref<(DraggableInstance | null)[]>([])
-const startedDraggables = new WeakSet<DraggableInstance>()
+const draggableRef = ref<DraggableInstance | null>(null)
+let sortableStarted = false
 
-function setDraggableRef(index: number, instance: unknown) {
-  draggableRefs.value[index] = instance as DraggableInstance | null
+function setDraggableRef(instance: unknown) {
+  draggableRef.value = instance as DraggableInstance | null
 }
 
-async function initSortables() {
+async function initSortable() {
   await nextTick()
-  for (const draggable of draggableRefs.value) {
-    if (!draggable || startedDraggables.has(draggable))
-      continue
-    if (draggable.$el instanceof HTMLElement) {
-      draggable.start(draggable.$el)
-      startedDraggables.add(draggable)
-    }
+  const draggable = draggableRef.value
+  if (!draggable || sortableStarted)
+    return
+  if (draggable.$el instanceof HTMLElement) {
+    draggable.start(draggable.$el)
+    sortableStarted = true
   }
 }
 
-onMounted(initSortables)
-// 页数增长时为新挂载的 VueDraggable 实例补初始化
-watch(() => props.pages.length, initSortables)
+onMounted(initSortable)
 
 /** 拖拽开始 */
 function onDragStart() {
@@ -106,32 +93,9 @@ function onDragStart() {
 
 /** 拖拽结束时更新 */
 function onDragEnd() {
-  const flatApps = pageModels.value.flat()
-  homeScreenStore.updateInstalledApps(flatApps)
+  homeScreenStore.updateInstalledApps([...gridModel.value])
   homeScreenStore.markPendingChanges()
   Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
-}
-
-/** 处理翻页滚动 */
-const scrollContainer = ref<HTMLElement | null>(null)
-
-function scrollToPage(index: number) {
-  if (!scrollContainer.value)
-    return
-  const width = scrollContainer.value.clientWidth
-  scrollContainer.value.scrollTo({ left: width * index, behavior: 'smooth' })
-  currentPage.value = index
-}
-
-function onScroll() {
-  if (!scrollContainer.value)
-    return
-  const width = scrollContainer.value.clientWidth
-  const scrollLeft = scrollContainer.value.scrollLeft
-  const page = Math.round(scrollLeft / width)
-  if (page !== currentPage.value) {
-    currentPage.value = page
-  }
 }
 
 /** 处理应用点击 */
@@ -172,7 +136,7 @@ function onPointerDown(e: PointerEvent, app: InstalledApp | null = null) {
   if (props.editMode)
     return
 
-  // 非编辑模式：图标上的 pointerdown 阻止冒泡到 .hs-page，
+  // 非编辑模式：图标上的 pointerdown 阻止冒泡到空白区域，
   // 避免同时触发空白区域的长按检测
   if (app)
     e.stopPropagation()
@@ -225,7 +189,7 @@ function clearTouchLongPressTimer() {
 function onBlankTouchStart(e: TouchEvent) {
   if (props.editMode)
     return
-  // 只在空白区域触发（事件直接在 .hs-page 上，不是从子元素冒泡）
+  // 只在空白区域触发（事件直接落在容器上，不是从子图标冒泡）
   if (e.target !== e.currentTarget)
     return
 
@@ -260,131 +224,82 @@ function onBlankTouchCancel() {
 </script>
 
 <template>
-  <div class="hs-grid-wrapper">
-    <!-- 翻页容器（编辑模式下禁止滚动，避免与拖拽冲突） -->
-    <div
-      ref="scrollContainer"
-      class="hs-scroll-container"
-      :class="{ 'no-scroll': editMode }"
-      @scroll.passive="onScroll"
+  <!-- 纵向滚动容器：长按空白区域进入编辑模式 -->
+  <div
+    class="hs-grid-wrapper"
+    @pointerdown="onPointerDown($event, null)"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerCancel"
+    @touchstart="onBlankTouchStart"
+    @touchmove="onBlankTouchMove"
+    @touchend="onBlankTouchEnd"
+    @touchcancel="onBlankTouchCancel"
+  >
+    <VueDraggable
+      :ref="setDraggableRef"
+      v-model="gridModel"
+      :immediate="false"
+      :disabled="!editMode"
+      :animation="300"
+      :delay="0"
+      :force-fallback="true"
+      :fallback-on-body="true"
+      :fallback-tolerance="3"
+      ghost-class="hs-ghost"
+      drag-class="hs-drag"
+      chosen-class="hs-chosen"
+      class="hs-grid"
+      @start="onDragStart"
+      @end="onDragEnd"
     >
       <div
-        v-for="(page, pageIndex) in pages"
-        :key="pageIndex"
-        class="hs-page"
-        @pointerdown="onPointerDown($event, null)"
-        @pointermove="onPointerMove"
-        @pointerup="onPointerUp"
-        @pointercancel="onPointerCancel"
-        @touchstart="onBlankTouchStart"
-        @touchmove="onBlankTouchMove"
-        @touchend="onBlankTouchEnd"
-        @touchcancel="onBlankTouchCancel"
+        v-for="element in gridModel"
+        :key="element.appId"
+        class="hs-grid-item"
+        :class="{
+          'edit-wobble': editMode,
+          'hs-hidden': element.appId === hiddenAppId,
+        }"
+        @click="handleAppClick(element)"
+        v-on="editMode ? {} : {
+          pointerdown: (e: PointerEvent) => onPointerDown(e, element),
+          pointermove: onPointerMove,
+          pointerup: onPointerUp,
+          pointercancel: onPointerCancel,
+        }"
+        @contextmenu.prevent
       >
-        <VueDraggable
-          :ref="(inst: unknown) => setDraggableRef(pageIndex, inst)"
-          v-model="pageModels[pageIndex]!"
-          :immediate="false"
-          :disabled="!editMode"
-          :animation="300"
-          :delay="0"
-          :force-fallback="true"
-          :fallback-on-body="true"
-          :fallback-tolerance="3"
-          ghost-class="hs-ghost"
-          drag-class="hs-drag"
-          chosen-class="hs-chosen"
-          class="hs-grid"
-          @start="onDragStart"
-          @end="onDragEnd"
+        <!-- 删除按钮（编辑模式） -->
+        <button
+          v-if="editMode"
+          class="delete-badge"
+          @click.stop="emit('remove', element)"
         >
-          <div
-            v-for="element in pageModels[pageIndex]"
-            :key="element.appId"
-            class="hs-grid-item"
-            :class="{
-              'edit-wobble': editMode,
-              'hs-hidden': element.appId === hiddenAppId,
-            }"
-            @click="handleAppClick(element)"
-            v-on="editMode ? {} : {
-              pointerdown: (e: PointerEvent) => onPointerDown(e, element),
-              pointermove: onPointerMove,
-              pointerup: onPointerUp,
-              pointercancel: onPointerCancel,
-            }"
-            @contextmenu.prevent
-          >
-            <!-- 删除按钮（编辑模式） -->
-            <button
-              v-if="editMode"
-              class="delete-badge"
-              @click.stop="emit('remove', element)"
-            >
-              <span class="delete-icon">−</span>
-            </button>
+          <span class="delete-icon">−</span>
+        </button>
 
-            <!-- 复用 AppIcon -->
-            <AppIcon
-              v-if="resolveApp(element)"
-              :app="resolveApp(element)!"
-              :show-badge="false"
-            />
-            <!-- 未解析的应用占位 -->
-            <AppIconBox
-              v-else
-              placeholder
-              :label="element.appId"
-            />
-          </div>
-        </VueDraggable>
+        <!-- 复用 AppIcon -->
+        <AppIcon
+          v-if="resolveApp(element)"
+          :app="resolveApp(element)!"
+          :show-badge="false"
+        />
+        <!-- 未解析的应用占位 -->
+        <AppIconBox
+          v-else
+          placeholder
+          :label="element.appId"
+        />
       </div>
-    </div>
-
-    <!-- 页码指示器 -->
-    <div v-if="pages.length > 1" class="page-dots">
-      <button
-        v-for="(_, i) in pages"
-        :key="i"
-        class="page-dot"
-        :class="{ active: i === currentPage }"
-        @click="scrollToPage(i)"
-      />
-    </div>
+    </VueDraggable>
   </div>
 </template>
 
 <style scoped>
 .hs-grid-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.hs-scroll-container {
-  flex: 1;
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* 编辑模式下禁止滚动，防止与 SortableJS 拖拽冲突 */
-.hs-scroll-container.no-scroll {
-  overflow-x: hidden;
-  scroll-snap-type: none;
-}
-
-.hs-scroll-container::-webkit-scrollbar {
-  display: none;
-}
-
-.hs-page {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  min-height: 0;
+  /* 至少撑满内容区，保证图标下方留有可长按进入编辑模式的空白 */
+  min-height: 100%;
 }
 
 .hs-grid {
@@ -392,7 +307,6 @@ function onBlankTouchCancel() {
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   padding: 12px 20px;
-  min-height: 100%;
   align-content: start;
 }
 
@@ -477,6 +391,20 @@ function onBlankTouchCancel() {
 .hs-ghost {
   opacity: 0;
 }
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 480px) {
+  .hs-grid {
+    gap: 16px;
+    padding: 12px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edit-wobble {
+    animation: none;
+  }
+}
 </style>
 
 <!-- 拖拽 clone 挂在 body 上（fallbackOnBody），需要全局样式 -->
@@ -497,46 +425,5 @@ function onBlankTouchCancel() {
   opacity: 1 !important;
   z-index: 100000 !important;
   filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
-}
-</style>
-
-<style scoped>
-/* ==================== 页码指示器 ==================== */
-.page-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 0;
-}
-
-.page-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ylf-label-quaternary);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.page-dot.active {
-  background: var(--ylf-label);
-  opacity: 0.6;
-  transform: scale(1.3);
-}
-
-/* ==================== 响应式 ==================== */
-@media (max-width: 480px) {
-  .hs-grid {
-    gap: 16px;
-    padding: 12px 16px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .edit-wobble {
-    animation: none;
-  }
 }
 </style>

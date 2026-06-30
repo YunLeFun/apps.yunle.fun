@@ -239,18 +239,15 @@ function normalizeHomeScreenApps() {
   return installed.changed || dock.changed
 }
 
-const visibleHomeScreenPages = computed(() => {
-  const pages = homeScreenStore.pagedApps
-    .map(page => page.filter(app => Boolean(resolveApp(app))))
-    .filter(page => page.length > 0)
-
-  return pages.length > 0 ? pages : [[]]
-})
+/** 可解析的已安装应用（单一纵向列表） */
+const visibleHomeScreenApps = computed(() => (
+  homeScreenStore.installedApps.filter(app => Boolean(resolveApp(app)))
+))
 
 const visibleDockApps = computed(() => homeScreenStore.dockApps.filter(app => Boolean(resolveApp(app))))
 
 /** 主屏幕是否为空（无可解析应用且非搜索态时展示空状态引导） */
-const isHomeEmpty = computed(() => visibleHomeScreenPages.value.every(page => page.length === 0))
+const isHomeEmpty = computed(() => visibleHomeScreenApps.value.length === 0)
 
 const contextMenuResolvedApp = computed(() => contextMenuApp.value
   ? resolveApp(contextMenuApp.value)
@@ -408,7 +405,7 @@ function handleContentClick() {
     <IonContent
       class="phone-homescreen"
       :class="{ 'has-dock': showDock }"
-      @click="handleContentClick"
+      @click="!isSearching && handleContentClick()"
     >
       <!-- 搜索结果 -->
       <template v-if="isSearching">
@@ -436,7 +433,7 @@ function handleContentClick() {
       </template>
 
       <!-- 正常布局（非搜索态） -->
-      <template v-else>
+      <div v-else class="home-agent-home-panel" :class="{ 'has-dock': showDock }">
         <!-- 最近使用 -->
         <div v-if="displayRecentApps.length > 0" class="recent-section">
           <div class="section-header px-5.5">
@@ -485,14 +482,14 @@ function handleContentClick() {
 
         <AppHomeScreenGrid
           v-else
-          :pages="visibleHomeScreenPages"
+          :apps="visibleHomeScreenApps"
           :edit-mode="homeScreenStore.isEditMode"
           :hidden-app-id="contextMenuHiddenAppId"
           @open="handleOpenApp"
           @remove="handleRemoveApp"
           @long-press="handleLongPress"
         />
-      </template>
+      </div>
     </IonContent>
 
     <!-- 底部 Dock 常用栏：固定在屏幕底部，类似 iOS Home Screen -->
@@ -548,6 +545,22 @@ function handleContentClick() {
 /* Dock 显示时，内容区底部留出空间避免遮挡 */
 .phone-homescreen.has-dock {
   --padding-bottom: 104px;
+}
+
+.home-agent-home-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 16px;
+}
+
+/* 应用网格占据剩余空间并随内容纵向增长（撑高后由外层内容区滚动） */
+.home-agent-home-panel :deep(.hs-grid-wrapper) {
+  flex: 1 0 auto;
+}
+
+.home-agent-home-panel.has-dock {
+  padding-bottom: 104px;
 }
 
 /* ==================== 最近使用区域 ==================== */

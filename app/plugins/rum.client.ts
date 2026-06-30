@@ -18,6 +18,9 @@ import consola from 'consola'
  * 关闭：清空 `nuxt.config.ts` 的 `runtimeConfig.public.rumAppId` 即可
  */
 export default defineNuxtPlugin(() => {
+  if (import.meta.env?.MODE === 'test')
+    return
+
   const config = useRuntimeConfig()
   const appId = (config.public as any).rumAppId as string | undefined
   const debug = (config.public as any).rumDebug === true

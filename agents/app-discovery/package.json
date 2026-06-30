@@ -1,0 +1,16 @@
+{
+  "name": "@yunlefun/app-discovery-agent",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^3.18.1",
+    "ws": "^8.18.3"
+  }
+}

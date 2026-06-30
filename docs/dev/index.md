@@ -9,3 +9,4 @@
 - [沉浸式内嵌浏览器](./in-app-browser) — 胶囊视觉规范与页面 JSAPI（window.ylf）
 - [短信登录](./sms-login) — CloudBase 短信验证码登录
 - [Home Screen 拖拽排序](./home-screen-drag) — SortableJS 拖拽架构与踩坑记录
+- [负一屏 AI Agent](./ai-agent-screen) — 会员对话检索应用方案(CloudBase Web SDK + Agent 工具卡片）

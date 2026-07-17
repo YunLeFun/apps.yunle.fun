@@ -53,7 +53,7 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 | UI     | Ionic Vue（ios 模式） + Konsta UI        |
 | 样式   | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS |
 | 状态   | Pinia                                    |
-| 移动端 | Capacitor 7（iOS）                       |
+| 移动端 | Capacitor 8（iOS）                       |
 | 后端   | Nitro Server + 腾讯 CloudBase            |
 | 认证   | CloudBase Auth + 微信 SDK + GitHub OAuth |
 | 部署   | Docker → 腾讯云 SCF（云函数）            |

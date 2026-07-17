@@ -1,9 +1,11 @@
-FROM node:20-alpine as build-stage
+FROM node:22-alpine AS build-stage
 
 WORKDIR /app
 RUN corepack enable
 
-COPY .npmrc package.json pnpm-lock.yaml ./
+COPY .npmrc package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY docs/package.json ./docs/package.json
+COPY patches ./patches
 RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile
 
@@ -11,7 +13,7 @@ COPY . .
 RUN pnpm build
 
 # SSR
-FROM node:20-alpine as production-stage
+FROM node:22-alpine AS production-stage
 
 WORKDIR /app
 

@@ -41,7 +41,7 @@ features:
     details: 分类浏览、搜索、安装云应用，开发者可发布自己的作品
   - icon: 📱
     title: 跨平台
-    details: Nuxt 4 + Capacitor 7，Web 与 iOS 原生双端体验
+    details: Nuxt 4 + Capacitor 8，Web 与 iOS 原生双端体验
   - icon: 🔐
     title: 云端同步
     details: CloudBase 云端数据同步，多设备桌面配置自动同步

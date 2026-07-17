@@ -5,8 +5,8 @@
 ## 前置条件
 
 - [ ] 已加入 [Apple Developer Program](https://developer.apple.com/programs/)（年费 $99，约 ¥698）
-- [ ] Team ID 为 `QT792GAY4C`（已写在 [package.json](https://github.com/YunYouJun/apps.yunle.fun/blob/main/package.json) `build:ios` 脚本里）
-- [ ] Bundle ID 为 `fun.yunle.apps`（Xcode 项目实际值，**注意与 `capacitor.config.ts` 的 `appId` 不一致，见下文**）
+- [ ] Team ID 为 `QT792GAY4C`（`scripts/ios-archive.sh` / `scripts/ios-testflight.sh` 的默认值，可用 `IOS_TEAM_ID` 覆盖）
+- [ ] Bundle ID 为 `fun.yunle.apps`（Capacitor、Xcode 和导出脚本保持一致；`IOS_BUNDLE_ID` 只校验期望值）
 
 ## 步骤一：注册 Bundle ID（如未注册）
 
@@ -61,33 +61,20 @@ export const config = {
 }
 ```
 
-## ⚠️ 重要：解决 Bundle ID 不一致问题
+## Bundle ID 一致性校验
 
-**发现的问题**：
+当前以下位置都应保持为同一个 App 标识：
 
 | 来源                                                                                                                                       | 当前值                        |
 | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| [capacitor.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/capacitor.config.ts) `appId`                                   | `apps.yunle.fun`              |
+| [capacitor.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/capacitor.config.ts) `appId`                                   | `fun.yunle.apps`              |
 | Xcode 项目 `PRODUCT_BUNDLE_IDENTIFIER`                                                                                                     | `fun.yunle.apps`              |
 | [apple-app-site-association](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/.well-known/apple-app-site-association) `appIDs` | `QT792GAY4C.fun.yunle.apps` ✓ |
-| WeChat URL Scheme                                                                                                                          | `wx925d6e320d64f30a`          |
+| `IOS_BUNDLE_ID` 期望值                                                                                                                     | `fun.yunle.apps`              |
 
-`capacitor.config.ts` 与 Xcode 不一致。如果跑 `pnpm sync` 或 `cap sync`，可能会把 Xcode 的 Bundle ID 改成 `apps.yunle.fun`，进而：
-
-- AASA 失效 → Universal Link 不工作
-- App Store Connect 找不到匹配的 Bundle ID
-- 已签发的开发证书失效
-
-**处理方式**（**在做 cap sync 之前必须先改**）：
-
-```ts
-// capacitor.config.ts
-const config: CapacitorConfig = {
-  appId: 'fun.yunle.apps', // ← 改为反向 DNS，跟 Xcode 实际值对齐
-  appName: '云乐坊',
-  // ...
-}
-```
+每次修改 Bundle ID 后都要同时更新 Capacitor 配置、Xcode、AASA、provisioning profile 和发布环境变量，
+否则 Universal Link、签名或 App Store Connect 匹配会失败。WeChat App ID `wx925d6e320d64f30a`
+是独立标识，不应作为 iOS Bundle ID。
 
 ## 步骤五：填补 App Store 元数据（不影响 ID 获取，可后做）
 

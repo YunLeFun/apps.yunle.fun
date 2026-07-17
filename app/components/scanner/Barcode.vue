@@ -16,7 +16,7 @@ const emit = defineEmits<{
   pickAlbum: []
 }>()
 
-const videoRef = ref<HTMLVideoElement | null>(null)
+const videoRef = shallowRef<HTMLVideoElement | null>(null)
 const { startScan: startWebScan, stopScan: stopWebScan, isSupported, stream } = useWebBarcodeScan()
 
 // 手电筒：基于 W3C MediaStreamTrack.applyConstraints({ torch })

@@ -17,7 +17,7 @@
 满足任一条件即可发版：
 
 - **仅 Web 发版**：跑 `pnpm release` 即可（需配 `TENCENT_SECRET_ID`/`KEY`）
-- **iOS TestFlight 内测**：跑 `pnpm sync` + `pnpm build:ios`（需 `LANG=en_US.UTF-8`）
+- **iOS TestFlight 内测**：跑 `pnpm build` + `pnpm sync` + `pnpm build:ios`，再按发布文档显式设置签名变量并运行 `scripts/ios-testflight.sh`
 - **App Store 正式上架**：等 ICP 备案 + 设计交付齐
 
 ---
@@ -131,7 +131,7 @@
 - [x] **bump 版本号 + iOS TestFlight 上架**
   - `package.json` version → `0.1.0`（pre-release 语义）
   - iOS `MARKETING_VERSION=0.1.0` / `CURRENT_PROJECT_VERSION=67`，与 package.json 自动对齐
-    （[`scripts/sync-ios-version.sh`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/scripts/sync-ios-version.sh) + `prebuild:ios` 钩子）
+    （[`scripts/sync-ios-version.sh`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
   - git tag `v0.1.0`
   - ✅ **已成功上传 TestFlight**（build 67，Delivery UUID 5a473656-…）
   - 踩坑与完整流程见 [`docs/dev/testflight.md`](./dev/testflight.md)（关键：`uploadSymbols=false` 绕过 Xcode 26 的 Copy failed）

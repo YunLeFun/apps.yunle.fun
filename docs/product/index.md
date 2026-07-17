@@ -27,7 +27,7 @@
 | UI 框架  | Ionic Vue + Konsta UI             |
 | 样式     | Tailwind CSS 4 + UnoCSS (仅图标)  |
 | 状态管理 | Pinia                             |
-| 移动端   | Capacitor 7 (iOS)                 |
+| 移动端   | Capacitor 8 (iOS)                 |
 | 后端     | Nitro Server API + 腾讯 CloudBase |
 | 认证     | CloudBase Auth + 微信登录         |
 | 部署     | Docker → 腾讯云 SCF               |

@@ -1,0 +1,10 @@
+diff --git a/index.js b/index.js
+--- a/index.js
++++ b/index.js
+@@ -509,3 +509,6 @@ function baseSet(object, path, value, customizer) {
+   while (nested != null && ++index < length) {
+     var key = toKey(path[index]),
+         newValue = value;
++    if (key == '__proto__' || key == 'constructor' || key == 'prototype') {
++      return object;
++    }

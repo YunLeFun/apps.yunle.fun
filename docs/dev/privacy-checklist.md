@@ -36,7 +36,7 @@
 
 - [ ] **腾讯 CloudBase JS SDK**：数据库 / 认证 / 文件存储
 - [ ] **腾讯云 RUM (aegis-web-sdk)**：错误与性能监控
-- [ ] **Capacitor 7**：iOS 原生壳
+- [ ] **Capacitor 8**：iOS 原生壳
   - `@capacitor/app` `@capacitor/browser` `@capacitor/keyboard` `@capacitor/status-bar` `@capacitor/haptics` `@capacitor/barcode-scanner`
 - [ ] **微信 SDK (cordova-plugin-wechat)**：iOS 微信登录
 - [ ] **GitHub OAuth**：仅 Web，不在 iOS 端启用

@@ -24,7 +24,7 @@
 
 ### 项目定位
 
-云乐坊 (yunle.fun) —— 一个「应用聚合平台」，用户可以浏览、搜索和使用各种小应用。项目采用 **Nuxt 4 (CSR 模式)** 构建 Web 端，同时通过 **Capacitor 7** 打包为 iOS 原生应用。
+云乐坊 (yunle.fun) —— 一个「应用聚合平台」，用户可以浏览、搜索和使用各种小应用。项目采用 **Nuxt 4 (CSR 模式)** 构建 Web 端，同时通过 **Capacitor 8** 打包为 iOS 原生应用。
 
 ### 技术栈组合
 
@@ -32,7 +32,7 @@
 - **UI**: Ionic Vue (`ios` 模式) + Konsta UI —— 双 UI 框架协同，Ionic 提供原生级路由和组件，Konsta 提供 iOS 风格的表单和列表组件
 - **样式**: Tailwind CSS 4 + UnoCSS（仅用 `presetIcons` 做图标方案）+ SCSS 自定义变量
 - **状态**: Pinia
-- **移动端**: Capacitor 7 (iOS)，集成微信 SDK（`cordova-plugin-wechat`）
+- **移动端**: Capacitor 8 (iOS)，集成微信 SDK（`cordova-plugin-wechat`）
 - **后端**: Nitro Server API + 腾讯 CloudBase (`@cloudbase/js-sdk`)
 - **认证**: CloudBase Auth + 微信登录 + `nuxt-auth-utils`
 - **部署**: Docker 容器 → 腾讯云 SCF (云函数)，通过 TCR 镜像仓库分发
@@ -89,7 +89,7 @@ packages/               # Monorepo 子包
 
 **Monorepo 结构**: 使用 pnpm workspace，但 `@yunlefun/auth` 包通过 `nuxt.config.ts` 的 `alias` 直接映射到源码路径，开发时无需构建子包。`@yunlefun/deploy` 和 `@yunlefun/toolkit` 为外部 npm 包。
 
-**部署流水线**: Docker 多阶段构建（node:20-alpine），生产镜像推送到腾讯 TCR，部署为腾讯云 SCF 云函数（端口 80）。Canary 环境 (dev.yunle.fun) 在每次 main 分支提交时自动部署。
+**部署流水线**: Docker 多阶段构建（node:22-alpine），生产镜像推送到腾讯 TCR，部署为腾讯云 SCF 云函数（端口 80）。Canary 环境 (dev.yunle.fun) 在每次 main 分支提交时自动部署。
 
 ### 样式约定
 

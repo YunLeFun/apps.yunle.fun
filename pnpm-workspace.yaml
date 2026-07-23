@@ -1,4 +1,23 @@
+minimumReleaseAgeExclude:
+  - '@vue/compiler-core@3.5.40'
+  - '@vue/compiler-dom@3.5.40'
+  - '@vue/compiler-sfc@3.5.40'
+  - '@vue/compiler-ssr@3.5.40'
+  - '@vue/reactivity@3.5.40'
+  - '@vue/runtime-core@3.5.40'
+  - '@vue/runtime-dom@3.5.40'
+  - '@vue/server-renderer@3.5.40'
+  - '@vue/shared@3.5.40'
+  - vue@3.5.40
 shellEmulator: true
+
+auditConfig:
+  # VitePress 1.6.4 仍固定 Vite 5；待 VitePress 2 稳定版发布后移除（详见安全文档）
+  ignoreGhsas:
+    - GHSA-4w7w-66w2-5vf9
+    - GHSA-fx2h-pf6j-xcff
+    - GHSA-p6mc-m468-83gw # lodash.set 无上游补丁；本仓库应用等价原型污染防护补丁
+    - GHSA-v6wh-96g9-6wx3
 
 trustPolicy: no-downgrade
 
@@ -9,41 +28,63 @@ trustPolicyExclude:
 packages:
   - docs
 overrides:
-  # 安全漏洞修复：钉死传递依赖到已修复版本（2026-06-04，详见 docs/dev/dependency-security.md）
+  # 安全漏洞修复：钉死传递依赖到已修复版本（2026-07-16，详见 docs/dev/dependency-security.md）
   # 键按字母升序排列（eslint yaml/sort-keys 要求）
+  '@babel/core@<=7.29.0': ^7.29.1 # 任意文件读取（workbox / Nuxt 构建链）
   '@babel/plugin-transform-modules-systemjs': ^7.29.7 # 任意代码生成（workbox > babel）
-  '@protobufjs/utf8': ^1.1.1 # overlong UTF-8 decoding（飞书 SDK）
+  '@capacitor/cli': 8.4.2 # @nuxtjs/ionic 仍声明 Capacitor 7，统一强制到 v8
+  '@capacitor/core': 8.4.2 # 避免工作区安装两份 Capacitor runtime
+  '@protobufjs/utf8': ^1.1.2 # overlong UTF-8 decoding（飞书 SDK）
+  '@vue/compiler-sfc': 3.5.40 # Nuxt 4.4.8 仍钉在 Vue 3.5.39，统一同一 patch 线
+  '@vue/server-renderer': 3.5.40 # 与根 Vue runtime 保持精确一致
   '@xmldom/xmldom': ^0.8.13 # XML 注入 / DoS（@capacitor/cli > plist）
-  axios: ^1.17.0 # SSRF / 原型污染 / MITM（@yunlefun/deploy、tencentcloud-sdk）
+  axios: ^1.18.1 # SSRF / 原型污染 / MITM（@yunlefun/deploy、tencentcloud-sdk）
   basic-ftp: ^5.3.1 # CRLF 注入 / DoS（@nuxtjs/ionic > @ionic/cli）
   brace-expansion@<1.1.13: ^1.1.13 # DoS（minimatch v1 链）
-  brace-expansion@>=2.0.0 <2.0.3: ^2.1.1 # DoS（minimatch v2 链）
-  brace-expansion@>=5.0.0 <5.0.6: ^5.0.6 # DoS（typescript-eslint minimatch 链）
+  brace-expansion@>=2.0.0 <2.0.3: ^2.1.2 # DoS（minimatch v2 链）
+  brace-expansion@>=5.0.0 <5.0.6: ^5.0.7 # DoS（typescript-eslint minimatch 链）
+  c12@2.0.4>magicast: 0.3.5 # @yunlefun/deploy 的旧 c12 可选 peer 仅兼容 magicast 0.3
   defu: ^6.1.7 # 原型污染（@nuxt/devtools > @nuxt/kit）
+  esbuild@<=0.24.2: ^0.25.0 # 开发服务器跨源读取（审计所列 0.24.3 未发布，取首个可用修复线）
+  esbuild@>=0.27.3 <0.28.1: ^0.28.1 # Windows 开发服务器任意文件读取
   fast-uri: ^3.1.2 # 路径穿越 / host 混淆（unocss webpack > ajv）
   flatted: ^3.4.2 # 原型污染 / DoS（eslint flat-cache）
   follow-redirects: ^1.16.0 # 跨域 header 泄露（axios）
+  form-data@>=3.0.0 <3.0.5: ^3.0.5 # multipart 字段名 CRLF 注入（腾讯云 SDK）
+  form-data@>=4.0.0 <4.0.6: ^4.0.6 # multipart 字段名 CRLF 注入（CloudBase / Ionic）
   h3: ^1.15.11 # SSE 注入 / 路径穿越（@nuxt/eslint > config-inspector）
   ip-address: ^10.2.0 # Address6 XSS（@nuxtjs/ionic > socks）
   js-cookie: ^3.0.8 # 原型劫持（@vue/test-utils > js-beautify）
+  js-yaml@>=4.0.0 <4.1.2: ^4.1.2 # 原型污染（eslint typegen 链）
+  launch-editor@<=2.14.0: ^2.14.1 # Windows UNC 凭据泄露（Nuxt DevTools）
   lodash: ^4.18.1 # 代码注入 / 原型污染（@cloudbase/js-sdk，运行时）
+  lodash.unset@>=4.0.0 <4.18.0: ^4.18.0 # 原型污染（CloudBase database）
   picomatch@<2.3.2: ^2.3.2 # ReDoS（workbox 链）
-  picomatch@>=4.0.0 <4.0.4: ^4.0.4 # ReDoS（typescript-eslint 链）
-  postcss: ^8.5.15 # CSS stringify XSS（vite）
-  protobufjs: ^7.6.3 # critical 任意代码执行（@yunlefun/deploy > 飞书 SDK）
-  qs: ^6.15.2 # DoS（@nuxtjs/ionic > superagent）
+  picomatch@>=4.0.0 <4.0.5: ^4.0.5 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
+  postcss: ^8.5.16 # CSS stringify XSS（vite）
+  protobufjs: ^7.6.5 # critical 任意代码执行（@yunlefun/deploy > 飞书 SDK）
+  qs: ^6.15.3 # DoS（@nuxtjs/ionic > superagent）
   semver@<7.0.0: '>=7.7.4'
-  serialize-javascript: ^7.0.5 # RCE（webpack 链，本项目用 vite 未触发）
+  serialize-javascript: ^7.0.7 # RCE（webpack 链，本项目用 vite 未触发）
+  shell-quote@<=1.8.3: ^1.8.4 # critical 换行转义绕过（Nuxt DevTools）
   shelljs: ^0.8.5 # 提权（cordova-plugin-wechat）
   simple-git: ^3.36.0 # RCE（@nuxt/devtools）
-  tar: ^7.5.16 # 路径穿越 / 符号链接（@capacitor/cli、node-pre-gyp）
+  tar: ^7.5.19 # 路径穿越 / 符号链接（@capacitor/cli、node-pre-gyp）
   tmp: ^0.2.7 # 路径穿越（@nuxtjs/ionic > inquirer）
+  undici@>=7.0.0 <7.28.0: ^7.28.0 # TLS / WebSocket / header 处理（jsdom 测试链）
   unhead: ^2.1.15 # useHeadSafe XSS 绕过（@nuxtjs/ionic > @unhead/vue）
+  uuid@<11.1.1: ^11.1.1 # v3/v5/v6 buffer 越界（腾讯云 SDK）
+  vite@>=7.0.0 <7.3.5: ^7.3.5 # fs.deny 绕过 / Windows UNC（Nuxt 构建链）
+  vue: 3.5.40 # 根应用、Nuxt 与 VitePress 统一 Vue patch 版本
   ws: ^8.21.0 # 未初始化内存泄露（@cloudbase/js-sdk，运行时）
   yaml: ^2.9.0 # 栈溢出（@antfu/eslint-config > eslint-plugin-pnpm）
 patchedDependencies:
   cordova-plugin-wechat@3.1.0: patches/cordova-plugin-wechat@3.1.0.patch
-ignoredBuiltDependencies:
-  - esbuild
-onlyBuiltDependencies:
-  - unrs-resolver
+  lodash.set@4.3.2: patches/lodash.set@4.3.2.patch
+allowBuilds:
+  '@parcel/watcher': true
+  core-js: true
+  core-js-pure: true
+  esbuild: true
+  protobufjs: true
+  unrs-resolver: true

@@ -38,12 +38,11 @@ overrides:
   '@vue/compiler-sfc': 3.5.40 # Nuxt 4.4.8 仍钉在 Vue 3.5.39，统一同一 patch 线
   '@vue/server-renderer': 3.5.40 # 与根 Vue runtime 保持精确一致
   '@xmldom/xmldom': ^0.8.13 # XML 注入 / DoS（@capacitor/cli > plist）
-  axios: ^1.18.1 # SSRF / 原型污染 / MITM（@yunlefun/deploy、tencentcloud-sdk）
+  axios: ^1.18.1 # SSRF / 原型污染 / MITM（tencentcloud-sdk）
   basic-ftp: ^5.3.1 # CRLF 注入 / DoS（@nuxtjs/ionic > @ionic/cli）
   brace-expansion@<1.1.13: ^1.1.13 # DoS（minimatch v1 链）
   brace-expansion@>=2.0.0 <2.0.3: ^2.1.2 # DoS（minimatch v2 链）
   brace-expansion@>=5.0.0 <5.0.6: ^5.0.7 # DoS（typescript-eslint minimatch 链）
-  c12@2.0.4>magicast: 0.3.5 # @yunlefun/deploy 的旧 c12 可选 peer 仅兼容 magicast 0.3
   defu: ^6.1.7 # 原型污染（@nuxt/devtools > @nuxt/kit）
   esbuild@<=0.24.2: ^0.25.0 # 开发服务器跨源读取（审计所列 0.24.3 未发布，取首个可用修复线）
   esbuild@>=0.27.3 <0.28.1: ^0.28.1 # Windows 开发服务器任意文件读取
@@ -62,7 +61,7 @@ overrides:
   picomatch@<2.3.2: ^2.3.2 # ReDoS（workbox 链）
   picomatch@>=4.0.0 <4.0.5: ^4.0.5 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
   postcss: ^8.5.16 # CSS stringify XSS（vite）
-  protobufjs: ^7.6.5 # critical 任意代码执行（@yunlefun/deploy > 飞书 SDK）
+  protobufjs: ^7.6.5 # critical 任意代码执行（腾讯云 SDK）
   qs: ^6.15.3 # DoS（@nuxtjs/ionic > superagent）
   semver@<7.0.0: '>=7.7.4'
   serialize-javascript: ^7.0.7 # RCE（webpack 链，本项目用 vite 未触发）

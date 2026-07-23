@@ -54,8 +54,8 @@ pnpm build
 # 运行生产构建
 pnpm start
 
-# 部署到腾讯云 SCF
-pnpm deploy
+# Web 生产发布
+# 将验证通过的改动合并到 main，EdgeOne 会自动构建并发布
 ```
 
 ## 代码质量

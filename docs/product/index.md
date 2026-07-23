@@ -30,4 +30,4 @@
 | 移动端   | Capacitor 8 (iOS)                 |
 | 后端     | Nitro Server API + 腾讯 CloudBase |
 | 认证     | CloudBase Auth + 微信登录         |
-| 部署     | Docker → 腾讯云 SCF               |
+| 部署     | EdgeOne Pages（Git 集成）         |

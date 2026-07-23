@@ -7,7 +7,7 @@
 详情页 `app/pages/app/[id].vue` 的「评分与评论」UI 已完整存在（323-399 行），但数据是硬编码假数据（54-63 行）；`YlfAppInfo.rating` 目前是运营预设伪指标。本计划落地真实的评分评论系统：评论/举报文本统一接入腾讯云文本内容安全（TMS），**服务端审核后写入**——`Pass` 公开、`Review` 待审、`Block` 拒绝。敏感词库在腾讯云控制台维护（官方不支持 API 管理自定义屏蔽词），代码只读 BizType 环境变量。
 
 **关键架构事实**（执行前必读）：
-- Nuxt 4 `ssr: false` SPA，但生产部署为 Node server（腾讯云 SCF 容器，[deploy.config.ts](deploy.config.ts)），`server/api/*` 路由生产可用。
+- Nuxt 4 `ssr: false` SPA，生产部署在 EdgeOne Pages；`server/api/*` 由 EdgeOne Cloud Functions 承载。
 - 客户端认证：CloudBase v2 auth，accessToken 为 JWT（claims 含 `sub`/`exp`），[app/plugins/api.ts](app/plugins/api.ts) 的 `$api` 自动带 `Authorization: Bearer`，**401 时自动刷新 token 重试**——服务端必须返回真实 HTTP 401 才能触发此机制。
 - **server/ 目前没有任何鉴权代码**，这是本计划新增的基础设施。
 - 客户端验 token 先例：[useCloudbaseAuthCore.ts](app/composables/auth/useCloudbaseAuthCore.ts) 148-206 行调 `https://{envId}.api.tcloudbasegateway.com/auth/v1/user/me`。
@@ -28,7 +28,7 @@
 | 一人一应用一条评论 | API 层 upsert + 控制台唯一索引 `(appKey, uid)` 双保险；编辑已发布评论重新审核 |
 | 读路径 | 写全走 server API；读：`app_reviews` 规则允许客户端读 published + 本人，但前端统一走 `GET /api/reviews`（规则只是兜底） |
 | 限流 | DB 查询判断（SCF 无状态，不用内存/Redis）：评论/举报每用户 60s 冷却；举报 (uid,targetType,targetId) 永久去重 |
-| 运行时凭证 | 独立 CAM 子账号（仅 TMS + TCB 权限），变量名 `NUXT_TENCENT_API_SECRET_ID/KEY`，**不复用**部署密钥 `TENCENT_CLOUD_SECRET_ID/KEY` |
+| 运行时凭证 | 独立 CAM 子账号（仅 TMS + TCB 权限），变量名 `NUXT_TENCENT_API_SECRET_ID/KEY`，仅配置在 EdgeOne 项目环境变量中 |
 | 聚合 | 均分/分布由 GET 现算（小数据量），集合注释预留聚合优化 |
 
 ---

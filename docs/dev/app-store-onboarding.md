@@ -115,16 +115,11 @@ export LC_ALL=en_US.UTF-8
 LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pnpm sync
 ```
 
-### `pnpm deploy` 需要的环境变量
+### Web 发布
 
-`@yunlefun/deploy` 通过腾讯云 SDK 推送 Docker 镜像。需要在环境中设置：
-
-```bash
-export TENCENT_SECRET_ID=<your-id>
-export TENCENT_SECRET_KEY=<your-key>
-```
-
-CI 中通过 GitHub Actions Secrets 注入。
+Web 生产环境由 EdgeOne Pages 的 Git 集成发布。合并到 `main` 后会自动构建，
+本地不需要 SCF、TCR 或部署密钥。运行时所需的服务端变量应配置在 EdgeOne
+项目环境变量中，不得写入仓库。
 
 ## 参考链接
 

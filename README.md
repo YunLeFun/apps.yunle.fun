@@ -16,10 +16,9 @@
 
 ## 🌐 部署
 
-| 环境       | 地址                    | 触发                     |
-| ---------- | ----------------------- | ------------------------ |
-| Production | <https://yunle.fun>     | 手动 `pnpm release`      |
-| Canary     | <https://dev.yunle.fun> | 每次合并到 main 自动部署 |
+| 环境       | 地址                     | 触发                            |
+| ---------- | ------------------------ | ------------------------------- |
+| Production | <https://apps.yunle.fun> | 合并到 `main` 后由 EdgeOne 发布 |
 
 ## 🚀 快速开始
 
@@ -30,20 +29,20 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 
 ### 常用命令
 
-| 命令                 | 说明                                        |
-| -------------------- | ------------------------------------------- |
-| `pnpm dev`           | 启动开发服务器（端口 8001，`--host` 暴露）  |
-| `pnpm build`         | 构建生产版本，输出到 `.output/`             |
-| `pnpm lint`          | ESLint 检查（@antfu + UnoCSS + formatters） |
-| `pnpm typecheck`     | TypeScript 类型检查                         |
-| `pnpm test:unit`     | 运行单元测试（Vitest，单次）                |
-| `pnpm test:watch`    | 单元测试 watch 模式                         |
-| `pnpm test:coverage` | 测试覆盖率报告                              |
-| `pnpm test:e2e`      | Playwright E2E 测试                         |
-| `pnpm dev:ios`       | Capacitor iOS 热重载                        |
-| `pnpm run:ios`       | 构建并运行 iOS 应用                         |
-| `pnpm sync`          | 同步 web → ios/android                      |
-| `pnpm deploy`        | 通过 `@yunlefun/deploy` 部署到腾讯云 SCF    |
+| 命令                 | 说明                                                 |
+| -------------------- | ---------------------------------------------------- |
+| `pnpm dev`           | 启动开发服务器（端口 8001，`--host` 暴露）           |
+| `pnpm build`         | 构建生产版本，输出到 `.output/`                      |
+| `pnpm lint`          | ESLint 检查（@antfu + UnoCSS + formatters）          |
+| `pnpm typecheck`     | TypeScript 类型检查                                  |
+| `pnpm test:unit`     | 运行单元测试（Vitest，单次）                         |
+| `pnpm test:watch`    | 单元测试 watch 模式                                  |
+| `pnpm test:coverage` | 测试覆盖率报告                                       |
+| `pnpm test:e2e`      | Playwright E2E 测试                                  |
+| `pnpm dev:ios`       | Capacitor iOS 热重载                                 |
+| `pnpm run:ios`       | 构建并运行 iOS 应用                                  |
+| `pnpm sync`          | 同步 web → ios/android                               |
+| `pnpm release`       | 更新版本、提交并推送 Tag；EdgeOne 随 `main` 自动发布 |
 
 ## 🏗️ 技术栈
 
@@ -56,7 +55,7 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 | 移动端 | Capacitor 8（iOS）                       |
 | 后端   | Nitro Server + 腾讯 CloudBase            |
 | 认证   | CloudBase Auth + 微信 SDK + GitHub OAuth |
-| 部署   | Docker → 腾讯云 SCF（云函数）            |
+| 部署   | EdgeOne Pages（Git 集成）                |
 
 ## 📁 目录结构
 
@@ -90,7 +89,7 @@ test/                   # Vitest + Playwright 测试
 完整文档（产品设计、UI 规范、数据库、开发笔记、上架路线图）见：
 
 - **本地预览**：`pnpm docs:dev`
-- **线上**：<https://yunle.fun/docs>
+- **线上**：<https://apps.yunle.fun/docs>
 
 主要章节：
 

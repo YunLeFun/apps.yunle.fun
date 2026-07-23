@@ -95,9 +95,6 @@ importers:
       '@vueuse/core':
         specifier: ^14.3.0
         version: 14.3.0(vue@3.5.40(typescript@5.9.3))
-      '@yunlefun/sso':
-        specifier: ^0.2.1
-        version: 0.2.1
       '@yunlefun/types':
         specifier: ^0.2.1
         version: 0.2.1
@@ -4505,9 +4502,6 @@ packages:
   '@yunlefun/deploy@0.0.12':
     resolution: {integrity: sha512-KY+aGyd0s8GCq7+VrbJB2Ue+rVMyl495ZvSNcGp1mD9GWWiR8fBXNGpBWiYe8WTnJing0ema4Hsf9ZapLwoAJw==}
     hasBin: true
-
-  '@yunlefun/sso@0.2.1':
-    resolution: {integrity: sha512-9ysP02MYQoyCYsjzytNModEXLnXPmTB5BCXqhYkaGxcrXdZGbo6iLSJ37h0D8MMVoI9q0qMMOpb4rSg4D3ANzw==}
 
   '@yunlefun/toolkit@0.1.2':
     resolution: {integrity: sha512-ylvcwBCABVSl6N2nqicCDwtttx1d5LShkAxzRahZHneHjzFhishazPTLl6lZigMEWpejUeJc1D22HI+a/Rf5Rg==}
@@ -14479,8 +14473,6 @@ snapshots:
       - magicast
       - supports-color
       - utf-8-validate
-
-  '@yunlefun/sso@0.2.1': {}
 
   '@yunlefun/toolkit@0.1.2(@vueuse/core@14.3.0(vue@3.5.40(typescript@5.9.3)))(vue@3.5.40(typescript@5.9.3))':
     dependencies:

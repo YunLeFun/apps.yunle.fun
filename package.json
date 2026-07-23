@@ -47,7 +47,6 @@
     "@capacitor/status-bar": "8.0.3",
     "@cloudbase/node-sdk": "^3.18.3",
     "@vueuse/core": "^14.3.0",
-    "@yunlefun/sso": "^0.2.1",
     "@yunlefun/types": "^0.2.1",
     "aegis-web-sdk": "^1.41.14",
     "cordova-plugin-wechat": "^3.1.0",

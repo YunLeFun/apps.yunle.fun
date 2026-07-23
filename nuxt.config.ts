@@ -183,7 +183,6 @@ export default defineNuxtConfig({
     tencentApiSecretKey: '',
     tmsRegion: 'ap-guangzhou',
     tmsBizType: '',
-    jsapiAuthAllowedOrigins: process.env.NUXT_JSAPI_AUTH_ALLOWED_ORIGINS || 'https://*.yunle.fun,https://*.yunyoujun.cn',
     public: {
       tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
       cloudbaseRegion: process.env.NUXT_PUBLIC_CLOUDBASE_REGION || '',

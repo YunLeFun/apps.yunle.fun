@@ -2,7 +2,6 @@ import type { PluginListenerHandle } from '@capacitor/core'
 import type { ExternalLinkMode } from '~/stores/settings'
 import { Browser } from '@capacitor/browser'
 import { Capacitor, registerPlugin } from '@capacitor/core'
-import { NATIVE_API_BASE_URL } from '~/constants/api'
 
 /** 传递给原生详情面板的应用元信息 */
 export interface InAppWebViewAppInfo {
@@ -18,12 +17,6 @@ export interface InAppWebViewAppInfo {
   rating?: number
   /** 评价条数（打开后异步补充） */
   ratingCount?: number
-}
-
-interface InAppWebViewAuthContext {
-  accessToken: string
-  refreshToken?: string
-  apiBaseUrl: string
 }
 
 /** 后台保活会话摘要（原生 sessionsChanged 事件 / listSessions 返回） */
@@ -57,11 +50,6 @@ interface InAppWebViewPlugin {
      * 内置已授信 yunle.fun 及其子域，仅对人工核验过的第三方应用传入
      */
     trustedHosts?: string[]
-    /**
-     * 宿主登录上下文。只传给云乐坊自定义容器，由原生 JSAPI 用它向服务端签发
-     * 短期授权码；不会直接暴露给被打开网页。
-     */
-    auth?: InAppWebViewAuthContext
   }) => Promise<void>
   close: () => Promise<void>
   /** 浏览器已打开时增量更新应用元信息（如评价数） */
@@ -124,7 +112,6 @@ export async function openInAppBrowser(
           displayMode: options?.displayMode ?? inAppBrowserMode,
           externalLinkMode,
           trustedHosts: options?.trustedHosts,
-          auth: await resolveAuthContext(),
         })
         refreshReviewMeta(options?.app)
         return
@@ -150,68 +137,6 @@ export async function openInAppBrowser(
     toolbarColor: options?.toolbarColor,
     presentationStyle: options?.presentationStyle || 'fullscreen',
   })
-}
-
-async function resolveAuthContext(): Promise<InAppWebViewAuthContext | undefined> {
-  let userStore: ReturnType<typeof useUserStore>
-  try {
-    userStore = useUserStore()
-  }
-  catch {
-    return undefined
-  }
-
-  if (!userStore.isLoggedIn && !userStore.accessToken)
-    return undefined
-
-  let sessionAccessToken = ''
-  try {
-    const { ensureValidToken } = useCloudbaseAuth()
-    const valid = await ensureValidToken()
-    if (valid) {
-      const { auth } = useCloudbase()
-      const { data } = await auth.getSession()
-      const session = data?.session
-      if (session?.access_token)
-        sessionAccessToken = String(session.access_token)
-      if (session?.refresh_token) {
-        return {
-          accessToken: String(sessionAccessToken || userStore.accessToken || ''),
-          refreshToken: String(session.refresh_token),
-          apiBaseUrl: resolveNativeApiBaseUrl(),
-        }
-      }
-    }
-  }
-  catch {
-    // 保持打开流程不中断；后续 JSAPI 会按未登录处理。
-  }
-
-  const accessToken = String(sessionAccessToken || userStore.accessToken || '')
-  if (!accessToken)
-    return undefined
-
-  return {
-    accessToken,
-    apiBaseUrl: resolveNativeApiBaseUrl(),
-  }
-}
-
-function resolveNativeApiBaseUrl(): string {
-  const config = useRuntimeConfig()
-  const configured = typeof config.public.apiBaseUrl === 'string'
-    ? config.public.apiBaseUrl.trim()
-    : ''
-  if (configured)
-    return configured.replace(/\/$/, '')
-
-  const isPackagedNative = typeof window !== 'undefined'
-    && Capacitor.isNativePlatform()
-    && window.location.hostname === 'localhost'
-  if (isPackagedNative)
-    return NATIVE_API_BASE_URL
-
-  return typeof window !== 'undefined' ? window.location.origin : ''
 }
 
 /**

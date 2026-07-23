@@ -84,8 +84,6 @@ if (window.ylf?.inYunleApp) {
 | `showTitleBar()`          | 公开 | 恢复标题栏                                                   |
 | `closeBrowser()`          | 公开 | 关闭浏览器，返回云乐坊                                       |
 | `setClipboard(text)`      | 授信 | 写入系统剪贴板（如复制兑换码）                               |
-| `getAuthCode(options?)`   | 授信 | 获取云乐坊一次性登录授权码                                   |
-| `login(options?)`         | 授信 | `getAuthCode` 的别名，便于按小程序登录模型接入               |
 
 ```ts
 interface YlfJSAPI {
@@ -102,8 +100,6 @@ interface YlfJSAPI {
     displayMode?: 'immersive' | 'titlebar'
     /** 当前页面来源是否授信（可调用「授信」级方法） */
     trusted: boolean
-    /** 宿主是否已有可用于签发授权码的登录态 */
-    authReady?: boolean
     capsuleVisible: boolean
     /** 标题栏当前是否显示（沉浸模式恒为 false；hideTitleBar 后为 false） */
     titleBarVisible?: boolean
@@ -121,66 +117,12 @@ interface YlfJSAPI {
   showTitleBar: () => Promise<void>
   closeBrowser: () => Promise<void>
   setClipboard: (text: string) => Promise<void>
-  getAuthCode: (options?: { scope?: string[] | string, nonce?: string }) => Promise<{
-    code: string
-    expiresIn: number
-    scope: string[]
-  }>
-  login: YlfJSAPI['getAuthCode']
 }
 ```
 
-## 登录接入
-
-授信域名可以静默调用 `getAuthCode()` 获取一次性授权码，再向云乐坊兑换当前用户的最小账号信息：
-
-```js
-async function loginWithYunle() {
-  if (!window.ylf?.inYunleApp)
-    return null
-
-  const { code } = await window.ylf.getAuthCode({ scope: ['profile'] })
-  const res = await fetch('https://apps.yunle.fun/api/jsapi/auth/exchange', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  })
-  if (!res.ok)
-    throw new Error('YunLeFun login failed')
-
-  const { data } = await res.json()
-  return data.user
-}
-```
-
-授权码规则：
-
-- 仅授信域名可调用，普通浏览器或未授信页面应降级到自己的登录入口；
-- 授权码 5 分钟内有效，只能兑换一次，并绑定发起调用的 origin；
-- JSAPI 默认不会把 CloudBase `access_token` / `refresh_token` 交给网页；
-- 第一方已审核域名可静默获取 `profile`，更高敏感 scope 后续应叠加用户确认。
-
-### 第一方 CloudBase 会话
-
-如果接入方本身使用同一个 CloudBase 环境，并且需要继续用 Web SDK 直连数据库，
-可在第一方白名单域名下显式请求 `cloudbase:session`：
-
-```js
-const { code } = await window.ylf.getAuthCode({
-  scope: ['profile', 'cloudbase:session'],
-})
-const res = await fetch('https://apps.yunle.fun/api/jsapi/auth/exchange', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ code }),
-})
-const { data } = await res.json()
-await cloudbaseAuth.setSession(data.session)
-```
-
-`cloudbase:session` 不会默认返回；它只面向同体系第一方应用，用于复用云乐坊
-App 宿主已登录的 CloudBase session。第三方页面仍应只使用 `profile`，
-再走自己的后端会话或账号绑定流程。
+内嵌浏览器不提供登录或会话转移能力。页面需要身份时，应在自己的浏览器
+Origin 上使用正式注册的 Web SSO/OIDC 客户端；宿主不会向页面传递 CloudBase
+access token、refresh token 或替页面签发授权码。
 
 ## 权限与授信
 

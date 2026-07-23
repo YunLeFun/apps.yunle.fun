@@ -18,7 +18,7 @@
 | `pnpm test:e2e:ui` | Playwright UI 模式调试 E2E |
 | `pnpm dev:ios` | Capacitor iOS 热重载开发 |
 | `pnpm run:ios` | 构建并运行 iOS 应用 |
-| `pnpm deploy` | 通过 `@yunlefun/deploy` 部署到腾讯云 SCF |
+| `pnpm release` | 更新版本、提交并推送 Tag；EdgeOne 随 `main` 自动发布 |
 
 ## 架构概览
 
@@ -35,7 +35,7 @@
 - **移动端**: Capacitor 8 (iOS)，集成微信 SDK（`cordova-plugin-wechat`）
 - **后端**: Nitro Server API + 腾讯 CloudBase (`@cloudbase/js-sdk`)
 - **认证**: CloudBase Auth + 微信登录 + `nuxt-auth-utils`
-- **部署**: Docker 容器 → 腾讯云 SCF (云函数)，通过 TCR 镜像仓库分发
+- **部署**: EdgeOne Pages（Git 集成），合并到 `main` 后自动构建生产版本
 
 ### 目录结构要点
 
@@ -87,9 +87,9 @@ packages/               # Monorepo 子包
 
 **认证体系**: 以腾讯 CloudBase Auth 为核心，支持多种登录方式。`useCloudbaseAuth()` 是认证统一入口 composable，组合了 Core（基础认证）+ OTP（短信/邮件验证码）+ OAuth（第三方登录）三个模块。JWT token 存储在 Cookie 中（31 天有效期），`api.ts` 插件拦截 401 响应自动刷新 token 并重试请求。
 
-**Monorepo 结构**: 使用 pnpm workspace，但 `@yunlefun/auth` 包通过 `nuxt.config.ts` 的 `alias` 直接映射到源码路径，开发时无需构建子包。`@yunlefun/deploy` 和 `@yunlefun/toolkit` 为外部 npm 包。
+**Monorepo 结构**: 使用 pnpm workspace，但 `@yunlefun/auth` 包通过 `nuxt.config.ts` 的 `alias` 直接映射到源码路径，开发时无需构建子包。`@yunlefun/toolkit` 为外部 npm 包。
 
-**部署流水线**: Docker 多阶段构建（node:22-alpine），生产镜像推送到腾讯 TCR，部署为腾讯云 SCF 云函数（端口 80）。Canary 环境 (dev.yunle.fun) 在每次 main 分支提交时自动部署。
+**部署流水线**: EdgeOne Pages 连接 GitHub 仓库；`main` 分支更新后自动构建并发布到 `apps.yunle.fun`。`server/api/*` 由 EdgeOne Cloud Functions 承载。
 
 ### 样式约定
 

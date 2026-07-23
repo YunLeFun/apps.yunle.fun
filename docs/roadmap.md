@@ -16,7 +16,7 @@
 
 满足任一条件即可发版：
 
-- **仅 Web 发版**：跑 `pnpm release` 即可（需配 `TENCENT_SECRET_ID`/`KEY`）
+- **仅 Web 发版**：合并到 `main` 后由 EdgeOne 自动发布；需要版本 Tag 时运行 `pnpm release`
 - **iOS TestFlight 内测**：跑 `pnpm build` + `pnpm sync` + `pnpm build:ios`，再按发布文档显式设置签名变量并运行 `scripts/ios-testflight.sh`
 - **App Store 正式上架**：等 ICP 备案 + 设计交付齐
 

@@ -129,26 +129,11 @@ await openInAppBrowser(app.url, {
 
 恢复暂停会话时插件层会同步刷新 `trustedHosts`，避免设置变更后沿用旧授信。
 
-### 登录授权码
+### 身份边界
 
-`getAuthCode` / `login` 属于 `trusted` 能力。白名单域名下可以静默调用，但只返回
-5 分钟有效、一次性的授权码；页面必须调用
-`POST /api/jsapi/auth/exchange` 兑换用户最小信息。
-
-设计边界：
-
-- 原生容器只持有宿主传入的 CloudBase session，用它向 Nitro 签发授权码；
-- 被打开网页默认拿不到 CloudBase access token / refresh token；
-- 授权码同时绑定调用页面的 `WKSecurityOrigin`，兑换接口也按 `Origin` 校验；
-- Native `trustedHosts` 与服务端 `NUXT_JSAPI_AUTH_ALLOWED_ORIGINS` 都需要放行。
-
-默认服务端白名单为 `https://*.yunle.fun,https://*.yunyoujun.cn`。第三方应用开通时，
-需要同时配置应用目录的 `trustedHosts` 与服务端环境变量。
-
-`profile` 是默认 scope，只兑换最小用户快照。`cloudbase:session` 是第一方受限 scope：
-页面显式请求后，原生容器才会把当前 CloudBase `access_token` / `refresh_token`
-随签发请求发给 Nitro；Nitro 将 session 绑定到一次性 code，兑换成功后返回给同
-origin 页面，用于 Web SDK `auth.setSession()`。第三方域名不应开通该 scope。
+内嵌浏览器只提供 UI 与设备能力，不提供登录、授权码或宿主会话转移。网页需要
+身份时必须在自己的 Origin 上使用注册的 Web SSO/OIDC 客户端。原生容器的
+CloudBase access token 与 refresh token 不进入 WebView 配置或 JSAPI。
 
 ## 胶囊交互状态
 

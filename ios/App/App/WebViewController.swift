@@ -19,14 +19,6 @@ struct WebAppInfo {
     var downloads: String = ""
 }
 
-/// 打开网页时随附的宿主登录上下文。仅原生容器持有，用于向云乐坊服务端签发
-/// 一次性授权码；不会直接暴露给被打开网页。
-struct WebAuthContext {
-    var accessToken: String = ""
-    var refreshToken: String = ""
-    var apiBaseUrl: String = ""
-}
-
 /// 跨站外链的打开方式
 enum ExternalLinkBehavior: String {
     /// App 内系统浏览器视图（SFSafariViewController，不跳出 App）
@@ -61,8 +53,6 @@ class WebViewController: UIViewController {
     /// 宿主打开时按应用追加的 JSAPI 授信 host（与内置第一方域合并）；
     /// 条目为可注册域（如 example.com），子域自动匹配
     var extraTrustedHosts: [String] = []
-    /// 当前宿主登录上下文。accessToken 只用于服务端签发短期授权码，不经 JSAPI 返回给页面
-    var authContext: WebAuthContext?
     /// 详情模态标志：true = 本容器是「查看详情与评价」弹出的站内详情页 sheet
     /// （pageSheet 可下滑 dismiss 回到下层应用；不进会话池，关闭即释放）
     var isDetailSheet = false
@@ -316,8 +306,6 @@ class WebViewController: UIViewController {
             showTitleBar: function () { return invoke('setTitleBarVisible', { visible: true }) },
             closeBrowser: function () { return invoke('close') },
             setClipboard: function (text) { return invoke('setClipboard', { text: text }) },
-            getAuthCode: function (options) { return invoke('getAuthCode', options || {}) },
-            login: function (options) { return invoke('getAuthCode', options || {}) },
           }
         })()
         """
@@ -647,7 +635,6 @@ class WebViewController: UIViewController {
         detailVC.customTitle = info.name
         detailVC.displayMode = .titlebar
         detailVC.isDetailSheet = true
-        detailVC.authContext = authContext
         detailVC.extraTrustedHosts = extraTrustedHosts
         // 默认 pageSheet：圆角卡片盖在应用之上，可下滑 dismiss 回到应用
         present(detailVC, animated: true)
@@ -728,7 +715,6 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             "setTitleBarVisible": .open,
             "close": .open,
             "setClipboard": .trusted,
-            "getAuthCode": .trusted,
         ]
     }
 
@@ -778,7 +764,6 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             method: method,
             params: body["params"] as? [String: Any] ?? [:],
             trusted: trusted,
-            origin: message.frameInfo.securityOrigin,
             reply: replyHandler)
     }
 
@@ -786,7 +771,6 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
         method: String,
         params: [String: Any],
         trusted: Bool,
-        origin: WKSecurityOrigin,
         reply: @escaping (Any?, String?) -> Void
     ) {
         switch method {
@@ -803,7 +787,6 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
                 "appId": appInfo?.id ?? "",
                 "displayMode": displayMode.rawValue,
                 "trusted": trusted,
-                "authReady": authContext?.accessToken.isEmpty == false,
                 "capsuleVisible": !capsuleHiddenByPage,
                 // 标题栏当前是否在显示（沉浸模式恒为 false：无标题栏）
                 "titleBarVisible": displayMode == .titlebar && titleBarVisible,
@@ -837,121 +820,9 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             UIPasteboard.general.string = text
             reply(nil, nil)
 
-        case "getAuthCode":
-            requestAuthCode(params: params, origin: origin, reply: reply)
-
         default:
             reply(nil, "unknown method: \(method)")
         }
-    }
-
-    private func requestAuthCode(
-        params: [String: Any],
-        origin: WKSecurityOrigin,
-        reply: @escaping (Any?, String?) -> Void
-    ) {
-        guard let auth = authContext,
-              !auth.accessToken.isEmpty,
-              !auth.apiBaseUrl.isEmpty
-        else {
-            reply(nil, "login required")
-            return
-        }
-
-        guard let endpoint = URL(string: "/api/jsapi/auth/code", relativeTo: URL(string: auth.apiBaseUrl)) else {
-            reply(nil, "bad request: invalid auth endpoint")
-            return
-        }
-
-        let scope = normalizeScope(params["scope"])
-        var body: [String: Any] = [
-            "appId": appInfo?.id ?? "",
-            "origin": originString(origin),
-            "scope": scope,
-        ]
-        if let nonce = params["nonce"] as? String, !nonce.isEmpty {
-            body["nonce"] = nonce
-        }
-        if scope.contains("cloudbase:session"), !auth.refreshToken.isEmpty {
-            body["session"] = [
-                "access_token": auth.accessToken,
-                "refresh_token": auth.refreshToken,
-            ]
-        }
-
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(auth.accessToken)", forHTTPHeaderField: "Authorization")
-
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        }
-        catch {
-            reply(nil, "bad request: invalid auth payload")
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            func finish(_ result: Any?, _ message: String?) {
-                DispatchQueue.main.async {
-                    reply(result, message)
-                }
-            }
-            if let error = error {
-                finish(nil, "auth request failed: \(error.localizedDescription)")
-                return
-            }
-            guard let http = response as? HTTPURLResponse else {
-                finish(nil, "auth request failed")
-                return
-            }
-            guard (200..<300).contains(http.statusCode), let data = data else {
-                finish(nil, "auth request failed: \(http.statusCode)")
-                return
-            }
-            do {
-                let payload = try JSONSerialization.jsonObject(with: data)
-                finish(payload, nil)
-            }
-            catch {
-                finish(nil, "auth request failed: invalid response")
-            }
-        }.resume()
-    }
-
-    private func originString(_ origin: WKSecurityOrigin) -> String {
-        var value = "\(origin.protocol)://\(origin.host)"
-        if origin.port > 0 {
-            value += ":\(origin.port)"
-        }
-        return value
-    }
-
-    private func normalizeScope(_ value: Any?) -> [String] {
-        let raw: [String]
-        if let array = value as? [String] {
-            raw = array
-        }
-        else if let string = value as? String {
-            raw = string.split { $0 == "," || $0 == " " || $0 == "\n" || $0 == "\t" }.map(String.init)
-        }
-        else {
-            raw = []
-        }
-
-        var output: [String] = []
-        let pattern = #"^[A-Za-z][A-Za-z0-9:_-]{0,63}$"#
-        for item in raw {
-            let trimmed = item.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty,
-                  trimmed.range(of: pattern, options: .regularExpression) != nil,
-                  !output.contains(trimmed)
-            else { continue }
-            output.append(trimmed)
-            if output.count >= 8 { break }
-        }
-        return output.isEmpty ? ["profile"] : output
     }
 
     /// 胶囊在页面视口坐标系中的布局位置（pt == CSS px），供沉浸页面避让；

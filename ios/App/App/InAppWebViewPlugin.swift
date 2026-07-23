@@ -69,8 +69,6 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         let externalLinkBehavior = ExternalLinkBehavior(rawValue: call.getString("externalLinkMode") ?? "") ?? .safariView
         // 本次会话追加的 JSAPI 授信域（敏感能力鉴权用，详见 WebViewController.isTrustedOrigin）
         let trustedHosts = call.getArray("trustedHosts", String.self) ?? []
-        // 宿主登录上下文（仅原生持有，用于 JSAPI 换取短期授权码）
-        let authContext = parseAuthContext(call.getObject("auth"))
 
         // 会话键：优先 appId，无则用 URL（与 WebViewController.sessionKey 一致）
         let sessionKey = (appInfo?.id).flatMap { $0.isEmpty ? nil : $0 } ?? urlString
@@ -85,7 +83,6 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
                 let paused = self.sessions[idx]
                 paused.externalLinkBehavior = externalLinkBehavior
                 paused.extraTrustedHosts = trustedHosts
-                paused.authContext = authContext
                 self.moveToFront(paused)
                 self.bridge?.viewController?.present(paused, animated: true) {
                     call.resolve()
@@ -107,7 +104,6 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
             vc.displayMode = displayMode
             vc.externalLinkBehavior = externalLinkBehavior
             vc.extraTrustedHosts = trustedHosts
-            vc.authContext = authContext
             vc.onClose = { [weak self, weak vc] in
                 guard let self = self, let vc = vc else { return }
                 self.removeSession(vc)
@@ -217,19 +213,6 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         var info = WebAppInfo()
         Self.apply(obj, to: &info)
         return info
-    }
-
-    private func parseAuthContext(_ obj: JSObject?) -> WebAuthContext? {
-        guard let obj = obj,
-              let accessToken = obj["accessToken"] as? String,
-              let apiBaseUrl = obj["apiBaseUrl"] as? String,
-              !accessToken.isEmpty,
-              !apiBaseUrl.isEmpty
-        else {
-            return nil
-        }
-        let refreshToken = obj["refreshToken"] as? String ?? ""
-        return WebAuthContext(accessToken: accessToken, refreshToken: refreshToken, apiBaseUrl: apiBaseUrl)
     }
 
     /// 仅覆盖 JS 侧传入的字段（部分更新）

@@ -2,13 +2,12 @@
 
 云乐坊使用腾讯 CloudBase NoSQL 数据库，包含以下核心集合：
 
-| 集合                                       | 说明                    |
-| ------------------------------------------ | ----------------------- |
-| [`apps`](./apps)                           | 应用信息表              |
-| [`featured_apps`](./featured-apps)         | 编辑精选推荐            |
-| [`jsapi_auth_codes`](./jsapi-auth-codes)   | App 内 JSAPI 登录授权码 |
-| [`user_home_screens`](./user-home-screens) | 用户 Home Screen 配置   |
-| [`weekly_charts`](./weekly-charts)         | 每周热门排行            |
+| 集合                                       | 说明                  |
+| ------------------------------------------ | --------------------- |
+| [`apps`](./apps)                           | 应用信息表            |
+| [`featured_apps`](./featured-apps)         | 编辑精选推荐          |
+| [`user_home_screens`](./user-home-screens) | 用户 Home Screen 配置 |
+| [`weekly_charts`](./weekly-charts)         | 每周热门排行          |
 
 ## 权限模型
 

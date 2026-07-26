@@ -42,6 +42,25 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Production build
+        run: pnpm run build
+
+      - name: Verify server runtime dependencies
+        run: pnpm run check:server-runtime-deps
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -60,3 +79,22 @@ jobs:
 
       - name: Nuxt tests
         run: pnpm run test:nuxt
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Chromium smoke tests
+        run: pnpm exec playwright test --project=chromium

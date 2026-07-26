@@ -100,12 +100,16 @@ NUXT_PUBLIC_RUM_DEBUG=true
 
 ## iOS Capacitor 内的特殊处理
 
-Capacitor WebView origin 是 `capacitor://localhost`（iOS）/`https://localhost`（部分版本），不在 RUM 白名单内会被拒。两种解决：
+Capacitor WebView origin 是 `capacitor://localhost`（iOS）/`https://localhost`（部分版本）。RUM 的页面维度面向 Web URL，直接使用该地址会导致原生壳 PV 无法与线上应用页面聚合。
 
-1. **推荐**：RUM 项目配置中关闭"严格 origin 校验"，或在白名单加 `capacitor://localhost`
-2. 设置 `serverUrl: 'https://aegis.qq.com/...'` 强制走自定义上报地址
+[`app/plugins/rum.client.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts) 会通过 SDK 的 `pageUrl` / `urlHandler` 把原生壳页面映射到公开 origin，并保留当前路由：
 
-详见腾讯文档：<https://cloud.tencent.com/document/product/1464/63138>
+```text
+capacitor://localhost/tabs/home
+→ https://apps.yunle.fun/tabs/home
+```
+
+上报接口仍统一使用 `https://rumt-zh.com`。
 
 ## 后续
 

@@ -5,8 +5,7 @@ import { alertController } from '@ionic/vue'
  * 提供退出登录功能和确认对话框
  */
 export function useLogout() {
-  const router = useRouter()
-  const { showSuccess, showError } = useToast()
+  const { logout: logoutCloudbase } = useCloudbaseAuth()
   const isLoggingOut = ref(false)
 
   /**
@@ -16,28 +15,23 @@ export function useLogout() {
     try {
       isLoggingOut.value = true
 
-      // 调用退出登录接口
-      const response = await $fetch<{
-        success: boolean
-        message: string
-      }>('/api/auth/logout', {
-        method: 'POST',
-      })
-
-      if (response.success) {
-        await showSuccess('退出登录成功')
-
-        // 跳转到登录页
-        await router.push('/login')
+      // Nuxt session 仅用于兼容微信网页登录；清理失败不能阻断
+      // CloudBase SDK、本地 token 与用户状态的退出。
+      try {
+        const response = await $fetch<{
+          success: boolean
+          message: string
+        }>('/api/auth/logout', {
+          method: 'POST',
+        })
+        if (!response.success)
+          console.warn('服务端会话清理失败:', response.message)
       }
-      else {
-        await showError(response.message || '退出登录失败')
+      catch (error: unknown) {
+        console.warn('服务端会话清理失败:', error)
       }
-    }
-    catch (error: unknown) {
-      console.error('退出登录失败:', error)
-      const message = error instanceof Error ? error.message : '退出登录失败，请重试'
-      await showError(message)
+
+      await logoutCloudbase()
     }
     finally {
       isLoggingOut.value = false

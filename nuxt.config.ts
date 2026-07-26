@@ -1,9 +1,12 @@
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import { defineNuxtConfig } from 'nuxt/config'
 import { DEFAULT_CLOUDBASE_ENV_ID } from './app/constants/cloudbase'
 import { appDescription } from './app/constants/index'
+
+const configRequire = createRequire(import.meta.url)
 
 export default defineNuxtConfig({
   ssr: false,
@@ -101,6 +104,12 @@ export default defineNuxtConfig({
       options: {
         target: 'esnext',
       },
+    },
+    // cloudbase-admin loads the CJS SDK lazily so Nuxt prerender does not
+    // execute it from a virtual entry. Explicit tracing keeps the package in
+    // the serverless output even though Rollup cannot see the dynamic require.
+    externals: {
+      traceInclude: [configRequire.resolve('@cloudbase/node-sdk')],
     },
     prerender: {
       crawlLinks: false,

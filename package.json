@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "prepare": "nuxt prepare",
     "generate": "nuxt generate",
+    "check:server-runtime-deps": "node scripts/check-server-runtime-deps.mjs",
     "release": "bumpp",
     "start": "nuxt start",
     "start:generate": "npx serve .output/public",

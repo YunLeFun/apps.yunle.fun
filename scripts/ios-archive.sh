@@ -100,4 +100,22 @@ xcodebuild archive \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   CODE_SIGN_STYLE=Automatic
 
+APP_BUNDLE="$(find "$ARCHIVE_PATH/Products/Applications" -maxdepth 1 -type d -name '*.app' -print -quit)"
+if [ -z "$APP_BUNDLE" ]; then
+  echo "Archive does not contain Products/Applications/*.app" >&2
+  exit 1
+fi
+
+required_privacy_manifests=(
+  "$APP_BUNDLE/PrivacyInfo.xcprivacy"
+  "$APP_BUNDLE/Frameworks/CordovaPlugins.framework/PrivacyInfo.xcprivacy"
+)
+for manifest in "${required_privacy_manifests[@]}"; do
+  if [ ! -f "$manifest" ]; then
+    echo "Missing required privacy manifest in archive: $manifest" >&2
+    exit 1
+  fi
+  plutil -lint "$manifest"
+done
+
 echo "Archive created: $ARCHIVE_PATH"

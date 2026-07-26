@@ -1,15 +1,17 @@
 import type { ICloudBaseConfig } from '@cloudbase/node-sdk'
 import process from 'node:process'
-import { DEFAULT_CLOUDBASE_ENV_ID } from '~/constants/cloudbase'
+import { DEFAULT_CLOUDBASE_ENV_ID, DEFAULT_CLOUDBASE_REGION } from '~/constants/cloudbase'
 
 interface CloudbaseConfigLike {
   tcbEnvId?: unknown
   cloudbaseEnvId?: unknown
+  cloudbaseRegion?: unknown
   tencentApiSecretId?: unknown
   tencentApiSecretKey?: unknown
   public?: {
     tcbEnvId?: unknown
     cloudbaseEnvId?: unknown
+    cloudbaseRegion?: unknown
   }
 }
 
@@ -38,6 +40,14 @@ export function resolveCloudbaseAdminInitConfig(
 ): ICloudBaseConfig {
   const initConfig: ICloudBaseConfig = {
     env: resolveCloudbaseEnvId(config, env),
+    region: firstNonEmptyString(
+      config.cloudbaseRegion,
+      config.public?.cloudbaseRegion,
+      env.NUXT_CLOUDBASE_REGION,
+      env.NUXT_PUBLIC_CLOUDBASE_REGION,
+      env.TCB_REGION,
+      env.CLOUDBASE_REGION,
+    ) || DEFAULT_CLOUDBASE_REGION,
   }
   const secretId = stringOrNull(config.tencentApiSecretId)
   const secretKey = stringOrNull(config.tencentApiSecretKey)

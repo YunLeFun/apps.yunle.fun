@@ -188,6 +188,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
+    cloudbaseRegion: process.env.NUXT_CLOUDBASE_REGION || process.env.NUXT_PUBLIC_CLOUDBASE_REGION || '',
     tencentApiSecretId: '',
     tencentApiSecretKey: '',
     tmsRegion: 'ap-guangzhou',

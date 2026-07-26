@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_CLOUDBASE_ENV_ID } from '../../app/constants/cloudbase'
+import { DEFAULT_CLOUDBASE_ENV_ID, DEFAULT_CLOUDBASE_REGION } from '../../app/constants/cloudbase'
 import { resolveCloudbaseAdminInitConfig, resolveCloudbaseEnvId } from '../../server/utils/cloudbase-config'
 
 describe('cloudbase config', () => {
@@ -47,6 +47,26 @@ describe('cloudbase config', () => {
       public: { tcbEnvId: '' },
     }, {})).toEqual({
       env: DEFAULT_CLOUDBASE_ENV_ID,
+      region: DEFAULT_CLOUDBASE_REGION,
+    })
+  })
+
+  it('passes the CloudBase environment region to the admin SDK', () => {
+    expect(resolveCloudbaseAdminInitConfig({
+      cloudbaseRegion: 'ap-beijing',
+      public: { cloudbaseRegion: 'ap-shanghai' },
+    }, {
+      NUXT_PUBLIC_CLOUDBASE_REGION: 'ap-guangzhou',
+    })).toMatchObject({
+      region: 'ap-beijing',
+    })
+
+    expect(resolveCloudbaseAdminInitConfig({
+      public: { cloudbaseRegion: '' },
+    }, {
+      CLOUDBASE_REGION: 'ap-guangzhou',
+    })).toMatchObject({
+      region: 'ap-guangzhou',
     })
   })
 
@@ -57,6 +77,7 @@ describe('cloudbase config', () => {
       tencentApiSecretKey: 'secret-key',
     }, {})).toEqual({
       env: 'server-env',
+      region: DEFAULT_CLOUDBASE_REGION,
       secretId: 'secret-id',
       secretKey: 'secret-key',
     })
@@ -67,6 +88,7 @@ describe('cloudbase config', () => {
       tencentApiSecretKey: '',
     }, {})).toEqual({
       env: 'server-env',
+      region: DEFAULT_CLOUDBASE_REGION,
     })
   })
 })

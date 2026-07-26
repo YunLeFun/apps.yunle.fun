@@ -1,5 +1,7 @@
+import { Capacitor } from '@capacitor/core'
 import Aegis from 'aegis-web-sdk'
 import consola from 'consola'
+import { getRumPageUrl } from '~/utils/rum'
 
 /**
  * 腾讯云 RUM（前端性能监控 / 错误上报）
@@ -37,6 +39,8 @@ export default defineNuxtPlugin(() => {
   }
 
   try {
+    const isNativePlatform = Capacitor.isNativePlatform()
+    const resolvePageUrl = () => getRumPageUrl(window.location, isNativePlatform)
     const aegis = new Aegis({
       id: appId,
       uin: '',
@@ -46,6 +50,10 @@ export default defineNuxtPlugin(() => {
       hostUrl: 'https://rumt-zh.com',
       // 环境标记，便于在 RUM 控制台过滤
       env: import.meta.dev ? 'dev' : 'production',
+      // RUM 只按 Web URL 聚合页面。原生壳保留路由，但把
+      // capacitor://localhost 映射到应用的公开 HTTPS origin。
+      pageUrl: resolvePageUrl(),
+      urlHandler: resolvePageUrl,
     } as any)
 
     // 用户登录态变化时同步 uin（用于按用户聚合错误）

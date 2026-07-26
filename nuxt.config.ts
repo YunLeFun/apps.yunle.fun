@@ -210,9 +210,9 @@ export default defineNuxtConfig({
        * 接入步骤见 docs/dev/rum.md
        * 可通过环境变量 NUXT_PUBLIC_RUM_APP_ID 覆盖
        */
-      rumAppId: 'nG8jRFK2e30nRrle5R',
+      rumAppId: process.env.NUXT_PUBLIC_RUM_APP_ID ?? 'nG8jRFK2e30nRrle5R',
       /** RUM 调试日志（仅本地） */
-      rumDebug: false,
+      rumDebug: process.env.NUXT_PUBLIC_RUM_DEBUG === 'true',
     },
   },
 })

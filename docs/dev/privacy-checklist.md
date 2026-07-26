@@ -2,6 +2,9 @@
 
 > 上架 App Store / 国内应用商店之前必须确认隐私政策页面覆盖以下披露项。
 > 对照 <https://www.yunle.fun/docs/privacy-policy> 逐条勾选。
+>
+> 2026-07-26 的代码—线上政策逐项结果与修订草案见
+> [privacy-release-audit.md](./privacy-release-audit.md)。线上政策当前尚未通过公开上架核对。
 
 ## 必须覆盖的披露项（按 App Store 隐私问卷分类）
 
@@ -20,13 +23,16 @@
 ### 2. 标识符 / Identifiers
 
 - [ ] **用户 ID（CloudBase uid）**：服务端自动生成
-- [ ] **设备 ID**：iOS IDFV（Capacitor 默认上报）
-- [ ] **RUM 用户标识 uin**：错误监控按用户聚合（即 CloudBase uid）
+- [ ] **设备 ID**：腾讯 RUM Aegis `aid`（localStorage 随机标识；当前没有证据表明采集 IDFA/IDFV）
+- [ ] **RUM 用户标识 uin**：错误监控按用户聚合（登录后为 CloudBase uid）
 
 ### 3. 使用数据 / Usage Data
 
 - [ ] **应用使用日志**：用户打开了哪些云应用、何时打开（云居"最近使用"）
 - [ ] **产品交互**：搜索关键词、安装应用、提交工坊作品
+- [ ] **用户生成内容**：工坊应用、评论、评分、举报理由/详情
+- [ ] **AI 内容**：提示词、上下文、回复、会话与运行标识
+- [ ] **购买历史**：StoreKit product ID、transaction ID、会员/云币流水
 - [ ] **崩溃日志 / 性能数据**：腾讯云 RUM 自动采集
   - Web Vitals（LCP、FID、CLS、INP）
   - JS 异常 / unhandledrejection
@@ -36,6 +42,9 @@
 
 - [ ] **腾讯 CloudBase JS SDK**：数据库 / 认证 / 文件存储
 - [ ] **腾讯云 RUM (aegis-web-sdk)**：错误与性能监控
+- [ ] **腾讯云 AI Bot / 模型服务**：AI 对话与工具调用
+- [ ] **腾讯云文本内容安全 TMS**：评论、举报等文本审核
+- [ ] **Apple StoreKit / App Store Server API**：IAP 购买、恢复与交易核验
 - [ ] **Capacitor 8**：iOS 原生壳
   - `@capacitor/app` `@capacitor/browser` `@capacitor/keyboard` `@capacitor/status-bar` `@capacitor/haptics` `@capacitor/barcode-scanner`
 - [ ] **微信 SDK (cordova-plugin-wechat)**：iOS 微信登录
@@ -43,7 +52,7 @@
 
 ### 5. 数据存储位置
 
-- [ ] 明确声明：**腾讯云 CloudBase，上海机房**（环境 `yunlefun-8g7ybcxc7345c490`，region `ap-shanghai`）
+- [ ] 明确声明：**腾讯云 CloudBase 上海**（业务/认证数据）和 **腾讯云 RUM 广州**（监控数据）
 - [ ] 不出境（符合《数据安全法》《个人信息保护法》境内存储要求）
 
 ### 6. 用户权利
@@ -55,14 +64,18 @@
 
 ### 7. Cookie / 本地存储
 
-- [ ] localStorage 项清单：
-  - `ylf:home-screen` 主屏幕配置
+- [ ] localStorage 项清单（至少按用途归类，详细键见专项审计）：
+  - `ylf:homescreen-apps` 主屏幕配置
   - `ylf:dock-apps` Dock 应用
+  - `ylf:recent-apps-v2` 最近使用
   - `ylf:dock-visible` Dock 显示开关
   - `ylf:cloud-sync-enabled` 云同步开关
-  - `ylf-color-mode` 浅/深色偏好
+  - `ylf_theme_mode` 浅/深色偏好
   - `app_create_draft` 工坊草稿
-- [ ] cookie：JWT token（31 天有效期）
+  - `ylf_access_token` / `ylf_user_info` 登录态镜像
+  - `ylf_saved_accounts` / `ylf_last_phone` 登录便利信息（手机号仅 Base64 混淆，不是加密）
+  - Aegis `aid` 监控设备标识
+- [ ] cookie：`ylf_access_token` JWT token 与 `ylf_user_info`（31 天有效期）
 
 ### 8. 必备元信息
 

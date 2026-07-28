@@ -79,15 +79,18 @@ function handleLogout() {
           inner-class="k-list-item-vcenter"
         >
           <template #media>
-            <img
-              v-if="userStore.userInfo.avatar"
+            <UserAvatar
               :src="userStore.userInfo.avatar"
               :alt="userStore.userInfo.nickname"
+              telemetry-surface="accounts.current"
               class="h-12 w-12 rounded-full object-cover"
             >
-            <div v-else class="account-avatar-placeholder">
-              <IonIcon :icon="personOutline" />
-            </div>
+              <template #fallback>
+                <div class="account-avatar-placeholder">
+                  <IonIcon :icon="personOutline" />
+                </div>
+              </template>
+            </UserAvatar>
           </template>
           <template #after>
             <IonIcon :icon="checkmarkCircle" class="text-xl text---ion-color-primary" />
@@ -114,15 +117,18 @@ function handleLogout() {
           @click="handleSwitchAccount(account)"
         >
           <template #media>
-            <img
-              v-if="account.avatar"
+            <UserAvatar
               :src="account.avatar"
               :alt="account.nickname"
+              telemetry-surface="accounts.saved"
               class="h-10 w-10 rounded-full object-cover"
             >
-            <div v-else class="account-avatar-placeholder account-avatar-sm">
-              <IonIcon :icon="personOutline" />
-            </div>
+              <template #fallback>
+                <div class="account-avatar-placeholder account-avatar-sm">
+                  <IonIcon :icon="personOutline" />
+                </div>
+              </template>
+            </UserAvatar>
           </template>
           <template #after>
             <button

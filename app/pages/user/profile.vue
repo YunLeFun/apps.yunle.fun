@@ -103,15 +103,18 @@ async function handleDescSave(val: string) {
         <k-block strong inset class="mt-4">
           <div class="flex items-center gap-4 py-2">
             <div class="h-18 w-18 shrink-0 overflow-hidden rounded-full">
-              <img
-                v-if="userInfo.avatar || user?.avatar"
+              <UserAvatar
                 :src="(userInfo.avatar || user?.avatar)!"
                 :alt="displayName"
+                telemetry-surface="user.profile"
                 class="h-full w-full object-cover"
               >
-              <div v-else class="h-full w-full flex items-center justify-center ios-avatar-bg">
-                <span class="text-2xl font-semibold text-white">{{ avatarInitial }}</span>
-              </div>
+                <template #fallback>
+                  <div class="h-full w-full flex items-center justify-center ios-avatar-bg">
+                    <span class="text-2xl font-semibold text-white">{{ avatarInitial }}</span>
+                  </div>
+                </template>
+              </UserAvatar>
             </div>
             <div class="min-w-0 flex-1">
               <h2 class="text-xl font-bold truncate">

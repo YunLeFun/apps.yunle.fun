@@ -76,7 +76,19 @@ NUXT_PUBLIC_RUM_DEBUG=true
 - ✅ Web Vitals（LCP、FID、CLS、INP）
 - ✅ PV / UV
 - ✅ 用户操作链路（click → request → error）
-- ⬜ 自定义业务埋点（登录失败、CloudBase 调用失败）—— 需要在业务代码中手动调 `rum.captureException()` 或 `rum.captureMessage()`
+- ✅ 用户头像签名失败 / 加载失败（`ui.avatar.signing_failed`、`ui.avatar.load_failed`）
+- ⬜ 其他自定义业务埋点（登录失败、CloudBase 调用失败）
+
+自定义客户端事件统一通过 `reportClientEvent()` 上报。它会同时写入 WebView
+控制台与 RUM，并固定使用以下筛选维度：
+
+| 字段   | 内容                                       |
+| ------ | ------------------------------------------ |
+| `ext1` | 页面或组件，例如 `tabs.me`、`user.profile` |
+| `ext2` | 失败阶段，例如 `sign`、`load`              |
+| `ext3` | 资源域名                                   |
+
+完整资源路径、查询参数和临时签名不会上报，避免泄露用户标识与访问凭证。
 
 ## 关键业务埋点建议
 

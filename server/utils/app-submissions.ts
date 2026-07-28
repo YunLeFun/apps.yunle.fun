@@ -1,20 +1,19 @@
+import type { ServerAuthUser } from './cloudbase-auth'
 import type {
   AppRecord,
   AppReviewEvent,
   AppSubmission,
   AppSubmissionAccess,
   AppSubmissionResult,
-  CreateAppForm,
 } from '~/types/app'
-import type { ServerAuthUser } from './cloudbase-auth'
 import { randomUUID } from 'node:crypto'
 import { createError } from 'h3'
-import { useCloudbaseAdmin } from './cloudbase-admin'
 import {
   isYunLeFunFirstPartyHostname,
   normalizeSubmissionInput,
   publicProjectionFromSubmission,
 } from './app-submission-validation'
+import { useCloudbaseAdmin } from './cloudbase-admin'
 
 export const APPS_COLLECTION = 'apps'
 export const APP_SUBMISSIONS_COLLECTION = 'app_submissions'

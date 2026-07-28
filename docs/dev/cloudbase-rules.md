@@ -102,7 +102,8 @@ CloudBase MCP 在更新规则时给的告警：
 
 - 数据库：<https://tcb.cloud.tencent.com/dev?envId=yunlefun-8g7ybcxc7345c490#/db/doc>
 - `apps` 集合：<https://tcb.cloud.tencent.com/dev?envId=yunlefun-8g7ybcxc7345c490#/db/doc/collection/apps>
-# 应用上架审核资源
+
+## 应用上架审核资源
 
 `apps` 只允许客户端读取 `isPublic=true && status='approved' && publicationStatus='published'` 的公开投影，客户端写入全部关闭。
 

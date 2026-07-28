@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const reviewsCollection = db.collection('app_reviews')
 
   const { data: apps } = await appsCollection
-    .where({ slug: input.appKey, isPublic: true, status: 'approved' })
+    .where({ slug: input.appKey, isPublic: true, status: 'approved', publicationStatus: 'published' })
     .limit(1)
     .get()
   const app = normalizeAppRecord(apps?.[0])

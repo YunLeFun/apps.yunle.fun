@@ -21,12 +21,15 @@ export interface AppDetailData extends YlfAppInfo {
   githubRepo?: string
   /** 标签 */
   tags?: string[]
+  privacyPolicyUrl?: string
+  supportUrl?: string
 }
 
 /**
  * 将静态应用转为详情数据（填充默认值）
  */
 function toDetailData(app: YlfAppInfo, extra?: Partial<AppDetailData>): AppDetailData {
+  const catalogApp = app as YlfAppInfo & Pick<Partial<AppDetailData>, 'privacyPolicyUrl' | 'supportUrl'>
   return {
     ...app,
     // 优先级：显式传入 > 目录回填的 developer（ownerLogin）> 站点默认
@@ -39,6 +42,8 @@ function toDetailData(app: YlfAppInfo, extra?: Partial<AppDetailData>): AppDetai
     compatibility: extra?.compatibility ?? '需要联网 · 现代浏览器',
     githubRepo: extra?.githubRepo,
     tags: extra?.tags,
+    privacyPolicyUrl: extra?.privacyPolicyUrl ?? catalogApp.privacyPolicyUrl,
+    supportUrl: extra?.supportUrl ?? catalogApp.supportUrl,
   }
 }
 
@@ -63,6 +68,8 @@ function recordToDetailData(record: AppRecord): AppDetailData {
       : '',
     githubRepo: record.githubRepo,
     tags: record.tags,
+    privacyPolicyUrl: record.privacyPolicyUrl,
+    supportUrl: record.supportUrl,
   })
 }
 
@@ -133,7 +140,7 @@ export function useAppDetail(appId: MaybeRef<string>) {
   async function queryPublicAppById(id: string): Promise<AppRecord | null> {
     const { data } = await db
       .collection('apps')
-      .where({ _id: id, isPublic: true, status: 'approved' })
+      .where({ _id: id, isPublic: true, status: 'approved', publicationStatus: 'published' })
       .limit(1)
       .get()
     return (data as AppRecord[])?.[0] || null
@@ -143,7 +150,7 @@ export function useAppDetail(appId: MaybeRef<string>) {
   async function queryPublicAppBySlug(slug: string): Promise<AppRecord | null> {
     const { data } = await db
       .collection('apps')
-      .where({ slug, isPublic: true, status: 'approved' })
+      .where({ slug, isPublic: true, status: 'approved', publicationStatus: 'published' })
       .limit(1)
       .get()
     return (data as AppRecord[])?.[0] || null

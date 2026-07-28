@@ -172,6 +172,11 @@ function openGithub() {
   openInAppBrowser(`https://github.com/${repo}`)
 }
 
+function openPolicyUrl(url?: string) {
+  if (url?.startsWith('https://'))
+    openInAppBrowser(url)
+}
+
 function formatRating(rating: number) {
   return Number.isInteger(rating) ? String(rating) : rating.toFixed(1)
 }
@@ -485,6 +490,30 @@ async function openMoreMenu() {
               <span class="info-row-label">源代码</span>
               <div class="info-row-value info-row-value--link">
                 <span>GitHub</span>
+                <IonIcon :icon="chevronForward" class="chevron-icon" />
+              </div>
+            </button>
+            <button
+              v-if="displayData.privacyPolicyUrl"
+              type="button"
+              class="info-row info-row-btn info-row--tappable"
+              @click="openPolicyUrl(displayData.privacyPolicyUrl)"
+            >
+              <span class="info-row-label">隐私政策</span>
+              <div class="info-row-value info-row-value--link">
+                <span>查看</span>
+                <IonIcon :icon="chevronForward" class="chevron-icon" />
+              </div>
+            </button>
+            <button
+              v-if="displayData.supportUrl"
+              type="button"
+              class="info-row info-row-btn info-row--tappable"
+              @click="openPolicyUrl(displayData.supportUrl)"
+            >
+              <span class="info-row-label">应用支持</span>
+              <div class="info-row-value info-row-value--link">
+                <span>联系</span>
                 <IonIcon :icon="chevronForward" class="chevron-icon" />
               </div>
             </button>

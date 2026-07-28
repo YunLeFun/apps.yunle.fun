@@ -61,6 +61,10 @@ describe('cloudbase auth utils', () => {
       uid: 'uid-1',
       name: '云游君',
       picture: 'https://example.com/avatar.png',
+      handle: undefined,
+      phoneVerified: false,
+      accountStatus: 'active',
+      anonymous: false,
     })
     await expect(tryGetCloudbaseUser(makeEvent(token))).resolves.toEqual(expect.objectContaining({ uid: 'uid-1' }))
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -84,6 +88,10 @@ describe('cloudbase auth utils', () => {
       uid: 'uid-1',
       name: undefined,
       picture: undefined,
+      handle: undefined,
+      phoneVerified: false,
+      accountStatus: 'active',
+      anonymous: false,
     })
 
     expect(fetchMock).toHaveBeenCalledWith(

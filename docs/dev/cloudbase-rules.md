@@ -105,5 +105,6 @@ CloudBase MCP 在更新规则时给的告警：
 # 应用上架审核资源
 
 `apps` 只允许客户端读取 `isPublic=true && status='approved' && publicationStatus='published'` 的公开投影，客户端写入全部关闭。
+Web 目录与详情页默认走 Nitro 的 `/api/apps/public` 只读字段白名单；该规则保留为纵深防御和旧版本兼容边界。
 
 `app_submissions`、`app_review_events`、`app_submitters` 均为服务端专用集合，浏览器读写全部关闭。完整流程与迁移方式见 [应用提交、审核与发布](../product/app-submission-review.md)。

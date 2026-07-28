@@ -10,12 +10,10 @@ import type {
  *
  * 浏览器不再直写 CloudBase `apps`：服务端负责身份验证、维护者 allowlist、
  * 字段校验、submission 快照、不可变审核事件与状态机。
- * 公开 approved 投影仍可通过 CloudBase 只读查询，保留目录离线能力。
+ * 公开目录也经 Nitro API 返回白名单投影；客户端缓存保留弱网与离线能力。
  */
 export function useApps() {
   const { $api } = useNuxtApp()
-  const { app } = useCloudbase()
-  const db = app.database()
 
   async function getSubmissionAccess(): Promise<AppSubmissionAccess> {
     return $api<AppSubmissionAccess>('/api/apps/access')
@@ -47,19 +45,19 @@ export function useApps() {
     }
   }
 
-  /** 公开目录读取仍是只读路径；安全规则必须同时要求 published + approved + public。 */
+  /** 公开目录也走服务端白名单投影，浏览器不依赖 CloudBase 凭据或数据库结构。 */
   async function getPublicAppBySlug(slug: string): Promise<AppRecord | null> {
-    const { data } = await db
-      .collection('apps')
-      .where({
-        slug,
-        isPublic: true,
-        status: 'approved',
-        publicationStatus: 'published',
-      })
-      .limit(1)
-      .get()
-    return (data as AppRecord[])[0] || null
+    if (!slug)
+      return null
+    try {
+      const response = await $api<{ app: AppRecord }>(`/api/apps/public/${encodeURIComponent(slug)}`)
+      return response.app
+    }
+    catch (error: unknown) {
+      if (statusCode(error) === 404)
+        return null
+      throw error
+    }
   }
 
   async function getAppBySlug(slug: string): Promise<AppRecord | null> {

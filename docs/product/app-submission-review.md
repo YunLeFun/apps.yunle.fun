@@ -16,7 +16,10 @@
 - `status == 'approved'`
 - `publicationStatus == 'published'`
 
-浏览器的 `create/update/delete` 全部关闭。所有者管理也必须经过 Nitro 服务端 API。
+公开客户端通过 `GET /api/apps/public` 与 `GET /api/apps/public/:key` 读取字段白名单投影，
+不直接依赖 CloudBase 客户端凭据、索引或安全规则实现。浏览器的
+`create/update/delete` 全部关闭，数据库读规则保留为纵深防御；所有者管理也必须经过
+Nitro 服务端 API。
 
 ### `app_submissions`
 

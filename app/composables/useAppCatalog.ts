@@ -7,8 +7,8 @@ import { recordToAppInfo } from '~/utils/appRecord'
  * 应用目录统一出口（Phase 3 前端在线化）。
  *
  * 三层数据：
- *   CloudBase apps 集合（唯一事实源）
- *     ↓ 运行时拉取
+ *   CloudBase apps 集合（唯一事实源）→ Nitro 公开白名单投影
+ *     ↓ 客户端运行时拉取
  *   localStorage 缓存（冷启动 / 弱网兜底）
  *     ↓ 缺失时
  *   内置快照 ALL_APPS（离线 / 首屏，编译时打包）
@@ -25,12 +25,11 @@ interface CachePayload {
 }
 
 export function useAppCatalog() {
-  const { app } = useCloudbase()
-  const db = app.database()
+  const { $api } = useNuxtApp()
 
   /** 目录列表：默认内置快照，运行时被缓存 / 集合覆盖 */
   const catalog = useState<YlfAppInfo[]>('catalog:list', () => [...ALL_APPS])
-  /** 是否已成功从集合拉取过 */
+  /** 是否已成功从公开目录 API 拉取过 */
   const loaded = useState('catalog:loaded', () => false)
   const loading = useState('catalog:loading', () => false)
 
@@ -60,24 +59,10 @@ export function useAppCatalog() {
     }
   }
 
-  /** 从集合分页拉取全部「已审核 + 公开」应用 */
+  /** 从服务端白名单投影拉取全部「已审核 + 已发布 + 公开」应用。 */
   async function fetchFromCloud(): Promise<YlfAppInfo[]> {
-    const all: AppRecord[] = []
-    const PAGE = 100
-    for (let skip = 0; ; skip += PAGE) {
-      const { data } = await db
-        .collection('apps')
-        .where({ isPublic: true, status: 'approved', publicationStatus: 'published' })
-        .orderBy('updatedAt', 'desc')
-        .skip(skip)
-        .limit(PAGE)
-        .get()
-      const page = (data as AppRecord[]) || []
-      all.push(...page)
-      if (page.length < PAGE)
-        break
-    }
-    return all.map(recordToAppInfo)
+    const response = await $api<{ items: AppRecord[] }>('/api/apps/public')
+    return response.items.map(recordToAppInfo)
   }
 
   /**

@@ -77,25 +77,22 @@ describe('useApps server-mediated submission flow', () => {
     await expect(apps.getMyAppBySlug('missing')).resolves.toBeNull()
   })
 
-  it('reads only the published public projection directly from CloudBase', async () => {
-    get.mockResolvedValue({ data: [appRecord({ isPublic: true, status: 'approved', publicationStatus: 'published' })] })
+  it('reads the published public projection through the Nitro API', async () => {
+    api.mockResolvedValue({ app: appRecord({ isPublic: true, status: 'approved', publicationStatus: 'published' }) })
     const apps = useApps()
 
     await expect(apps.getPublicAppBySlug('example')).resolves.toMatchObject({ slug: 'example' })
-    expect(collection).toHaveBeenCalledWith('apps')
-    expect(where).toHaveBeenCalledWith({
-      slug: 'example',
-      isPublic: true,
-      status: 'approved',
-      publicationStatus: 'published',
-    })
+    expect(api).toHaveBeenCalledWith('/api/apps/public/example')
+    expect(collection).not.toHaveBeenCalled()
   })
 
   it('falls back to the public projection when the owner endpoint is unauthorized', async () => {
-    api.mockRejectedValueOnce({ statusCode: 401 })
-    get.mockResolvedValue({ data: [appRecord({ isPublic: true, status: 'approved', publicationStatus: 'published' })] })
+    api
+      .mockRejectedValueOnce({ statusCode: 401 })
+      .mockResolvedValueOnce({ app: appRecord({ isPublic: true, status: 'approved', publicationStatus: 'published' }) })
 
     await expect(useApps().getAppBySlug('example')).resolves.toMatchObject({ slug: 'example' })
+    expect(api).toHaveBeenNthCalledWith(2, '/api/apps/public/example')
   })
 
   it('creates a first-party submission through the server', async () => {

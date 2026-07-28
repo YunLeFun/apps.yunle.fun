@@ -76,15 +76,14 @@ function recordToDetailData(record: AppRecord): AppDetailData {
 /**
  * 应用详情页数据获取 composable
  *
- * 采用「集合优先 + CloudBase 直查兜底」的两级查找策略：
- * 1. 先确保应用目录已加载，再用 catalog 通过 id/slug 匹配（集合优先，内置兜底）
- * 2. 未命中则通过 CloudBase where({ _id, isPublic: true }) 按文档 ID 查询
- * 3. 仍未命中则按 where({ slug, isPublic: true }) 查询
- *    （用于公开目录之外 / 属主自己的应用）
+ * 采用「目录优先 + 服务端公开投影兜底」的两级查找策略：
+ * 1. 先确保应用目录已加载，再用 catalog 通过 id/slug 匹配（在线目录优先，内置快照兜底）
+ * 2. 未命中则通过 `/api/apps/public/:key` 按文档 ID 或 slug 查询
+ *
+ * 浏览器不直接依赖 CloudBase 凭据、索引或安全规则细节；服务端仅返回已发布字段白名单。
  */
 export function useAppDetail(appId: MaybeRef<string>) {
-  const { app: cloudbaseApp } = useCloudbase()
-  const db = cloudbaseApp.database()
+  const { $api } = useNuxtApp()
   const { getApp, ensureLoaded } = useAppCatalog()
 
   const appData = ref<AppDetailData | null>(null)
@@ -102,7 +101,7 @@ export function useAppDetail(appId: MaybeRef<string>) {
     loading.value = true
     error.value = null
 
-    // 1. 应用目录查找（集合优先，内置兜底）
+    // 1. 应用目录查找（在线目录优先，内置兜底）
     await ensureLoaded()
     const catalogApp = getApp(id)
     if (catalogApp) {
@@ -111,49 +110,17 @@ export function useAppDetail(appId: MaybeRef<string>) {
       return
     }
 
-    // 2. CloudBase 查询
+    // 2. 服务端公开投影查询
     try {
-      // 先按 _id 查
-      let record = await queryPublicAppById(id)
-
-      // 再按 slug 查
-      if (!record) {
-        record = await queryPublicAppBySlug(id)
-      }
-
-      if (record) {
-        appData.value = recordToDetailData(record)
-      }
-      else {
-        error.value = '应用未找到'
-      }
+      const response = await $api<{ app: AppRecord }>(`/api/apps/public/${encodeURIComponent(id)}`)
+      appData.value = recordToDetailData(response.app)
     }
-    catch {
-      error.value = '加载失败，请稍后重试'
+    catch (queryError) {
+      error.value = statusCode(queryError) === 404 ? '应用未找到' : '加载失败，请稍后重试'
     }
     finally {
       loading.value = false
     }
-  }
-
-  /** 按 _id 查询公开应用（需 isPublic + status=approved 双重满足） */
-  async function queryPublicAppById(id: string): Promise<AppRecord | null> {
-    const { data } = await db
-      .collection('apps')
-      .where({ _id: id, isPublic: true, status: 'approved', publicationStatus: 'published' })
-      .limit(1)
-      .get()
-    return (data as AppRecord[])?.[0] || null
-  }
-
-  /** 按 slug 查询公开应用（需 isPublic + status=approved 双重满足） */
-  async function queryPublicAppBySlug(slug: string): Promise<AppRecord | null> {
-    const { data } = await db
-      .collection('apps')
-      .where({ slug, isPublic: true, status: 'approved', publicationStatus: 'published' })
-      .limit(1)
-      .get()
-    return (data as AppRecord[])?.[0] || null
   }
 
   // 监听 appId 变化时重新加载
@@ -166,5 +133,20 @@ export function useAppDetail(appId: MaybeRef<string>) {
     loading,
     error,
     refresh: resolve,
+  }
+}
+
+function statusCode(error: unknown): number | undefined {
+  if (!error || typeof error !== 'object')
+    return
+  const record = error as Record<string, unknown>
+  if (typeof record.statusCode === 'number')
+    return record.statusCode
+  if (typeof record.status === 'number')
+    return record.status
+  const response = record.response
+  if (response && typeof response === 'object') {
+    const status = (response as Record<string, unknown>).status
+    return typeof status === 'number' ? status : undefined
   }
 }

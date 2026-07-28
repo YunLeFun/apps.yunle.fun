@@ -18,6 +18,7 @@ const emit = defineEmits<{
 
 const qrcodeDataUrl = ref('')
 const canvasRef = ref<HTMLCanvasElement>()
+const { resolvedSrc: resolvedAvatar } = useAvatarUrl(() => props.avatar)
 
 const profileUrl = computed(() => {
   if (!props.userId)
@@ -73,12 +74,26 @@ async function saveCard() {
   ctx.beginPath()
   ctx.arc(width / 2, 60, 32, 0, Math.PI * 2)
   ctx.clip()
-  if (props.avatar) {
+  if (resolvedAvatar.value) {
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.src = props.avatar
-    await new Promise(resolve => img.onload = resolve)
-    ctx.drawImage(img, width / 2 - 32, 28, 64, 64)
+    img.src = resolvedAvatar.value
+    try {
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error('名片头像加载失败'))
+      })
+      ctx.drawImage(img, width / 2 - 32, 28, 64, 64)
+    }
+    catch {
+      ctx.fillStyle = '#007aff'
+      ctx.fill()
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(props.avatarInitial, width / 2, 60)
+    }
   }
   else {
     ctx.fillStyle = '#007aff'
@@ -157,15 +172,18 @@ function close() {
           <div class="flex flex-col items-center px-6 py-8">
             <!-- 头像 -->
             <div class="mb-3 h-16 w-16 overflow-hidden rounded-full">
-              <img
-                v-if="avatar"
+              <UserAvatar
                 :src="avatar"
                 :alt="nickname"
+                telemetry-surface="user.profile-card"
                 class="h-full w-full object-cover"
               >
-              <div v-else class="h-full w-full flex items-center justify-center ios-avatar-bg">
-                <span class="text-xl font-semibold text-white">{{ avatarInitial }}</span>
-              </div>
+                <template #fallback>
+                  <div class="h-full w-full flex items-center justify-center ios-avatar-bg">
+                    <span class="text-xl font-semibold text-white">{{ avatarInitial }}</span>
+                  </div>
+                </template>
+              </UserAvatar>
             </div>
 
             <!-- 昵称 -->

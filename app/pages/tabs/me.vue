@@ -76,20 +76,20 @@ function navigateTo(path: string) {
             @click="navigateTo('/user/profile')"
           >
             <template #media>
-              <img
-                v-if="userInfo.avatar"
+              <UserAvatar
                 :src="userInfo.avatar"
                 :alt="userInfo.nickname"
+                telemetry-surface="tabs.me"
                 class="h-14 w-14 rounded-full object-cover"
               >
-              <div
-                v-else
-                class="ios-icon-avatar"
-              >
-                <span class="text-xl text-white font-semibold">
-                  {{ (userInfo.nickname || '云')[0] }}
-                </span>
-              </div>
+                <template #fallback>
+                  <div class="ios-icon-avatar">
+                    <span class="text-xl text-white font-semibold">
+                      {{ (userInfo.nickname || '云')[0] }}
+                    </span>
+                  </div>
+                </template>
+              </UserAvatar>
             </template>
           </k-list-item>
         </k-list>

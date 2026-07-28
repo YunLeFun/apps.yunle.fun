@@ -50,6 +50,7 @@ export async function searchApps(
   const where: Record<string, unknown> = {
     isPublic: true,
     status: 'approved',
+    publicationStatus: 'published',
   }
 
   if (input.category?.trim())
@@ -159,7 +160,9 @@ function recordToAgentCard(record: AppRecord, reason: string): AgentSearchAppCar
 }
 
 function isPublicApproved(record: AppRecord) {
-  return record.isPublic === true && record.status === 'approved'
+  return record.isPublic === true
+    && record.status === 'approved'
+    && record.publicationStatus === 'published'
 }
 
 function normalizeLimit(limit: number | undefined) {

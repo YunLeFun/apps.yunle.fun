@@ -106,22 +106,22 @@ async function confirmDelete() {
     return
 
   const alert = await alertController.create({
-    header: '删除应用',
-    message: `确定要删除「${app.value.name}」吗？此操作不可撤销。`,
+    header: '下架应用',
+    message: `确定要下架「${app.value.name}」吗？应用会从目录移除，提交与审核记录仍会保留。`,
     buttons: [
       { text: '取消', role: 'cancel' },
       {
-        text: '删除',
+        text: '下架',
         role: 'destructive',
         handler: async () => {
           try {
             await deleteApp(app.value!._id)
             workshopDirty.value = true
-            toast.showSuccess('已删除')
+            toast.showSuccess('已下架')
             router.replace('/workshop')
           }
           catch (err: unknown) {
-            toast.showError(err instanceof Error ? err.message : '删除失败')
+            toast.showError(err instanceof Error ? err.message : '下架失败')
           }
         },
       },
@@ -205,7 +205,16 @@ watch(slug, (val) => {
               {{ app.category }}
             </IonChip>
             <IonChip v-if="!app.isPublic" class="hero-chip hero-chip--private">
-              私有
+              未上架
+            </IonChip>
+            <IonChip v-if="app.releaseStage === 'beta'" class="hero-chip">
+              Beta
+            </IonChip>
+            <IonChip v-if="app.accessMode === 'login_required'" class="hero-chip hero-chip--private">
+              需登录
+            </IonChip>
+            <IonChip v-if="app.accessMode === 'invite_only'" class="hero-chip hero-chip--private">
+              仅限受邀
             </IonChip>
           </div>
           <p v-if="app.description" class="app-hero-desc">
@@ -270,9 +279,21 @@ watch(slug, (val) => {
             </IonNote>
           </IonItem>
           <IonItem>
-            <IonLabel>可见性</IonLabel>
+            <IonLabel>目录状态</IonLabel>
             <IonNote slot="end">
-              {{ app.isPublic ? '公开' : '私有' }}
+              {{ app.publicationStatus === 'published' ? '已上架' : '未上架' }}
+            </IonNote>
+          </IonItem>
+          <IonItem>
+            <IonLabel>访问方式</IonLabel>
+            <IonNote slot="end">
+              {{ app.accessMode === 'invite_only' ? '仅限受邀' : app.accessMode === 'login_required' ? '需登录' : '公开访问' }}
+            </IonNote>
+          </IonItem>
+          <IonItem>
+            <IonLabel>审核状态</IonLabel>
+            <IonNote slot="end">
+              {{ app.latestSubmission?.reviewStatus || app.status }}
             </IonNote>
           </IonItem>
           <IonItem>
@@ -301,7 +322,7 @@ watch(slug, (val) => {
           <IonItem button :detail="false" class="delete-item" @click="confirmDelete">
             <IonIcon slot="start" :icon="trashOutline" color="danger" />
             <IonLabel color="danger">
-              删除应用
+              下架应用
             </IonLabel>
           </IonItem>
         </IonList>

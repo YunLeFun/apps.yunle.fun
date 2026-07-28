@@ -191,6 +191,10 @@ export default defineNuxtConfig({
     cloudbaseRegion: process.env.NUXT_CLOUDBASE_REGION || process.env.NUXT_PUBLIC_CLOUDBASE_REGION || '',
     tencentApiSecretId: '',
     tencentApiSecretKey: '',
+    // 第一阶段仅向内部第一方维护者开放；动态集合 app_submitters 优先，此处为迁移/故障兜底。
+    appFirstPartySubmitterUids: process.env.NUXT_APP_FIRST_PARTY_SUBMITTER_UIDS || '1978032370372050944',
+    // 第三方模型与接口预留，但产品入口默认关闭并展示「敬请期待」。
+    appThirdPartySubmissionsEnabled: process.env.NUXT_APP_THIRD_PARTY_SUBMISSIONS_ENABLED === 'true',
     tmsRegion: 'ap-guangzhou',
     tmsBizType: '',
     public: {

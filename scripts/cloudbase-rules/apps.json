@@ -3,5 +3,5 @@
   "resourceType": "noSqlDatabase",
   "resourceId": "apps",
   "permission": "CUSTOM",
-  "securityRule": "{\"read\":\"(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid\",\"create\":\"auth.uid != null && auth.loginType != 'ANONYMOUS'\",\"update\":\"auth.uid == doc._openid\",\"delete\":\"auth.uid == doc._openid\"}"
+  "securityRule": "{\"read\":\"doc.isPublic == true && doc.status == 'approved' && doc.publicationStatus == 'published'\",\"create\":false,\"update\":false,\"delete\":false}"
 }

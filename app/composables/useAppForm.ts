@@ -1,4 +1,4 @@
-import type { AppRecord, CreateAppForm } from '~/types/app'
+import type { AppAccessMode, AppRecord, AppReleaseStage, CreateAppForm } from '~/types/app'
 import { actionSheetController } from '@ionic/vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { DEFAULT_EMOJI, DEFAULT_THEME_COLOR } from '~/types/app'
@@ -17,15 +17,18 @@ function createEmptyForm() {
     description: '',
     githubRepo: '',
     websiteUrl: '',
+    privacyPolicyUrl: '',
+    supportUrl: '',
     backupUrl: '',
     logo: '',
     emoji: DEFAULT_EMOJI,
     themeColor: DEFAULT_THEME_COLOR,
     category: '',
     tags: [] as string[],
-    // 默认不公开 —— 用户提交后即使勾了 isPublic，也需要审核通过才会真对外可见
-    // 详见 app/types/app.ts AppStatus
-    isPublic: false,
+    // 是否出现在目录由 publicationStatus 控制；isPublic 仅保留旧表单兼容。
+    isPublic: true,
+    accessMode: 'public' as AppAccessMode,
+    releaseStage: 'stable' as AppReleaseStage,
   }
 }
 
@@ -60,6 +63,8 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
     form.description = app.description || ''
     form.githubRepo = app.githubRepo || ''
     form.websiteUrl = app.websiteUrl || ''
+    form.privacyPolicyUrl = app.privacyPolicyUrl || ''
+    form.supportUrl = app.supportUrl || ''
     form.backupUrl = app.backupUrl || ''
     form.logo = app.logo || ''
     form.emoji = app.emoji || DEFAULT_EMOJI
@@ -67,6 +72,8 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
     form.category = app.category || ''
     form.tags = app.tags ? [...app.tags] : []
     form.isPublic = app.isPublic
+    form.accessMode = app.accessMode || 'public'
+    form.releaseStage = app.releaseStage || 'stable'
     autoSlug.value = false
     // 更新初始快照
     initialFormSnapshot.value = JSON.stringify(form)
@@ -251,6 +258,8 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       description: form.description.trim(),
       githubRepo: form.githubRepo.trim(),
       websiteUrl: form.websiteUrl.trim(),
+      privacyPolicyUrl: form.privacyPolicyUrl.trim(),
+      supportUrl: form.supportUrl.trim(),
       backupUrl: form.backupUrl.trim(),
       logo: form.logo.trim(),
       emoji: form.emoji || DEFAULT_EMOJI,
@@ -258,6 +267,8 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       category: form.category,
       tags: form.tags.filter(Boolean),
       isPublic: form.isPublic,
+      accessMode: form.accessMode,
+      releaseStage: form.releaseStage,
     }
   }
 
@@ -270,6 +281,11 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
 
     if (!form.name.trim()) {
       toast.showWarning('请输入应用名称')
+      return
+    }
+
+    if (!form.websiteUrl.trim() || !form.privacyPolicyUrl.trim() || !form.supportUrl.trim()) {
+      toast.showWarning('请填写应用网址、隐私政策和支持链接')
       return
     }
 

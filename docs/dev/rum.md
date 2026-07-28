@@ -76,7 +76,7 @@ NUXT_PUBLIC_RUM_DEBUG=true
 - ✅ Web Vitals（LCP、FID、CLS、INP）
 - ✅ PV / UV
 - ✅ 用户操作链路（click → request → error）
-- ✅ 用户头像签名失败 / 加载失败（`ui.avatar.signing_failed`、`ui.avatar.load_failed`）
+- ✅ 用户头像加载失败（`ui.avatar.load_failed`）
 - ⬜ 其他自定义业务埋点（登录失败、CloudBase 调用失败）
 
 自定义客户端事件统一通过 `reportClientEvent()` 上报。它会同时写入 WebView

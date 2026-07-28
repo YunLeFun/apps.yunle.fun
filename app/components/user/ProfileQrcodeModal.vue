@@ -47,6 +47,17 @@ watch(() => props.open, async (val) => {
 /**
  * 保存名片为图片
  */
+async function loadAvatarImage(source: string): Promise<HTMLImageElement> {
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.src = source
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve()
+    img.onerror = () => reject(new Error('名片头像加载失败'))
+  })
+  return img
+}
+
 async function saveCard() {
   if (!canvasRef.value)
     return
@@ -75,14 +86,8 @@ async function saveCard() {
   ctx.arc(width / 2, 60, 32, 0, Math.PI * 2)
   ctx.clip()
   if (resolvedAvatar.value) {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.src = resolvedAvatar.value
     try {
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = () => reject(new Error('名片头像加载失败'))
-      })
+      const img = await loadAvatarImage(resolvedAvatar.value)
       ctx.drawImage(img, width / 2 - 32, 28, 64, 64)
     }
     catch {

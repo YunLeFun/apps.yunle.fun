@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const failed = ref(false)
-const { resolvedSrc, resolutionError } = useAvatarUrl(() => props.src)
+const { resolvedSrc } = useAvatarUrl(() => props.src)
 
 watch(() => props.src, () => {
   failed.value = false
@@ -28,18 +28,6 @@ watch(() => props.src, () => {
 
 watch(resolvedSrc, () => {
   failed.value = false
-})
-
-watch(resolutionError, (error) => {
-  if (!error)
-    return
-
-  reportClientEvent('ui.avatar.signing_failed', {
-    surface: props.telemetrySurface,
-    stage: 'sign',
-    ...describeRemoteResource(props.src),
-    error: error.message,
-  })
 })
 
 function handleLoad(event: Event) {

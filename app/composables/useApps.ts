@@ -99,6 +99,12 @@ export function useApps() {
     await $api(`/api/apps/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
+  async function submitPublicMarket(id: string): Promise<void> {
+    await $api(`/api/apps/${encodeURIComponent(id)}/public-market`, {
+      method: 'POST',
+    })
+  }
+
   async function isSlugTaken(slug: string): Promise<boolean> {
     if (!slug)
       return false
@@ -118,6 +124,7 @@ export function useApps() {
     createApp,
     updateApp,
     deleteApp,
+    submitPublicMarket,
     isSlugTaken,
   }
 }
@@ -139,6 +146,7 @@ function toForm(app: AppRecord): CreateAppForm {
     category: app.category || '其他',
     tags: app.tags || [],
     isPublic: true,
+    audience: app.audience || (app.isPublic ? 'public' : 'owner'),
     accessMode: app.accessMode || 'public',
     releaseStage: app.releaseStage || 'stable',
   }

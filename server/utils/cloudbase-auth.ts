@@ -74,25 +74,31 @@ export async function requireCloudbaseUser(event: H3Event): Promise<ServerAuthUs
   return user
 }
 
-/** 应用提交等高信任操作要求已验证手机号、非匿名且账号状态正常。 */
-export async function requireVerifiedCloudbaseUser(event: H3Event): Promise<ServerAuthUser> {
+/** 需要真实注册账号，但不强制手机号验证。 */
+export async function requireRegisteredCloudbaseUser(event: H3Event): Promise<ServerAuthUser> {
   const user = await requireCloudbaseUser(event)
   if (user.anonymous) {
     throw createError({
       statusCode: 403,
-      statusMessage: '匿名账号不能提交应用',
-    })
-  }
-  if (!user.phoneVerified) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: '提交应用前请先验证云乐坊手机号',
+      statusMessage: '请使用正式账号登录',
     })
   }
   if (user.accountStatus !== 'active') {
     throw createError({
       statusCode: 403,
-      statusMessage: '当前账号状态不能提交应用',
+      statusMessage: '当前账号状态不能执行此操作',
+    })
+  }
+  return user
+}
+
+/** 应用提交等高信任操作要求已验证手机号、非匿名且账号状态正常。 */
+export async function requireVerifiedCloudbaseUser(event: H3Event): Promise<ServerAuthUser> {
+  const user = await requireRegisteredCloudbaseUser(event)
+  if (!user.phoneVerified) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: '提交应用前请先验证云乐坊手机号',
     })
   }
   return user

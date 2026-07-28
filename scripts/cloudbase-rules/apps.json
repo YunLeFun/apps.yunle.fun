@@ -2,6 +2,5 @@
   "action": "updateResourcePermission",
   "resourceType": "noSqlDatabase",
   "resourceId": "apps",
-  "permission": "CUSTOM",
-  "securityRule": "{\"read\":\"doc.isPublic == true && doc.status == 'approved' && doc.publicationStatus == 'published'\",\"create\":false,\"update\":false,\"delete\":false}"
+  "permission": "ADMINONLY"
 }

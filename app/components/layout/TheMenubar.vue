@@ -8,7 +8,7 @@ const items = ref([
     route: '/',
   },
   {
-    label: '工坊',
+    label: '市场',
     icon: 'i-ri-apps-line',
     route: '/tabs/apps',
   },

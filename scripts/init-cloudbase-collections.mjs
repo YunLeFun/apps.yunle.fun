@@ -24,7 +24,14 @@ if (!secretId || !secretKey) {
 const app = cloudbase.init({ env, secretId, secretKey })
 const db = app.database()
 
-const collections = ['app_reviews', 'app_reports', 'moderation_tasks']
+const collections = [
+  'app_reviews',
+  'app_reports',
+  'moderation_tasks',
+  'app_submissions',
+  'app_review_events',
+  'app_submitters',
+]
 
 for (const name of collections) {
   try {

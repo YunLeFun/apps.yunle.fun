@@ -44,14 +44,67 @@ export type AppStatus = 'pending' | 'approved' | 'rejected'
 /** 默认审核状态 */
 export const DEFAULT_APP_STATUS: AppStatus = 'pending'
 
+/** 目录访问方式。受限访问不代表审核不通过。 */
+export type AppAccessMode = 'public' | 'login_required' | 'invite_only'
+
+/** 面向用户展示的发布阶段。 */
+export type AppReleaseStage = 'stable' | 'beta'
+
+/** 一次提交的审核状态。 */
+export type AppReviewStatus
+  = | 'draft'
+    | 'pending'
+    | 'in_review'
+    | 'changes_requested'
+    | 'approved'
+    | 'rejected'
+    | 'withdrawn'
+
+/** 应用在公开目录中的分发状态。 */
+export type AppPublicationStatus
+  = | 'unpublished'
+    | 'published'
+    | 'suspended'
+    | 'delisted'
+
+/** 当前仅开放 first_party；third_party 保留为后续兼容入口。 */
+export type AppSubmissionKind = 'first_party' | 'third_party'
+
+export type AppOwnershipStatus = 'pending' | 'verified' | 'failed'
+
+export type AppOwnershipMethod
+  = | 'yunle_infra'
+    | 'dns_txt'
+    | 'well_known'
+    | 'github'
+    | 'admin_override'
+
+export interface AppOwnershipCheck {
+  key: 'hostname' | 'cloudflare_dns' | 'deployment_project' | 'https' | 'redirect' | 'repository' | 'privacy' | 'support'
+  status: 'pass' | 'warning' | 'fail'
+  summary: string
+  detail?: string
+}
+
+export interface AppOwnershipVerification {
+  status: AppOwnershipStatus
+  method?: AppOwnershipMethod
+  hostname?: string
+  checks: AppOwnershipCheck[]
+  verifiedAt?: number
+  verifiedBy?: string
+}
+
 /** 应用数据模型 - 对应 CloudBase NoSQL 集合 `apps` */
 export interface AppRecord {
   /** 文档 ID（CloudBase 自动生成） */
   _id: string
   /** 创建者用户 ID（CloudBase 服务端自动注入，用于安全规则校验） */
-  _openid: string
+  _openid?: string
   /** 应用所有者用户名 */
   ownerLogin: string
+  /** 稳定所有者 UID；新流程不再依赖浏览器可写的 _openid。 */
+  ownerUid?: string
   /** 应用名称 */
   name: string
   /** 唯一标识符（URL slug） */
@@ -62,6 +115,10 @@ export interface AppRecord {
   githubRepo?: string
   /** 应用网页链接 */
   websiteUrl?: string
+  /** 面向用户公开的隐私政策。 */
+  privacyPolicyUrl?: string
+  /** 面向用户公开的支持入口。 */
+  supportUrl?: string
   /** 授信 JSAPI 域名（可注册域，子域自动匹配；仅审核通过的应用配置） */
   trustedHosts?: string[]
   /** 备用链接 */
@@ -98,6 +155,20 @@ export interface AppRecord {
   requiresMembership?: boolean
   /** 用户是否愿意公开（默认 false；与 status=approved 同时满足才会真正对外可见） */
   isPublic: boolean
+  /** 目录访问方式，与审核/发布状态正交。 */
+  accessMode?: AppAccessMode
+  /** Stable / Beta 展示标记。 */
+  releaseStage?: AppReleaseStage
+  /** 官方标记只能由管理后台授予。 */
+  isOfficial?: boolean
+  /** 当前目录分发状态。 */
+  publicationStatus?: AppPublicationStatus
+  /** 当前公开投影对应的提交。 */
+  publishedSubmissionId?: string
+  /** 最近一次待处理提交。 */
+  activeSubmissionId?: string
+  /** 管理/所有者视图附带的最近提交；公开目录不会返回。 */
+  latestSubmission?: AppSubmission
   /** 审核状态（必填，默认 pending） */
   status: AppStatus
   /** 拒绝原因（仅 status=rejected 时有值） */
@@ -117,6 +188,8 @@ export interface CreateAppForm {
   description?: string
   githubRepo?: string
   websiteUrl?: string
+  privacyPolicyUrl?: string
+  supportUrl?: string
   trustedHosts?: string[]
   backupUrl?: string
   logo?: string
@@ -125,4 +198,69 @@ export interface CreateAppForm {
   category?: string
   tags?: string[]
   isPublic: boolean
+  accessMode?: AppAccessMode
+  releaseStage?: AppReleaseStage
+}
+
+/**
+ * 每次新增或修改都形成不可变提交快照。
+ * 审核只改变 submission 的状态，不直接覆盖线上 AppRecord 投影。
+ */
+export interface AppSubmission {
+  _id: string
+  appId: string
+  revision: number
+  kind: AppSubmissionKind
+  submitterUid: string
+  submitterLogin?: string
+  reviewStatus: AppReviewStatus
+  snapshot: CreateAppForm
+  ownership: AppOwnershipVerification
+  submittedAt: number
+  createdAt: number
+  updatedAt: number
+  reviewedAt?: number
+  reviewedBy?: string
+  reviewNote?: string
+}
+
+export type AppReviewEventAction
+  = | 'submission.created'
+    | 'submission.updated'
+    | 'submission.withdrawn'
+    | 'review.started'
+    | 'review.changes_requested'
+    | 'review.approved'
+    | 'review.rejected'
+    | 'ownership.verified'
+    | 'ownership.failed'
+    | 'publication.published'
+    | 'publication.suspended'
+    | 'publication.delisted'
+    | 'publication.restored'
+    | 'publication.emergency_published'
+
+/** 追加写审核/发布事件；事件写入后不允许修改或删除。 */
+export interface AppReviewEvent {
+  _id: string
+  appId: string
+  submissionId?: string
+  action: AppReviewEventAction
+  actorType: 'submitter' | 'admin' | 'system'
+  actorId: string
+  actorLogin?: string
+  note?: string
+  metadata?: Record<string, unknown>
+  createdAt: number
+}
+
+export interface AppSubmissionAccess {
+  canSubmitFirstParty: boolean
+  thirdPartyEnabled: boolean
+  thirdPartyMessage: string
+}
+
+export interface AppSubmissionResult {
+  app: AppRecord
+  submission: AppSubmission
 }

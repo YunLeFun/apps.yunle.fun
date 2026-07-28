@@ -17,6 +17,7 @@ function makeApp(slug: string, overrides: Partial<AppRecord> = {}): AppRecord {
     rating: 0,
     ratingCount: 0,
     isPublic: true,
+    publicationStatus: 'published',
     status: 'approved',
     createdAt: 1,
     updatedAt: 1,

@@ -9,14 +9,14 @@ import {
   IonIcon,
   IonInput,
   IonItem,
-  IonLabel,
   IonList,
   IonNote,
   IonPage,
+  IonSelect,
+  IonSelectOption,
   IonSpinner,
   IonTextarea,
   IonTitle,
-  IonToggle,
   IonToolbar,
   onIonViewWillEnter,
 } from '@ionic/vue'
@@ -199,9 +199,29 @@ watch(slug, (val) => {
           <IonItem>
             <IonInput
               v-model="form.websiteUrl"
-              label="网址"
+              label="网址（必填）"
               label-placement="stacked"
               placeholder="https://example.com"
+              type="url"
+            />
+          </IonItem>
+
+          <IonItem>
+            <IonInput
+              v-model="form.privacyPolicyUrl"
+              label="隐私政策（必填）"
+              label-placement="stacked"
+              placeholder="https://example.yunle.fun/privacy"
+              type="url"
+            />
+          </IonItem>
+
+          <IonItem>
+            <IonInput
+              v-model="form.supportUrl"
+              label="支持链接（必填）"
+              label-placement="stacked"
+              placeholder="https://support.yunle.fun"
               type="url"
             />
           </IonItem>
@@ -235,17 +255,33 @@ watch(slug, (val) => {
         <!-- 标签 -->
         <AppTagInput v-model="form.tags" />
 
-        <!-- 可见性 -->
+        <!-- 分发属性 -->
         <IonList inset class="mt-4">
           <IonItem>
-            <IonToggle v-model="form.isPublic">
-              <IonLabel>
-                <h3>公开应用</h3>
-                <p class="text-xs text---ion-color-medium">
-                  保存后将重新进入审核队列，通过后才会公开可见
-                </p>
-              </IonLabel>
-            </IonToggle>
+            <IonSelect v-model="form.accessMode" label="访问方式" label-placement="stacked">
+              <IonSelectOption value="public">
+                直接访问
+              </IonSelectOption>
+              <IonSelectOption value="login_required">
+                登录后使用
+              </IonSelectOption>
+              <IonSelectOption value="invite_only">
+                仅限受邀用户
+              </IonSelectOption>
+            </IonSelect>
+          </IonItem>
+          <IonItem>
+            <IonSelect v-model="form.releaseStage" label="发布阶段" label-placement="stacked">
+              <IonSelectOption value="stable">
+                Stable
+              </IonSelectOption>
+              <IonSelectOption value="beta">
+                Beta
+              </IonSelectOption>
+            </IonSelect>
+            <IonNote slot="helper">
+              保存后形成新提交；当前线上版本会保留到新提交审核并发布
+            </IonNote>
           </IonItem>
         </IonList>
 

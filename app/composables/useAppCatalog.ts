@@ -13,11 +13,11 @@ import { recordToAppInfo } from '~/utils/appRecord'
  *     ↓ 缺失时
  *   内置快照 ALL_APPS（离线 / 首屏，编译时打包）
  *
- * 合并策略：集合优先——按 slug 覆盖内置快照，内置中集合没有的保留（离线覆盖）。
- * 失败静默降级到缓存 / 内置快照，保证离线与首屏始终有数据。
+ * 在线成功后集合是完整权威快照，不再把已删除/暂停项从内置快照合并回来。
+ * 只有网络失败时才降级到上次缓存或构建时快照，保证离线与首屏可用。
  */
 
-const CACHE_KEY = 'ylf:app-catalog:v1'
+const CACHE_KEY = 'ylf:app-catalog:v2'
 
 interface CachePayload {
   list: YlfAppInfo[]
@@ -33,16 +33,6 @@ export function useAppCatalog() {
   /** 是否已成功从集合拉取过 */
   const loaded = useState('catalog:loaded', () => false)
   const loading = useState('catalog:loading', () => false)
-
-  /** 集合优先合并：remote 按 slug 覆盖 seed */
-  function merge(seed: YlfAppInfo[], remote: YlfAppInfo[]): YlfAppInfo[] {
-    const map = new Map<string, YlfAppInfo>()
-    for (const a of seed)
-      map.set(a.slug, a)
-    for (const a of remote)
-      map.set(a.slug, a)
-    return [...map.values()]
-  }
 
   function readCache(): YlfAppInfo[] | null {
     if (!import.meta.client)
@@ -77,7 +67,7 @@ export function useAppCatalog() {
     for (let skip = 0; ; skip += PAGE) {
       const { data } = await db
         .collection('apps')
-        .where({ isPublic: true, status: 'approved' })
+        .where({ isPublic: true, status: 'approved', publicationStatus: 'published' })
         .orderBy('updatedAt', 'desc')
         .skip(skip)
         .limit(PAGE)
@@ -100,15 +90,14 @@ export function useAppCatalog() {
 
     const cached = readCache()
     if (cached?.length)
-      catalog.value = merge(ALL_APPS, cached)
+      catalog.value = cached
 
     loading.value = true
     try {
       const remote = await fetchFromCloud()
-      if (remote.length) {
-        catalog.value = merge(ALL_APPS, remote)
-        writeCache(remote)
-      }
+      // 空列表同样是权威结果：必须清掉已下架缓存。
+      catalog.value = remote
+      writeCache(remote)
       loaded.value = true
     }
     catch {

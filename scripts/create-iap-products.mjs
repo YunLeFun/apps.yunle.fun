@@ -6,6 +6,8 @@
 
 import { createSign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const KEY_ID = '3BCG9ZYMR8'
 const ISSUER_ID = '73b700d9-9661-417c-bfa4-0ceedd7a38e2'
@@ -13,7 +15,7 @@ const KEY_PATH = '/Users/yunyou/Downloads/AuthKey_3BCG9ZYMR8.p8'
 const BUNDLE_ID = 'fun.yunle.apps'
 const BASE_URL = 'https://api.appstoreconnect.apple.com'
 
-const PRODUCTS = [
+export const PRODUCTS = [
   {
     productId: 'fun.yunle.apps.coin_100',
     name: '100 云币',
@@ -43,16 +45,16 @@ const PRODUCTS = [
     name: '会员月度',
     type: 'NON_RENEWING_SUBSCRIPTION',
     priceY: '12',
-    zh: { displayName: '云乐坊会员（月度）', description: '云乐坊会员 · 1 个月（31 天）' },
-    en: { displayName: 'Yunle Member (Monthly)', description: 'Yunle membership · 1 month (31 days)' },
+    zh: { displayName: '云乐坊会员（月度）', description: '云乐坊会员 · 1 个自然月' },
+    en: { displayName: 'Yunle Member (Monthly)', description: 'Yunle membership · 1 calendar month' },
   },
   {
     productId: 'fun.yunle.apps.member_year',
     name: '会员年度',
     type: 'NON_RENEWING_SUBSCRIPTION',
     priceY: '118',
-    zh: { displayName: '云乐坊会员（年度）', description: '云乐坊会员 · 1 年（366 天）' },
-    en: { displayName: 'Yunle Member (Yearly)', description: 'Yunle membership · 1 year (366 days)' },
+    zh: { displayName: '云乐坊会员（年度）', description: '云乐坊会员 · 1 个自然年' },
+    en: { displayName: 'Yunle Member (Yearly)', description: 'Yunle membership · 1 calendar year' },
   },
 ]
 
@@ -227,4 +229,6 @@ async function main() {
   console.log('\n完成。请在 ASC 确认商品状态，并提交审核。')
 }
 
-main()
+const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : ''
+if (import.meta.url === invokedPath)
+  await main()

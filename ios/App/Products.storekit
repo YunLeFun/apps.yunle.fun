@@ -7,7 +7,7 @@
       "internalID" : "F3A1B2C4-0000-4000-8000-MEMBERMONTH1",
       "localizations" : [
         {
-          "description" : "云乐坊会员 · 1 个月（31 天）",
+          "description" : "云乐坊会员 · 1 个自然月 / 1 calendar month",
           "displayName" : "云乐坊会员（月度）",
           "locale" : "zh_CN"
         }
@@ -22,7 +22,7 @@
       "internalID" : "F3A1B2C4-0000-4000-8000-MEMBERYEAR01",
       "localizations" : [
         {
-          "description" : "云乐坊会员 · 1 年（366 天）",
+          "description" : "云乐坊会员 · 1 个自然年 / 1 calendar year",
           "displayName" : "云乐坊会员（年度）",
           "locale" : "zh_CN"
         }

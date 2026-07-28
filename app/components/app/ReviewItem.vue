@@ -52,10 +52,18 @@ function formatDate(timestamp?: number) {
   <div class="review-item" :class="{ 'review-item--mine': mine }">
     <div class="review-header">
       <div class="reviewer-info">
-        <img v-if="review.authorAvatar" :src="review.authorAvatar" alt="" class="reviewer-avatar-img">
-        <div v-else class="reviewer-avatar">
-          {{ avatarText(review.authorName) }}
-        </div>
+        <UserAvatar
+          :src="review.authorAvatar"
+          :alt="review.authorName"
+          telemetry-surface="app.review"
+          class="reviewer-avatar-img"
+        >
+          <template #fallback>
+            <div class="reviewer-avatar">
+              {{ avatarText(review.authorName) }}
+            </div>
+          </template>
+        </UserAvatar>
         <div class="reviewer-details">
           <div class="reviewer-name-row">
             <span class="reviewer-name">{{ review.authorName }}</span>

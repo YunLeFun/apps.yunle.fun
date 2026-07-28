@@ -1,5 +1,8 @@
 import { createError, getRouterParam, setResponseHeader } from 'h3'
-import { getPublicAppByKey } from '../../../utils/public-apps'
+import {
+  catalogAppViewToRecord,
+  createCloudbaseCatalogResolver,
+} from '../../../domain/catalog/cloudbase'
 
 const PUBLIC_APP_KEY_RE = /^[\w.-]{1,128}$/
 
@@ -12,7 +15,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const app = await getPublicAppByKey(key)
+  const resolver = createCloudbaseCatalogResolver()
+  const view = await resolver.resolveCatalog({ surface: 'public_market' }, null)
+  const found = view.apps.find(app => app._id === key || app.slug === key)
+  const app = found ? catalogAppViewToRecord(found) : null
   if (!app) {
     throw createError({
       statusCode: 404,

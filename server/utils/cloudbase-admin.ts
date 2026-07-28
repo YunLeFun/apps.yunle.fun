@@ -19,6 +19,9 @@ function loadCloudbase(): CloudbaseModule {
 
 type CloudbaseAdminApp = CloudBase
 export type CloudbaseAdminDb = ReturnType<CloudbaseAdminApp['database']>
+export interface CloudbaseTransaction {
+  collection: (name: string) => ReturnType<CloudbaseAdminDb['collection']>
+}
 
 let cachedApp: CloudbaseAdminApp | null = null
 let cachedDb: CloudbaseAdminDb | null = null

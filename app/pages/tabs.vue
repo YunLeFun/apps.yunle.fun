@@ -33,7 +33,7 @@ const agentScreenOpen = useState('agent:screen-open', () => false)
 
         <IonTabButton tab="apps" href="/tabs/apps">
           <IonIcon :icon="apps" />
-          <IonLabel>工坊</IonLabel>
+          <IonLabel>市场</IonLabel>
         </IonTabButton>
 
         <IonTabButton tab="me" href="/tabs/me">

@@ -53,4 +53,18 @@ describe('app submission validation', () => {
     expect(() => normalizeSubmissionInput({ ...base, websiteUrl: 'http://cms.yunle.fun' })).toThrow(/HTTPS/)
     expect(() => normalizeSubmissionInput({ ...base, githubRepo: 'not-a-repo' })).toThrow(/owner\/repo/)
   })
+
+  it('accepts arbitrary HTTPS and static sites for workshop-only apps', () => {
+    const result = normalizeSubmissionInput({
+      ...base,
+      audience: 'workshop',
+      websiteUrl: 'https://static.example.com/tool/',
+    })
+
+    expect(result.snapshot).toMatchObject({
+      audience: 'workshop',
+      isPublic: false,
+      websiteUrl: 'https://static.example.com/tool/',
+    })
+  })
 })

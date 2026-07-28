@@ -47,6 +47,9 @@ export const DEFAULT_APP_STATUS: AppStatus = 'pending'
 /** 目录访问方式。受限访问不代表审核不通过。 */
 export type AppAccessMode = 'public' | 'login_required' | 'invite_only'
 
+/** App 元数据在云乐坊目录中的可见受众。 */
+export type AppAudience = 'public' | 'workshop' | 'owner'
+
 /** 面向用户展示的发布阶段。 */
 export type AppReleaseStage = 'stable' | 'beta'
 
@@ -155,6 +158,8 @@ export interface AppRecord {
   requiresMembership?: boolean
   /** 用户是否愿意公开（默认 false；与 status=approved 同时满足才会真正对外可见） */
   isPublic: boolean
+  /** 目录受众；缺省记录按旧版 isPublic 兼容迁移。 */
+  audience?: AppAudience
   /** 目录访问方式，与审核/发布状态正交。 */
   accessMode?: AppAccessMode
   /** Stable / Beta 展示标记。 */
@@ -165,6 +170,8 @@ export interface AppRecord {
   publicationStatus?: AppPublicationStatus
   /** 当前公开投影对应的提交。 */
   publishedSubmissionId?: string
+  /** 坊主当前发布的不可变 revision。 */
+  currentRevisionId?: string
   /** 最近一次待处理提交。 */
   activeSubmissionId?: string
   /** 管理/所有者视图附带的最近提交；公开目录不会返回。 */
@@ -198,6 +205,7 @@ export interface CreateAppForm {
   category?: string
   tags?: string[]
   isPublic: boolean
+  audience?: AppAudience
   accessMode?: AppAccessMode
   releaseStage?: AppReleaseStage
 }
@@ -239,6 +247,9 @@ export type AppReviewEventAction
     | 'publication.delisted'
     | 'publication.restored'
     | 'publication.emergency_published'
+    | 'public_market.submitted'
+    | 'public_market.listed'
+    | 'public_market.delisted'
 
 /** 追加写审核/发布事件；事件写入后不允许修改或删除。 */
 export interface AppReviewEvent {

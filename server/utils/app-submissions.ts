@@ -1,3 +1,4 @@
+import type { CloudbaseTransaction } from './cloudbase-admin'
 import type { ServerAuthUser } from './cloudbase-auth'
 import type {
   AppRecord,
@@ -8,6 +9,7 @@ import type {
 } from '~/types/app'
 import { randomUUID } from 'node:crypto'
 import { createError } from 'h3'
+import { PUBLIC_MARKET_LISTINGS_COLLECTION } from '../domain/catalog/cloudbase'
 import {
   isYunLeFunFirstPartyHostname,
   normalizeSubmissionInput,
@@ -18,21 +20,11 @@ import { useCloudbaseAdmin } from './cloudbase-admin'
 export const APPS_COLLECTION = 'apps'
 export const APP_SUBMISSIONS_COLLECTION = 'app_submissions'
 export const APP_REVIEW_EVENTS_COLLECTION = 'app_review_events'
-export const APP_SUBMITTERS_COLLECTION = 'app_submitters'
-
-interface SubmitterRecord {
-  _id: string
-  enabled?: boolean
-  firstParty?: boolean
-  note?: string
-}
 
 export async function getAppSubmissionAccess(user: ServerAuthUser): Promise<AppSubmissionAccess> {
-  const { db } = useCloudbaseAdmin()
   const canSubmitFirstParty = !user.anonymous
     && user.phoneVerified
     && user.accountStatus === 'active'
-    && await isFirstPartySubmitter(db, user.uid)
   return {
     canSubmitFirstParty,
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
@@ -59,8 +51,6 @@ export async function createAppSubmission(
   const normalized = normalizeSubmissionInput(input, {
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
   })
-  if (normalized.kind === 'first_party')
-    await requireFirstPartySubmitter(user)
   await enforceSubmissionRateLimit(db, user.uid)
 
   const { data: duplicates } = await db.collection(APPS_COLLECTION)
@@ -82,7 +72,7 @@ export async function createAppSubmission(
     kind: normalized.kind,
     submitterUid: user.uid,
     ...(user.handle ? { submitterLogin: user.handle } : {}),
-    reviewStatus: 'pending',
+    reviewStatus: 'draft',
     snapshot: normalized.snapshot,
     ownership: {
       status: 'pending',
@@ -103,17 +93,20 @@ export async function createAppSubmission(
     ownerUid: user.uid,
     ownerLogin: user.handle || user.name || 'YunLeFun',
     ...projection,
-    isPublic: false,
+    isPublic: normalized.snapshot.audience === 'public',
+    audience: normalized.snapshot.audience || 'public',
     isOfficial: false,
-    publicationStatus: 'unpublished',
-    activeSubmissionId: submissionId,
-    status: 'pending',
+    publicationStatus: 'published',
+    currentRevisionId: submissionId,
+    publishedSubmissionId: submissionId,
+    activeSubmissionId: '',
+    status: 'approved',
     createdAt: now,
     updatedAt: now,
   }
   const event = submissionEvent(eventId, appId, submissionId, user, 'submission.created', now)
 
-  await db.runTransaction(async (transaction: any) => {
+  await db.runTransaction(async (transaction: CloudbaseTransaction) => {
     await transaction.collection(APPS_COLLECTION).doc(appId).set(documentPayload(app))
     await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).set(documentPayload(submission))
     await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
@@ -132,10 +125,8 @@ export async function updateAppSubmission(
   const normalized = normalizeSubmissionInput(input, {
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
   })
-  if (normalized.kind === 'first_party')
-    await requireFirstPartySubmitter(user)
   await enforceSubmissionRateLimit(db, user.uid)
-  if (app.publishedSubmissionId && normalized.snapshot.slug !== app.slug) {
+  if (app.currentRevisionId && normalized.snapshot.slug !== app.slug) {
     throw createError({
       statusCode: 409,
       statusMessage: '已上架应用不能修改 slug',
@@ -167,7 +158,7 @@ export async function updateAppSubmission(
     kind: normalized.kind,
     submitterUid: user.uid,
     ...(user.handle ? { submitterLogin: user.handle } : {}),
-    reviewStatus: 'pending',
+    reviewStatus: 'draft',
     snapshot: normalized.snapshot,
     ownership: {
       status: 'pending',
@@ -184,22 +175,25 @@ export async function updateAppSubmission(
   }
   const event = submissionEvent(eventId, appId, submissionId, user, 'submission.updated', now)
   const appPatch: Record<string, unknown> = {
-    activeSubmissionId: submissionId,
-    status: 'pending',
+    ...publicProjectionFromSubmission(normalized.snapshot),
+    audience: normalized.snapshot.audience || 'public',
+    isPublic: normalized.snapshot.audience === 'public',
+    publicationStatus: 'published',
+    currentRevisionId: submissionId,
+    publishedSubmissionId: submissionId,
+    activeSubmissionId: '',
+    status: 'approved',
     rejectedReason: '',
     updatedAt: now,
   }
-  if (!app.publishedSubmissionId) {
-    Object.assign(appPatch, publicProjectionFromSubmission(normalized.snapshot), {
-      isPublic: false,
-    })
-  }
 
-  await db.runTransaction(async (transaction: any) => {
+  await db.runTransaction(async (transaction: CloudbaseTransaction) => {
     await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).set(documentPayload(submission))
     await transaction.collection(APPS_COLLECTION).doc(appId).update(appPatch)
     await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
   })
+  if (normalized.snapshot.audience !== 'public')
+    await invalidatePublicMarketListing(db, appId, now)
 
   const nextApp = {
     ...app,
@@ -207,6 +201,88 @@ export async function updateAppSubmission(
     latestSubmission: submission,
   } as AppRecord
   return { app: nextApp, submission }
+}
+
+export async function submitOwnedAppToPublicMarket(
+  user: ServerAuthUser,
+  appId: string,
+): Promise<{ appId: string, submissionId: string, reviewStatus: 'pending' }> {
+  const { db } = useCloudbaseAdmin()
+  const app = await ownedApp(db, appId, user.uid)
+  if ((app.audience || 'public') !== 'public' || app.publicationStatus !== 'published') {
+    throw createError({
+      statusCode: 409,
+      message: '只有已发布的公开应用可以投稿公共市场',
+      data: { code: 'PUBLIC_MARKET_AUDIENCE_REQUIRED' },
+    })
+  }
+
+  const submissionId = app.currentRevisionId || app.publishedSubmissionId
+  if (!submissionId)
+    throw createError({ statusCode: 409, message: '应用还没有可投稿的版本' })
+
+  const { data: submissionData } = await db.collection(APP_SUBMISSIONS_COLLECTION)
+    .doc(submissionId)
+    .get()
+  const submission = (Array.isArray(submissionData) ? submissionData[0] : submissionData) as AppSubmission | undefined
+  if (!submission || submission.appId !== appId)
+    throw createError({ statusCode: 409, message: '应用版本不存在' })
+  if (submission.reviewStatus === 'pending' || submission.reviewStatus === 'in_review') {
+    throw createError({
+      statusCode: 409,
+      message: '当前版本已经在公共市场审核中',
+      data: { code: 'PUBLIC_MARKET_SUBMISSION_ACTIVE' },
+    })
+  }
+
+  const { data: listingData } = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION)
+    .doc(appId)
+    .get()
+  const listing = (Array.isArray(listingData) ? listingData[0] : listingData) as {
+    status?: string
+    approvedRevisionId?: string
+  } | undefined
+  const now = Date.now()
+  const eventId = entityId('review_event')
+  const event = submissionEvent(
+    eventId,
+    appId,
+    submissionId,
+    user,
+    'public_market.submitted',
+    now,
+  )
+
+  await db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).update({
+      reviewStatus: 'pending',
+      submittedAt: now,
+      updatedAt: now,
+      reviewedAt: 0,
+      reviewedBy: '',
+      reviewNote: '',
+    })
+    await transaction.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(appId).set({
+      appId,
+      status: listing?.status === 'listed' ? 'listed' : 'unlisted',
+      approvedRevisionId: listing?.approvedRevisionId || '',
+      activeSubmissionId: submissionId,
+      submittedAt: now,
+      updatedAt: now,
+    })
+    await transaction.collection(APPS_COLLECTION).doc(appId).update({
+      activeSubmissionId: submissionId,
+      status: 'pending',
+      updatedAt: now,
+    })
+    await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
+  })
+
+  return {
+    appId,
+    submissionId,
+    reviewStatus: 'pending',
+  }
 }
 
 export async function listOwnedApps(user: ServerAuthUser): Promise<AppRecord[]> {
@@ -255,7 +331,7 @@ export async function delistOwnedApp(user: ServerAuthUser, appId: string): Promi
     '应用所有者主动下架',
   )
 
-  await db.runTransaction(async (transaction: any) => {
+  await db.runTransaction(async (transaction: CloudbaseTransaction) => {
     if (app.activeSubmissionId) {
       await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(app.activeSubmissionId).update({
         reviewStatus: 'withdrawn',
@@ -273,7 +349,9 @@ export async function delistOwnedApp(user: ServerAuthUser, appId: string): Promi
 }
 
 async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppRecord[]> {
-  const submissionIds = apps.map(app => app.activeSubmissionId).filter(Boolean) as string[]
+  const submissionIds = apps
+    .map(app => app.activeSubmissionId || app.currentRevisionId || app.publishedSubmissionId)
+    .filter(Boolean) as string[]
   if (!submissionIds.length)
     return apps
   const { data } = await db.collection(APP_SUBMISSIONS_COLLECTION)
@@ -284,14 +362,15 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
     ((data || []) as AppSubmission[]).map(item => [item._id, item]),
   )
   return apps.map((app) => {
-    const latest = app.activeSubmissionId ? submissions.get(app.activeSubmissionId) : undefined
+    const latestId = app.activeSubmissionId || app.currentRevisionId || app.publishedSubmissionId
+    const latest = latestId ? submissions.get(latestId) : undefined
     if (!latest)
       return app
     const visibleSnapshot = latest.snapshot
     return {
       ...app,
       ...visibleSnapshot,
-      isPublic: app.publicationStatus === 'published',
+      isPublic: app.publicationStatus === 'published' && (app.audience || visibleSnapshot.audience || 'public') === 'public',
       status: reviewStatusToLegacy(latest.reviewStatus, app.status),
       rejectedReason: latest.reviewStatus === 'rejected' || latest.reviewStatus === 'changes_requested'
         ? latest.reviewNote || ''
@@ -299,6 +378,29 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
       latestSubmission: latest,
     }
   })
+}
+
+async function invalidatePublicMarketListing(
+  db: ReturnType<typeof useCloudbaseAdmin>['db'],
+  appId: string,
+  updatedAt: number,
+): Promise<void> {
+  try {
+    const { data } = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(appId).get()
+    const existing = Array.isArray(data) ? data[0] : data
+    if (!existing)
+      return
+    await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(appId).update({
+      status: 'delisted',
+      activeSubmissionId: '',
+      delistedReason: 'audience_changed',
+      updatedAt,
+    })
+  }
+  catch (error: unknown) {
+    // 兼容公共市场 listing 集合尚未完成初始化的滚动部署阶段。
+    console.warn('[PublicMarket] listing invalidation skipped during migration', error)
+  }
 }
 
 async function ownedApp(db: any, appId: string, uid: string): Promise<AppRecord> {
@@ -309,19 +411,6 @@ async function ownedApp(db: any, appId: string, uid: string): Promise<AppRecord>
   if (app.ownerUid !== uid && app._openid !== uid)
     throw createError({ statusCode: 403, statusMessage: '无权管理此应用' })
   return app
-}
-
-async function isFirstPartySubmitter(db: any, uid: string): Promise<boolean> {
-  try {
-    const { data } = await db.collection(APP_SUBMITTERS_COLLECTION).doc(uid).get()
-    const row = (Array.isArray(data) ? data[0] : data) as SubmitterRecord | undefined
-    if (row)
-      return row.enabled !== false && row.firstParty !== false
-  }
-  catch {
-    // 资源迁移完成前允许 server-only 配置兜底。
-  }
-  return configuredSubmitterUids().includes(uid)
 }
 
 async function enforceSubmissionRateLimit(db: any, uid: string): Promise<void> {
@@ -355,14 +444,6 @@ async function enforceSubmissionRateLimit(db: any, uid: string): Promise<void> {
       data: { code: 'APP_SUBMISSION_DAILY_LIMITED' },
     })
   }
-}
-
-function configuredSubmitterUids(): string[] {
-  const config = useRuntimeConfig() as Record<string, unknown>
-  return String(config.appFirstPartySubmitterUids || '')
-    .split(',')
-    .map(item => item.trim())
-    .filter(Boolean)
 }
 
 function thirdPartySubmissionsEnabled(): boolean {

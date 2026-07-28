@@ -1,0 +1,6 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "workshop_memberships",
+  "permission": "ADMINONLY"
+}

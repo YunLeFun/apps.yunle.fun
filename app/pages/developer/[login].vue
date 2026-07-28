@@ -15,7 +15,6 @@ import { chevronForward, logoGithub } from 'ionicons/icons'
 
 const route = useRoute()
 const router = useRouter()
-const { ensureLoaded, loading: catalogLoading, getAppsByDeveloper } = useAppCatalog()
 
 // Ionic + Nuxt 路由下 route.params 偶发为空，回退解析 URL（与 app/[id].vue 同款兜底）
 function resolveLoginFromUrl(): string {
@@ -33,8 +32,8 @@ const login = computed(() => {
   return resolveLoginFromUrl()
 })
 
-// 该开发者的全部公开应用
-const apps = computed(() => getAppsByDeveloper(login.value))
+// 个人市场独立于公共市场审核，读取坊主当前发布的公开作品。
+const { apps, loading: catalogLoading, load } = usePersonalMarket(login)
 
 // GitHub 公开资料（中文名 / 头像 / 简介）
 const { profile } = useGithubProfile(login)
@@ -56,7 +55,7 @@ watch([login, avatarUrl], () => {
   avatarError.value = false
 })
 
-function openAppDetail(app: YlfAppInfo) {
+function openAppDetail(app: Pick<YlfAppInfo, 'id' | 'slug'>) {
   router.push(`/app/${app.slug || app.id}`)
 }
 
@@ -66,7 +65,8 @@ function openGithubProfile() {
     openInAppBrowser(url)
 }
 
-onMounted(() => ensureLoaded())
+onMounted(load)
+watch(login, load)
 </script>
 
 <template>
@@ -76,7 +76,7 @@ onMounted(() => ensureLoaded())
         <IonButtons slot="start">
           <IonBackButton default-href="/tabs/apps" text="" />
         </IonButtons>
-        <IonTitle>开发者</IonTitle>
+        <IonTitle>个人市场</IonTitle>
       </IonToolbar>
     </IonHeader>
 

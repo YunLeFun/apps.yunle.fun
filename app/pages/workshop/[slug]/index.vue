@@ -25,6 +25,7 @@ import {
   linkOutline,
   logoGithub,
   openOutline,
+  paperPlaneOutline,
   trashOutline,
 } from 'ionicons/icons'
 import { DEFAULT_EMOJI } from '~/types/app'
@@ -32,7 +33,7 @@ import { DEFAULT_EMOJI } from '~/types/app'
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const { getMyAppBySlug, deleteApp } = useApps()
+const { getMyAppBySlug, deleteApp, submitPublicMarket } = useApps()
 
 /**
  * 从路由参数获取 slug
@@ -44,6 +45,7 @@ const slug = computed(() => (route.params as { slug?: string }).slug ?? '')
 const loading = ref(true)
 const loadError = ref('')
 const app = ref<AppRecord | null>(null)
+const submittingPublicMarket = ref(false)
 /** 当前页面绑定的 slug（首次解析后锁定） */
 const pageSlug = ref('')
 
@@ -130,6 +132,23 @@ async function confirmDelete() {
   await alert.present()
 }
 
+async function handlePublicMarketSubmission() {
+  if (!app.value)
+    return
+  try {
+    submittingPublicMarket.value = true
+    await submitPublicMarket(app.value._id)
+    toast.showSuccess('已投稿公共市场，等待审核')
+    await loadApp(app.value.slug)
+  }
+  catch (err: unknown) {
+    toast.showError(err instanceof Error ? err.message : '投稿失败')
+  }
+  finally {
+    submittingPublicMarket.value = false
+  }
+}
+
 function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -204,8 +223,11 @@ watch(slug, (val) => {
             <IonChip v-if="app.category" class="hero-chip">
               {{ app.category }}
             </IonChip>
-            <IonChip v-if="!app.isPublic" class="hero-chip hero-chip--private">
-              未上架
+            <IonChip v-if="app.audience === 'workshop'" class="hero-chip hero-chip--private">
+              坊客专属
+            </IonChip>
+            <IonChip v-else-if="app.audience === 'owner'" class="hero-chip hero-chip--private">
+              仅自己
             </IonChip>
             <IonChip v-if="app.releaseStage === 'beta'" class="hero-chip">
               Beta
@@ -285,15 +307,15 @@ watch(slug, (val) => {
             </IonNote>
           </IonItem>
           <IonItem>
-            <IonLabel>访问方式</IonLabel>
+            <IonLabel>可见范围</IonLabel>
             <IonNote slot="end">
-              {{ app.accessMode === 'invite_only' ? '仅限受邀' : app.accessMode === 'login_required' ? '需登录' : '公开访问' }}
+              {{ app.audience === 'workshop' ? '坊客专属' : app.audience === 'owner' ? '仅自己' : '公开' }}
             </IonNote>
           </IonItem>
           <IonItem>
-            <IonLabel>审核状态</IonLabel>
+            <IonLabel>公共市场审核</IonLabel>
             <IonNote slot="end">
-              {{ app.latestSubmission?.reviewStatus || app.status }}
+              {{ app.latestSubmission?.reviewStatus === 'draft' ? '未投稿' : app.latestSubmission?.reviewStatus || app.status }}
             </IonNote>
           </IonItem>
           <IonItem>
@@ -315,6 +337,19 @@ watch(slug, (val) => {
           管理
         </div>
         <IonList inset>
+          <IonItem
+            v-if="(app.audience || 'public') === 'public' && app.publicationStatus === 'published'"
+            button
+            :disabled="submittingPublicMarket || ['pending', 'in_review'].includes(app.latestSubmission?.reviewStatus || '')"
+            :detail="false"
+            @click="handlePublicMarketSubmission"
+          >
+            <IonIcon slot="start" :icon="paperPlaneOutline" color="primary" />
+            <IonLabel>
+              {{ ['pending', 'in_review'].includes(app.latestSubmission?.reviewStatus || '') ? '公共市场审核中' : '投稿公共市场' }}
+            </IonLabel>
+            <IonSpinner v-if="submittingPublicMarket" slot="end" name="crescent" />
+          </IonItem>
           <IonItem button :detail="true" @click="goEdit">
             <IonIcon slot="start" :icon="createOutline" color="primary" />
             <IonLabel>编辑应用</IonLabel>

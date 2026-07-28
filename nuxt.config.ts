@@ -3,7 +3,10 @@ import path from 'node:path'
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import { defineNuxtConfig } from 'nuxt/config'
-import { DEFAULT_CLOUDBASE_ENV_ID } from './app/constants/cloudbase'
+import {
+  DEFAULT_CLOUDBASE_ENV_ID,
+  DEFAULT_CLOUDBASE_STORAGE_PUBLIC_ORIGIN,
+} from './app/constants/cloudbase'
 import { appDescription } from './app/constants/index'
 
 const configRequire = createRequire(import.meta.url)
@@ -199,6 +202,8 @@ export default defineNuxtConfig({
     tmsBizType: '',
     public: {
       tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
+      cloudbaseStoragePublicOrigin: process.env.NUXT_PUBLIC_CLOUDBASE_STORAGE_PUBLIC_ORIGIN
+        || DEFAULT_CLOUDBASE_STORAGE_PUBLIC_ORIGIN,
       cloudbaseRegion: process.env.NUXT_PUBLIC_CLOUDBASE_REGION || '',
       cloudbaseAccessKey: process.env.NUXT_PUBLIC_CLOUDBASE_ACCESS_KEY || '',
       agentBotId: process.env.NUXT_PUBLIC_AGENT_BOT_ID || 'agent-yunlefun-1g1ef4a470aefe98',

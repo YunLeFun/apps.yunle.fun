@@ -193,6 +193,22 @@ const {
         <!-- 分发属性 -->
         <IonList inset class="mt-4">
           <IonItem>
+            <IonSelect v-model="form.audience" label="可见范围" label-placement="stacked">
+              <IonSelectOption value="public">
+                公开
+              </IonSelectOption>
+              <IonSelectOption value="workshop">
+                坊客专属
+              </IonSelectOption>
+              <IonSelectOption value="owner">
+                仅自己
+              </IonSelectOption>
+            </IonSelect>
+            <IonNote slot="helper">
+              {{ form.audience === 'workshop' ? '仅在个人工坊展示，站点访问权限由开发者决定' : form.audience === 'owner' ? '仅你本人可以在创作管理中看到' : '发布后展示在个人市场，可另行投稿公共市场' }}
+            </IonNote>
+          </IonItem>
+          <IonItem>
             <IonSelect v-model="form.accessMode" label="访问方式" label-placement="stacked">
               <IonSelectOption value="public">
                 直接访问
@@ -215,7 +231,7 @@ const {
               </IonSelectOption>
             </IonSelect>
             <IonNote slot="helper">
-              提交后进入审核队列；审核通过并发布后才会出现在目录
+              保存后立即形成不可变版本；投稿公共市场时再进入人工审核
             </IonNote>
           </IonItem>
         </IonList>

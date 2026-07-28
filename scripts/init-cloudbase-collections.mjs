@@ -31,6 +31,10 @@ const collections = [
   'app_submissions',
   'app_review_events',
   'app_submitters',
+  'public_market_listings',
+  'personal_workshops',
+  'workshop_memberships',
+  'workshop_events',
 ]
 
 for (const name of collections) {

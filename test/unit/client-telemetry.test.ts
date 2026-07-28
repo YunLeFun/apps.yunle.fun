@@ -17,10 +17,10 @@ describe('client telemetry', () => {
       $rum: { report, reportEvent },
     })
 
-    reportClientEvent('ui.avatar.signing_failed', {
+    reportClientEvent('ui.avatar.load_failed', {
       error: 'GET https://example.com/private/user.jpg?sign=secret with Bearer abc.def failed',
       host: 'example.com',
-      stage: 'sign',
+      stage: 'load',
       surface: 'user.profile',
     })
 

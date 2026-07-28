@@ -1,5 +1,6 @@
 import type {
   AppAccessMode,
+  AppAudience,
   AppReleaseStage,
   AppSubmissionKind,
   CreateAppForm,
@@ -29,6 +30,7 @@ export function normalizeSubmissionInput(
     invalid('提交内容格式不正确')
 
   const kind = normalizeKind(value.kind)
+  const audience = normalizeAudience(value.audience)
   if (kind === 'third_party' && !options.thirdPartyEnabled) {
     throw createError({
       statusCode: 403,
@@ -46,7 +48,7 @@ export function normalizeSubmissionInput(
   const privacyPolicyUrl = normalizeHttpsUrl(value.privacyPolicyUrl, '隐私政策链接', true)
   const supportUrl = normalizeHttpsUrl(value.supportUrl, '支持链接', true)
   const hostname = new URL(websiteUrl).hostname
-  if (kind === 'first_party' && !isYunLeFunFirstPartyHostname(hostname))
+  if (kind === 'first_party' && audience === 'public' && !isYunLeFunFirstPartyHostname(hostname))
     invalid('第一方应用网址必须属于 yunle.fun')
 
   const githubRepo = optionalString(value.githubRepo, 'GitHub 仓库', 160)
@@ -76,7 +78,8 @@ export function normalizeSubmissionInput(
       themeColor,
       category: optionalString(value.category, '分类', 40) || '其他',
       tags,
-      isPublic: true,
+      isPublic: audience === 'public',
+      audience,
       accessMode: normalizeAccessMode(value.accessMode),
       releaseStage: normalizeReleaseStage(value.releaseStage),
     },
@@ -99,7 +102,8 @@ export function publicProjectionFromSubmission(snapshot: CreateAppForm) {
     themeColor: snapshot.themeColor || '#007AFF',
     category: snapshot.category || '其他',
     tags: snapshot.tags || [],
-    isPublic: true,
+    isPublic: snapshot.audience === 'public',
+    audience: snapshot.audience || 'public',
     accessMode: snapshot.accessMode || 'public',
     releaseStage: snapshot.releaseStage || 'stable',
   }
@@ -119,6 +123,14 @@ function normalizeAccessMode(value: unknown): AppAccessMode {
   if (value === 'login_required' || value === 'invite_only')
     return value
   return invalid('访问方式不正确')
+}
+
+function normalizeAudience(value: unknown): AppAudience {
+  if (value === undefined || value === 'public')
+    return 'public'
+  if (value === 'workshop' || value === 'owner')
+    return value
+  return invalid('可见范围不正确')
 }
 
 function normalizeReleaseStage(value: unknown): AppReleaseStage {

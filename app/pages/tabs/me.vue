@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { apps, chatbubbleEllipsesOutline, codeSlashOutline, flagOutline, helpCircleOutline, informationCircle, personCircleOutline, ribbonOutline, settings, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
+import { apps, chatbubbleEllipsesOutline, codeSlashOutline, flagOutline, helpCircleOutline, informationCircle, peopleOutline, personCircleOutline, ribbonOutline, settings, storefrontOutline, swapHorizontalOutline, walletOutline } from 'ionicons/icons'
 import {
   kList,
   kListItem,
@@ -96,6 +96,34 @@ function navigateTo(path: string) {
 
         <!-- 钱包（登录后可见） -->
         <k-list v-if="userStore.isLoggedIn" strong inset>
+          <k-list-item
+            link
+            title="我的个人工坊"
+            subtitle="设置二维码、加入方式和坊客"
+            inner-class="k-list-item-vcenter"
+            @click="navigateTo('/user/workshop')"
+          >
+            <template #media>
+              <span class="ios-icon-box ios-icon-blue">
+                <IonIcon :icon="storefrontOutline" />
+              </span>
+            </template>
+          </k-list-item>
+
+          <k-list-item
+            link
+            title="已加入的工坊"
+            subtitle="查看坊客专属作品"
+            inner-class="k-list-item-vcenter"
+            @click="navigateTo('/user/workshops')"
+          >
+            <template #media>
+              <span class="ios-icon-box ios-icon-orange">
+                <IonIcon :icon="peopleOutline" />
+              </span>
+            </template>
+          </k-list-item>
+
           <k-list-item
             link
             title="钱包"

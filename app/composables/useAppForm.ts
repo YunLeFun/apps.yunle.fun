@@ -1,4 +1,4 @@
-import type { AppAccessMode, AppRecord, AppReleaseStage, CreateAppForm } from '~/types/app'
+import type { AppAccessMode, AppAudience, AppRecord, AppReleaseStage, CreateAppForm } from '~/types/app'
 import { actionSheetController } from '@ionic/vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { DEFAULT_EMOJI, DEFAULT_THEME_COLOR } from '~/types/app'
@@ -27,6 +27,7 @@ function createEmptyForm() {
     tags: [] as string[],
     // 是否出现在目录由 publicationStatus 控制；isPublic 仅保留旧表单兼容。
     isPublic: true,
+    audience: 'public' as AppAudience,
     accessMode: 'public' as AppAccessMode,
     releaseStage: 'stable' as AppReleaseStage,
   }
@@ -72,6 +73,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
     form.category = app.category || ''
     form.tags = app.tags ? [...app.tags] : []
     form.isPublic = app.isPublic
+    form.audience = app.audience || (app.isPublic ? 'public' : 'owner')
     form.accessMode = app.accessMode || 'public'
     form.releaseStage = app.releaseStage || 'stable'
     autoSlug.value = false
@@ -267,6 +269,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       category: form.category,
       tags: form.tags.filter(Boolean),
       isPublic: form.isPublic,
+      audience: form.audience,
       accessMode: form.accessMode,
       releaseStage: form.releaseStage,
     }

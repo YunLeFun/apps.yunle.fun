@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AppRecord } from '~/types/app'
+import type { AppRecord, AppSubmissionAccess } from '~/types/app'
 import {
   alertController,
   IonBackButton,
@@ -33,10 +33,12 @@ import { DEFAULT_EMOJI } from '~/types/app'
 const router = useRouter()
 const toast = useToast()
 const userStore = useUserStore()
-const { getMyApps, deleteApp } = useApps()
+const { getMyApps, deleteApp, getSubmissionAccess } = useApps()
 
 const loading = ref(true)
 const myApps = ref<AppRecord[]>([])
+const submissionAccess = ref<AppSubmissionAccess | null>(null)
+const canCreateFirstParty = computed(() => submissionAccess.value?.canSubmitFirstParty === true)
 const initialized = ref(false)
 /** 上次成功获取数据的时间戳 */
 const lastFetchedAt = ref(0)
@@ -59,6 +61,19 @@ async function fetchMyApps() {
   finally {
     loading.value = false
   }
+}
+
+async function fetchSubmissionAccess() {
+  try {
+    submissionAccess.value = await getSubmissionAccess()
+  }
+  catch {
+    submissionAccess.value = null
+  }
+}
+
+async function fetchWorkshop() {
+  await Promise.all([fetchMyApps(), fetchSubmissionAccess()])
 }
 
 async function handleRefresh(event: CustomEvent) {
@@ -84,21 +99,21 @@ function openApp(app: AppRecord, slidingItem?: any) {
 async function confirmDeleteApp(app: AppRecord, slidingItem?: any) {
   slidingItem?.close()
   const alert = await alertController.create({
-    header: '删除应用',
-    message: `确定要删除「${app.name}」吗？此操作不可撤销。`,
+    header: '下架应用',
+    message: `确定要下架「${app.name}」吗？应用会从目录移除，提交与审核记录仍会保留。`,
     buttons: [
       { text: '取消', role: 'cancel' },
       {
-        text: '删除',
+        text: '下架',
         role: 'destructive',
         handler: async () => {
           try {
             await deleteApp(app._id)
             myApps.value = myApps.value.filter(a => a._id !== app._id)
-            toast.showSuccess('已删除')
+            toast.showSuccess('已下架')
           }
           catch (err: unknown) {
-            toast.showError(err instanceof Error ? err.message : '删除失败')
+            toast.showError(err instanceof Error ? err.message : '下架失败')
           }
         },
       },
@@ -125,7 +140,7 @@ function statusLabel(status: AppRecord['status']) {
 
 onMounted(() => {
   if (userStore.isLoggedIn)
-    fetchMyApps()
+    fetchWorkshop()
   else
     loading.value = false
 })
@@ -135,15 +150,16 @@ onIonViewWillEnter(() => {
     return
   // 子页面标记了数据变更，或超过过期阈值，才重新查询
   if (workshopDirty.value || Date.now() - lastFetchedAt.value > STALE_THRESHOLD)
-    fetchMyApps()
+    fetchWorkshop()
 })
 
 watch(() => userStore.isLoggedIn, (loggedIn) => {
   if (loggedIn) {
-    fetchMyApps()
+    fetchWorkshop()
   }
   else {
     myApps.value = []
+    submissionAccess.value = null
     loading.value = false
   }
 })
@@ -158,7 +174,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
         </IonButtons>
         <IonTitle>我的应用</IonTitle>
         <IonButtons slot="end">
-          <IonButton v-if="userStore.isLoggedIn" @click="router.push('/workshop/new')">
+          <IonButton v-if="userStore.isLoggedIn && canCreateFirstParty" @click="router.push('/workshop/new')">
             <IonIcon slot="icon-only" :icon="add" />
           </IonButton>
         </IonButtons>
@@ -200,9 +216,9 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
           还没有应用
         </p>
         <p class="empty-text">
-          创建你的第一个应用吧
+          {{ canCreateFirstParty ? '创建你的第一个一方应用吧' : '第三方应用入驻敬请期待' }}
         </p>
-        <IonButton fill="solid" shape="round" @click="router.push('/workshop/new')">
+        <IonButton v-if="canCreateFirstParty" fill="solid" shape="round" @click="router.push('/workshop/new')">
           创建应用
         </IonButton>
       </div>
@@ -224,7 +240,9 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
             <IonLabel>
               <h2 class="app-name">
                 {{ app.name }}
-                <span v-if="!app.isPublic" class="private-badge">私有</span>
+                <span v-if="app.releaseStage === 'beta'" class="private-badge">Beta</span>
+                <span v-if="app.accessMode === 'login_required'" class="private-badge">需登录</span>
+                <span v-if="app.accessMode === 'invite_only'" class="private-badge">仅限受邀</span>
                 <span
                   v-if="app.status && app.status !== 'approved'"
                   class="status-badge"
@@ -261,7 +279,10 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
 
       <!-- 底部统计 -->
       <div v-if="userStore.isLoggedIn && myApps.length > 0" class="list-footer">
-        共 {{ myApps.length }} 个应用 · 左滑查看更多操作
+        <p>共 {{ myApps.length }} 个应用 · 左滑查看更多操作</p>
+        <p v-if="!canCreateFirstParty">
+          第三方应用入驻敬请期待
+        </p>
       </div>
     </IonContent>
   </IonPage>

@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   let appKey = input.appKey || ''
   if (input.targetType === 'app') {
     const { data } = await db.collection('apps')
-      .where({ slug: input.targetId, isPublic: true, status: 'approved' })
+      .where({ slug: input.targetId, isPublic: true, status: 'approved', publicationStatus: 'published' })
       .limit(1)
       .get()
     if (!data?.[0]) {

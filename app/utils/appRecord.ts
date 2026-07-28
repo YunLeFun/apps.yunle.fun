@@ -1,5 +1,13 @@
 import type { YlfAppInfo } from '@yunlefun/types'
-import type { AppRecord } from '~/types/app'
+import type { AppAccessMode, AppRecord, AppReleaseStage } from '~/types/app'
+
+export type CatalogAppInfo = YlfAppInfo & {
+  accessMode?: AppAccessMode
+  releaseStage?: AppReleaseStage
+  isOfficial?: boolean
+  privacyPolicyUrl?: string
+  supportUrl?: string
+}
 
 /**
  * 把 CloudBase `apps` 集合文档（AppRecord）映射为前端展示用的 YlfAppInfo。
@@ -9,7 +17,7 @@ import type { AppRecord } from '~/types/app'
  * - themeColor 默认 #007AFF
  * - 业务主键用 slug；id 取文档 _id
  */
-export function recordToAppInfo(record: AppRecord): YlfAppInfo {
+export function recordToAppInfo(record: AppRecord): CatalogAppInfo {
   return {
     id: record._id,
     slug: record.slug,
@@ -19,6 +27,8 @@ export function recordToAppInfo(record: AppRecord): YlfAppInfo {
     themeColor: record.themeColor || '#007AFF',
     logo: record.logo || undefined,
     websiteUrl: record.websiteUrl || '',
+    privacyPolicyUrl: record.privacyPolicyUrl || undefined,
+    supportUrl: record.supportUrl || undefined,
     trustedHosts: record.trustedHosts,
     category: record.category,
     rating: record.rating,
@@ -29,5 +39,8 @@ export function recordToAppInfo(record: AppRecord): YlfAppInfo {
     developerName: record.developerName || undefined,
     coinCost: record.coinCost,
     requiresMembership: record.requiresMembership,
+    accessMode: record.accessMode || 'public',
+    releaseStage: record.releaseStage || 'stable',
+    isOfficial: record.isOfficial === true,
   }
 }

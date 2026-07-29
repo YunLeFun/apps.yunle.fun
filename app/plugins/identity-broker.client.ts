@@ -11,7 +11,7 @@ import {
 const SSO_ISSUER = 'https://www.yunle.fun'
 
 /**
- * iOS 宿主身份代理。
+ * iOS 第一方宿主身份代理。
  *
  * Apps 使用自身 CloudBase 登录态向统一 SSO 云函数申请一个 60 秒、单次使用、
  * 绑定 source origin / client / nonce / PKCE 的 code。页面永远拿不到 Apps 的

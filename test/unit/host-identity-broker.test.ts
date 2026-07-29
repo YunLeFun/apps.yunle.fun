@@ -23,6 +23,7 @@ const request = {
 describe('host identity broker', () => {
   it('accepts only the exact registered Play SSO binding', () => {
     expect(validateHostAuthorization(request)).toEqual({
+      appId: 'play',
       clientId: 'play-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
@@ -32,8 +33,30 @@ describe('host identity broker', () => {
     })
   })
 
+  it('accepts the separately registered CMS binding', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'cms',
+      sourceOrigin: 'https://cms.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'cms-web',
+        redirectUri: 'https://cms.yunle.fun/',
+      },
+    })).toEqual({
+      appId: 'cms',
+      clientId: 'cms-web',
+      codeChallenge: request.request.codeChallenge,
+      nonce: request.request.nonce,
+      redirectUri: 'https://cms.yunle.fun/',
+      scope: 'identity:bootstrap',
+      targetOrigin: 'https://cms.yunle.fun',
+    })
+  })
+
   it.each([
     { sourceOrigin: 'https://evil.example' },
+    { appId: 'cms' },
     { request: { ...request.request, clientId: 'other-web' } },
     { request: { ...request.request, redirectUri: 'https://play.yunle.fun/callback' } },
     { request: { ...request.request, scope: ['identity:bootstrap', 'profile'] } },

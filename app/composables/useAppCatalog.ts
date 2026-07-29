@@ -1,5 +1,10 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppRecord } from '~/types/app'
+import type {
+  WorkshopManagementView,
+  WorkshopPublicInfo,
+  WorkshopView,
+} from '~/types/workshop'
 import { ALL_APPS } from '~/constants/apps'
 import { recordToAppInfo } from '~/utils/appRecord'
 
@@ -26,12 +31,30 @@ interface CachePayload {
 
 export function useAppCatalog() {
   const { $api } = useNuxtApp()
+  const userStore = useUserStore()
 
   /** 目录列表：默认内置快照，运行时被缓存 / 集合覆盖 */
   const catalog = useState<YlfAppInfo[]>('catalog:list', () => [...ALL_APPS])
   /** 是否已成功从公开目录 API 拉取过 */
   const loaded = useState('catalog:loaded', () => false)
   const loading = useState('catalog:loading', () => false)
+  /**
+   * 当前账号通过个人工坊授权可见的应用。
+   *
+   * 这部分数据包含非公开元数据，只保存在内存状态中，不写入公共目录缓存。
+   */
+  const accessibleAppState = useState<YlfAppInfo[]>('catalog:accessible-apps', () => [])
+  const accessibleUserId = useState('catalog:accessible-user-id', () => '')
+  const accessibleLoadedState = useState('catalog:accessible-loaded', () => false)
+  const accessibleApps = computed(() =>
+    accessibleUserId.value === (userStore.userInfo?.id || '')
+      ? accessibleAppState.value
+      : [],
+  )
+  const accessibleLoaded = computed(() =>
+    accessibleUserId.value === (userStore.userInfo?.id || '')
+    && accessibleLoadedState.value,
+  )
 
   function readCache(): YlfAppInfo[] | null {
     if (!import.meta.client)
@@ -93,11 +116,84 @@ export function useAppCatalog() {
     }
   }
 
-  /** 按 slug 或 id 解析单个应用（集合优先，内置兜底） */
+  function clearAccessibleApps() {
+    accessibleAppState.value = []
+    accessibleUserId.value = ''
+    accessibleLoadedState.value = false
+  }
+
+  /**
+   * 加载当前账号通过个人工坊有权访问的应用元数据。
+   *
+   * 切换账号时先清空旧账号数据；单个工坊暂时加载失败时保留其他成功结果，
+   * 并保持 loaded=false，允许后续页面进入时重试。
+   */
+  async function ensureAccessibleLoaded(userId: string, force = false) {
+    const normalizedUserId = userId.trim()
+    if (!normalizedUserId) {
+      clearAccessibleApps()
+      return
+    }
+
+    if (accessibleUserId.value === normalizedUserId && accessibleLoadedState.value && !force)
+      return
+
+    const accountChanged = accessibleUserId.value !== normalizedUserId
+    accessibleUserId.value = normalizedUserId
+    accessibleLoadedState.value = false
+    if (accountChanged)
+      accessibleAppState.value = []
+
+    try {
+      const [joinedResponse, mineResponse] = await Promise.all([
+        $api<{ items: WorkshopPublicInfo[] }>('/api/workshops/joined'),
+        $api<{ management: WorkshopManagementView | null }>('/api/workshops/mine'),
+      ])
+      if (accessibleUserId.value !== normalizedUserId)
+        return
+
+      const workshops = [
+        ...(mineResponse.management?.workshop.status === 'active'
+          ? [mineResponse.management.workshop]
+          : []),
+        ...joinedResponse.items.filter(workshop => workshop.status === 'active'),
+      ]
+      const workshopIds = Array.from(new Set(workshops.map(workshop => workshop._id)))
+      const results = await Promise.allSettled(
+        workshopIds.map(workshopId =>
+          $api<WorkshopView>(`/api/workshops/${encodeURIComponent(workshopId)}`),
+        ),
+      )
+      if (accessibleUserId.value !== normalizedUserId)
+        return
+
+      const appsById = new Map<string, YlfAppInfo>()
+      for (const result of results) {
+        if (result.status !== 'fulfilled')
+          continue
+        if (result.value.access !== 'active' && result.value.access !== 'owner')
+          continue
+
+        for (const record of result.value.apps) {
+          const app = recordToAppInfo(record)
+          appsById.set(app.id || app.slug, app)
+        }
+      }
+
+      accessibleAppState.value = Array.from(appsById.values())
+      accessibleLoadedState.value = results.every(result => result.status === 'fulfilled')
+    }
+    catch {
+      // 身份尚未恢复或网络失败时保留同账号已有结果，等待后续重试。
+    }
+  }
+
+  /** 按 slug 或 id 解析单个应用（公开目录优先，账号授权目录兜底） */
   function getApp(idOrSlug: string): YlfAppInfo | undefined {
     if (!idOrSlug)
       return undefined
     return catalog.value.find(a => a.slug === idOrSlug || a.id === idOrSlug)
+      || accessibleApps.value.find(a => a.slug === idOrSlug || a.id === idOrSlug)
   }
 
   /** 按分类过滤（'全部' 返回全部） */
@@ -119,5 +215,17 @@ export function useAppCatalog() {
     return catalog.value.filter(a => a.developer === login)
   }
 
-  return { catalog, loading, loaded, ensureLoaded, getApp, getByCategory, getAppsByDeveloper }
+  return {
+    catalog,
+    loading,
+    loaded,
+    accessibleApps,
+    accessibleLoaded,
+    ensureLoaded,
+    ensureAccessibleLoaded,
+    clearAccessibleApps,
+    getApp,
+    getByCategory,
+    getAppsByDeveloper,
+  }
 }

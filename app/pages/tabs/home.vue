@@ -38,9 +38,21 @@ const userStore = useUserStore()
 const { loadFromCloud, reloadForAccount, recordRecentUse, uninstallApp, installApp, removeRecentApp, updateDock, finishEditing, syncToCloud } = useHomeScreen()
 const { shareApp } = useAppActions()
 const { openApp } = useOpenApp()
-const { catalog, getApp, ensureLoaded } = useAppCatalog()
+const {
+  catalog,
+  accessibleApps,
+  getApp,
+  ensureLoaded,
+  ensureAccessibleLoaded,
+} = useAppCatalog()
 
 const searchQuery = ref('')
+const homeCatalog = computed(() => {
+  const apps = new Map<string, YlfAppInfo>()
+  for (const app of [...catalog.value, ...accessibleApps.value])
+    apps.set(app.id || app.slug, app)
+  return Array.from(apps.values())
+})
 
 /** Dock 是否可见（用户在「设置 → 主屏幕 → 显示 Dock 栏」中控制，默认关闭） */
 const showDock = computed(() => settingsStore.dockVisible)
@@ -55,7 +67,7 @@ const searchResults = computed<YlfAppInfo[]>(() => {
   const q = searchQuery.value.trim().toLowerCase()
   if (!q)
     return []
-  return catalog.value.filter((app) => {
+  return homeCatalog.value.filter((app) => {
     return [app.name, app.description, app.category, app.tagline]
       .some(field => field?.toLowerCase().includes(q))
   })
@@ -66,6 +78,7 @@ const searchResults = computed<YlfAppInfo[]>(() => {
 onMounted(async () => {
   // 确保应用目录已加载（集合优先，内置兜底）
   await ensureLoaded()
+  await ensureAccessibleLoaded(userStore.userInfo?.id || '')
   const changedBeforeCloud = normalizeHomeScreenApps()
 
   // 用可解析的静态数据初始化 Home Screen（首次使用时）
@@ -73,6 +86,7 @@ onMounted(async () => {
 
   // 异步加载云端数据
   await loadFromCloud()
+  await ensureAccessibleLoaded(userStore.userInfo?.id || '')
   const changedAfterCloud = normalizeHomeScreenApps()
   initDefaultHomeScreen()
 
@@ -81,9 +95,19 @@ onMounted(async () => {
 })
 
 // 切换账号 / 登入登出时，强制按新账号重新拉取云端数据
-watch(() => userStore.userInfo?.id, (newId, oldId) => {
-  if (newId && newId !== oldId)
-    reloadForAccount()
+watch(() => userStore.userInfo?.id, async (newId, oldId) => {
+  if (newId === oldId)
+    return
+  if (!newId) {
+    await ensureAccessibleLoaded('')
+    return
+  }
+
+  await Promise.all([
+    reloadForAccount(),
+    ensureAccessibleLoaded(newId, true),
+  ])
+  normalizeHomeScreenApps()
 })
 
 // ==================== 最近使用 ====================
@@ -212,7 +236,9 @@ function normalizeAppList(apps: InstalledApp[]) {
     const migratedAppId = rawAppId ? legacyHomeAppIdMap.value.get(rawAppId) : undefined
     const appId = migratedAppId || rawAppId
 
-    if (!appId || !getApp(appId) || seen.has(appId)) {
+    // 目录加载失败、离线或工坊权限暂不可用都不应破坏用户的安装记录。
+    // 这里只清理无效 ID 与重复项；展示阶段再按当前可见目录解析。
+    if (!appId || seen.has(appId)) {
       changed = true
       continue
     }

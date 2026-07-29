@@ -45,8 +45,15 @@ const props = withDefaults(defineProps<Props>(), {
 const settingsStore = useSettingsStore()
 
 /** 仅当 icon 是图片路径（/ 或 http 开头）时才作为图片渲染，否则回退 emoji */
-const isImageIcon = computed(() => props.icon.startsWith('/') || props.icon.startsWith('http'))
+const imageLoadFailed = ref(false)
+const isImageUrl = computed(() => props.icon.startsWith('/') || props.icon.startsWith('http'))
+const isImageIcon = computed(() => isImageUrl.value && !imageLoadFailed.value)
+const fallbackIcon = computed(() => isImageUrl.value ? props.emoji : props.icon || props.emoji)
 const currentStyleMode = computed(() => props.styleMode ?? settingsStore.appIconStyle)
+
+watch(() => props.icon, () => {
+  imageLoadFailed.value = false
+})
 
 const iconBoxClasses = computed(() => ({
   'has-color': Boolean(props.color) && !props.placeholder,
@@ -68,8 +75,14 @@ const iconBoxStyle = computed(() => props.color
       :style="iconBoxStyle"
     >
       <slot name="icon">
-        <img v-if="isImageIcon" :src="icon" alt="应用图标" class="app-icon-img">
-        <span v-else class="app-emoji">{{ icon || emoji }}</span>
+        <img
+          v-if="isImageIcon"
+          :src="icon"
+          alt="应用图标"
+          class="app-icon-img"
+          @error="imageLoadFailed = true"
+        >
+        <span v-else class="app-emoji">{{ fallbackIcon }}</span>
       </slot>
       <slot name="badge" />
     </div>

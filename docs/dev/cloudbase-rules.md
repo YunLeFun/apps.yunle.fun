@@ -124,9 +124,9 @@ GET /api/admin/diagnostics/logs/<uploadId>
 
 生产集合使用以下索引：
 
-- `idx_diagnostic_owner_created`：`ownerUid` 升序、`createdAt` 降序，支持按 UID 拉取最新上传。
+- `idx_owner_created_at`：`ownerUid` 升序、`createdAt` 降序，支持按 UID 拉取最新上传。
 - `idx_diagnostic_support_code`：`supportCode` 升序，支持按反馈编号定位。
-- `idx_diagnostic_expires_at`：`expiresAt` 升序，支持定时清理。
+- `idx_expires_at`：`expiresAt` 升序，支持定时清理。
 
 索引配置保存在 `scripts/cloudbase-indexes/diagnostic_log_uploads.json`；应用到当前选中的 CloudBase 环境：
 

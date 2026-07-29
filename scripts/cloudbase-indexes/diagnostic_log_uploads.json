@@ -4,7 +4,7 @@
   "updateOptions": {
     "CreateIndexes": [
       {
-        "IndexName": "idx_diagnostic_owner_created",
+        "IndexName": "idx_owner_created_at",
         "MgoKeySchema": {
           "MgoIndexKeys": [
             {
@@ -32,7 +32,7 @@
         }
       },
       {
-        "IndexName": "idx_diagnostic_expires_at",
+        "IndexName": "idx_expires_at",
         "MgoKeySchema": {
           "MgoIndexKeys": [
             {

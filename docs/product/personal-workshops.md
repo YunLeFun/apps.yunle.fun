@@ -2,11 +2,11 @@
 
 ## 三个目录表面
 
-| 表面 | 可见内容 | 版本来源 |
-| --- | --- | --- |
-| 公共市场 | 管理员已批准并上架的公开应用 | `public_market_listings.approvedRevisionId` |
-| 个人市场 | 坊主当前发布的公开应用 | `apps.currentRevisionId` |
-| 个人工坊 | 坊主及有效坊客可见的公开、坊客专属应用 | `apps.currentRevisionId` |
+| 表面     | 可见内容                               | 版本来源                                    |
+| -------- | -------------------------------------- | ------------------------------------------- |
+| 公共市场 | 管理员已批准并上架的公开应用           | `public_market_listings.approvedRevisionId` |
+| 个人市场 | 坊主当前发布的公开应用                 | `apps.currentRevisionId`                    |
+| 个人工坊 | 坊主及有效坊客可见的公开、坊客专属应用 | `apps.currentRevisionId`                    |
 
 应用身份和当前状态只保存在 `apps`。`app_submissions` 保存不可变 revision，
 `public_market_listings` 只保存公共市场审核指针，不复制名称、链接等应用资料。

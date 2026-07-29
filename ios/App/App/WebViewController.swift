@@ -61,6 +61,8 @@ class WebViewController: UIViewController {
     var onMinimize: (() -> Void)?
     /// 用户点击「查看详情与评价」，由插件层通知 JS 跳转站内详情页
     var onDetail: ((String) -> Void)?
+    /// 可信页面请求宿主代为签发一次性 SSO code；宿主不会向页面暴露自身 token。
+    var onAuthorizationRequest: ((String, String, [String: Any]) -> Void)?
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与插件层 sessionKey 一致）
     var sessionKey: String {
@@ -121,6 +123,11 @@ class WebViewController: UIViewController {
     private var canGoBackObservation: NSKeyValueObservation?
     private var contentOffsetObservation: NSKeyValueObservation?
     private var titleObservation: NSKeyValueObservation?
+    private struct PendingAuthorization {
+        let reply: (Any?, String?) -> Void
+        let timeout: DispatchWorkItem
+    }
+    private var pendingAuthorizations: [String: PendingAuthorization] = [:]
 
     /// 标题栏内容区高度（safe-area 顶部以下）
     private static let titleBarContentHeight: CGFloat = 44
@@ -295,10 +302,11 @@ class WebViewController: UIViewController {
             return window.webkit.messageHandlers.ylf.postMessage({ method: method, params: params || {} })
           }
           window.ylf = {
-            version: 3,
+            version: 4,
             inYunleApp: true,
             invoke: invoke,
             canIUse: function (method) { return invoke('canIUse', { method: method }) },
+            authorize: function (params) { return invoke('authorize', params) },
             getEnv: function () { return invoke('getEnv') },
             hideCapsule: function () { return invoke('setCapsuleVisible', { visible: false }) },
             showCapsule: function () { return invoke('setCapsuleVisible', { visible: true }) },
@@ -686,12 +694,51 @@ class WebViewController: UIViewController {
     }
 
     deinit {
+        rejectPendingAuthorizations("browser closed")
         progressObservation?.invalidate()
         canGoBackObservation?.invalidate()
         contentOffsetObservation?.invalidate()
         titleObservation?.invalidate()
         webView?.configuration.userContentController
             .removeScriptMessageHandler(forName: "ylf", contentWorld: .page)
+    }
+
+    /// 由 Capacitor 宿主页回传一次性授权码；requestId 随机且仅在当前 WebView 生命周期有效。
+    @discardableResult
+    func resolveAuthorization(
+        requestId: String,
+        result: [String: Any]?,
+        error: String?
+    ) -> Bool {
+        guard let pending = pendingAuthorizations.removeValue(forKey: requestId) else {
+            return false
+        }
+        pending.timeout.cancel()
+        if let error = error, !error.isEmpty {
+            pending.reply(nil, error)
+        }
+        else {
+            pending.reply(result ?? [:], nil)
+        }
+        return true
+    }
+
+    func cancelPendingAuthorizations() {
+        rejectPendingAuthorizations("browser closed")
+    }
+
+    func notifyHostIdentityChanged() {
+        webView?.evaluateJavaScript(
+            "window.dispatchEvent(new CustomEvent('ylf:identityChanged'))")
+    }
+
+    private func rejectPendingAuthorizations(_ reason: String) {
+        let pending = pendingAuthorizations
+        pendingAuthorizations.removeAll()
+        pending.values.forEach {
+            $0.timeout.cancel()
+            $0.reply(nil, reason)
+        }
     }
 }
 
@@ -714,6 +761,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             "setCapsuleVisible": .open,
             "setTitleBarVisible": .open,
             "close": .open,
+            "authorize": .trusted,
             "setClipboard": .trusted,
         ]
     }
@@ -763,6 +811,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
         handleJSAPI(
             method: method,
             params: body["params"] as? [String: Any] ?? [:],
+            sourceOrigin: exactOrigin(message.frameInfo.securityOrigin),
             trusted: trusted,
             reply: replyHandler)
     }
@@ -770,6 +819,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     private func handleJSAPI(
         method: String,
         params: [String: Any],
+        sourceOrigin: String?,
         trusted: Bool,
         reply: @escaping (Any?, String?) -> Void
     ) {
@@ -812,6 +862,26 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             closeTapped()
             reply(nil, nil)
 
+        case "authorize":
+            guard let sourceOrigin = sourceOrigin,
+                  let onAuthorizationRequest = onAuthorizationRequest
+            else {
+                reply(nil, "authorization broker unavailable")
+                return
+            }
+            let requestId = UUID().uuidString.lowercased()
+            let timeout = DispatchWorkItem { [weak self] in
+                _ = self?.resolveAuthorization(
+                    requestId: requestId,
+                    result: nil,
+                    error: "authorization timed out")
+            }
+            pendingAuthorizations[requestId] = PendingAuthorization(
+                reply: reply,
+                timeout: timeout)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeout)
+            onAuthorizationRequest(requestId, sourceOrigin, params)
+
         case "setClipboard":
             guard let text = params["text"] as? String else {
                 reply(nil, "bad request: missing text")
@@ -823,6 +893,18 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
         default:
             reply(nil, "unknown method: \(method)")
         }
+    }
+
+    /// 把 WebKit 提供的安全源转换为严格 origin；默认端口省略，与 URL.origin 对齐。
+    private func exactOrigin(_ origin: WKSecurityOrigin) -> String? {
+        let scheme = origin.protocol.lowercased()
+        let host = origin.host.lowercased()
+        guard !scheme.isEmpty, !host.isEmpty else { return nil }
+        let port = origin.port
+        let defaultPort = (scheme == "https" && port == 443)
+            || (scheme == "http" && port == 80)
+            || port == 0
+        return "\(scheme)://\(host)\(defaultPort ? "" : ":\(port)")"
     }
 
     /// 胶囊在页面视口坐标系中的布局位置（pt == CSS px），供沉浸页面避让；

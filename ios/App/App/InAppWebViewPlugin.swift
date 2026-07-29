@@ -1,6 +1,7 @@
 import Capacitor
 import Foundation
 import UIKit
+import WebKit
 
 @objc(InAppWebViewPlugin)
 public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -12,6 +13,8 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "updateAppInfo", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listSessions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "resolveAuthorization", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "clearIdentitySessions", returnType: CAPPluginReturnPromise),
     ]
 
     /// 后台会话池（强持有，保活已最小化/暂停的 WebView）。
@@ -34,6 +37,7 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func removeSession(_ vc: WebViewController) {
+        vc.cancelPendingAuthorizations()
         if let i = sessions.firstIndex(where: { $0 === vc }) {
             sessions.remove(at: i)
         }
@@ -43,7 +47,7 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
     private func evictIfNeeded() {
         while sessions.count > maxSessions {
             guard let idx = sessions.lastIndex(where: { $0.presentingViewController == nil }) else { break }
-            sessions.remove(at: idx)
+            removeSession(sessions[idx])
         }
     }
 
@@ -93,7 +97,7 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
 
             // 同键但形态不一致（无法复用）：释放旧的，走新建
             if let idx = self.indexOfSession(key: sessionKey) {
-                self.sessions.remove(at: idx)
+                self.removeSession(self.sessions[idx])
             }
 
             let vc = WebViewController()
@@ -120,6 +124,15 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             vc.onDetail = { [weak self] appId in
                 self?.notifyListeners("detailRequested", data: ["appId": appId])
+            }
+            vc.onAuthorizationRequest = { [weak self, weak vc] requestId, sourceOrigin, request in
+                guard let self = self, let vc = vc else { return }
+                self.notifyListeners("authorizationRequested", data: [
+                    "requestId": requestId,
+                    "sourceOrigin": sourceOrigin,
+                    "appId": vc.appInfo?.id ?? "",
+                    "request": request,
+                ])
             }
 
             vc.modalPresentationStyle = .fullScreen
@@ -202,9 +215,62 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
                 }
                 return
             }
-            self.sessions.remove(at: idx)
+            self.removeSession(vc)
             self.notifySessionsChanged()
             call.resolve()
+        }
+    }
+
+    /// 把宿主 JS 签发的一次性授权码回传给发起请求的 WebView Promise。
+    @objc func resolveAuthorization(_ call: CAPPluginCall) {
+        guard let requestId = call.getString("requestId"), !requestId.isEmpty else {
+            call.reject("Missing requestId")
+            return
+        }
+        let result = call.getObject("result")
+        let error = call.getString("error")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                call.reject("Browser unavailable")
+                return
+            }
+            let resolved = self.sessions.contains {
+                $0.resolveAuthorization(
+                    requestId: requestId,
+                    result: result,
+                    error: error)
+            }
+            if resolved {
+                call.resolve()
+            }
+            else {
+                call.reject("Unknown or expired authorization request")
+            }
+        }
+    }
+
+    /// Apps 退出或切换账号后清除 Play 的 HttpOnly BFF cookie，并通知保活页面刷新身份。
+    @objc func clearIdentitySessions(_ call: CAPPluginCall) {
+        let cookieStore = WKWebsiteDataStore.default().httpCookieStore
+        cookieStore.getAllCookies { [weak self] cookies in
+            let playCookies = cookies.filter {
+                $0.name == "__Host-ylf_play_session"
+                    && $0.domain.trimmingCharacters(in: CharacterSet(charactersIn: "."))
+                        .lowercased() == "play.yunle.fun"
+            }
+            let group = DispatchGroup()
+            playCookies.forEach { cookie in
+                group.enter()
+                cookieStore.delete(cookie) {
+                    group.leave()
+                }
+            }
+            group.notify(queue: .main) {
+                self?.sessions
+                    .filter { ($0.url?.host ?? "").lowercased() == "play.yunle.fun" }
+                    .forEach { $0.notifyHostIdentityChanged() }
+                call.resolve()
+            }
         }
     }
 

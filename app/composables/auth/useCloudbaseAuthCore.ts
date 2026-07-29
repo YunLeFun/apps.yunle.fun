@@ -5,6 +5,7 @@
  */
 import type { CloudbaseUser, TcbRawUser, YlfUserInfo } from '@yunlefun/auth'
 import { getErrorMessage, mapCloudbaseUser } from '@yunlefun/auth'
+import { clearInAppBrowserIdentitySessions } from '~/composables/useBrowser'
 import { useAccountsStore } from '~/stores/accounts'
 import { classifyAuthError, isBeyondSessionRecovery, serializeAuthError } from '~/utils/auth-session'
 
@@ -325,6 +326,12 @@ function createCloudbaseAuthCore() {
                   : undefined
               accountsStore.saveAccount(userStore.userInfo, method)
             }
+            // A signed-in identity is authoritative for first-party embedded
+            // apps. Drop any previous BFF cookie and ask preserved WebViews to
+            // bootstrap against the new Apps account.
+            clearInAppBrowserIdentitySessions().catch((error) => {
+              console.warn('[Auth] 同步内嵌应用身份失败:', error)
+            })
           })
         }
       })

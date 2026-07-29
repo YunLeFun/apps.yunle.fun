@@ -83,6 +83,7 @@ if (window.ylf?.inYunleApp) {
 | `hideTitleBar()`          | 公开 | 收起标题栏退化为沉浸姿态（仅标题栏模式，会话内持久）         |
 | `showTitleBar()`          | 公开 | 恢复标题栏                                                   |
 | `closeBrowser()`          | 公开 | 关闭浏览器，返回云乐坊                                       |
+| `authorize(params)`       | 授信 | 为精确注册的第一方客户端申请短时、单次 SSO code              |
 | `setClipboard(text)`      | 授信 | 写入系统剪贴板（如复制兑换码）                               |
 
 ```ts
@@ -116,13 +117,22 @@ interface YlfJSAPI {
   hideTitleBar: () => Promise<void>
   showTitleBar: () => Promise<void>
   closeBrowser: () => Promise<void>
+  authorize: (params: {
+    clientId: string
+    redirectUri: string
+    scope: string[]
+    nonce: string
+    codeChallenge: string
+    codeChallengeMethod: 'S256'
+  }) => Promise<{ ok: true, code: string, issuer: string, expiresAt?: number }>
   setClipboard: (text: string) => Promise<void>
 }
 ```
 
-内嵌浏览器不提供登录或会话转移能力。页面需要身份时，应在自己的浏览器
-Origin 上使用正式注册的 Web SSO/OIDC 客户端；宿主不会向页面传递 CloudBase
-access token、refresh token 或替页面签发授权码。
+内嵌浏览器不转移登录会话。`authorize` 只为精确注册的第一方 SSO client 签发
+绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。
+宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项仅为
+`https://play.yunle.fun` / `play-web` / `identity:bootstrap`。
 
 ## 权限与授信
 

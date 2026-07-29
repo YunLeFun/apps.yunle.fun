@@ -54,6 +54,27 @@ describe('host identity broker', () => {
     })
   })
 
+  it('accepts the private Admin control-plane binding without marketplace discovery', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'admin',
+      sourceOrigin: 'https://admin.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'admin-web',
+        redirectUri: 'https://admin.yunle.fun/',
+      },
+    })).toEqual({
+      appId: 'admin',
+      clientId: 'admin-web',
+      codeChallenge: request.request.codeChallenge,
+      nonce: request.request.nonce,
+      redirectUri: 'https://admin.yunle.fun/',
+      scope: 'identity:bootstrap',
+      targetOrigin: 'https://admin.yunle.fun',
+    })
+  })
+
   it.each([
     { sourceOrigin: 'https://evil.example' },
     { appId: 'cms' },

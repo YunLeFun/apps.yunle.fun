@@ -14,6 +14,13 @@ export interface FirstPartySsoClient {
  */
 export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
   Object.freeze({
+    appId: 'admin',
+    clientId: 'admin-web',
+    origin: 'https://admin.yunle.fun',
+    redirectUri: 'https://admin.yunle.fun/',
+    scope: ['identity:bootstrap'] as const,
+  }),
+  Object.freeze({
     appId: 'play',
     clientId: 'play-web',
     origin: 'https://play.yunle.fun',

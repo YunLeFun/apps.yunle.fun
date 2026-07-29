@@ -75,6 +75,27 @@ describe('host identity broker', () => {
     })
   })
 
+  it('accepts the separately registered Saier binding', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'saier',
+      sourceOrigin: 'https://saier.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'saier-web',
+        redirectUri: 'https://saier.yunle.fun/',
+      },
+    })).toEqual({
+      appId: 'saier',
+      clientId: 'saier-web',
+      codeChallenge: request.request.codeChallenge,
+      nonce: request.request.nonce,
+      redirectUri: 'https://saier.yunle.fun/',
+      scope: 'identity:bootstrap',
+      targetOrigin: 'https://saier.yunle.fun',
+    })
+  })
+
   it.each([
     { sourceOrigin: 'https://evil.example' },
     { appId: 'cms' },

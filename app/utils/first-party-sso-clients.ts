@@ -21,6 +21,13 @@ export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
     scope: ['identity:bootstrap'] as const,
   }),
   Object.freeze({
+    appId: 'saier',
+    clientId: 'saier-web',
+    origin: 'https://saier.yunle.fun',
+    redirectUri: 'https://saier.yunle.fun/',
+    scope: ['identity:bootstrap'] as const,
+  }),
+  Object.freeze({
     appId: 'play',
     clientId: 'play-web',
     origin: 'https://play.yunle.fun',

@@ -28,7 +28,7 @@ trustPolicyExclude:
 packages:
   - docs
 overrides:
-  # 安全漏洞修复：钉死传递依赖到已修复版本（2026-07-16，详见 docs/dev/dependency-security.md）
+  # 安全漏洞修复：钉死传递依赖到已修复版本（2026-07-29，详见 docs/dev/dependency-security.md）
   # 键按字母升序排列（eslint yaml/sort-keys 要求）
   '@babel/core@<=7.29.0': ^7.29.1 # 任意文件读取（workbox / Nuxt 构建链）
   '@babel/plugin-transform-modules-systemjs': ^7.29.7 # 任意代码生成（workbox > babel）
@@ -40,39 +40,41 @@ overrides:
   '@xmldom/xmldom': ^0.8.13 # XML 注入 / DoS（@capacitor/cli > plist）
   axios: ^1.18.1 # SSRF / 原型污染 / MITM（tencentcloud-sdk）
   basic-ftp: ^5.3.1 # CRLF 注入 / DoS（@nuxtjs/ionic > @ionic/cli）
-  brace-expansion@<1.1.13: ^1.1.13 # DoS（minimatch v1 链）
-  brace-expansion@>=2.0.0 <2.0.3: ^2.1.2 # DoS（minimatch v2 链）
-  brace-expansion@>=5.0.0 <5.0.6: ^5.0.7 # DoS（typescript-eslint minimatch 链）
+  brace-expansion: ^5.0.8 # DoS（minimatch 链；新告警覆盖所有旧主版本）
   defu: ^6.1.7 # 原型污染（@nuxt/devtools > @nuxt/kit）
   esbuild@<=0.24.2: ^0.25.0 # 开发服务器跨源读取（审计所列 0.24.3 未发布，取首个可用修复线）
   esbuild@>=0.27.3 <0.28.1: ^0.28.1 # Windows 开发服务器任意文件读取
-  fast-uri: ^3.1.2 # 路径穿越 / host 混淆（unocss webpack > ajv）
+  fast-uri: ^3.1.4 # 路径穿越 / host 混淆（unocss webpack > ajv）
   flatted: ^3.4.2 # 原型污染 / DoS（eslint flat-cache）
   follow-redirects: ^1.16.0 # 跨域 header 泄露（axios）
   form-data@>=3.0.0 <3.0.5: ^3.0.5 # multipart 字段名 CRLF 注入（腾讯云 SDK）
   form-data@>=4.0.0 <4.0.6: ^4.0.6 # multipart 字段名 CRLF 注入（CloudBase / Ionic）
   h3: ^1.15.11 # SSE 注入 / 路径穿越（@nuxt/eslint > config-inspector）
+  immutable: ^5.1.8 # trie 溢出 / 哈希碰撞 DoS（sass）
   ip-address: ^10.2.0 # Address6 XSS（@nuxtjs/ionic > socks）
   js-cookie: ^3.0.8 # 原型劫持（@vue/test-utils > js-beautify）
   js-yaml@>=4.0.0 <4.1.2: ^4.1.2 # 原型污染（eslint typegen 链）
   launch-editor@<=2.14.0: ^2.14.1 # Windows UNC 凭据泄露（Nuxt DevTools）
+  linkify-it: ^5.0.2 # mailto 校验器二次复杂度 DoS（Markdown 渲染链）
   lodash: ^4.18.1 # 代码注入 / 原型污染（@cloudbase/js-sdk，运行时）
   lodash.unset@>=4.0.0 <4.18.0: ^4.18.0 # 原型污染（CloudBase database）
   picomatch@<2.3.2: ^2.3.2 # ReDoS（workbox 链）
   picomatch@>=4.0.0 <4.0.5: ^4.0.5 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
-  postcss: ^8.5.16 # CSS stringify XSS（vite）
+  postcss: ^8.5.18 # source map 路径穿越 / CSS stringify XSS（vite）
   protobufjs: ^7.6.5 # critical 任意代码执行（腾讯云 SDK）
   qs: ^6.15.3 # DoS（@nuxtjs/ionic > superagent）
   semver@<7.0.0: '>=7.7.4'
   serialize-javascript: ^7.0.7 # RCE（webpack 链，本项目用 vite 未触发）
-  shell-quote@<=1.8.3: ^1.8.4 # critical 换行转义绕过（Nuxt DevTools）
+  shell-quote: ^1.10.0 # 换行转义绕过 / 二次复杂度 DoS（Nuxt DevTools）
   shelljs: ^0.8.5 # 提权（cordova-plugin-wechat）
   simple-git: ^3.36.0 # RCE（@nuxt/devtools）
-  tar: ^7.5.19 # 路径穿越 / 符号链接（@capacitor/cli、node-pre-gyp）
+  svgo: ^4.0.2 # removeScripts 绕过（Nuxt CSS 压缩链）
+  tar: ^7.5.21 # 路径穿越 / 符号链接 / 栈溢出（@capacitor/cli、node-pre-gyp）
   tmp: ^0.2.7 # 路径穿越（@nuxtjs/ionic > inquirer）
   undici@>=7.0.0 <7.28.0: ^7.28.0 # TLS / WebSocket / header 处理（jsdom 测试链）
   unhead: ^2.1.15 # useHeadSafe XSS 绕过（@nuxtjs/ionic > @unhead/vue）
   uuid@<11.1.1: ^11.1.1 # v3/v5/v6 buffer 越界（腾讯云 SDK）
+  valibot: ^1.4.2 # issue path 继承属性导致 flatten 崩溃（Nuxt ESLint）
   vite@>=7.0.0 <7.3.5: ^7.3.5 # fs.deny 绕过 / Windows UNC（Nuxt 构建链）
   vue: 3.5.40 # 根应用、Nuxt 与 VitePress 统一 Vue patch 版本
   ws: ^8.21.0 # 未初始化内存泄露（@cloudbase/js-sdk，运行时）

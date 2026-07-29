@@ -1,15 +1,15 @@
 # 依赖安全（pnpm audit）
 
-记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-07-16**。
+记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-07-29**。
 
 ## 现状
 
 | 等级     | 修复前 | 未忽略 | 精确接受（见下） |
 | -------- | ------ | ------ | ---------------- |
-| critical | 1      | **0**  | 0                |
-| high     | 8      | **0**  | 2                |
-| moderate | 11     | **0**  | 2                |
-| low      | 4      | **0**  | 0                |
+| critical | 0      | **0**  | 0                |
+| high     | 11     | **0**  | 2                |
+| moderate | 4      | **0**  | 2                |
+| low      | 0      | **0**  | 0                |
 
 `pnpm audit` 会显示 `4 vulnerabilities found`，随后明确标注 `2 moderate (2 ignored) | 2 high (2 ignored)`；
 `pnpm audit --json` 的 `advisories` 为空，表示没有未处理告警。
@@ -37,19 +37,22 @@ pnpm audit                      # 查看完整列表
 
 - `protobufjs ^7.6.5` — critical 任意代码执行（飞书 SDK 带的，仅部署用）
 - `axios ^1.18.1` — 多个 SSRF / 原型污染 / MITM
-- `tar ^7.5.19` — node-tar 多个路径穿越 / 符号链接（Capacitor CLI、node-pre-gyp）。
+- `tar ^7.5.21` — node-tar 多个路径穿越 / 符号链接 / 栈溢出（Capacitor CLI、node-pre-gyp）。
   注意：`@capacitor/cli` < 7.5.0 按 tar v6 API 调用，在此 override 下 `cap sync` 会报
   `Cannot read properties of undefined (reading 'extract')`，需保持 `@capacitor/cli >= 7.5.0`
   （其 tar 依赖已升至 ^7.5.3）。
-- `shelljs ^0.8.5`、`shell-quote ^1.8.4`、`@xmldom/xmldom ^0.8.13`、`serialize-javascript ^7.0.7`、
+- `shelljs ^0.8.5`、`shell-quote ^1.10.0`、`@xmldom/xmldom ^0.8.13`、`serialize-javascript ^7.0.7`、
   `flatted ^3.4.2`、`h3 ^1.15.11`、`picomatch`、`lodash ^4.18.1`、`ws ^8.21.0`、
   `defu`、`simple-git`、`basic-ftp`、`fast-uri`、`js-cookie`、`tmp`、
   `@babel/plugin-transform-modules-systemjs` 等。
 - 2026-07-16 新增：`@babel/core ^7.29.1`、`esbuild`（分版本段）、`form-data`（v3/v4 分段）、
   `js-yaml ^4.1.2`、`launch-editor ^2.14.1`、`lodash.unset ^4.18.0`、`undici ^7.28.0`、
   `uuid ^11.1.1`、`vite ^7.3.5`。
+- 2026-07-29 新增或上调：`brace-expansion ^5.0.8`、`fast-uri ^3.1.4`、
+  `immutable ^5.1.8`、`linkify-it ^5.0.2`、`postcss ^8.5.18`、`svgo ^4.0.2`、
+  `tar ^7.5.21`、`valibot ^1.4.2`。
 - 其他 moderate 的安全小版本升级：`unhead`、`ip-address`、`qs`、`yaml`、
-  `follow-redirects`、`postcss`、`brace-expansion`（分版本段 override）。
+  `follow-redirects`、`postcss`、`brace-expansion`。
 - `@capacitor/haptics` 固定在 `8.0.1`：`8.0.2` 缺少前一稳定版具备的 provenance，
   会触发 `trustPolicy: no-downgrade`；未通过 `trustPolicyExclude` 放宽供应链策略。
 
@@ -57,7 +60,7 @@ pnpm audit                      # 查看完整列表
 
 ```bash
 pnpm install
-pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build
+pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:nuxt && pnpm build
 ```
 
 ## 精确接受项（2 high + 2 moderate）

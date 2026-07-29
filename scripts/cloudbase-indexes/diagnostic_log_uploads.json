@@ -1,0 +1,48 @@
+{
+  "action": "updateCollection",
+  "collectionName": "diagnostic_log_uploads",
+  "updateOptions": {
+    "CreateIndexes": [
+      {
+        "IndexName": "idx_diagnostic_owner_created",
+        "MgoKeySchema": {
+          "MgoIndexKeys": [
+            {
+              "Name": "ownerUid",
+              "Direction": "1"
+            },
+            {
+              "Name": "createdAt",
+              "Direction": "-1"
+            }
+          ],
+          "MgoIsUnique": false
+        }
+      },
+      {
+        "IndexName": "idx_diagnostic_support_code",
+        "MgoKeySchema": {
+          "MgoIndexKeys": [
+            {
+              "Name": "supportCode",
+              "Direction": "1"
+            }
+          ],
+          "MgoIsUnique": false
+        }
+      },
+      {
+        "IndexName": "idx_diagnostic_expires_at",
+        "MgoKeySchema": {
+          "MgoIndexKeys": [
+            {
+              "Name": "expiresAt",
+              "Direction": "1"
+            }
+          ],
+          "MgoIsUnique": false
+        }
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { useDebounceFn } from '@vueuse/core'
-import { APP_CATEGORIES } from '~/constants/apps'
+import { getAvailableAppCategories } from '~/utils/appCategories'
 
 /**
  * 工坊数据 composable
@@ -37,14 +37,14 @@ export function useWorkshop() {
   const displayOffset = useState('workshop:displayOffset', () => 0)
 
   /** 分类列表 */
-  const categories = APP_CATEGORIES
+  const categories = computed(() => getAvailableAppCategories(catalog.value))
 
   /** 获取当前分类 + 搜索词过滤后的候选应用列表（数据源为 catalog） */
   function getFilteredStaticApps(): YlfAppInfo[] {
     let list = catalog.value
 
     if (selectedCategory.value !== '全部') {
-      list = list.filter(a => a.category === selectedCategory.value)
+      list = list.filter(a => a.category?.trim() === selectedCategory.value)
     }
 
     const keyword = searchQuery.value.trim().toLowerCase()

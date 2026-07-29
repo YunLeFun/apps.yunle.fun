@@ -2,7 +2,7 @@ import type { YlfAppInfo } from '@yunlefun/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // --- Mock ~/constants/apps ---
-// 应用目录在线化后 useWorkshop 仅消费 APP_CATEGORIES，
+// 应用目录在线化后 useWorkshop 仅用 APP_CATEGORIES 保持已有分类的展示顺序，
 // 候选数据源统一走 useAppCatalog().catalog（在下方 stub）。
 vi.mock('~/constants/apps', () => ({
   APP_CATEGORIES: [
@@ -256,10 +256,28 @@ describe('useWorkshop', () => {
   })
 
   describe('categories', () => {
-    it('提供分类列表', async () => {
+    it('只提供当前目录应用实际使用的分类', async () => {
       const { categories } = await loadWorkshop()
-      expect(categories.length).toBeGreaterThan(0)
-      expect(categories[0].name).toBe('全部')
+      expect(categories.value.map(category => category.name)).toEqual([
+        '全部',
+        '整活',
+        '工具',
+        '设计',
+      ])
+    })
+
+    it('保留应用提交的非预设分类', async () => {
+      setCatalog([
+        makeApp('tool-1', '工具'),
+        makeApp('music-1', '音乐'),
+      ])
+
+      const { categories } = await loadWorkshop()
+      expect(categories.value.map(category => category.name)).toEqual([
+        '全部',
+        '工具',
+        '音乐',
+      ])
     })
   })
 })

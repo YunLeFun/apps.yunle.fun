@@ -2,6 +2,7 @@
 import type { WorkshopPublicInfo } from '~/types/workshop'
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
@@ -10,22 +11,32 @@ import {
   IonLabel,
   IonList,
   IonPage,
-  IonSpinner,
   IonTitle,
   IonToolbar,
   onIonViewWillEnter,
 } from '@ionic/vue'
-import { chevronForwardOutline, peopleOutline } from 'ionicons/icons'
+import {
+  alertCircleOutline,
+  chevronForwardOutline,
+  peopleOutline,
+  refreshOutline,
+} from 'ionicons/icons'
 
 const router = useRouter()
 const workshopModule = usePersonalWorkshop()
 const loading = ref(true)
 const workshops = ref<WorkshopPublicInfo[]>([])
+const error = ref('')
 
 async function load() {
   loading.value = true
+  error.value = ''
   try {
     workshops.value = await workshopModule.getJoined()
+  }
+  catch (reason: unknown) {
+    workshops.value = []
+    error.value = reason instanceof Error ? reason.message : '已加入的工坊加载失败'
   }
   finally {
     loading.value = false
@@ -46,8 +57,15 @@ onIonViewWillEnter(load)
       </IonToolbar>
     </IonHeader>
     <IonContent :fullscreen="true">
-      <div v-if="loading" class="joined-loading">
-        <IonSpinner name="crescent" />
+      <AppPageLoading v-if="loading" label="正在加载已加入的工坊" />
+      <div v-else-if="error" class="joined-empty">
+        <IonIcon :icon="alertCircleOutline" />
+        <h1>无法加载已加入的工坊</h1>
+        <p>{{ error }}</p>
+        <IonButton fill="outline" @click="load">
+          <IonIcon slot="start" :icon="refreshOutline" />
+          重试
+        </IonButton>
       </div>
       <IonList v-else-if="workshops.length" inset>
         <IonItem
@@ -75,7 +93,6 @@ onIonViewWillEnter(load)
 </template>
 
 <style scoped>
-.joined-loading,
 .joined-empty {
   min-height: 60vh;
   padding: 72px 28px 32px;

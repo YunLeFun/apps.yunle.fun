@@ -38,6 +38,10 @@
   - Web Vitals（LCP、FID、CLS、INP）
   - JS 异常 / unhandledrejection
   - 网络请求耗时
+- [x] **用户主动提交的诊断日志**：仅保存 App 自身脱敏日志
+  - 用户在「反馈」页自行选择时间范围并二次确认
+  - 上传内容包含所选日志、CloudBase UID、问题描述和 App/设备基本信息
+  - 服务端集合为 `ADMINONLY`，诊断记录保留 7 天并由私有定时云函数每小时清理
 
 ### 4. 第三方 SDK 清单（必列）
 
@@ -75,6 +79,7 @@
   - `app_create_draft` 工坊草稿
   - `ylf_access_token` / `ylf_user_info` 登录态镜像
   - `ylf_saved_accounts` / `ylf_last_phone` 登录便利信息（手机号仅 Base64 混淆，不是加密）
+  - `ylf:diagnostic-logs:v1` App 自身脱敏诊断日志（最多 500 条、最长 7 天）
   - Aegis `aid` 监控设备标识
 - [x] cookie：`ylf_access_token` JWT token 与 `ylf_user_info`（31 天有效期）
 

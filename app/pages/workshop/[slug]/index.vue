@@ -213,9 +213,7 @@ watch(slug, (val) => {
 
     <IonContent :fullscreen="true">
       <!-- 加载中 -->
-      <div v-if="loading" class="flex justify-center pt-20">
-        <IonSpinner name="crescent" class="opacity-40" />
-      </div>
+      <AppPageLoading v-if="loading" label="正在加载应用详情" />
 
       <!-- 加载失败 -->
       <div v-else-if="loadError" class="error-state">

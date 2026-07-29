@@ -131,9 +131,12 @@ await openInAppBrowser(app.url, {
 
 ### 身份边界
 
-内嵌浏览器只提供 UI 与设备能力，不提供登录、授权码或宿主会话转移。网页需要
-身份时必须在自己的 Origin 上使用注册的 Web SSO/OIDC 客户端。原生容器的
-CloudBase access token 与 refresh token 不进入 WebView 配置或 JSAPI。
+内嵌浏览器不转移宿主会话。原生容器的 CloudBase access token 与 refresh token
+不进入 WebView 配置或 JSAPI。第一方页面可以调用 `window.ylf.authorize()` 请求
+绑定来源、client、nonce 与 PKCE 的短时单次 SSO code；宿主以自身登录态向统一
+身份服务签发后，页面仍须在自己的 Origin/BFF 完成 code 交换和 HttpOnly session
+建立。该能力当前只开放给精确注册的 Play 客户端。Apps 登出或切换账号时会只清除
+Play 的 BFF cookie，并通知保活 WebView 重新同步；不会清空其他站点数据。
 
 ## 胶囊交互状态
 

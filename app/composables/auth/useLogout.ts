@@ -1,4 +1,5 @@
 import { alertController } from '@ionic/vue'
+import { clearInAppBrowserIdentitySessions } from '~/composables/useBrowser'
 
 /**
  * 退出登录 Composable
@@ -32,6 +33,12 @@ export function useLogout() {
       }
 
       await logoutCloudbase()
+      try {
+        await clearInAppBrowserIdentitySessions()
+      }
+      catch (error: unknown) {
+        console.warn('内嵌应用会话清理失败:', error)
+      }
     }
     finally {
       isLoggingOut.value = false

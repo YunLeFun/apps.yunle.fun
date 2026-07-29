@@ -34,6 +34,22 @@ export interface BackgroundSession {
   displayMode?: 'immersive' | 'titlebar'
 }
 
+export interface HostAuthorizationRequest {
+  clientId: string
+  codeChallenge: string
+  codeChallengeMethod: 'S256'
+  nonce: string
+  redirectUri: string
+  scope: string[]
+}
+
+export interface HostAuthorizationEvent {
+  appId: string
+  request: HostAuthorizationRequest
+  requestId: string
+  sourceOrigin: string
+}
+
 interface InAppWebViewPlugin {
   open: (options: {
     url: string
@@ -58,7 +74,15 @@ interface InAppWebViewPlugin {
   listSessions: () => Promise<{ sessions: BackgroundSession[] }>
   /** 彻底结束并释放指定会话（按 key 传入） */
   endSession: (options: { id: string }) => Promise<void>
-  addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>) & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'sessionsChanged', handler: (data: { sessions: BackgroundSession[] }) => void) => Promise<PluginListenerHandle>) & ((event: 'browserMinimized', handler: (data: { name: string }) => void) => Promise<PluginListenerHandle>)
+  /** 完成页面发起的宿主 SSO 请求；result 仅允许携带一次性 code。 */
+  resolveAuthorization: (options: {
+    requestId: string
+    result?: Record<string, unknown>
+    error?: string
+  }) => Promise<void>
+  /** Apps 退出/换号时清除第一方应用 BFF cookie，并通知保活页面刷新。 */
+  clearIdentitySessions: () => Promise<void>
+  addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>) & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'sessionsChanged', handler: (data: { sessions: BackgroundSession[] }) => void) => Promise<PluginListenerHandle>) & ((event: 'browserMinimized', handler: (data: { name: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'authorizationRequested', handler: (data: HostAuthorizationEvent) => void) => Promise<PluginListenerHandle>)
   removeAllListeners: () => Promise<void>
 }
 
@@ -183,6 +207,17 @@ export async function closeInAppBrowser() {
   }
 
   await Browser.close()
+}
+
+/** 清理原生容器中由宿主身份派生的第一方应用会话。 */
+export async function clearInAppBrowserIdentitySessions() {
+  if (
+    !Capacitor.isNativePlatform()
+    || Capacitor.getPlatform() !== 'ios'
+  ) {
+    return
+  }
+  await InAppWebView.clearIdentitySessions()
 }
 
 /**

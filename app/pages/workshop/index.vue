@@ -29,6 +29,7 @@ import {
   trashOutline,
 } from 'ionicons/icons'
 import { DEFAULT_EMOJI } from '~/types/app'
+import { getYunLeFunSubmissionState } from '~/utils/yunlefunSubmission'
 
 const router = useRouter()
 const toast = useToast()
@@ -129,13 +130,19 @@ function formatDate(ts: number) {
   })
 }
 
-function statusLabel(status: AppRecord['status']) {
-  switch (status) {
-    case 'pending': return '审核中'
-    case 'rejected': return '已拒绝'
-    case 'approved': return ''
-    default: return ''
-  }
+function yunlefunStateFor(app: AppRecord) {
+  return getYunLeFunSubmissionState(app)
+}
+
+function yunlefunStateTone(app: AppRecord) {
+  const status = yunlefunStateFor(app).status
+  if (status === 'listed')
+    return 'success'
+  if (status === 'pending' || status === 'in_review' || status === 'awaiting_publication')
+    return 'warning'
+  if (status === 'changes_requested' || status === 'rejected' || status === 'suspended')
+    return 'danger'
+  return 'default'
 }
 
 onMounted(() => {
@@ -244,16 +251,18 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
                 <span v-if="app.accessMode === 'login_required'" class="private-badge">需登录</span>
                 <span v-if="app.accessMode === 'invite_only'" class="private-badge">仅限受邀</span>
                 <span
-                  v-if="app.status && app.status !== 'approved'"
                   class="status-badge"
-                  :class="`status-badge--${app.status}`"
-                >{{ statusLabel(app.status) }}</span>
+                  :class="`status-badge--${yunlefunStateTone(app)}`"
+                >{{ yunlefunStateFor(app).statusLabel }}</span>
               </h2>
               <p v-if="app.description">
                 {{ app.description }}
               </p>
-              <p v-if="app.status === 'rejected' && app.rejectedReason" class="reject-reason">
-                被拒原因：{{ app.rejectedReason }}
+              <p
+                v-if="['changes_requested', 'rejected'].includes(yunlefunStateFor(app).status)"
+                class="reject-reason"
+              >
+                审核意见：{{ yunlefunStateFor(app).detail }}
               </p>
               <p class="app-meta">
                 <span v-if="app.category" class="meta-category">{{ app.category }}</span>
@@ -360,12 +369,22 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
   vertical-align: middle;
 }
 
-.status-badge--pending {
+.status-badge--default {
+  background: var(--ylf-fill-tertiary);
+  color: var(--ion-color-medium);
+}
+
+.status-badge--success {
+  background: rgba(var(--ion-color-success-rgb), 0.14);
+  color: var(--ion-color-success-shade);
+}
+
+.status-badge--warning {
   background: rgba(var(--ion-color-warning-rgb), 0.16);
   color: var(--ion-color-warning-shade);
 }
 
-.status-badge--rejected {
+.status-badge--danger {
   background: rgba(var(--ion-color-danger-rgb), 0.16);
   color: var(--ion-color-danger);
 }

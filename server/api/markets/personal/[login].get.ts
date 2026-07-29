@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const ownerUid = await resolveOwnerUidByLogin(login)
   if (!ownerUid)
-    throw createError({ statusCode: 404, message: '个人市场不存在' })
+    throw createError({ statusCode: 404, message: '个人主页不存在' })
 
   const resolver = createCloudbaseCatalogResolver()
   const view = await resolver.resolveCatalog({

@@ -70,6 +70,21 @@ export type AppPublicationStatus
     | 'suspended'
     | 'delisted'
 
+export type YunLeFunListingStatus = 'unlisted' | 'listed' | 'suspended' | 'delisted'
+
+export interface YunLeFunListing {
+  appId: string
+  status: YunLeFunListingStatus
+  approvedRevisionId?: string
+  activeSubmissionId?: string
+  reason?: string
+  submittedAt?: number
+  reviewedAt?: number
+  reviewedBy?: string
+  createdAt: number
+  updatedAt: number
+}
+
 /** 当前仅开放 first_party；third_party 保留为后续兼容入口。 */
 export type AppSubmissionKind = 'first_party' | 'third_party'
 
@@ -176,6 +191,8 @@ export interface AppRecord {
   activeSubmissionId?: string
   /** 管理/所有者视图附带的最近提交；公开目录不会返回。 */
   latestSubmission?: AppSubmission
+  /** 所有者视图附带的云乐坊上架指针；公开目录不会返回。 */
+  yunlefunListing?: YunLeFunListing
   /** 审核状态（必填，默认 pending） */
   status: AppStatus
   /** 拒绝原因（仅 status=rejected 时有值） */

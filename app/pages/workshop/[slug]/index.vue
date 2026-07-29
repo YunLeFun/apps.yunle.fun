@@ -29,6 +29,7 @@ import {
   trashOutline,
 } from 'ionicons/icons'
 import { DEFAULT_EMOJI } from '~/types/app'
+import { getYunLeFunSubmissionState } from '~/utils/yunlefunSubmission'
 
 const route = useRoute()
 const router = useRouter()
@@ -45,6 +46,7 @@ const slug = computed(() => (route.params as { slug?: string }).slug ?? '')
 const loading = ref(true)
 const loadError = ref('')
 const app = ref<AppRecord | null>(null)
+const yunlefunState = computed(() => app.value ? getYunLeFunSubmissionState(app.value) : null)
 const submittingPublicMarket = ref(false)
 /** 当前页面绑定的 slug（首次解析后锁定） */
 const pageSlug = ref('')
@@ -132,13 +134,14 @@ async function confirmDelete() {
   await alert.present()
 }
 
-async function handlePublicMarketSubmission() {
+async function performYunLeFunSubmission(makePublic: boolean) {
   if (!app.value)
     return
   try {
     submittingPublicMarket.value = true
-    await submitPublicMarket(app.value._id)
-    toast.showSuccess('已投稿公共市场，等待审核')
+    await submitPublicMarket(app.value._id, { makePublic })
+    workshopDirty.value = true
+    toast.showSuccess('已投稿云乐坊，等待审核')
     await loadApp(app.value.slug)
   }
   catch (err: unknown) {
@@ -147,6 +150,29 @@ async function handlePublicMarketSubmission() {
   finally {
     submittingPublicMarket.value = false
   }
+}
+
+async function handleYunLeFunSubmission() {
+  if (!app.value || !yunlefunState.value?.action)
+    return
+
+  if (yunlefunState.value.action === 'make_public') {
+    const alert = await alertController.create({
+      header: '设为公开并投稿？',
+      message: '系统会为当前作品创建一个公开版本并投稿云乐坊。应用站点自身的登录、邀请或其他访问保护仍由开发者负责，不会被修改。',
+      buttons: [
+        { text: '取消', role: 'cancel' },
+        {
+          text: '设为公开并投稿',
+          handler: () => performYunLeFunSubmission(true),
+        },
+      ],
+    })
+    await alert.present()
+    return
+  }
+
+  await performYunLeFunSubmission(false)
 }
 
 function formatDate(ts: number) {
@@ -313,9 +339,12 @@ watch(slug, (val) => {
             </IonNote>
           </IonItem>
           <IonItem>
-            <IonLabel>公共市场审核</IonLabel>
-            <IonNote slot="end">
-              {{ app.latestSubmission?.reviewStatus === 'draft' ? '未投稿' : app.latestSubmission?.reviewStatus || app.status }}
+            <IonLabel>
+              <h3>云乐坊状态</h3>
+              <p>{{ yunlefunState?.detail }}</p>
+            </IonLabel>
+            <IonNote slot="end" class="submission-status">
+              {{ yunlefunState?.statusLabel }}
             </IonNote>
           </IonItem>
           <IonItem>
@@ -338,15 +367,15 @@ watch(slug, (val) => {
         </div>
         <IonList inset>
           <IonItem
-            v-if="(app.audience || 'public') === 'public' && app.publicationStatus === 'published'"
+            v-if="app.publicationStatus === 'published' && yunlefunState"
             button
-            :disabled="submittingPublicMarket || ['pending', 'in_review'].includes(app.latestSubmission?.reviewStatus || '')"
+            :disabled="submittingPublicMarket || !yunlefunState.action"
             :detail="false"
-            @click="handlePublicMarketSubmission"
+            @click="handleYunLeFunSubmission"
           >
             <IonIcon slot="start" :icon="paperPlaneOutline" color="primary" />
             <IonLabel>
-              {{ ['pending', 'in_review'].includes(app.latestSubmission?.reviewStatus || '') ? '公共市场审核中' : '投稿公共市场' }}
+              {{ yunlefunState.actionLabel }}
             </IonLabel>
             <IonSpinner v-if="submittingPublicMarket" slot="end" name="crescent" />
           </IonItem>
@@ -510,6 +539,12 @@ watch(slug, (val) => {
   color: var(--ion-color-medium);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+}
+
+.submission-status {
+  max-width: 42%;
+  text-align: right;
+  white-space: normal;
 }
 
 .page-footer {

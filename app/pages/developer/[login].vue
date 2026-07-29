@@ -32,7 +32,7 @@ const login = computed(() => {
   return resolveLoginFromUrl()
 })
 
-// 个人市场独立于公共市场审核，读取坊主当前发布的公开作品。
+// 个人主页独立于云乐坊审核，读取坊主当前发布的公开作品。
 const { apps, loading: catalogLoading, load } = usePersonalMarket(login)
 
 // GitHub 公开资料（中文名 / 头像 / 简介）
@@ -76,7 +76,7 @@ watch(login, load)
         <IonButtons slot="start">
           <IonBackButton default-href="/tabs/apps" text="" />
         </IonButtons>
-        <IonTitle>个人市场</IonTitle>
+        <IonTitle>个人主页</IonTitle>
       </IonToolbar>
     </IonHeader>
 

@@ -1,19 +1,20 @@
-# 个人市场与个人工坊
+# 云乐坊、个人主页与个人工坊
 
 ## 三个目录表面
 
 | 表面     | 可见内容                               | 版本来源                                    |
 | -------- | -------------------------------------- | ------------------------------------------- |
-| 公共市场 | 管理员已批准并上架的公开应用           | `public_market_listings.approvedRevisionId` |
-| 个人市场 | 坊主当前发布的公开应用                 | `apps.currentRevisionId`                    |
+| 云乐坊   | 管理员已批准并上架的公开应用           | `public_market_listings.approvedRevisionId` |
+| 个人主页 | 坊主当前发布的公开应用                 | `apps.currentRevisionId`                    |
 | 个人工坊 | 坊主及有效坊客可见的公开、坊客专属应用 | `apps.currentRevisionId`                    |
 
 应用身份和当前状态只保存在 `apps`。`app_submissions` 保存不可变 revision，
-`public_market_listings` 只保存公共市场审核指针，不复制名称、链接等应用资料。
+`public_market_listings` 只保存云乐坊审核指针，不复制名称、链接等应用资料。
+`public_market`、`personal_market` 等旧名称仅作为内部接口和存储标识保留。
 
 ## 可见范围
 
-- `public`：个人市场可见，也可以投稿公共市场；坊客同样可见。
+- `public`：个人主页可见，也可以投稿云乐坊；坊客同样可见。
 - `workshop`：仅坊主和有效坊客可见。
 - `owner`：仅坊主自己的应用管理视图可见。
 

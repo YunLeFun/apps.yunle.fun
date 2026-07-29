@@ -270,7 +270,7 @@ watch(slug, (val) => {
               </IonSelectOption>
             </IonSelect>
             <IonNote slot="helper">
-              {{ form.audience === 'workshop' ? '仅在个人工坊展示，站点访问权限由开发者决定' : form.audience === 'owner' ? '仅你本人可以在创作管理中看到' : '发布后展示在个人市场，可另行投稿公共市场' }}
+              {{ form.audience === 'workshop' ? '仅在个人工坊展示，站点访问权限由开发者决定' : form.audience === 'owner' ? '仅你本人可以在创作管理中看到' : '发布后展示在个人主页，可另行投稿云乐坊' }}
             </IonNote>
           </IonItem>
           <IonItem>
@@ -296,7 +296,7 @@ watch(slug, (val) => {
               </IonSelectOption>
             </IonSelect>
             <IonNote slot="helper">
-              保存后立即形成新版本；公共市场继续展示已审核版本
+              保存后立即形成新版本；云乐坊继续展示已审核版本
             </IonNote>
           </IonItem>
         </IonList>

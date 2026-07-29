@@ -142,4 +142,19 @@ describe('useApps server-mediated submission flow', () => {
     expect(api).toHaveBeenNthCalledWith(1, '/api/apps/app_1', { method: 'DELETE' })
     expect(api).toHaveBeenNthCalledWith(2, '/api/apps/slug', { query: { slug: 'example' } })
   })
+
+  it('can explicitly make a private work public when submitting it to YunLeFun', async () => {
+    api.mockResolvedValue({
+      appId: 'app_1',
+      submissionId: 'submission_2',
+      reviewStatus: 'pending',
+    })
+
+    await useApps().submitPublicMarket('app_1', { makePublic: true })
+
+    expect(api).toHaveBeenCalledWith('/api/apps/app_1/public-market', {
+      method: 'POST',
+      body: { makePublic: true },
+    })
+  })
 })

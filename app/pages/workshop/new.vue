@@ -205,7 +205,7 @@ const {
               </IonSelectOption>
             </IonSelect>
             <IonNote slot="helper">
-              {{ form.audience === 'workshop' ? '仅在个人工坊展示，站点访问权限由开发者决定' : form.audience === 'owner' ? '仅你本人可以在创作管理中看到' : '发布后展示在个人市场，可另行投稿公共市场' }}
+              {{ form.audience === 'workshop' ? '仅在个人工坊展示，站点访问权限由开发者决定' : form.audience === 'owner' ? '仅你本人可以在创作管理中看到' : '发布后展示在个人主页，可另行投稿云乐坊' }}
             </IonNote>
           </IonItem>
           <IonItem>
@@ -231,7 +231,7 @@ const {
               </IonSelectOption>
             </IonSelect>
             <IonNote slot="helper">
-              保存后立即形成不可变版本；投稿公共市场时再进入人工审核
+              保存后立即形成不可变版本；投稿云乐坊时再进入人工审核
             </IonNote>
           </IonItem>
         </IonList>

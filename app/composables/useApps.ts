@@ -99,9 +99,13 @@ export function useApps() {
     await $api(`/api/apps/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
-  async function submitPublicMarket(id: string): Promise<void> {
+  async function submitPublicMarket(
+    id: string,
+    options: { makePublic?: boolean } = {},
+  ): Promise<void> {
     await $api(`/api/apps/${encodeURIComponent(id)}/public-market`, {
       method: 'POST',
+      body: { makePublic: options.makePublic === true },
     })
   }
 

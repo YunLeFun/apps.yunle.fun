@@ -25,7 +25,7 @@ export function usePersonalMarket(login: Ref<string>) {
     }
     catch (reason: unknown) {
       apps.value = []
-      error.value = reason instanceof Error ? reason.message : '个人市场加载失败'
+      error.value = reason instanceof Error ? reason.message : '个人主页加载失败'
     }
     finally {
       loading.value = false

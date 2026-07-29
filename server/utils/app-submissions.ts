@@ -1,3 +1,7 @@
+import type {
+  PublicMarketListingRecord,
+  PublicMarketSubmissionChange,
+} from '../domain/public-market-submission'
 import type { CloudbaseTransaction } from './cloudbase-admin'
 import type { ServerAuthUser } from './cloudbase-auth'
 import type {
@@ -10,6 +14,10 @@ import type {
 import { randomUUID } from 'node:crypto'
 import { createError } from 'h3'
 import { PUBLIC_MARKET_LISTINGS_COLLECTION } from '../domain/catalog/cloudbase'
+import {
+  createPublicMarketSubmissionModule,
+  PublicMarketSubmissionError,
+} from '../domain/public-market-submission'
 import {
   isYunLeFunFirstPartyHostname,
   normalizeSubmissionInput,
@@ -206,82 +214,57 @@ export async function updateAppSubmission(
 export async function submitOwnedAppToPublicMarket(
   user: ServerAuthUser,
   appId: string,
+  options: { makePublic?: boolean } = {},
 ): Promise<{ appId: string, submissionId: string, reviewStatus: 'pending' }> {
   const { db } = useCloudbaseAdmin()
-  const app = await ownedApp(db, appId, user.uid)
-  if ((app.audience || 'public') !== 'public' || app.publicationStatus !== 'published') {
-    throw createError({
-      statusCode: 409,
-      message: '只有已发布的公开应用可以投稿公共市场',
-      data: { code: 'PUBLIC_MARKET_AUDIENCE_REQUIRED' },
-    })
-  }
-
-  const submissionId = app.currentRevisionId || app.publishedSubmissionId
-  if (!submissionId)
-    throw createError({ statusCode: 409, message: '应用还没有可投稿的版本' })
-
-  const { data: submissionData } = await db.collection(APP_SUBMISSIONS_COLLECTION)
-    .doc(submissionId)
-    .get()
-  const submission = (Array.isArray(submissionData) ? submissionData[0] : submissionData) as AppSubmission | undefined
-  if (!submission || submission.appId !== appId)
-    throw createError({ statusCode: 409, message: '应用版本不存在' })
-  if (submission.reviewStatus === 'pending' || submission.reviewStatus === 'in_review') {
-    throw createError({
-      statusCode: 409,
-      message: '当前版本已经在公共市场审核中',
-      data: { code: 'PUBLIC_MARKET_SUBMISSION_ACTIVE' },
-    })
-  }
-
-  const { data: listingData } = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION)
-    .doc(appId)
-    .get()
-  const listing = (Array.isArray(listingData) ? listingData[0] : listingData) as {
-    status?: string
-    approvedRevisionId?: string
-  } | undefined
-  const now = Date.now()
-  const eventId = entityId('review_event')
-  const event = submissionEvent(
-    eventId,
-    appId,
-    submissionId,
-    user,
-    'public_market.submitted',
-    now,
-  )
-
-  await db.runTransaction(async (transaction: CloudbaseTransaction) => {
-    await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).update({
-      reviewStatus: 'pending',
-      submittedAt: now,
-      updatedAt: now,
-      reviewedAt: 0,
-      reviewedBy: '',
-      reviewNote: '',
-    })
-    await transaction.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(appId).set({
-      appId,
-      status: listing?.status === 'listed' ? 'listed' : 'unlisted',
-      approvedRevisionId: listing?.approvedRevisionId || '',
-      activeSubmissionId: submissionId,
-      submittedAt: now,
-      updatedAt: now,
-    })
-    await transaction.collection(APPS_COLLECTION).doc(appId).update({
-      activeSubmissionId: submissionId,
-      status: 'pending',
-      updatedAt: now,
-    })
-    await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
+  const workflow = createPublicMarketSubmissionModule({
+    async getOwnedApp(id, ownerUid) {
+      return ownedApp(db, id, ownerUid)
+    },
+    async getSubmission(submissionId) {
+      const { data } = await db.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).get()
+      return firstDocument<AppSubmission>(data)
+    },
+    async getListing(id) {
+      const { data } = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(id).get()
+      const listing = firstDocument<PublicMarketListingRecord>(data)
+      return listing
+        ? {
+            ...listing,
+            appId: listing.appId || id,
+            approvedRevisionId: listing.approvedRevisionId || '',
+            activeSubmissionId: listing.activeSubmissionId || '',
+          }
+        : null
+    },
+    async getLatestRevisionNumber(id) {
+      const { data } = await db.collection(APP_SUBMISSIONS_COLLECTION)
+        .where({ appId: id })
+        .orderBy('revision', 'desc')
+        .limit(1)
+        .get()
+      return Number((data?.[0] as AppSubmission | undefined)?.revision || 0)
+    },
+    async commit(change) {
+      await commitPublicMarketSubmission(db, change)
+    },
   })
-
-  return {
-    appId,
-    submissionId,
-    reviewStatus: 'pending',
+  try {
+    return await workflow.submit(
+      appId,
+      { uid: user.uid, ...(user.handle ? { login: user.handle } : {}) },
+      options,
+    )
+  }
+  catch (error: unknown) {
+    if (error instanceof PublicMarketSubmissionError) {
+      throw createError({
+        statusCode: error.code === 'APP_NOT_FOUND' ? 404 : 409,
+        message: error.message,
+        data: { code: error.code },
+      })
+    }
+    throw error
   }
 }
 
@@ -349,11 +332,31 @@ export async function delistOwnedApp(user: ServerAuthUser, appId: string): Promi
 }
 
 async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppRecord[]> {
-  const submissionIds = apps
-    .map(app => app.activeSubmissionId || app.currentRevisionId || app.publishedSubmissionId)
-    .filter(Boolean) as string[]
-  if (!submissionIds.length)
+  if (!apps.length)
     return apps
+  const listingResult = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION)
+    .where({ _id: db.command.in(apps.map(app => app._id)) })
+    .limit(apps.length)
+    .get()
+  const listings = new Map<string, PublicMarketListingRecord>(
+    ((listingResult.data || []) as PublicMarketListingRecord[])
+      .map(item => [item.appId || '', item]),
+  )
+  const submissionIds = apps
+    .map((app) => {
+      const listing = listings.get(app._id)
+      return listing?.activeSubmissionId
+        || app.activeSubmissionId
+        || app.currentRevisionId
+        || app.publishedSubmissionId
+    })
+    .filter(Boolean) as string[]
+  if (!submissionIds.length) {
+    return apps.map(app => ({
+      ...app,
+      ...(listings.get(app._id) ? { yunlefunListing: listings.get(app._id) } : {}),
+    }))
+  }
   const { data } = await db.collection(APP_SUBMISSIONS_COLLECTION)
     .where({ _id: db.command.in(submissionIds) })
     .limit(submissionIds.length)
@@ -362,10 +365,18 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
     ((data || []) as AppSubmission[]).map(item => [item._id, item]),
   )
   return apps.map((app) => {
-    const latestId = app.activeSubmissionId || app.currentRevisionId || app.publishedSubmissionId
+    const listing = listings.get(app._id)
+    const latestId = listing?.activeSubmissionId
+      || app.activeSubmissionId
+      || app.currentRevisionId
+      || app.publishedSubmissionId
     const latest = latestId ? submissions.get(latestId) : undefined
-    if (!latest)
-      return app
+    if (!latest) {
+      return {
+        ...app,
+        ...(listing ? { yunlefunListing: listing } : {}),
+      }
+    }
     const visibleSnapshot = latest.snapshot
     return {
       ...app,
@@ -376,7 +387,38 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
         ? latest.reviewNote || ''
         : app.rejectedReason,
       latestSubmission: latest,
+      ...(listing ? { yunlefunListing: listing } : {}),
     }
+  })
+}
+
+async function commitPublicMarketSubmission(
+  db: ReturnType<typeof useCloudbaseAdmin>['db'],
+  change: PublicMarketSubmissionChange,
+): Promise<void> {
+  await db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const submissionRef = transaction.collection(APP_SUBMISSIONS_COLLECTION)
+      .doc(change.submission._id)
+    if (change.submissionMode === 'create') {
+      await submissionRef.set(documentPayload(change.submission))
+    }
+    else {
+      await submissionRef.update({
+        reviewStatus: change.submission.reviewStatus,
+        submittedAt: change.submission.submittedAt,
+        updatedAt: change.submission.updatedAt,
+        reviewedAt: change.submission.reviewedAt || 0,
+        reviewedBy: change.submission.reviewedBy || '',
+        reviewNote: change.submission.reviewNote || '',
+      })
+    }
+    await transaction.collection(PUBLIC_MARKET_LISTINGS_COLLECTION)
+      .doc(change.appId)
+      .set(change.listing)
+    await transaction.collection(APPS_COLLECTION).doc(change.appId).update(change.appPatch)
+    await transaction.collection(APP_REVIEW_EVENTS_COLLECTION)
+      .doc(change.event._id)
+      .set(documentPayload(change.event))
   })
 }
 
@@ -398,7 +440,7 @@ async function invalidatePublicMarketListing(
     })
   }
   catch (error: unknown) {
-    // 兼容公共市场 listing 集合尚未完成初始化的滚动部署阶段。
+    // 兼容云乐坊 listing 集合尚未完成初始化的滚动部署阶段。
     console.warn('[PublicMarket] listing invalidation skipped during migration', error)
   }
 }
@@ -493,4 +535,10 @@ function entityId(prefix: string): string {
 function documentPayload<T extends { _id: string }>(document: T): Omit<T, '_id'> {
   const { _id: _documentId, ...payload } = document
   return payload
+}
+
+function firstDocument<T>(value: unknown): T | null {
+  if (Array.isArray(value))
+    return value[0] as T | undefined || null
+  return value && typeof value === 'object' ? value as T : null
 }

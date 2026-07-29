@@ -24,12 +24,13 @@ import {
   qrCodeOutline,
   refreshOutline,
 } from 'ionicons/icons'
+import { getAvailableAppCategories } from '~/utils/appCategories'
 import { recordToAppInfo } from '~/utils/appRecord'
 
 const {
   searchQuery,
   selectedCategory,
-  categories,
+  categories: publicCategories,
   changeCategory,
   debouncedSearch,
   queryApps,
@@ -99,9 +100,32 @@ const searchPlaceholder = computed(() =>
     : `搜索${scopeTitle.value}中的应用`,
 )
 
+const scopedCategoryApps = computed(() => {
+  if (isPrivateScope.value)
+    return currentView.value?.apps ?? []
+
+  const apps: Array<{ category?: string }> = [...catalog.value]
+  for (const workshop of availableWorkshops.value) {
+    const view = workshopViews.value[workshop._id]
+    if (view)
+      apps.push(...view.apps)
+  }
+  return apps
+})
+
+const categories = computed(() =>
+  isPublicScope.value
+    ? publicCategories.value
+    : getAvailableAppCategories(scopedCategoryApps.value),
+)
+
 function matchesCurrentFilters(app: YlfAppInfo) {
-  if (selectedCategory.value !== '全部' && app.category !== selectedCategory.value)
+  if (
+    selectedCategory.value !== '全部'
+    && app.category?.trim() !== selectedCategory.value
+  ) {
     return false
+  }
 
   const keyword = searchQuery.value.trim().toLocaleLowerCase()
   if (!keyword)
@@ -299,7 +323,7 @@ async function retryCurrentScope() {
 }
 
 function manageWorkshops() {
-  router.push(ownedWorkshop.value ? '/user/workshop' : '/user/workshops')
+  router.push('/user/workshop')
 }
 
 function openScopedApp(item: WorkshopScopedApp) {
@@ -334,6 +358,19 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
   else
     selectScope('public')
 })
+
+watch(categories, (availableCategories) => {
+  const selectedCategoryStillExists = availableCategories.some(
+    category => category.name === selectedCategory.value,
+  )
+  if (selectedCategoryStillExists)
+    return
+
+  if (isPublicScope.value)
+    changeCategory('全部')
+  else
+    selectedCategory.value = '全部'
+}, { flush: 'sync' })
 
 function handleSegmentChange(event: CustomEvent) {
   if (isPublicScope.value)

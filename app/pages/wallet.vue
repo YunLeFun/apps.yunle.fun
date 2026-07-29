@@ -327,11 +327,22 @@ const memberExpireText = computed(() => formatExpireDate(membership.value?.expir
 }
 
 .iap-pack-card {
-  border: 1.5px solid var(--ion-color-step-200, #e5e5ea);
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
   border-radius: 14px;
   padding: 14px 8px 10px;
+  color: inherit;
   text-align: center;
-  background: transparent;
+  background: color-mix(in srgb, var(--ion-item-background, var(--ion-background-color)) 94%, currentColor 6%);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.iap-pack-card:active:not(:disabled) {
+  border-color: color-mix(in srgb, var(--ion-color-primary) 50%, currentColor);
+  background: color-mix(in srgb, var(--ion-color-primary) 10%, var(--ion-item-background, var(--ion-background-color)));
+  transform: scale(0.985);
 }
 
 .iap-pack-card:disabled {

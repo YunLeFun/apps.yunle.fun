@@ -249,17 +249,33 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// Apps 退出或切换账号后清除 Play 的 HttpOnly BFF cookie，并通知保活页面刷新身份。
+    /// Native allowlist for sessions derived from Apps identity.
+    ///
+    /// Keep this independent from web input: JavaScript cannot choose arbitrary
+    /// cookie names or domains for native deletion.
+    private static let identitySessionCookies: [(host: String, name: String)] = [
+        ("play.yunle.fun", "__Host-ylf_play_session"),
+        ("cms.yunle.fun", "__Host-ylf-cms-session"),
+        // nuxt-auth-utils stores the CMS user projection separately. It is
+        // never authoritative without the opaque CMS session, but clearing it
+        // ensures SSR renders LoginGate immediately after an Apps account change.
+        ("cms.yunle.fun", "h3"),
+    ]
+
+    /// Apps 退出或切换账号后清除第一方 HttpOnly BFF cookie，并通知保活页面刷新身份。
     @objc func clearIdentitySessions(_ call: CAPPluginCall) {
         let cookieStore = WKWebsiteDataStore.default().httpCookieStore
         cookieStore.getAllCookies { [weak self] cookies in
-            let playCookies = cookies.filter {
-                $0.name == "__Host-ylf_play_session"
-                    && $0.domain.trimmingCharacters(in: CharacterSet(charactersIn: "."))
-                        .lowercased() == "play.yunle.fun"
+            let identityCookies = cookies.filter { cookie in
+                let host = cookie.domain
+                    .trimmingCharacters(in: CharacterSet(charactersIn: "."))
+                    .lowercased()
+                return Self.identitySessionCookies.contains {
+                    $0.host == host && $0.name == cookie.name
+                }
             }
             let group = DispatchGroup()
-            playCookies.forEach { cookie in
+            identityCookies.forEach { cookie in
                 group.enter()
                 cookieStore.delete(cookie) {
                     group.leave()
@@ -267,7 +283,10 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             group.notify(queue: .main) {
                 self?.sessions
-                    .filter { ($0.url?.host ?? "").lowercased() == "play.yunle.fun" }
+                    .filter { session in
+                        let host = (session.url?.host ?? "").lowercased()
+                        return Self.identitySessionCookies.contains { $0.host == host }
+                    }
                     .forEach { $0.notifyHostIdentityChanged() }
                 call.resolve()
             }

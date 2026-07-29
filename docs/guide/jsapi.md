@@ -131,8 +131,13 @@ interface YlfJSAPI {
 
 内嵌浏览器不转移登录会话。`authorize` 只为精确注册的第一方 SSO client 签发
 绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。
-宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项仅为
-`https://play.yunle.fun` / `play-web` / `identity:bootstrap`。
+宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项为：
+
+- `https://play.yunle.fun` / `play-web` / `identity:bootstrap`
+- `https://cms.yunle.fun` / `cms-web` / `identity:bootstrap`
+
+共享 `yunle.fun` 后缀不会自动获得授权；应用 id、Origin、client id、redirect URI
+和 scope 必须同时精确匹配第一方注册表。
 
 ## 权限与授信
 

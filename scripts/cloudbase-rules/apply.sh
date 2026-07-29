@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "==> 选择环境 $ENV_ID"
 npx mcporter call cloudbase auth action=set_env envId="$ENV_ID" >/dev/null
 
-for f in apps app_submissions app_review_events app_submitters public_market_listings personal_workshops workshop_memberships workshop_events user_home_screens featured_apps weekly_charts app_reviews app_reports moderation_tasks; do
+for f in apps app_submissions app_review_events app_submitters public_market_listings personal_workshops workshop_memberships workshop_events user_home_screens featured_apps weekly_charts app_reviews app_reports moderation_tasks diagnostic_log_uploads; do
   echo "==> 应用 $f 规则"
   npx mcporter call cloudbase managePermissions --args "$(cat "$SCRIPT_DIR/$f.json")" \
     | grep -E '"Success"|"message"' | head -3
@@ -27,7 +27,7 @@ done
 
 echo
 echo "==> 校验所有集合规则"
-for f in apps app_submissions app_review_events app_submitters public_market_listings personal_workshops workshop_memberships workshop_events user_home_screens featured_apps weekly_charts app_reviews app_reports moderation_tasks; do
+for f in apps app_submissions app_review_events app_submitters public_market_listings personal_workshops workshop_memberships workshop_events user_home_screens featured_apps weekly_charts app_reviews app_reports moderation_tasks diagnostic_log_uploads; do
   echo "--- $f ---"
   npx mcporter call cloudbase queryPermissions \
     action=getResourcePermission resourceType=noSqlDatabase resourceId="$f" \

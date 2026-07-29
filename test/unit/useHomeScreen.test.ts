@@ -15,6 +15,7 @@ function createMockDb() {
     limit: vi.fn().mockReturnThis(),
     get: vi.fn(),
     add: vi.fn(),
+    update: vi.fn(),
     doc: vi.fn(() => mockDoc),
   }
   const db = {
@@ -113,22 +114,31 @@ describe('useHomeScreen', () => {
     mockUserStore = createMockUserStore()
     mockHomeScreenStore = createMockHomeScreenStore()
     mockSettingsStore = createMockSettingsStore()
+    mockAuth.getSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'default-token',
+          user: { id: 'user-123' },
+        },
+      },
+      error: null,
+    })
   })
 
   // ==================== ensureAuth ====================
 
   describe('ensureAuth（通过 loadFromCloud 间接测试）', () => {
-    it('已登录且有 id 时直接使用 userStore.userInfo.id', async () => {
+    it('已登录时仍以 CloudBase 当前会话身份加载，避免启动阶段账号竞态', async () => {
       mockUserStore = createMockUserStore({
         isLoggedIn: true,
-        userInfo: { id: 'user-123' },
+        userInfo: { id: 'stale-user' },
       })
       mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
 
       const { loadFromCloud } = useHomeScreen()
       await loadFromCloud()
 
-      expect(mockAuth.getSession).not.toHaveBeenCalled()
+      expect(mockAuth.getSession).toHaveBeenCalled()
       expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({ _openid: 'user-123' })
     })
 
@@ -172,7 +182,7 @@ describe('useHomeScreen', () => {
       }))
     })
 
-    it('userStore 已有 id 时不重复调用 login', async () => {
+    it('userStore 身份与当前会话不同时纠正本地账号', async () => {
       mockUserStore = createMockUserStore({
         isLoggedIn: false,
         userInfo: { id: 'existing-id', nickname: '', avatar: '' },
@@ -190,7 +200,9 @@ describe('useHomeScreen', () => {
       const { loadFromCloud } = useHomeScreen()
       await loadFromCloud()
 
-      expect(mockUserStore.login).not.toHaveBeenCalled()
+      expect(mockUserStore.login).toHaveBeenCalledWith('token', expect.objectContaining({
+        id: 'restored-uid',
+      }))
     })
 
     it('session 无效时不执行数据库操作', async () => {
@@ -401,16 +413,19 @@ describe('useHomeScreen', () => {
       })
     })
 
-    it('有 cloudDocId 时执行 update', async () => {
+    it('有 cloudDocId 时通过包含 owner 的条件执行 update', async () => {
       mockHomeScreenStore.cloudDocId = 'existing-doc'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const { syncToCloud } = useHomeScreen()
       await syncToCloud()
 
       expect(mockDbSetup.db.collection).toHaveBeenCalledWith('user_home_screens')
-      expect(mockDbSetup.mockCollection.doc).toHaveBeenCalledWith('existing-doc')
-      expect(mockDbSetup.mockDoc.update).toHaveBeenCalledWith(
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({
+        _id: 'existing-doc',
+        _openid: 'user-123',
+      })
+      expect(mockDbSetup.mockCollection.update).toHaveBeenCalledWith(
         expect.objectContaining({
           installedApps: expect.any(Array),
           dockApps: expect.any(Array),
@@ -420,9 +435,52 @@ describe('useHomeScreen', () => {
       )
     })
 
+    it('同步时以 CloudBase 当前会话身份为准，不使用可能过期的本地账号 ID', async () => {
+      mockUserStore = createMockUserStore({
+        isLoggedIn: true,
+        userInfo: { id: 'stale-user' },
+      })
+      mockAuth.getSession.mockResolvedValue({
+        data: {
+          session: {
+            access_token: 'current-token',
+            user: { id: 'current-user' },
+          },
+        },
+        error: null,
+      })
+      mockHomeScreenStore.cloudDocId = 'existing-doc'
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({
+        _id: 'existing-doc',
+        _openid: 'current-user',
+      })
+    })
+
+    it('匿名会话不发起需要实名用户权限的云同步', async () => {
+      mockAuth.getSession.mockResolvedValue({
+        data: {
+          session: {
+            access_token: 'anonymous-token',
+            user: { id: 'anonymous-user', is_anonymous: true },
+          },
+        },
+        error: null,
+      })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      expect(mockDbSetup.db.collection).not.toHaveBeenCalled()
+    })
+
     it('update 成功后设置 lastSyncAt', async () => {
       mockHomeScreenStore.cloudDocId = 'existing-doc'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const config = { installedApps: [], dockApps: [], recentApps: [], updatedAt: 5000 }
       mockHomeScreenStore.getHomeScreenConfig.mockReturnValue(config)
@@ -434,51 +492,145 @@ describe('useHomeScreen', () => {
       expect(mockHomeScreenStore.isSyncing).toBe(false)
     })
 
-    it('无 cloudDocId 且云端无文档时执行 add 并保存返回的 id', async () => {
+    it('无 cloudDocId 且云端无文档时不提交系统字段并保存返回的 _id', async () => {
       mockHomeScreenStore.cloudDocId = null
       mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
-      mockDbSetup.mockCollection.add.mockResolvedValue({ id: 'new-doc-id' })
+      mockDbSetup.mockCollection.add.mockResolvedValue({ _id: 'new-doc-id' })
 
       const { syncToCloud } = useHomeScreen()
       await syncToCloud()
 
-      expect(mockDbSetup.mockCollection.add).toHaveBeenCalledWith(
-        expect.objectContaining({
-          _openid: 'user-123',
-          installedApps: expect.any(Array),
-          dockApps: expect.any(Array),
-          recentApps: expect.any(Array),
-          createdAt: expect.any(Number),
-          updatedAt: expect.any(Number),
-        }),
-      )
+      const addPayload = mockDbSetup.mockCollection.add.mock.calls[0]?.[0]
+      expect(addPayload).toEqual(expect.objectContaining({
+        installedApps: expect.any(Array),
+        dockApps: expect.any(Array),
+        recentApps: expect.any(Array),
+        createdAt: expect.any(Number),
+        updatedAt: expect.any(Number),
+      }))
+      expect(addPayload).not.toHaveProperty('_openid')
       expect(mockHomeScreenStore.cloudDocId).toBe('new-doc-id')
     })
 
     it('无 cloudDocId 但云端已有文档时复用该文档执行 update（upsert，不产生重复文档）', async () => {
       mockHomeScreenStore.cloudDocId = null
       mockDbSetup.mockCollection.get.mockResolvedValue({ data: [{ _id: 'found-doc' }] })
-      mockDbSetup.mockDoc.update.mockResolvedValue({ updated: 1 })
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const { syncToCloud } = useHomeScreen()
       await syncToCloud()
 
-      expect(mockDbSetup.mockCollection.doc).toHaveBeenCalledWith('found-doc')
-      expect(mockDbSetup.mockDoc.update).toHaveBeenCalled()
+      expect(mockDbSetup.mockCollection.where).toHaveBeenCalledWith({
+        _id: 'found-doc',
+        _openid: 'user-123',
+      })
+      expect(mockDbSetup.mockCollection.update).toHaveBeenCalled()
       expect(mockDbSetup.mockCollection.add).not.toHaveBeenCalled()
       expect(mockHomeScreenStore.cloudDocId).toBe('found-doc')
     })
 
     it('update 命中 0 条（云端文档已删除）时回退到 add', async () => {
       mockHomeScreenStore.cloudDocId = 'stale-doc'
-      mockDbSetup.mockDoc.update.mockResolvedValue({ updated: 0 })
-      mockDbSetup.mockCollection.add.mockResolvedValue({ id: 'recreated-doc' })
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 0 })
+      mockDbSetup.mockCollection.get.mockResolvedValue({ data: [] })
+      mockDbSetup.mockCollection.add.mockResolvedValue({ _id: 'recreated-doc' })
 
       const { syncToCloud } = useHomeScreen()
       await syncToCloud()
 
       expect(mockDbSetup.mockCollection.add).toHaveBeenCalled()
       expect(mockHomeScreenStore.cloudDocId).toBe('recreated-doc')
+    })
+
+    it('旧文档 ID 未命中时先重新查找当前账号文档，避免重复创建', async () => {
+      mockAuth.getSession.mockResolvedValue({
+        data: {
+          session: {
+            access_token: 'current-token',
+            user: { id: 'user-123' },
+          },
+        },
+        error: null,
+      })
+      mockHomeScreenStore.cloudDocId = 'stale-doc'
+      mockDbSetup.mockCollection.get.mockResolvedValue({
+        data: [{ _id: 'current-doc' }],
+      })
+      mockDbSetup.mockCollection.update
+        .mockResolvedValueOnce({ updated: 0 })
+        .mockResolvedValueOnce({ updated: 1 })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      expect(mockDbSetup.mockCollection.update).toHaveBeenCalledTimes(2)
+      expect(mockDbSetup.mockCollection.add).not.toHaveBeenCalled()
+      expect(mockHomeScreenStore.cloudDocId).toBe('current-doc')
+    })
+
+    it('幂等更新返回 0 但当前账号文档仍存在时视为同步成功', async () => {
+      mockHomeScreenStore.cloudDocId = 'current-doc'
+      mockHomeScreenStore.getHomeScreenConfig.mockReturnValue({
+        installedApps: [{ appId: 'private-app' }],
+        dockApps: [],
+        recentApps: [],
+        updatedAt: 5000,
+      })
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 0 })
+      mockDbSetup.mockCollection.get.mockResolvedValue({
+        data: [{ _id: 'current-doc' }],
+      })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      expect(mockDbSetup.mockCollection.add).not.toHaveBeenCalled()
+      expect(mockHomeScreenStore.lastSyncAt).toBe(5000)
+    })
+
+    it('多个安装按钮同时请求同步时，数据库写入保持串行', async () => {
+      mockAuth.getSession.mockResolvedValue({
+        data: {
+          session: {
+            access_token: 'current-token',
+            user: { id: 'user-123' },
+          },
+        },
+        error: null,
+      })
+      mockHomeScreenStore.cloudDocId = 'current-doc'
+
+      let releaseFirstUpdate!: () => void
+      let notifyFirstUpdateStarted!: () => void
+      const firstUpdateStarted = new Promise<void>((resolve) => {
+        notifyFirstUpdateStarted = resolve
+      })
+      const firstUpdateGate = new Promise<void>((resolve) => {
+        releaseFirstUpdate = resolve
+      })
+      let activeUpdates = 0
+      let maxActiveUpdates = 0
+      mockDbSetup.mockCollection.update.mockImplementation(async () => {
+        activeUpdates += 1
+        maxActiveUpdates = Math.max(maxActiveUpdates, activeUpdates)
+        if (mockDbSetup.mockCollection.update.mock.calls.length === 1) {
+          notifyFirstUpdateStarted()
+          await firstUpdateGate
+        }
+        activeUpdates -= 1
+        return { updated: 1 }
+      })
+
+      const firstSync = useHomeScreen().syncToCloud()
+      await firstUpdateStarted
+      const secondSync = useHomeScreen().syncToCloud()
+      await Promise.resolve()
+
+      expect(maxActiveUpdates).toBe(1)
+
+      releaseFirstUpdate()
+      await Promise.all([firstSync, secondSync])
+      expect(maxActiveUpdates).toBe(1)
     })
 
     it('云同步关闭时不执行', async () => {
@@ -505,7 +657,7 @@ describe('useHomeScreen', () => {
 
     it('update 失败时 isSyncing 恢复为 false', async () => {
       mockHomeScreenStore.cloudDocId = 'existing-doc'
-      mockDbSetup.mockDoc.update.mockRejectedValue({
+      mockDbSetup.mockCollection.update.mockRejectedValue({
         code: 'DATABASE_PERMISSION_DENIED',
         message: 'Permission denied',
       })
@@ -538,7 +690,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
     })
 
     it('云同步和自动同步都开启时执行 syncToCloud', async () => {
@@ -546,7 +698,9 @@ describe('useHomeScreen', () => {
       await installApp('new-app')
 
       expect(mockHomeScreenStore.installApp).toHaveBeenCalledWith('new-app')
-      expect(mockDbSetup.mockDoc.update).toHaveBeenCalled()
+      await vi.waitFor(() => {
+        expect(mockDbSetup.mockCollection.update).toHaveBeenCalled()
+      })
     })
 
     it('云同步关闭时不执行', async () => {
@@ -590,7 +744,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
     })
 
     it('有 pending 变更时退出编辑并触发同步', async () => {
@@ -601,7 +755,7 @@ describe('useHomeScreen', () => {
 
       // syncToCloud 是异步的，等待 Promise 队列刷新
       await vi.waitFor(() => {
-        expect(mockDbSetup.mockDoc.update).toHaveBeenCalled()
+        expect(mockDbSetup.mockCollection.update).toHaveBeenCalled()
       })
 
       expect(mockHomeScreenStore.consumePendingChanges).toHaveBeenCalled()
@@ -628,7 +782,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const { installApp } = useHomeScreen()
       await installApp('app-x')
@@ -644,7 +798,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const { uninstallApp } = useHomeScreen()
       await uninstallApp('app-1')
@@ -660,7 +814,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const apps = [{ appId: 'a' }, { appId: 'b' }]
       const { updateOrder } = useHomeScreen()
@@ -677,7 +831,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const apps = [{ appId: 'dock-a' }]
       const { updateDock } = useHomeScreen()
@@ -694,7 +848,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
 
       const { recordRecentUse } = useHomeScreen()
       await recordRecentUse('app-recent')
@@ -712,7 +866,7 @@ describe('useHomeScreen', () => {
         userInfo: { id: 'user-123' },
       })
       mockHomeScreenStore.cloudDocId = 'doc-1'
-      mockDbSetup.mockDoc.update.mockResolvedValue({})
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
     })
 
     it('编辑模式下多次操作只在退出时同步一次', async () => {
@@ -736,7 +890,7 @@ describe('useHomeScreen', () => {
 
       // syncToCloud 是异步的，等待 Promise 队列刷新
       await vi.waitFor(() => {
-        expect(mockDbSetup.mockDoc.update).toHaveBeenCalledTimes(1)
+        expect(mockDbSetup.mockCollection.update).toHaveBeenCalledTimes(1)
       })
     })
   })

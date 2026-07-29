@@ -60,6 +60,8 @@ describe('workshop picker sheet', () => {
 
     expect(wrapper.text()).toContain('还没有加入个人工坊')
     expect(wrapper.text()).not.toContain('登录后查看个人工坊')
+    expect(wrapper.text()).toContain('开启工坊')
+    expect(wrapper.text()).not.toContain('管理工坊')
   })
 
   it('renders an active workshop returned for the logged-in account', () => {
@@ -85,5 +87,30 @@ describe('workshop picker sheet', () => {
     expect(wrapper.text()).toContain('云乐坊内部工坊')
     expect(wrapper.text()).toContain('云乐坊的工坊')
     expect(wrapper.text()).toContain('全部动态')
+  })
+
+  it('keeps the manage label when the account owns a workshop', () => {
+    const wrapper = mount(WorkshopPickerSheet, {
+      props: {
+        isOpen: true,
+        currentScope: '6MU9AG',
+        isLoggedIn: true,
+        ownedWorkshopId: '6MU9AG',
+        workshops: [{
+          _id: '6MU9AG',
+          ownerName: '云乐坊',
+          name: '云乐坊内部工坊',
+          description: '内部应用',
+          joinPolicy: 'approval',
+          status: 'active',
+        }],
+      },
+      global: {
+        stubs: ionicStubs,
+      },
+    })
+
+    expect(wrapper.text()).toContain('管理工坊')
+    expect(wrapper.text()).not.toContain('开启工坊')
   })
 })

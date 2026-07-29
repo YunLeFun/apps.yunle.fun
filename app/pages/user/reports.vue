@@ -8,7 +8,6 @@ import {
   IonPage,
   IonRefresher,
   IonRefresherContent,
-  IonSpinner,
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
@@ -85,9 +84,10 @@ async function handleRefresh(event: CustomEvent) {
         </IonToolbar>
       </IonHeader>
 
-      <div v-if="loading && reports.length === 0" class="report-loading">
-        <IonSpinner name="crescent" />
-      </div>
+      <AppPageLoading
+        v-if="loading && reports.length === 0"
+        label="正在加载我的举报"
+      />
 
       <k-list v-else-if="reports.length > 0" strong inset>
         <k-list-item
@@ -119,12 +119,6 @@ async function handleRefresh(event: CustomEvent) {
 </template>
 
 <style scoped>
-.report-loading {
-  display: flex;
-  justify-content: center;
-  padding: 24px;
-}
-
 .report-empty {
   text-align: center;
   opacity: 0.5;

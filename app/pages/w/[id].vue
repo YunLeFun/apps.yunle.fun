@@ -33,29 +33,51 @@ const userStore = useUserStore()
 const toast = useToast()
 const workshopModule = usePersonalWorkshop()
 
+function resolveWorkshopIdFromUrl(): string {
+  if (!import.meta.client)
+    return ''
+  const pathId = window.location.pathname.match(/\/w\/([^/]+)/)?.[1]
+  return pathId ? decodeURIComponent(pathId).toUpperCase() : ''
+}
+
 const workshopId = computed(() => {
   const raw = route.params.id
-  return (Array.isArray(raw) ? raw[0] : raw || '').toUpperCase()
+  const paramId = Array.isArray(raw) ? raw[0] : raw
+  if (paramId)
+    return paramId.toUpperCase()
+  return resolveWorkshopIdFromUrl()
 })
 const view = ref<WorkshopView | null>(null)
 const loading = ref(true)
 const acting = ref(false)
 const error = ref('')
+const requestedWorkshopId = ref('')
 
 async function load() {
-  if (!workshopId.value)
+  const currentWorkshopId = workshopId.value
+  if (!currentWorkshopId) {
+    view.value = null
+    error.value = '个人工坊地址无效'
+    loading.value = false
     return
+  }
+  requestedWorkshopId.value = currentWorkshopId
   loading.value = true
   error.value = ''
   try {
-    view.value = await workshopModule.getView(workshopId.value)
+    const nextView = await workshopModule.getView(currentWorkshopId)
+    if (requestedWorkshopId.value === currentWorkshopId)
+      view.value = nextView
   }
   catch (reason: unknown) {
+    if (requestedWorkshopId.value !== currentWorkshopId)
+      return
     view.value = null
     error.value = reason instanceof Error ? reason.message : '个人工坊加载失败'
   }
   finally {
-    loading.value = false
+    if (requestedWorkshopId.value === currentWorkshopId)
+      loading.value = false
   }
 }
 
@@ -109,7 +131,11 @@ const canRequest = computed(() =>
 )
 
 onIonViewWillEnter(load)
-watch(() => userStore.isLoggedIn, load)
+watch(workshopId, (nextWorkshopId) => {
+  if (nextWorkshopId && nextWorkshopId !== requestedWorkshopId.value)
+    load()
+})
+watch(() => userStore.isLoggedIn, () => load())
 </script>
 
 <template>
@@ -129,9 +155,7 @@ watch(() => userStore.isLoggedIn, load)
     </IonHeader>
 
     <IonContent :fullscreen="true" class="workshop-content">
-      <div v-if="loading" class="workshop-loading">
-        <IonSpinner name="crescent" />
-      </div>
+      <AppPageLoading v-if="loading" label="正在加载个人工坊" />
 
       <div v-else-if="error" class="workshop-message">
         <IonIcon :icon="lockClosedOutline" />
@@ -255,7 +279,6 @@ watch(() => userStore.isLoggedIn, load)
   --background: var(--ion-background-color);
 }
 
-.workshop-loading,
 .workshop-message {
   min-height: 60vh;
   padding: 80px 28px 32px;

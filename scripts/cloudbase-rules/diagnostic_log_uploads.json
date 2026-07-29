@@ -1,0 +1,6 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "diagnostic_log_uploads",
+  "permission": "ADMINONLY"
+}

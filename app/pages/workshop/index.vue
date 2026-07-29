@@ -17,7 +17,6 @@ import {
   IonPage,
   IonRefresher,
   IonRefresherContent,
-  IonSpinner,
   IonTitle,
   IonToolbar,
   onIonViewWillEnter,
@@ -210,9 +209,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
       </div>
 
       <!-- 加载中 -->
-      <div v-else-if="loading" class="flex justify-center pt-20">
-        <IonSpinner name="crescent" class="opacity-40" />
-      </div>
+      <AppPageLoading v-else-if="loading" label="正在加载我的应用" />
 
       <!-- 空状态 -->
       <div v-else-if="myApps.length === 0" class="empty-state">

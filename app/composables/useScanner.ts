@@ -95,17 +95,17 @@ async function pickPhotoLibraryImageSource(): Promise<AlbumImageSource | null> {
 }
 
 async function pickNativePhotoLibraryImageSource(): Promise<string | null> {
-  const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
-  const photo = await Camera.getPhoto({
-    resultType: CameraResultType.Uri,
-    source: CameraSource.Photos,
-    allowEditing: false,
+  const { Camera, MediaTypeSelection } = await import('@capacitor/camera')
+  const { results } = await Camera.chooseFromGallery({
+    mediaType: MediaTypeSelection.Photo,
+    allowMultipleSelection: false,
+    editable: 'no',
     quality: 100,
     correctOrientation: true,
     presentationStyle: 'fullscreen',
   })
 
-  return photo.webPath ?? null
+  return results[0]?.webPath ?? null
 }
 
 function isPhotoPickerCancel(error: unknown): boolean {

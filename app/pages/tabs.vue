@@ -21,6 +21,7 @@ const agentScreenOpen = useState('agent:screen-open', () => false)
 
       <!-- 底部标签栏 -->
       <IonTabBar v-show="!agentScreenOpen" slot="bottom">
+        <!-- 命名彩蛋：前三个核心 Tab 各取“云 / 乐 / 坊”，合起来是“云乐坊”，详见 docs/product/tabs-architecture.md -->
         <IonTabButton tab="home" href="/tabs/home">
           <IonIcon :icon="home" />
           <IonLabel>云居</IonLabel>
@@ -33,7 +34,7 @@ const agentScreenOpen = useState('agent:screen-open', () => false)
 
         <IonTabButton tab="apps" href="/tabs/apps">
           <IonIcon :icon="apps" />
-          <IonLabel>云乐坊</IonLabel>
+          <IonLabel>工坊</IonLabel>
         </IonTabButton>
 
         <IonTabButton tab="me" href="/tabs/me">

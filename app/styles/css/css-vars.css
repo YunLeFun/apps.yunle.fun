@@ -33,6 +33,13 @@
   --ylf-color-indigo: #5856d6;
   --ylf-color-yellow: #ffcc00;
   --ylf-color-cyan: #00c7be;
+
+  /* 会员与交易场景的可访问语义色 */
+  --ylf-color-warning-on: #5c3b00;
+  --ylf-color-warning-text: #7a4b00;
+  --ylf-color-success-on-surface: #197b3e;
+  --ylf-color-primary-action: #006bd6;
+  --ylf-color-primary-action-pressed: #0057b8;
 }
 
 /* 深色模式（与 .ion-palette-dark 同步） */
@@ -57,6 +64,12 @@
   --ylf-color-indigo: #5e5ce6;
   --ylf-color-yellow: #ffd60a;
   --ylf-color-cyan: #6ac4dc;
+
+  --ylf-color-warning-on: #5c3b00;
+  --ylf-color-warning-text: #ffce31;
+  --ylf-color-success-on-surface: #50d878;
+  --ylf-color-primary-action: #006bd6;
+  --ylf-color-primary-action-pressed: #0057b8;
 }
 
 @media (max-width: 480px) {

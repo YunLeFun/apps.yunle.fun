@@ -18,6 +18,7 @@ export const APP_CATEGORIES: AppCategory[] = [
   { id: 'all', name: '全部', icon: '📱' },
   { id: 'interesting', name: '整活', icon: '🤣' },
   { id: 'applets', name: '应用', icon: '📱' },
+  { id: 'games', name: '游戏', icon: '🎮' },
   { id: 'tools', name: '工具', icon: '🔧' },
   { id: 'life', name: '生活', icon: '🏠' },
   { id: 'design', name: '设计', icon: '🎨' },

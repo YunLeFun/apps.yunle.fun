@@ -10,6 +10,13 @@ const storeKit = JSON.parse(
 )
 
 describe('app store 非续订会员商品文案', () => {
+  it('本地 StoreKit 测试使用中国区人民币与中文本地化', () => {
+    expect(storeKit.settings).toMatchObject({
+      _locale: 'zh_CN',
+      _storefront: 'CHN',
+    })
+  })
+
   it.each([
     ['fun.yunle.apps.member_month', '自然月', 'calendar month'],
     ['fun.yunle.apps.member_year', '自然年', 'calendar year'],

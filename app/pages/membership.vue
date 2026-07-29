@@ -10,6 +10,7 @@ import {
   IonRefresherContent,
   IonTitle,
   IonToolbar,
+  onIonViewWillEnter,
 } from '@ionic/vue'
 import { formatPrice, IAP_MEMBER_PRODUCTS, PLAN_FEATURES, PLAN_NAMES, PLAN_PRICES } from '@yunlefun/types'
 import {
@@ -65,9 +66,13 @@ const purchasable = computed(() => channel === 'web-redirect' || iap.ready.value
 
 const memberExpireText = computed(() => formatExpireDate(membership.value?.expireAt))
 
-onMounted(async () => {
+// Ionic 会缓存路由页面；每次重新进入都以服务端快照覆盖本地旧状态。
+onIonViewWillEnter(() => {
   if (userStore.isLoggedIn)
     refresh()
+})
+
+onMounted(async () => {
   if (channel === 'ios-iap') {
     await iap.loadProducts()
     // 杀进程 / 入账失败的交易补单
@@ -160,7 +165,7 @@ async function handleRestore() {
           :title="feature"
         >
           <template #media>
-            <IonIcon :icon="checkmarkCircle" class="feature-check" />
+            <IonIcon :icon="checkmarkCircle" class="feature-check" aria-hidden="true" />
           </template>
         </k-list-item>
       </k-list>
@@ -176,6 +181,7 @@ async function handleRestore() {
               type="button"
               class="plan-card"
               :class="{ 'plan-card-selected': selectedCycle === opt.cycle }"
+              :aria-pressed="selectedCycle === opt.cycle"
               @click="selectedCycle = opt.cycle"
             >
               <span v-if="opt.popular" class="plan-badge">推荐</span>
@@ -197,9 +203,9 @@ async function handleRestore() {
           <p v-if="channel === 'web-redirect'" class="purchase-hint">
             将跳转 www.yunle.fun 完成支付，支付完成后返回本页自动到账
           </p>
-          <p v-else class="purchase-hint restore-link" @click="handleRestore">
+          <button v-else type="button" class="purchase-hint restore-link" @click="handleRestore">
             恢复购买
-          </p>
+          </button>
         </k-block>
       </template>
       <k-block v-else strong inset class="text-center opacity-50">
@@ -239,7 +245,7 @@ async function handleRestore() {
 
 .feature-check {
   font-size: 22px;
-  color: var(--ion-color-success, #2dd36f);
+  color: var(--ylf-color-success-on-surface);
 }
 
 .plan-grid {
@@ -250,30 +256,53 @@ async function handleRestore() {
 
 .plan-card {
   position: relative;
-  border: 1.5px solid var(--ion-color-step-200, #e5e5ea);
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
   border-radius: 14px;
   padding: 16px 12px 10px;
+  color: inherit;
   text-align: center;
-  background: transparent;
+  background: color-mix(in srgb, var(--ion-item-background, var(--ion-background-color)) 94%, currentColor 6%);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .plan-card-selected {
-  border-color: var(--ion-color-primary, #007aff);
-  background: rgba(0, 122, 255, 0.06);
+  border-color: color-mix(
+    in srgb,
+    var(--ion-color-primary) 72%,
+    var(--ion-item-background, var(--ion-background-color))
+  );
+  background: color-mix(in srgb, var(--ion-color-primary) 12%, var(--ion-item-background, var(--ion-background-color)));
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--ion-color-primary) 38%, transparent);
+}
+
+.plan-card:active {
+  transform: scale(0.985);
+}
+
+.plan-card:focus-visible,
+.purchase-btn:focus-visible,
+.restore-link:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
 }
 
 .plan-badge {
   position: absolute;
-  top: -9px;
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  color: #fff;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ylf-color-warning-on);
   background: var(--ion-color-warning, #ff9f0a);
-  border-radius: 8px;
-  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+  box-shadow: 0 1px 3px color-mix(in srgb, currentColor 14%, transparent);
 }
 
 .plan-label {
@@ -289,25 +318,53 @@ async function handleRestore() {
 
 .plan-note {
   font-size: 12px;
-  color: var(--ion-color-warning, #ff9f0a);
+  font-weight: 600;
+  color: var(--ylf-color-warning-text);
   margin-top: 2px;
   min-height: 16px;
 }
 
 .purchase-btn {
   max-width: 240px;
+  min-height: 44px;
+  height: 44px;
   margin: 16px auto 0;
+  background-color: var(--ylf-color-primary-action);
+}
+
+.purchase-btn:active {
+  background-color: var(--ylf-color-primary-action-pressed);
 }
 
 .purchase-hint {
   font-size: 12px;
+  line-height: 1.45;
   color: var(--ion-color-medium);
   text-align: center;
   margin-top: 10px;
 }
 
 .restore-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
   color: var(--ion-color-primary, #007aff);
   cursor: pointer;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-card {
+    transition: none;
+  }
+
+  .plan-card:active {
+    transform: none;
+  }
 }
 </style>

@@ -1,12 +1,12 @@
 import { createError, getRouterParam, readBody, setResponseHeader } from 'h3'
 import { createCloudbaseWorkshopMembershipModule } from '../../../../domain/workshop-membership/cloudbase'
-import { requireVerifiedCloudbaseUser } from '../../../../utils/cloudbase-auth'
+import { requireRegisteredCloudbaseUser } from '../../../../utils/cloudbase-auth'
 import { rethrowWorkshopMembershipError } from '../../../../utils/workshop-errors'
 
 type MembershipDecision = 'approve' | 'reject' | 'remove' | 'block' | 'unblock'
 
 export default defineEventHandler(async (event) => {
-  const user = await requireVerifiedCloudbaseUser(event)
+  const user = await requireRegisteredCloudbaseUser(event)
   const workshopId = getRouterParam(event, 'id')?.trim().toUpperCase() || ''
   const targetUid = getRouterParam(event, 'uid')?.trim() || ''
   const body = await readBody<unknown>(event)

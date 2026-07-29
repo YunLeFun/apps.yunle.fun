@@ -2,6 +2,7 @@ import type { AppAccessMode, AppAudience, AppRecord, AppReleaseStage, CreateAppF
 import { actionSheetController } from '@ionic/vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { DEFAULT_EMOJI, DEFAULT_THEME_COLOR } from '~/types/app'
+import { ensureWorkshopForAudience } from '~/utils/workshopAudience'
 
 const DRAFT_KEY = 'app_create_draft'
 const SLUG_REGEX = /^[a-z][a-z0-9-]{1,49}$/
@@ -45,6 +46,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   const toast = useToast()
   const userStore = useUserStore()
   const { createApp, updateApp, isSlugTaken } = useApps()
+  const workshopModule = usePersonalWorkshop()
 
   const form = reactive(createEmptyForm())
   const saving = ref(false)
@@ -310,11 +312,12 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
           slugError.value = '此标识符已被占用，请换一个'
           return
         }
+        const workshopOpened = await ensureWorkshopForAudience(form.audience, workshopModule)
         await createApp(buildFormData())
         submitted.value = true
         clearDraft()
         workshopDirty.value = true
-        toast.showSuccess('应用创建成功')
+        toast.showSuccess(workshopOpened ? '已开启个人工坊并创建应用' : '应用创建成功')
         router.push('/workshop')
       }
       else {
@@ -330,10 +333,11 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
             return
           }
         }
+        const workshopOpened = await ensureWorkshopForAudience(form.audience, workshopModule)
         await updateApp(existingApp.value._id, buildFormData())
         submitted.value = true
         workshopDirty.value = true
-        toast.showSuccess('保存成功')
+        toast.showSuccess(workshopOpened ? '已开启个人工坊并保存' : '保存成功')
         // 更新快照
         initialFormSnapshot.value = JSON.stringify(form)
         // 返回详情页（使用可能已更新的 slug）

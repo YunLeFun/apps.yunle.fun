@@ -37,6 +37,7 @@ import {
   shareOutline,
 } from 'ionicons/icons'
 import QRCode from 'qrcode'
+import { getRequestErrorInfo } from '~/utils/requestError'
 
 const workshopModule = usePersonalWorkshop()
 const toast = useToast()
@@ -98,11 +99,12 @@ async function createWorkshop() {
       name: name.value.trim() || undefined,
       description: description.value.trim() || undefined,
     })
-    toast.showSuccess('个人工坊已创建')
+    toast.showSuccess('个人工坊已开启')
     await load()
   }
   catch (reason: unknown) {
-    toast.showError(reason instanceof Error ? reason.message : '创建失败')
+    const requestError = getRequestErrorInfo(reason, '创建失败')
+    toast.showError(requestError.message, requestError.copyText)
   }
   finally {
     saving.value = false
@@ -250,40 +252,18 @@ onIonViewWillEnter(load)
     </IonHeader>
 
     <IonContent :fullscreen="true" class="management-content">
-      <div v-if="loading" class="management-loading">
-        <IonSpinner name="crescent" />
-      </div>
+      <AppPageLoading v-if="loading" label="正在加载个人工坊" />
 
       <div v-else-if="!management" class="create-workshop">
         <div class="create-symbol">
           <IonIcon :icon="qrCodeOutline" />
         </div>
         <span>仅需创建一次</span>
-        <h1>创建你的个人工坊</h1>
-        <p>发布坊客专属作品，通过固定二维码邀请其他用户申请加入。</p>
-        <IonList inset>
-          <IonItem>
-            <IonInput
-              v-model="name"
-              label="工坊名称"
-              label-placement="stacked"
-              placeholder="留空将使用默认名称"
-              :maxlength="40"
-            />
-          </IonItem>
-          <IonItem>
-            <IonTextarea
-              v-model="description"
-              label="简介"
-              label-placement="stacked"
-              :maxlength="200"
-              :rows="3"
-            />
-          </IonItem>
-        </IonList>
+        <h1>开启你的个人工坊</h1>
+        <p>系统会使用默认名称并生成固定工坊号，名称和简介可以稍后修改。</p>
         <IonButton :disabled="saving" @click="createWorkshop">
           <IonSpinner v-if="saving" name="crescent" />
-          创建个人工坊
+          开启个人工坊
         </IonButton>
       </div>
 
@@ -438,12 +418,6 @@ onIonViewWillEnter(load)
 <style scoped>
 .management-content {
   --background: var(--ion-background-color);
-}
-
-.management-loading {
-  padding-top: 96px;
-  display: flex;
-  justify-content: center;
 }
 
 .create-workshop {

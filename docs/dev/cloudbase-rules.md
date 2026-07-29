@@ -109,3 +109,28 @@ CloudBase MCP 在更新规则时给的告警：
 Web 目录与详情页默认走 Nitro 的 `/api/apps/public` 只读字段白名单；该规则保留为纵深防御和旧版本兼容边界。
 
 `app_submissions`、`app_review_events`、`app_submitters` 均为服务端专用集合，浏览器读写全部关闭。完整流程与迁移方式见 [应用提交、审核与发布](../product/app-submission-review.md)。
+
+`diagnostic_log_uploads` 保存用户在「反馈」页主动提交的脱敏 App 日志，权限为 `ADMINONLY`。客户端不能直连该集合，只能经 `/api/diagnostics/logs` 完成登录校验、时间范围/大小限制和服务端二次脱敏；`cleanup-diagnostic-logs` 私有 Event 云函数每小时清理 `expiresAt` 已到期的文档，上传接口也会执行兜底清理。
+
+诊断管理接口使用独立的 `NUXT_DIAGNOSTIC_ADMIN_UIDS` 服务端白名单（多个 UID 用逗号分隔），不能仅凭传入的 UID 查询：
+
+```text
+GET /api/admin/diagnostics/logs?uid=<CloudBase UID>&limit=20
+GET /api/admin/diagnostics/logs?supportCode=<12 位支持编号>
+GET /api/admin/diagnostics/logs/<uploadId>
+```
+
+前两个接口只返回未过期上传的摘要，最后一个接口返回完整脱敏日志。所有接口都要求携带白名单管理员自己的 CloudBase Bearer Token；普通用户即使知道 UID、supportCode 或 uploadId 也会得到 403。
+
+生产集合使用以下索引：
+
+- `idx_diagnostic_owner_created`：`ownerUid` 升序、`createdAt` 降序，支持按 UID 拉取最新上传。
+- `idx_diagnostic_support_code`：`supportCode` 升序，支持按反馈编号定位。
+- `idx_diagnostic_expires_at`：`expiresAt` 升序，支持定时清理。
+
+索引配置保存在 `scripts/cloudbase-indexes/diagnostic_log_uploads.json`；应用到当前选中的 CloudBase 环境：
+
+```bash
+npx mcporter call cloudbase writeNoSqlDatabaseStructure \
+  --args "$(cat scripts/cloudbase-indexes/diagnostic_log_uploads.json)"
+```

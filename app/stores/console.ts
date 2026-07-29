@@ -1,6 +1,18 @@
+import type {
+  DiagnosticLogEntry,
+  DiagnosticLogLevel,
+} from '~/utils/diagnostic-logs'
 import { acceptHMRUpdate, defineStore } from 'pinia'
+import {
+  clearDiagnosticLogs,
+  loadDiagnosticLogs,
+  normalizeDiagnosticLogEntry,
+  pruneDiagnosticLogs,
+  saveDiagnosticLogs,
+  serializeDiagnosticLogArgument,
+} from '~/utils/diagnostic-logs'
 
-export type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug'
+export type LogLevel = DiagnosticLogLevel
 
 // Console 格式化指令正则（%c, %s, %d, %i, %f, %o, %O, %%）
 const FORMAT_SPECIFIER_REGEX = /%[csdifoO%]/
@@ -74,26 +86,15 @@ function sanitizeStyle(css: string): string {
 }
 
 /** 将任意值序列化为字符串 */
-function stringifyArg(arg: any): string {
-  if (arg === null)
-    return 'null'
-  if (arg === undefined)
-    return 'undefined'
-  if (typeof arg === 'string')
-    return arg
-  try {
-    return JSON.stringify(arg, null, 2)
-  }
-  catch {
-    return String(arg)
-  }
+function stringifyArg(arg: unknown): string {
+  return serializeDiagnosticLogArgument(arg)
 }
 
 /**
  * 解析 console 参数，处理格式化字符串中的 %c / %s / %d / %i / %f / %o / %O
  * 模拟 Chrome DevTools 的行为
  */
-function parseArgs(args: any[]): { segments: LogSegment[], plain: string } {
+function parseArgs(args: unknown[]): { segments: LogSegment[], plain: string } {
   if (args.length === 0)
     return { segments: [], plain: '' }
 
@@ -195,10 +196,14 @@ function parseArgs(args: any[]): { segments: LogSegment[], plain: string } {
  */
 export const useConsoleStore = defineStore('console', () => {
   const logs = ref<LogEntry[]>([])
+  const diagnosticLogs = ref<DiagnosticLogEntry[]>(
+    import.meta.client ? loadDiagnosticLogs(localStorage) : [],
+  )
   const capturing = ref(false)
+  let persistTimer: ReturnType<typeof setTimeout> | undefined
 
   // 保存原始 console 方法
-  const _originals: Record<LogLevel, (...args: any[]) => void> = {
+  const _originals: Record<LogLevel, (...args: unknown[]) => void> = {
     log: console.log.bind(console), // eslint-disable-line no-console
     info: console.info.bind(console), // eslint-disable-line no-console
     warn: console.warn.bind(console),
@@ -206,12 +211,13 @@ export const useConsoleStore = defineStore('console', () => {
     debug: console.debug.bind(console), // eslint-disable-line no-console
   }
 
-  function addLog(level: LogLevel, args: any[]) {
+  function addLog(level: LogLevel, args: unknown[]) {
     const { segments, plain } = parseArgs(args)
+    const timestamp = Date.now()
     logs.value.push({
       id: ++_id,
       level,
-      timestamp: Date.now(),
+      timestamp,
       segments,
       plain,
     })
@@ -219,6 +225,30 @@ export const useConsoleStore = defineStore('console', () => {
     if (logs.value.length > MAX_LOGS) {
       logs.value = logs.value.slice(-MAX_LOGS)
     }
+
+    const diagnosticEntry = normalizeDiagnosticLogEntry({
+      level,
+      message: plain,
+      timestamp,
+    })
+    if (diagnosticEntry) {
+      diagnosticLogs.value = pruneDiagnosticLogs([
+        ...diagnosticLogs.value,
+        diagnosticEntry,
+      ], timestamp)
+      scheduleDiagnosticPersistence()
+    }
+  }
+
+  function scheduleDiagnosticPersistence() {
+    if (!import.meta.client)
+      return
+    if (persistTimer)
+      clearTimeout(persistTimer)
+    persistTimer = setTimeout(() => {
+      diagnosticLogs.value = saveDiagnosticLogs(localStorage, diagnosticLogs.value)
+      persistTimer = undefined
+    }, 150)
   }
 
   function startCapture() {
@@ -227,8 +257,9 @@ export const useConsoleStore = defineStore('console', () => {
     capturing.value = true
 
     const levels: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug']
+    const mutableConsole = console as unknown as Record<LogLevel, (...args: unknown[]) => void>
     for (const level of levels) {
-      ;(console as any)[level] = (...args: any[]) => {
+      mutableConsole[level] = (...args: unknown[]) => {
         _originals[level](...args) // 仍输出到真实 console
         addLog(level, args)
       }
@@ -241,18 +272,27 @@ export const useConsoleStore = defineStore('console', () => {
     capturing.value = false
 
     const levels: LogLevel[] = ['log', 'info', 'warn', 'error', 'debug']
+    const mutableConsole = console as unknown as Record<LogLevel, (...args: unknown[]) => void>
     for (const level of levels) {
-      ;(console as any)[level] = _originals[level]
+      mutableConsole[level] = _originals[level]
     }
   }
 
   function clearLogs() {
     logs.value = []
+    diagnosticLogs.value = []
     _id = 0
+    if (persistTimer) {
+      clearTimeout(persistTimer)
+      persistTimer = undefined
+    }
+    if (import.meta.client)
+      clearDiagnosticLogs(localStorage)
   }
 
   return {
     logs,
+    diagnosticLogs,
     capturing,
     startCapture,
     stopCapture,

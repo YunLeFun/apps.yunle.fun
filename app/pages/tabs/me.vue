@@ -99,7 +99,7 @@ function navigateTo(path: string) {
           <k-list-item
             link
             title="我的个人工坊"
-            subtitle="设置二维码、加入方式和坊客"
+            subtitle="开启或管理二维码、加入方式和坊客"
             inner-class="k-list-item-vcenter"
             @click="navigateTo('/user/workshop')"
           >

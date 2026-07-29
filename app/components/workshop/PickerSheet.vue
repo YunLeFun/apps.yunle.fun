@@ -12,6 +12,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import {
+  addCircleOutline,
   albumsOutline,
   checkmarkCircle,
   close,
@@ -240,8 +241,8 @@ function login() {
             class="picker-action"
             @click="isLoggedIn ? manage() : scan()"
           >
-            <IonIcon :icon="isLoggedIn ? settingsOutline : qrCodeOutline" />
-            {{ isLoggedIn ? '管理工坊' : '扫码加入' }}
+            <IonIcon :icon="isLoggedIn ? (ownedWorkshopId ? settingsOutline : addCircleOutline) : qrCodeOutline" />
+            {{ isLoggedIn ? (ownedWorkshopId ? '管理工坊' : '开启工坊') : '扫码加入' }}
           </button>
         </div>
       </div>

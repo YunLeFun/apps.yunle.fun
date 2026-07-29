@@ -3,6 +3,31 @@ import { useDebounceFn } from '@vueuse/core'
 import consola from 'consola'
 
 const COLLECTION = 'user_home_screens'
+let syncWriteQueue: Promise<void> = Promise.resolve()
+
+interface DatabaseResult {
+  code?: string | number
+  message?: string
+}
+
+interface DatabaseUpdateResult extends DatabaseResult {
+  updated?: number
+}
+
+interface DatabaseAddResult extends DatabaseResult {
+  _id?: string
+}
+
+function assertDatabaseSuccess(result: DatabaseResult, fallbackMessage: string) {
+  if (result.code)
+    throw new Error(result.message || fallbackMessage)
+}
+
+function enqueueSyncWrite(task: () => Promise<void>): Promise<void> {
+  const queuedTask = syncWriteQueue.then(task, task)
+  syncWriteQueue = queuedTask.catch(() => {})
+  return queuedTask
+}
 
 /**
  * Home Screen 数据管理 composable
@@ -21,28 +46,30 @@ export function useHomeScreen() {
    * 安全规则：doc._openid == auth.openid || doc._openid == auth.uid
    * - auth.openid: 微信登录方式的 openid
    * - auth.uid: 非微信登录方式的 user_id（Auth v2 的 sub）
-   * - _openid: CloudBase 服务端 add() 时自动注入，或代码手动设置
+   * - _openid: CloudBase 服务端 add() 时自动注入，客户端不可手动设置
    */
   async function ensureAuth(): Promise<string | null> {
-    if (userStore.isLoggedIn && userStore.userInfo?.id)
-      return userStore.userInfo.id
-
     try {
       const { data, error } = await auth.getSession()
       if (error || !data?.session?.access_token)
         return null
 
-      const { data: userData, error: userError } = await auth.getUser()
-      if (userError || !userData?.user)
+      let u = data.session.user as any
+      let uid = u?.sub || u?.uid || u?.id
+
+      if (!uid) {
+        const { data: userData, error: userError } = await auth.getUser()
+        if (userError || !userData?.user)
+          return null
+
+        u = userData.user as any
+        uid = u.sub || u.uid || u.id
+      }
+      if (!uid || u?.is_anonymous)
         return null
 
-      const u = userData.user as any
-      const uid = u.sub || u.uid || u.id
-      if (!uid)
-        return null
-
-      // 同步到 userStore 以便后续快速路径命中
-      if (!userStore.userInfo?.id) {
+      // 会话身份可能已切换，始终让业务 store 与 CloudBase 当前会话保持一致。
+      if (userStore.userInfo?.id !== uid) {
         userStore.login(data.session.access_token, {
           ...userStore.userInfo,
           id: uid,
@@ -104,8 +131,21 @@ export function useHomeScreen() {
 
   const settingsStore = useSettingsStore()
 
+  async function findLatestCloudDocId(uid: string): Promise<string | null> {
+    const { data } = await db
+      .collection(COLLECTION)
+      .where({ _openid: uid })
+      .orderBy('updatedAt', 'desc')
+      .limit(1)
+      .get()
+
+    return data && data.length > 0
+      ? (data[0] as { _id: string })._id
+      : null
+  }
+
   /** 同步到 CloudBase（防抖 500ms），受云同步总开关控制 */
-  const syncToCloud = useDebounceFn(async () => {
+  async function performCloudSync() {
     if (!settingsStore.cloudSyncEnabled)
       return
 
@@ -124,36 +164,58 @@ export function useHomeScreen() {
 
     try {
       // 重启后 cloudDocId 为空：先按 _openid 查找既有文档，避免重复创建（upsert）
-      if (!homeScreenStore.cloudDocId) {
-        const { data } = await db
-          .collection(COLLECTION)
-          .where({ _openid: uid })
-          .orderBy('updatedAt', 'desc')
-          .limit(1)
-          .get()
-        if (data && data.length > 0)
-          homeScreenStore.cloudDocId = (data[0] as { _id: string })._id
-      }
+      if (!homeScreenStore.cloudDocId)
+        homeScreenStore.cloudDocId = await findLatestCloudDocId(uid)
 
       let needCreate = !homeScreenStore.cloudDocId
       if (homeScreenStore.cloudDocId) {
+        const attemptedDocId = homeScreenStore.cloudDocId
         const res = await db.collection(COLLECTION)
-          .doc(homeScreenStore.cloudDocId)
-          .update(payload) as unknown as { updated?: number }
-        // 云端文档已被删除（updated=0）时回退到新建
-        if (res?.updated === 0) {
-          homeScreenStore.cloudDocId = null
-          needCreate = true
+          .where({
+            _id: attemptedDocId,
+            _openid: uid,
+          })
+          .update(payload) as unknown as DatabaseUpdateResult
+        assertDatabaseSuccess(res, '云端数据更新失败')
+        if (res.updated === undefined)
+          throw new Error('云端数据更新结果缺少 updated 字段')
+
+        // 旧账号或已删除文档会命中 0 条。先重新解析当前账号文档，
+        // 避免在账号切换与并发同步时直接创建重复记录。
+        if (res.updated === 0) {
+          homeScreenStore.cloudDocId = await findLatestCloudDocId(uid)
+          if (homeScreenStore.cloudDocId && homeScreenStore.cloudDocId !== attemptedDocId) {
+            const retryRes = await db.collection(COLLECTION)
+              .where({
+                _id: homeScreenStore.cloudDocId,
+                _openid: uid,
+              })
+              .update(payload) as unknown as DatabaseUpdateResult
+            assertDatabaseSuccess(retryRes, '云端数据更新失败')
+            if (retryRes.updated !== 1)
+              throw new Error('重新定位云端数据后仍未能更新')
+            needCreate = false
+          }
+          else if (homeScreenStore.cloudDocId === attemptedDocId) {
+            // CloudBase 对幂等更新可能返回 updated=0；重新查询仍能命中同一
+            // owner 文档，说明记录没有丢失，也无需创建重复文档。
+            needCreate = false
+          }
+          else {
+            needCreate = true
+          }
         }
       }
 
       if (needCreate) {
         const res = await db.collection(COLLECTION).add({
-          _openid: uid,
           ...payload,
           createdAt: Date.now(),
-        }) as unknown as { id: string }
-        homeScreenStore.cloudDocId = res.id
+        }) as unknown as DatabaseAddResult
+        assertDatabaseSuccess(res, '云端数据创建失败')
+        if (!res._id)
+          throw new Error('云端数据创建成功但未返回文档 ID')
+        homeScreenStore.cloudDocId = res._id
       }
 
       homeScreenStore.lastSyncAt = config.updatedAt
@@ -165,7 +227,12 @@ export function useHomeScreen() {
     finally {
       homeScreenStore.isSyncing = false
     }
-  }, 500)
+  }
+
+  const syncToCloud = useDebounceFn(
+    () => enqueueSyncWrite(performCloudSync),
+    500,
+  )
 
   /** 自动同步：编辑模式下延迟到退出时批量同步 */
   function autoSyncToCloud() {

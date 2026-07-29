@@ -14,22 +14,9 @@
 
 ## 技术实现
 
-### 移动端（Capacitor）
+### 实时扫码
 
-使用 `@capacitor/barcode-scanner` 插件：
-
-```typescript
-import { BarcodeScanner } from '@capacitor/barcode-scanner'
-
-const result = await BarcodeScanner.startScan()
-if (result.hasContent) {
-  console.log('扫码结果:', result.content)
-}
-```
-
-### Web 端
-
-使用浏览器的 `getUserMedia` API：
+移动端与 Web 端统一由 `ScannerBarcode` 组件调用浏览器 `getUserMedia` 获取相机画面，再使用 `jsQR` 解码视频帧。
 
 ```typescript
 const stream = await navigator.mediaDevices.getUserMedia({
@@ -37,21 +24,37 @@ const stream = await navigator.mediaDevices.getUserMedia({
 })
 ```
 
+### 从相册扫码
+
+- Capacitor 原生端使用 `@capacitor/camera` 的 `Camera.chooseFromGallery()` 拉起系统相册。
+- Web 端使用隐藏的 `<input type="file" accept="image/*">`。
+- 图片先缩放到最长边 1280 像素后交给 `jsQR`；未识别且发生过缩放时，再使用原图重试。
+
+```typescript
+import { Camera, MediaTypeSelection } from '@capacitor/camera'
+
+const { results } = await Camera.chooseFromGallery({
+  mediaType: MediaTypeSelection.Photo,
+  allowMultipleSelection: false,
+})
+
+const imageUrl = results[0]?.webPath
+```
+
+> Capacitor Camera 8.1 起应使用 `chooseFromGallery()`。不要改回已弃用的 `getPhoto({ source: CameraSource.Photos })`，否则原生相册入口可能直接失败。
+
 ## 使用方式
 
 ### Composable
 
 ```vue
 <script setup>
-import { useBarcodeScan } from '~/composables/useBarcodeScan'
+const { scanFromAlbum } = useScanner()
 
-const { startScan, stopScan, isScanning } = useBarcodeScan()
-
-async function handleScan() {
-  const result = await startScan()
-  if (result?.content) {
-    console.log('扫码结果:', result.content)
-  }
+async function handlePickAlbum() {
+  const result = await scanFromAlbum()
+  if (result)
+    console.log('扫码结果:', result)
 }
 </script>
 ```
@@ -60,7 +63,7 @@ async function handleScan() {
 
 ```vue
 <template>
-  <BarcodeScanner
+  <ScannerBarcode
     :is-visible="showScanner"
     :show-flashlight="true"
     @cancel="showScanner = false"
@@ -71,8 +74,8 @@ async function handleScan() {
 
 ## 权限要求
 
-| 平台    | 配置                                           |
-| ------- | ---------------------------------------------- |
-| iOS     | `Info.plist` 中添加 `NSCameraUsageDescription` |
-| Android | `AndroidManifest.xml` 中添加 `CAMERA` 权限     |
-| Web     | 浏览器自动请求相机权限，需 HTTPS 环境          |
+| 平台    | 配置                                                                               |
+| ------- | ---------------------------------------------------------------------------------- |
+| iOS     | `Info.plist` 中添加 `NSCameraUsageDescription` 与 `NSPhotoLibraryUsageDescription` |
+| Android | `AndroidManifest.xml` 中添加 `CAMERA` 权限                                         |
+| Web     | 浏览器自动请求相机权限，需 HTTPS 环境                                              |

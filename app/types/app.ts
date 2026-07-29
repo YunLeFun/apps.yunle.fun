@@ -24,6 +24,7 @@ export const APP_CATEGORIES = [
   { label: '效率', icon: '⚡' },
   { label: '社交', icon: '💬' },
   { label: '娱乐', icon: '🎮' },
+  { label: '游戏', icon: '🕹️' },
   { label: '教育', icon: '📚' },
   { label: '生活', icon: '🏠' },
   { label: '开发', icon: '💻' },

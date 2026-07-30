@@ -206,6 +206,7 @@ export default defineNuxtConfig({
     tmsBizType: '',
     public: {
       tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
+      appBaseUrl: process.env.NUXT_PUBLIC_APP_BASE_URL || 'https://apps.yunle.fun',
       cloudbaseStoragePublicOrigin: process.env.NUXT_PUBLIC_CLOUDBASE_STORAGE_PUBLIC_ORIGIN
         || DEFAULT_CLOUDBASE_STORAGE_PUBLIC_ORIGIN,
       cloudbaseRegion: process.env.NUXT_PUBLIC_CLOUDBASE_REGION || '',

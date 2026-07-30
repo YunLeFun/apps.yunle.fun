@@ -1,7 +1,40 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createCatalogResolver } from '../../server/domain/catalog'
+import { createCloudbaseCatalogDataSource } from '../../server/domain/catalog/cloudbase'
 
 describe('catalogResolver', () => {
+  it('projects access and release metadata from an approved revision', async () => {
+    const get = vi.fn(async () => ({
+      data: [{
+        _id: 'revision-approved',
+        appId: 'app-1',
+        revision: 1,
+        snapshot: {
+          name: '星纸',
+          slug: 'paper-star',
+          accessMode: 'public',
+          releaseStage: 'beta',
+        },
+      }],
+    }))
+    const limit = vi.fn(() => ({ get }))
+    const where = vi.fn(() => ({ limit }))
+    const collection = vi.fn(() => ({ where }))
+    const source = createCloudbaseCatalogDataSource({
+      command: { in: vi.fn(value => value) },
+      collection,
+    } as any)
+
+    await expect(source.getRevisions(['revision-approved'])).resolves.toEqual([
+      expect.objectContaining({
+        snapshot: expect.objectContaining({
+          accessMode: 'public',
+          releaseStage: 'beta',
+        }),
+      }),
+    ])
+  })
+
   it('uses the approved revision for the public market instead of the owner current revision', async () => {
     const resolver = createCatalogResolver({
       async listApps() {
@@ -32,6 +65,8 @@ describe('catalogResolver', () => {
               name: '审核版本',
               slug: 'reviewed-app',
               websiteUrl: 'https://reviewed.example.com/',
+              accessMode: 'login_required',
+              releaseStage: 'beta',
             },
           },
           {
@@ -61,6 +96,8 @@ describe('catalogResolver', () => {
         _id: 'app-1',
         name: '审核版本',
         websiteUrl: 'https://reviewed.example.com/',
+        accessMode: 'login_required',
+        releaseStage: 'beta',
       }),
     ])
   })

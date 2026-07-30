@@ -94,6 +94,8 @@ export function catalogAppViewToRecord(view: CatalogAppView): AppRecord {
     themeColor: view.themeColor,
     category: view.category,
     tags: view.tags,
+    accessMode: view.accessMode,
+    releaseStage: view.releaseStage,
     rating: view.rating,
     ratingCount: view.ratingCount,
     ratingUpdatedAt: view.ratingUpdatedAt,
@@ -178,6 +180,8 @@ function toCatalogRevision(submission: AppSubmission): CatalogRevision {
       themeColor: submission.snapshot.themeColor,
       category: submission.snapshot.category,
       tags: submission.snapshot.tags,
+      accessMode: submission.snapshot.accessMode,
+      releaseStage: submission.snapshot.releaseStage,
     },
   }
 }

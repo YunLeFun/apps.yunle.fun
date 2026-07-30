@@ -46,6 +46,8 @@ export interface CatalogRevisionSnapshot {
   themeColor?: string
   category?: string
   tags?: string[]
+  accessMode?: 'public' | 'login_required' | 'invite_only'
+  releaseStage?: 'stable' | 'beta'
 }
 
 export interface CatalogRevision {

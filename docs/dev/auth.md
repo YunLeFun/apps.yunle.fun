@@ -4,6 +4,19 @@
 
 位于 `/public/.well-known/apple-app-site-association`
 
+当前由 App 接管的路径：
+
+- `/app/*`
+- `/w/*`：个人工坊分享链接，进入 App 后映射为本地 `/w/{id}` 路由
+- `/ulink/*`
+
+`app/plugins/deeplink.client.ts` 同时处理运行中的 `appUrlOpen` 事件和冷启动
+`App.getLaunchUrl()`，避免 App 未启动时丢失目标页面。未安装 App 的用户会继续
+打开同一个 HTTPS 在线页面。
+
+> Apple 会通过 CDN 缓存 AASA。线上文件更新后，已安装设备不一定立即刷新；
+> 发布新包或重装 App 后再验证最可靠。
+
 ### 辅助工具
 
 [Apple App Site Association (AASA) Validator](https://branch.io/resources/aasa-validator/#resultsbox)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseWorkshopLink } from '../../app/composables/useWorkshopScan'
+import { parseWorkshopLink } from '../../app/utils/publicUrl'
 
 describe('workshop scan', () => {
   it('accepts only stable personal workshop links and returns the short id', () => {

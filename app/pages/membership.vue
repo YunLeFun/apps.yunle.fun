@@ -29,6 +29,7 @@ const userStore = useUserStore()
 const router = useRouter()
 const { membership, isMember, refresh, reconcileOrders } = useCoin()
 const iap = useIap()
+const toast = useToast()
 
 const { channel, goMembershipPurchase } = usePaymentChannel({
   // 从 www 支付页回到 App：兜底对账 + 刷新会员状态
@@ -36,7 +37,7 @@ const { channel, goMembershipPurchase } = usePaymentChannel({
     const { paid } = await reconcileOrders()
     await refresh()
     if (paid > 0)
-      showIonicToast('已为你补发到账')
+      toast.showSuccess('已为你补发到账')
   },
 })
 
@@ -60,6 +61,7 @@ const cycleOptions = computed(() => {
 })
 
 const selectedCycle = ref<BillingCycle>('year')
+const restoring = ref(false)
 
 /** 当前通道下购买入口是否可用（iOS 须商品加载成功，否则整体隐藏，见审核 3.1.1） */
 const purchasable = computed(() => channel === 'web-redirect' || iap.ready.value)
@@ -78,7 +80,7 @@ onMounted(async () => {
     // 杀进程 / 入账失败的交易补单
     const settled = await iap.processUnfinished()
     if (settled > 0)
-      showIonicToast('购买已到账')
+      toast.showSuccess('购买已到账')
   }
 })
 
@@ -98,23 +100,32 @@ async function handlePurchase() {
   }
   const ok = await iap.purchase(IAP_MEMBER_PRODUCTS[LEVEL][selectedCycle.value])
   if (ok) {
-    showIonicToast('会员已开通')
+    toast.showSuccess('会员已开通')
     iap.reset()
   }
   else if (iap.phase.value === 'fail') {
-    showIonicToast(iap.errorMessage.value || '购买失败，请稍后重试', 'danger')
+    toast.showError(iap.errorMessage.value || '购买失败，请稍后重试', '')
     iap.reset()
   }
 }
 
 /** 恢复购买（App Store 审核要求的显式入口） */
 async function handleRestore() {
+  if (restoring.value)
+    return
+  restoring.value = true
   try {
     const settled = await iap.restore()
-    showIonicToast(settled > 0 ? `已恢复 ${settled} 笔购买` : '没有可恢复的购买')
+    if (settled > 0)
+      toast.showSuccess(`已恢复 ${settled} 笔购买`)
+    else
+      toast.showInfo('未发现需要恢复的购买')
   }
   catch {
-    showIonicToast('恢复购买失败，请稍后重试', 'danger')
+    toast.showError('恢复购买失败，请稍后重试', '')
+  }
+  finally {
+    restoring.value = false
   }
 }
 </script>
@@ -203,9 +214,21 @@ async function handleRestore() {
           <p v-if="channel === 'web-redirect'" class="purchase-hint">
             将跳转 www.yunle.fun 完成支付，支付完成后返回本页自动到账
           </p>
-          <button v-else type="button" class="purchase-hint restore-link" @click="handleRestore">
-            恢复购买
-          </button>
+          <div v-else class="restore-purchase">
+            <button
+              type="button"
+              class="purchase-hint restore-link"
+              :disabled="restoring"
+              :aria-busy="restoring"
+              aria-describedby="restore-purchase-tip"
+              @click="handleRestore"
+            >
+              {{ restoring ? '正在恢复…' : '恢复 App Store 购买' }}
+            </button>
+            <p id="restore-purchase-tip" class="restore-tip">
+              更换设备或重装后，可恢复当前 Apple 账户购买的会员，不会重复扣款
+            </p>
+          </div>
         </k-block>
       </template>
       <k-block v-else strong inset class="text-center opacity-50">
@@ -356,6 +379,20 @@ async function handleRestore() {
   cursor: pointer;
   margin-right: auto;
   margin-left: auto;
+}
+
+.restore-link:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.restore-tip {
+  max-width: 320px;
+  margin: -2px auto 0;
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
 }
 
 @media (prefers-reduced-motion: reduce) {

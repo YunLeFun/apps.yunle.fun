@@ -4,6 +4,29 @@ import { Storekit } from '@yunlefun/capacitor-storekit'
 import { IAP_ALL_PRODUCT_IDS } from '@yunlefun/types'
 import consola from 'consola'
 
+const XCODE_STOREKIT_ERROR
+  = '本地 StoreKit 仅用于界面预览，请使用 App Scheme 和 Sandbox 测试完整购买链路'
+
+function isXcodeStoreKitTransaction(tx: IapTransaction): boolean {
+  if (tx.originalTransactionId === '0')
+    return true
+
+  try {
+    const encodedHeader = tx.jws.split('.')[0]
+    if (!encodedHeader)
+      return false
+    const base64 = encodedHeader
+      .replaceAll('-', '+')
+      .replaceAll('_', '/')
+      .padEnd(Math.ceil(encodedHeader.length / 4) * 4, '=')
+    const header = JSON.parse(atob(base64)) as { kid?: string }
+    return header.kid === 'Apple_Xcode_Key'
+  }
+  catch {
+    return false
+  }
+}
+
 /**
  * iOS App Store 内购流程（仅 'ios-iap' 通道下使用，调用方必须先判定通道）。
  *
@@ -64,6 +87,12 @@ export function useIap() {
     errorMessage.value = ''
     try {
       const tx = await Storekit.purchase({ productId })
+      if (isXcodeStoreKitTransaction(tx)) {
+        // Xcode 本地交易无法被 App Store Server API 验签；及时结束，避免它在
+        // 后续启动时反复出现在 unfinished 队列并被误送到线上补单。
+        await Storekit.finishTransaction({ transactionId: tx.transactionId })
+        throw new Error(XCODE_STOREKIT_ERROR)
+      }
       await verifyOnServer(tx)
       await Storekit.finishTransaction({ transactionId: tx.transactionId })
       await refresh()
@@ -94,11 +123,29 @@ export function useIap() {
 
   /** 补单一批交易：服务端入账成功的逐一 finish */
   async function settleTransactions(transactions: IapTransaction[]): Promise<number> {
-    if (transactions.length === 0 || !app)
+    if (transactions.length === 0)
       return 0
+
+    const appStoreTransactions: IapTransaction[] = []
+    for (const tx of transactions) {
+      if (isXcodeStoreKitTransaction(tx)) {
+        // 旧的 Xcode 测试交易只做本地清理，绝不进入线上验单。
+        await Storekit.finishTransaction({ transactionId: tx.transactionId })
+      }
+      else {
+        appStoreTransactions.push(tx)
+      }
+    }
+
+    if (appStoreTransactions.length === 0 || !app)
+      return 0
+
     const res = await app.callFunction({
       name: 'iap-order',
-      data: { action: 'restore', transactionIds: transactions.map(tx => tx.transactionId) },
+      data: {
+        action: 'restore',
+        transactionIds: appStoreTransactions.map(tx => tx.transactionId),
+      },
     })
     const { results } = res.result as { results: { transactionId: string, ok: boolean }[] }
     let settled = 0

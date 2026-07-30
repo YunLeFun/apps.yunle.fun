@@ -14,12 +14,13 @@ export default defineNuxtPlugin(() => {
     return
 
   const { processUnfinished } = useIap()
+  const { showSuccess } = useToast()
 
   Storekit.addListener('transactionUpdated', async (tx) => {
     consola.info('[iap] 收到交易更新:', tx.transactionId, tx.productId)
     const settled = await processUnfinished()
     if (settled > 0)
-      showIonicToast('购买已到账')
+      showSuccess('购买已到账')
   }).catch((err) => {
     consola.warn('[iap] 注册交易监听失败:', err)
   })

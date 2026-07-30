@@ -1,6 +1,6 @@
 /**
  * OAuth 第三方登录 / 绑定 / 解绑
- * 参考 www.yunle.fun 的 useOAuth.ts，适配 Ionic Toast
+ * 参考 www.yunle.fun 的 useOAuth.ts，适配全局 AppToast
  *
  * 移动端（Capacitor）使用 Browser.open() 打开授权页，
  * 线上 callback 通过 deeplink (yunlefun://) 把 code+state 传回 App，

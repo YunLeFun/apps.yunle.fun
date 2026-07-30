@@ -1,6 +1,6 @@
 /**
  * CloudBase Auth 核心状态管理
- * 参考 www.yunle.fun 的 useAuthCore.ts，适配 Ionic Toast + Pinia Store
+ * 参考 www.yunle.fun 的 useAuthCore.ts，适配全局 AppToast + Pinia Store
  * 支持 refresh token 机制实现登录态长期保持
  */
 import type { CloudbaseUser, TcbRawUser, YlfUserInfo } from '@yunlefun/auth'

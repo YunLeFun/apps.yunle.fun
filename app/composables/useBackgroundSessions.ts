@@ -1,10 +1,9 @@
 import type { BackgroundSession } from '~/composables/useBrowser'
 import { Capacitor } from '@capacitor/core'
-import { toastController } from '@ionic/vue'
 import { InAppWebView, openInAppBrowser } from '~/composables/useBrowser'
 
 /** 首次最小化时一次性顶部轻提示，教用户去左上角入口找回（之后不再打扰） */
-async function coachMinimizeOnce(name?: string) {
+function coachMinimizeOnce(name?: string) {
   if (!import.meta.client)
     return
   const KEY = 'ylf:bg-minimize-coached'
@@ -14,15 +13,7 @@ async function coachMinimizeOnce(name?: string) {
     localStorage.setItem(KEY, '1')
   }
   catch {}
-  try {
-    const toast = await toastController.create({
-      message: name ? `「${name}」已转入后台，点左上角可恢复` : '已转入后台，点左上角可恢复',
-      duration: 2600,
-      position: 'top',
-    })
-    await toast.present()
-  }
-  catch {}
+  useToast().showInfo(name ? `「${name}」已转入后台，点左上角可恢复` : '已转入后台，点左上角可恢复')
 }
 
 /**
@@ -65,7 +56,7 @@ async function ensureInit() {
       sessions.value = data?.sessions ?? []
     })
     await InAppWebView.addListener('browserMinimized', (data) => {
-      void coachMinimizeOnce(data?.name)
+      coachMinimizeOnce(data?.name)
     })
   }
   catch {

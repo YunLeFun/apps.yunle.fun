@@ -100,6 +100,7 @@ function navigateTo(path: string) {
             link
             title="我的个人工坊"
             subtitle="开启或管理二维码、加入方式和坊客"
+            :strong-title="false"
             inner-class="k-list-item-vcenter"
             @click="navigateTo('/user/workshop')"
           >
@@ -114,6 +115,7 @@ function navigateTo(path: string) {
             link
             title="已加入的工坊"
             subtitle="查看坊客专属作品"
+            :strong-title="false"
             inner-class="k-list-item-vcenter"
             @click="navigateTo('/user/workshops')"
           >
@@ -127,7 +129,9 @@ function navigateTo(path: string) {
           <k-list-item
             link
             title="钱包"
-            footer="云币 & 流水"
+            subtitle="云币 & 流水"
+            :strong-title="false"
+            inner-class="k-list-item-vcenter"
             @click="navigateTo('/wallet')"
           >
             <template #media>
@@ -144,7 +148,9 @@ function navigateTo(path: string) {
           <k-list-item
             link
             title="会员"
-            :footer="isMember ? '会员有效中' : '解锁更多权益'"
+            :subtitle="isMember ? '会员有效中' : '解锁更多权益'"
+            :strong-title="false"
+            inner-class="k-list-item-vcenter"
             @click="navigateTo('/membership')"
           >
             <template #media>
@@ -164,6 +170,7 @@ function navigateTo(path: string) {
             link
             title="我的应用"
             subtitle="创建和管理你的应用"
+            :strong-title="false"
             inner-class="k-list-item-vcenter"
             @click="navigateTo('/workshop')"
           >
@@ -178,6 +185,7 @@ function navigateTo(path: string) {
             link
             title="我的举报"
             subtitle="查看举报处理进度"
+            :strong-title="false"
             inner-class="k-list-item-vcenter"
             @click="navigateTo('/user/reports')"
           >
@@ -293,8 +301,13 @@ function navigateTo(path: string) {
   margin-top: 32px !important;
 }
 
-/* 钱包余额展示 */
 .wallet-balance {
+  display: block;
+  max-width: min(46vw, 200px);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 15px;
   font-weight: 600;
   color: var(--ion-color-warning, #ff9f0a);

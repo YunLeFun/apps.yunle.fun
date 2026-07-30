@@ -1,6 +1,6 @@
 /**
  * OTP 验证码登录（手机号/邮箱）
- * 参考 www.yunle.fun 的 useOtp.ts，适配 Ionic Toast
+ * 参考 www.yunle.fun 的 useOtp.ts，适配全局 AppToast
  */
 import { getErrorMessage } from '@yunlefun/auth'
 

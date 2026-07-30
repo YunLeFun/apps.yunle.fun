@@ -31,6 +31,7 @@ import {
 const userStore = useUserStore()
 const router = useRouter()
 const { account, balance, membership, isMember, loading, refresh, reconcileOrders, listTransactions } = useCoin()
+const toast = useToast()
 
 const { channel, canPurchase, goRecharge } = usePaymentChannel({
   // 从 www 支付页回到 App：兜底对账 + 刷新余额与流水
@@ -53,12 +54,12 @@ const iapCoinPacks = computed(() =>
 async function handleIapRecharge(packId: CoinPackId) {
   const ok = await iap.purchase(IAP_COIN_PRODUCTS[packId])
   if (ok) {
-    showIonicToast('充值已到账')
+    toast.showSuccess('充值已到账')
     iap.reset()
     await loadTransactions(true)
   }
   else if (iap.phase.value === 'fail') {
-    showIonicToast(iap.errorMessage.value || '购买失败，请稍后重试', 'danger')
+    toast.showError(iap.errorMessage.value || '购买失败，请稍后重试', '')
     iap.reset()
   }
 }
@@ -104,7 +105,7 @@ async function reconcileAndRefresh() {
   const { paid } = await reconcileOrders()
   await Promise.all([refresh(), loadTransactions(true)])
   if (paid > 0)
-    showIonicToast(`已为你补发到账：${paid} 笔支付已确认入账`)
+    toast.showSuccess(`已为你补发到账：${paid} 笔支付已确认入账`)
 }
 
 onMounted(async () => {
@@ -116,7 +117,7 @@ onMounted(async () => {
     await iap.loadProducts()
     const settled = await iap.processUnfinished()
     if (settled > 0)
-      showIonicToast('购买已到账')
+      toast.showSuccess('购买已到账')
   }
   await reconcileAndRefresh()
 })

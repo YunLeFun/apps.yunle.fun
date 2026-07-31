@@ -35,6 +35,13 @@ export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
     scope: ['identity:bootstrap'] as const,
   }),
   Object.freeze({
+    appId: 'wenta',
+    clientId: 'wenta-web',
+    origin: 'https://wenta.yunle.fun',
+    redirectUri: 'https://wenta.yunle.fun/',
+    scope: ['identity:bootstrap'] as const,
+  }),
+  Object.freeze({
     appId: 'cms',
     clientId: 'cms-web',
     origin: 'https://cms.yunle.fun',

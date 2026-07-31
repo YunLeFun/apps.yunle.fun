@@ -133,7 +133,10 @@ interface YlfJSAPI {
 绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。
 宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项为：
 
+- `https://admin.yunle.fun` / `admin-web` / `identity:bootstrap`
+- `https://saier.yunle.fun` / `saier-web` / `identity:bootstrap`
 - `https://play.yunle.fun` / `play-web` / `identity:bootstrap`
+- `https://wenta.yunle.fun` / `wenta-web` / `identity:bootstrap`
 - `https://cms.yunle.fun` / `cms-web` / `identity:bootstrap`
 
 共享 `yunle.fun` 后缀不会自动获得授权；应用 id、Origin、client id、redirect URI

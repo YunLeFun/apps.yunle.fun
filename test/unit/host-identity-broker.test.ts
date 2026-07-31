@@ -96,6 +96,27 @@ describe('host identity broker', () => {
     })
   })
 
+  it('accepts the separately registered Wenta binding', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'wenta',
+      sourceOrigin: 'https://wenta.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'wenta-web',
+        redirectUri: 'https://wenta.yunle.fun/',
+      },
+    })).toEqual({
+      appId: 'wenta',
+      clientId: 'wenta-web',
+      codeChallenge: request.request.codeChallenge,
+      nonce: request.request.nonce,
+      redirectUri: 'https://wenta.yunle.fun/',
+      scope: 'identity:bootstrap',
+      targetOrigin: 'https://wenta.yunle.fun',
+    })
+  })
+
   it.each([
     { sourceOrigin: 'https://evil.example' },
     { appId: 'cms' },

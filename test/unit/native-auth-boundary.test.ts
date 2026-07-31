@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 const browser = readFileSync(new URL('../../app/composables/useBrowser.ts', import.meta.url), 'utf8')
 const native = readFileSync(new URL('../../ios/App/App/WebViewController.swift', import.meta.url), 'utf8')
+const nativePlugin = readFileSync(new URL('../../ios/App/App/InAppWebViewPlugin.swift', import.meta.url), 'utf8')
 const manifest = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'))
 
 describe('native WebView authorization boundary', () => {
@@ -19,5 +20,11 @@ describe('native WebView authorization boundary', () => {
     expect(existsSync(new URL('../../server/utils/jsapi-auth.ts', import.meta.url))).toBe(false)
     expect(existsSync(new URL('../../server/api/jsapi/auth/code.post.ts', import.meta.url))).toBe(false)
     expect(existsSync(new URL('../../server/api/jsapi/auth/exchange.post.ts', import.meta.url))).toBe(false)
+  })
+
+  it('notifies kept-alive Wenta pages when the Apps identity changes', () => {
+    expect(nativePlugin).toContain(`private static let identityAwareHosts: Set<String>`)
+    expect(nativePlugin).toContain(`"wenta.yunle.fun"`)
+    expect(nativePlugin).toContain(`return Self.identityAwareHosts.contains(host)`)
   })
 })

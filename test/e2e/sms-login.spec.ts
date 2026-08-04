@@ -29,6 +29,14 @@ test.describe('登录页面', () => {
     await expect(page.getByRole('button', { name: '登录', exact: true })).toBeDisabled()
   })
 
+  test('允许已有的长用户名进行密码登录', async ({ page }) => {
+    await page.getByRole('button', { name: '密码' }).click()
+    await page.getByPlaceholder('手机号 / 邮箱 / 用户名').fill('ylf_test_saier_viewer')
+    await page.getByPlaceholder('请输入密码').fill('test-password')
+
+    await expect(page.getByRole('button', { name: '登录', exact: true })).toBeEnabled()
+  })
+
   test('限制手机号长度并支持切换注册模式', async ({ page }) => {
     const phoneInput = page.getByPlaceholder('请输入手机号')
     await phoneInput.fill('138000000001234')

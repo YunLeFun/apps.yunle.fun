@@ -41,7 +41,7 @@ function handleClick() {
   if (installed.value) {
     if (props.app?.websiteUrl) {
       if (props.app.websiteUrl.startsWith('http')) {
-        openInAppBrowser(props.app.websiteUrl, { trustedHosts: props.app.trustedHosts })
+        openCatalogAppInBrowser(props.app)
       }
       else {
         router.push(props.app.websiteUrl)

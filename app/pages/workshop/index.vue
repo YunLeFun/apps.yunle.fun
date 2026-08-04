@@ -93,7 +93,7 @@ function editApp(app: AppRecord, slidingItem?: any) {
 function openApp(app: AppRecord, slidingItem?: any) {
   slidingItem?.close()
   if (app.websiteUrl)
-    openInAppBrowser(app.websiteUrl, { trustedHosts: app.trustedHosts })
+    openCatalogAppInBrowser({ ...app, websiteUrl: app.websiteUrl })
 }
 
 async function confirmDeleteApp(app: AppRecord, slidingItem?: any) {

@@ -36,6 +36,21 @@ export default defineNuxtPlugin(() => {
           )
         }
 
+        if (request.prompt === 'consent') {
+          const userInfo = useUserStore().userInfo
+          const accountName = userInfo.nickname || userInfo.login || '当前云乐坊账号'
+          const { allowed } = await InAppWebView.confirmAuthorization({
+            applicationName: request.applicationName,
+            accountName,
+          })
+          if (!allowed) {
+            throw new HostIdentityBrokerError(
+              'HOST_AUTH_DENIED',
+              '用户取消了宿主账号授权',
+            )
+          }
+        }
+
         const response = await app.callFunction({
           name: 'sso-ticket',
           data: {

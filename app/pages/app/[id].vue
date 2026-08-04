@@ -161,7 +161,7 @@ function openWebsite() {
   const url = displayData.value?.websiteUrl
   if (!url || !url.startsWith('http'))
     return
-  openInAppBrowser(url, { trustedHosts: displayData.value?.trustedHosts })
+  openCatalogAppInBrowser({ ...displayData.value, websiteUrl: url })
 }
 
 // 打开 GitHub 仓库

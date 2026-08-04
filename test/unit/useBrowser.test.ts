@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { openInAppBrowser } from '../../app/composables/useBrowser'
+import { openCatalogAppInBrowser, openInAppBrowser } from '../../app/composables/useBrowser'
 
 // --- Capacitor mock：固定 iOS 原生环境 ---
 const { mockInAppOpen, mockBrowserOpen } = vi.hoisted(() => ({
@@ -77,5 +77,28 @@ describe('openInAppBrowser 形态优先级', () => {
       }),
     )
     expect(mockInAppOpen.mock.calls[0]?.[0]).not.toHaveProperty('auth')
+  })
+
+  it('目录应用始终把稳定 appId 和展示元信息交给原生容器', async () => {
+    await openCatalogAppInBrowser({
+      id: 'catalog-record-123',
+      slug: 'cms',
+      name: '云笺',
+      websiteUrl: 'https://cms.yunle.fun',
+      emoji: '📝',
+      description: '内容编辑平台',
+      trustedHosts: ['cms.yunle.fun'],
+    })
+
+    expect(mockInAppOpen).toHaveBeenCalledWith(expect.objectContaining({
+      url: 'https://cms.yunle.fun',
+      title: '云笺',
+      app: expect.objectContaining({
+        id: 'cms',
+        slug: 'cms',
+        name: '云笺',
+      }),
+      trustedHosts: ['cms.yunle.fun'],
+    }))
   })
 })

@@ -14,7 +14,7 @@ vi.mock('@ionic/vue', () => ({
 
 // --- 全局 composable / 工具 mock ---
 const mockPush = vi.fn()
-const mockOpenInAppBrowser = vi.fn()
+const mockOpenCatalogAppInBrowser = vi.fn()
 const mockDeduct = vi.fn(async () => ({ balance: 0, deduped: false }))
 const mockRefresh = vi.fn()
 
@@ -36,7 +36,7 @@ vi.stubGlobal('useToast', () => ({
   showWarning: vi.fn(),
   showInfo: vi.fn(),
 }))
-vi.stubGlobal('openInAppBrowser', mockOpenInAppBrowser)
+vi.stubGlobal('openCatalogAppInBrowser', mockOpenCatalogAppInBrowser)
 
 function makeApp(overrides: Record<string, unknown> = {}) {
   return {
@@ -68,13 +68,11 @@ describe('useOpenApp', () => {
     const { openApp } = useOpenApp()
     const opened = await openApp(makeApp())
     expect(opened).toBe(true)
-    expect(mockOpenInAppBrowser).toHaveBeenCalledWith(
-      'https://demo.example.com',
-      expect.objectContaining({
-        title: 'Demo',
-        app: expect.objectContaining({ id: 'demo', name: 'Demo' }),
-      }),
-    )
+    expect(mockOpenCatalogAppInBrowser).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'demo',
+      name: 'Demo',
+      websiteUrl: 'https://demo.example.com',
+    }))
     expect(mockDeduct).not.toHaveBeenCalled()
   })
 
@@ -82,7 +80,7 @@ describe('useOpenApp', () => {
     const { openApp } = useOpenApp()
     const opened = await openApp(makeApp({ requiresMembership: true }))
     expect(opened).toBe(false)
-    expect(mockOpenInAppBrowser).not.toHaveBeenCalled()
+    expect(mockOpenCatalogAppInBrowser).not.toHaveBeenCalled()
     expect(mockPush).toHaveBeenCalledWith('/wallet')
   })
 
@@ -96,7 +94,7 @@ describe('useOpenApp', () => {
       // 一次买断：bizId 固定，服务端幂等去重
       bizId: 'purchase:demo',
     }))
-    expect(mockOpenInAppBrowser).toHaveBeenCalled()
+    expect(mockOpenCatalogAppInBrowser).toHaveBeenCalled()
   })
 
   it('付费应用：已购后再次打开不再弹窗、不再扣费', async () => {
@@ -109,7 +107,7 @@ describe('useOpenApp', () => {
     const opened = await openApp(makeApp({ coinCost: 10 }))
     expect(opened).toBe(true)
     expect(mockDeduct).toHaveBeenCalledTimes(1)
-    expect(mockOpenInAppBrowser).toHaveBeenCalledTimes(2)
+    expect(mockOpenCatalogAppInBrowser).toHaveBeenCalledTimes(2)
   })
 
   it('付费应用：服务端 dedupe（已在其他设备购买）时照常打开', async () => {
@@ -117,7 +115,7 @@ describe('useOpenApp', () => {
     const { openApp } = useOpenApp()
     const opened = await openApp(makeApp({ coinCost: 10 }))
     expect(opened).toBe(true)
-    expect(mockOpenInAppBrowser).toHaveBeenCalled()
+    expect(mockOpenCatalogAppInBrowser).toHaveBeenCalled()
   })
 
   it('付费应用：非会员余额不足，引导去充值且不扣费', async () => {
@@ -135,7 +133,7 @@ describe('useOpenApp', () => {
     const opened = await openApp(makeApp({ coinCost: 10 }))
     expect(opened).toBe(true)
     expect(mockDeduct).not.toHaveBeenCalled()
-    expect(mockOpenInAppBrowser).toHaveBeenCalled()
+    expect(mockOpenCatalogAppInBrowser).toHaveBeenCalled()
   })
 
   it('付费应用：用户取消消费则不打开、不扣费', async () => {
@@ -144,7 +142,7 @@ describe('useOpenApp', () => {
     const opened = await openApp(makeApp({ coinCost: 10 }))
     expect(opened).toBe(false)
     expect(mockDeduct).not.toHaveBeenCalled()
-    expect(mockOpenInAppBrowser).not.toHaveBeenCalled()
+    expect(mockOpenCatalogAppInBrowser).not.toHaveBeenCalled()
   })
 
   it('未登录访问受控应用：引导去登录', async () => {
@@ -158,8 +156,7 @@ describe('useOpenApp', () => {
   it('应用目录声明的浏览形态透传给浏览器', async () => {
     const { openApp } = useOpenApp()
     await openApp(makeApp({ displayMode: 'titlebar' }))
-    expect(mockOpenInAppBrowser).toHaveBeenCalledWith(
-      'https://demo.example.com',
+    expect(mockOpenCatalogAppInBrowser).toHaveBeenCalledWith(
       expect.objectContaining({ displayMode: 'titlebar' }),
     )
   })

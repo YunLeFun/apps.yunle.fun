@@ -24,6 +24,7 @@ describe('host identity broker', () => {
   it('accepts only the exact registered Play SSO binding', () => {
     expect(validateHostAuthorization(request)).toEqual({
       appId: 'play',
+      applicationName: 'Play',
       clientId: 'play-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
@@ -45,12 +46,30 @@ describe('host identity broker', () => {
       },
     })).toEqual({
       appId: 'cms',
+      applicationName: '云笺',
       clientId: 'cms-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
       redirectUri: 'https://cms.yunle.fun/',
       scope: 'identity:bootstrap',
       targetOrigin: 'https://cms.yunle.fun',
+    })
+  })
+
+  it('preserves an explicit consent prompt for the trusted host UI', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'cms',
+      sourceOrigin: 'https://cms.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'cms-web',
+        redirectUri: 'https://cms.yunle.fun/',
+        prompt: 'consent',
+      },
+    })).toMatchObject({
+      appId: 'cms',
+      prompt: 'consent',
     })
   })
 
@@ -66,6 +85,7 @@ describe('host identity broker', () => {
       },
     })).toEqual({
       appId: 'admin',
+      applicationName: '云乐坊管理后台',
       clientId: 'admin-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
@@ -87,6 +107,7 @@ describe('host identity broker', () => {
       },
     })).toEqual({
       appId: 'saier',
+      applicationName: '赛尔',
       clientId: 'saier-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
@@ -108,6 +129,7 @@ describe('host identity broker', () => {
       },
     })).toEqual({
       appId: 'wenta',
+      applicationName: '闻塔',
       clientId: 'wenta-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
@@ -123,6 +145,7 @@ describe('host identity broker', () => {
     { request: { ...request.request, clientId: 'other-web' } },
     { request: { ...request.request, redirectUri: 'https://play.yunle.fun/callback' } },
     { request: { ...request.request, scope: ['identity:bootstrap', 'profile'] } },
+    { request: { ...request.request, prompt: 'login' } },
   ])('rejects altered origin/client/redirect/scope bindings', (patch) => {
     expect(() => validateHostAuthorization({
       ...request,

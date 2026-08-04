@@ -37,7 +37,7 @@ describe('host identity broker', () => {
   it('accepts the separately registered CMS binding', () => {
     expect(validateHostAuthorization({
       ...request,
-      appId: 'cms',
+      appId: 'yunjian',
       sourceOrigin: 'https://cms.yunle.fun',
       request: {
         ...request.request,
@@ -45,7 +45,7 @@ describe('host identity broker', () => {
         redirectUri: 'https://cms.yunle.fun/',
       },
     })).toEqual({
-      appId: 'cms',
+      appId: 'yunjian',
       applicationName: '云笺',
       clientId: 'cms-web',
       codeChallenge: request.request.codeChallenge,
@@ -59,7 +59,7 @@ describe('host identity broker', () => {
   it('preserves an explicit consent prompt for the trusted host UI', () => {
     expect(validateHostAuthorization({
       ...request,
-      appId: 'cms',
+      appId: 'yunjian',
       sourceOrigin: 'https://cms.yunle.fun',
       request: {
         ...request.request,
@@ -68,7 +68,7 @@ describe('host identity broker', () => {
         prompt: 'consent',
       },
     })).toMatchObject({
-      appId: 'cms',
+      appId: 'yunjian',
       prompt: 'consent',
     })
   })

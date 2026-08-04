@@ -48,7 +48,7 @@ vi.stubGlobal('useUserStore', () => ({
 }))
 
 const consentRequest: HostAuthorizationEvent = {
-  appId: 'cms',
+  appId: 'yunjian',
   requestId: 'native-request-1234',
   sourceOrigin: 'https://cms.yunle.fun',
   request: {

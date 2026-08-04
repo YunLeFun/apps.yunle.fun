@@ -16,8 +16,9 @@ import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icon
 import { config } from '~/config'
 import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
 
-// 用户名校验正则：小写字母开头，包含字母数字下划线连字符，3-20 字符
-const USERNAME_REGEX = /^[a-z][\w-]{2,19}$/i
+// 用户名校验正则：字母开头，包含字母数字下划线连字符，3-64 字符。
+// 最终合法性仍由认证服务判断；客户端不应拦截已有的长用户名。
+const USERNAME_REGEX = /^[a-z][\w-]{2,63}$/i
 
 const {
   sendPhoneOtp,

@@ -12,12 +12,14 @@ const SSO_CODE_RE = /^[\w-]{32,256}$/
 
 export interface ValidatedHostAuthorization {
   appId: string
+  applicationName: string
   clientId: string
   codeChallenge: string
   nonce: string
   redirectUri: string
   scope: typeof IDENTITY_SCOPE
   targetOrigin: string
+  prompt?: 'consent'
 }
 
 export function validateHostAuthorization(
@@ -35,6 +37,7 @@ export function validateHostAuthorization(
     || !Array.isArray(request.scope)
     || request.scope.length !== 1
     || request.scope[0] !== client.scope[0]
+    || (request.prompt !== undefined && request.prompt !== 'consent')
   ) {
     throw new HostIdentityBrokerError(
       'HOST_AUTH_INVALID_REQUEST',
@@ -43,12 +46,14 @@ export function validateHostAuthorization(
   }
   return {
     appId: client.appId,
+    applicationName: client.displayName,
     clientId: client.clientId,
     codeChallenge: request.codeChallenge,
     nonce: request.nonce,
     redirectUri: client.redirectUri,
     scope: IDENTITY_SCOPE,
     targetOrigin: client.origin,
+    ...(request.prompt === 'consent' ? { prompt: 'consent' as const } : {}),
   }
 }
 
@@ -83,6 +88,7 @@ export class HostIdentityBrokerError extends Error {
     readonly code:
       | 'HOST_AUTH_INVALID_REQUEST'
       | 'HOST_AUTH_REQUIRED'
+      | 'HOST_AUTH_DENIED'
       | 'HOST_AUTH_FAILED',
     message: string,
   ) {

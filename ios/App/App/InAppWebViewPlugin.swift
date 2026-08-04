@@ -13,6 +13,7 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "updateAppInfo", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listSessions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "confirmAuthorization", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "resolveAuthorization", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearIdentitySessions", returnType: CAPPluginReturnPromise),
     ]
@@ -22,6 +23,7 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
     /// 「最小化」「跳详情页」只暂停（dismiss 保留状态），「结束」才真正移除释放。
     private var sessions: [WebViewController] = []
     private let maxSessions = 3
+    private var authorizationPromptActive = false
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与 WebViewController.sessionKey 一致）
     private func indexOfSession(key: String) -> Int? {
@@ -221,6 +223,54 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    /// 在原生可信界面中确认是否允许当前 Apps 账号登录目标应用。
+    @objc func confirmAuthorization(_ call: CAPPluginCall) {
+        guard let applicationName = normalizedPromptLabel(
+            call.getString("applicationName"),
+            maxLength: 80),
+            let accountName = normalizedPromptLabel(
+                call.getString("accountName"),
+                maxLength: 120)
+        else {
+            call.reject("Missing authorization prompt context")
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                call.reject("Browser unavailable")
+                return
+            }
+            guard !self.authorizationPromptActive else {
+                call.reject("Authorization prompt already active")
+                return
+            }
+            guard let presenter = self.authorizationPromptPresenter() else {
+                call.reject("No active browser session")
+                return
+            }
+
+            self.authorizationPromptActive = true
+            let alert = UIAlertController(
+                title: "授权登录 \(applicationName)",
+                message: """
+                当前账号：\(accountName)
+
+                \(applicationName) 只会获得一次性身份授权，不会获得密码或云乐坊长期令牌。
+                """,
+                preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "取消", style: .cancel) { [weak self] _ in
+                self?.authorizationPromptActive = false
+                call.resolve(["allowed": false])
+            })
+            alert.addAction(UIAlertAction(title: "允许", style: .default) { [weak self] _ in
+                self?.authorizationPromptActive = false
+                call.resolve(["allowed": true])
+            })
+            presenter.present(alert, animated: true)
+        }
+    }
+
     /// 把宿主 JS 签发的一次性授权码回传给发起请求的 WebView Promise。
     @objc func resolveAuthorization(_ call: CAPPluginCall) {
         guard let requestId = call.getString("requestId"), !requestId.isEmpty else {
@@ -309,6 +359,26 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         var info = WebAppInfo()
         Self.apply(obj, to: &info)
         return info
+    }
+
+    private func normalizedPromptLabel(_ value: String?, maxLength: Int) -> String? {
+        guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !value.isEmpty
+        else {
+            return nil
+        }
+        return String(value.prefix(maxLength))
+    }
+
+    private func authorizationPromptPresenter() -> UIViewController? {
+        guard let session = sessions.first(where: { $0.presentingViewController != nil }) else {
+            return nil
+        }
+        var presenter: UIViewController = session
+        while let presented = presenter.presentedViewController {
+            presenter = presented
+        }
+        return presenter
     }
 
     /// 仅覆盖 JS 侧传入的字段（部分更新）

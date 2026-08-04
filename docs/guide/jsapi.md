@@ -124,6 +124,8 @@ interface YlfJSAPI {
     nonce: string
     codeChallenge: string
     codeChallengeMethod: 'S256'
+    /** 显式点击登录时由宿主展示当前账号授权确认。 */
+    prompt?: 'consent'
   }) => Promise<{ ok: true, code: string, issuer: string, expiresAt?: number }>
   setClipboard: (text: string) => Promise<void>
 }
@@ -132,6 +134,10 @@ interface YlfJSAPI {
 内嵌浏览器不转移登录会话。`authorize` 只为精确注册的第一方 SSO client 签发
 绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。
 宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项为：
+
+当请求携带 `prompt: 'consent'` 时，宿主使用可信 UI 展示当前云乐坊账号、目标应用与
+最小权限说明；用户取消后返回 `HOST_AUTH_DENIED`，不会签发授权码。页面不得把取消
+解释为宿主不可用并静默改走其他账号。
 
 - `https://admin.yunle.fun` / `admin-web` / `identity:bootstrap`
 - `https://saier.yunle.fun` / `saier-web` / `identity:bootstrap`

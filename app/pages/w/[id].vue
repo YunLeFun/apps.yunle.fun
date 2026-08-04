@@ -120,7 +120,7 @@ async function handleLeave() {
 
 function openApp(app: AppRecord) {
   if (app.websiteUrl)
-    openInAppBrowser(app.websiteUrl, { trustedHosts: app.trustedHosts })
+    openCatalogAppInBrowser({ ...app, websiteUrl: app.websiteUrl })
 }
 
 const canRequest = computed(() =>

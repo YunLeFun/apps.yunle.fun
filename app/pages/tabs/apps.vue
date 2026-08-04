@@ -328,7 +328,7 @@ function manageWorkshops() {
 
 function openScopedApp(item: WorkshopScopedApp) {
   if (item.private && item.app.websiteUrl) {
-    openInAppBrowser(item.app.websiteUrl, { trustedHosts: item.app.trustedHosts })
+    openCatalogAppInBrowser(item.app)
     return
   }
   router.push(`/app/${item.app.slug || item.app.id}`)

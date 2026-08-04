@@ -19,6 +19,27 @@ export interface InAppWebViewAppInfo {
   ratingCount?: number
 }
 
+/** Catalog fields required to launch an app without losing its trusted identity. */
+export interface CatalogBrowserApp extends InAppWebViewAppInfo {
+  websiteUrl: string
+  displayMode?: 'immersive' | 'titlebar'
+  trustedHosts?: string[]
+}
+
+export interface InAppBrowserOptions {
+  /** 顶部显示的站点名称，不传则自动读取页面 <title> */
+  title?: string
+  /** 工具栏颜色 (hex) */
+  toolbarColor?: string
+  presentationStyle?: 'fullscreen' | 'popover'
+  /** 应用目录声明优先于用户全局设置。 */
+  displayMode?: 'immersive' | 'titlebar'
+  /** 应用元信息（自定义容器详情面板与宿主授权使用）。 */
+  app?: InAppWebViewAppInfo
+  /** 经人工核验、允许调用授信 JSAPI 的可注册域名。 */
+  trustedHosts?: string[]
+}
+
 /** 后台保活会话摘要（原生 sessionsChanged 事件 / listSessions 返回） */
 export interface BackgroundSession {
   /** 应用 id（第三方外链应用可能为空） */
@@ -41,6 +62,7 @@ export interface HostAuthorizationRequest {
   nonce: string
   redirectUri: string
   scope: string[]
+  prompt?: 'consent'
 }
 
 export interface HostAuthorizationEvent {
@@ -74,6 +96,11 @@ interface InAppWebViewPlugin {
   listSessions: () => Promise<{ sessions: BackgroundSession[] }>
   /** 彻底结束并释放指定会话（按 key 传入） */
   endSession: (options: { id: string }) => Promise<void>
+  /** 由 iOS 原生界面展示当前账号授权确认。 */
+  confirmAuthorization: (options: {
+    applicationName: string
+    accountName: string
+  }) => Promise<{ allowed: boolean }>
   /** 完成页面发起的宿主 SSO 请求；result 仅允许携带一次性 code。 */
   resolveAuthorization: (options: {
     requestId: string
@@ -89,6 +116,32 @@ interface InAppWebViewPlugin {
 export const InAppWebView = registerPlugin<InAppWebViewPlugin>('InAppWebView')
 
 /**
+ * Opens one catalog app with the stable slug/id and display metadata required
+ * by the native identity broker. Generic links should use openInAppBrowser.
+ */
+export function openCatalogAppInBrowser(app: CatalogBrowserApp): Promise<void> {
+  const appId = app.slug || app.id
+  if (!appId)
+    throw new TypeError('Catalog app requires a stable slug or id')
+  return openInAppBrowser(app.websiteUrl, {
+    title: app.name,
+    displayMode: app.displayMode,
+    app: {
+      id: appId,
+      slug: app.slug,
+      name: app.name,
+      emoji: app.emoji,
+      logo: app.logo,
+      themeColor: app.themeColor,
+      description: app.description,
+      category: app.category,
+      rating: app.rating,
+    },
+    trustedHosts: app.trustedHosts,
+  })
+}
+
+/**
  * 在应用内打开网页
  *
  * iOS: 自定义 WKWebView，默认标题栏形态（顶部固定导航栏，套用应用主题色，右上角单菜单按钮）；
@@ -98,25 +151,7 @@ export const InAppWebView = registerPlugin<InAppWebViewPlugin>('InAppWebView')
  */
 export async function openInAppBrowser(
   url: string,
-  options?: {
-    /** 顶部显示的站点名称，不传则自动读取页面 <title> */
-    title?: string
-    /** 工具栏颜色 (hex) */
-    toolbarColor?: string
-    presentationStyle?: 'fullscreen' | 'popover'
-    /**
-     * 应用目录声明的展示形态（YlfAppInfo.displayMode），优先于用户全局设置；
-     * 用户全局选「手机内置」时整体退出自定义容器，声明不生效
-     */
-    displayMode?: 'immersive' | 'titlebar'
-    /** 应用元信息（自定义容器详情面板展示：图标/评分/简介等） */
-    app?: InAppWebViewAppInfo
-    /**
-     * 本次会话追加的 JSAPI 授信域（敏感 JSAPI 鉴权，仅沉浸/标题栏模式生效）。
-     * 内置已授信 yunle.fun 及其子域，仅对人工核验过的第三方应用传入
-     */
-    trustedHosts?: string[]
-  },
+  options?: InAppBrowserOptions,
 ) {
   if (!Capacitor.isNativePlatform()) {
     window.open(url, '_blank')

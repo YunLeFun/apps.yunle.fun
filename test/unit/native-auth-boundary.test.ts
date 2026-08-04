@@ -27,4 +27,13 @@ describe('native WebView authorization boundary', () => {
     expect(nativePlugin).toContain(`"wenta.yunle.fun"`)
     expect(nativePlugin).toContain(`return Self.identityAwareHosts.contains(host)`)
   })
+
+  it('places the account consent prompt in the native plugin seam', () => {
+    expect(browser).toContain('confirmAuthorization: (options:')
+    expect(nativePlugin).toContain('CAPPluginMethod(name: "confirmAuthorization"')
+    expect(nativePlugin).toContain('@objc func confirmAuthorization')
+    expect(nativePlugin).toContain('UIAlertController(')
+    expect(nativePlugin).toContain('call.resolve(["allowed": true])')
+    expect(nativePlugin).toContain('call.resolve(["allowed": false])')
+  })
 })

@@ -45,22 +45,7 @@ export function useOpenApp() {
     }
     else if (app.websiteUrl) {
       if (app.websiteUrl.startsWith('http')) {
-        openInAppBrowser(app.websiteUrl, {
-          title: app.name,
-          displayMode: app.displayMode,
-          app: {
-            id: app.id || app.slug,
-            slug: app.slug,
-            name: app.name,
-            emoji: app.emoji,
-            logo: app.logo,
-            themeColor: app.themeColor,
-            description: app.description,
-            category: app.category,
-            rating: app.rating,
-          },
-          trustedHosts: app.trustedHosts,
-        })
+        openCatalogAppInBrowser(app)
       }
       else {
         router.push(app.websiteUrl)

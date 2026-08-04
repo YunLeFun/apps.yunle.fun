@@ -20,8 +20,12 @@ import { getRumPageUrl } from '~/utils/rum'
  * 关闭：清空 `nuxt.config.ts` 的 `runtimeConfig.public.rumAppId` 即可
  */
 export default defineNuxtPlugin(() => {
-  if (import.meta.env?.MODE === 'test')
+  if (
+    import.meta.env?.MODE === 'test'
+      || import.meta.env?.VITEST === 'true'
+  ) {
     return
+  }
 
   const config = useRuntimeConfig()
   const appId = (config.public as any).rumAppId as string | undefined
@@ -40,7 +44,9 @@ export default defineNuxtPlugin(() => {
 
   try {
     const isNativePlatform = Capacitor.isNativePlatform()
-    const resolvePageUrl = () => getRumPageUrl(window.location, isNativePlatform)
+    const resolvePageUrl = () => typeof window === 'undefined'
+      ? 'https://apps.yunle.fun/'
+      : getRumPageUrl(window.location, isNativePlatform)
     const aegis = new Aegis({
       id: appId,
       uin: '',

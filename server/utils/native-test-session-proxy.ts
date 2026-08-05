@@ -15,6 +15,10 @@ export interface NativeTestSsoRequest {
   codeChallengeMethod: 'S256'
 }
 
+export class NativeTestSessionInputError extends Error {
+  override name = 'NativeTestSessionInputError'
+}
+
 export async function exchangeNativeTestSession(
   input: { publicAlias: string, challengeId: string, code: string },
   options: NativeTestSessionProxyOptions,
@@ -54,7 +58,7 @@ export async function authorizeNativeTestSession(
   options: NativeTestSessionProxyOptions,
 ) {
   if (typeof input?.hostSession !== 'string' || input.hostSession.length < 8 || input.hostSession.length > 4096)
-    throw new Error('Native test host session is invalid')
+    throw new NativeTestSessionInputError('Native test host session is invalid')
   assertNativeSsoRequest(input.request)
   const response = await callBroker('authorize', {
     hostSession: input.hostSession,
@@ -102,7 +106,7 @@ function assertNativeSsoRequest(request: NativeTestSsoRequest): void {
     || request.codeChallengeMethod !== 'S256'
     || !/^[\w-]{32,128}$/.test(request.nonce)
     || !/^[\w-]{43}$/.test(request.codeChallenge)) {
-    throw new Error('Native test SSO request is invalid')
+    throw new NativeTestSessionInputError('Native test SSO request is invalid')
   }
 }
 
@@ -129,19 +133,19 @@ function normalizeBrokerBaseUrl(raw: string): string {
 function normalizeAlias(value: unknown): string {
   const alias = typeof value === 'string' ? value.trim().toLowerCase() : ''
   if (!/^[a-z0-9][a-z0-9-]{1,62}@yunlefun$/.test(alias))
-    throw new Error('Native test public alias is invalid')
+    throw new NativeTestSessionInputError('Native test public alias is invalid')
   return alias
 }
 
 function requireReference(value: unknown): string {
   if (typeof value !== 'string' || !/^[\w:-]{4,128}$/.test(value))
-    throw new Error('Native test challenge id is invalid')
+    throw new NativeTestSessionInputError('Native test challenge id is invalid')
   return value
 }
 
 function requireCode(value: unknown): string {
   if (typeof value !== 'string' || !/^\d{6}$/.test(value))
-    throw new Error('Native test verification code is invalid')
+    throw new NativeTestSessionInputError('Native test verification code is invalid')
   return value
 }
 

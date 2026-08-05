@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   authorizeNativeTestSession,
   exchangeNativeTestSession,
+  NativeTestSessionInputError,
 } from '../../server/utils/native-test-session-proxy'
 
 const options = {
@@ -70,5 +71,22 @@ describe('native test session server proxy', () => {
         codeChallengeMethod: 'S256',
       },
     }, { ...options, request })).rejects.toThrow(/invalid/i)
+  })
+
+  it('classifies malformed client payloads separately from runtime failures', async () => {
+    await expect(exchangeNativeTestSession({
+      publicAlias: '',
+      challengeId: '',
+      code: '',
+    }, options)).rejects.toBeInstanceOf(NativeTestSessionInputError)
+
+    await expect(exchangeNativeTestSession({
+      publicAlias: 'native-sso-smoke@yunlefun',
+      challengeId: 'challenge_01',
+      code: '000042',
+    }, {
+      brokerBaseUrl: '',
+      serviceToken: '',
+    })).rejects.not.toBeInstanceOf(NativeTestSessionInputError)
   })
 })

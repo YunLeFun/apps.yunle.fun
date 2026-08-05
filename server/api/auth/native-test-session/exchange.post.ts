@@ -1,4 +1,7 @@
-import { exchangeNativeTestSession } from '../../../utils/native-test-session-proxy'
+import {
+  exchangeNativeTestSession,
+  NativeTestSessionInputError,
+} from '../../../utils/native-test-session-proxy'
 
 export default defineEventHandler(async (event) => {
   setResponseHeaders(event, {
@@ -12,12 +15,23 @@ export default defineEventHandler(async (event) => {
     code?: string
   }>(event)
   const runtime = useRuntimeConfig(event)
-  return await exchangeNativeTestSession({
-    publicAlias: body?.publicAlias ?? '',
-    challengeId: body?.challengeId ?? '',
-    code: body?.code ?? '',
-  }, {
-    brokerBaseUrl: runtime.nativeSessionBrokerBaseUrl,
-    serviceToken: runtime.nativeSessionBrokerToken,
-  })
+  try {
+    return await exchangeNativeTestSession({
+      publicAlias: body?.publicAlias ?? '',
+      challengeId: body?.challengeId ?? '',
+      code: body?.code ?? '',
+    }, {
+      brokerBaseUrl: runtime.nativeSessionBrokerBaseUrl,
+      serviceToken: runtime.nativeSessionBrokerToken,
+    })
+  }
+  catch (error) {
+    if (error instanceof NativeTestSessionInputError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: error.message,
+      })
+    }
+    throw error
+  }
 })

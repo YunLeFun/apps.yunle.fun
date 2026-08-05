@@ -1,5 +1,8 @@
 import type { NativeTestSsoRequest } from '../../../utils/native-test-session-proxy'
-import { authorizeNativeTestSession } from '../../../utils/native-test-session-proxy'
+import {
+  authorizeNativeTestSession,
+  NativeTestSessionInputError,
+} from '../../../utils/native-test-session-proxy'
 
 export default defineEventHandler(async (event) => {
   setResponseHeaders(event, {
@@ -12,11 +15,22 @@ export default defineEventHandler(async (event) => {
     request?: NativeTestSsoRequest
   }>(event)
   const runtime = useRuntimeConfig(event)
-  return await authorizeNativeTestSession({
-    hostSession: body?.hostSession ?? '',
-    request: body?.request as NativeTestSsoRequest,
-  }, {
-    brokerBaseUrl: runtime.nativeSessionBrokerBaseUrl,
-    serviceToken: runtime.nativeSessionBrokerToken,
-  })
+  try {
+    return await authorizeNativeTestSession({
+      hostSession: body?.hostSession ?? '',
+      request: body?.request as NativeTestSsoRequest,
+    }, {
+      brokerBaseUrl: runtime.nativeSessionBrokerBaseUrl,
+      serviceToken: runtime.nativeSessionBrokerToken,
+    })
+  }
+  catch (error) {
+    if (error instanceof NativeTestSessionInputError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: error.message,
+      })
+    }
+    throw error
+  }
 })

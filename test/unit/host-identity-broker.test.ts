@@ -1,4 +1,4 @@
-import type { HostAuthorizationEvent } from '~/composables/useBrowser'
+import type { HostAuthorizationEvent } from '~/host-runtime'
 
 import { describe, expect, it } from 'vitest'
 import {
@@ -70,6 +70,23 @@ describe('host identity broker', () => {
     })).toMatchObject({
       appId: 'yunjian',
       prompt: 'consent',
+    })
+  })
+
+  it('preserves an explicit account-selection prompt for system authentication', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'yunjian',
+      sourceOrigin: 'https://cms.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'cms-web',
+        redirectUri: 'https://cms.yunle.fun/',
+        prompt: 'select_account',
+      },
+    })).toMatchObject({
+      appId: 'yunjian',
+      prompt: 'select_account',
     })
   })
 

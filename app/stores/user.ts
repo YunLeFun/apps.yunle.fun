@@ -6,10 +6,21 @@ export type UserInfo = YlfUserInfo
 
 const TOKEN_KEY = 'ylf_access_token'
 const USER_INFO_KEY = 'ylf_user_info'
+const NATIVE_TEST_SESSION_KEY = 'ylf_native_test_session'
 
 export interface UserSession {
   accessToken: string
   user: UserInfo
+}
+
+export interface NativeTestSession {
+  hostSession: string
+  expiresAt: number
+  account: {
+    publicAlias: string
+    virtualPhone: string
+    displayName: string
+  }
 }
 
 const defaultUserInfo: YlfUserInfo = {
@@ -40,6 +51,7 @@ export const useUserStore = defineStore('user', () => {
     sameSite: 'strict',
     secure: import.meta.env.PROD && !isNativeShell,
   })
+  const nativeTestSession = ref<NativeTestSession | null>(null)
 
   // cookie 丢失（原生壳重启/更新后常见）时从 localStorage 镜像恢复，
   // 与 CloudBase SDK 凭证（persistence: 'local'，同在 localStorage）同生共死
@@ -54,6 +66,14 @@ export const useUserStore = defineStore('user', () => {
         const stored = localStorage.getItem(USER_INFO_KEY)
         if (stored)
           userInfoCookie.value = JSON.parse(stored)
+      }
+      const storedNativeSession = localStorage.getItem(NATIVE_TEST_SESSION_KEY)
+      if (storedNativeSession) {
+        const parsed = JSON.parse(storedNativeSession)
+        if (isNativeTestSession(parsed) && parsed.expiresAt > Date.now())
+          nativeTestSession.value = parsed
+        else
+          localStorage.removeItem(NATIVE_TEST_SESSION_KEY)
       }
     }
     catch {
@@ -95,6 +115,9 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const isLoggedIn = computed(() => !!accessToken.value && !!userInfo.value.nickname)
+  const isNativeTestLoggedIn = computed(() => (
+    !!nativeTestSession.value && nativeTestSession.value.expiresAt > Date.now()
+  ))
 
   /**
    * Current named of the user.
@@ -126,6 +149,7 @@ export const useUserStore = defineStore('user', () => {
    * 登录：保存 access_token 和用户信息
    */
   function login(token: string, user: YlfUserInfo) {
+    clearNativeTestSession()
     accessToken.value = token
     userInfo.value = user
     // userInfoCookie 会通过 watch 自动同步
@@ -147,10 +171,30 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  function loginNativeTestSession(session: NativeTestSession) {
+    if (!isNativeTestSession(session) || session.expiresAt <= Date.now())
+      throw new TypeError('原生测试会话无效或已过期')
+    nativeTestSession.value = structuredClone(session)
+    if (import.meta.client)
+      localStorage.setItem(NATIVE_TEST_SESSION_KEY, JSON.stringify(session))
+  }
+
+  function clearNativeTestSession() {
+    nativeTestSession.value = null
+    if (import.meta.client) {
+      try {
+        localStorage.removeItem(NATIVE_TEST_SESSION_KEY)
+      }
+      catch {}
+    }
+  }
+
   return {
     userInfo,
     accessToken,
     isLoggedIn,
+    nativeTestSession,
+    isNativeTestLoggedIn,
 
     setNewName,
     otherNames,
@@ -159,8 +203,25 @@ export const useUserStore = defineStore('user', () => {
     setUserInfo,
     login,
     logout,
+    loginNativeTestSession,
+    clearNativeTestSession,
   }
 })
+
+function isNativeTestSession(value: unknown): value is NativeTestSession {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    return false
+  const candidate = value as Partial<NativeTestSession>
+  return typeof candidate.hostSession === 'string'
+    && candidate.hostSession.length >= 8
+    && candidate.hostSession.length <= 4096
+    && Number.isSafeInteger(candidate.expiresAt)
+    && !!candidate.account
+    && typeof candidate.account.publicAlias === 'string'
+    && /^[a-z0-9][a-z0-9-]{1,62}@yunlefun$/.test(candidate.account.publicAlias)
+    && typeof candidate.account.virtualPhone === 'string'
+    && typeof candidate.account.displayName === 'string'
+}
 
 if (import.meta.hot)
   import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot))

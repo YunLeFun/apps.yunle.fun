@@ -1,5 +1,6 @@
+import { Capacitor } from '@capacitor/core'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useScanner } from '../../app/composables/useScanner'
 
 const cameraMocks = vi.hoisted(() => ({
@@ -8,17 +9,6 @@ const cameraMocks = vi.hoisted(() => ({
 const decodeQr = vi.hoisted(() => vi.fn())
 const showError = vi.fn()
 const showWarning = vi.fn()
-
-vi.mock('@capacitor/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@capacitor/core')>()
-  return {
-    ...actual,
-    Capacitor: {
-      ...actual.Capacitor,
-      isNativePlatform: () => true,
-    },
-  }
-})
 
 vi.mock('@capacitor/camera', () => ({
   Camera: {
@@ -41,6 +31,7 @@ mockNuxtImport('useToast', () => () => ({
 describe('scanner album picker', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true)
     cameraMocks.chooseFromGallery.mockResolvedValue({
       results: [{
         webPath: 'capacitor://localhost/_capacitor_file_/tmp/workshop-qr.png',
@@ -73,6 +64,10 @@ describe('scanner album picker', () => {
         height: 1,
       })),
     } as unknown as CanvasRenderingContext2D)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('opens the native photo gallery and decodes the selected QR image', async () => {

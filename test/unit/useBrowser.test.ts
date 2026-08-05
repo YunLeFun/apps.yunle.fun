@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { openCatalogAppInBrowser, openInAppBrowser } from '../../app/composables/useBrowser'
 
-// --- Capacitor mock：固定 iOS 原生环境 ---
+// --- Capacitor mock：统一原生 HostRuntime 环境 ---
 const { mockInAppOpen, mockBrowserOpen } = vi.hoisted(() => ({
   mockInAppOpen: vi.fn(async () => {}),
   mockBrowserOpen: vi.fn(async () => {}),

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { TcbOtpData, TcbSignUpData } from '~/composables/auth/useCloudbaseOtp'
+import { Capacitor } from '@capacitor/core'
 import {
   IonBackButton,
   IonButtons,
@@ -36,6 +37,18 @@ const {
 
 const router = useRouter()
 const accountsStore = useAccountsStore()
+const nativePlatform = Capacitor.isNativePlatform()
+const showNativeTestLogin = ref(false)
+const nativeTestAlias = ref('native-sso-smoke@yunlefun')
+const nativeTestChallengeId = ref('')
+const nativeTestCode = ref('')
+const nativeTestLoading = ref(false)
+const nativeTestError = ref('')
+const nativeTestFormValid = computed(() => (
+  /^[a-z0-9][a-z0-9-]{1,62}@yunlefun$/.test(nativeTestAlias.value.trim().toLowerCase())
+  && /^[\w:-]{4,128}$/.test(nativeTestChallengeId.value.trim())
+  && /^\d{6}$/.test(nativeTestCode.value)
+))
 
 watch(isAuthenticated, (value) => {
   if (value) {
@@ -209,6 +222,31 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
     accountsStore.saveAccount(userStore.userInfo, method)
   }
 }
+
+async function handleNativeTestLogin() {
+  if (!nativeTestFormValid.value || nativeTestLoading.value)
+    return
+  nativeTestLoading.value = true
+  nativeTestError.value = ''
+  try {
+    const session = await useNuxtApp().$api('/api/auth/native-test-session/exchange', {
+      method: 'POST',
+      body: {
+        publicAlias: nativeTestAlias.value.trim().toLowerCase(),
+        challengeId: nativeTestChallengeId.value.trim(),
+        code: nativeTestCode.value,
+      },
+    })
+    useUserStore().loginNativeTestSession(session)
+    await router.replace('/tabs/me')
+  }
+  catch {
+    nativeTestError.value = '验证码无效、已过期，或测试租约尚未启用'
+  }
+  finally {
+    nativeTestLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -237,8 +275,63 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
 
         <!-- ===== 登录模式 ===== -->
         <template v-if="pageMode === 'login'">
+          <div v-if="nativePlatform" class="auth-footer native-test-switch">
+            <button class="auth-link-btn" @click="showNativeTestLogin = !showNativeTestLogin">
+              {{ showNativeTestLogin ? '返回普通账号登录' : '使用 @yunlefun 公共测试身份' }}
+            </button>
+          </div>
+
+          <form v-if="showNativeTestLogin" class="auth-form" @submit.prevent="handleNativeTestLogin">
+            <div class="auth-card">
+              <div class="auth-card-row">
+                <input
+                  v-model="nativeTestAlias"
+                  type="text"
+                  autocomplete="username"
+                  placeholder="测试账号，例如 native-sso-smoke@yunlefun"
+                  class="auth-input w-full"
+                  :disabled="nativeTestLoading"
+                >
+              </div>
+              <div class="auth-card-separator" />
+              <div class="auth-card-row">
+                <input
+                  v-model="nativeTestChallengeId"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Admin 领取结果中的挑战 ID"
+                  class="auth-input w-full"
+                  :disabled="nativeTestLoading"
+                >
+              </div>
+              <div class="auth-card-separator" />
+              <div class="auth-card-row">
+                <input
+                  v-model="nativeTestCode"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  placeholder="6 位模拟验证码"
+                  maxlength="6"
+                  class="auth-input w-full"
+                  :disabled="nativeTestLoading"
+                >
+              </div>
+            </div>
+            <button type="submit" class="auth-btn-primary" :disabled="!nativeTestFormValid || nativeTestLoading">
+              <IonSpinner v-if="nativeTestLoading" name="crescent" class="auth-btn-spinner" />
+              <span v-else>登录测试身份</span>
+            </button>
+            <p v-if="nativeTestError" class="auth-hint native-test-error">
+              {{ nativeTestError }}
+            </p>
+            <p class="auth-hint">
+              验证码由 Admin 针对当前短期租约生成；此身份只能授权云笺登录，不会获得云乐坊业务访问令牌。
+            </p>
+          </form>
+
           <!-- Segmented Control（根据开关配置动态渲染） -->
-          <div v-if="loginTabs.length > 1" class="auth-segment">
+          <div v-if="!showNativeTestLogin && loginTabs.length > 1" class="auth-segment">
             <button
               v-for="tab in loginTabs"
               :key="tab.key"
@@ -251,7 +344,7 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
           </div>
 
           <!-- 手机号登录 -->
-          <div v-if="loginMode === 'phone' && authMethods.phoneOtp" class="auth-form">
+          <div v-if="!showNativeTestLogin && loginMode === 'phone' && authMethods.phoneOtp" class="auth-form">
             <div class="auth-card">
               <div class="auth-card-row">
                 <span class="auth-area-code">+86</span>
@@ -372,7 +465,7 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
           </div>
 
           <!-- 密码登录 -->
-          <form v-else class="auth-form" @submit.prevent="handlePasswordLogin">
+          <form v-else-if="!showNativeTestLogin" class="auth-form" @submit.prevent="handlePasswordLogin">
             <div class="auth-card">
               <div class="auth-card-row">
                 <input
@@ -419,12 +512,12 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
           </form>
 
           <!-- 分割线 -->
-          <div v-if="hasEnabledOAuthProviders()" class="auth-divider">
+          <div v-if="!showNativeTestLogin && hasEnabledOAuthProviders()" class="auth-divider">
             <span class="auth-divider-text">其他登录方式</span>
           </div>
 
           <!-- 第三方登录 - 图标模式 -->
-          <div v-if="hasEnabledOAuthProviders()" class="auth-social-icons">
+          <div v-if="!showNativeTestLogin && hasEnabledOAuthProviders()" class="auth-social-icons">
             <button v-if="authMethods.github" class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
               <IonIcon :icon="logoGithub" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">GitHub</span>
@@ -436,7 +529,7 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
           </div>
 
           <!-- 注册入口 -->
-          <div v-if="authMethods.phoneSignup" class="auth-footer">
+          <div v-if="!showNativeTestLogin && authMethods.phoneSignup" class="auth-footer">
             <p class="auth-footer-switch">
               还没有账号？
               <button class="auth-link-btn" @click="switchMode('signup')">
@@ -618,6 +711,14 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
 .auth-form {
   margin-bottom: 4px;
   padding: 0 16px;
+}
+
+.native-test-switch {
+  margin-bottom: 16px;
+}
+
+.native-test-error {
+  color: var(--ion-color-danger);
 }
 
 // iOS Grouped Card — 浅色模式白色卡片 + 页面灰色背景形成区分（iOS 标准分组列表风格）

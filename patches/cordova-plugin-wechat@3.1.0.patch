@@ -1,3 +1,16 @@
+diff --git a/android-build.gradle b/android-build.gradle
+index 207aa2b..8cba305 100644
+--- a/android-build.gradle
++++ b/android-build.gradle
+@@ -1,7 +1,3 @@
+-repositories {
+-    jcenter()
+-}
+-
+ dependencies {
+-    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
++    implementation 'com.tencent.mm.opensdk:wechat-sdk-android:6.8.34'
+ }
 diff --git a/plugin.xml b/plugin.xml
 index 0e9dc333c8fc6938f69b76b4dc8c9c1619441433..4e0f5dc1b4cc3e14cf09882fd7fa98624c6a23cd 100644
 --- a/plugin.xml

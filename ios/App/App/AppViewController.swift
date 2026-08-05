@@ -7,7 +7,7 @@ import YunlefunCapacitorStorekit
 /// 手动添加的条目每次同步都会被抹掉。
 class AppViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
-        bridge?.registerPluginInstance(InAppWebViewPlugin())
+        bridge?.registerPluginInstance(HostRuntimePlugin())
         bridge?.registerPluginInstance(StorekitPlugin())
     }
 }

@@ -1,8 +1,9 @@
 # 沉浸式内嵌浏览器
 
-iOS 端「沉浸模式」「标题栏模式」共用自定义 WKWebView 容器
-（`ios/App/App/WebViewController.swift`），按 `displayMode` 分两种形态。
-入口见 `app/composables/useBrowser.ts` 的 `openInAppBrowser()`。
+iOS / Android 的自定义网页容器共用 `app/host-runtime/index.ts` 定义的
+`HostRuntime` 协议，Web 层入口见 `app/composables/useBrowser.ts` 的
+`openInAppBrowser()`。iOS 适配器使用 `WKWebView`（`ios/App/App/WebViewController.swift`），
+Android 适配器使用平台 `WebView`（`android/app/src/main/java/fun/yunle/apps/HostWebViewActivity.kt`）。
 
 > 面向第三方页面开发者的 JSAPI 使用文档见 [JSAPI 接入（window.ylf）](/guide/jsapi)，
 > 本文记录容器内部实现与维护流程。
@@ -22,10 +23,12 @@ iOS 端「沉浸模式」「标题栏模式」共用自定义 WKWebView 容器
   （点开展开面板，「结束」收口其中；不可拖动、不随滚动隐藏），网页从栏下开始、底部仍铺满；
 - **沉浸 `immersive`**（官方应用声明专属）：网页全屏平铺（顶达屏幕最顶、底达屏幕最底），
   右上角悬浮胶囊（更多 | 关闭，可拖动、随滚动隐藏），可后退时左上角悬浮返回键；
-- **手机内置 `system`**：SFSafariViewController，样式由系统控制。
+- **手机内置 `system`**：iOS 使用 SFSafariViewController，Android 使用 Custom Tabs，
+  样式与生命周期由系统组件控制。
 
 形态在 `viewDidLoad` 定型；设置变更后再打开同一应用时，
-插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新建（见 `InAppWebViewPlugin.open`）。
+iOS 插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新建；Android 首版只维护
+当前原生 Activity，会话结束后释放 WebView，并固定保留标题栏退出锚，不开放沉浸形态。
 
 ### 形态决策优先级
 
@@ -71,7 +74,7 @@ iOS 端「沉浸模式」「标题栏模式」共用自定义 WKWebView 容器
   `styleBarButton`），沉浸模式或 `hideTitleBar` 收起后转悬浮暗色圆钮；「更多」展开面板
   （`AppInfoSheetController`）含分享 / 复制 / Safari / 刷新 / 详情与「结束」（彻底释放）。
 
-## 生命周期：最小化（压后台）/ 结束
+## iOS 生命周期：最小化（压后台）/ 结束
 
 标题栏左上角是**最小化**而非关闭，配合容器既有的「暂停保活」机制做小程序式压后台：
 
@@ -94,13 +97,15 @@ iOS 端「沉浸模式」「标题栏模式」共用自定义 WKWebView 容器
 
 传输层只有一条 `invoke(method, params) → Promise` 通道：
 
-- 基于 `WKScriptMessageHandlerWithReply`，原生 `replyHandler(result, error)`
-  直接驱动页面 Promise 的 resolve/reject，无需维护 callbackId 注册表；
+- iOS 基于 `WKScriptMessageHandlerWithReply`，原生 `replyHandler(result, error)`
+  直接驱动页面 Promise 的 resolve/reject；Android 基于 AndroidX WebKit
+  `WebViewCompat.addWebMessageListener` / `JavaScriptReplyProxy`，每条消息携带
+  不可由页面伪造的 `sourceOrigin` 与 `isMainFrame`；
 - 注入脚本（`setupJSBridge`）只定义 `invoke` 与薄糖衣方法，长期稳定；
 - 方法登记在 `jsapiRegistry`（方法名 → 权限级别），鉴权由分发层统一执行，
   方法实现（`handleJSAPI` 的 case）不关心权限；
-- 脚本仅注入主文档（`forMainFrameOnly`），分发层再校验 `frameInfo.isMainFrame`，
-  iframe 调用一律 reject；
+- 两端分发层均再次校验主 frame，iframe 调用一律 reject；Android 禁止退回
+  `addJavascriptInterface`，因为它不能为每条调用提供同等级的来源证明；
 - handler 经 `WeakScriptMessageHandler` 弱引用代理注册，
   打破 `WKUserContentController` 强持有导致的循环引用，`deinit` 时移除。
 
@@ -110,8 +115,8 @@ iOS 端「沉浸模式」「标题栏模式」共用自定义 WKWebView 容器
 
 **授信判定**（`isTrustedOrigin`，每条消息独立评估，文档内导航后自动按新源重新判定）：
 
-1. 来源取自 `WKSecurityOrigin` —— 由 WebKit 进程注入，页面脚本无法伪造
-   （勿用 `webView.url` 或 `frameInfo.request.url` 替代）；
+1. 来源由平台 WebKit 提供：iOS 使用 `WKSecurityOrigin`，Android 使用
+   `WebMessageListener.sourceOrigin`；页面脚本无法伪造（勿用 `webView.url` 替代）；
 2. 协议必须是 `https`（`localhost` / `127.0.0.1` 本机调试地址除外）；
 3. host 命中授信域或其子域。授信域 = 内置第一方域（`firstPartyHosts`，
    现为 `yunle.fun`、`yunyoujun.cn`）∪ 宿主打开浏览器时传入的 `trustedHosts`。
@@ -135,8 +140,25 @@ await openInAppBrowser(app.url, {
 不进入 WebView 配置或 JSAPI。第一方页面可以调用 `window.ylf.authorize()` 请求
 绑定来源、client、nonce 与 PKCE 的短时单次 SSO code；宿主以自身登录态向统一
 身份服务签发后，页面仍须在自己的 Origin/BFF 完成 code 交换和 HttpOnly session
-建立。该能力当前只开放给精确注册的 Play 客户端。Apps 登出或切换账号时会只清除
-Play 的 BFF cookie，并通知保活 WebView 重新同步；不会清空其他站点数据。
+建立。该能力只开放给统一 SSO Registry 中精确注册的第一方客户端，client id、Origin、
+redirect URI、scope、nonce 与 PKCE 必须全部匹配。
+
+`HostRuntime` 统一支持两种交互，页面不按 iOS / Android 分支：
+
+- `prompt: 'consent'`：原生弹窗显示当前云乐坊账号、目标应用与最小权限，用户可授权当前账号、
+  取消，或选择「其他账号」；当前账号路径直接由宿主签发一次性 code；
+- `prompt: 'select_account'`：跳过当前账号弹窗，直接进入系统级认证会话。iOS 使用
+  `ASWebAuthenticationSession`，Android 使用 Custom Tabs；登录凭据和 Provider Cookie
+  始终留在系统认证组件，不进入自定义 WebView。
+
+系统认证会话在原请求的 HTTPS redirect URI 之外增加一个仅用于传输结果的
+`yunlefun://auth/sso` 原生回调。回调以 256-bit state 绑定发起会话，原生端再精确校验
+issuer、redirect URI、nonce 和一次性 code；回调中禁止出现 access token、refresh token、
+ticket 或 session。Provider 仍按原注册 HTTPS redirect URI 绑定和签发 code，Consumer 仍在
+自己的 Origin/BFF 兑换，因此原生回调不是新的 OAuth redirect URI，也不能绕过 Registry。
+
+Android 的 WebMessage listener 只注册初始页面的精确 Origin，不使用 `*`；跨 Origin 导航后
+不会复用旧桥接会话。Release 构建仅允许 HTTPS，Debug 只额外允许 loopback HTTP。
 
 ## 胶囊交互状态
 
@@ -168,7 +190,7 @@ Play 的 BFF cookie，并通知保活 WebView 重新同步；不会清空其他�
 4. 更新 [JSAPI 接入](/guide/jsapi) 的 API 参考表；
    若属破坏性变更，递增注入脚本中的 `version`。
 
-## 未来扩展约定
+## 扩展约定
 
 - **原生 → 页面事件**：用标准 `CustomEvent` 下发（`evaluateJavaScript` 派发
   `window.dispatchEvent(new CustomEvent('ylf:xxx', { detail }))`），
@@ -177,5 +199,5 @@ Play 的 BFF cookie，并通知保活 WebView 重新同步；不会清空其他�
   此类能力还应回传宿主 JS 层做用户级确认（弹窗授权），
   参考微信 JS-SDK config 签名 + 用户授权双层模式。当前 `profile`
   仅通过一次性授权码静默兑换最小账号信息。
-- **跨端**：Android 实现同名 `window.ylf` 接口（`@JavascriptInterface` + Promise 包装），
-  页面侧代码即可不变。
+- **跨端**：新增能力先修改 `HostRuntime` / `window.ylf` 统一协议，再分别落到 Swift 与
+  Kotlin 适配器；页面代码不按平台分支，只通过 `canIUse` 做能力探测。

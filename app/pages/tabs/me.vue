@@ -35,6 +35,11 @@ function goToLoginPage() {
 function navigateTo(path: string) {
   router.push(path)
 }
+
+async function logoutNativeTestSession() {
+  userStore.clearNativeTestSession()
+  await router.push('/login')
+}
 </script>
 
 <template>
@@ -48,7 +53,7 @@ function navigateTo(path: string) {
     <IonContent>
       <div class="me-page-content">
         <!-- 未登录：登录入口（iOS Settings Apple ID 风格） -->
-        <k-list v-if="!userStore.isLoggedIn" strong inset>
+        <k-list v-if="!userStore.isLoggedIn && !userStore.isNativeTestLoggedIn" strong inset>
           <k-list-item
             link
             title="登录「云乐坊」账户"
@@ -66,7 +71,20 @@ function navigateTo(path: string) {
           </k-list-item>
         </k-list>
 
-        <!-- 已登录：用户信息 -->
+        <!-- 原生测试身份：只展示授权能力，不解锁业务功能 -->
+        <k-list v-else-if="userStore.isNativeTestLoggedIn" strong inset>
+          <k-list-item
+            :title="userStore.nativeTestSession?.account.publicAlias"
+            :footer="`${userStore.nativeTestSession?.account.virtualPhone} · 仅限云笺原生登录验证`"
+            inner-class="k-list-item-vcenter"
+          >
+            <template #media>
+              <IonIcon :icon="personCircleOutline" class="text-5xl" color="primary" />
+            </template>
+          </k-list-item>
+        </k-list>
+
+        <!-- 已登录：真实用户信息 -->
         <k-list v-else strong inset>
           <k-list-item
             link
@@ -273,6 +291,20 @@ function navigateTo(path: string) {
             title="切换 / 退出账号"
             :footer="otherAccounts.length > 0 ? `还有 ${otherAccounts.length} 个已保存的账号` : '管理已登录的账号'"
             @click="navigateTo('/accounts')"
+          >
+            <template #media>
+              <span class="ios-icon-box ios-icon-blue">
+                <IonIcon :icon="swapHorizontalOutline" />
+              </span>
+            </template>
+          </k-list-item>
+        </k-list>
+        <k-list v-else-if="userStore.isNativeTestLoggedIn" strong inset class="me-signout-list">
+          <k-list-item
+            link
+            title="退出测试身份"
+            footer="也可以在云笺授权弹窗中选择其他账号"
+            @click="logoutNativeTestSession"
           >
             <template #media>
               <span class="ios-icon-box ios-icon-blue">

@@ -1,6 +1,6 @@
 # JSAPI 接入（window.ylf）
 
-你的网页应用在云乐坊 App 内（iOS 沉浸/标题栏模式）打开时，容器会向页面注入
+你的网页应用在云乐坊 App 内（iOS / Android 自定义容器）打开时，容器会向页面注入
 `window.ylf` 对象，可借此控制宿主：隐藏右上角胶囊、读取安全区与胶囊位置、
 关闭浏览器返回云乐坊等。
 
@@ -95,7 +95,7 @@ interface YlfJSAPI {
   invoke: (method: string, params?: Record<string, unknown>) => Promise<unknown>
   canIUse: (method: string) => Promise<boolean>
   getEnv: () => Promise<{
-    platform: 'ios'
+    platform: 'ios' | 'android'
     appId: string
     /** 展示形态（旧版本 App 无此字段，按 immersive 处理） */
     displayMode?: 'immersive' | 'titlebar'
@@ -124,8 +124,8 @@ interface YlfJSAPI {
     nonce: string
     codeChallenge: string
     codeChallengeMethod: 'S256'
-    /** 显式点击登录时由宿主展示当前账号授权确认。 */
-    prompt?: 'consent'
+    /** consent 展示当前账号授权；select_account 直接打开系统账号选择。 */
+    prompt?: 'consent' | 'select_account'
   }) => Promise<{ ok: true, code: string, issuer: string, expiresAt?: number }>
   setClipboard: (text: string) => Promise<void>
 }
@@ -135,9 +135,13 @@ interface YlfJSAPI {
 绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。
 宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项为：
 
-当请求携带 `prompt: 'consent'` 时，宿主使用可信 UI 展示当前云乐坊账号、目标应用与
-最小权限说明；用户取消后返回 `HOST_AUTH_DENIED`，不会签发授权码。页面不得把取消
-解释为宿主不可用并静默改走其他账号。
+当请求携带 `prompt: 'consent'` 时，宿主使用原生可信 UI 展示当前云乐坊账号、目标应用与
+最小权限说明；用户可以授权当前账号、取消或选择「其他账号」。`prompt: 'select_account'`
+则直接打开系统认证组件（iOS `ASWebAuthenticationSession` / Android Custom Tabs）。
+登录凭据与 Provider Cookie 不进入自定义 WebView；系统认证结果只通过 state 绑定的原生回调
+返回一次性 code，原生端仍会校验 issuer、redirect URI、nonce 与 code，Consumer 仍须在自己的
+Origin/BFF 用 PKCE 兑换。用户取消后返回 `HOST_AUTH_DENIED`，页面不得将取消解释为宿主
+不可用并静默降级到另一个登录通道。
 
 - `https://admin.yunle.fun` / `admin-web` / `identity:bootstrap`
 - `https://saier.yunle.fun` / `saier-web` / `identity:bootstrap`
@@ -185,8 +189,10 @@ else
 
 ## 兼容性
 
-- 目前仅 iOS App 的「沉浸模式」「标题栏模式」注入 `window.ylf`（手机内置模式、
-  Android、Web 端均无）；Android 未来将实现同名接口，页面代码无需改动。
+- iOS / Android 自定义容器均注入同一 `window.ylf` 协议；手机内置模式与普通 Web
+  环境不注入。Android 首版固定使用原生标题栏，胶囊位置返回零矩形，且
+  `canIUse('setTitleBarVisible')` 返回 `false`；待 Android 悬浮退出锚完成后再开放沉浸模式。
+  页面应配合 `displayMode` 和 `canIUse` 渐进适配。
 - 新增能力时 `version` 递增；跨版本兼容请依赖 `canIUse` 探测而非版本号判断。
 
 > 容器内部实现（鉴权模型、新增方法流程）见 [沉浸式内嵌浏览器](/dev/in-app-browser)。

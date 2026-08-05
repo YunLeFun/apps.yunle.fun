@@ -1,7 +1,7 @@
-import type { HostAuthorizationEvent } from '~/composables/useBrowser'
+import type { HostAuthorizationEvent } from '~/host-runtime'
 
 import { Capacitor } from '@capacitor/core'
-import { InAppWebView } from '~/composables/useBrowser'
+import { HostRuntime } from '~/host-runtime'
 import {
   HostIdentityBrokerError,
   readIssuedAuthorizationCode,
@@ -11,25 +11,38 @@ import {
 const SSO_ISSUER = 'https://www.yunle.fun'
 
 /**
- * iOS 第一方宿主身份代理。
+ * 移动端第一方宿主身份代理。
  *
  * Apps 使用自身 CloudBase 登录态向统一 SSO 云函数申请一个 60 秒、单次使用、
  * 绑定 source origin / client / nonce / PKCE 的 code。页面永远拿不到 Apps 的
  * access token 或 refresh token。
  */
 export default defineNuxtPlugin(() => {
-  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios')
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('HostRuntime'))
     return
 
-  InAppWebView.addListener(
+  HostRuntime.addListener(
     'authorizationRequested',
     async (event: HostAuthorizationEvent) => {
       try {
         const request = validateHostAuthorization(event)
+        if (request.prompt === 'select_account') {
+          await HostRuntime.authorizeWithOtherAccount({
+            requestId: event.requestId,
+          })
+          return
+        }
         const { app, auth } = useCloudbase()
         const { data, error } = await auth.getSession()
         const session = data?.session
-        if (error || !session?.access_token || session.user?.is_anonymous) {
+        const hasCloudBaseSession = !error && !!session?.access_token && !session.user?.is_anonymous
+        const userStore = useUserStore()
+        const nativeTestSession = userStore.nativeTestSession
+        const hasNativeTestSession = !!nativeTestSession
+          && nativeTestSession.expiresAt > Date.now()
+        if (!hasCloudBaseSession && !hasNativeTestSession) {
+          if (nativeTestSession)
+            userStore.clearNativeTestSession()
           throw new HostIdentityBrokerError(
             'HOST_AUTH_REQUIRED',
             '请先登录云乐坊',
@@ -37,13 +50,21 @@ export default defineNuxtPlugin(() => {
         }
 
         if (request.prompt === 'consent') {
-          const userInfo = useUserStore().userInfo
-          const accountName = userInfo.nickname || userInfo.login || '当前云乐坊账号'
-          const { allowed } = await InAppWebView.confirmAuthorization({
+          const userInfo = userStore.userInfo
+          const accountName = hasCloudBaseSession
+            ? userInfo.nickname || userInfo.login || '当前云乐坊账号'
+            : nativeTestSession!.account.publicAlias
+          const decision = await HostRuntime.confirmAuthorization({
             applicationName: request.applicationName,
             accountName,
           })
-          if (!allowed) {
+          if (decision.choice === 'other') {
+            await HostRuntime.authorizeWithOtherAccount({
+              requestId: event.requestId,
+            })
+            return
+          }
+          if (!decision.allowed) {
             throw new HostIdentityBrokerError(
               'HOST_AUTH_DENIED',
               '用户取消了宿主账号授权',
@@ -51,22 +72,33 @@ export default defineNuxtPlugin(() => {
           }
         }
 
-        const response = await app.callFunction({
-          name: 'sso-ticket',
-          data: {
-            action: 'issueSsoCode',
-            clientId: request.clientId,
-            mode: 'redirect',
-            targetOrigin: request.targetOrigin,
-            returnUrl: request.redirectUri,
-            scope: request.scope,
-            nonce: request.nonce,
-            codeChallenge: request.codeChallenge,
-            codeChallengeMethod: 'S256',
-          },
-        })
+        const issueRequest = {
+          mode: 'redirect' as const,
+          clientId: request.clientId,
+          targetOrigin: request.targetOrigin,
+          returnUrl: request.redirectUri,
+          scope: request.scope,
+          nonce: request.nonce,
+          codeChallenge: request.codeChallenge,
+          codeChallengeMethod: 'S256' as const,
+        }
+        const response = hasCloudBaseSession
+          ? await app.callFunction({
+              name: 'sso-ticket',
+              data: {
+                action: 'issueSsoCode',
+                ...issueRequest,
+              },
+            })
+          : await useNuxtApp().$api('/api/auth/native-test-session/authorize', {
+              method: 'POST',
+              body: {
+                hostSession: nativeTestSession!.hostSession,
+                request: issueRequest,
+              },
+            })
         const issued = readIssuedAuthorizationCode(response)
-        await InAppWebView.resolveAuthorization({
+        await HostRuntime.resolveAuthorization({
           requestId: event.requestId,
           result: {
             ok: true,
@@ -81,7 +113,7 @@ export default defineNuxtPlugin(() => {
           ? cause.code
           : 'HOST_AUTH_FAILED'
         try {
-          await InAppWebView.resolveAuthorization({
+          await HostRuntime.resolveAuthorization({
             requestId: event.requestId,
             error,
           })

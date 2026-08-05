@@ -1,23 +1,16 @@
-import type { PluginListenerHandle } from '@capacitor/core'
-import type { ExternalLinkMode } from '~/stores/settings'
+import type { HostAppInfo } from '~/host-runtime'
 import { Browser } from '@capacitor/browser'
-import { Capacitor, registerPlugin } from '@capacitor/core'
+import { Capacitor } from '@capacitor/core'
+import { HostRuntime } from '~/host-runtime'
+
+export type {
+  HostSession as BackgroundSession,
+  HostAuthorizationEvent,
+  HostAuthorizationRequest,
+} from '~/host-runtime'
 
 /** 传递给原生详情面板的应用元信息 */
-export interface InAppWebViewAppInfo {
-  id?: string
-  /** URL slug（评价数据以 slug 优先作为 key） */
-  slug?: string
-  name?: string
-  emoji?: string
-  logo?: string
-  themeColor?: string
-  description?: string
-  category?: string
-  rating?: number
-  /** 评价条数（打开后异步补充） */
-  ratingCount?: number
-}
+export type InAppWebViewAppInfo = HostAppInfo
 
 /** Catalog fields required to launch an app without losing its trusted identity. */
 export interface CatalogBrowserApp extends InAppWebViewAppInfo {
@@ -39,81 +32,6 @@ export interface InAppBrowserOptions {
   /** 经人工核验、允许调用授信 JSAPI 的可注册域名。 */
   trustedHosts?: string[]
 }
-
-/** 后台保活会话摘要（原生 sessionsChanged 事件 / listSessions 返回） */
-export interface BackgroundSession {
-  /** 应用 id（第三方外链应用可能为空） */
-  id: string
-  /** 去重 / 操作键：优先 appId，无则 URL */
-  key: string
-  name: string
-  emoji?: string
-  logo?: string
-  themeColor?: string
-  url: string
-  title?: string
-  displayMode?: 'immersive' | 'titlebar'
-}
-
-export interface HostAuthorizationRequest {
-  clientId: string
-  codeChallenge: string
-  codeChallengeMethod: 'S256'
-  nonce: string
-  redirectUri: string
-  scope: string[]
-  prompt?: 'consent'
-}
-
-export interface HostAuthorizationEvent {
-  appId: string
-  request: HostAuthorizationRequest
-  requestId: string
-  sourceOrigin: string
-}
-
-interface InAppWebViewPlugin {
-  open: (options: {
-    url: string
-    title?: string
-    toolbarColor?: string
-    app?: InAppWebViewAppInfo
-    /** 展示形态：titlebar = 顶部固定标题栏（默认，套用主题色 + 单菜单按钮）；immersive = 全屏平铺 + 悬浮胶囊（官方应用声明专属） */
-    displayMode?: 'immersive' | 'titlebar'
-    /** 跨站外链打开方式：safari-view = App 内系统浏览器视图；default-browser = 跳出到手机默认浏览器 */
-    externalLinkMode?: ExternalLinkMode
-    /**
-     * 本次会话追加的 JSAPI 授信域（可注册域，子域自动匹配，要求 https）。
-     * 授信页面可调用敏感 JSAPI（如 setClipboard），详见 docs/dev/in-app-browser.md；
-     * 内置已授信 yunle.fun 及其子域，仅对人工核验过的第三方应用传入
-     */
-    trustedHosts?: string[]
-  }) => Promise<void>
-  close: () => Promise<void>
-  /** 浏览器已打开时增量更新应用元信息（如评价数） */
-  updateAppInfo: (options: { app: InAppWebViewAppInfo }) => Promise<void>
-  /** 当前后台保活会话列表 */
-  listSessions: () => Promise<{ sessions: BackgroundSession[] }>
-  /** 彻底结束并释放指定会话（按 key 传入） */
-  endSession: (options: { id: string }) => Promise<void>
-  /** 由 iOS 原生界面展示当前账号授权确认。 */
-  confirmAuthorization: (options: {
-    applicationName: string
-    accountName: string
-  }) => Promise<{ allowed: boolean }>
-  /** 完成页面发起的宿主 SSO 请求；result 仅允许携带一次性 code。 */
-  resolveAuthorization: (options: {
-    requestId: string
-    result?: Record<string, unknown>
-    error?: string
-  }) => Promise<void>
-  /** Apps 退出/换号时清除第一方应用 BFF cookie，并通知保活页面刷新。 */
-  clearIdentitySessions: () => Promise<void>
-  addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>) & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'sessionsChanged', handler: (data: { sessions: BackgroundSession[] }) => void) => Promise<PluginListenerHandle>) & ((event: 'browserMinimized', handler: (data: { name: string }) => void) => Promise<PluginListenerHandle>) & ((event: 'authorizationRequested', handler: (data: HostAuthorizationEvent) => void) => Promise<PluginListenerHandle>)
-  removeAllListeners: () => Promise<void>
-}
-
-export const InAppWebView = registerPlugin<InAppWebViewPlugin>('InAppWebView')
 
 /**
  * Opens one catalog app with the stable slug/id and display metadata required
@@ -144,10 +62,10 @@ export function openCatalogAppInBrowser(app: CatalogBrowserApp): Promise<void> {
 /**
  * 在应用内打开网页
  *
- * iOS: 自定义 WKWebView，默认标题栏形态（顶部固定导航栏，套用应用主题色，右上角单菜单按钮）；
+ * iOS / Android: 平台原生 WebView，默认标题栏形态；
  *      沉浸形态（全屏平铺 + 悬浮胶囊）仅由官方应用经目录声明 displayMode 启用；
  *      容器内点击跨站外链时按设置以 App 内系统浏览器视图（默认）或手机默认浏览器打开
- * 其他平台: @capacitor/browser 原有行为
+ * 「手机内置」模式使用 @capacitor/browser。
  */
 export async function openInAppBrowser(
   url: string,
@@ -158,39 +76,29 @@ export async function openInAppBrowser(
     return
   }
 
-  if (Capacitor.getPlatform() === 'ios') {
-    const { inAppBrowserMode, externalLinkMode } = useSettingsStore()
-    if (inAppBrowserMode !== 'system') {
-      try {
-        await InAppWebView.open({
-          url,
-          title: options?.title ?? '',
-          toolbarColor: options?.toolbarColor,
-          app: options?.app,
-          // 形态优先级：应用目录声明 > 用户全局设置
-          displayMode: options?.displayMode ?? inAppBrowserMode,
-          externalLinkMode,
-          trustedHosts: options?.trustedHosts,
-        })
-        refreshReviewMeta(options?.app)
-        return
-      }
-      catch (e) {
-        console.warn('[useBrowser] InAppWebView.open failed, falling back to Browser:', e)
-        // fall through to @capacitor/browser below
-      }
+  const { inAppBrowserMode, externalLinkMode } = useSettingsStore()
+  if (inAppBrowserMode !== 'system') {
+    try {
+      await HostRuntime.open({
+        url,
+        title: options?.title ?? '',
+        toolbarColor: options?.toolbarColor,
+        app: options?.app,
+        // 形态优先级：应用目录声明 > 用户全局设置
+        displayMode: options?.displayMode ?? inAppBrowserMode,
+        externalLinkMode,
+        trustedHosts: options?.trustedHosts,
+      })
+      refreshReviewMeta(options?.app)
+      return
     }
-    // system 模式或自定义容器降级
-    // closeButtonTitle 已在 @capacitor/browser 8 移除，关闭按钮文案由系统控制
-    await Browser.open({
-      url,
-      toolbarColor: options?.toolbarColor,
-      presentationStyle: options?.presentationStyle || 'fullscreen',
-    })
-    return
+    catch (e) {
+      console.warn('[useBrowser] HostRuntime.open failed, falling back to Browser:', e)
+      // fall through to @capacitor/browser below
+    }
   }
 
-  // Android / other
+  // system 模式或自定义容器降级
   await Browser.open({
     url,
     toolbarColor: options?.toolbarColor,
@@ -215,7 +123,7 @@ function refreshReviewMeta(app?: InAppWebViewAppInfo) {
       const summary = res?.data?.summary
       if (!summary)
         return
-      return InAppWebView.updateAppInfo({
+      return HostRuntime.updateAppInfo({
         app: {
           // 有真实评价时用动态均分覆盖目录里的静态评分
           rating: summary.count > 0 ? summary.average : app?.rating,
@@ -236,8 +144,8 @@ export async function closeInAppBrowser() {
   if (!Capacitor.isNativePlatform())
     return
 
-  if (Capacitor.getPlatform() === 'ios') {
-    await InAppWebView.close()
+  if (useSettingsStore().inAppBrowserMode !== 'system') {
+    await HostRuntime.close()
     return
   }
 
@@ -246,13 +154,10 @@ export async function closeInAppBrowser() {
 
 /** 清理原生容器中由宿主身份派生的第一方应用会话。 */
 export async function clearInAppBrowserIdentitySessions() {
-  if (
-    !Capacitor.isNativePlatform()
-    || Capacitor.getPlatform() !== 'ios'
-  ) {
+  if (!Capacitor.isNativePlatform()) {
     return
   }
-  await InAppWebView.clearIdentitySessions()
+  await HostRuntime.clearIdentitySessions()
 }
 
 /**
@@ -262,11 +167,11 @@ export function useBrowserEvents() {
   const isOpen = ref(false)
 
   onMounted(async () => {
-    const useCustom = Capacitor.getPlatform() === 'ios'
+    const useCustom = Capacitor.isNativePlatform()
       && useSettingsStore().inAppBrowserMode !== 'system'
 
     if (useCustom) {
-      await InAppWebView.addListener('browserFinished', () => {
+      await HostRuntime.addListener('browserFinished', () => {
         isOpen.value = false
       })
     }
@@ -281,11 +186,11 @@ export function useBrowserEvents() {
   })
 
   onUnmounted(async () => {
-    const useCustom = Capacitor.getPlatform() === 'ios'
+    const useCustom = Capacitor.isNativePlatform()
       && useSettingsStore().inAppBrowserMode !== 'system'
 
     if (useCustom)
-      await InAppWebView.removeAllListeners()
+      await HostRuntime.removeAllListeners()
     else
       Browser.removeAllListeners()
   })

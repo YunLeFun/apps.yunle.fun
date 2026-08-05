@@ -1,6 +1,7 @@
-import type { BackgroundSession } from '~/composables/useBrowser'
+import type { HostSession } from '~/host-runtime'
 import { Capacitor } from '@capacitor/core'
-import { InAppWebView, openInAppBrowser } from '~/composables/useBrowser'
+import { openInAppBrowser } from '~/composables/useBrowser'
+import { HostRuntime } from '~/host-runtime'
 
 /** 首次最小化时一次性顶部轻提示，教用户去左上角入口找回（之后不再打扰） */
 function coachMinimizeOnce(name?: string) {
@@ -19,22 +20,22 @@ function coachMinimizeOnce(name?: string) {
 /**
  * useBackgroundSessions - 后台保活会话（压后台的应用网站）
  *
- * 原生侧（iOS 自定义容器）按 appId 保活多个已最小化的 WebView（LRU 上限 3），
+ * 原生侧按平台能力保活 WebView（iOS 支持多个 LRU 会话，Android 首版支持当前会话），
  * 通过 sessionsChanged 事件 + listSessions 暴露给前端。本组合式以模块级单例维护
  * 一份共享列表，供「正在运行」区与悬浮球/托盘复用，监听器随 App 生命周期常驻。
  *
  * - resume：再次走 openInAppBrowser，命中暂停会话即秒恢复（保留滚动/表单/登录态）；
  * - end：调用原生 endSession 彻底释放该会话。
  *
- * 仅在 iOS 自定义容器模式下生效；其他平台/「手机内置」模式下列表恒为空。
+ * 仅在原生自定义容器模式下生效；Web /「手机内置」模式下列表恒为空。
  */
 
-const sessions = ref<BackgroundSession[]>([])
+const sessions = ref<HostSession[]>([])
 let initialized = false
 
-/** 是否运行在 iOS 自定义容器（沉浸/标题栏）模式 */
+/** 是否运行在平台自定义容器（沉浸/标题栏）模式。 */
 function isCustomContainer(): boolean {
-  if (!import.meta.client || Capacitor.getPlatform() !== 'ios')
+  if (!import.meta.client || !Capacitor.isNativePlatform())
     return false
   try {
     return useSettingsStore().inAppBrowserMode !== 'system'
@@ -49,13 +50,13 @@ async function ensureInit() {
     return
   initialized = true
   try {
-    const { sessions: list } = await InAppWebView.listSessions()
+    const { sessions: list } = await HostRuntime.listSessions()
     sessions.value = list ?? []
     // 监听器随 App 生命周期常驻，无需保存移除句柄
-    await InAppWebView.addListener('sessionsChanged', (data) => {
+    await HostRuntime.addListener('sessionsChanged', (data) => {
       sessions.value = data?.sessions ?? []
     })
-    await InAppWebView.addListener('browserMinimized', (data) => {
+    await HostRuntime.addListener('browserMinimized', (data) => {
       coachMinimizeOnce(data?.name)
     })
   }
@@ -69,7 +70,7 @@ export function useBackgroundSessions() {
     ensureInit()
 
   /** 恢复（再次打开命中暂停会话即秒恢复） */
-  async function resume(session: BackgroundSession) {
+  async function resume(session: HostSession) {
     await openInAppBrowser(session.url, {
       title: session.title || session.name,
       displayMode: session.displayMode,
@@ -84,11 +85,11 @@ export function useBackgroundSessions() {
   }
 
   /** 结束并释放该后台会话 */
-  async function end(session: BackgroundSession) {
+  async function end(session: HostSession) {
     // 乐观更新，原生 sessionsChanged 会再兜底刷新
     sessions.value = sessions.value.filter(s => s.key !== session.key)
     try {
-      await InAppWebView.endSession({ id: session.key })
+      await HostRuntime.endSession({ id: session.key })
     }
     catch {
       // 调用失败时回到原生真相
@@ -102,7 +103,7 @@ export function useBackgroundSessions() {
     sessions.value = []
     for (const s of all) {
       try {
-        await InAppWebView.endSession({ id: s.key })
+        await HostRuntime.endSession({ id: s.key })
       }
       catch {}
     }
@@ -113,7 +114,7 @@ export function useBackgroundSessions() {
     if (!isCustomContainer())
       return
     try {
-      const { sessions: list } = await InAppWebView.listSessions()
+      const { sessions: list } = await HostRuntime.listSessions()
       sessions.value = list ?? []
     }
     catch {}

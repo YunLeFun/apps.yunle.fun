@@ -56,13 +56,16 @@ overrides:
   yaml: ^2.9.0
 
 patchedDependencies:
-  cordova-plugin-wechat@3.1.0: 49b57e4265c48f05045cbfc6c6f253f8bf591c8fd097055d6dc45a96ae6e581d
+  cordova-plugin-wechat@3.1.0: 048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d
   lodash.set@4.3.2: afd64858aac507c25e09fdff9b29a1375fd5be3d7ebc855f79bd75fbe25a5063
 
 importers:
 
   .:
     dependencies:
+      '@capacitor/android':
+        specifier: 8.4.2
+        version: 8.4.2(@capacitor/core@8.4.2)
       '@capacitor/app':
         specifier: 8.1.1
         version: 8.1.1(@capacitor/core@8.4.2)
@@ -104,7 +107,7 @@ importers:
         version: 1.41.14
       cordova-plugin-wechat:
         specifier: ^3.1.0
-        version: 3.1.0(patch_hash=49b57e4265c48f05045cbfc6c6f253f8bf591c8fd097055d6dc45a96ae6e581d)
+        version: 3.1.0(patch_hash=048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d)
       h3:
         specifier: ^1.15.11
         version: 1.15.11
@@ -1010,6 +1013,11 @@ packages:
   '@bramus/specificity@2.4.2':
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
+
+  '@capacitor/android@8.4.2':
+    resolution: {integrity: sha512-bzf8XZ9C+ePgOQ+e+T0fnhHGH4aCNY494vvSQIF5w4AY07RwEmkFqZs1678DDSMH0hLSQpxEwXGFNUVcXO6bBA==}
+    peerDependencies:
+      '@capacitor/core': 8.4.2
 
   '@capacitor/app@8.1.1':
     resolution: {integrity: sha512-xM2ZTX5jK60tFtmjsmJv+Cdj1Qsb6NcavkqmdEnCPQBeya9oKhamZJxYOnQNj1ZvcJM7sWfG6BEtSLx42pisbA==}
@@ -10536,6 +10544,10 @@ snapshots:
     dependencies:
       css-tree: 3.2.1
 
+  '@capacitor/android@8.4.2(@capacitor/core@8.4.2)':
+    dependencies:
+      '@capacitor/core': 8.4.2
+
   '@capacitor/app@8.1.1(@capacitor/core@8.4.2)':
     dependencies:
       '@capacitor/core': 8.4.2
@@ -14803,7 +14815,7 @@ snapshots:
 
   copy-text-to-clipboard@3.2.2: {}
 
-  cordova-plugin-wechat@3.1.0(patch_hash=49b57e4265c48f05045cbfc6c6f253f8bf591c8fd097055d6dc45a96ae6e581d):
+  cordova-plugin-wechat@3.1.0(patch_hash=048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d):
     dependencies:
       shelljs: 0.8.5
 

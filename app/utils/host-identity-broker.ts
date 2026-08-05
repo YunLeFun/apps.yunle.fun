@@ -1,7 +1,7 @@
 import type {
   HostAuthorizationEvent,
   HostAuthorizationRequest,
-} from '~/composables/useBrowser'
+} from '~/host-runtime'
 import {
   findFirstPartySsoClient,
 } from '~/utils/first-party-sso-clients'
@@ -19,7 +19,7 @@ export interface ValidatedHostAuthorization {
   redirectUri: string
   scope: typeof IDENTITY_SCOPE
   targetOrigin: string
-  prompt?: 'consent'
+  prompt?: 'consent' | 'select_account'
 }
 
 export function validateHostAuthorization(
@@ -37,7 +37,9 @@ export function validateHostAuthorization(
     || !Array.isArray(request.scope)
     || request.scope.length !== 1
     || request.scope[0] !== client.scope[0]
-    || (request.prompt !== undefined && request.prompt !== 'consent')
+    || (request.prompt !== undefined
+      && request.prompt !== 'consent'
+      && request.prompt !== 'select_account')
   ) {
     throw new HostIdentityBrokerError(
       'HOST_AUTH_INVALID_REQUEST',
@@ -53,7 +55,7 @@ export function validateHostAuthorization(
     redirectUri: client.redirectUri,
     scope: IDENTITY_SCOPE,
     targetOrigin: client.origin,
-    ...(request.prompt === 'consent' ? { prompt: 'consent' as const } : {}),
+    ...(request.prompt ? { prompt: request.prompt } : {}),
   }
 }
 

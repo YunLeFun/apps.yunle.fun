@@ -3,10 +3,10 @@ import Foundation
 import UIKit
 import WebKit
 
-@objc(InAppWebViewPlugin)
-public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
-    public let identifier = "InAppWebViewPlugin"
-    public let jsName = "InAppWebView"
+@objc(HostRuntimePlugin)
+public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "HostRuntimePlugin"
+    public let jsName = "HostRuntime"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "open", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "close", returnType: CAPPluginReturnPromise),
@@ -14,6 +14,7 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "listSessions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "confirmAuthorization", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "authorizeWithOtherAccount", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "resolveAuthorization", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearIdentitySessions", returnType: CAPPluginReturnPromise),
     ]
@@ -60,7 +61,8 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func open(_ call: CAPPluginCall) {
         guard let urlString = call.getString("url"),
-              let url = URL(string: urlString)
+              let url = URL(string: urlString),
+              Self.isSupportedWebURL(url)
         else {
             call.reject("Missing or invalid url")
             return
@@ -261,13 +263,40 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
                 preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel) { [weak self] _ in
                 self?.authorizationPromptActive = false
-                call.resolve(["allowed": false])
+                call.resolve(["allowed": false, "choice": "cancel"])
+            })
+            alert.addAction(UIAlertAction(title: "其他账号", style: .default) { [weak self] _ in
+                self?.authorizationPromptActive = false
+                call.resolve(["allowed": false, "choice": "other"])
             })
             alert.addAction(UIAlertAction(title: "允许", style: .default) { [weak self] _ in
                 self?.authorizationPromptActive = false
-                call.resolve(["allowed": true])
+                call.resolve(["allowed": true, "choice": "current"])
             })
             presenter.present(alert, animated: true)
+        }
+    }
+
+    /// 在 AuthenticationServices 的可信系统界面中完成其他账号登录。
+    @objc func authorizeWithOtherAccount(_ call: CAPPluginCall) {
+        guard let requestId = call.getString("requestId"), !requestId.isEmpty else {
+            call.reject("Missing requestId")
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                call.reject("Browser unavailable")
+                return
+            }
+            let started = self.sessions.contains {
+                $0.beginOtherAccountAuthorization(requestId: requestId)
+            }
+            if started {
+                call.resolve()
+            }
+            else {
+                call.reject("Unknown or invalid authorization request")
+            }
         }
     }
 
@@ -368,6 +397,24 @@ public class InAppWebViewPlugin: CAPPlugin, CAPBridgedPlugin {
             return nil
         }
         return String(value.prefix(maxLength))
+    }
+
+    private static func isSupportedWebURL(_ url: URL) -> Bool {
+        guard let scheme = url.scheme?.lowercased(),
+              let host = url.host?.lowercased(),
+              !host.isEmpty,
+              url.user == nil,
+              url.password == nil
+        else {
+            return false
+        }
+        if scheme == "https" { return true }
+#if DEBUG
+        return scheme == "http"
+            && (host == "localhost" || host == "127.0.0.1" || host == "::1")
+#else
+        return false
+#endif
     }
 
     private func authorizationPromptPresenter() -> UIViewController? {

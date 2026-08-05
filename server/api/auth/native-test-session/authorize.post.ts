@@ -1,0 +1,22 @@
+import type { NativeTestSsoRequest } from '../../../utils/native-test-session-proxy'
+import { authorizeNativeTestSession } from '../../../utils/native-test-session-proxy'
+
+export default defineEventHandler(async (event) => {
+  setResponseHeaders(event, {
+    'Cache-Control': 'no-store, max-age=0',
+    'Pragma': 'no-cache',
+    'Referrer-Policy': 'no-referrer',
+  })
+  const body = await readBody<{
+    hostSession?: string
+    request?: NativeTestSsoRequest
+  }>(event)
+  const runtime = useRuntimeConfig(event)
+  return await authorizeNativeTestSession({
+    hostSession: body?.hostSession ?? '',
+    request: body?.request as NativeTestSsoRequest,
+  }, {
+    brokerBaseUrl: runtime.nativeSessionBrokerBaseUrl,
+    serviceToken: runtime.nativeSessionBrokerToken,
+  })
+})

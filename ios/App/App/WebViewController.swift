@@ -1,4 +1,6 @@
+import AuthenticationServices
 import SafariServices
+import Security
 import UIKit
 import WebKit
 
@@ -126,8 +128,11 @@ class WebViewController: UIViewController {
     private struct PendingAuthorization {
         let reply: (Any?, String?) -> Void
         let timeout: DispatchWorkItem
+        let request: [String: Any]
     }
     private var pendingAuthorizations: [String: PendingAuthorization] = [:]
+    private var systemAuthenticationSession: ASWebAuthenticationSession?
+    private var systemAuthorization: NativeSsoSystemAuthorization?
 
     /// 标题栏内容区高度（safe-area 顶部以下）
     private static let titleBarContentHeight: CGFloat = 44
@@ -302,7 +307,7 @@ class WebViewController: UIViewController {
             return window.webkit.messageHandlers.ylf.postMessage({ method: method, params: params || {} })
           }
           window.ylf = {
-            version: 4,
+            version: 5,
             inYunleApp: true,
             invoke: invoke,
             canIUse: function (method) { return invoke('canIUse', { method: method }) },
@@ -714,12 +719,96 @@ class WebViewController: UIViewController {
             return false
         }
         pending.timeout.cancel()
+        if systemAuthorization?.requestId == requestId {
+            systemAuthenticationSession?.cancel()
+            systemAuthenticationSession = nil
+            systemAuthorization = nil
+        }
         if let error = error, !error.isEmpty {
             pending.reply(nil, error)
         }
         else {
             pending.reply(result ?? [:], nil)
         }
+        return true
+    }
+
+    @discardableResult
+    func beginOtherAccountAuthorization(requestId: String) -> Bool {
+        guard systemAuthenticationSession == nil,
+              let pending = pendingAuthorizations[requestId],
+              let request = NativeSsoProtocol.readRequest(pending.request),
+              let state = NativeSsoProtocol.randomState(),
+              let authorizationURL = NativeSsoProtocol.authorizationURL(
+                  request: request,
+                  state: state)
+        else {
+            return false
+        }
+
+        let session = ASWebAuthenticationSession(
+            url: authorizationURL,
+            callbackURLScheme: "yunlefun"
+        ) { [weak self] callbackURL, error in
+            DispatchQueue.main.async {
+                guard let self = self,
+                      self.systemAuthorization?.requestId == requestId
+                else {
+                    return
+                }
+                self.systemAuthenticationSession = nil
+                self.systemAuthorization = nil
+                if let callbackURL = callbackURL,
+                   let result = NativeSsoProtocol.readCallback(
+                       callbackURL,
+                       expectedState: state,
+                       request: request) {
+                    switch result {
+                    case let .success(code, issuer):
+                        _ = self.resolveAuthorization(
+                            requestId: requestId,
+                            result: ["ok": true, "code": code, "issuer": issuer],
+                            error: nil)
+                    case .denied:
+                        _ = self.resolveAuthorization(
+                            requestId: requestId,
+                            result: nil,
+                            error: "HOST_AUTH_DENIED")
+                    }
+                }
+                else {
+                    let code = (error as? ASWebAuthenticationSessionError)?.code
+                    _ = self.resolveAuthorization(
+                        requestId: requestId,
+                        result: nil,
+                        error: code == .canceledLogin
+                            ? "HOST_AUTH_DENIED"
+                            : "HOST_AUTH_FAILED")
+                }
+            }
+        }
+        session.presentationContextProvider = self
+        guard session.start() else {
+            return false
+        }
+
+        pending.timeout.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            _ = self?.resolveAuthorization(
+                requestId: requestId,
+                result: nil,
+                error: "HOST_AUTH_FAILED")
+        }
+        pendingAuthorizations[requestId] = PendingAuthorization(
+            reply: pending.reply,
+            timeout: timeout,
+            request: pending.request)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 300, execute: timeout)
+        systemAuthorization = NativeSsoSystemAuthorization(
+            requestId: requestId,
+            state: state,
+            request: request)
+        systemAuthenticationSession = session
         return true
     }
 
@@ -733,12 +822,179 @@ class WebViewController: UIViewController {
     }
 
     private func rejectPendingAuthorizations(_ reason: String) {
+        systemAuthenticationSession?.cancel()
+        systemAuthenticationSession = nil
+        systemAuthorization = nil
         let pending = pendingAuthorizations
         pendingAuthorizations.removeAll()
         pending.values.forEach {
             $0.timeout.cancel()
             $0.reply(nil, reason)
         }
+    }
+}
+
+extension WebViewController: ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for _: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        view.window ?? ASPresentationAnchor()
+    }
+}
+
+private struct NativeSsoSystemAuthorization {
+    let requestId: String
+    let state: String
+    let request: NativeSsoRequest
+}
+
+private struct NativeSsoRequest {
+    let clientId: String
+    let codeChallenge: String
+    let nonce: String
+    let redirectUri: String
+    let scope: String
+}
+
+private enum NativeSsoResult {
+    case success(code: String, issuer: String)
+    case denied
+}
+
+private enum NativeSsoProtocol {
+    private static let issuer = "https://www.yunle.fun"
+
+    static func readRequest(_ input: [String: Any]) -> NativeSsoRequest? {
+        guard let clientId = input["clientId"] as? String,
+              let codeChallenge = input["codeChallenge"] as? String,
+              let nonce = input["nonce"] as? String,
+              let redirectUri = input["redirectUri"] as? String,
+              let scopes = input["scope"] as? [String],
+              scopes == ["identity:bootstrap"],
+              input["codeChallengeMethod"] as? String == "S256",
+              isClientId(clientId),
+              isValue(codeChallenge),
+              isValue(nonce),
+              isSecureRedirect(redirectUri)
+        else {
+            return nil
+        }
+        return NativeSsoRequest(
+            clientId: clientId,
+            codeChallenge: codeChallenge,
+            nonce: nonce,
+            redirectUri: redirectUri,
+            scope: scopes[0])
+    }
+
+    static func authorizationURL(request: NativeSsoRequest, state: String) -> URL? {
+        guard isValue(state) else { return nil }
+        let callback = "yunlefun://auth/sso?state=\(state)"
+        var components = URLComponents(string: "\(issuer)/auth/sso")
+        components?.queryItems = [
+            URLQueryItem(name: "client_id", value: request.clientId),
+            URLQueryItem(name: "redirect_uri", value: request.redirectUri),
+            URLQueryItem(name: "scope", value: request.scope),
+            URLQueryItem(name: "nonce", value: request.nonce),
+            URLQueryItem(name: "code_challenge", value: request.codeChallenge),
+            URLQueryItem(name: "code_challenge_method", value: "S256"),
+            URLQueryItem(name: "prompt", value: "select_account"),
+            URLQueryItem(name: "native_callback_uri", value: callback),
+        ]
+        return components?.url
+    }
+
+    static func readCallback(
+        _ callbackURL: URL,
+        expectedState: String,
+        request: NativeSsoRequest
+    ) -> NativeSsoResult? {
+        guard let callback = URLComponents(
+            url: callbackURL,
+            resolvingAgainstBaseURL: false),
+            callback.scheme == "yunlefun",
+            callback.host == "auth",
+            callback.path == "/sso",
+            callback.fragment == nil,
+            let items = callback.queryItems,
+            items.count == 2,
+            Set(items.map(\.name)) == Set(["state", "result"]),
+            items.first(where: { $0.name == "state" })?.value == expectedState,
+            let resultValue = items.first(where: { $0.name == "result" })?.value,
+            let resultURL = URL(string: resultValue),
+            var result = URLComponents(url: resultURL, resolvingAgainstBaseURL: false),
+            let fragment = result.fragment,
+            fragment.hasPrefix("ylf_sso="),
+            !fragment.contains("&")
+        else {
+            return nil
+        }
+        result.fragment = nil
+        guard result.url?.absoluteString == request.redirectUri else { return nil }
+
+        let encoded = String(fragment.dropFirst("ylf_sso=".count))
+        guard let data = decodeBase64Url(encoded),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              payload["nonce"] as? String == request.nonce,
+              payload["iss"] as? String == issuer,
+              payload["ticket"] == nil,
+              payload["session"] == nil,
+              payload["access_token"] == nil,
+              payload["refresh_token"] == nil
+        else {
+            return nil
+        }
+        if payload["ok"] as? Bool == true,
+           let code = payload["code"] as? String,
+           isValue(code) {
+            return .success(code: code, issuer: issuer)
+        }
+        return payload["ok"] as? Bool == false
+            && payload["reason"] as? String == "access_denied"
+            ? .denied
+            : nil
+    }
+
+    static func randomState() -> String? {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else {
+            return nil
+        }
+        return Data(bytes).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    private static func isClientId(_ value: String) -> Bool {
+        value.range(
+            of: "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$",
+            options: .regularExpression) != nil
+    }
+
+    private static func isValue(_ value: String) -> Bool {
+        value.count == 43 && value.unicodeScalars.allSatisfy {
+            CharacterSet.alphanumerics.contains($0) || $0 == "_" || $0 == "-"
+        }
+    }
+
+    private static func isSecureRedirect(_ value: String) -> Bool {
+        guard let components = URLComponents(string: value),
+              components.scheme == "https",
+              !(components.host ?? "").isEmpty,
+              components.user == nil,
+              components.password == nil,
+              components.fragment == nil
+        else {
+            return false
+        }
+        return components.url?.absoluteString == value
+    }
+
+    private static func decodeBase64Url(_ value: String) -> Data? {
+        var base64 = value
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        base64.append(String(repeating: "=", count: (4 - base64.count % 4) % 4))
+        return Data(base64Encoded: base64)
     }
 }
 
@@ -878,7 +1134,8 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             }
             pendingAuthorizations[requestId] = PendingAuthorization(
                 reply: reply,
-                timeout: timeout)
+                timeout: timeout,
+                request: params)
             DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeout)
             onAuthorizationRequest(requestId, sourceOrigin, params)
 

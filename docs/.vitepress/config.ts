@@ -44,6 +44,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'Ionic + Konsta UI 实践', link: '/ui/' },
+          { text: '原生应用授权面板', link: '/ui/native-authorization-sheet' },
         ],
       },
       {

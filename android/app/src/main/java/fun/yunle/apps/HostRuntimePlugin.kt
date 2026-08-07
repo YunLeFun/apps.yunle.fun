@@ -1,8 +1,8 @@
 package `fun`.yunle.apps
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.net.Uri
 import android.webkit.CookieManager
 import com.getcapacitor.JSArray
 import com.getcapacitor.JSObject
@@ -84,8 +84,15 @@ class HostRuntimePlugin : Plugin() {
     @PluginMethod
     fun confirmAuthorization(call: PluginCall) {
         val applicationName = normalizedLabel(call.getString("applicationName"), 80)
+        val applicationOrigin = normalizedHttpsOrigin(call.getString("applicationOrigin"))
         val accountName = normalizedLabel(call.getString("accountName"), 120)
-        if (applicationName == null || accountName == null) {
+        val permissionDescription = normalizedLabel(call.getString("permissionDescription"), 160)
+        if (
+            applicationName == null ||
+            applicationOrigin == null ||
+            accountName == null ||
+            permissionDescription == null
+        ) {
             call.reject("Missing authorization prompt context")
             return
         }
@@ -102,37 +109,26 @@ class HostRuntimePlugin : Plugin() {
             }
 
             authorizationPromptActive = true
-            AlertDialog.Builder(presenter)
-                .setTitle("授权登录 $applicationName")
-                .setMessage(
-                    "当前账号：$accountName\n\n" +
-                        "$applicationName 只会获得一次性身份授权，不会获得密码或云乐坊长期令牌。",
+            val authorizationNotice = normalizedLabel(call.getString("authorizationNotice"), 160)
+            AuthorizationConsentSheet(
+                activity = presenter,
+                content = AuthorizationSheetContent(
+                    applicationName = applicationName,
+                    applicationOrigin = applicationOrigin,
+                    applicationIconUrl = normalizedHttpsUrl(call.getString("applicationIconUrl")),
+                    accountName = accountName,
+                    accountAvatarUrl = normalizedHttpsUrl(call.getString("accountAvatarUrl")),
+                    permissionDescription = permissionDescription,
+                    authorizationNotice = authorizationNotice,
+                ),
+            ) { choice ->
+                authorizationPromptActive = false
+                call.resolve(
+                    JSObject()
+                        .put("allowed", choice == AuthorizationSheetChoice.CURRENT)
+                        .put("choice", choice.wireValue),
                 )
-                .setNegativeButton("取消") { _, _ ->
-                    authorizationPromptActive = false
-                    call.resolve(
-                        JSObject().put("allowed", false).put("choice", "cancel"),
-                    )
-                }
-                .setNeutralButton("其他账号") { _, _ ->
-                    authorizationPromptActive = false
-                    call.resolve(
-                        JSObject().put("allowed", false).put("choice", "other"),
-                    )
-                }
-                .setPositiveButton("允许") { _, _ ->
-                    authorizationPromptActive = false
-                    call.resolve(
-                        JSObject().put("allowed", true).put("choice", "current"),
-                    )
-                }
-                .setOnCancelListener {
-                    authorizationPromptActive = false
-                    call.resolve(
-                        JSObject().put("allowed", false).put("choice", "cancel"),
-                    )
-                }
-                .show()
+            }.show()
         }
     }
 
@@ -226,6 +222,7 @@ class HostRuntimePlugin : Plugin() {
                 .put("sourceOrigin", sourceOrigin)
                 .put("appId", appId)
                 .put("request", request),
+            true,
         )
     }
 
@@ -248,7 +245,34 @@ class HostRuntimePlugin : Plugin() {
     }
 
     private fun normalizedLabel(value: String?, maxLength: Int): String? =
-        value?.trim()?.takeIf { it.isNotEmpty() }?.take(maxLength)
+        value
+            ?.trim()
+            ?.replace(Regex("\\s+"), " ")
+            ?.takeIf { it.isNotEmpty() }
+            ?.take(maxLength)
+
+    private fun normalizedHttpsOrigin(value: String?): String? {
+        val uri = value?.let(Uri::parse) ?: return null
+        if (
+            uri.scheme?.lowercase() != "https" ||
+            uri.host.isNullOrBlank() ||
+            uri.userInfo != null ||
+            (uri.path.orEmpty().isNotEmpty() && uri.path != "/") ||
+            uri.query != null ||
+            uri.fragment != null
+        ) return null
+        val port = if (uri.port == -1) "" else ":${uri.port}"
+        return "https://${uri.host!!.lowercase()}$port"
+    }
+
+    private fun normalizedHttpsUrl(value: String?): String? {
+        val uri = value?.let(Uri::parse) ?: return null
+        return if (
+            uri.scheme?.lowercase() == "https" &&
+            !uri.host.isNullOrBlank() &&
+            uri.userInfo == null
+        ) uri.toString() else null
+    }
 
     override fun handleOnDestroy() {
         if (current.get() === this) current.clear()

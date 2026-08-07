@@ -1,5 +1,6 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppAccessMode, AppRecord, AppReleaseStage } from '~/types/app'
+import { withCanonicalAppDomain } from '~/utils/canonical-app-domain'
 
 export type CatalogAppInfo = YlfAppInfo & {
   accessMode?: AppAccessMode
@@ -18,7 +19,7 @@ export type CatalogAppInfo = YlfAppInfo & {
  * - 业务主键用 slug；id 取文档 _id
  */
 export function recordToAppInfo(record: AppRecord): CatalogAppInfo {
-  return {
+  return withCanonicalAppDomain({
     id: record._id,
     slug: record.slug,
     name: record.name,
@@ -42,5 +43,5 @@ export function recordToAppInfo(record: AppRecord): CatalogAppInfo {
     accessMode: record.accessMode || 'public',
     releaseStage: record.releaseStage || 'stable',
     isOfficial: record.isOfficial === true,
-  }
+  })
 }

@@ -3,7 +3,6 @@ package `fun`.yunle.apps
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.util.Base64
 import org.json.JSONObject
 
@@ -67,7 +66,7 @@ internal object HostSsoProtocol {
             ?: return null
         val payload = runCatching {
             JSONObject(
-                String(Base64.getUrlDecoder().decode(padded(encoded)), StandardCharsets.UTF_8),
+                String(Base64.getUrlDecoder().decode(padded(encoded)), Charsets.UTF_8),
             )
         }.getOrNull() ?: return null
         if (payload.optString("nonce") != request.nonce || payload.optString("iss") != ISSUER ||
@@ -107,10 +106,10 @@ internal object HostSsoProtocol {
     }
 
     private fun encode(value: String): String =
-        URLEncoder.encode(value, StandardCharsets.UTF_8)
+        URLEncoder.encode(value, Charsets.UTF_8.name())
 
     private fun decode(value: String): String =
-        URLDecoder.decode(value, StandardCharsets.UTF_8)
+        URLDecoder.decode(value, Charsets.UTF_8.name())
 
     private fun padded(value: String): String =
         value + "=".repeat((4 - value.length % 4) % 4)

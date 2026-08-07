@@ -183,6 +183,11 @@ class WebViewController: UIViewController {
         setupJSBridge(config.userContentController)
 
         webView = WKWebView(frame: .zero, configuration: config)
+#if DEBUG
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        }
+#endif
         // WKWebView 默认 isOpaque，在首帧内容绘制前会先铺一层不透明白底，
         // 暗色模式 / 深色页面下表现为打开瞬间白闪；改为透明并以系统背景色兜底
         webView.isOpaque = false

@@ -2,9 +2,11 @@ export interface FirstPartySsoClient {
   appId: string
   clientId: string
   displayName: string
+  iconUrl?: string
   origin: string
   redirectUri: string
   scope: readonly ['identity:bootstrap']
+  authorizationNotice?: string
 }
 
 /**
@@ -14,6 +16,16 @@ export interface FirstPartySsoClient {
  * domain. Every app/client/redirect/scope tuple must be explicitly listed.
  */
 export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
+  Object.freeze({
+    appId: 'ai-sfc',
+    clientId: 'ai-sfc-web',
+    displayName: 'AI 春联',
+    iconUrl: 'https://ai-sfc.yunle.fun/brand/ai-sfc-logo-256.png',
+    origin: 'https://ai-sfc.yunle.fun',
+    redirectUri: 'https://ai-sfc.yunle.fun/',
+    scope: ['identity:bootstrap'] as const,
+    authorizationNotice: '登录本身不会消耗云币；生成春联时会另行提示消耗。',
+  }),
   Object.freeze({
     appId: 'admin',
     clientId: 'admin-web',

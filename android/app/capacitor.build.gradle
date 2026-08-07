@@ -18,7 +18,7 @@ dependencies {
     implementation project(':capacitor-status-bar')
 
 }
-apply from: "../../node_modules/.pnpm/cordova-plugin-wechat@3.1.0_patch_hash=048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d/node_modules/cordova-plugin-wechat/android-build.gradle"
+apply from: "../../node_modules/.pnpm/cordova-plugin-wechat@3.1.0_patch_hash=7239b725b64862d1edcf360c18724e217b622254dffe668d40cff1afc46ed388/node_modules/cordova-plugin-wechat/android-build.gradle"
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()

@@ -145,8 +145,9 @@ redirect URI、scope、nonce 与 PKCE 必须全部匹配。
 
 `HostRuntime` 统一支持两种交互，页面不按 iOS / Android 分支：
 
-- `prompt: 'consent'`：原生弹窗显示当前云乐坊账号、目标应用与最小权限，用户可授权当前账号、
-  取消，或选择「其他账号」；当前账号路径直接由宿主签发一次性 code；
+- `prompt: 'consent'`：iOS Sheet 与 Android Material Bottom Sheet 使用统一信息结构，显示注册表
+  应用图标、认证域名、当前云乐坊账号、scope 对应权限与可信注册表配置的业务提示；用户可明确选择「以当前账号登录」、取消或「其他账号」。页面不能自定义
+  权限或消耗文案；当前账号路径直接由宿主签发一次性 code；
 - `prompt: 'select_account'`：跳过当前账号弹窗，直接进入系统级认证会话。iOS 使用
   `ASWebAuthenticationSession`，Android 使用 Custom Tabs；登录凭据和 Provider Cookie
   始终留在系统认证组件，不进入自定义 WebView。

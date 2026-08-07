@@ -32,17 +32,21 @@ export default defineNuxtPlugin(() => {
           })
           return
         }
-        const { app, auth } = useCloudbase()
-        const { data, error } = await auth.getSession()
-        const session = data?.session
-        const hasCloudBaseSession = !error && !!session?.access_token && !session.user?.is_anonymous
         const userStore = useUserStore()
         const nativeTestSession = userStore.nativeTestSession
         const hasNativeTestSession = !!nativeTestSession
           && nativeTestSession.expiresAt > Date.now()
+        if (nativeTestSession && !hasNativeTestSession)
+          userStore.clearNativeTestSession()
+
+        const { app, auth } = useCloudbase()
+        let hasCloudBaseSession = false
+        if (!hasNativeTestSession) {
+          const { data, error } = await auth.getSession()
+          const session = data?.session
+          hasCloudBaseSession = !error && !!session?.access_token && !session.user?.is_anonymous
+        }
         if (!hasCloudBaseSession && !hasNativeTestSession) {
-          if (nativeTestSession)
-            userStore.clearNativeTestSession()
           throw new HostIdentityBrokerError(
             'HOST_AUTH_REQUIRED',
             '请先登录云乐坊',
@@ -55,8 +59,19 @@ export default defineNuxtPlugin(() => {
             ? userInfo.nickname || userInfo.login || '当前云乐坊账号'
             : nativeTestSession!.account.publicAlias
           const decision = await HostRuntime.confirmAuthorization({
+            ...(request.applicationIconUrl
+              ? { applicationIconUrl: request.applicationIconUrl }
+              : {}),
             applicationName: request.applicationName,
+            applicationOrigin: request.applicationOrigin,
             accountName,
+            ...(hasCloudBaseSession && userInfo.avatar
+              ? { accountAvatarUrl: userInfo.avatar }
+              : {}),
+            permissionDescription: request.permissionDescription,
+            ...(request.authorizationNotice
+              ? { authorizationNotice: request.authorizationNotice }
+              : {}),
           })
           if (decision.choice === 'other') {
             await HostRuntime.authorizeWithOtherAccount({

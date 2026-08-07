@@ -70,8 +70,13 @@ export interface HostRuntimePlugin {
   listSessions: () => Promise<{ sessions: HostSession[] }>
   endSession: (options: { id: string }) => Promise<void>
   confirmAuthorization: (options: {
+    applicationIconUrl?: string
     applicationName: string
+    applicationOrigin: string
     accountName: string
+    accountAvatarUrl?: string
+    permissionDescription: string
+    authorizationNotice?: string
   }) => Promise<{
     allowed: boolean
     choice?: 'current' | 'other' | 'cancel'

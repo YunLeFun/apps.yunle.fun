@@ -7,15 +7,20 @@ import {
 } from '~/utils/first-party-sso-clients'
 
 const IDENTITY_SCOPE = 'identity:bootstrap'
+const IDENTITY_PERMISSION_DESCRIPTION = '账号标识、昵称和头像'
 const SSO_VALUE_RE = /^[\w-]{32,128}$/
 const SSO_CODE_RE = /^[\w-]{32,256}$/
 
 export interface ValidatedHostAuthorization {
   appId: string
+  applicationIconUrl?: string
   applicationName: string
+  applicationOrigin: string
+  authorizationNotice?: string
   clientId: string
   codeChallenge: string
   nonce: string
+  permissionDescription: typeof IDENTITY_PERMISSION_DESCRIPTION
   redirectUri: string
   scope: typeof IDENTITY_SCOPE
   targetOrigin: string
@@ -48,10 +53,16 @@ export function validateHostAuthorization(
   }
   return {
     appId: client.appId,
+    ...(client.iconUrl ? { applicationIconUrl: client.iconUrl } : {}),
     applicationName: client.displayName,
+    applicationOrigin: client.origin,
+    ...(client.authorizationNotice
+      ? { authorizationNotice: client.authorizationNotice }
+      : {}),
     clientId: client.clientId,
     codeChallenge: request.codeChallenge,
     nonce: request.nonce,
+    permissionDescription: IDENTITY_PERMISSION_DESCRIPTION,
     redirectUri: client.redirectUri,
     scope: IDENTITY_SCOPE,
     targetOrigin: client.origin,

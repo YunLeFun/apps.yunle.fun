@@ -14,6 +14,7 @@ const h = vi.hoisted(() => ({
   },
   resolveAuthorization: vi.fn(),
   fetch: vi.fn(),
+  userInfo: { nickname: '云游君', avatar: '' },
 }))
 
 vi.mock('@capacitor/core', () => ({
@@ -46,7 +47,7 @@ vi.stubGlobal('useCloudbase', () => ({
   },
 }))
 vi.stubGlobal('useUserStore', () => ({
-  userInfo: { nickname: '云游君' },
+  userInfo: h.userInfo,
   nativeTestSession: h.nativeTestSession,
   clearNativeTestSession: vi.fn(),
 }))
@@ -82,6 +83,7 @@ describe('apps host identity broker consent', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     h.nativeTestSession = undefined
+    h.userInfo = { nickname: '云游君', avatar: '' }
     h.confirmAuthorization.mockResolvedValue({ allowed: false })
     if (!h.authorizationHandler)
       await import('../../app/plugins/identity-broker.client')
@@ -93,7 +95,9 @@ describe('apps host identity broker consent', () => {
 
     expect(h.confirmAuthorization).toHaveBeenCalledWith({
       applicationName: '云笺',
+      applicationOrigin: 'https://cms.yunle.fun',
       accountName: '云游君',
+      permissionDescription: '账号标识、昵称和头像',
     })
     expect(h.callFunction).not.toHaveBeenCalled()
     expect(h.resolveAuthorization).toHaveBeenCalledWith({
@@ -134,7 +138,6 @@ describe('apps host identity broker consent', () => {
   })
 
   it('uses the narrow native test host session when no CloudBase account is logged in', async () => {
-    h.getSession.mockResolvedValueOnce({ data: { session: null }, error: null })
     h.nativeTestSession = {
       hostSession: 'host.jwt.value',
       expiresAt: Date.now() + 60_000,
@@ -149,9 +152,12 @@ describe('apps host identity broker consent', () => {
 
     await h.authorizationHandler?.(consentRequest)
 
+    expect(h.getSession).not.toHaveBeenCalled()
     expect(h.confirmAuthorization).toHaveBeenCalledWith({
       applicationName: '云笺',
+      applicationOrigin: 'https://cms.yunle.fun',
       accountName: 'native-sso-smoke@yunlefun',
+      permissionDescription: '账号标识、昵称和头像',
     })
     expect(h.fetch).toHaveBeenCalledWith('/api/auth/native-test-session/authorize', expect.objectContaining({
       method: 'POST',
@@ -180,5 +186,34 @@ describe('apps host identity broker consent', () => {
     })
     expect(h.callFunction).not.toHaveBeenCalled()
     expect(h.resolveAuthorization).not.toHaveBeenCalled()
+  })
+
+  it('passes the AI SFC cost notice from the trusted registry to native UI', async () => {
+    h.confirmAuthorization.mockResolvedValue({ allowed: false })
+    h.userInfo = {
+      nickname: '云游君',
+      avatar: 'https://avatars.example.com/yunyoujun.png',
+    }
+
+    await h.authorizationHandler?.({
+      ...consentRequest,
+      appId: 'ai-sfc',
+      sourceOrigin: 'https://ai-sfc.yunle.fun',
+      request: {
+        ...consentRequest.request,
+        clientId: 'ai-sfc-web',
+        redirectUri: 'https://ai-sfc.yunle.fun/',
+      },
+    })
+
+    expect(h.confirmAuthorization).toHaveBeenCalledWith({
+      applicationIconUrl: 'https://ai-sfc.yunle.fun/brand/ai-sfc-logo-256.png',
+      applicationName: 'AI 春联',
+      applicationOrigin: 'https://ai-sfc.yunle.fun',
+      accountName: '云游君',
+      accountAvatarUrl: 'https://avatars.example.com/yunyoujun.png',
+      permissionDescription: '账号标识、昵称和头像',
+      authorizationNotice: '登录本身不会消耗云币；生成春联时会另行提示消耗。',
+    })
   })
 })

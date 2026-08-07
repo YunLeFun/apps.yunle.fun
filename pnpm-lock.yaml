@@ -56,7 +56,7 @@ overrides:
   yaml: ^2.9.0
 
 patchedDependencies:
-  cordova-plugin-wechat@3.1.0: 048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d
+  cordova-plugin-wechat@3.1.0: 7239b725b64862d1edcf360c18724e217b622254dffe668d40cff1afc46ed388
   lodash.set@4.3.2: afd64858aac507c25e09fdff9b29a1375fd5be3d7ebc855f79bd75fbe25a5063
 
 importers:
@@ -107,7 +107,7 @@ importers:
         version: 1.41.14
       cordova-plugin-wechat:
         specifier: ^3.1.0
-        version: 3.1.0(patch_hash=048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d)
+        version: 3.1.0(patch_hash=7239b725b64862d1edcf360c18724e217b622254dffe668d40cff1afc46ed388)
       h3:
         specifier: ^1.15.11
         version: 1.15.11
@@ -14815,7 +14815,7 @@ snapshots:
 
   copy-text-to-clipboard@3.2.2: {}
 
-  cordova-plugin-wechat@3.1.0(patch_hash=048f7c60c956087c9d9a6b41cb46fcaa45797248fe557625c7d48548d9dff52d):
+  cordova-plugin-wechat@3.1.0(patch_hash=7239b725b64862d1edcf360c18724e217b622254dffe668d40cff1afc46ed388):
     dependencies:
       shelljs: 0.8.5
 

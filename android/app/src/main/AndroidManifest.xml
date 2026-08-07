@@ -6,6 +6,10 @@
         <package android:name="com.tencent.mm" />
     </queries>
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -52,15 +56,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Capacitor cannot run this Cordova plugin's install hook, so replace
-             its library-namespace callbacks with the package required by WeChat. -->
-        <activity
-            android:name="capacitor.cordova.android.plugins.wxapi.WXEntryActivity"
-            tools:node="remove" />
-        <activity
-            android:name="capacitor.cordova.android.plugins.wxapi.WXPayEntryActivity"
-            tools:node="remove" />
-
+        <!-- Capacitor cannot run this Cordova plugin's install hook, so the patched
+             plugin omits its library callbacks and these use the package WeChat requires. -->
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
@@ -96,9 +93,4 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
 </manifest>

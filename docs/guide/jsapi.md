@@ -135,8 +135,10 @@ interface YlfJSAPI {
 绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。
 宿主不会向页面传递 CloudBase access token 或 refresh token。当前注册项为：
 
-当请求携带 `prompt: 'consent'` 时，宿主使用原生可信 UI 展示当前云乐坊账号、目标应用与
-最小权限说明；用户可以授权当前账号、取消或选择「其他账号」。`prompt: 'select_account'`
+当请求携带 `prompt: 'consent'` 时，宿主使用跨平台原生授权 Sheet 展示注册表应用图标、认证
+域名、当前云乐坊账号、按 scope 映射的权限说明，以及注册表中配置的业务提示（例如是否消耗云币）；用户可以明确
+选择「以当前账号登录」、取消或「其他账号」。这些文案由宿主可信注册表生成，页面不能伪造。
+`prompt: 'select_account'`
 则直接打开系统认证组件（iOS `ASWebAuthenticationSession` / Android Custom Tabs）。
 登录凭据与 Provider Cookie 不进入自定义 WebView；系统认证结果只通过 state 绑定的原生回调
 返回一次性 code，原生端仍会校验 issuer、redirect URI、nonce 与 code，Consumer 仍须在自己的
@@ -144,6 +146,7 @@ Origin/BFF 用 PKCE 兑换。用户取消后返回 `HOST_AUTH_DENIED`，页面�
 不可用并静默降级到另一个登录通道。
 
 - `https://admin.yunle.fun` / `admin-web` / `identity:bootstrap`
+- `https://ai-sfc.yunle.fun` / `ai-sfc-web` / `identity:bootstrap`
 - `https://saier.yunle.fun` / `saier-web` / `identity:bootstrap`
 - `https://play.yunle.fun` / `play-web` / `identity:bootstrap`
 - `https://wenta.yunle.fun` / `wenta-web` / `identity:bootstrap`

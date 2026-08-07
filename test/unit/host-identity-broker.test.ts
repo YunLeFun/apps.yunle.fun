@@ -25,9 +25,11 @@ describe('host identity broker', () => {
     expect(validateHostAuthorization(request)).toEqual({
       appId: 'play',
       applicationName: 'Play',
+      applicationOrigin: 'https://play.yunle.fun',
       clientId: 'play-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
+      permissionDescription: '账号标识、昵称和头像',
       redirectUri: 'https://play.yunle.fun/',
       scope: 'identity:bootstrap',
       targetOrigin: 'https://play.yunle.fun',
@@ -47,9 +49,11 @@ describe('host identity broker', () => {
     })).toEqual({
       appId: 'yunjian',
       applicationName: '云笺',
+      applicationOrigin: 'https://cms.yunle.fun',
       clientId: 'cms-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
+      permissionDescription: '账号标识、昵称和头像',
       redirectUri: 'https://cms.yunle.fun/',
       scope: 'identity:bootstrap',
       targetOrigin: 'https://cms.yunle.fun',
@@ -70,6 +74,46 @@ describe('host identity broker', () => {
     })).toMatchObject({
       appId: 'yunjian',
       prompt: 'consent',
+    })
+  })
+
+  it('ignores page-supplied display copy and uses only registry metadata', () => {
+    const result = validateHostAuthorization({
+      ...request,
+      request: {
+        ...request.request,
+        applicationName: '伪造应用',
+        applicationOrigin: 'https://evil.example',
+        permissionDescription: '读取全部数据',
+      },
+    } as HostAuthorizationEvent)
+
+    expect(result).toMatchObject({
+      applicationName: 'Play',
+      applicationOrigin: 'https://play.yunle.fun',
+      permissionDescription: '账号标识、昵称和头像',
+    })
+  })
+
+  it('accepts AI SFC and derives its disclosure copy from the trusted registry', () => {
+    expect(validateHostAuthorization({
+      ...request,
+      appId: 'ai-sfc',
+      sourceOrigin: 'https://ai-sfc.yunle.fun',
+      request: {
+        ...request.request,
+        clientId: 'ai-sfc-web',
+        redirectUri: 'https://ai-sfc.yunle.fun/',
+        prompt: 'consent',
+      },
+    })).toMatchObject({
+      appId: 'ai-sfc',
+      applicationIconUrl: 'https://ai-sfc.yunle.fun/brand/ai-sfc-logo-256.png',
+      applicationName: 'AI 春联',
+      applicationOrigin: 'https://ai-sfc.yunle.fun',
+      authorizationNotice: '登录本身不会消耗云币；生成春联时会另行提示消耗。',
+      permissionDescription: '账号标识、昵称和头像',
+      targetOrigin: 'https://ai-sfc.yunle.fun',
     })
   })
 
@@ -103,9 +147,11 @@ describe('host identity broker', () => {
     })).toEqual({
       appId: 'admin',
       applicationName: '云乐坊管理后台',
+      applicationOrigin: 'https://admin.yunle.fun',
       clientId: 'admin-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
+      permissionDescription: '账号标识、昵称和头像',
       redirectUri: 'https://admin.yunle.fun/',
       scope: 'identity:bootstrap',
       targetOrigin: 'https://admin.yunle.fun',
@@ -125,9 +171,11 @@ describe('host identity broker', () => {
     })).toEqual({
       appId: 'saier',
       applicationName: '赛尔',
+      applicationOrigin: 'https://saier.yunle.fun',
       clientId: 'saier-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
+      permissionDescription: '账号标识、昵称和头像',
       redirectUri: 'https://saier.yunle.fun/',
       scope: 'identity:bootstrap',
       targetOrigin: 'https://saier.yunle.fun',
@@ -147,9 +195,11 @@ describe('host identity broker', () => {
     })).toEqual({
       appId: 'wenta',
       applicationName: '闻塔',
+      applicationOrigin: 'https://wenta.yunle.fun',
       clientId: 'wenta-web',
       codeChallenge: request.request.codeChallenge,
       nonce: request.request.nonce,
+      permissionDescription: '账号标识、昵称和头像',
       redirectUri: 'https://wenta.yunle.fun/',
       scope: 'identity:bootstrap',
       targetOrigin: 'https://wenta.yunle.fun',

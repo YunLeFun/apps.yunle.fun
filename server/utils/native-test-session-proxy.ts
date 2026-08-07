@@ -1,3 +1,5 @@
+import { FIRST_PARTY_SSO_CLIENTS } from '../../app/utils/first-party-sso-clients'
+
 export interface NativeTestSessionProxyOptions {
   brokerBaseUrl: string
   serviceToken: string
@@ -6,14 +8,16 @@ export interface NativeTestSessionProxyOptions {
 
 export interface NativeTestSsoRequest {
   mode: 'redirect'
-  clientId: 'cms-web'
-  targetOrigin: 'https://cms.yunle.fun'
-  returnUrl: 'https://cms.yunle.fun/'
+  clientId: string
+  targetOrigin: string
+  returnUrl: string
   scope: 'identity:bootstrap'
   nonce: string
   codeChallenge: string
   codeChallengeMethod: 'S256'
 }
+
+const NATIVE_TEST_SSO_APP_IDS = new Set(['ai-sfc', 'yunjian'])
 
 export class NativeTestSessionInputError extends Error {
   override name = 'NativeTestSessionInputError'
@@ -97,11 +101,15 @@ async function callBroker(
 }
 
 function assertNativeSsoRequest(request: NativeTestSsoRequest): void {
-  if (!request
+  const registeredClient = request && FIRST_PARTY_SSO_CLIENTS.find(client => (
+    NATIVE_TEST_SSO_APP_IDS.has(client.appId)
+    && client.clientId === request.clientId
+    && client.origin === request.targetOrigin
+    && client.redirectUri === request.returnUrl
+    && client.scope[0] === request.scope
+  ))
+  if (!registeredClient
     || request.mode !== 'redirect'
-    || request.clientId !== 'cms-web'
-    || request.targetOrigin !== 'https://cms.yunle.fun'
-    || request.returnUrl !== 'https://cms.yunle.fun/'
     || request.scope !== 'identity:bootstrap'
     || request.codeChallengeMethod !== 'S256'
     || !/^[\w-]{32,128}$/.test(request.nonce)

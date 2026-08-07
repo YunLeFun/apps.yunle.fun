@@ -41,7 +41,7 @@ describe('native test session server proxy', () => {
     )
   })
 
-  it('forwards a host capability only for the exact YunJian PKCE request', async () => {
+  it('forwards a host capability only for an exact registered native SSO request', async () => {
     const request = vi.fn(async () => ({ code: 'c'.repeat(43), expiresAt: Date.now() + 60_000 }))
     await authorizeNativeTestSession({
       hostSession: 'host.jwt.value',
@@ -58,12 +58,41 @@ describe('native test session server proxy', () => {
     }, { ...options, request })
 
     expect(request).toHaveBeenCalledOnce()
+    await authorizeNativeTestSession({
+      hostSession: 'host.jwt.value',
+      request: {
+        mode: 'redirect',
+        clientId: 'ai-sfc-web',
+        targetOrigin: 'https://ai-sfc.yunle.fun',
+        returnUrl: 'https://ai-sfc.yunle.fun/',
+        scope: 'identity:bootstrap',
+        nonce: 'n'.repeat(32),
+        codeChallenge: 'c'.repeat(43),
+        codeChallengeMethod: 'S256',
+      },
+    }, { ...options, request })
+
+    expect(request).toHaveBeenCalledTimes(2)
     await expect(authorizeNativeTestSession({
       hostSession: 'host.jwt.value',
       request: {
         mode: 'redirect',
         clientId: 'cms-web',
         targetOrigin: 'https://evil.example',
+        returnUrl: 'https://cms.yunle.fun/',
+        scope: 'identity:bootstrap',
+        nonce: 'n'.repeat(32),
+        codeChallenge: 'c'.repeat(43),
+        codeChallengeMethod: 'S256',
+      },
+    }, { ...options, request })).rejects.toThrow(/invalid/i)
+
+    await expect(authorizeNativeTestSession({
+      hostSession: 'host.jwt.value',
+      request: {
+        mode: 'redirect',
+        clientId: 'ai-sfc-web',
+        targetOrigin: 'https://ai-sfc.yunle.fun',
         returnUrl: 'https://cms.yunle.fun/',
         scope: 'identity:bootstrap',
         nonce: 'n'.repeat(32),

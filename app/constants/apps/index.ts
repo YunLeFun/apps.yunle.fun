@@ -1,4 +1,5 @@
 import type { YlfAppInfo } from '@yunlefun/types'
+import { withCanonicalAppDomain } from '~/utils/canonical-app-domain'
 import { yunHomeApp } from './builtin'
 import { GENERATED_APPS } from './generated'
 
@@ -64,7 +65,10 @@ function mergeFallbackApps(seed: YlfAppInfo[], fallback: YlfAppInfo[]) {
   return [...map.values()]
 }
 
-export const ALL_APPS: YlfAppInfo[] = mergeFallbackApps(GENERATED_APPS, FIRST_PARTY_FALLBACK_APPS)
+export const ALL_APPS: YlfAppInfo[] = mergeFallbackApps(
+  GENERATED_APPS.map(withCanonicalAppDomain),
+  FIRST_PARTY_FALLBACK_APPS.map(withCanonicalAppDomain),
+)
 
 /**
  * 根据分类获取应用列表

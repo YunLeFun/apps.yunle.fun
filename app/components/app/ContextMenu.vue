@@ -9,9 +9,11 @@
  */
 
 import type { YlfAppInfo } from '@yunlefun/types'
+import type { AppIconAssets } from '~/types/app'
 
 interface IconPreview {
   icon?: string
+  iconAssets?: AppIconAssets
   emoji?: string
   color?: string
   label?: string
@@ -92,6 +94,7 @@ const floatingPreview = computed<IconPreview | null>(() => {
   if (props.app) {
     return {
       icon: props.app.logo,
+      iconAssets: props.app.iconAssets,
       emoji: props.app.emoji,
       color: props.app.themeColor,
       label: props.app.name,
@@ -188,6 +191,7 @@ function onOverlayClick() {
         >
           <AppIconBox
             :icon="floatingPreview.icon"
+            :icon-assets="floatingPreview.iconAssets"
             :emoji="floatingPreview.emoji"
             :color="floatingPreview.color"
             :label="floatingPreview.label"

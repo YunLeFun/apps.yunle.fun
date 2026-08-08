@@ -1,3 +1,5 @@
+import type { AppIconAssets } from './app'
+
 export type AgentMessageRole = 'user' | 'assistant' | 'system' | 'tool'
 
 export interface AgentProtocolMessage {
@@ -39,6 +41,7 @@ export interface AgentAppCard {
   name: string
   description?: string
   logo?: string
+  iconAssets?: AppIconAssets
   emoji?: string
   themeColor?: string
   category?: string

@@ -67,6 +67,7 @@ const todayDateStr = computed(() => {
             <div class="featured-icon-wrap">
               <AppIconBox
                 :icon="featuredApp.logo"
+                :icon-assets="featuredApp.iconAssets"
                 :emoji="featuredApp.emoji"
                 :color="featuredApp.themeColor"
                 size="md"

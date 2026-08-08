@@ -79,6 +79,7 @@ export function toPublicAppRecord(record: AppRecord | null | undefined): AppReco
     trustedHosts: record.trustedHosts,
     backupUrl: record.backupUrl,
     logo: record.logo,
+    iconAssets: record.iconAssets,
     emoji: record.emoji,
     themeColor: record.themeColor,
     category: record.category,

@@ -236,6 +236,7 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
               slot="start"
               class="workshop-app-icon"
               :icon="app.logo"
+              :icon-assets="app.iconAssets"
               :emoji="app.emoji || DEFAULT_EMOJI"
               :color="app.themeColor || '#007AFF'"
               size="list"

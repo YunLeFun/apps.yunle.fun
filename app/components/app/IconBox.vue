@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { AppIconStyle } from '~/stores/settings'
+import type { AppIconAssets } from '~/types/app'
+import { resolveAppIconPresentation } from '~/utils/appIconAssets'
+import { getPublicCloudbaseStorageUrl } from '~/utils/cloudbase-storage-url'
 
 /**
  * AppIconBox - 应用图标盒子（纯展示）
@@ -12,6 +15,8 @@ import type { AppIconStyle } from '~/stores/settings'
 interface Props {
   /** 图标图片 URL（路径或 http 开头）；非图片值会被忽略，回退到 emoji */
   icon?: string
+  /** 结构化完整图标 / 主体图标资产。 */
+  iconAssets?: AppIconAssets
   /** Emoji 字符 */
   emoji?: string
   /** 背景色 */
@@ -22,6 +27,8 @@ interface Props {
   placeholder?: boolean
   /** 可选覆盖图标风格；默认读取外观设置 */
   styleMode?: AppIconStyle
+  /** 预览时可强制指定外观；默认跟随全局主题。 */
+  appearance?: 'auto' | 'light' | 'dark'
   /**
    * 尺寸预设：
    * - grid：跟随全局响应式 CSS 变量（主屏幕网格，默认）
@@ -39,19 +46,42 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: false,
   styleMode: undefined,
+  appearance: 'auto',
   size: 'grid',
 })
 
 const settingsStore = useSettingsStore()
+const config = useRuntimeConfig()
 
-/** 仅当 icon 是图片路径（/ 或 http 开头）时才作为图片渲染，否则回退 emoji */
 const imageLoadFailed = ref(false)
-const isImageUrl = computed(() => props.icon.startsWith('/') || props.icon.startsWith('http'))
-const isImageIcon = computed(() => isImageUrl.value && !imageLoadFailed.value)
-const fallbackIcon = computed(() => isImageUrl.value ? props.emoji : props.icon || props.emoji)
 const currentStyleMode = computed(() => props.styleMode ?? settingsStore.appIconStyle)
+const isDark = computed(() => props.appearance === 'dark'
+  || (props.appearance === 'auto' && settingsStore.currentTheme === 'dark'))
+const presentation = computed(() => resolveAppIconPresentation({
+  assets: props.iconAssets,
+  legacyIcon: props.icon,
+  dark: isDark.value,
+  preferOriginal: currentStyleMode.value === 'original',
+}))
+const resolvedImageSource = computed(() => {
+  if (!presentation.value.source)
+    return ''
+  return getPublicCloudbaseStorageUrl(
+    presentation.value.source,
+    config.public.tcbEnvId as string,
+    config.public.cloudbaseStoragePublicOrigin as string,
+  ) || ''
+})
+/** 仅图片路径作为图片渲染；其他旧值继续回退 emoji。 */
+const isImageUrl = computed(() => resolvedImageSource.value.startsWith('/') || resolvedImageSource.value.startsWith('http'))
+const isImageIcon = computed(() => isImageUrl.value && !imageLoadFailed.value)
+const fallbackIcon = computed(() => {
+  if (presentation.value.role !== 'legacy' || presentation.value.source.startsWith('cloud://'))
+    return props.emoji
+  return isImageUrl.value ? props.emoji : props.icon || props.emoji
+})
 
-watch(() => props.icon, () => {
+watch(() => [resolvedImageSource.value, isDark.value], () => {
   imageLoadFailed.value = false
 })
 
@@ -59,6 +89,8 @@ const iconBoxClasses = computed(() => ({
   'has-color': Boolean(props.color) && !props.placeholder,
   'has-image': isImageIcon.value,
   'is-placeholder': props.placeholder,
+  'is-dark': isDark.value,
+  [`asset-${presentation.value.role}`]: true,
   [`style-${currentStyleMode.value}`]: true,
 }))
 
@@ -77,7 +109,7 @@ const iconBoxStyle = computed(() => props.color
       <slot name="icon">
         <img
           v-if="isImageIcon"
-          :src="icon"
+          :src="resolvedImageSource"
           alt="应用图标"
           class="app-icon-img"
           @error="imageLoadFailed = true"
@@ -144,6 +176,16 @@ const iconBoxStyle = computed(() => props.color
   -webkit-backface-visibility: hidden;
 }
 
+/* 原始图标风格：完整图标不叠加装饰；主体图标仍使用应用主题色承托。 */
+.app-icon-box.style-original {
+  background: var(--ylf-fill-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.app-icon-box.style-original.has-color {
+  background: var(--app-icon-color);
+}
+
 .app-icon-box.style-liquid-glass {
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.14) 62%), var(--ylf-fill-secondary);
@@ -179,7 +221,7 @@ const iconBoxStyle = computed(() => props.color
   pointer-events: none;
 }
 
-.dark .app-icon-box.style-liquid-glass {
+.app-icon-box.is-dark.style-liquid-glass {
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 62%), var(--ylf-fill-secondary);
   box-shadow:
@@ -188,7 +230,7 @@ const iconBoxStyle = computed(() => props.color
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-.dark .app-icon-box.style-liquid-glass.has-color {
+.app-icon-box.is-dark.style-liquid-glass.has-color {
   background: var(--app-icon-color);
   background:
     radial-gradient(130% 90% at 25% -12%, rgba(255, 255, 255, 0.18), transparent 52%),
@@ -200,7 +242,7 @@ const iconBoxStyle = computed(() => props.color
     );
 }
 
-.dark .app-icon-box.style-liquid-glass::before {
+.app-icon-box.is-dark.style-liquid-glass::before {
   background:
     linear-gradient(168deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 38%, transparent 58%),
     radial-gradient(90% 56% at 50% 118%, rgba(255, 255, 255, 0.08), transparent 64%);
@@ -231,17 +273,17 @@ const iconBoxStyle = computed(() => props.color
   background: var(--app-icon-color);
 }
 
-.app-icon-box.style-flat-color.has-image {
+.app-icon-box.style-flat-color:is(.asset-app-icon, .asset-legacy) {
   background: transparent;
 }
 
-.dark .app-icon-box.style-flat-color {
+.app-icon-box.is-dark.style-flat-color {
   box-shadow:
     0 3px 10px rgba(0, 0, 0, 0.35),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
-.dark .app-icon-box.style-flat-color.has-color {
+.app-icon-box.is-dark.style-flat-color.has-color {
   background: color-mix(in srgb, var(--app-icon-color) 88%, black 12%);
 }
 
@@ -262,11 +304,11 @@ const iconBoxStyle = computed(() => props.color
   );
 }
 
-.app-icon-box.style-gradient.has-image {
+.app-icon-box.style-gradient:is(.asset-app-icon, .asset-legacy) {
   background: transparent;
 }
 
-.dark .app-icon-box.style-gradient {
+.app-icon-box.is-dark.style-gradient {
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.4),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
@@ -283,7 +325,7 @@ const iconBoxStyle = computed(() => props.color
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-icon-color) 45%, transparent);
 }
 
-.app-icon-box.style-minimal.has-image {
+.app-icon-box.style-minimal:is(.asset-app-icon, .asset-legacy) {
   background: transparent;
   box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--ion-text-color, #000) 12%, transparent);
 }
@@ -292,7 +334,7 @@ const iconBoxStyle = computed(() => props.color
   filter: none;
 }
 
-.dark .app-icon-box.style-minimal.has-color {
+.app-icon-box.is-dark.style-minimal.has-color {
   background: color-mix(in srgb, var(--app-icon-color) 18%, var(--ion-background-color, #000));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-icon-color) 55%, transparent);
 }
@@ -339,6 +381,20 @@ const iconBoxStyle = computed(() => props.color
   height: 100%;
   border-radius: var(--app-icon-radius);
   object-fit: cover;
+}
+
+.app-icon-box.asset-mark .app-icon-img {
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.app-icon-box.asset-app-icon {
+  background: transparent !important;
+}
+
+.app-icon-box.asset-app-icon::before,
+.app-icon-box.asset-app-icon::after {
+  opacity: 0 !important;
 }
 
 .app-emoji {

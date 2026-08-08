@@ -2,7 +2,7 @@ import { useStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
-export type AppIconStyle = 'liquid-glass' | 'flat-color' | 'gradient' | 'minimal'
+export type AppIconStyle = 'original' | 'liquid-glass' | 'flat-color' | 'gradient' | 'minimal'
 /**
  * iOS 内嵌浏览器模式（用户可在设置中选择）：
  * titlebar = 标题栏视图（顶部固定导航栏，自动套用应用主题色，右上角单菜单按钮，底部仍铺满）；
@@ -18,6 +18,7 @@ export type ExternalLinkMode = 'safari-view' | 'default-browser'
 
 /** 应用图标风格选项（设置页渲染用） */
 export const APP_ICON_STYLE_OPTIONS: { value: AppIconStyle, label: string }[] = [
+  { value: 'original', label: '原始图标' },
   { value: 'liquid-glass', label: '液态玻璃' },
   { value: 'flat-color', label: '平铺色彩' },
   { value: 'gradient', label: '渐变立体' },
@@ -95,7 +96,7 @@ export const useSettingsStore = defineStore('settings', () => {
   // ==================== 外观设置 ====================
 
   /** 主屏幕应用图标风格 */
-  const appIconStyle = useStorage<AppIconStyle>('ylf_icon_style', 'liquid-glass')
+  const appIconStyle = useStorage<AppIconStyle>('ylf_icon_style', 'original')
 
   function setAppIconStyle(style: AppIconStyle) {
     appIconStyle.value = style

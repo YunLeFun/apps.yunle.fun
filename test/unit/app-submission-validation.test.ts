@@ -67,4 +67,34 @@ describe('app submission validation', () => {
       websiteUrl: 'https://static.example.com/tool/',
     })
   })
+
+  it('normalizes complete, mark, and dark icon variants', () => {
+    const result = normalizeSubmissionInput({
+      ...base,
+      iconAssets: {
+        appIcon: { src: 'https://cdn.example.com/app.png', darkSrc: 'https://cdn.example.com/app-dark.png' },
+        mark: {
+          src: 'cloud://yunlefun.bucket/app-icons/0123456789abcdef/123e4567-e89b-12d3-a456-426614174000.png',
+        },
+      },
+    })
+
+    expect(result.snapshot.iconAssets).toEqual({
+      appIcon: { src: 'https://cdn.example.com/app.png', darkSrc: 'https://cdn.example.com/app-dark.png' },
+      mark: {
+        src: 'cloud://yunlefun.bucket/app-icons/0123456789abcdef/123e4567-e89b-12d3-a456-426614174000.png',
+      },
+    })
+  })
+
+  it('rejects malformed cloud icon ids and incomplete variants', () => {
+    expect(() => normalizeSubmissionInput({
+      ...base,
+      iconAssets: { mark: { src: 'cloud://yunlefun.bucket/private/file.png' } },
+    })).toThrow(/云乐坊图标资源/)
+    expect(() => normalizeSubmissionInput({
+      ...base,
+      iconAssets: { appIcon: { darkSrc: 'https://cdn.example.com/dark.png' } },
+    })).toThrow(/必填/)
+  })
 })

@@ -51,6 +51,7 @@ async function handleInfiniteScroll(event: CustomEvent) {
             <AppIconBox
               class="flex-shrink-0"
               :icon="app.logo"
+              :icon-assets="app.iconAssets"
               :emoji="app.emoji"
               :color="app.themeColor"
               size="md"

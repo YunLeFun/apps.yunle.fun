@@ -27,6 +27,7 @@ export function recordToAppInfo(record: AppRecord): CatalogAppInfo {
     emoji: record.emoji || '📱',
     themeColor: record.themeColor || '#007AFF',
     logo: record.logo || undefined,
+    iconAssets: record.iconAssets,
     websiteUrl: record.websiteUrl || '',
     privacyPolicyUrl: record.privacyPolicyUrl || undefined,
     supportUrl: record.supportUrl || undefined,

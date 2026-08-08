@@ -4,10 +4,12 @@ const CLOUDBASE_STORAGE_HOST_SUFFIXES = [
 ]
 const CLOUDBASE_PUBLIC_HOST_SUFFIX = '.tcb.qcloud.la'
 const PUBLIC_AVATAR_PATH_PATTERN = /^\/avatars\/[^/]+\.(?:jpe?g|png|webp)$/i
+const PUBLIC_APP_ICON_PATH_PATTERN = /^\/app-icons\/[a-f0-9]{16}\/[a-f0-9-]{36}\.png$/i
 
-function isPublicAvatarPath(pathname: string): boolean {
+function isPublicMediaPath(pathname: string): boolean {
   try {
-    return PUBLIC_AVATAR_PATH_PATTERN.test(decodeURIComponent(pathname))
+    const decoded = decodeURIComponent(pathname)
+    return PUBLIC_AVATAR_PATH_PATTERN.test(decoded) || PUBLIC_APP_ICON_PATH_PATTERN.test(decoded)
   }
   catch {
     return false
@@ -52,7 +54,7 @@ function getPublicCloudbaseFileUrl(
       !publicOrigin
       || url.protocol !== 'cloud:'
       || !url.hostname.startsWith(environmentPrefix)
-      || !isPublicAvatarPath(url.pathname)
+      || !isPublicMediaPath(url.pathname)
     ) {
       return null
     }
@@ -87,7 +89,7 @@ function getCurrentCloudbaseStorageUrl(
       || url.protocol !== 'https:'
       || url.origin !== publicOrigin.origin
       || !url.hostname.includes(envId)
-      || !isPublicAvatarPath(url.pathname)
+      || !isPublicMediaPath(url.pathname)
     ) {
       return null
     }

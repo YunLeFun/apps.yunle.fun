@@ -75,6 +75,10 @@ const displayData = computed(() => {
     ],
   }
 })
+const { resolvedSrc: displayIconSrc } = useAppIconSource(
+  () => displayData.value?.iconAssets,
+  () => displayData.value?.logo,
+)
 
 function getUrlHost(url?: string) {
   if (!url)
@@ -258,6 +262,7 @@ async function openMoreMenu() {
             <AppIconBox
               class="app-header-icon flex-shrink-0"
               :icon="displayData.logo"
+              :icon-assets="displayData.iconAssets"
               :emoji="displayData.emoji"
               :color="displayData.themeColor"
               size="xl"
@@ -386,7 +391,7 @@ async function openMoreMenu() {
                 :style="{ '--preview-color': displayData.themeColor }"
               >
                 <div class="preview-panel-orb">
-                  <img v-if="displayData.logo" :src="displayData.logo" alt="" class="preview-panel-logo">
+                  <img v-if="displayIconSrc" :src="displayIconSrc" alt="" class="preview-panel-logo">
                   <span v-else>{{ displayData.emoji }}</span>
                 </div>
                 <div class="preview-panel-content">
@@ -423,7 +428,7 @@ async function openMoreMenu() {
           id="app-reviews"
           :app-key="reviewAppKey"
           :app-name="displayData.name"
-          :app-icon="displayData.logo"
+          :app-icon="displayIconSrc || undefined"
           @summary="reviewSummary = $event"
         />
 
@@ -541,6 +546,7 @@ async function openMoreMenu() {
             >
               <AppIconBox
                 :icon="a.logo"
+                :icon-assets="a.iconAssets"
                 :emoji="a.emoji"
                 :color="a.themeColor"
                 size="md"

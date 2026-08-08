@@ -1,5 +1,5 @@
 import type { CloudbaseAdminDb } from './cloudbase-admin'
-import type { AppRecord } from '~/types/app'
+import type { AppIconAssets, AppRecord } from '~/types/app'
 import { useCloudbaseAdmin } from './cloudbase-admin'
 
 export interface SearchAppsInput {
@@ -14,6 +14,7 @@ export interface AgentSearchAppCard {
   name: string
   description?: string
   logo?: string
+  iconAssets?: AppIconAssets
   emoji?: string
   themeColor?: string
   category?: string
@@ -146,6 +147,7 @@ function recordToAgentCard(record: AppRecord, reason: string): AgentSearchAppCar
     name: record.name,
     description: record.description,
     logo: record.logo,
+    ...(record.iconAssets ? { iconAssets: record.iconAssets } : {}),
     emoji: record.emoji || '📱',
     themeColor: record.themeColor || '#007AFF',
     category: record.category,

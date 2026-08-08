@@ -141,6 +141,7 @@ watch(login, load)
               <AppIconBox
                 class="flex-shrink-0"
                 :icon="app.logo"
+                :icon-assets="app.iconAssets"
                 :emoji="app.emoji"
                 :color="app.themeColor"
                 size="md"

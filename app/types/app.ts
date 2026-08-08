@@ -54,6 +54,21 @@ export type AppAudience = 'public' | 'workshop' | 'owner'
 /** 面向用户展示的发布阶段。 */
 export type AppReleaseStage = 'stable' | 'beta'
 
+/** 图标在启动器中的用途：完整图标自带背景，主体图标由启动器补背景。 */
+export type AppIconAssetRole = 'app-icon' | 'mark'
+
+/** 同一用途的默认与深色模式资源。深色资源缺省时回退默认资源。 */
+export interface AppIconAssetVariants {
+  src: string
+  darkSrc?: string
+}
+
+/** 应用图标资产；完整图标建议提供，主体图标和深色版本均可选。 */
+export interface AppIconAssets {
+  appIcon?: AppIconAssetVariants
+  mark?: AppIconAssetVariants
+}
+
 /** 一次提交的审核状态。 */
 export type AppReviewStatus
   = | 'draft'
@@ -144,6 +159,8 @@ export interface AppRecord {
   backupUrl?: string
   /** 自定义 Logo 图片 URL（优先于 emoji 展示） */
   logo?: string
+  /** 结构化图标资产；缺省时兼容使用旧版 logo。 */
+  iconAssets?: AppIconAssets
   /** 应用 emoji 图标（无 logo 时展示，默认 📱） */
   emoji?: string
   /** 主题色（十六进制色值，默认 #007AFF） */
@@ -218,6 +235,7 @@ export interface CreateAppForm {
   trustedHosts?: string[]
   backupUrl?: string
   logo?: string
+  iconAssets?: AppIconAssets
   emoji?: string
   themeColor?: string
   category?: string

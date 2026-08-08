@@ -40,4 +40,14 @@ describe('cloudbase storage URL', () => {
     const fileID = `cloud://${envId}.${bucket}/avatars/user.jpg`
     expect(getPublicCloudbaseStorageUrl(fileID, envId, '')).toBeNull()
   })
+
+  it('maps normalized app icons while rejecting arbitrary public paths', () => {
+    const iconID = `cloud://${envId}.${bucket}/app-icons/0123456789abcdef/123e4567-e89b-12d3-a456-426614174000.png`
+    expect(getPublicCloudbaseStorageUrl(iconID, envId, publicOrigin)).toBe(
+      `${publicOrigin}/app-icons/0123456789abcdef/123e4567-e89b-12d3-a456-426614174000.png`,
+    )
+
+    const arbitrary = `cloud://${envId}.${bucket}/app-icons/owner/raw.svg`
+    expect(getPublicCloudbaseStorageUrl(arbitrary, envId, publicOrigin)).toBeNull()
+  })
 })

@@ -39,6 +39,7 @@ const emit = defineEmits<{
         <AppIconBox
           class="scoped-app-icon"
           :icon="item.app.logo"
+          :icon-assets="item.app.iconAssets"
           :emoji="item.app.emoji"
           :color="item.app.themeColor"
           size="md"

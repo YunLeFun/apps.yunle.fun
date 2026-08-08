@@ -239,6 +239,7 @@ watch(() => userStore.isLoggedIn, () => load())
               <AppIconBox
                 slot="start"
                 :icon="app.logo"
+                :icon-assets="app.iconAssets"
                 :emoji="app.emoji"
                 :color="app.themeColor"
                 size="list"

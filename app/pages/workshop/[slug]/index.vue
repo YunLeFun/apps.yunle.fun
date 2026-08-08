@@ -236,10 +236,13 @@ watch(slug, (val) => {
       <div v-else-if="app" class="detail-content">
         <!-- 应用头部 -->
         <div class="app-hero">
-          <div class="app-hero-icon" :style="{ backgroundColor: app.themeColor || '#007AFF' }">
-            <img v-if="app.logo" :src="app.logo" alt="" class="h-full w-full object-cover">
-            <span v-else class="app-hero-emoji">{{ app.emoji || DEFAULT_EMOJI }}</span>
-          </div>
+          <AppIconBox
+            class="app-hero-icon"
+            :icon="app.logo"
+            :icon-assets="app.iconAssets"
+            :emoji="app.emoji || DEFAULT_EMOJI"
+            :color="app.themeColor || '#007AFF'"
+          />
           <h1 class="app-hero-name">
             {{ app.name }}
           </h1>
@@ -438,28 +441,9 @@ watch(slug, (val) => {
 }
 
 .app-hero-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  position: relative;
-}
-
-.app-hero-icon::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
-  pointer-events: none;
-}
-
-.app-hero-emoji {
-  font-size: 40px;
+  --app-icon-size: 80px;
+  --app-icon-radius: 18px;
+  --app-emoji-size: 40px;
 }
 
 .app-hero-name {

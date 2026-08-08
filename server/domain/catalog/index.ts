@@ -1,3 +1,5 @@
+import type { AppIconAssets } from '~/types/app'
+
 /** Central catalog authorization Module. */
 export type CatalogSurface = 'public_market' | 'personal_market' | 'workshop'
 export type CatalogAudience = 'public' | 'workshop' | 'owner'
@@ -42,6 +44,7 @@ export interface CatalogRevisionSnapshot {
   trustedHosts?: string[]
   backupUrl?: string
   logo?: string
+  iconAssets?: AppIconAssets
   emoji?: string
   themeColor?: string
   category?: string

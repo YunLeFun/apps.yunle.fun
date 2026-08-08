@@ -548,6 +548,7 @@ function handleContentClick() {
       <div v-if="recentDrag.isDragging.value && recentDrag.dragApp.value" :style="dragPreviewStyle">
         <AppIconBox
           :icon="recentDrag.dragApp.value.logo"
+          :icon-assets="recentDrag.dragApp.value.iconAssets"
           :emoji="recentDrag.dragApp.value.emoji"
           :color="recentDrag.dragApp.value.themeColor"
           :label="recentDrag.dragApp.value.name"

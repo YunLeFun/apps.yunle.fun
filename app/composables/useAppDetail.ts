@@ -59,6 +59,7 @@ function recordToDetailData(record: AppRecord): AppDetailData {
     emoji: record.emoji || '📱',
     themeColor: record.themeColor || '#007AFF',
     logo: record.logo || undefined,
+    iconAssets: record.iconAssets,
     websiteUrl: record.websiteUrl || '',
     category: record.category,
   }, {

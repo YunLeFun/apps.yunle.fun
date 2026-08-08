@@ -23,6 +23,7 @@ const router = useRouter()
 const {
   form,
   saving,
+  iconUploadBusy,
   slugError,
   slugChecking,
   SLUG_REGEX,
@@ -43,7 +44,7 @@ const {
         </IonButtons>
         <IonTitle>创建应用</IonTitle>
         <IonButtons slot="end">
-          <IonButton :disabled="saving || !form.name.trim() || !!slugError" @click="handleSubmit">
+          <IonButton :disabled="saving || iconUploadBusy || !form.name.trim() || !!slugError" @click="handleSubmit">
             <IonIcon v-if="!saving" slot="icon-only" :icon="checkmark" />
             <IonSpinner v-else name="crescent" />
           </IonButton>
@@ -54,7 +55,7 @@ const {
     <IonContent :fullscreen="true" class="ion-padding">
       <form @submit.prevent="handleSubmit">
         <!-- 图标预览 -->
-        <AppIconPreview :emoji="form.emoji" :theme-color="form.themeColor" :logo="form.logo" />
+        <AppIconPreview :emoji="form.emoji" :theme-color="form.themeColor" :logo="form.logo" :icon-assets="form.iconAssets" />
 
         <!-- 基本信息 -->
         <IonList inset>
@@ -107,24 +108,7 @@ const {
         <!-- 主题色选择 -->
         <AppThemeColorPicker v-model="form.themeColor" />
 
-        <!-- Logo -->
-        <div class="section-header">
-          Logo（可选）
-        </div>
-        <IonList inset>
-          <IonItem>
-            <IonInput
-              v-model="form.logo"
-              label="图片 URL"
-              label-placement="stacked"
-              placeholder="https://example.com/logo.png"
-              type="url"
-            />
-            <IonNote slot="helper">
-              设置后优先展示 Logo，替代 Emoji
-            </IonNote>
-          </IonItem>
-        </IonList>
+        <AppIconAssetsEditor v-model:icon-assets="form.iconAssets" v-model:legacy-logo="form.logo" v-model:busy="iconUploadBusy" />
 
         <!-- 链接信息 -->
         <div class="section-header">
@@ -240,7 +224,7 @@ const {
         <div class="px-4 pb-8 pt-4">
           <IonButton
             expand="block"
-            :disabled="saving || !form.name.trim() || !!slugError || slugChecking"
+            :disabled="saving || iconUploadBusy || !form.name.trim() || !!slugError || slugChecking"
             class="submit-btn"
             @click="handleSubmit"
           >

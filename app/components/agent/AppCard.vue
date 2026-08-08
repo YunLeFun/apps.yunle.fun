@@ -32,6 +32,7 @@ const appInfo = computed<YlfAppInfo>(() => {
     name: props.card.name,
     description: props.card.description,
     logo: props.card.logo,
+    iconAssets: props.card.iconAssets,
     emoji: props.card.emoji || '📱',
     themeColor: props.card.themeColor || '#007AFF',
     websiteUrl: props.card.websiteUrl || '',
@@ -97,6 +98,7 @@ async function handlePrimary() {
       <AppIconBox
         class="agent-app-card-icon"
         :icon="appInfo.logo"
+        :icon-assets="appInfo.iconAssets"
         :emoji="appInfo.emoji"
         :color="appInfo.themeColor"
         size="list"

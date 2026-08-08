@@ -53,6 +53,7 @@ function viewAllChart() {
           <AppIconBox
             class="chart-icon"
             :icon="app.logo"
+            :icon-assets="app.iconAssets"
             :emoji="app.emoji"
             :color="app.themeColor"
             size="md"

@@ -2,9 +2,14 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { IonAvatar, IonChip, IonLabel } from '@ionic/vue'
 
-defineProps<{
+const props = defineProps<{
   appInfo: YlfAppInfo
 }>()
+
+const { resolvedSrc: appIconSrc } = useAppIconSource(
+  () => props.appInfo.iconAssets,
+  () => props.appInfo.logo,
+)
 </script>
 
 <template>
@@ -19,9 +24,9 @@ defineProps<{
         class="inline-block"
       >
         <IonChip color="primary" class="text-base">
-          <IonAvatar v-if="appInfo.logo">
+          <IonAvatar v-if="appIconSrc">
             <img
-              :src="appInfo.logo"
+              :src="appIconSrc"
               alt="icon"
             >
           </IonAvatar>

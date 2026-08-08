@@ -74,6 +74,7 @@ function normalizeAgentAppCard(value: unknown): AgentAppCard | null {
   const trustedHosts = Array.isArray(value.trustedHosts)
     ? value.trustedHosts.filter((item): item is string => typeof item === 'string' && item.length > 0)
     : undefined
+  const iconAssets = normalizeAgentIconAssets(value.iconAssets)
 
   return {
     id: stringValue(value.id),
@@ -81,6 +82,7 @@ function normalizeAgentAppCard(value: unknown): AgentAppCard | null {
     name,
     description: stringValue(value.description),
     logo: stringValue(value.logo),
+    iconAssets,
     emoji: stringValue(value.emoji),
     themeColor: stringValue(value.themeColor),
     category: stringValue(value.category),
@@ -92,6 +94,25 @@ function normalizeAgentAppCard(value: unknown): AgentAppCard | null {
     websiteUrl: stringValue(value.websiteUrl),
     trustedHosts,
   }
+}
+
+function normalizeAgentIconAssets(value: unknown): AgentAppCard['iconAssets'] {
+  if (!isRecord(value))
+    return undefined
+
+  const parseVariants = (candidate: unknown) => {
+    if (!isRecord(candidate))
+      return undefined
+    const src = stringValue(candidate.src)
+    if (!src)
+      return undefined
+    const darkSrc = stringValue(candidate.darkSrc)
+    return darkSrc ? { src, darkSrc } : { src }
+  }
+
+  const appIcon = parseVariants(value.appIcon)
+  const mark = parseVariants(value.mark)
+  return appIcon || mark ? { appIcon, mark } : undefined
 }
 
 function findCardCandidates(value: unknown): unknown[] {

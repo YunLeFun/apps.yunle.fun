@@ -49,6 +49,7 @@ function openAppDetail(app: YlfAppInfo) {
           <AppIconBox
             class="weekly-icon"
             :icon="app.logo"
+            :icon-assets="app.iconAssets"
             :emoji="app.emoji"
             :color="app.themeColor"
             size="md"

@@ -145,6 +145,7 @@ function toForm(app: AppRecord): CreateAppForm {
     trustedHosts: app.trustedHosts || [],
     backupUrl: app.backupUrl || '',
     logo: app.logo || '',
+    iconAssets: app.iconAssets,
     emoji: app.emoji || '📱',
     themeColor: app.themeColor || '#007AFF',
     category: app.category || '其他',

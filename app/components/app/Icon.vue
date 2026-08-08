@@ -103,6 +103,7 @@ const appIconClasses = computed(() => {
   >
     <AppIconBox
       :icon="app.logo"
+      :icon-assets="app.iconAssets"
       :emoji="app.emoji"
       :color="app.themeColor"
       :label="app.name"

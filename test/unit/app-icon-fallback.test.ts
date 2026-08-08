@@ -10,12 +10,12 @@ describe('app icon image fallback contract', () => {
     expect(source).toContain('const imageLoadFailed = ref(false)')
     expect(source).toContain('isImageUrl.value && !imageLoadFailed.value')
     expect(source).toContain('@error="imageLoadFailed = true"')
-    expect(source).toContain('isImageUrl.value ? props.emoji : props.icon || props.emoji')
+    expect(source).toContain('return isImageUrl.value ? props.emoji : props.icon || props.emoji')
   })
 
   it('retries image rendering when the icon URL changes', () => {
     const source = readFileSync(iconBoxUrl, 'utf8')
 
-    expect(source).toMatch(/watch\(\(\) => props\.icon,[\s\S]*imageLoadFailed\.value = false/)
+    expect(source).toMatch(/watch\(\(\) => \[resolvedImageSource\.value, isDark\.value\],[\s\S]*imageLoadFailed\.value = false/)
   })
 })

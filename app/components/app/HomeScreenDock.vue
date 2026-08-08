@@ -181,6 +181,7 @@ function onPointerCancel() {
           <AppIconBox
             v-if="resolveApp(element)"
             :icon="resolveApp(element)!.logo"
+            :icon-assets="resolveApp(element)!.iconAssets"
             :emoji="resolveApp(element)!.emoji"
             :color="resolveApp(element)!.themeColor"
           />

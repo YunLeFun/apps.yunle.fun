@@ -50,6 +50,7 @@ const sampleCards = computed(() => catalog.value.slice(0, 2).map(app => ({
   name: app.name,
   description: app.description,
   logo: app.logo,
+  iconAssets: app.iconAssets,
   emoji: app.emoji,
   themeColor: app.themeColor,
   category: app.category,

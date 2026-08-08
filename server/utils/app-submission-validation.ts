@@ -1,6 +1,8 @@
 import type {
   AppAccessMode,
   AppAudience,
+  AppIconAssets,
+  AppIconAssetVariants,
   AppReleaseStage,
   AppSubmissionKind,
   CreateAppForm,
@@ -60,6 +62,7 @@ export function normalizeSubmissionInput(
     invalid('主题色必须为 #RRGGBB')
 
   const tags = normalizeTags(value.tags)
+  const iconAssets = normalizeIconAssets(value.iconAssets)
 
   return {
     kind,
@@ -73,7 +76,8 @@ export function normalizeSubmissionInput(
       supportUrl,
       trustedHosts: normalizeTrustedHosts(value.trustedHosts, hostname),
       backupUrl: normalizeHttpsUrl(value.backupUrl, '备用链接'),
-      logo: normalizeHttpsUrl(value.logo, 'Logo 链接'),
+      logo: normalizeIconSource(value.logo, 'Logo 链接'),
+      ...(iconAssets ? { iconAssets } : {}),
       emoji: optionalString(value.emoji, 'Emoji', 16) || '📱',
       themeColor,
       category: optionalString(value.category, '分类', 40) || '其他',
@@ -98,6 +102,7 @@ export function publicProjectionFromSubmission(snapshot: CreateAppForm) {
     trustedHosts: snapshot.trustedHosts || [],
     backupUrl: snapshot.backupUrl || '',
     logo: snapshot.logo || '',
+    ...(snapshot.iconAssets ? { iconAssets: snapshot.iconAssets } : {}),
     emoji: snapshot.emoji || '📱',
     themeColor: snapshot.themeColor || '#007AFF',
     category: snapshot.category || '其他',
@@ -107,6 +112,56 @@ export function publicProjectionFromSubmission(snapshot: CreateAppForm) {
     accessMode: snapshot.accessMode || 'public',
     releaseStage: snapshot.releaseStage || 'stable',
   }
+}
+
+function normalizeIconAssets(value: unknown): AppIconAssets | undefined {
+  if (value === undefined || value === null)
+    return undefined
+  if (!isRecord(value))
+    invalid('图标资产格式不正确')
+
+  const appIcon = normalizeIconVariants(value.appIcon, '完整图标')
+  const mark = normalizeIconVariants(value.mark, '主体图标')
+  if (!appIcon && !mark)
+    return undefined
+  return { appIcon, mark }
+}
+
+function normalizeIconVariants(value: unknown, label: string): AppIconAssetVariants | undefined {
+  if (value === undefined || value === null)
+    return undefined
+  if (!isRecord(value))
+    invalid(`${label}格式不正确`)
+
+  const src = normalizeIconSource(value.src, `${label}链接`, true)
+  const darkSrc = normalizeIconSource(value.darkSrc, `${label}深色链接`)
+  return darkSrc ? { src, darkSrc } : { src }
+}
+
+function normalizeIconSource(value: unknown, label: string, required = false): string {
+  const raw = typeof value === 'string' ? value.trim() : ''
+  if (!raw) {
+    if (required)
+      invalid(`${label}必填`)
+    return ''
+  }
+  if (raw.length > 2048)
+    invalid(`${label}不能超过 2048 个字符`)
+
+  if (raw.startsWith('cloud://')) {
+    let parsed: URL
+    try {
+      parsed = new URL(raw)
+    }
+    catch {
+      return invalid(`${label}格式不正确`)
+    }
+    if (parsed.protocol !== 'cloud:' || !/^\/app-icons\/[a-f0-9]{16}\/[a-f0-9-]{36}\.png$/i.test(parsed.pathname))
+      invalid(`${label}不是有效的云乐坊图标资源`)
+    return raw
+  }
+
+  return normalizeHttpsUrl(raw, label, required)
 }
 
 function normalizeKind(value: unknown): AppSubmissionKind {

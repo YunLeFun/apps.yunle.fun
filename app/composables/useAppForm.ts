@@ -2,6 +2,7 @@ import type { AppAccessMode, AppAudience, AppRecord, AppReleaseStage, CreateAppF
 import { actionSheetController } from '@ionic/vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { DEFAULT_EMOJI, DEFAULT_THEME_COLOR } from '~/types/app'
+import { compactAppIconAssets, createAppIconAssetsDraft, createEmptyAppIconAssetsDraft } from '~/utils/appIconAssets'
 import { ensureWorkshopForAudience } from '~/utils/workshopAudience'
 
 const DRAFT_KEY = 'app_create_draft'
@@ -22,6 +23,7 @@ function createEmptyForm() {
     supportUrl: '',
     backupUrl: '',
     logo: '',
+    iconAssets: createEmptyAppIconAssetsDraft(),
     emoji: DEFAULT_EMOJI,
     themeColor: DEFAULT_THEME_COLOR,
     category: '',
@@ -50,6 +52,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
 
   const form = reactive(createEmptyForm())
   const saving = ref(false)
+  const iconUploadBusy = ref(false)
   const slugError = ref('')
   const slugChecking = ref(false)
   const submitted = ref(false)
@@ -70,6 +73,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
     form.supportUrl = app.supportUrl || ''
     form.backupUrl = app.backupUrl || ''
     form.logo = app.logo || ''
+    form.iconAssets = createAppIconAssetsDraft(app.iconAssets)
     form.emoji = app.emoji || DEFAULT_EMOJI
     form.themeColor = app.themeColor || DEFAULT_THEME_COLOR
     form.category = app.category || ''
@@ -256,6 +260,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   // ---- 提交 ----
 
   function buildFormData(): CreateAppForm {
+    const iconAssets = compactAppIconAssets(form.iconAssets)
     return {
       name: form.name.trim(),
       slug: form.slug,
@@ -265,7 +270,9 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       privacyPolicyUrl: form.privacyPolicyUrl.trim(),
       supportUrl: form.supportUrl.trim(),
       backupUrl: form.backupUrl.trim(),
-      logo: form.logo.trim(),
+      // 镜像到旧字段，保证尚未升级的消费端仍能显示图标。
+      logo: iconAssets?.appIcon?.src || iconAssets?.mark?.src || form.logo.trim(),
+      iconAssets,
       emoji: form.emoji || DEFAULT_EMOJI,
       themeColor: form.themeColor || DEFAULT_THEME_COLOR,
       category: form.category,
@@ -278,6 +285,10 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   }
 
   async function handleSubmit() {
+    if (iconUploadBusy.value) {
+      toast.showWarning('请等待图标上传完成')
+      return
+    }
     if (!userStore.isLoggedIn) {
       toast.showWarning('请先登录')
       router.push('/login')
@@ -355,6 +366,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   return {
     form,
     saving,
+    iconUploadBusy,
     slugError,
     slugChecking,
     isDirty,

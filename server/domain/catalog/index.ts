@@ -38,6 +38,7 @@ export interface CatalogRevisionSnapshot {
   name: string
   slug: string
   description?: string
+  githubRepo?: string
   websiteUrl?: string
   privacyPolicyUrl?: string
   supportUrl?: string

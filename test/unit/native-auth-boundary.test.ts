@@ -30,23 +30,20 @@ describe('native WebView authorization boundary', () => {
     expect(contract).not.toContain('refreshToken')
   })
 
-  it('keeps the native test capability separate from the CloudBase API bearer token', () => {
-    expect(userStore).toContain('NATIVE_TEST_SESSION_KEY')
-    expect(userStore).toContain('nativeTestSession')
+  it('uses only the authenticated CloudBase session for native authorization', () => {
+    expect(userStore).not.toContain('NATIVE_TEST_SESSION_KEY')
+    expect(userStore).not.toContain('nativeTestSession')
     expect(apiPlugin).toContain('userStore.accessToken')
     expect(apiPlugin).not.toContain('nativeTestSession')
     expect(apiPlugin).not.toContain('hostSession')
   })
 
-  it('requires a leased challenge and one-time code for the native public test identity', () => {
-    expect(loginPage).toContain('使用 @yunlefun 公共测试身份')
-    expect(loginPage).toContain('nativeTestChallengeId')
-    expect(loginPage).toContain('nativeTestCode')
-    expect(loginPage).toContain('/api/auth/native-test-session/exchange')
-    expect(loginPage).toContain('loginNativeTestSession(session)')
-    expect(loginPage).toContain('只能授权租约登记的应用')
-    expect(loginPage).toContain('不会获得云乐坊业务访问令牌')
-    expect(loginPage).not.toContain('accessToken: session.hostSession')
+  it('lets fixed test accounts use the standard username and password form', () => {
+    expect(loginPage).toContain('signInWithPassword')
+    expect(loginPage).toContain('params.username = passwordAccount.value')
+    expect(loginPage).not.toContain('nativeTestChallengeId')
+    expect(loginPage).not.toContain('/api/auth/native-test-session/exchange')
+    expect(loginPage).not.toContain('模拟验证码')
   })
 
   it('removes the bespoke native authorization service', () => {
@@ -141,7 +138,7 @@ describe('native WebView authorization boundary', () => {
     expect(loginPage).toContain('重试返回原应用')
     expect(loginPage).toContain('returningToApplication.value = true')
     expect(loginPage).toContain('returningToApplication.value = false')
-    expect(loginPage).toContain('nativePlatform && pendingNativeAuthorization')
+    expect(loginPage).toContain('pendingNativeAuthorization || nativeAuthorizationReturnError')
     expect(nativePlugin).toContain('CAPPluginMethod(name: "requestHostLogin"')
     expect(nativePlugin).toContain('CAPPluginMethod(name: "resumeAuthorizationAfterLogin"')
     expect(nativePlugin).toContain('CAPPluginMethod(name: "cancelAuthorizationLogin"')

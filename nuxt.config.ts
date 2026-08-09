@@ -200,9 +200,6 @@ export default defineNuxtConfig({
     appFirstPartySubmitterUids: firstPartySubmitterUids,
     // 诊断日志管理 API 独立白名单；默认沿用第一方维护者，可用逗号分隔多个 CloudBase UID。
     diagnosticAdminUids: process.env.NUXT_DIAGNOSTIC_ADMIN_UIDS || firstPartySubmitterUids,
-    // 原生测试身份只通过服务端代理访问 Admin Broker；令牌绝不进入 public runtimeConfig。
-    nativeSessionBrokerBaseUrl: process.env.NUXT_NATIVE_SESSION_BROKER_BASE_URL || 'https://admin.yunle.fun',
-    nativeSessionBrokerToken: '',
     // 第三方模型与接口预留，但产品入口默认关闭并展示「敬请期待」。
     appThirdPartySubmissionsEnabled: process.env.NUXT_APP_THIRD_PARTY_SUBMISSIONS_ENABLED === 'true',
     tmsRegion: 'ap-guangzhou',

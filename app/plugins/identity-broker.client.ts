@@ -87,20 +87,11 @@ export default defineNuxtPlugin(() => {
           return
         }
         const userStore = useUserStore()
-        const nativeTestSession = userStore.nativeTestSession
-        const hasNativeTestSession = !!nativeTestSession
-          && nativeTestSession.expiresAt > Date.now()
-        if (nativeTestSession && !hasNativeTestSession)
-          userStore.clearNativeTestSession()
-
         const { app, auth } = useCloudbase()
-        let hasCloudBaseSession = false
-        if (!hasNativeTestSession) {
-          const { data, error } = await auth.getSession()
-          const session = data?.session
-          hasCloudBaseSession = !error && !!session?.access_token && !session.user?.is_anonymous
-        }
-        if (!hasCloudBaseSession && !hasNativeTestSession) {
+        const { data, error } = await auth.getSession()
+        const session = data?.session
+        const hasCloudBaseSession = !error && !!session?.access_token && !session.user?.is_anonymous
+        if (!hasCloudBaseSession) {
           stage = 'host_login'
           if (!rememberNativeAuthorizationLogin(event.requestId)) {
             throw new HostIdentityBrokerError(
@@ -126,11 +117,9 @@ export default defineNuxtPlugin(() => {
         if (request.prompt === 'consent') {
           stage = 'consent'
           const userInfo = userStore.userInfo
-          const accountName = hasCloudBaseSession
-            ? userInfo.nickname || userInfo.login || '当前云乐坊账号'
-            : nativeTestSession!.account.publicAlias
+          const accountName = userInfo.nickname || userInfo.login || '当前云乐坊账号'
           report('auth.native_sso.prompted', {
-            accountSource: hasCloudBaseSession ? 'cloudbase' : 'native_test',
+            accountSource: 'cloudbase',
           })
           const decision = await HostRuntime.confirmAuthorization({
             requestId: event.requestId,
@@ -140,7 +129,7 @@ export default defineNuxtPlugin(() => {
             applicationName: request.applicationName,
             applicationOrigin: request.applicationOrigin,
             accountName,
-            ...(hasCloudBaseSession && userInfo.avatar
+            ...(userInfo.avatar
               ? { accountAvatarUrl: userInfo.avatar }
               : {}),
             permissionDescription: request.permissionDescription,
@@ -178,24 +167,16 @@ export default defineNuxtPlugin(() => {
           codeChallenge: request.codeChallenge,
           codeChallengeMethod: 'S256' as const,
         }
-        const response = hasCloudBaseSession
-          ? await app.callFunction({
-              name: 'sso-ticket',
-              data: {
-                action: 'issueSsoCode',
-                ...issueRequest,
-              },
-            })
-          : await useNuxtApp().$api('/api/auth/native-test-session/authorize', {
-              method: 'POST',
-              body: {
-                hostSession: nativeTestSession!.hostSession,
-                request: issueRequest,
-              },
-            })
+        const response = await app.callFunction({
+          name: 'sso-ticket',
+          data: {
+            action: 'issueSsoCode',
+            ...issueRequest,
+          },
+        })
         const issued = readIssuedAuthorizationCode(response)
         report('auth.native_sso.code_issued', {
-          accountSource: hasCloudBaseSession ? 'cloudbase' : 'native_test',
+          accountSource: 'cloudbase',
           outcome: 'success',
         })
         stage = 'deliver_code'

@@ -52,7 +52,6 @@ const router = useRouter()
 const route = useRoute()
 const accountsStore = useAccountsStore()
 const nativePlatform = Capacitor.isNativePlatform()
-const showNativeTestLogin = ref(false)
 const nativeAuthorizationReturnError = ref('')
 const pendingNativeAuthorization = ref(
   nativePlatform
@@ -60,16 +59,6 @@ const pendingNativeAuthorization = ref(
   && !!readNativeAuthorizationLogin(),
 )
 const returningToApplication = ref(false)
-const nativeTestAlias = ref('native-sso-smoke@yunlefun')
-const nativeTestChallengeId = ref('')
-const nativeTestCode = ref('')
-const nativeTestLoading = ref(false)
-const nativeTestError = ref('')
-const nativeTestFormValid = computed(() => (
-  /^[a-z0-9][a-z0-9-]{1,62}@yunlefun$/.test(nativeTestAlias.value.trim().toLowerCase())
-  && /^[\w:-]{4,128}$/.test(nativeTestChallengeId.value.trim())
-  && /^\d{6}$/.test(nativeTestCode.value)
-))
 
 watch(isAuthenticated, (value) => {
   if (value)
@@ -174,11 +163,6 @@ const signupPhoneValid = computed(() => isValidPhone(signupPhone.value))
 // 切换页面模式时重置状态
 function switchMode(mode: PageMode) {
   pageMode.value = mode
-}
-
-function toggleNativeTestLogin() {
-  showNativeTestLogin.value = !showNativeTestLogin.value
-  nativeTestError.value = ''
 }
 
 // 手机号验证码
@@ -321,31 +305,6 @@ async function completeLoginNavigation(): Promise<void> {
     loginNavigation = undefined
   }
 }
-
-async function handleNativeTestLogin() {
-  if (!nativeTestFormValid.value || nativeTestLoading.value)
-    return
-  nativeTestLoading.value = true
-  nativeTestError.value = ''
-  try {
-    const session = await useNuxtApp().$api('/api/auth/native-test-session/exchange', {
-      method: 'POST',
-      body: {
-        publicAlias: nativeTestAlias.value.trim().toLowerCase(),
-        challengeId: nativeTestChallengeId.value.trim(),
-        code: nativeTestCode.value,
-      },
-    })
-    useUserStore().loginNativeTestSession(session)
-    await completeLoginNavigation()
-  }
-  catch {
-    nativeTestError.value = '验证码无效、已过期，或测试租约尚未启用'
-  }
-  finally {
-    nativeTestLoading.value = false
-  }
-}
 </script>
 
 <template>
@@ -422,79 +381,8 @@ async function handleNativeTestLogin() {
 
         <!-- ===== 登录模式 ===== -->
         <template v-if="pageMode === 'login'">
-          <div v-if="nativePlatform && pendingNativeAuthorization" class="auth-footer native-test-switch">
-            <span class="native-test-label">测试与验收</span>
-            <button
-              type="button"
-              class="auth-link-btn"
-              aria-controls="native-test-login"
-              :aria-expanded="showNativeTestLogin"
-              @click="toggleNativeTestLogin"
-            >
-              {{ showNativeTestLogin ? '返回普通账号登录' : '使用 @yunlefun 公共测试身份' }}
-            </button>
-          </div>
-
-          <form
-            v-if="showNativeTestLogin"
-            id="native-test-login"
-            class="auth-form"
-            @submit.prevent="handleNativeTestLogin"
-          >
-            <div class="auth-card">
-              <div class="auth-card-row">
-                <input
-                  v-model="nativeTestAlias"
-                  type="text"
-                  autocomplete="username"
-                  autocapitalize="none"
-                  :spellcheck="false"
-                  placeholder="测试账号，例如 native-sso-smoke@yunlefun"
-                  class="auth-input w-full"
-                  :disabled="nativeTestLoading"
-                >
-              </div>
-              <div class="auth-card-separator" />
-              <div class="auth-card-row">
-                <input
-                  v-model="nativeTestChallengeId"
-                  type="text"
-                  autocomplete="off"
-                  autocapitalize="none"
-                  :spellcheck="false"
-                  placeholder="Admin 领取结果中的挑战 ID"
-                  class="auth-input w-full"
-                  :disabled="nativeTestLoading"
-                >
-              </div>
-              <div class="auth-card-separator" />
-              <div class="auth-card-row">
-                <input
-                  v-model="nativeTestCode"
-                  type="text"
-                  inputmode="numeric"
-                  autocomplete="one-time-code"
-                  placeholder="6 位模拟验证码"
-                  maxlength="6"
-                  class="auth-input w-full"
-                  :disabled="nativeTestLoading"
-                >
-              </div>
-            </div>
-            <button type="submit" class="auth-btn-primary" :disabled="!nativeTestFormValid || nativeTestLoading">
-              <IonSpinner v-if="nativeTestLoading" name="crescent" class="auth-btn-spinner" />
-              <span v-else>登录测试身份</span>
-            </button>
-            <p v-if="nativeTestError" class="auth-hint native-test-error" role="alert">
-              {{ nativeTestError }}
-            </p>
-            <p class="auth-hint">
-              验证码由 Admin 针对当前短期租约生成；此身份只能授权租约登记的应用，不会获得云乐坊业务访问令牌。
-            </p>
-          </form>
-
           <!-- Segmented Control（根据开关配置动态渲染） -->
-          <div v-if="!showNativeTestLogin && loginTabs.length > 1" class="auth-segment">
+          <div v-if="loginTabs.length > 1" class="auth-segment">
             <button
               v-for="tab in loginTabs"
               :key="tab.key"
@@ -507,7 +395,7 @@ async function handleNativeTestLogin() {
           </div>
 
           <!-- 手机号登录 -->
-          <div v-if="!showNativeTestLogin && loginMode === 'phone' && authMethods.phoneOtp" class="auth-form">
+          <div v-if="loginMode === 'phone' && authMethods.phoneOtp" class="auth-form">
             <div class="auth-card">
               <div class="auth-card-row">
                 <span class="auth-area-code">+86</span>
@@ -628,7 +516,7 @@ async function handleNativeTestLogin() {
           </div>
 
           <!-- 密码登录 -->
-          <form v-else-if="!showNativeTestLogin" class="auth-form" @submit.prevent="handlePasswordLogin">
+          <form v-else class="auth-form" @submit.prevent="handlePasswordLogin">
             <div class="auth-card">
               <div class="auth-card-row">
                 <input
@@ -677,12 +565,12 @@ async function handleNativeTestLogin() {
           </form>
 
           <!-- 分割线 -->
-          <div v-if="!showNativeTestLogin && hasEnabledOAuthProviders()" class="auth-divider">
+          <div v-if="hasEnabledOAuthProviders()" class="auth-divider">
             <span class="auth-divider-text">其他登录方式</span>
           </div>
 
           <!-- 第三方登录 - 图标模式 -->
-          <div v-if="!showNativeTestLogin && hasEnabledOAuthProviders()" class="auth-social-icons">
+          <div v-if="hasEnabledOAuthProviders()" class="auth-social-icons">
             <button v-if="authMethods.github" class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
               <IonIcon :icon="logoGithub" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">GitHub</span>
@@ -694,7 +582,7 @@ async function handleNativeTestLogin() {
           </div>
 
           <!-- 注册入口 -->
-          <div v-if="!showNativeTestLogin && authMethods.phoneSignup" class="auth-footer">
+          <div v-if="authMethods.phoneSignup" class="auth-footer">
             <p class="auth-footer-switch">
               还没有账号？
               <button class="auth-link-btn" @click="switchMode('signup')">
@@ -890,25 +778,6 @@ async function handleNativeTestLogin() {
 .auth-form {
   margin-bottom: 4px;
   padding: 0 16px;
-}
-
-.native-test-switch {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-  padding-top: 0;
-}
-
-.native-test-label {
-  color: var(--ion-color-medium);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.native-test-error {
-  color: var(--ion-color-danger);
 }
 
 .native-authorization-context {

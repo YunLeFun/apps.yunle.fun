@@ -7,15 +7,9 @@ const h = vi.hoisted(() => ({
   callFunction: vi.fn(),
   confirmAuthorization: vi.fn(),
   getSession: vi.fn(),
-  nativeTestSession: undefined as undefined | {
-    hostSession: string
-    expiresAt: number
-    account: { publicAlias: string, virtualPhone: string, displayName: string }
-  },
   navigateTo: vi.fn(),
   requestHostLogin: vi.fn(),
   resolveAuthorization: vi.fn(),
-  fetch: vi.fn(),
   telemetryEvents: [] as Array<{
     context: Record<string, unknown>
     name: string
@@ -70,12 +64,8 @@ vi.stubGlobal('useCloudbase', () => ({
 }))
 vi.stubGlobal('useUserStore', () => ({
   userInfo: h.userInfo,
-  nativeTestSession: h.nativeTestSession,
-  clearNativeTestSession: vi.fn(),
 }))
 vi.stubGlobal('navigateTo', h.navigateTo)
-vi.stubGlobal('$fetch', h.fetch)
-vi.stubGlobal('useNuxtApp', () => ({ $api: h.fetch }))
 
 h.getSession.mockImplementation(async () => ({
   data: {
@@ -113,7 +103,6 @@ describe('apps host identity broker consent', () => {
         setItem: (key: string, value: string) => sessionStorageValues.set(key, value),
       },
     })
-    h.nativeTestSession = undefined
     h.telemetryEvents.length = 0
     h.userInfo = { nickname: '云游君', avatar: '' }
     h.getSession.mockResolvedValue({
@@ -206,40 +195,6 @@ describe('apps host identity broker consent', () => {
     })
     expect(h.callFunction).not.toHaveBeenCalled()
     expect(h.resolveAuthorization).not.toHaveBeenCalled()
-  })
-
-  it('uses the narrow native test host session when no CloudBase account is logged in', async () => {
-    h.nativeTestSession = {
-      hostSession: 'host.jwt.value',
-      expiresAt: Date.now() + 60_000,
-      account: {
-        publicAlias: 'native-sso-smoke@yunlefun',
-        virtualPhone: '+86 000 0000 0001',
-        displayName: 'Native SSO Smoke',
-      },
-    }
-    h.confirmAuthorization.mockResolvedValue({ allowed: true })
-    h.fetch.mockResolvedValue({ ok: true, code: 't'.repeat(43), expiresAt: Date.now() + 60_000 })
-
-    await h.authorizationHandler?.(consentRequest)
-
-    expect(h.getSession).not.toHaveBeenCalled()
-    expect(h.confirmAuthorization).toHaveBeenCalledWith({
-      requestId: consentRequest.requestId,
-      applicationName: '云笺',
-      applicationOrigin: 'https://cms.yunle.fun',
-      accountName: 'native-sso-smoke@yunlefun',
-      permissionDescription: '账号标识、昵称和头像',
-    })
-    expect(h.fetch).toHaveBeenCalledWith('/api/auth/native-test-session/authorize', expect.objectContaining({
-      method: 'POST',
-      body: expect.objectContaining({ hostSession: 'host.jwt.value' }),
-    }))
-    expect(h.callFunction).not.toHaveBeenCalled()
-    expect(h.resolveAuthorization).toHaveBeenCalledWith(expect.objectContaining({
-      requestId: consentRequest.requestId,
-      result: expect.objectContaining({ code: 't'.repeat(43) }),
-    }))
   })
 
   it('starts system account selection without reading the host account', async () => {

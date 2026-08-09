@@ -38,6 +38,11 @@ class HostRuntimePlugin : Plugin() {
                 currentActivity.canReuseFor(url)
             ) {
                 currentActivity.applyOptions(call.data)
+                activity.startActivity(
+                    Intent(activity, HostWebViewActivity::class.java).addFlags(
+                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                    ),
+                )
             } else {
                 currentActivity?.takeUnless { it.isFinishing }?.finish()
                 val intent = Intent(activity, HostWebViewActivity::class.java)
@@ -83,11 +88,13 @@ class HostRuntimePlugin : Plugin() {
     /** The account choice is deliberately rendered by Android, outside page DOM control. */
     @PluginMethod
     fun confirmAuthorization(call: PluginCall) {
+        val requestId = call.getString("requestId").orEmpty()
         val applicationName = normalizedLabel(call.getString("applicationName"), 80)
         val applicationOrigin = normalizedHttpsOrigin(call.getString("applicationOrigin"))
         val accountName = normalizedLabel(call.getString("accountName"), 120)
         val permissionDescription = normalizedLabel(call.getString("permissionDescription"), 160)
         if (
+            requestId.isEmpty() ||
             applicationName == null ||
             applicationOrigin == null ||
             accountName == null ||
@@ -107,10 +114,16 @@ class HostRuntimePlugin : Plugin() {
                 call.reject("No active browser session")
                 return@runOnUiThread
             }
+            if (!presenter.pauseAuthorizationTimeout(requestId)) {
+                call.reject("Unknown or expired authorization request")
+                return@runOnUiThread
+            }
 
             authorizationPromptActive = true
             val authorizationNotice = normalizedLabel(call.getString("authorizationNotice"), 160)
-            AuthorizationConsentSheet(
+            var decisionFinished = false
+            var promptTimeout: Runnable? = null
+            val sheet = AuthorizationConsentSheet(
                 activity = presenter,
                 content = AuthorizationSheetContent(
                     applicationName = applicationName,
@@ -121,14 +134,119 @@ class HostRuntimePlugin : Plugin() {
                     permissionDescription = permissionDescription,
                     authorizationNotice = authorizationNotice,
                 ),
-            ) { choice ->
+            ) decision@{ choice ->
+                if (decisionFinished) return@decision
+                decisionFinished = true
+                promptTimeout?.let { presenter.window.decorView.removeCallbacks(it) }
                 authorizationPromptActive = false
+                if (!presenter.resumeAuthorizationTimeout(requestId)) {
+                    call.reject("Unknown or expired authorization request")
+                    return@decision
+                }
                 call.resolve(
                     JSObject()
                         .put("allowed", choice == AuthorizationSheetChoice.CURRENT)
                         .put("choice", choice.wireValue),
                 )
-            }.show()
+            }
+            sheet.show()
+            promptTimeout = Runnable timeout@{
+                if (!authorizationPromptActive || decisionFinished) return@timeout
+                presenter.resolveAuthorization(requestId, null, "authorization timed out")
+                sheet.expire()
+            }
+            promptTimeout?.let {
+                presenter.window.decorView.postDelayed(it, AUTHORIZATION_CONSENT_TIMEOUT_MS)
+            }
+        }
+    }
+
+    /** Keep the app WebView alive and bring the local Apps login UI forward. */
+    @PluginMethod
+    fun requestHostLogin(call: PluginCall) {
+        val requestId = call.getString("requestId").orEmpty()
+        if (requestId.isEmpty()) {
+            call.reject("Missing requestId")
+            return
+        }
+        activity.runOnUiThread {
+            val presenter = hostActivity.get()?.takeUnless { it.isFinishing }
+            if (
+                presenter?.authorizationEvent(requestId) == null ||
+                !presenter.pauseAuthorizationTimeout(requestId)
+            ) {
+                call.reject("Unknown or expired authorization request")
+                return@runOnUiThread
+            }
+            activity.startActivity(
+                Intent(activity, MainActivity::class.java).addFlags(
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                ),
+            )
+            call.resolve()
+        }
+    }
+
+    /** Return to the original WebView and re-deliver its still-pending request. */
+    @PluginMethod
+    fun resumeAuthorizationAfterLogin(call: PluginCall) {
+        val requestId = call.getString("requestId").orEmpty()
+        if (requestId.isEmpty()) {
+            call.reject("Missing requestId")
+            return
+        }
+        activity.runOnUiThread {
+            val presenter = hostActivity.get()?.takeUnless { it.isFinishing }
+            val event = presenter?.authorizationEvent(requestId)
+            if (presenter == null || event == null) {
+                call.reject("Unknown or expired authorization request")
+                return@runOnUiThread
+            }
+            activity.startActivity(
+                Intent(activity, HostWebViewActivity::class.java).addFlags(
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                ),
+            )
+            presenter.runWhenResumed {
+                notifyListeners("authorizationRequested", event, true)
+                notifySessionsChanged()
+                call.resolve()
+            }
+        }
+    }
+
+    /** Cancel the pending page request and return to its kept-alive WebView. */
+    @PluginMethod
+    fun cancelAuthorizationLogin(call: PluginCall) {
+        val requestId = call.getString("requestId").orEmpty()
+        if (requestId.isEmpty()) {
+            call.reject("Missing requestId")
+            return
+        }
+        activity.runOnUiThread {
+            val presenter = hostActivity.get()?.takeUnless { it.isFinishing }
+            if (presenter == null) {
+                call.reject("Unknown or expired authorization request")
+                return@runOnUiThread
+            }
+            val resolved = presenter.resolveAuthorization(
+                requestId,
+                null,
+                "HOST_AUTH_DENIED",
+            )
+            if (!resolved) {
+                call.reject("Unknown or expired authorization request")
+                return@runOnUiThread
+            }
+            activity.startActivity(
+                Intent(activity, HostWebViewActivity::class.java).addFlags(
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                ),
+            )
+            presenter.runWhenResumed {
+                notifySessionsChanged()
+                call.resolve()
+            }
         }
     }
 
@@ -215,6 +333,7 @@ class HostRuntimePlugin : Plugin() {
         appId: String,
         request: JSObject,
     ) {
+        hostActivity.get()?.pauseAuthorizationTimeout(requestId)
         notifyListeners(
             "authorizationRequested",
             JSObject()
@@ -281,6 +400,7 @@ class HostRuntimePlugin : Plugin() {
     }
 
     companion object {
+        private const val AUTHORIZATION_CONSENT_TIMEOUT_MS = 5 * 60 * 1000L
         private var current = WeakReference<HostRuntimePlugin>(null)
 
         internal fun instance(): HostRuntimePlugin? = current.get()

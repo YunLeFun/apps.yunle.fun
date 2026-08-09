@@ -61,6 +61,16 @@
 内嵌页面仍只能提交 `clientId`、`redirectUri`、scope、nonce、PKCE challenge 和 prompt。展示数据
 不得从页面请求中透传。
 
+### 远程图片安全边界
+
+应用图标与账号头像加载失败时必须保留文字占位，不得阻断授权。两端统一执行以下限制：
+
+- 只接受 HTTPS，禁止跟随重定向，只允许常见栅格图片 MIME；
+- 响应体最多 2 MB，已声明的 `Content-Length` 超限时立即拒绝，流式读取再次执行硬上限；
+- 源图单边最多 8192 px、总像素最多 16,777,216；先读元数据，不得直接完整解码；
+- 最终只生成最长边 256 px 的缩略图，避免压缩体积很小但解码内存巨大的图片；
+- 不向页面暴露下载错误、缓存路径或底层图片对象。
+
 ## 状态与错误
 
 - `ready`：展示全部可信信息并允许选择。
@@ -70,3 +80,79 @@
 
 当前协议在用户选择后关闭 Sheet，再由宿主签发一次性 code；因此首版实现 `ready` 与
 `dismissed`，并通过 `authorizationPromptActive` 防止重复面板。
+
+授权请求进入原生交互后使用 5 分钟用户决策时限；用户作出选择后重新启动 30 秒 broker/网络
+时限。不能让最初的 30 秒网络超时在用户阅读面板期间继续倒计时，也不能无限期保留请求。
+
+### 宿主未登录回跳
+
+当宿主没有有效 CloudBase 会话或受限测试会话时，不得立即向页面返回失败，也不得销毁发起请求的
+WebView：
+
+1. 原生层以 `requestId` 定位并暂停原请求，将页面会话保活在后台；
+2. Apps Web 层只在 `sessionStorage` 保存受格式与长度限制的 `requestId`，进入本地 `/login`；
+3. 登录页默认展示普通登录，公共测试身份仅作为明确的手动入口，不能影响生产用户；
+4. 登录成功调用 `resumeAuthorizationAfterLogin`，恢复原 WebView 并重新投递同一请求；
+5. 用户返回或离开登录页调用 `cancelAuthorizationLogin`，恢复原 WebView 并以
+   `HOST_AUTH_DENIED` 结束原 Promise；
+6. 任一步骤过期或 App 进程被回收时失败关闭，不签码、不自动重试凭据，也不在 URL 中携带账号或
+   challenge。
+
+登录页的交互状态必须保持一致：
+
+- 顶栏标题使用“登录并继续”或“注册并继续”，返回操作显示为“取消”；
+- 上下文提示固定说明“返回后仍需在原生面板确认；登录本身不会自动授权”，避免用户误以为提交
+  登录表单等于授权；
+- 恢复原应用期间显示“登录成功，正在返回原应用”，锁定表单并阻止重复返回或提交；
+- 恢复失败时保留原 `requestId` 和已登录状态，提供“重试返回原应用”，用户仍可取消本次授权；
+- 公共测试身份入口只在存在待处理原生授权时展示，并使用折叠式次要入口，不与普通登录方式竞争。
+
+Android 主 Activity 使用 `singleTop` 配合 `FLAG_ACTIVITY_REORDER_TO_FRONT`，避免回到登录页时清除
+上层 `HostWebViewActivity`；iOS 继续使用会话池保活并重新 present 同一个 `WebViewController`。
+
+## 授权生命周期与可观测性
+
+当前版本不保存长期 grant：每次 `prompt: 'consent'` 都由用户确认，因此暂不需要“已授权应用”撤销
+页面。未来若保存长期授权，必须同时上线授权时间、scope、设备/客户端、撤销入口和策略版本，
+不能只增加“记住授权”开关。
+
+宿主通过既有 Tencent RUM 上报以下脱敏事件：
+
+| 阶段           | 事件                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| 收到并校验请求 | `auth.native_sso.requested`、`auth.native_sso.validated`                                   |
+| 展示与选择     | `auth.native_sso.prompted`、`auth.native_sso.consent_decided`                              |
+| 签码与交付     | `auth.native_sso.code_issued`、`auth.native_sso.completed`                                 |
+| 系统账号/失败  | `auth.native_sso.handed_off`、`auth.native_sso.failed`、`auth.native_sso.delivery_expired` |
+
+事件只包含 `requestId`、client/app、阶段、结果、耗时、平台和 App 版本。客户端与 Provider 使用
+nonce 的 SHA-256 前 16 个十六进制字符作为匿名 `flow` 关联值；严禁记录原始 nonce、PKCE、code、
+ticket、token、Cookie、完整 URL 或账号凭据。
+
+## 上线前验收
+
+自动验证：
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test:unit
+pnpm build
+xcodebuild -workspace ios/App/App.xcworkspace -scheme App \
+  -configuration Debug -sdk iphonesimulator \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  CODE_SIGNING_ALLOWED=NO build
+(cd android && ./gradlew testDebugUnitTest assembleDebug)
+```
+
+真机至少覆盖以下场景，并在 RUM 中按 `flow` 核对事件闭环：
+
+1. 当前账号同意：AI 春联完成登录，页面显示宿主账号。
+2. 取消/下滑/系统返回：不签发 code，页面显示取消状态。
+3. 使用其他账号：只进入系统认证组件，凭据不进入自定义 WebView。
+4. 宿主切换账号：保活中的 AI 春联清理旧会话并要求重新授权。
+5. 弱网、断网和 30 秒签码超时：可重试，无迟到请求覆盖新会话。
+6. 超大、错误 MIME、重定向图片：显示文字占位，App 内存稳定且授权仍可完成。
+7. 冷启动、后台恢复、杀进程重启各执行一次；检查无崩溃和新控制台错误。
+8. 宿主未登录：显示本地“登录并继续”上下文；成功后回原应用再次确认，回跳失败可重试，取消可
+   恢复原页面且不签发 code。

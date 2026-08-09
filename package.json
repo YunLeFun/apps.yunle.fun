@@ -32,6 +32,7 @@
     "run:ios": "LANG=en_US.UTF-8 cap run ios",
     "run:ios:build": "nuxt build && LANG=en_US.UTF-8 cap sync && LANG=en_US.UTF-8 cap run ios",
     "sync:version": "bash scripts/sync-ios-version.sh",
+    "build:android:release": "bash scripts/android-release.sh",
     "build:ios": "bash scripts/ios-archive.sh",
     "build:ios:adhoc": "pnpm sync:version && LANG=en_US.UTF-8 cap build ios --xcode-export-method release-testing --xcode-team-id QT792GAY4C",
     "publish:ios:testflight": "node scripts/ios-testflight-publish.mjs"

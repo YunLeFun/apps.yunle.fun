@@ -13,9 +13,22 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { isValidEmail, isValidPhone, useCountdown } from '@yunlefun/auth'
-import { eyeOffOutline, eyeOutline, logoGithub, logoWechat } from 'ionicons/icons'
+import {
+  alertCircleOutline,
+  eyeOffOutline,
+  eyeOutline,
+  logoGithub,
+  logoWechat,
+  shieldCheckmarkOutline,
+} from 'ionicons/icons'
 import { config } from '~/config'
 import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
+import { HostRuntime } from '~/host-runtime'
+import {
+  clearNativeAuthorizationLogin,
+  NATIVE_AUTHORIZATION_LOGIN_RETURN_TO,
+  readNativeAuthorizationLogin,
+} from '~/utils/native-authorization-login'
 
 // 用户名校验正则：字母开头，包含字母数字下划线连字符，3-64 字符。
 // 最终合法性仍由认证服务判断；客户端不应拦截已有的长用户名。
@@ -36,9 +49,17 @@ const {
 } = useCloudbaseAuth()
 
 const router = useRouter()
+const route = useRoute()
 const accountsStore = useAccountsStore()
 const nativePlatform = Capacitor.isNativePlatform()
 const showNativeTestLogin = ref(false)
+const nativeAuthorizationReturnError = ref('')
+const pendingNativeAuthorization = ref(
+  nativePlatform
+  && Capacitor.isPluginAvailable('HostRuntime')
+  && !!readNativeAuthorizationLogin(),
+)
+const returningToApplication = ref(false)
 const nativeTestAlias = ref('native-sso-smoke@yunlefun')
 const nativeTestChallengeId = ref('')
 const nativeTestCode = ref('')
@@ -51,11 +72,8 @@ const nativeTestFormValid = computed(() => (
 ))
 
 watch(isAuthenticated, (value) => {
-  if (value) {
-    // 用 replace 而非 push：登录页在 tabs 之外，push 进入 tab 子路由会把 me.vue
-    // 叠在根 outlet 栈上而不重新进入 tabs 外壳，导致底部 IonTabBar 不渲染
-    router.replace('/tabs/me')
-  }
+  if (value)
+    void completeLoginNavigation()
 }, { immediate: true })
 
 // 页面模式：登录 / 注册
@@ -104,6 +122,19 @@ const { remaining: signupCountdown, isActive: signupCountdownActive, start: star
 
 // 恢复上次登录信息
 onMounted(() => {
+  const requestId = nativePlatform && Capacitor.isPluginAvailable('HostRuntime')
+    ? readNativeAuthorizationLogin()
+    : undefined
+  pendingNativeAuthorization.value = !!requestId
+  if (
+    nativePlatform
+    && route.query.returnTo === NATIVE_AUTHORIZATION_LOGIN_RETURN_TO
+    && !requestId
+    && !isAuthenticated.value
+  ) {
+    nativeAuthorizationReturnError.value = '本次授权请求已结束，你仍可正常登录云乐坊。'
+  }
+
   // 恢复上次密码登录的账号
   const saved = localStorage.getItem(LAST_PASSWORD_ACCOUNT_KEY)
   if (saved)
@@ -114,6 +145,27 @@ onMounted(() => {
     phone.value = accountsStore.lastPhone
 })
 
+onBeforeRouteLeave(async () => {
+  const requestId = nativePlatform && Capacitor.isPluginAvailable('HostRuntime')
+    ? readNativeAuthorizationLogin()
+    : undefined
+  if (!requestId)
+    return true
+  if (returningToApplication.value)
+    return false
+
+  clearNativeAuthorizationLogin(requestId)
+  pendingNativeAuthorization.value = false
+  try {
+    await HostRuntime.cancelAuthorizationLogin({ requestId })
+  }
+  catch {
+    // The native request may already have expired; route navigation should
+    // still be allowed so the login screen never traps the user.
+  }
+  return true
+})
+
 // 校验
 const phoneValid = computed(() => isValidPhone(phone.value))
 const emailValid = computed(() => isValidEmail(email.value))
@@ -122,6 +174,11 @@ const signupPhoneValid = computed(() => isValidPhone(signupPhone.value))
 // 切换页面模式时重置状态
 function switchMode(mode: PageMode) {
   pageMode.value = mode
+}
+
+function toggleNativeTestLogin() {
+  showNativeTestLogin.value = !showNativeTestLogin.value
+  nativeTestError.value = ''
 }
 
 // 手机号验证码
@@ -221,6 +278,48 @@ function afterLoginSuccess(method: 'phone' | 'email' | 'password' | 'github' | '
   if (userStore.userInfo) {
     accountsStore.saveAccount(userStore.userInfo, method)
   }
+  void completeLoginNavigation()
+}
+
+let loginNavigation: Promise<void> | undefined
+
+async function completeLoginNavigation(): Promise<void> {
+  if (loginNavigation)
+    return loginNavigation
+
+  loginNavigation = (async () => {
+    nativeAuthorizationReturnError.value = ''
+    const requestId = nativePlatform && Capacitor.isPluginAvailable('HostRuntime')
+      ? readNativeAuthorizationLogin()
+      : undefined
+
+    if (requestId) {
+      returningToApplication.value = true
+      try {
+        await HostRuntime.resumeAuthorizationAfterLogin({ requestId })
+        clearNativeAuthorizationLogin(requestId)
+        pendingNativeAuthorization.value = false
+      }
+      catch {
+        nativeAuthorizationReturnError.value = '原应用暂时无法恢复。你的云乐坊账号已登录，可以重试返回或取消本次授权。'
+        return
+      }
+      finally {
+        returningToApplication.value = false
+      }
+    }
+
+    // 用 replace 而非 push：登录页在 tabs 之外，push 进入 tab 子路由会把 me.vue
+    // 叠在根 outlet 栈上而不重新进入 tabs 外壳，导致底部 IonTabBar 不渲染。
+    await router.replace('/tabs/me')
+  })()
+
+  try {
+    await loginNavigation
+  }
+  finally {
+    loginNavigation = undefined
+  }
 }
 
 async function handleNativeTestLogin() {
@@ -238,7 +337,7 @@ async function handleNativeTestLogin() {
       },
     })
     useUserStore().loginNativeTestSession(session)
-    await router.replace('/tabs/me')
+    await completeLoginNavigation()
   }
   catch {
     nativeTestError.value = '验证码无效、已过期，或测试租约尚未启用'
@@ -254,14 +353,26 @@ async function handleNativeTestLogin() {
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/me" text="返回" />
+          <IonBackButton
+            default-href="/tabs/me"
+            :disabled="returningToApplication"
+            :text="pendingNativeAuthorization ? '取消' : '返回'"
+          />
         </IonButtons>
-        <IonTitle>{{ pageMode === 'login' ? '登录' : '注册' }}</IonTitle>
+        <IonTitle>
+          {{ pendingNativeAuthorization
+            ? (pageMode === 'login' ? '登录并继续' : '注册并继续')
+            : (pageMode === 'login' ? '登录' : '注册') }}
+        </IonTitle>
       </IonToolbar>
     </IonHeader>
 
     <IonContent :fullscreen="true" class="ion-padding">
-      <div class="auth-container">
+      <div
+        class="auth-container"
+        :class="{ 'auth-container--returning': returningToApplication }"
+        :aria-busy="returningToApplication"
+      >
         <!-- Logo 区域 -->
         <div class="auth-header">
           <YlfLogoSvg class="auth-logo-icon" />
@@ -273,21 +384,71 @@ async function handleNativeTestLogin() {
           </h1>
         </div>
 
+        <section
+          v-if="pendingNativeAuthorization || nativeAuthorizationReturnError"
+          class="native-authorization-context"
+          :class="{ 'native-authorization-context--error': nativeAuthorizationReturnError }"
+          :role="nativeAuthorizationReturnError ? 'alert' : 'status'"
+          aria-live="polite"
+        >
+          <div class="native-authorization-context-icon" aria-hidden="true">
+            <IonSpinner v-if="returningToApplication" name="crescent" />
+            <IonIcon
+              v-else
+              :icon="nativeAuthorizationReturnError ? alertCircleOutline : shieldCheckmarkOutline"
+            />
+          </div>
+          <div>
+            <p class="native-authorization-context-title">
+              {{ returningToApplication
+                ? '登录成功，正在返回原应用'
+                : (nativeAuthorizationReturnError ? '暂时无法返回原应用' : '登录后返回原应用') }}
+            </p>
+            <p class="native-authorization-context-description">
+              {{ nativeAuthorizationReturnError
+                || '返回后仍需在原生面板确认；登录本身不会自动授权。' }}
+            </p>
+            <button
+              v-if="nativeAuthorizationReturnError && pendingNativeAuthorization"
+              type="button"
+              class="native-authorization-retry"
+              :disabled="returningToApplication"
+              @click="completeLoginNavigation"
+            >
+              重试返回原应用
+            </button>
+          </div>
+        </section>
+
         <!-- ===== 登录模式 ===== -->
         <template v-if="pageMode === 'login'">
-          <div v-if="nativePlatform" class="auth-footer native-test-switch">
-            <button class="auth-link-btn" @click="showNativeTestLogin = !showNativeTestLogin">
+          <div v-if="nativePlatform && pendingNativeAuthorization" class="auth-footer native-test-switch">
+            <span class="native-test-label">测试与验收</span>
+            <button
+              type="button"
+              class="auth-link-btn"
+              aria-controls="native-test-login"
+              :aria-expanded="showNativeTestLogin"
+              @click="toggleNativeTestLogin"
+            >
               {{ showNativeTestLogin ? '返回普通账号登录' : '使用 @yunlefun 公共测试身份' }}
             </button>
           </div>
 
-          <form v-if="showNativeTestLogin" class="auth-form" @submit.prevent="handleNativeTestLogin">
+          <form
+            v-if="showNativeTestLogin"
+            id="native-test-login"
+            class="auth-form"
+            @submit.prevent="handleNativeTestLogin"
+          >
             <div class="auth-card">
               <div class="auth-card-row">
                 <input
                   v-model="nativeTestAlias"
                   type="text"
                   autocomplete="username"
+                  autocapitalize="none"
+                  :spellcheck="false"
                   placeholder="测试账号，例如 native-sso-smoke@yunlefun"
                   class="auth-input w-full"
                   :disabled="nativeTestLoading"
@@ -299,6 +460,8 @@ async function handleNativeTestLogin() {
                   v-model="nativeTestChallengeId"
                   type="text"
                   autocomplete="off"
+                  autocapitalize="none"
+                  :spellcheck="false"
                   placeholder="Admin 领取结果中的挑战 ID"
                   class="auth-input w-full"
                   :disabled="nativeTestLoading"
@@ -322,11 +485,11 @@ async function handleNativeTestLogin() {
               <IonSpinner v-if="nativeTestLoading" name="crescent" class="auth-btn-spinner" />
               <span v-else>登录测试身份</span>
             </button>
-            <p v-if="nativeTestError" class="auth-hint native-test-error">
+            <p v-if="nativeTestError" class="auth-hint native-test-error" role="alert">
               {{ nativeTestError }}
             </p>
             <p class="auth-hint">
-              验证码由 Admin 针对当前短期租约生成；此身份只能授权云笺登录，不会获得云乐坊业务访问令牌。
+              验证码由 Admin 针对当前短期租约生成；此身份只能授权租约登记的应用，不会获得云乐坊业务访问令牌。
             </p>
           </form>
 
@@ -474,6 +637,8 @@ async function handleNativeTestLogin() {
                   placeholder="手机号 / 邮箱 / 用户名"
                   class="auth-input w-full"
                   autocomplete="username"
+                  autocapitalize="none"
+                  :spellcheck="false"
                   :disabled="loading"
                 >
               </div>
@@ -639,6 +804,20 @@ async function handleNativeTestLogin() {
   padding: 0 4px;
 }
 
+.auth-container--returning {
+  .auth-header,
+  .auth-segment,
+  .auth-form,
+  .auth-divider,
+  .auth-social-icons,
+  .auth-footer,
+  .auth-terms {
+    opacity: 0.42;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
 // Header
 .auth-header {
   text-align: center;
@@ -714,11 +893,87 @@ async function handleNativeTestLogin() {
 }
 
 .native-test-switch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 16px;
+  padding-top: 0;
+}
+
+.native-test-label {
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .native-test-error {
   color: var(--ion-color-danger);
+}
+
+.native-authorization-context {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+  margin: 0 16px 20px;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+  border-color: color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ion-color-primary) 8%, var(--ion-item-background));
+}
+
+.native-authorization-context--error {
+  border-color: color-mix(in srgb, var(--ion-color-danger) 24%, transparent);
+  background: color-mix(in srgb, var(--ion-color-danger) 7%, var(--ion-item-background));
+}
+
+.native-authorization-context-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
+  color: var(--ion-color-primary);
+  font-size: 20px;
+}
+
+.native-authorization-context--error .native-authorization-context-icon {
+  background: color-mix(in srgb, var(--ion-color-danger) 12%, transparent);
+  color: var(--ion-color-danger);
+}
+
+.native-authorization-context-title {
+  margin: 1px 0 4px;
+  color: var(--ion-text-color);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.native-authorization-context-description {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.native-authorization-retry {
+  margin-top: 9px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ion-color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.native-authorization-retry:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 // iOS Grouped Card — 浅色模式白色卡片 + 页面灰色背景形成区分（iOS 标准分组列表风格）

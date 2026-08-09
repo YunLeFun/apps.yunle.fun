@@ -1,5 +1,6 @@
 import Capacitor
 import Foundation
+import ImageIO
 import UIKit
 import WebKit
 
@@ -17,6 +18,150 @@ private enum AuthorizationSheetChoice: String {
     case current
     case other
     case cancel
+}
+
+/// Reads image metadata without decoding the source at full resolution, then
+/// creates only the small thumbnail needed by the authorization surface.
+enum AuthorizationImageDecoder {
+    private static let maximumSourceDimension: Int64 = 8_192
+    private static let maximumSourcePixels: Int64 = 16_777_216
+    private static let thumbnailPixelSize = 256
+
+    static func decode(_ data: Data) -> UIImage? {
+        let sourceOptions = [
+            kCGImageSourceShouldCache: false
+        ] as CFDictionary
+        guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil)
+                as? [CFString: Any],
+              let widthNumber = properties[kCGImagePropertyPixelWidth] as? NSNumber,
+              let heightNumber = properties[kCGImagePropertyPixelHeight] as? NSNumber
+        else {
+            return nil
+        }
+
+        let width = widthNumber.int64Value
+        let height = heightNumber.int64Value
+        guard width > 0,
+              height > 0,
+              width <= Self.maximumSourceDimension,
+              height <= Self.maximumSourceDimension,
+              width <= Self.maximumSourcePixels / height
+        else {
+            return nil
+        }
+
+        let thumbnailOptions = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: Self.thumbnailPixelSize,
+        ] as CFDictionary
+        guard let thumbnail = CGImageSourceCreateThumbnailAtIndex(
+            source,
+            0,
+            thumbnailOptions)
+        else {
+            return nil
+        }
+        return UIImage(cgImage: thumbnail)
+    }
+}
+
+/// Streams an HTTPS image with a hard byte ceiling and no redirects. The
+/// response is never buffered past the consent surface's 2 MB policy.
+final class BoundedHTTPSImageLoader: NSObject, URLSessionDataDelegate,
+    URLSessionTaskDelegate {
+    private static let allowedMIMETypes: Set<String> = [
+        "image/gif",
+        "image/heic",
+        "image/heif",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    ]
+
+    private let maximumBytes: Int
+    private let completion: (Data?) -> Void
+    private var received = Data()
+    private var session: URLSession?
+    private var completed = false
+
+    init(maximumBytes: Int, completion: @escaping (Data?) -> Void) {
+        self.maximumBytes = maximumBytes
+        self.completion = completion
+        super.init()
+    }
+
+    func start(url: URL) {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.timeoutIntervalForRequest = 4
+        configuration.timeoutIntervalForResource = 6
+        configuration.urlCache = nil
+        let session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        self.session = session
+        session.dataTask(with: url).resume()
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive response: URLResponse,
+        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+    ) {
+        guard let http = response as? HTTPURLResponse,
+              http.url?.scheme?.lowercased() == "https",
+              (200..<300).contains(http.statusCode),
+              http.mimeType.map({ Self.allowedMIMETypes.contains($0.lowercased()) }) == true,
+              response.expectedContentLength == NSURLSessionTransferSizeUnknown
+                || response.expectedContentLength <= Int64(maximumBytes)
+        else {
+            completionHandler(.cancel)
+            finish(nil)
+            return
+        }
+        completionHandler(.allow)
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive data: Data
+    ) {
+        guard received.count <= maximumBytes - data.count else {
+            dataTask.cancel()
+            finish(nil)
+            return
+        }
+        received.append(data)
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        didCompleteWithError error: Error?
+    ) {
+        finish(error == nil ? received : nil)
+    }
+
+    private func finish(_ data: Data?) {
+        guard !completed else { return }
+        completed = true
+        completion(data)
+        session?.invalidateAndCancel()
+        session = nil
+    }
 }
 
 /// 云乐坊第一方应用的可信原生授权 Sheet。所有展示字段均由宿主注册表或宿主会话提供。
@@ -439,16 +584,9 @@ private final class AuthorizationConsentViewController: UIViewController,
         else {
             return
         }
-        URLSession.shared.downloadTask(with: url) { location, response, _ in
-            guard let location = location,
-                  let http = response as? HTTPURLResponse,
-                  (200..<300).contains(http.statusCode),
-                  http.mimeType?.hasPrefix("image/") == true,
-                  let values = try? location.resourceValues(forKeys: [.fileSizeKey]),
-                  let fileSize = values.fileSize,
-                  fileSize <= Self.maximumImageBytes,
-                  let data = try? Data(contentsOf: location, options: .mappedIfSafe),
-                  let image = UIImage(data: data)
+        BoundedHTTPSImageLoader(maximumBytes: Self.maximumImageBytes) { data in
+            guard let data = data,
+                  let image = AuthorizationImageDecoder.decode(data)
             else {
                 return
             }
@@ -457,7 +595,7 @@ private final class AuthorizationConsentViewController: UIViewController,
                 imageView.isHidden = false
                 fallback.isHidden = true
             }
-        }.resume()
+        }.start(url: url)
     }
 
     @objc private func allowTapped() {
@@ -480,6 +618,10 @@ private final class AuthorizationConsentViewController: UIViewController,
             self.dismiss(animated: true)
         }
     }
+
+    func expire() {
+        complete(.cancel)
+    }
 }
 
 @objc(HostRuntimePlugin)
@@ -493,6 +635,9 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "listSessions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "confirmAuthorization", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "requestHostLogin", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "resumeAuthorizationAfterLogin", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "cancelAuthorizationLogin", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "authorizeWithOtherAccount", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "resolveAuthorization", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearIdentitySessions", returnType: CAPPluginReturnPromise),
@@ -504,6 +649,7 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
     private var sessions: [WebViewController] = []
     private let maxSessions = 3
     private var authorizationPromptActive = false
+    private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与 WebViewController.sessionKey 一致）
     private func indexOfSession(key: String) -> Int? {
@@ -610,6 +756,7 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
             }
             vc.onAuthorizationRequest = { [weak self, weak vc] requestId, sourceOrigin, request in
                 guard let self = self, let vc = vc else { return }
+                _ = vc.pauseAuthorizationTimeout(requestId: requestId)
                 self.notifyListeners("authorizationRequested", data: [
                     "requestId": requestId,
                     "sourceOrigin": sourceOrigin,
@@ -706,7 +853,8 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// 在原生可信界面中确认是否允许当前 Apps 账号登录目标应用。
     @objc func confirmAuthorization(_ call: CAPPluginCall) {
-        guard let applicationName = normalizedPromptLabel(
+        guard let requestId = call.getString("requestId"), !requestId.isEmpty,
+            let applicationName = normalizedPromptLabel(
             call.getString("applicationName"),
             maxLength: 80),
             let applicationOrigin = normalizedHTTPSOrigin(
@@ -735,8 +883,16 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
                 call.reject("No active browser session")
                 return
             }
+            guard let authorizationSession = self.sessions.first(where: {
+                $0.pauseAuthorizationTimeout(requestId: requestId)
+            }) else {
+                call.reject("Unknown or expired authorization request")
+                return
+            }
 
             self.authorizationPromptActive = true
+            var decisionFinished = false
+            var promptTimeout: DispatchWorkItem?
             let authorizationNotice = normalizedPromptLabel(
                 call.getString("authorizationNotice"),
                 maxLength: 160)
@@ -750,7 +906,14 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
                     permissionDescription: permissionDescription,
                     authorizationNotice: authorizationNotice),
                 onChoice: { [weak self] choice in
+                    guard !decisionFinished else { return }
+                    decisionFinished = true
+                    promptTimeout?.cancel()
                     self?.authorizationPromptActive = false
+                    guard authorizationSession.resumeAuthorizationTimeout(requestId: requestId) else {
+                        call.reject("Unknown or expired authorization request")
+                        return
+                    }
                     call.resolve([
                         "allowed": choice == .current,
                         "choice": choice.rawValue,
@@ -762,6 +925,130 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
                 presentation.preferredCornerRadius = 28
             }
             presenter.present(sheet, animated: true)
+            let timeout = DispatchWorkItem { [weak self, weak sheet] in
+                guard let self = self,
+                      self.authorizationPromptActive,
+                      !decisionFinished
+                else { return }
+                _ = authorizationSession.resolveAuthorization(
+                    requestId: requestId,
+                    result: nil,
+                    error: "authorization timed out")
+                sheet?.expire()
+            }
+            promptTimeout = timeout
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + Self.authorizationConsentTimeoutSeconds,
+                execute: timeout)
+        }
+    }
+
+    /// Keep the originating WebView alive while the Apps login route is shown.
+    @objc func requestHostLogin(_ call: CAPPluginCall) {
+        guard let requestId = call.getString("requestId"), !requestId.isEmpty else {
+            call.reject("Missing requestId")
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self,
+                  let session = self.sessions.first(where: {
+                      $0.authorizationEvent(requestId: requestId) != nil
+                  }),
+                  session.pauseAuthorizationTimeout(requestId: requestId)
+            else {
+                call.reject("Unknown or expired authorization request")
+                return
+            }
+
+            self.moveToFront(session)
+            guard session.presentingViewController != nil else {
+                call.resolve()
+                return
+            }
+            session.dismiss(animated: true) {
+                self.notifyListeners("browserFinished", data: [:])
+                self.notifySessionsChanged()
+                call.resolve()
+            }
+        }
+    }
+
+    /// Restore the kept-alive WebView and deliver the same validated request
+    /// again. The page Promise is still the original pending authorization.
+    @objc func resumeAuthorizationAfterLogin(_ call: CAPPluginCall) {
+        guard let requestId = call.getString("requestId"), !requestId.isEmpty else {
+            call.reject("Missing requestId")
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self,
+                  let session = self.sessions.first(where: {
+                      $0.authorizationEvent(requestId: requestId) != nil
+                  }),
+                  let event = session.authorizationEvent(requestId: requestId),
+                  let presenter = self.bridge?.viewController
+            else {
+                call.reject("Unknown or expired authorization request")
+                return
+            }
+
+            let deliver = {
+                self.moveToFront(session)
+                self.notifyListeners(
+                    "authorizationRequested",
+                    data: event,
+                    retainUntilConsumed: true)
+                self.notifySessionsChanged()
+                call.resolve()
+            }
+            if session.presentingViewController != nil {
+                deliver()
+                return
+            }
+            guard presenter.presentedViewController == nil else {
+                call.reject("Host login surface is busy")
+                return
+            }
+            presenter.present(session, animated: true, completion: deliver)
+        }
+    }
+
+    /// Cancel the pending page Promise and restore the originating WebView so
+    /// the application can render its ordinary signed-out state.
+    @objc func cancelAuthorizationLogin(_ call: CAPPluginCall) {
+        guard let requestId = call.getString("requestId"), !requestId.isEmpty else {
+            call.reject("Missing requestId")
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self,
+                  let session = self.sessions.first(where: {
+                      $0.authorizationEvent(requestId: requestId) != nil
+                  }),
+                  session.resolveAuthorization(
+                      requestId: requestId,
+                      result: nil,
+                      error: "HOST_AUTH_DENIED"),
+                  let presenter = self.bridge?.viewController
+            else {
+                call.reject("Unknown or expired authorization request")
+                return
+            }
+
+            let finish = {
+                self.moveToFront(session)
+                self.notifySessionsChanged()
+                call.resolve()
+            }
+            if session.presentingViewController != nil {
+                finish()
+                return
+            }
+            guard presenter.presentedViewController == nil else {
+                call.reject("Host login surface is busy")
+                return
+            }
+            presenter.present(session, animated: true, completion: finish)
         }
     }
 
@@ -835,6 +1122,7 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
     /// so it needs the identityChanged event even though there is no native cookie
     /// for this plugin to delete.
     private static let identityAwareHosts: Set<String> = [
+        "ai-sfc.yunle.fun",
         "play.yunle.fun",
         "cms.yunle.fun",
         "wenta.yunle.fun",

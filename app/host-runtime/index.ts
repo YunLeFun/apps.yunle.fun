@@ -70,6 +70,7 @@ export interface HostRuntimePlugin {
   listSessions: () => Promise<{ sessions: HostSession[] }>
   endSession: (options: { id: string }) => Promise<void>
   confirmAuthorization: (options: {
+    requestId: string
     applicationIconUrl?: string
     applicationName: string
     applicationOrigin: string
@@ -81,6 +82,12 @@ export interface HostRuntimePlugin {
     allowed: boolean
     choice?: 'current' | 'other' | 'cancel'
   }>
+  /** 暂停当前页面授权并将云乐坊登录页带到前台。 */
+  requestHostLogin: (options: { requestId: string }) => Promise<void>
+  /** 登录成功后恢复原页面，并重新投递仍然有效的授权请求。 */
+  resumeAuthorizationAfterLogin: (options: { requestId: string }) => Promise<void>
+  /** 用户离开登录页时取消并恢复原页面，避免留下悬空请求。 */
+  cancelAuthorizationLogin: (options: { requestId: string }) => Promise<void>
   authorizeWithOtherAccount: (options: { requestId: string }) => Promise<void>
   resolveAuthorization: (options: {
     requestId: string

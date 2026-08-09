@@ -77,6 +77,7 @@ NUXT_PUBLIC_RUM_DEBUG=true
 - ✅ PV / UV
 - ✅ 用户操作链路（click → request → error）
 - ✅ 用户头像加载失败（`ui.avatar.load_failed`）
+- ✅ 原生 SSO 请求、确认、签码、交付和失败事件（`auth.native_sso.*`）
 - ⬜ 其他自定义业务埋点（登录失败、CloudBase 调用失败）
 
 自定义客户端事件统一通过 `reportClientEvent()` 上报。它会同时写入 WebView
@@ -89,6 +90,9 @@ NUXT_PUBLIC_RUM_DEBUG=true
 | `ext3` | 资源域名                                   |
 
 完整资源路径、查询参数和临时签名不会上报，避免泄露用户标识与访问凭证。
+字段名命中 token、code、nonce、PKCE、Cookie、密码或 secret 时会无条件替换为
+`[redacted]`。原生 SSO 仅用 nonce 的截断 SHA-256 作为 `flow`，可与 Provider 安全审计日志关联，
+但不能反推出原始 nonce。
 
 ## 关键业务埋点建议
 
@@ -101,6 +105,10 @@ NUXT_PUBLIC_RUM_DEBUG=true
 | [`plugins/api.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/api.ts) 401 刷新失败分支                                    | `auth.refresh.failed`    |
 | [`composables/useApps.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useApps.ts) createApp / updateApp catch         | `cloudbase.write.failed` |
 | Capacitor 扫码失败                                                                                                                               | `scan.failed`            |
+
+原生 SSO 已完成埋点，RUM 可按 `surface=native_sso`、`stage`、目标 host、App 版本和匿名 `flow`
+筛选。验收时必须确认成功链路以 `auth.native_sso.completed` 结束，取消链路以
+`auth.native_sso.failed / HOST_AUTH_DENIED` 结束，并且上报正文中没有 code/token/nonce。
 
 ## 验证清单
 

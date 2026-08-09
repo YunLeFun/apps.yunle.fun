@@ -27,8 +27,9 @@ Android 适配器使用平台 `WebView`（`android/app/src/main/java/fun/yunle/a
   样式与生命周期由系统组件控制。
 
 形态在 `viewDidLoad` 定型；设置变更后再打开同一应用时，
-iOS 插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新建；Android 首版只维护
-当前原生 Activity，会话结束后释放 WebView，并固定保留标题栏退出锚，不开放沉浸形态。
+iOS 插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新建；Android 当前只维护
+一个原生 Activity，会话结束后释放 WebView，并通过标题栏右侧「更多」菜单提供分享、
+复制链接、系统浏览器打开、刷新与「结束」，暂不开放沉浸形态。
 
 ### 形态决策优先级
 
@@ -72,7 +73,9 @@ iOS 插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新�
   明暗（`darkContent` / `lightContent`）；无合法主题色时回退 `systemBackground` + `.separator`。
 - **标题栏浮层按钮（最小化 / 返回 / 更多）**：栏内为素色（前景色着色、无背景，统一走
   `styleBarButton`），沉浸模式或 `hideTitleBar` 收起后转悬浮暗色圆钮；「更多」展开面板
-  （`AppInfoSheetController`）含分享 / 复制 / Safari / 刷新 / 详情与「结束」（彻底释放）。
+  在 iOS 由 `AppInfoSheetController`、Android 由 `AppMenuSheet` 实现；两端均含分享 / 复制 /
+  系统浏览器打开 / 刷新与「结束」（彻底释放），并提供站内详情与评价入口。动作 ID、信息顺序、
+  深浅色和辅助功能约束见[原生应用菜单设计规范](../ui/native-app-menu.md)。
 
 ## iOS 生命周期：最小化（压后台）/ 结束
 

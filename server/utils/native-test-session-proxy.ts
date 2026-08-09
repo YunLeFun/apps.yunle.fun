@@ -17,8 +17,6 @@ export interface NativeTestSsoRequest {
   codeChallengeMethod: 'S256'
 }
 
-const NATIVE_TEST_SSO_APP_IDS = new Set(['ai-sfc', 'yunjian'])
-
 export class NativeTestSessionInputError extends Error {
   override name = 'NativeTestSessionInputError'
 }
@@ -102,7 +100,8 @@ async function callBroker(
 
 function assertNativeSsoRequest(request: NativeTestSsoRequest): void {
   const registeredClient = request && FIRST_PARTY_SSO_CLIENTS.find(client => (
-    NATIVE_TEST_SSO_APP_IDS.has(client.appId)
+    'supportsNativeTestSession' in client
+    && client.supportsNativeTestSession === true
     && client.clientId === request.clientId
     && client.origin === request.targetOrigin
     && client.redirectUri === request.returnUrl

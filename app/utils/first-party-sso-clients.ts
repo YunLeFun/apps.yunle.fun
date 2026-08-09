@@ -7,6 +7,7 @@ export interface FirstPartySsoClient {
   redirectUri: string
   scope: readonly ['identity:bootstrap']
   authorizationNotice?: string
+  supportsNativeTestSession?: boolean
 }
 
 /**
@@ -25,6 +26,7 @@ export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
     redirectUri: 'https://ai-sfc.yunle.fun/',
     scope: ['identity:bootstrap'] as const,
     authorizationNotice: '登录本身不会消耗云币；生成春联时会另行提示消耗。',
+    supportsNativeTestSession: true,
   }),
   Object.freeze({
     appId: 'admin',
@@ -66,6 +68,7 @@ export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
     origin: 'https://cms.yunle.fun',
     redirectUri: 'https://cms.yunle.fun/',
     scope: ['identity:bootstrap'] as const,
+    supportsNativeTestSession: true,
   }),
 ] satisfies readonly FirstPartySsoClient[])
 

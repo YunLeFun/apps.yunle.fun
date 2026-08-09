@@ -1,7 +1,10 @@
 import type { HostAppInfo } from '~/host-runtime'
+import type { AppIconAssets } from '~/types/app'
 import { Browser } from '@capacitor/browser'
 import { Capacitor } from '@capacitor/core'
 import { HostRuntime } from '~/host-runtime'
+import { resolveAppIconPresentation } from '~/utils/appIconAssets'
+import { getPublicCloudbaseStorageUrl } from '~/utils/cloudbase-storage-url'
 
 export type {
   HostSession as BackgroundSession,
@@ -10,7 +13,9 @@ export type {
 } from '~/host-runtime'
 
 /** 传递给原生详情面板的应用元信息 */
-export type InAppWebViewAppInfo = HostAppInfo
+export interface InAppWebViewAppInfo extends HostAppInfo {
+  iconAssets?: AppIconAssets
+}
 
 /** Catalog fields required to launch an app without losing its trusted identity. */
 export interface CatalogBrowserApp extends InAppWebViewAppInfo {
@@ -50,6 +55,7 @@ export function openCatalogAppInBrowser(app: CatalogBrowserApp): Promise<void> {
       name: app.name,
       emoji: app.emoji,
       logo: app.logo,
+      iconAssets: app.iconAssets,
       themeColor: app.themeColor,
       description: app.description,
       category: app.category,
@@ -77,13 +83,14 @@ export async function openInAppBrowser(
   }
 
   const { inAppBrowserMode, externalLinkMode } = useSettingsStore()
+  const nativeAppInfo = options?.app ? resolveNativeAppInfo(options.app) : undefined
   if (inAppBrowserMode !== 'system') {
     try {
       await HostRuntime.open({
         url,
         title: options?.title ?? '',
         toolbarColor: options?.toolbarColor,
-        app: options?.app,
+        app: nativeAppInfo,
         // 形态优先级：应用目录声明 > 用户全局设置
         displayMode: options?.displayMode ?? inAppBrowserMode,
         externalLinkMode,
@@ -104,6 +111,25 @@ export async function openInAppBrowser(
     toolbarColor: options?.toolbarColor,
     presentationStyle: options?.presentationStyle || 'fullscreen',
   })
+}
+
+/** Resolve structured catalog assets to the stable HTTPS URL native surfaces accept. */
+function resolveNativeAppInfo(app: InAppWebViewAppInfo): HostAppInfo {
+  const presentation = resolveAppIconPresentation({
+    assets: app.iconAssets,
+    legacyIcon: app.logo,
+    preferOriginal: true,
+  })
+  if (!presentation.source)
+    return app
+
+  const config = useRuntimeConfig()
+  const resolvedLogo = getPublicCloudbaseStorageUrl(
+    presentation.source,
+    config.public.tcbEnvId as string,
+    config.public.cloudbaseStoragePublicOrigin as string,
+  )
+  return resolvedLogo ? { ...app, logo: resolvedLogo } : app
 }
 
 /**

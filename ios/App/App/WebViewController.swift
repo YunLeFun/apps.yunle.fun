@@ -129,6 +129,7 @@ class WebViewController: UIViewController {
         let reply: (Any?, String?) -> Void
         let timeout: DispatchWorkItem
         let request: [String: Any]
+        let sourceOrigin: String
     }
     private var pendingAuthorizations: [String: PendingAuthorization] = [:]
     private var systemAuthenticationSession: ASWebAuthenticationSession?
@@ -738,6 +739,51 @@ class WebViewController: UIViewController {
         return true
     }
 
+    /// The consent sheet has its own user-controlled dwell time. Pause the
+    /// page request deadline while it is visible, then restart the 30 s broker
+    /// deadline only after the user has made a choice.
+    @discardableResult
+    func pauseAuthorizationTimeout(requestId: String) -> Bool {
+        guard let pending = pendingAuthorizations[requestId] else { return false }
+        pending.timeout.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            _ = self?.resolveAuthorization(
+                requestId: requestId,
+                result: nil,
+                error: "authorization timed out")
+        }
+        pendingAuthorizations[requestId] = PendingAuthorization(
+            reply: pending.reply,
+            timeout: timeout,
+            request: pending.request,
+            sourceOrigin: pending.sourceOrigin)
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.authorizationConsentTimeoutSeconds,
+            execute: timeout)
+        return true
+    }
+
+    @discardableResult
+    func resumeAuthorizationTimeout(requestId: String) -> Bool {
+        guard let pending = pendingAuthorizations[requestId] else { return false }
+        pending.timeout.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            _ = self?.resolveAuthorization(
+                requestId: requestId,
+                result: nil,
+                error: "authorization timed out")
+        }
+        pendingAuthorizations[requestId] = PendingAuthorization(
+            reply: pending.reply,
+            timeout: timeout,
+            request: pending.request,
+            sourceOrigin: pending.sourceOrigin)
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.authorizationTimeoutSeconds,
+            execute: timeout)
+        return true
+    }
+
     @discardableResult
     func beginOtherAccountAuthorization(requestId: String) -> Bool {
         guard systemAuthenticationSession == nil,
@@ -807,7 +853,8 @@ class WebViewController: UIViewController {
         pendingAuthorizations[requestId] = PendingAuthorization(
             reply: pending.reply,
             timeout: timeout,
-            request: pending.request)
+            request: pending.request,
+            sourceOrigin: pending.sourceOrigin)
         DispatchQueue.main.asyncAfter(deadline: .now() + 300, execute: timeout)
         systemAuthorization = NativeSsoSystemAuthorization(
             requestId: requestId,
@@ -821,9 +868,20 @@ class WebViewController: UIViewController {
         rejectPendingAuthorizations("browser closed")
     }
 
+    func authorizationEvent(requestId: String) -> [String: Any]? {
+        guard let pending = pendingAuthorizations[requestId] else { return nil }
+        return [
+            "requestId": requestId,
+            "sourceOrigin": pending.sourceOrigin,
+            "appId": appInfo?.id ?? "",
+            "request": pending.request,
+        ]
+    }
+
     func notifyHostIdentityChanged() {
         webView?.evaluateJavaScript(
-            "window.dispatchEvent(new CustomEvent('ylf:identityChanged'))")
+            "window.dispatchEvent(new CustomEvent('ylf:host-identity-changed'));"
+                + "window.dispatchEvent(new CustomEvent('ylf:identityChanged'))")
     }
 
     private func rejectPendingAuthorizations(_ reason: String) {
@@ -1140,8 +1198,11 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             pendingAuthorizations[requestId] = PendingAuthorization(
                 reply: reply,
                 timeout: timeout,
-                request: params)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeout)
+                request: params,
+                sourceOrigin: sourceOrigin)
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + Self.authorizationTimeoutSeconds,
+                execute: timeout)
             onAuthorizationRequest(requestId, sourceOrigin, params)
 
         case "setClipboard":
@@ -1179,6 +1240,9 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
         rect.origin.y -= webView.frame.minY
         return ["x": rect.minX, "y": rect.minY, "width": rect.width, "height": rect.height]
     }
+
+    private static let authorizationTimeoutSeconds: TimeInterval = 30
+    private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
 }
 
 /// WKUserContentController 会强持有 handler，经弱引用代理转发以打破循环引用
@@ -1294,6 +1358,39 @@ extension WebViewController: WKNavigationDelegate {
 
 // MARK: - 应用详情半屏面板（仿小程序「更多」面板）
 
+private enum AppMenuAction: String {
+    case details
+    case share
+    case copyLink = "copy_link"
+    case openBrowser = "open_browser"
+    case reload
+    case end
+
+    var title: String {
+        switch self {
+        case .details: return "查看详情与评价"
+        case .share: return "分享"
+        case .copyLink: return "复制链接"
+        case .openBrowser: return "在 Safari 中打开"
+        case .reload: return "刷新"
+        case .end: return "结束"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .details: return "info.circle"
+        case .share: return "square.and.arrow.up"
+        case .copyLink: return "link"
+        case .openBrowser: return "safari"
+        case .reload: return "arrow.clockwise"
+        case .end: return "xmark"
+        }
+    }
+
+    var isDestructive: Bool { self == .end }
+}
+
 class AppInfoSheetController: UIViewController {
     var appInfo: WebAppInfo?
     var currentURL: URL?
@@ -1303,6 +1400,7 @@ class AppInfoSheetController: UIViewController {
     var onReload: (() -> Void)?
     var onClose: (() -> Void)?
     var onDetail: (() -> Void)?
+    private var iconLoader: BoundedHTTPSImageLoader?
     /// 是否显示评分行（= 查看详情入口）；详情页 sheet 内隐藏，避免循环再弹详情
     var showRatingRow = true
 
@@ -1310,16 +1408,27 @@ class AppInfoSheetController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
 
+        let scroll = UIScrollView()
+        scroll.alwaysBounceVertical = true
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scroll)
+
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 0
         stack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stack)
+        scroll.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            scroll.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scroll.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 20),
+            stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -20),
+            stack.widthAnchor.constraint(equalTo: scroll.frameLayoutGuide.widthAnchor, constant: -40),
         ])
 
         stack.addArrangedSubview(makeHeader())
@@ -1328,7 +1437,8 @@ class AppInfoSheetController: UIViewController {
         if let desc = appInfo?.description, !desc.isEmpty {
             let descLabel = UILabel()
             descLabel.text = desc
-            descLabel.font = .systemFont(ofSize: 13)
+            descLabel.font = scaledFont(size: 13, textStyle: .footnote)
+            descLabel.adjustsFontForContentSizeCategory = true
             descLabel.textColor = .secondaryLabel
             descLabel.numberOfLines = 2
             stack.addArrangedSubview(descLabel)
@@ -1342,19 +1452,17 @@ class AppInfoSheetController: UIViewController {
         stack.setCustomSpacing(6, after: divider)
 
         // 操作行
-        stack.addArrangedSubview(makeActionRow(icon: "square.and.arrow.up", title: "分享") { [weak self] in
+        stack.addArrangedSubview(makeActionRow(.share) { [weak self] in
             self?.dismissThen { self?.onShare?() }
         })
-        stack.addArrangedSubview(makeActionRow(icon: "link", title: "复制链接") { [weak self] in
-            self?.onCopyLink?()
-            self?.dismiss(animated: true)
+        stack.addArrangedSubview(makeActionRow(.copyLink) { [weak self] in
+            self?.dismissThen { self?.onCopyLink?() }
         })
-        stack.addArrangedSubview(makeActionRow(icon: "safari", title: "在 Safari 中打开") { [weak self] in
+        stack.addArrangedSubview(makeActionRow(.openBrowser) { [weak self] in
             self?.dismissThen { self?.onOpenSafari?() }
         })
-        stack.addArrangedSubview(makeActionRow(icon: "arrow.clockwise", title: "刷新") { [weak self] in
-            self?.onReload?()
-            self?.dismiss(animated: true)
+        stack.addArrangedSubview(makeActionRow(.reload) { [weak self] in
+            self?.dismissThen { self?.onReload?() }
         })
 
         // 「结束」彻底释放会话（左上角是「最小化」压后台保活，此处才是真正关闭）
@@ -1364,7 +1472,7 @@ class AppInfoSheetController: UIViewController {
         stack.addArrangedSubview(exitDivider)
         stack.setCustomSpacing(6, after: exitDivider)
 
-        stack.addArrangedSubview(makeActionRow(icon: "xmark", title: "结束") { [weak self] in
+        stack.addArrangedSubview(makeActionRow(.end) { [weak self] in
             self?.dismissThen { self?.onClose?() }
         })
     }
@@ -1379,16 +1487,32 @@ class AppInfoSheetController: UIViewController {
     private func makeHeader() -> UIView {
         let container = UIView()
 
-        // 图标：logo 优先，否则 emoji + 主题色背景
+        // 图标：受限 HTTPS logo 优先，否则用应用名称首字母 + 主题色背景
         let iconView = UIView()
         iconView.layer.cornerRadius = 12
         iconView.clipsToBounds = true
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.backgroundColor = UIColor(hex: appInfo?.themeColor ?? "") ?? .systemBlue
 
-        if let logo = appInfo?.logo, let logoURL = URL(string: logo), !logo.isEmpty {
+        let initialLabel = UILabel()
+        let fallbackName = appInfo?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        initialLabel.text = fallbackName.isEmpty ? "Y" : String(fallbackName.prefix(1))
+        initialLabel.font = .systemFont(ofSize: 22, weight: .semibold)
+        initialLabel.textColor = iconView.backgroundColor?.isLight == true ? .black : .white
+        initialLabel.translatesAutoresizingMaskIntoConstraints = false
+        iconView.addSubview(initialLabel)
+        NSLayoutConstraint.activate([
+            initialLabel.centerXAnchor.constraint(equalTo: iconView.centerXAnchor),
+            initialLabel.centerYAnchor.constraint(equalTo: iconView.centerYAnchor),
+        ])
+
+        if let logo = appInfo?.logo,
+           let logoURL = URL(string: logo),
+           logoURL.scheme?.lowercased() == "https",
+           !logo.isEmpty {
             let imageView = UIImageView()
             imageView.contentMode = .scaleAspectFill
+            imageView.accessibilityLabel = "\(appInfo?.name ?? "应用")图标"
             imageView.translatesAutoresizingMaskIntoConstraints = false
             iconView.addSubview(imageView)
             NSLayoutConstraint.activate([
@@ -1397,29 +1521,30 @@ class AppInfoSheetController: UIViewController {
                 imageView.leadingAnchor.constraint(equalTo: iconView.leadingAnchor),
                 imageView.trailingAnchor.constraint(equalTo: iconView.trailingAnchor),
             ])
-            URLSession.shared.dataTask(with: logoURL) { data, _, _ in
-                guard let data = data, let image = UIImage(data: data) else { return }
-                DispatchQueue.main.async { imageView.image = image }
-            }.resume()
+            let loader = BoundedHTTPSImageLoader(maximumBytes: 2_000_000) { [weak self] data in
+                guard let data, let image = AuthorizationImageDecoder.decode(data) else {
+                    self?.iconLoader = nil
+                    return
+                }
+                DispatchQueue.main.async {
+                    imageView.image = image
+                    initialLabel.isHidden = true
+                    self?.iconLoader = nil
+                }
+            }
+            iconLoader = loader
+            loader.start(url: logoURL)
         }
-        else {
-            let emojiLabel = UILabel()
-            emojiLabel.text = appInfo?.emoji ?? "🌐"
-            emojiLabel.font = .systemFont(ofSize: 26)
-            emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-            iconView.addSubview(emojiLabel)
-            NSLayoutConstraint.activate([
-                emojiLabel.centerXAnchor.constraint(equalTo: iconView.centerXAnchor),
-                emojiLabel.centerYAnchor.constraint(equalTo: iconView.centerYAnchor),
-            ])
-        }
-
         let nameLabel = UILabel()
         nameLabel.text = appInfo?.name.isEmpty == false ? appInfo?.name : (currentURL?.host ?? "")
-        nameLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        nameLabel.font = scaledFont(size: 17, weight: .semibold, textStyle: .headline)
+        nameLabel.adjustsFontForContentSizeCategory = true
+
+        let originView = makeOriginView()
 
         let metaLabel = UILabel()
-        metaLabel.font = .systemFont(ofSize: 13)
+        metaLabel.font = scaledFont(size: 13, textStyle: .footnote)
+        metaLabel.adjustsFontForContentSizeCategory = true
         metaLabel.textColor = .secondaryLabel
         var metaParts: [String] = []
         if let category = appInfo?.category, !category.isEmpty {
@@ -1432,7 +1557,8 @@ class AppInfoSheetController: UIViewController {
 
         let ratingView = showRatingRow ? makeRatingView() : nil
 
-        let textStack = UIStackView(arrangedSubviews: [nameLabel, metaLabel, ratingView].compactMap { $0 })
+        let textStack = UIStackView(
+            arrangedSubviews: [nameLabel, originView, metaLabel, ratingView].compactMap { $0 })
         textStack.axis = .vertical
         textStack.spacing = 3
         textStack.alignment = .leading
@@ -1451,10 +1577,45 @@ class AppInfoSheetController: UIViewController {
             textStack.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
             textStack.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor),
             textStack.centerYAnchor.constraint(equalTo: iconView.centerYAnchor),
+            textStack.topAnchor.constraint(greaterThanOrEqualTo: container.topAnchor),
+            textStack.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor),
             container.heightAnchor.constraint(greaterThanOrEqualToConstant: 52),
         ])
 
         return container
+    }
+
+    private func makeOriginView() -> UIView? {
+        guard let url = currentURL,
+              let scheme = url.scheme?.lowercased(),
+              let host = url.host?.lowercased()
+        else { return nil }
+
+        let port = url.port.map { ":\($0)" } ?? ""
+        let lock = UIImageView(image: UIImage(
+            systemName: "lock.fill",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 10, weight: .medium)))
+        lock.tintColor = .secondaryLabel
+        lock.contentMode = .scaleAspectFit
+        lock.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            lock.widthAnchor.constraint(equalToConstant: 12),
+            lock.heightAnchor.constraint(equalToConstant: 12),
+        ])
+
+        let label = UILabel()
+        label.text = "\(scheme)://\(host)\(port)"
+        label.font = scaledFont(size: 12, textStyle: .caption1)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .secondaryLabel
+        label.lineBreakMode = .byTruncatingTail
+
+        let row = UIStackView(arrangedSubviews: [lock, label])
+        row.axis = .horizontal
+        row.spacing = 4
+        row.alignment = .center
+        row.accessibilityLabel = "已验证应用域名 \(label.text ?? "")"
+        return row
     }
 
     /// 评分行：整行可点击，跳转站内详情页（含评价区）
@@ -1497,7 +1658,8 @@ class AppInfoSheetController: UIViewController {
 
             let scoreLabel = UILabel()
             scoreLabel.text = String(format: rating.truncatingRemainder(dividingBy: 1) == 0 ? "%.0f" : "%.1f", rating)
-            scoreLabel.font = .systemFont(ofSize: 12, weight: .medium)
+            scoreLabel.font = scaledFont(size: 12, weight: .medium, textStyle: .caption1)
+            scoreLabel.adjustsFontForContentSizeCategory = true
             scoreLabel.textColor = .secondaryLabel
             stack.addArrangedSubview(scoreLabel)
             stack.setCustomSpacing(5, after: stack.arrangedSubviews[4])
@@ -1505,7 +1667,8 @@ class AppInfoSheetController: UIViewController {
 
         // 评价数 / 引导文案
         let countLabel = UILabel()
-        countLabel.font = .systemFont(ofSize: 12)
+        countLabel.font = scaledFont(size: 12, textStyle: .caption1)
+        countLabel.adjustsFontForContentSizeCategory = true
         countLabel.textColor = .secondaryLabel
         if info.ratingCount > 0 {
             countLabel.text = rating > 0 ? "· 共 \(info.ratingCount) 条评价" : "共 \(info.ratingCount) 条评价"
@@ -1533,6 +1696,8 @@ class AppInfoSheetController: UIViewController {
         control.rowAction = { [weak self] in
             self?.dismiss(animated: true) { self?.onDetail?() }
         }
+        control.accessibilityIdentifier = AppMenuAction.details.rawValue
+        control.accessibilityLabel = AppMenuAction.details.title
         stack.translatesAutoresizingMaskIntoConstraints = false
         control.addSubview(stack)
         control.translatesAutoresizingMaskIntoConstraints = false
@@ -1540,7 +1705,9 @@ class AppInfoSheetController: UIViewController {
             stack.leadingAnchor.constraint(equalTo: control.leadingAnchor),
             stack.trailingAnchor.constraint(lessThanOrEqualTo: control.trailingAnchor),
             stack.centerYAnchor.constraint(equalTo: control.centerYAnchor),
-            control.heightAnchor.constraint(equalToConstant: 24),
+            stack.topAnchor.constraint(greaterThanOrEqualTo: control.topAnchor, constant: 10),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: control.bottomAnchor, constant: -10),
+            control.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
         ])
 
         return control
@@ -1548,29 +1715,32 @@ class AppInfoSheetController: UIViewController {
 
     // MARK: 操作行
 
-    private func makeActionRow(icon: String, title: String, action: @escaping () -> Void) -> UIView {
+    private func makeActionRow(_ menuAction: AppMenuAction, action: @escaping () -> Void) -> UIView {
         let control = ActionRowControl()
         control.rowAction = action
+        control.accessibilityIdentifier = menuAction.rawValue
+        control.accessibilityLabel = menuAction.title
         control.translatesAutoresizingMaskIntoConstraints = false
 
         // 固定宽度图标列：各 SF Symbol 字形宽度不一，统一居中到 24pt 列内，保证各行标题左缘对齐
-        let iconView = UIImageView(image: UIImage(systemName: icon, withConfiguration:
+        let iconView = UIImageView(image: UIImage(systemName: menuAction.systemImage, withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)))
-        iconView.tintColor = .label
+        iconView.tintColor = menuAction.isDestructive ? .systemRed : .label
         iconView.contentMode = .center
         iconView.translatesAutoresizingMaskIntoConstraints = false
 
         let label = UILabel()
-        label.text = title
-        label.font = .systemFont(ofSize: 15)
-        label.textColor = .label
+        label.text = menuAction.title
+        label.font = scaledFont(size: 15, textStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = menuAction.isDestructive ? .systemRed : .label
         label.translatesAutoresizingMaskIntoConstraints = false
 
         control.addSubview(iconView)
         control.addSubview(label)
 
         NSLayoutConstraint.activate([
-            control.heightAnchor.constraint(equalToConstant: 44),
+            control.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
 
             iconView.leadingAnchor.constraint(equalTo: control.leadingAnchor, constant: 4),
             iconView.centerYAnchor.constraint(equalTo: control.centerYAnchor),
@@ -1578,10 +1748,21 @@ class AppInfoSheetController: UIViewController {
 
             label.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
             label.centerYAnchor.constraint(equalTo: control.centerYAnchor),
+            label.topAnchor.constraint(greaterThanOrEqualTo: control.topAnchor, constant: 8),
+            label.bottomAnchor.constraint(lessThanOrEqualTo: control.bottomAnchor, constant: -8),
             label.trailingAnchor.constraint(lessThanOrEqualTo: control.trailingAnchor, constant: -4),
         ])
 
         return control
+    }
+
+    private func scaledFont(
+        size: CGFloat,
+        weight: UIFont.Weight = .regular,
+        textStyle: UIFont.TextStyle
+    ) -> UIFont {
+        UIFontMetrics(forTextStyle: textStyle).scaledFont(
+            for: .systemFont(ofSize: size, weight: weight))
     }
 }
 

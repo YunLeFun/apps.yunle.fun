@@ -3,11 +3,9 @@ package `fun`.yunle.apps
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -16,15 +14,12 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 import kotlin.math.roundToInt
 
 internal data class AuthorizationSheetContent(
@@ -73,6 +68,10 @@ internal class AuthorizationConsentSheet(
             skipCollapsed = true
             isDraggable = true
         }
+    }
+
+    fun expire() {
+        complete(AuthorizationSheetChoice.CANCEL)
     }
 
     private fun buildLayout(): View {
@@ -217,7 +216,7 @@ internal class AuthorizationConsentSheet(
                 gravity = Gravity.CENTER_HORIZONTAL
             }
         }
-        loadHttpsImage(imageUrl, imageView, fallbackView)
+        BoundedHttpsImageLoader.load(activity, imageUrl, imageView, fallbackView)
 
         return LinearLayout(dialog.context).apply {
             orientation = LinearLayout.VERTICAL
@@ -234,7 +233,9 @@ internal class AuthorizationConsentSheet(
 
     private fun makeOriginRow(): View {
         val lock = DrawableCompat.wrap(
-            activity.getDrawable(android.R.drawable.ic_lock_lock)!!.mutate(),
+            requireNotNull(
+                AppCompatResources.getDrawable(activity, android.R.drawable.ic_lock_lock),
+            ).mutate(),
         )
         DrawableCompat.setTint(lock, secondaryTextColor)
         return makeText(
@@ -357,52 +358,6 @@ internal class AuthorizationConsentSheet(
         gravity = gravityValue
     }
 
-    private fun loadHttpsImage(source: String?, imageView: ImageView, fallback: View) {
-        val safeSource = source ?: return
-        val uri = Uri.parse(safeSource)
-        if (uri.scheme?.lowercase() != "https" || uri.host.isNullOrBlank()) return
-        Thread {
-            val bitmap = runCatching {
-                val connection = URL(safeSource).openConnection() as HttpsURLConnection
-                try {
-                    connection.connectTimeout = 4_000
-                    connection.readTimeout = 4_000
-                    connection.instanceFollowRedirects = false
-                    connection.connect()
-                    if (connection.responseCode !in 200..299) return@runCatching null
-                    if (!connection.contentType.orEmpty().startsWith("image/")) return@runCatching null
-                    val bytes = connection.inputStream.use {
-                        readBounded(it, MAXIMUM_IMAGE_BYTES)
-                    } ?: return@runCatching null
-                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                } finally {
-                    connection.disconnect()
-                }
-            }.getOrNull() ?: return@Thread
-            activity.runOnUiThread {
-                if (!activity.isFinishing && !activity.isDestroyed) {
-                    imageView.setImageBitmap(bitmap)
-                    imageView.visibility = View.VISIBLE
-                    fallback.visibility = View.GONE
-                }
-            }
-        }.start()
-    }
-
-    private fun readBounded(stream: InputStream, maximumBytes: Int): ByteArray? {
-        val output = ByteArrayOutputStream()
-        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-        var total = 0
-        while (true) {
-            val count = stream.read(buffer)
-            if (count < 0) break
-            total += count
-            if (total > maximumBytes) return null
-            output.write(buffer, 0, count)
-        }
-        return output.toByteArray()
-    }
-
     private fun complete(choice: AuthorizationSheetChoice, dismiss: Boolean = true) {
         if (completed) return
         completed = true
@@ -445,7 +400,4 @@ internal class AuthorizationConsentSheet(
 
     private fun dp(value: Float): Int = (value * activity.resources.displayMetrics.density).roundToInt()
 
-    private companion object {
-        const val MAXIMUM_IMAGE_BYTES = 2_000_000
-    }
 }

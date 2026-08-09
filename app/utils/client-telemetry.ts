@@ -11,8 +11,18 @@ type TelemetryValue = boolean | null | number | string | undefined
 const MAX_VALUE_LENGTH = 300
 const BEARER_TOKEN_REGEX = /Bearer\s+[\w.~+/=-]+/gi
 const HTTP_URL_REGEX = /https?:\/\/[^\s"'<>]+/gi
+const SENSITIVE_KEY_REGEX = /(?:^|_)(?:authorization|code|code_challenge|code_verifier|cookie|nonce|password|pkce|refresh_token|secret|token)(?:$|_)/i
 
-function normalizeValue(value: TelemetryValue): boolean | null | number | string {
+function normalizedTelemetryKey(key: string): string {
+  return key
+    .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+    .replace(/[^a-z\d]+/gi, '_')
+    .toLowerCase()
+}
+
+function normalizeValue(key: string, value: TelemetryValue): boolean | null | number | string {
+  if (SENSITIVE_KEY_REGEX.test(normalizedTelemetryKey(key)))
+    return '[redacted]'
   if (value === undefined)
     return ''
   if (typeof value !== 'string')
@@ -21,6 +31,25 @@ function normalizeValue(value: TelemetryValue): boolean | null | number | string
     .replace(BEARER_TOKEN_REGEX, 'Bearer [redacted]')
     .replace(HTTP_URL_REGEX, '[redacted-url]')
     .slice(0, MAX_VALUE_LENGTH)
+}
+
+/**
+ * 生成可跨客户端与服务端关联、但不可反推出 nonce 的短 flow ID。
+ * 监控能力不可用时返回空串，绝不阻断授权主链路。
+ */
+export async function anonymizeTelemetryIdentifier(value: string): Promise<string> {
+  try {
+    const subtle = globalThis.crypto?.subtle
+    if (!subtle || !value)
+      return ''
+    const digest = await subtle.digest('SHA-256', new TextEncoder().encode(value))
+    return Array.from(new Uint8Array(digest).slice(0, 8))
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('')
+  }
+  catch {
+    return ''
+  }
 }
 
 function currentRum(): RumClient | undefined {
@@ -74,7 +103,7 @@ export function reportClientEvent(
   context: Record<string, TelemetryValue> = {},
 ) {
   const normalizedContext = Object.fromEntries(
-    Object.entries(context).map(([key, value]) => [key, normalizeValue(value)]),
+    Object.entries(context).map(([key, value]) => [key, normalizeValue(key, value)]),
   )
   const payload = {
     event: name,

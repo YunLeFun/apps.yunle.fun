@@ -71,3 +71,8 @@
 - Konsta UI：`KonstaProvider` 的 `:dark` prop
 - Ionic：`.ion-palette-dark` CSS class
 - 统一由 `@nuxtjs/color-mode` 管理
+
+## 原生宿主表面
+
+- [原生应用授权面板](./native-authorization-sheet.md)：账号授权、切换账号与未登录回跳。
+- [原生应用菜单](./native-app-menu.md)：应用身份、分享、详情、刷新与会话结束。

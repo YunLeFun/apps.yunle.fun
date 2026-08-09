@@ -12,9 +12,23 @@ const h = vi.hoisted(() => ({
     expiresAt: number
     account: { publicAlias: string, virtualPhone: string, displayName: string }
   },
+  navigateTo: vi.fn(),
+  requestHostLogin: vi.fn(),
   resolveAuthorization: vi.fn(),
   fetch: vi.fn(),
+  telemetryEvents: [] as Array<{
+    context: Record<string, unknown>
+    name: string
+  }>,
   userInfo: { nickname: '云游君', avatar: '' },
+}))
+
+const sessionStorageValues = new Map<string, string>()
+
+vi.mock('@capacitor/app', () => ({
+  App: {
+    getInfo: vi.fn().mockResolvedValue({ build: '42', version: '1.2.3' }),
+  },
 }))
 
 vi.mock('@capacitor/core', () => ({
@@ -32,8 +46,16 @@ vi.mock('../../app/host-runtime', () => ({
     }),
     authorizeWithOtherAccount: h.authorizeWithOtherAccount,
     confirmAuthorization: h.confirmAuthorization,
+    requestHostLogin: h.requestHostLogin,
     resolveAuthorization: h.resolveAuthorization,
   },
+}))
+
+vi.mock('../../app/utils/client-telemetry', () => ({
+  anonymizeTelemetryIdentifier: vi.fn().mockResolvedValue('flow-1234567890'),
+  reportClientEvent: vi.fn((name: string, context: Record<string, unknown>) => {
+    h.telemetryEvents.push({ context, name })
+  }),
 }))
 
 vi.stubGlobal('defineNuxtPlugin', (setup: () => void) => {
@@ -51,6 +73,7 @@ vi.stubGlobal('useUserStore', () => ({
   nativeTestSession: h.nativeTestSession,
   clearNativeTestSession: vi.fn(),
 }))
+vi.stubGlobal('navigateTo', h.navigateTo)
 vi.stubGlobal('$fetch', h.fetch)
 vi.stubGlobal('useNuxtApp', () => ({ $api: h.fetch }))
 
@@ -82,8 +105,26 @@ const consentRequest: HostAuthorizationEvent = {
 describe('apps host identity broker consent', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    sessionStorageValues.clear()
+    vi.stubGlobal('window', {
+      sessionStorage: {
+        getItem: (key: string) => sessionStorageValues.get(key) ?? null,
+        removeItem: (key: string) => sessionStorageValues.delete(key),
+        setItem: (key: string, value: string) => sessionStorageValues.set(key, value),
+      },
+    })
     h.nativeTestSession = undefined
+    h.telemetryEvents.length = 0
     h.userInfo = { nickname: '云游君', avatar: '' }
+    h.getSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'apps-access-token',
+          user: { is_anonymous: false },
+        },
+      },
+      error: null,
+    })
     h.confirmAuthorization.mockResolvedValue({ allowed: false })
     if (!h.authorizationHandler)
       await import('../../app/plugins/identity-broker.client')
@@ -94,6 +135,7 @@ describe('apps host identity broker consent', () => {
     await h.authorizationHandler?.(consentRequest)
 
     expect(h.confirmAuthorization).toHaveBeenCalledWith({
+      requestId: consentRequest.requestId,
       applicationName: '云笺',
       applicationOrigin: 'https://cms.yunle.fun',
       accountName: '云游君',
@@ -104,6 +146,14 @@ describe('apps host identity broker consent', () => {
       requestId: consentRequest.requestId,
       error: 'HOST_AUTH_DENIED',
     })
+    expect(h.telemetryEvents).toContainEqual(expect.objectContaining({
+      context: expect.objectContaining({
+        outcome: 'denied',
+        requestId: consentRequest.requestId,
+        stage: 'consent',
+      }),
+      name: 'auth.native_sso.failed',
+    }))
   })
 
   it('mints and returns only a one-time code after consent', async () => {
@@ -123,6 +173,27 @@ describe('apps host identity broker consent', () => {
         issuer: 'https://www.yunle.fun',
       },
     })
+    expect(h.telemetryEvents.map(event => event.name)).toEqual(expect.arrayContaining([
+      'auth.native_sso.requested',
+      'auth.native_sso.validated',
+      'auth.native_sso.prompted',
+      'auth.native_sso.consent_decided',
+      'auth.native_sso.code_issued',
+      'auth.native_sso.completed',
+    ]))
+    expect(h.telemetryEvents).toContainEqual(expect.objectContaining({
+      context: expect.objectContaining({
+        clientId: 'cms-web',
+        flow: 'flow-1234567890',
+        outcome: 'success',
+        requestId: consentRequest.requestId,
+        stage: 'deliver_code',
+      }),
+      name: 'auth.native_sso.completed',
+    }))
+    const telemetry = JSON.stringify(h.telemetryEvents)
+    expect(telemetry).not.toContain(consentRequest.request.nonce)
+    expect(telemetry).not.toContain('c'.repeat(43))
   })
 
   it('hands other-account authorization to the platform system session', async () => {
@@ -154,6 +225,7 @@ describe('apps host identity broker consent', () => {
 
     expect(h.getSession).not.toHaveBeenCalled()
     expect(h.confirmAuthorization).toHaveBeenCalledWith({
+      requestId: consentRequest.requestId,
       applicationName: '云笺',
       applicationOrigin: 'https://cms.yunle.fun',
       accountName: 'native-sso-smoke@yunlefun',
@@ -188,6 +260,31 @@ describe('apps host identity broker consent', () => {
     expect(h.resolveAuthorization).not.toHaveBeenCalled()
   })
 
+  it('keeps the page request pending and opens local Apps login when signed out', async () => {
+    h.getSession.mockResolvedValue({ data: { session: null }, error: null })
+    h.requestHostLogin.mockResolvedValue(undefined)
+
+    await h.authorizationHandler?.(consentRequest)
+
+    expect(h.requestHostLogin).toHaveBeenCalledWith({
+      requestId: consentRequest.requestId,
+    })
+    expect(h.navigateTo).toHaveBeenCalledWith({
+      path: '/login',
+      query: { returnTo: 'native-authorization' },
+    })
+    expect(h.confirmAuthorization).not.toHaveBeenCalled()
+    expect(h.callFunction).not.toHaveBeenCalled()
+    expect(h.resolveAuthorization).not.toHaveBeenCalled()
+    expect(h.telemetryEvents).toContainEqual(expect.objectContaining({
+      context: expect.objectContaining({
+        outcome: 'host_login',
+        stage: 'host_login',
+      }),
+      name: 'auth.native_sso.handed_off',
+    }))
+  })
+
   it('passes the AI SFC cost notice from the trusted registry to native UI', async () => {
     h.confirmAuthorization.mockResolvedValue({ allowed: false })
     h.userInfo = {
@@ -207,6 +304,7 @@ describe('apps host identity broker consent', () => {
     })
 
     expect(h.confirmAuthorization).toHaveBeenCalledWith({
+      requestId: consentRequest.requestId,
       applicationIconUrl: 'https://ai-sfc.yunle.fun/brand/ai-sfc-logo-256.png',
       applicationName: 'AI 春联',
       applicationOrigin: 'https://ai-sfc.yunle.fun',

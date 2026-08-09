@@ -23,6 +23,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
@@ -45,7 +46,7 @@ class HostWebViewActivity : AppCompatActivity() {
     private lateinit var toolbar: LinearLayout
     private lateinit var backButton: Button
     private lateinit var titleView: TextView
-    private lateinit var closeButton: Button
+    private lateinit var menuButton: Button
     private lateinit var progressView: ProgressBar
 
     private var initialUrl = ""
@@ -61,6 +62,8 @@ class HostWebViewActivity : AppCompatActivity() {
     private val pendingAuthorizations = mutableMapOf<String, PendingAuthorization>()
     private var systemAuthorization: SystemAuthorization? = null
     private var systemAuthorizationWasPaused = false
+    private var activityResumed = false
+    private val resumeActions = mutableListOf<() -> Unit>()
 
     val sessionKey: String
         get() = appInfo.getString("id")?.takeIf { it.isNotBlank() } ?: initialUrl
@@ -134,6 +137,41 @@ class HostWebViewActivity : AppCompatActivity() {
         return true
     }
 
+    internal fun pauseAuthorizationTimeout(requestId: String): Boolean {
+        val pending = pendingAuthorizations[requestId] ?: return false
+        mainHandler.removeCallbacks(pending.timeout)
+        val timeout = Runnable {
+            resolveAuthorization(requestId, null, "authorization timed out")
+        }
+        pendingAuthorizations[requestId] = pending.copy(timeout = timeout)
+        mainHandler.postDelayed(timeout, AUTHORIZATION_CONSENT_TIMEOUT_MS)
+        return true
+    }
+
+    internal fun resumeAuthorizationTimeout(requestId: String): Boolean {
+        val pending = pendingAuthorizations[requestId] ?: return false
+        mainHandler.removeCallbacks(pending.timeout)
+        val timeout = Runnable {
+            resolveAuthorization(requestId, null, "authorization timed out")
+        }
+        pendingAuthorizations[requestId] = pending.copy(timeout = timeout)
+        mainHandler.postDelayed(timeout, AUTHORIZATION_TIMEOUT_MS)
+        return true
+    }
+
+    internal fun authorizationEvent(requestId: String): JSObject? {
+        val pending = pendingAuthorizations[requestId] ?: return null
+        return JSObject()
+            .put("requestId", requestId)
+            .put("sourceOrigin", pending.sourceOrigin)
+            .put("appId", appInfo.getString("id") ?: "")
+            .put("request", pending.request)
+    }
+
+    internal fun runWhenResumed(action: () -> Unit) {
+        if (activityResumed) action() else resumeActions.add(action)
+    }
+
     internal fun beginOtherAccountAuthorization(requestId: String): Boolean {
         if (systemAuthorization != null) return false
         val pending = pendingAuthorizations[requestId] ?: return false
@@ -183,7 +221,8 @@ class HostWebViewActivity : AppCompatActivity() {
         val host = Uri.parse(webView.url ?: initialUrl).host?.lowercase()
         if (host !in IDENTITY_AWARE_HOSTS) return
         webView.evaluateJavascript(
-            "window.dispatchEvent(new CustomEvent('ylf:host-identity-changed'))",
+            "window.dispatchEvent(new CustomEvent('ylf:host-identity-changed'));" +
+                "window.dispatchEvent(new CustomEvent('ylf:identityChanged'))",
             null,
         )
     }
@@ -193,8 +232,8 @@ class HostWebViewActivity : AppCompatActivity() {
         if (!isSupportedUrl(url, isDebuggable())) return false
         initialUrl = url
         customTitle = options.getString("title") ?: ""
-        // Android keeps a native exit anchor until its draggable capsule reaches
-        // feature parity with iOS. Pages can detect the titlebar result via getEnv.
+        // Android currently supports the shared title-bar contract. Immersive
+        // chrome remains disabled until its draggable capsule reaches iOS parity.
         displayMode = "titlebar"
         externalLinkMode = options.getString("externalLinkMode")
             ?.takeIf { it == "default-browser" || it == "safari-view" }
@@ -240,18 +279,19 @@ class HostWebViewActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             maxLines = 1
         }
-        closeButton = Button(this).apply {
-            text = "关闭"
-            contentDescription = "关闭"
+        menuButton = Button(this).apply {
+            text = "•••"
+            textSize = 17f
+            contentDescription = "更多"
             isAllCaps = false
             minWidth = 0
             minHeight = 0
             setBackgroundColor(Color.TRANSPARENT)
-            setOnClickListener { finish() }
+            setOnClickListener { showAppMenu() }
         }
         toolbar.addView(backButton, LinearLayout.LayoutParams(dp(56), dp(56)))
         toolbar.addView(titleView, LinearLayout.LayoutParams(0, dp(56), 1f))
-        toolbar.addView(closeButton, LinearLayout.LayoutParams(dp(64), dp(56)))
+        toolbar.addView(menuButton, LinearLayout.LayoutParams(dp(56), dp(56)))
 
         progressView = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
@@ -288,7 +328,68 @@ class HostWebViewActivity : AppCompatActivity() {
         toolbar.setBackgroundColor(backgroundColor)
         backButton.setTextColor(foregroundColor)
         titleView.setTextColor(foregroundColor)
-        closeButton.setTextColor(foregroundColor)
+        menuButton.setTextColor(foregroundColor)
+    }
+
+    private fun showAppMenu() {
+        val currentUri = Uri.parse(webView.url ?: initialUrl)
+        val currentUrl = currentUri.toString()
+        val applicationName = appInfo.getString("name")
+            ?.takeIf { it.isNotBlank() }
+            ?: customTitle.ifBlank { currentUri.host ?: "云乐坊应用" }
+        val applicationKey = (appInfo.getString("slug") ?: appInfo.getString("id"))
+            ?.takeIf { it.isNotBlank() }
+        AppMenuSheet(
+            activity = this,
+            content = AppMenuContent(
+                applicationName = applicationName,
+                applicationOrigin = exactOrigin(currentUri),
+                applicationIconUrl = appInfo.getString("logo")?.takeIf { it.isNotBlank() },
+                themeColor = appInfo.getString("themeColor")?.takeIf { it.isNotBlank() },
+                description = appInfo.getString("description")?.takeIf { it.isNotBlank() },
+                detailsAvailable = applicationKey != null,
+            ),
+            onAction = { action ->
+                when (action) {
+                    AppMenuAction.DETAILS -> applicationKey?.let(::openAppDetails)
+                    AppMenuAction.SHARE -> {
+                        val share = Intent(Intent.ACTION_SEND)
+                            .setType("text/plain")
+                            .putExtra(Intent.EXTRA_SUBJECT, applicationName)
+                            .putExtra(Intent.EXTRA_TEXT, currentUrl)
+                        startActivity(Intent.createChooser(share, "分享 $applicationName"))
+                    }
+                    AppMenuAction.COPY_LINK -> {
+                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText(applicationName, currentUrl))
+                        Toast.makeText(this, "链接已复制", Toast.LENGTH_SHORT).show()
+                    }
+                    AppMenuAction.OPEN_BROWSER -> {
+                        runCatching { startActivity(Intent(Intent.ACTION_VIEW, currentUri)) }
+                    }
+                    AppMenuAction.RELOAD -> webView.reload()
+                    AppMenuAction.END -> finish()
+                }
+            },
+        ).show()
+    }
+
+    private fun openAppDetails(applicationKey: String) {
+        val detailsUri = Uri.Builder()
+            .scheme("https")
+            .authority("apps.yunle.fun")
+            .appendPath("app")
+            .appendPath(applicationKey)
+            .fragment("reviews")
+            .build()
+        runCatching {
+            CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+                .launchUrl(this, detailsUri)
+        }.onFailure {
+            runCatching { startActivity(Intent(Intent.ACTION_VIEW, detailsUri)) }
+        }
     }
 
     @Suppress("SetJavaScriptEnabled")
@@ -473,6 +574,7 @@ class HostWebViewActivity : AppCompatActivity() {
             replyProxy,
             timeout,
             request,
+            exactOrigin(sourceOrigin),
         )
         mainHandler.postDelayed(timeout, AUTHORIZATION_TIMEOUT_MS)
         plugin.requestAuthorization(
@@ -502,6 +604,7 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     private fun replySuccess(messageId: String, proxy: JavaScriptReplyProxy, result: Any) {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return
         proxy.postMessage(
             JSObject()
                 .put("id", messageId)
@@ -512,6 +615,7 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     private fun replyError(messageId: String, proxy: JavaScriptReplyProxy, error: String) {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return
         proxy.postMessage(
             JSObject()
                 .put("id", messageId)
@@ -571,12 +675,17 @@ class HostWebViewActivity : AppCompatActivity() {
         applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
     override fun onPause() {
+        activityResumed = false
         if (systemAuthorization != null) systemAuthorizationWasPaused = true
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        activityResumed = true
+        val actions = resumeActions.toList()
+        resumeActions.clear()
+        actions.forEach { it() }
         val active = systemAuthorization
         if (active != null && systemAuthorizationWasPaused) {
             mainHandler.postDelayed({
@@ -603,6 +712,7 @@ class HostWebViewActivity : AppCompatActivity() {
         val replyProxy: JavaScriptReplyProxy,
         val timeout: Runnable,
         val request: JSObject,
+        val sourceOrigin: String,
     )
 
     private data class SystemAuthorization(
@@ -616,11 +726,13 @@ class HostWebViewActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_OPTIONS = "fun.yunle.apps.host_runtime_options"
         private const val AUTHORIZATION_TIMEOUT_MS = 30_000L
+        private const val AUTHORIZATION_CONSENT_TIMEOUT_MS = 5 * 60_000L
         private const val SYSTEM_AUTHORIZATION_TIMEOUT_MS = 5 * 60_000L
         private const val SYSTEM_AUTHORIZATION_RETURN_GRACE_MS = 750L
 
         private val FIRST_PARTY_HOSTS = setOf("yunle.fun", "yunyoujun.cn")
         private val IDENTITY_AWARE_HOSTS = setOf(
+            "ai-sfc.yunle.fun",
             "play.yunle.fun",
             "cms.yunle.fun",
             "wenta.yunle.fun",

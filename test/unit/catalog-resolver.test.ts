@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createCatalogResolver } from '../../server/domain/catalog'
-import { createCloudbaseCatalogDataSource } from '../../server/domain/catalog/cloudbase'
+import {
+  catalogAppViewToRecord,
+  createCloudbaseCatalogDataSource,
+} from '../../server/domain/catalog/cloudbase'
 
 describe('catalogResolver', () => {
   it('projects access and release metadata from an approved revision', async () => {
@@ -12,6 +15,7 @@ describe('catalogResolver', () => {
         snapshot: {
           name: '星纸',
           slug: 'paper-star',
+          githubRepo: 'YunLeFun/play',
           accessMode: 'public',
           releaseStage: 'beta',
         },
@@ -28,11 +32,30 @@ describe('catalogResolver', () => {
     await expect(source.getRevisions(['revision-approved'])).resolves.toEqual([
       expect.objectContaining({
         snapshot: expect.objectContaining({
+          githubRepo: 'YunLeFun/play',
           accessMode: 'public',
           releaseStage: 'beta',
         }),
       }),
     ])
+  })
+
+  it('keeps the approved repository link in the public record', () => {
+    const record = catalogAppViewToRecord({
+      _id: 'app-1',
+      ownerUid: 'owner-1',
+      ownerLogin: 'YunYouJun',
+      revisionId: 'revision-approved',
+      name: 'SMAP 星际导航',
+      slug: 'smap',
+      githubRepo: 'YunYouJun/smap',
+      audience: 'public',
+      publicationStatus: 'published',
+      createdAt: 1,
+      updatedAt: 2,
+    })
+
+    expect(record.githubRepo).toBe('YunYouJun/smap')
   })
 
   it('uses the approved revision for the public market instead of the owner current revision', async () => {

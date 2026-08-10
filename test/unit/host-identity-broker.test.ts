@@ -48,7 +48,7 @@ describe('host identity broker', () => {
       },
     })).toEqual({
       appId: 'yunjian',
-      applicationName: '云笺',
+      applicationName: '云栈',
       applicationOrigin: 'https://cms.yunle.fun',
       clientId: 'cms-web',
       codeChallenge: request.request.codeChallenge,

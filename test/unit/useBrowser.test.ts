@@ -83,7 +83,7 @@ describe('openInAppBrowser 形态优先级', () => {
     await openCatalogAppInBrowser({
       id: 'catalog-record-123',
       slug: 'cms',
-      name: '云笺',
+      name: '云栈',
       websiteUrl: 'https://cms.yunle.fun',
       emoji: '📝',
       description: '内容编辑平台',
@@ -92,11 +92,11 @@ describe('openInAppBrowser 形态优先级', () => {
 
     expect(mockInAppOpen).toHaveBeenCalledWith(expect.objectContaining({
       url: 'https://cms.yunle.fun',
-      title: '云笺',
+      title: '云栈',
       app: expect.objectContaining({
         id: 'cms',
         slug: 'cms',
-        name: '云笺',
+        name: '云栈',
       }),
       trustedHosts: ['cms.yunle.fun'],
     }))

@@ -125,7 +125,7 @@ describe('apps host identity broker consent', () => {
 
     expect(h.confirmAuthorization).toHaveBeenCalledWith({
       requestId: consentRequest.requestId,
-      applicationName: '云笺',
+      applicationName: '云栈',
       applicationOrigin: 'https://cms.yunle.fun',
       accountName: '云游君',
       permissionDescription: '账号标识、昵称和头像',

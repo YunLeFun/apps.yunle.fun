@@ -7,13 +7,39 @@ export const GENERATED_APPS: YlfAppInfo[] = [
   {
     "id": "yunjian",
     "slug": "yunjian",
-    "name": "云笺",
+    "name": "云栈",
     "emoji": "📝",
-    "themeColor": "#6366F1",
+    "themeColor": "#35566b",
     "websiteUrl": "https://cms.yunle.fun/",
     "description": "面向 Valaxy、VitePress 与 Git 内容站点的轻量内容工作台",
     "logo": "https://cms.yunle.fun/icon.svg",
     "category": "效率工具",
+    "developer": "YunYouJun"
+  },
+  {
+    "id": "smap",
+    "slug": "smap",
+    "name": "SMAP 星际导航",
+    "emoji": "🪐",
+    "themeColor": "#061B2B",
+    "websiteUrl": "https://smap.yunle.fun/",
+    "description": "以移动地图应用的交互方式规划星际路线、探索与出行",
+    "logo": "https://smap.yunle.fun/smap-logo.svg",
+    "category": "工具",
+    "developer": "yunyoujun"
+  },
+  {
+    "id": "ai-sfc",
+    "slug": "ai-sfc",
+    "name": "AI 春联",
+    "emoji": "🧧",
+    "themeColor": "#ff4444",
+    "websiteUrl": "https://ai-sfc.yunle.fun/",
+    "description": "AI 春联生成器，让 AI 帮你写春联",
+    "logo": "https://ai-sfc.yunle.fun/brand/ai-sfc-logo-256.png",
+    "category": "应用",
+    "rating": 4.7,
+    "age": "4+",
     "developer": "YunYouJun"
   },
   {
@@ -241,19 +267,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "基于 K-Means 色彩聚类提取主题色",
     "category": "应用",
     "rating": 4.6,
-    "age": "4+",
-    "developer": "YunYouJun"
-  },
-  {
-    "id": "ai-sfc",
-    "slug": "ai-sfc",
-    "name": "AI 春联",
-    "emoji": "🧧",
-    "themeColor": "#ff4444",
-    "websiteUrl": "https://ai-sfc.yunyoujun.cn",
-    "description": "AI 春联生成器，让 AI 帮你写春联",
-    "category": "应用",
-    "rating": 4.7,
     "age": "4+",
     "developer": "YunYouJun"
   },

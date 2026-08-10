@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getAppById } from '../../app/constants/apps'
+import { resolveAppIconPresentation } from '../../app/utils/appIconAssets'
 import { findFirstPartySsoClient } from '../../app/utils/first-party-sso-clients'
 
 describe('offline app catalog snapshot', () => {
@@ -13,7 +14,11 @@ describe('offline app catalog snapshot', () => {
       websiteUrl: 'https://cms.yunle.fun/',
     })
     expect(app?.iconAssets?.appIcon?.src).toBe('/app-icons/cms-app-icon.svg')
-    expect(app?.iconAssets?.mark?.src).toBe('/app-icons/cms-mark.svg')
+    expect(app?.iconAssets?.mark).toBeUndefined()
+    expect(resolveAppIconPresentation({ assets: app?.iconAssets })).toEqual({
+      role: 'app-icon',
+      source: '/app-icons/cms-app-icon.svg',
+    })
     expect(findFirstPartySsoClient('yunjian', 'https://cms.yunle.fun')).toMatchObject({
       displayName: '云栈',
     })

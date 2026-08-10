@@ -175,6 +175,16 @@ describe('native WebView authorization boundary', () => {
     expect(androidWebView).toContain('CustomTabsIntent.Builder()')
   })
 
+  it('opens trusted external OAuth in a state-bound system authentication session', () => {
+    expect(native).toContain('"openAuthSession": .trusted')
+    expect(native).toContain('NativeExternalAuthorizationProtocol.readRequest')
+    expect(native).toContain('callback.path == "/external"')
+    expect(native).toContain('ASWebAuthenticationSession(')
+    expect(androidWebView).toContain('"openAuthSession" to JsapiAccess.TRUSTED')
+    expect(androidWebView).toContain('ExternalAuthProtocol.readRequest')
+    expect(androidManifest).toContain('android:path="/external"')
+  })
+
   it('binds Android sensitive calls to an unforgeable main-frame source origin', () => {
     expect(androidWebView).toContain('WebViewCompat.addWebMessageListener(')
     expect(androidWebView).toContain('sourceOrigin: Uri')

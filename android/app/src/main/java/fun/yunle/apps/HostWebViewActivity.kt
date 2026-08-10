@@ -61,6 +61,7 @@ class HostWebViewActivity : AppCompatActivity() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingAuthorizations = mutableMapOf<String, PendingAuthorization>()
     private var systemAuthorization: SystemAuthorization? = null
+    private var systemExternalAuthorization: SystemExternalAuthorization? = null
     private var systemAuthorizationWasPaused = false
     private var activityResumed = false
     private val resumeActions = mutableListOf<() -> Unit>()
@@ -129,6 +130,7 @@ class HostWebViewActivity : AppCompatActivity() {
         val pending = pendingAuthorizations.remove(requestId) ?: return false
         mainHandler.removeCallbacks(pending.timeout)
         if (systemAuthorization?.requestId == requestId) systemAuthorization = null
+        if (systemExternalAuthorization?.requestId == requestId) systemExternalAuthorization = null
         if (error != null) {
             replyError(pending.messageId, pending.replyProxy, error)
         } else {
@@ -173,7 +175,7 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     internal fun beginOtherAccountAuthorization(requestId: String): Boolean {
-        if (systemAuthorization != null) return false
+        if (systemAuthorization != null || systemExternalAuthorization != null) return false
         val pending = pendingAuthorizations[requestId] ?: return false
         val request = readSystemAuthorizationRequest(pending.request) ?: return false
         val state = randomBase64Url()
@@ -201,6 +203,22 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     internal fun deliverSystemAuthorizationCallback(uri: Uri) {
+        val external = systemExternalAuthorization
+        if (external != null) {
+            when (ExternalAuthProtocol.readCallback(uri.toString(), external.state)) {
+                ExternalAuthProtocol.Status.SUCCESS -> resolveAuthorization(
+                    external.requestId,
+                    JSObject().put("ok", true).put("state", external.state),
+                    null,
+                )
+                ExternalAuthProtocol.Status.DENIED ->
+                    resolveAuthorization(external.requestId, null, "EXTERNAL_AUTH_DENIED")
+                ExternalAuthProtocol.Status.ERROR ->
+                    resolveAuthorization(external.requestId, null, "EXTERNAL_AUTH_FAILED")
+                null -> return
+            }
+            return
+        }
         val active = systemAuthorization ?: return
         when (val result = HostSsoProtocol.readCallback(uri.toString(), active.state, active.request)) {
             is HostSsoProtocol.Result.Success -> resolveAuthorization(
@@ -551,7 +569,49 @@ class HostWebViewActivity : AppCompatActivity() {
                 }
             }
             "authorize" -> beginAuthorization(messageId, replyProxy, sourceOrigin, params)
+            "openAuthSession" -> beginExternalAuthorization(messageId, replyProxy, sourceOrigin, params)
         }
+    }
+
+    private fun beginExternalAuthorization(
+        messageId: String,
+        replyProxy: JavaScriptReplyProxy,
+        sourceOrigin: Uri,
+        input: JSObject,
+    ) {
+        if (systemAuthorization != null || systemExternalAuthorization != null) {
+            replyError(messageId, replyProxy, "EXTERNAL_AUTH_UNAVAILABLE")
+            return
+        }
+        val request = ExternalAuthProtocol.readRequest(input, isDebuggable())
+        if (request == null) {
+            replyError(messageId, replyProxy, "EXTERNAL_AUTH_INVALID_REQUEST")
+            return
+        }
+        val requestId = UUID.randomUUID().toString().lowercase()
+        val timeout = Runnable {
+            resolveAuthorization(requestId, null, "EXTERNAL_AUTH_FAILED")
+        }
+        pendingAuthorizations[requestId] = PendingAuthorization(
+            messageId,
+            replyProxy,
+            timeout,
+            input,
+            exactOrigin(sourceOrigin),
+        )
+        val launched = runCatching {
+            CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+                .launchUrl(this, Uri.parse(request.url))
+        }.isSuccess
+        if (!launched) {
+            resolveAuthorization(requestId, null, "EXTERNAL_AUTH_UNAVAILABLE")
+            return
+        }
+        mainHandler.postDelayed(timeout, SYSTEM_AUTHORIZATION_TIMEOUT_MS)
+        systemExternalAuthorization = SystemExternalAuthorization(requestId, request.state)
+        systemAuthorizationWasPaused = false
     }
 
     private fun beginAuthorization(
@@ -627,6 +687,7 @@ class HostWebViewActivity : AppCompatActivity() {
 
     private fun cancelPendingAuthorizations(reason: String) {
         systemAuthorization = null
+        systemExternalAuthorization = null
         val pending = pendingAuthorizations.values.toList()
         pendingAuthorizations.clear()
         pending.forEach {
@@ -676,7 +737,9 @@ class HostWebViewActivity : AppCompatActivity() {
 
     override fun onPause() {
         activityResumed = false
-        if (systemAuthorization != null) systemAuthorizationWasPaused = true
+        if (systemAuthorization != null || systemExternalAuthorization != null) {
+            systemAuthorizationWasPaused = true
+        }
         super.onPause()
     }
 
@@ -687,10 +750,14 @@ class HostWebViewActivity : AppCompatActivity() {
         resumeActions.clear()
         actions.forEach { it() }
         val active = systemAuthorization
-        if (active != null && systemAuthorizationWasPaused) {
+        val external = systemExternalAuthorization
+        if ((active != null || external != null) && systemAuthorizationWasPaused) {
             mainHandler.postDelayed({
-                if (systemAuthorization === active) {
+                if (active != null && systemAuthorization === active) {
                     resolveAuthorization(active.requestId, null, "HOST_AUTH_DENIED")
+                }
+                if (external != null && systemExternalAuthorization === external) {
+                    resolveAuthorization(external.requestId, null, "EXTERNAL_AUTH_CANCELLED")
                 }
             }, SYSTEM_AUTHORIZATION_RETURN_GRACE_MS)
         }
@@ -721,6 +788,11 @@ class HostWebViewActivity : AppCompatActivity() {
         val request: HostSsoProtocol.Request,
     )
 
+    private data class SystemExternalAuthorization(
+        val requestId: String,
+        val state: String,
+    )
+
     private enum class JsapiAccess { OPEN, TRUSTED }
 
     companion object {
@@ -748,6 +820,7 @@ class HostWebViewActivity : AppCompatActivity() {
             "setCapsuleVisible" to JsapiAccess.OPEN,
             "close" to JsapiAccess.OPEN,
             "authorize" to JsapiAccess.TRUSTED,
+            "openAuthSession" to JsapiAccess.TRUSTED,
             "setClipboard" to JsapiAccess.TRUSTED,
         )
 
@@ -777,11 +850,12 @@ class HostWebViewActivity : AppCompatActivity() {
                 })
               }
               window.ylf = {
-                version: 5,
+                version: 6,
                 inYunleApp: true,
                 invoke: invoke,
                 canIUse: function (method) { return invoke('canIUse', { method: method }) },
                 authorize: function (params) { return invoke('authorize', params) },
+                openAuthSession: function (params) { return invoke('openAuthSession', params) },
                 getEnv: function () { return invoke('getEnv') },
                 hideCapsule: function () { return invoke('setCapsuleVisible', { visible: false }) },
                 showCapsule: function () { return invoke('setCapsuleVisible', { visible: true }) },

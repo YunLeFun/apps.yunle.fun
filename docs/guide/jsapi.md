@@ -84,6 +84,7 @@ if (window.ylf?.inYunleApp) {
 | `showTitleBar()`          | 公开 | 恢复标题栏                                                   |
 | `closeBrowser()`          | 公开 | 关闭浏览器，返回云乐坊                                       |
 | `authorize(params)`       | 授信 | 为精确注册的第一方客户端申请短时、单次 SSO code              |
+| `openAuthSession(params)` | 授信 | 在系统认证组件中完成 GitHub OAuth，并校验固定原生回调        |
 | `setClipboard(text)`      | 授信 | 写入系统剪贴板（如复制兑换码）                               |
 
 ```ts
@@ -127,9 +128,21 @@ interface YlfJSAPI {
     /** consent 展示当前账号授权；select_account 直接打开系统账号选择。 */
     prompt?: 'consent' | 'select_account'
   }) => Promise<{ ok: true, code: string, issuer: string, expiresAt?: number }>
+  openAuthSession: (params: {
+    /** 由应用 BFF 生成、写入 GitHub authorize URL 的短时单次 state。 */
+    state: string
+    /** 当前仅接受 https://github.com/login/oauth/authorize。 */
+    url: string
+  }) => Promise<{ ok: true, state: string }>
   setClipboard: (text: string) => Promise<void>
 }
 ```
+
+`openAuthSession` 用于 GitHub 等不能在自定义 WebView 中完成的外部身份授权。当前协议只接受
+GitHub 官方授权地址，并只接受 `yunlefun://auth/external` 回调；回调必须携带与请求一致的
+短时 `state` 和 `success` / `denied` / `error` 状态。OAuth code 与 token 必须由应用 BFF
+在 HTTPS 回调中消费，禁止放入原生回调。普通浏览器和旧版客户端应先用
+`canIUse('openAuthSession')` 探测，不支持时继续标准网页 OAuth。
 
 内嵌浏览器不转移登录会话。`authorize` 只为精确注册的第一方 SSO client 签发
 绑定来源、nonce 与 PKCE 的短时单次 code；页面仍要在自己的 Origin/BFF 消费它。

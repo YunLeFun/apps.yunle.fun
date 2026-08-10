@@ -54,6 +54,15 @@
                     android:path="/sso"
                     android:scheme="yunlefun" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="auth"
+                    android:path="/external"
+                    android:scheme="yunlefun" />
+            </intent-filter>
         </activity>
 
         <!-- Capacitor cannot run this Cordova plugin's install hook, so the patched

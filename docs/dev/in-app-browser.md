@@ -155,6 +155,12 @@ redirect URI、scope、nonce 与 PKCE 必须全部匹配。
   `ASWebAuthenticationSession`，Android 使用 Custom Tabs；登录凭据和 Provider Cookie
   始终留在系统认证组件，不进入自定义 WebView。
 
+授信页面还可用 `openAuthSession` 完成外部 GitHub OAuth。宿主只接受 GitHub 官方 HTTPS
+授权入口和固定 `yunlefun://auth/external` 回调，并逐字节校验页面提供的短时 state。HTTPS
+回调先由应用 BFF 消费 OAuth code、持久化结果，再仅以 `state + status` 回到原生端；code、
+token、ticket 和 session 均不得进入自定义 scheme。旧客户端通过 `canIUse` 自动回退标准
+网页 OAuth。
+
 系统认证会话在原请求的 HTTPS redirect URI 之外增加一个仅用于传输结果的
 `yunlefun://auth/sso` 原生回调。回调以 256-bit state 绑定发起会话，原生端再精确校验
 issuer、redirect URI、nonce 和一次性 code；回调中禁止出现 access token、refresh token、

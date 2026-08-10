@@ -134,6 +134,7 @@ class WebViewController: UIViewController {
     private var pendingAuthorizations: [String: PendingAuthorization] = [:]
     private var systemAuthenticationSession: ASWebAuthenticationSession?
     private var systemAuthorization: NativeSsoSystemAuthorization?
+    private var systemExternalAuthorization: NativeExternalSystemAuthorization?
 
     /// 标题栏内容区高度（safe-area 顶部以下）
     private static let titleBarContentHeight: CGFloat = 44
@@ -313,11 +314,12 @@ class WebViewController: UIViewController {
             return window.webkit.messageHandlers.ylf.postMessage({ method: method, params: params || {} })
           }
           window.ylf = {
-            version: 5,
+            version: 6,
             inYunleApp: true,
             invoke: invoke,
             canIUse: function (method) { return invoke('canIUse', { method: method }) },
             authorize: function (params) { return invoke('authorize', params) },
+            openAuthSession: function (params) { return invoke('openAuthSession', params) },
             getEnv: function () { return invoke('getEnv') },
             hideCapsule: function () { return invoke('setCapsuleVisible', { visible: false }) },
             showCapsule: function () { return invoke('setCapsuleVisible', { visible: true }) },
@@ -730,6 +732,11 @@ class WebViewController: UIViewController {
             systemAuthenticationSession = nil
             systemAuthorization = nil
         }
+        if systemExternalAuthorization?.requestId == requestId {
+            systemAuthenticationSession?.cancel()
+            systemAuthenticationSession = nil
+            systemExternalAuthorization = nil
+        }
         if let error = error, !error.isEmpty {
             pending.reply(nil, error)
         }
@@ -864,6 +871,87 @@ class WebViewController: UIViewController {
         return true
     }
 
+    @discardableResult
+    private func beginExternalAuthorization(requestId: String) -> Bool {
+        guard systemAuthenticationSession == nil,
+              let pending = pendingAuthorizations[requestId],
+              let request = NativeExternalAuthorizationProtocol.readRequest(pending.request)
+        else {
+            return false
+        }
+
+        let session = ASWebAuthenticationSession(
+            url: request.url,
+            callbackURLScheme: "yunlefun"
+        ) { [weak self] callbackURL, error in
+            DispatchQueue.main.async {
+                guard let self = self,
+                      self.systemExternalAuthorization?.requestId == requestId
+                else {
+                    return
+                }
+                self.systemAuthenticationSession = nil
+                self.systemExternalAuthorization = nil
+                if let callbackURL = callbackURL,
+                   let status = NativeExternalAuthorizationProtocol.readCallback(
+                       callbackURL,
+                       expectedState: request.state) {
+                    switch status {
+                    case .success:
+                        _ = self.resolveAuthorization(
+                            requestId: requestId,
+                            result: ["ok": true, "state": request.state],
+                            error: nil)
+                    case .denied:
+                        _ = self.resolveAuthorization(
+                            requestId: requestId,
+                            result: nil,
+                            error: "EXTERNAL_AUTH_DENIED")
+                    case .error:
+                        _ = self.resolveAuthorization(
+                            requestId: requestId,
+                            result: nil,
+                            error: "EXTERNAL_AUTH_FAILED")
+                    }
+                }
+                else {
+                    let code = (error as? ASWebAuthenticationSessionError)?.code
+                    _ = self.resolveAuthorization(
+                        requestId: requestId,
+                        result: nil,
+                        error: code == .canceledLogin
+                            ? "EXTERNAL_AUTH_CANCELLED"
+                            : "EXTERNAL_AUTH_FAILED")
+                }
+            }
+        }
+        session.presentationContextProvider = self
+        guard session.start() else {
+            return false
+        }
+
+        pending.timeout.cancel()
+        let timeout = DispatchWorkItem { [weak self] in
+            _ = self?.resolveAuthorization(
+                requestId: requestId,
+                result: nil,
+                error: "EXTERNAL_AUTH_FAILED")
+        }
+        pendingAuthorizations[requestId] = PendingAuthorization(
+            reply: pending.reply,
+            timeout: timeout,
+            request: pending.request,
+            sourceOrigin: pending.sourceOrigin)
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.externalAuthorizationTimeoutSeconds,
+            execute: timeout)
+        systemExternalAuthorization = NativeExternalSystemAuthorization(
+            requestId: requestId,
+            state: request.state)
+        systemAuthenticationSession = session
+        return true
+    }
+
     func cancelPendingAuthorizations() {
         rejectPendingAuthorizations("browser closed")
     }
@@ -888,6 +976,7 @@ class WebViewController: UIViewController {
         systemAuthenticationSession?.cancel()
         systemAuthenticationSession = nil
         systemAuthorization = nil
+        systemExternalAuthorization = nil
         let pending = pendingAuthorizations
         pendingAuthorizations.removeAll()
         pending.values.forEach {
@@ -900,6 +989,110 @@ class WebViewController: UIViewController {
 extension WebViewController: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for _: ASWebAuthenticationSession) -> ASPresentationAnchor {
         view.window ?? ASPresentationAnchor()
+    }
+}
+
+private struct NativeExternalSystemAuthorization {
+    let requestId: String
+    let state: String
+}
+
+private struct NativeExternalAuthorizationRequest {
+    let url: URL
+    let state: String
+}
+
+private enum NativeExternalAuthorizationStatus {
+    case success
+    case denied
+    case error
+}
+
+private enum NativeExternalAuthorizationProtocol {
+    private static let statePattern = try! NSRegularExpression(
+        pattern: "^native_[A-Za-z0-9_-]{43}$")
+
+    static func readRequest(_ input: [String: Any]) -> NativeExternalAuthorizationRequest? {
+        guard let rawURL = input["url"] as? String,
+              let state = input["state"] as? String,
+              isState(state),
+              var components = URLComponents(string: rawURL),
+              components.scheme == "https",
+              components.host?.lowercased() == "github.com",
+              components.path == "/login/oauth/authorize",
+              components.user == nil,
+              components.password == nil,
+              components.fragment == nil,
+              components.queryItems?.filter({ $0.name == "state" }).map(\.value) == [state],
+              let redirectItems = components.queryItems?
+                  .filter({ $0.name == "redirect_uri" }),
+              redirectItems.count == 1,
+              let redirectURI = redirectItems[0].value,
+              isAllowedRedirectURI(redirectURI)
+        else {
+            return nil
+        }
+        components.scheme = components.scheme?.lowercased()
+        components.host = components.host?.lowercased()
+        guard let url = components.url else { return nil }
+        return NativeExternalAuthorizationRequest(url: url, state: state)
+    }
+
+    static func readCallback(
+        _ callbackURL: URL,
+        expectedState: String
+    ) -> NativeExternalAuthorizationStatus? {
+        guard isState(expectedState),
+              let callback = URLComponents(
+                  url: callbackURL,
+                  resolvingAgainstBaseURL: false),
+              callback.scheme == "yunlefun",
+              callback.host == "auth",
+              callback.path == "/external",
+              callback.user == nil,
+              callback.password == nil,
+              callback.port == nil,
+              callback.fragment == nil,
+              let items = callback.queryItems,
+              items.count == 2,
+              Set(items.map(\.name)) == Set(["state", "status"]),
+              items.first(where: { $0.name == "state" })?.value == expectedState,
+              let status = items.first(where: { $0.name == "status" })?.value
+        else {
+            return nil
+        }
+        switch status {
+        case "success": return .success
+        case "denied": return .denied
+        case "error": return .error
+        default: return nil
+        }
+    }
+
+    private static func isState(_ value: String) -> Bool {
+        let range = NSRange(value.startIndex..<value.endIndex, in: value)
+        return statePattern.firstMatch(in: value, range: range)?.range == range
+    }
+
+    private static func isAllowedRedirectURI(_ value: String) -> Bool {
+        if value == "https://cms.yunle.fun/api/github/callback" {
+            return true
+        }
+        #if DEBUG
+        guard let url = URLComponents(string: value),
+              ["http", "https"].contains(url.scheme?.lowercased() ?? ""),
+              ["localhost", "127.0.0.1"].contains(url.host?.lowercased() ?? ""),
+              url.path == "/api/github/callback",
+              url.user == nil,
+              url.password == nil,
+              url.fragment == nil
+        else {
+            return false
+        }
+        return true
+        #else
+        return false
+        #endif
     }
 }
 
@@ -1081,6 +1274,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             "setTitleBarVisible": .open,
             "close": .open,
             "authorize": .trusted,
+            "openAuthSession": .trusted,
             "setClipboard": .trusted,
         ]
     }
@@ -1205,6 +1399,31 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
                 execute: timeout)
             onAuthorizationRequest(requestId, sourceOrigin, params)
 
+        case "openAuthSession":
+            guard let sourceOrigin = sourceOrigin else {
+                reply(nil, "authorization broker unavailable")
+                return
+            }
+            let requestId = UUID().uuidString.lowercased()
+            let timeout = DispatchWorkItem { [weak self] in
+                _ = self?.resolveAuthorization(
+                    requestId: requestId,
+                    result: nil,
+                    error: "EXTERNAL_AUTH_FAILED")
+            }
+            pendingAuthorizations[requestId] = PendingAuthorization(
+                reply: reply,
+                timeout: timeout,
+                request: params,
+                sourceOrigin: sourceOrigin)
+            guard beginExternalAuthorization(requestId: requestId) else {
+                _ = resolveAuthorization(
+                    requestId: requestId,
+                    result: nil,
+                    error: "EXTERNAL_AUTH_UNAVAILABLE")
+                return
+            }
+
         case "setClipboard":
             guard let text = params["text"] as? String else {
                 reply(nil, "bad request: missing text")
@@ -1243,6 +1462,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
 
     private static let authorizationTimeoutSeconds: TimeInterval = 30
     private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
+    private static let externalAuthorizationTimeoutSeconds: TimeInterval = 5 * 60
 }
 
 /// WKUserContentController 会强持有 handler，经弱引用代理转发以打破循环引用

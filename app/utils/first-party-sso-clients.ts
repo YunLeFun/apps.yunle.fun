@@ -62,7 +62,7 @@ export const FIRST_PARTY_SSO_CLIENTS = Object.freeze([
     // appId is the marketplace catalog slug passed into the native browser.
     appId: 'yunjian',
     clientId: 'cms-web',
-    displayName: '云笺',
+    displayName: '云栈',
     origin: 'https://cms.yunle.fun',
     redirectUri: 'https://cms.yunle.fun/',
     scope: ['identity:bootstrap'] as const,

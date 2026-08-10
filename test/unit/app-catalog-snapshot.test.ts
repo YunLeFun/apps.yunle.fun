@@ -4,12 +4,16 @@ import { findFirstPartySsoClient } from '../../app/utils/first-party-sso-clients
 
 describe('offline app catalog snapshot', () => {
   it('keeps the published 云栈 brand aligned across the catalog and SSO registry', () => {
-    expect(getAppById('yunjian')).toMatchObject({
+    const app = getAppById('yunjian')
+
+    expect(app).toMatchObject({
       name: '云栈',
       logo: 'https://cms.yunle.fun/icon.svg',
       themeColor: '#35566b',
       websiteUrl: 'https://cms.yunle.fun/',
     })
+    expect(app?.iconAssets?.appIcon?.src).toBe('/app-icons/cms-app-icon.svg')
+    expect(app?.iconAssets?.mark?.src).toBe('/app-icons/cms-mark.svg')
     expect(findFirstPartySsoClient('yunjian', 'https://cms.yunle.fun')).toMatchObject({
       displayName: '云栈',
     })

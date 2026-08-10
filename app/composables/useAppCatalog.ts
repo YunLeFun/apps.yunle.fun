@@ -8,6 +8,7 @@ import type {
 import { ALL_APPS } from '~/constants/apps'
 import { recordToAppInfo } from '~/utils/appRecord'
 import { withCanonicalAppDomain } from '~/utils/canonical-app-domain'
+import { withCanonicalAppIcon } from '~/utils/canonical-app-icon'
 
 /**
  * 应用目录统一出口（Phase 3 前端在线化）。
@@ -66,7 +67,7 @@ export function useAppCatalog() {
         return null
       const payload = JSON.parse(raw) as CachePayload
       return Array.isArray(payload.list)
-        ? payload.list.map(withCanonicalAppDomain)
+        ? payload.list.map(app => withCanonicalAppIcon(withCanonicalAppDomain(app)))
         : null
     }
     catch {

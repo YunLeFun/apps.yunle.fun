@@ -1,5 +1,6 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { withCanonicalAppDomain } from '~/utils/canonical-app-domain'
+import { withCanonicalAppIcon } from '~/utils/canonical-app-icon'
 import { yunHomeApp } from './builtin'
 import { GENERATED_APPS } from './generated'
 
@@ -66,8 +67,8 @@ function mergeFallbackApps(seed: YlfAppInfo[], fallback: YlfAppInfo[]) {
 }
 
 export const ALL_APPS: YlfAppInfo[] = mergeFallbackApps(
-  GENERATED_APPS.map(withCanonicalAppDomain),
-  FIRST_PARTY_FALLBACK_APPS.map(withCanonicalAppDomain),
+  GENERATED_APPS.map(app => withCanonicalAppIcon(withCanonicalAppDomain(app))),
+  FIRST_PARTY_FALLBACK_APPS.map(app => withCanonicalAppIcon(withCanonicalAppDomain(app))),
 )
 
 /**

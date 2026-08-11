@@ -85,6 +85,7 @@ if (window.ylf?.inYunleApp) {
 | `closeBrowser()`          | 公开 | 关闭浏览器，返回云乐坊                                       |
 | `authorize(params)`       | 授信 | 为精确注册的第一方客户端申请短时、单次 SSO code              |
 | `openAuthSession(params)` | 授信 | 在系统认证组件中完成 GitHub OAuth，并校验固定原生回调        |
+| `haptic(style)`           | 授信 | 触发有界的原生触感反馈；仅接受 light/medium/heavy/success    |
 | `setClipboard(text)`      | 授信 | 写入系统剪贴板（如复制兑换码）                               |
 
 ```ts
@@ -118,6 +119,7 @@ interface YlfJSAPI {
   hideTitleBar: () => Promise<void>
   showTitleBar: () => Promise<void>
   closeBrowser: () => Promise<void>
+  haptic: (style: 'light' | 'medium' | 'heavy' | 'success') => Promise<void>
   authorize: (params: {
     clientId: string
     redirectUri: string
@@ -206,8 +208,8 @@ else
 ## 兼容性
 
 - iOS / Android 自定义容器均注入同一 `window.ylf` 协议；手机内置模式与普通 Web
-  环境不注入。Android 首版固定使用原生标题栏，胶囊位置返回零矩形，且
-  `canIUse('setTitleBarVisible')` 返回 `false`；待 Android 悬浮退出锚完成后再开放沉浸模式。
+  环境不注入。Android 默认使用原生标题栏；页面调用 `hideTitleBar()` 后进入沉浸布局，
+  宿主仍保留右上角「更多」悬浮退出锚，并通过 `safeAreaInsets` / `capsuleRect` 返回避让信息。
   页面应配合 `displayMode` 和 `canIUse` 渐进适配。
 - 新增能力时 `version` 递增；跨版本兼容请依赖 `canIUse` 探测而非版本号判断。
 

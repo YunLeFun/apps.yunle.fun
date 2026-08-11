@@ -314,7 +314,7 @@ class WebViewController: UIViewController {
             return window.webkit.messageHandlers.ylf.postMessage({ method: method, params: params || {} })
           }
           window.ylf = {
-            version: 6,
+            version: 7,
             inYunleApp: true,
             invoke: invoke,
             canIUse: function (method) { return invoke('canIUse', { method: method }) },
@@ -326,6 +326,7 @@ class WebViewController: UIViewController {
             hideTitleBar: function () { return invoke('setTitleBarVisible', { visible: false }) },
             showTitleBar: function () { return invoke('setTitleBarVisible', { visible: true }) },
             closeBrowser: function () { return invoke('close') },
+            haptic: function (style) { return invoke('haptic', { style: style }) },
             setClipboard: function (text) { return invoke('setClipboard', { text: text }) },
           }
         })()
@@ -1275,6 +1276,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             "close": .open,
             "authorize": .trusted,
             "openAuthSession": .trusted,
+            "haptic": .trusted,
             "setClipboard": .trusted,
         ]
     }
@@ -1423,6 +1425,26 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
                     error: "EXTERNAL_AUTH_UNAVAILABLE")
                 return
             }
+
+        case "haptic":
+            guard let style = params["style"] as? String else {
+                reply(nil, "bad request: missing haptic style")
+                return
+            }
+            switch style {
+            case "light":
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            case "medium":
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            case "heavy":
+                UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            case "success":
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            default:
+                reply(nil, "bad request: unsupported haptic style")
+                return
+            }
+            reply(nil, nil)
 
         case "setClipboard":
             guard let text = params["text"] as? String else {

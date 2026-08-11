@@ -200,7 +200,7 @@ describe('native WebView authorization boundary', () => {
     expect(androidDebugManifest).toContain('android:usesCleartextTraffic="true"')
   })
 
-  it('keeps a native Android exit anchor until immersive chrome is implemented', () => {
+  it('keeps a native Android exit anchor when trusted pages enter immersive chrome', () => {
     expect(browser).toContain('resolveAppIconPresentation')
     expect(browser).toContain('iconAssets: app.iconAssets')
     expect(browser).toContain('preferOriginal: true')
@@ -208,6 +208,7 @@ describe('native WebView authorization boundary', () => {
     expect(browser).toContain('app: nativeAppInfo')
     expect(androidWebView).toContain('displayMode = "titlebar"')
     expect(androidWebView).toContain('contentDescription = "更多"')
+    expect(androidWebView).toContain('floatingMenuButton.visibility')
     expect(androidWebView).toContain('AppMenuSheet(')
     expect(androidAppMenuSheet).toContain('BottomSheetDialog')
     expect(androidAppMenuSheet).toContain('NestedScrollView')
@@ -232,8 +233,17 @@ describe('native WebView authorization boundary', () => {
     expect(native).toContain('adjustsFontForContentSizeCategory = true')
     expect(native).toContain('constraint(greaterThanOrEqualToConstant: 44)')
     expect(androidWebView).not.toContain('contentDescription = "关闭"')
-    expect(androidWebView).not.toContain('"setTitleBarVisible" to JsapiAccess.OPEN')
+    expect(androidWebView).toContain('"setTitleBarVisible" to JsapiAccess.OPEN')
     expect(androidWebView).toContain('WindowInsetsCompat.Type.systemBars()')
+  })
+
+  it('exposes bounded trusted native haptics on iOS and Android', () => {
+    expect(native).toContain('"haptic": .trusted')
+    expect(native).toContain('UIImpactFeedbackGenerator(style: .heavy)')
+    expect(native).toContain('UINotificationFeedbackGenerator().notificationOccurred(.success)')
+    expect(androidWebView).toContain('"haptic" to JsapiAccess.TRUSTED')
+    expect(androidWebView).toContain('HapticFeedbackConstants.CONFIRM')
+    expect(androidWebView).toContain('bad request: unsupported haptic style')
   })
 
   it('uses the complete Material Design share vector path', () => {

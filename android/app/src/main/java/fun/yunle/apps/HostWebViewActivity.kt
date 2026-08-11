@@ -6,11 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
@@ -20,6 +23,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -28,7 +32,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.JavaScriptReplyProxy
 import androidx.webkit.WebMessageCompat
@@ -42,16 +48,21 @@ import java.util.UUID
 
 /** Android's platform-native WebView adapter for HostRuntime. */
 class HostWebViewActivity : AppCompatActivity() {
+    private lateinit var root: FrameLayout
+    private lateinit var content: LinearLayout
     private lateinit var webView: WebView
     private lateinit var toolbar: LinearLayout
     private lateinit var backButton: Button
     private lateinit var titleView: TextView
     private lateinit var menuButton: Button
+    private lateinit var floatingMenuButton: Button
     private lateinit var progressView: ProgressBar
 
     private var initialUrl = ""
     private var customTitle = ""
     private var displayMode = "titlebar"
+    private var titleBarVisible = true
+    private var systemBarInsets = Insets.NONE
     private var externalLinkMode = "safari-view"
     private var toolbarColor: String? = null
     private var appInfo = JSObject()
@@ -250,9 +261,10 @@ class HostWebViewActivity : AppCompatActivity() {
         if (!isSupportedUrl(url, isDebuggable())) return false
         initialUrl = url
         customTitle = options.getString("title") ?: ""
-        // Android currently supports the shared title-bar contract. Immersive
-        // chrome remains disabled until its draggable capsule reaches iOS parity.
+        // Android starts with the shared title bar. Trusted pages may request a
+        // reversible immersive layout while a floating host menu remains visible.
         displayMode = "titlebar"
+        titleBarVisible = true
         externalLinkMode = options.getString("externalLinkMode")
             ?.takeIf { it == "default-browser" || it == "safari-view" }
             ?: "safari-view"
@@ -271,7 +283,14 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     private fun buildNativeChrome() {
-        val root = LinearLayout(this).apply {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+
+        root = FrameLayout(this).apply {
+            setBackgroundColor(Color.WHITE)
+        }
+        content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.WHITE)
         }
@@ -307,6 +326,24 @@ class HostWebViewActivity : AppCompatActivity() {
             setBackgroundColor(Color.TRANSPARENT)
             setOnClickListener { showAppMenu() }
         }
+        floatingMenuButton = Button(this).apply {
+            text = "•••"
+            textSize = 17f
+            contentDescription = "更多"
+            isAllCaps = false
+            minWidth = 0
+            minHeight = 0
+            setTextColor(Color.WHITE)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = dp(22).toFloat()
+                setColor(Color.argb(184, 22, 25, 35))
+                setStroke(dp(1), Color.argb(96, 255, 255, 255))
+            }
+            visibility = View.GONE
+            elevation = dp(8).toFloat()
+            setOnClickListener { showAppMenu() }
+        }
         toolbar.addView(backButton, LinearLayout.LayoutParams(dp(56), dp(56)))
         toolbar.addView(titleView, LinearLayout.LayoutParams(0, dp(56), 1f))
         toolbar.addView(menuButton, LinearLayout.LayoutParams(dp(56), dp(56)))
@@ -316,14 +353,25 @@ class HostWebViewActivity : AppCompatActivity() {
         }
         webView = WebView(this)
 
-        root.addView(toolbar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56)))
-        root.addView(progressView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(2)))
-        root.addView(webView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        content.addView(toolbar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56)))
+        content.addView(progressView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(2)))
+        content.addView(webView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        root.addView(
+            content,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        root.addView(
+            floatingMenuButton,
+            FrameLayout.LayoutParams(dp(64), dp(44), Gravity.TOP or Gravity.END),
+        )
         setContentView(root)
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            WindowInsetsCompat.CONSUMED
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
+            systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            applyChromeInsets()
+            insets
         }
         ViewCompat.requestApplyInsets(root)
         updateNativeChrome()
@@ -331,7 +379,7 @@ class HostWebViewActivity : AppCompatActivity() {
 
     private fun updateNativeChrome() {
         if (!::toolbar.isInitialized) return
-        toolbar.visibility = View.VISIBLE
+        updateTitleBarVisibility()
         titleView.text = customTitle.ifBlank { appInfo.getString("name") ?: "云乐坊" }
         val color = parseColor(
             appInfo.getString("themeColor")
@@ -347,6 +395,35 @@ class HostWebViewActivity : AppCompatActivity() {
         backButton.setTextColor(foregroundColor)
         titleView.setTextColor(foregroundColor)
         menuButton.setTextColor(foregroundColor)
+    }
+
+    private fun setTitleBarVisible(visible: Boolean) {
+        if (titleBarVisible == visible) return
+        titleBarVisible = visible
+        updateTitleBarVisibility()
+    }
+
+    private fun updateTitleBarVisibility() {
+        if (!::toolbar.isInitialized) return
+        toolbar.visibility = if (titleBarVisible) View.VISIBLE else View.GONE
+        floatingMenuButton.visibility = if (titleBarVisible) View.GONE else View.VISIBLE
+        applyChromeInsets()
+    }
+
+    private fun applyChromeInsets() {
+        if (!::content.isInitialized) return
+        content.setPadding(
+            if (titleBarVisible) systemBarInsets.left else 0,
+            if (titleBarVisible) systemBarInsets.top else 0,
+            if (titleBarVisible) systemBarInsets.right else 0,
+            if (titleBarVisible) systemBarInsets.bottom else 0,
+        )
+        if (::floatingMenuButton.isInitialized) {
+            val layout = floatingMenuButton.layoutParams as FrameLayout.LayoutParams
+            layout.topMargin = systemBarInsets.top + dp(8)
+            layout.rightMargin = systemBarInsets.right + dp(8)
+            floatingMenuButton.layoutParams = layout
+        }
     }
 
     private fun showAppMenu() {
@@ -542,18 +619,22 @@ class HostWebViewActivity : AppCompatActivity() {
                     .put("appId", appInfo.getString("id") ?: "")
                     .put("displayMode", displayMode)
                     .put("trusted", trusted)
-                    .put("capsuleVisible", false)
-                    .put("titleBarVisible", true)
+                    .put("capsuleVisible", !titleBarVisible)
+                    .put("titleBarVisible", titleBarVisible)
                     .put(
                         "safeAreaInsets",
-                        JSObject().put("top", 0).put("bottom", 0).put("left", 0).put("right", 0),
+                        safeAreaInsetsForPage(),
                     )
                     .put(
                         "capsuleRect",
-                        JSObject().put("x", 0).put("y", 0).put("width", 0).put("height", 0),
+                        capsuleRectForPage(),
                     ),
             )
             "setCapsuleVisible" -> replySuccess(messageId, replyProxy, JSONObject.NULL)
+            "setTitleBarVisible" -> {
+                setTitleBarVisible(params.getBool("visible") ?: true)
+                replySuccess(messageId, replyProxy, JSONObject.NULL)
+            }
             "close" -> {
                 replySuccess(messageId, replyProxy, JSONObject.NULL)
                 mainHandler.post { finish() }
@@ -565,6 +646,26 @@ class HostWebViewActivity : AppCompatActivity() {
                 } else {
                     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboard.setPrimaryClip(ClipData.newPlainText("云乐坊", text))
+                    replySuccess(messageId, replyProxy, JSONObject.NULL)
+                }
+            }
+            "haptic" -> {
+                val style = params.getString("style")
+                val feedback = when (style) {
+                    "light" -> HapticFeedbackConstants.KEYBOARD_TAP
+                    "medium" -> HapticFeedbackConstants.VIRTUAL_KEY
+                    "heavy" -> HapticFeedbackConstants.LONG_PRESS
+                    "success" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        HapticFeedbackConstants.CONFIRM
+                    } else {
+                        HapticFeedbackConstants.LONG_PRESS
+                    }
+                    else -> null
+                }
+                if (feedback == null) {
+                    replyError(messageId, replyProxy, "bad request: unsupported haptic style")
+                } else {
+                    webView.performHapticFeedback(feedback)
                     replySuccess(messageId, replyProxy, JSONObject.NULL)
                 }
             }
@@ -652,6 +753,27 @@ class HostWebViewActivity : AppCompatActivity() {
         return (FIRST_PARTY_HOSTS + extraTrustedHosts).any {
             host == it || host.endsWith(".$it")
         }
+    }
+
+    private fun safeAreaInsetsForPage(): JSObject {
+        val density = resources.displayMetrics.density.toDouble()
+        return JSObject()
+            .put("top", if (titleBarVisible) 0.0 else systemBarInsets.top / density)
+            .put("bottom", if (titleBarVisible) 0.0 else systemBarInsets.bottom / density)
+            .put("left", if (titleBarVisible) 0.0 else systemBarInsets.left / density)
+            .put("right", if (titleBarVisible) 0.0 else systemBarInsets.right / density)
+    }
+
+    private fun capsuleRectForPage(): JSObject {
+        if (titleBarVisible || !::floatingMenuButton.isInitialized) {
+            return JSObject().put("x", 0).put("y", 0).put("width", 0).put("height", 0)
+        }
+        val density = resources.displayMetrics.density.toDouble()
+        return JSObject()
+            .put("x", floatingMenuButton.x / density)
+            .put("y", floatingMenuButton.y / density)
+            .put("width", floatingMenuButton.width / density)
+            .put("height", floatingMenuButton.height / density)
     }
 
     private fun exactOrigin(origin: Uri): String {
@@ -818,9 +940,11 @@ class HostWebViewActivity : AppCompatActivity() {
             "canIUse" to JsapiAccess.OPEN,
             "getEnv" to JsapiAccess.OPEN,
             "setCapsuleVisible" to JsapiAccess.OPEN,
+            "setTitleBarVisible" to JsapiAccess.OPEN,
             "close" to JsapiAccess.OPEN,
             "authorize" to JsapiAccess.TRUSTED,
             "openAuthSession" to JsapiAccess.TRUSTED,
+            "haptic" to JsapiAccess.TRUSTED,
             "setClipboard" to JsapiAccess.TRUSTED,
         )
 
@@ -850,7 +974,7 @@ class HostWebViewActivity : AppCompatActivity() {
                 })
               }
               window.ylf = {
-                version: 6,
+                version: 7,
                 inYunleApp: true,
                 invoke: invoke,
                 canIUse: function (method) { return invoke('canIUse', { method: method }) },
@@ -862,6 +986,7 @@ class HostWebViewActivity : AppCompatActivity() {
                 hideTitleBar: function () { return invoke('setTitleBarVisible', { visible: false }) },
                 showTitleBar: function () { return invoke('setTitleBarVisible', { visible: true }) },
                 closeBrowser: function () { return invoke('close') },
+                haptic: function (style) { return invoke('haptic', { style: style }) },
                 setClipboard: function (text) { return invoke('setClipboard', { text: text }) }
               }
             })()

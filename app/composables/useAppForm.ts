@@ -3,6 +3,7 @@ import { actionSheetController } from '@ionic/vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { DEFAULT_EMOJI, DEFAULT_THEME_COLOR } from '~/types/app'
 import { compactAppIconAssets, createAppIconAssetsDraft, createEmptyAppIconAssetsDraft } from '~/utils/appIconAssets'
+import { getRequestErrorInfo } from '~/utils/requestError'
 import { ensureWorkshopForAudience } from '~/utils/workshopAudience'
 
 const DRAFT_KEY = 'app_create_draft'
@@ -47,7 +48,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   const router = useRouter()
   const toast = useToast()
   const userStore = useUserStore()
-  const { createApp, updateApp, isSlugTaken } = useApps()
+  const { createApp, updateApp, isSlugTaken, isNameTaken } = useApps()
   const workshopModule = usePersonalWorkshop()
 
   const form = reactive(createEmptyForm())
@@ -55,6 +56,9 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   const iconUploadBusy = ref(false)
   const slugError = ref('')
   const slugChecking = ref(false)
+  const nameError = ref('')
+  const nameChecking = ref(false)
+  const nameAvailable = ref(false)
   const submitted = ref(false)
   const autoSlug = ref(mode === 'create')
 
@@ -196,6 +200,45 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
 
   // ---- Slug 校验 ----
 
+  let nameCheckTimer: ReturnType<typeof setTimeout> | null = null
+  let nameCheckRequest = 0
+
+  function checkNameAvailability(name: string) {
+    if (nameCheckTimer)
+      clearTimeout(nameCheckTimer)
+    nameCheckRequest += 1
+    nameError.value = ''
+    nameAvailable.value = false
+    const normalizedName = name.trim()
+    if (!normalizedName) {
+      nameChecking.value = false
+      return
+    }
+
+    const request = nameCheckRequest
+    nameChecking.value = true
+    nameCheckTimer = setTimeout(async () => {
+      try {
+        const taken = await isNameTaken(normalizedName, existingApp?.value?._id)
+        if (request === nameCheckRequest && form.name.trim() === normalizedName) {
+          nameError.value = taken ? '名称已被占用，请换一个' : ''
+          nameAvailable.value = !taken
+        }
+      }
+      catch {
+        if (request === nameCheckRequest && form.name.trim() === normalizedName) {
+          // 网络异常时交给服务端提交校验兜底，不把临时故障误报为名称冲突。
+          nameError.value = ''
+          nameAvailable.value = false
+        }
+      }
+      finally {
+        if (request === nameCheckRequest)
+          nameChecking.value = false
+      }
+    }, 500)
+  }
+
   let slugCheckTimer: ReturnType<typeof setTimeout> | null = null
 
   function checkSlugAvailability(slug: string) {
@@ -235,6 +278,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   }
 
   watch(() => form.name, (name) => {
+    checkNameAvailability(name)
     if (autoSlug.value) {
       const slug = name
         .toLowerCase()
@@ -312,6 +356,8 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
 
     if (slugError.value)
       return
+    if (nameError.value || nameChecking.value)
+      return
 
     try {
       saving.value = true
@@ -356,7 +402,13 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       }
     }
     catch (err: unknown) {
-      toast.showError(err instanceof Error ? err.message : `${mode === 'create' ? '创建' : '保存'}失败，请稍后重试`)
+      const fallback = `${mode === 'create' ? '创建' : '保存'}失败，请稍后重试`
+      const message = getRequestErrorInfo(err, fallback).message
+      if (message === '应用名称已被占用') {
+        nameError.value = '名称已被占用，请换一个'
+        nameAvailable.value = false
+      }
+      toast.showError(message)
     }
     finally {
       saving.value = false
@@ -369,6 +421,9 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
     iconUploadBusy,
     slugError,
     slugChecking,
+    nameError,
+    nameChecking,
+    nameAvailable,
     isDirty,
     SLUG_REGEX,
     onSlugInput,

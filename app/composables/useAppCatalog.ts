@@ -24,7 +24,7 @@ import { withCanonicalAppIcon } from '~/utils/canonical-app-icon'
  * 只有网络失败时才降级到上次缓存或构建时快照，保证离线与首屏可用。
  */
 
-const CACHE_KEY = 'ylf:app-catalog:v2'
+const CACHE_KEY = 'ylf:app-catalog:v5'
 
 interface CachePayload {
   list: YlfAppInfo[]

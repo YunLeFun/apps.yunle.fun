@@ -5,6 +5,82 @@ import type { YlfAppInfo } from '@yunlefun/types'
 
 export const GENERATED_APPS: YlfAppInfo[] = [
   {
+    "id": "cook",
+    "slug": "cook",
+    "name": "今天来做菜",
+    "emoji": "🥘",
+    "themeColor": "#16a34a",
+    "websiteUrl": "https://cook.yunyoujun.cn",
+    "description": "好的，今天我们来做菜！可以根据所选食材筛选菜谱",
+    "category": "应用",
+    "rating": 4.8,
+    "age": "4+",
+    "developer": "YunYouJun"
+  },
+  {
+    "id": "give-me-money",
+    "slug": "give-me-money",
+    "name": "请给我钱！",
+    "emoji": "🎣",
+    "themeColor": "#8a91d0",
+    "websiteUrl": "https://gmm.yunyoujun.cn",
+    "description": "我很可爱，请给我钱！直白的绅士钓鱼网站",
+    "category": "整活",
+    "rating": 4.7,
+    "age": "12+",
+    "developer": "YunYouJun"
+  },
+  {
+    "id": "electric-fan",
+    "slug": "electric-fan",
+    "name": "云风扇",
+    "emoji": "♻️",
+    "themeColor": "#20c077",
+    "websiteUrl": "https://fan.elpsy.cn",
+    "description": "电风扇，便携夏日小风扇！纯 CSS 编写，小空调的前辈",
+    "category": "整活",
+    "rating": 4.6,
+    "age": "4+",
+    "developer": "YunYouJun"
+  },
+  {
+    "id": "dayun-kicker",
+    "slug": "dayun-kicker",
+    "name": "暴力电驴",
+    "emoji": "🛵",
+    "themeColor": "#FFD447",
+    "websiteUrl": "https://dayun-kicker.yunle.fun/",
+    "description": "第一视角电动车街机游戏，在城市车流中加速、闪避并把大云汽车踹出赛道。",
+    "logo": "https://dayun-kicker.yunle.fun/icon-512.png",
+    "category": "游戏",
+    "developer": "yunyoujun"
+  },
+  {
+    "id": "air-conditioner",
+    "slug": "air-conditioner",
+    "name": "云空调",
+    "emoji": "❄️",
+    "themeColor": "#4ea5f5",
+    "websiteUrl": "https://ac.yunyoujun.cn",
+    "description": "云空调，便携小空调！其实是个冷笑话，随身携带的毫无制冷效果的仿真小空调",
+    "category": "整活",
+    "rating": 4.8,
+    "age": "4+",
+    "developer": "YunYouJun"
+  },
+  {
+    "id": "pachinko",
+    "slug": "pachinko",
+    "name": "云乐弹珠",
+    "emoji": "🎮",
+    "themeColor": "#4B8DF8",
+    "websiteUrl": "https://play.yunle.fun/games/pachinko/local",
+    "description": "云乐坊主题的仿真 2.5D 弹珠机，支持拉杆发射、随机开彩、倍率口与云币吐币反馈。",
+    "logo": "https://play.yunle.fun/games/pachinko/icon-512.png",
+    "category": "游戏",
+    "developer": "yunyoujun"
+  },
+  {
     "id": "yunjian",
     "slug": "yunjian",
     "name": "云栈",
@@ -206,19 +282,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "developer": "YunYouJun"
   },
   {
-    "id": "valaxy",
-    "slug": "valaxy",
-    "name": "Valaxy",
-    "emoji": "🌌",
-    "themeColor": "#0078e7",
-    "websiteUrl": "https://valaxy.yyj.moe",
-    "description": "新一代静态博客框架",
-    "category": "应用",
-    "rating": 4.9,
-    "age": "4+",
-    "developer": "YunYouJun"
-  },
-  {
     "id": "birthday",
     "slug": "birthday",
     "name": "Birthday",
@@ -271,19 +334,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "developer": "YunYouJun"
   },
   {
-    "id": "cook",
-    "slug": "cook",
-    "name": "Cook",
-    "emoji": "🥘",
-    "themeColor": "#16a34a",
-    "websiteUrl": "https://cook.yunyoujun.cn",
-    "description": "好的，今天我们来做菜！可以根据所选食材筛选菜谱",
-    "category": "应用",
-    "rating": 4.8,
-    "age": "4+",
-    "developer": "YunYouJun"
-  },
-  {
     "id": "chat-generator",
     "slug": "chat-generator",
     "name": "Chat Generator",
@@ -306,45 +356,6 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "description": "基于 JSNES 与 Vue 实现的红白机 FC",
     "category": "整活",
     "rating": 4.5,
-    "age": "4+",
-    "developer": "YunYouJun"
-  },
-  {
-    "id": "electric-fan",
-    "slug": "electric-fan",
-    "name": "Electric Fan",
-    "emoji": "♻️",
-    "themeColor": "#20c077",
-    "websiteUrl": "https://fan.elpsy.cn",
-    "description": "电风扇，便携夏日小风扇！纯 CSS 编写，小空调的前辈",
-    "category": "整活",
-    "rating": 4.6,
-    "age": "4+",
-    "developer": "YunYouJun"
-  },
-  {
-    "id": "give-me-money",
-    "slug": "give-me-money",
-    "name": "Give Me Money",
-    "emoji": "🎣",
-    "themeColor": "#8a91d0",
-    "websiteUrl": "https://gmm.yunyoujun.cn",
-    "description": "我很可爱，请给我钱！直白的绅士钓鱼网站",
-    "category": "整活",
-    "rating": 4.7,
-    "age": "12+",
-    "developer": "YunYouJun"
-  },
-  {
-    "id": "air-conditioner",
-    "slug": "air-conditioner",
-    "name": "Air Conditioner",
-    "emoji": "❄️",
-    "themeColor": "#4ea5f5",
-    "websiteUrl": "https://ac.yunyoujun.cn",
-    "description": "云空调，便携小空调！其实是个冷笑话，随身携带的毫无制冷效果的仿真小空调",
-    "category": "整活",
-    "rating": 4.8,
     "age": "4+",
     "developer": "YunYouJun"
   }

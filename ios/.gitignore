@@ -1,8 +1,6 @@
 App/build
 App/Pods
-App/output
-App/output-appstore
-App/output-appstore-local
+App/output*
 App/App/public
 DerivedData
 xcuserdata

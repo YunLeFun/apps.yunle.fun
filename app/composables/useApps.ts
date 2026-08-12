@@ -118,6 +118,16 @@ export function useApps() {
     return response.taken
   }
 
+  async function isNameTaken(name: string, excludeAppId?: string): Promise<boolean> {
+    if (!name.trim())
+      return false
+    const response = await $api<{ taken: boolean }>('/api/apps/name', {
+      method: 'POST',
+      body: { name, excludeAppId },
+    })
+    return response.taken
+  }
+
   return {
     getSubmissionAccess,
     getMyApps,
@@ -130,6 +140,7 @@ export function useApps() {
     deleteApp,
     submitPublicMarket,
     isSlugTaken,
+    isNameTaken,
   }
 }
 

@@ -141,6 +141,8 @@ export interface AppRecord {
   ownerUid?: string
   /** 应用名称 */
   name: string
+  /** 展示名称的服务端标准化键；用于全局唯一约束，不向普通用户展示。 */
+  nameKey?: string
   /** 唯一标识符（URL slug） */
   slug: string
   /** 应用描述 */

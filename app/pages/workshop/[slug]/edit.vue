@@ -38,6 +38,9 @@ const {
   iconUploadBusy,
   slugError,
   slugChecking,
+  nameError,
+  nameChecking,
+  nameAvailable,
   isDirty,
   SLUG_REGEX,
   onSlugInput,
@@ -86,7 +89,7 @@ watch(slug, (val) => {
         </IonButtons>
         <IonTitle>编辑应用</IonTitle>
         <IonButtons slot="end">
-          <IonButton :disabled="saving || iconUploadBusy || !isDirty || !form.name.trim() || !!slugError" @click="handleSubmit">
+          <IonButton :disabled="saving || iconUploadBusy || !isDirty || !form.name.trim() || !!nameError || nameChecking || !!slugError" @click="handleSubmit">
             <IonIcon v-if="!saving" slot="icon-only" :icon="checkmark" />
             <IonSpinner v-else name="crescent" />
           </IonButton>
@@ -122,7 +125,7 @@ watch(slug, (val) => {
 
         <!-- 基本信息 -->
         <IonList inset>
-          <IonItem>
+          <IonItem :class="{ 'ion-invalid': nameError, 'ion-valid': nameAvailable }">
             <IonInput
               v-model="form.name"
               label="名称"
@@ -131,7 +134,15 @@ watch(slug, (val) => {
               :maxlength="50"
               required
             />
+            <IonSpinner v-if="nameChecking" slot="end" name="crescent" class="slug-spinner" />
           </IonItem>
+          <IonNote
+            class="name-availability-note"
+            :color="nameError ? 'danger' : nameAvailable ? 'success' : 'medium'"
+            aria-live="polite"
+          >
+            {{ nameChecking ? '正在检查名称…' : nameError || (nameAvailable ? '名称可用' : '展示名称全局唯一') }}
+          </IonNote>
 
           <IonItem :class="{ 'ion-invalid': slugError, 'ion-valid': !slugError && !slugChecking && form.slug && SLUG_REGEX.test(form.slug) }">
             <IonInput
@@ -287,7 +298,7 @@ watch(slug, (val) => {
         <div class="px-4 pb-8 pt-4">
           <IonButton
             expand="block"
-            :disabled="saving || iconUploadBusy || !isDirty || !form.name.trim() || !!slugError || slugChecking"
+            :disabled="saving || iconUploadBusy || !isDirty || !form.name.trim() || !!nameError || nameChecking || !!slugError || slugChecking"
             class="submit-btn"
             @click="handleSubmit"
           >
@@ -342,6 +353,13 @@ watch(slug, (val) => {
   width: 16px;
   height: 16px;
   color: var(--ion-color-medium);
+}
+
+.name-availability-note {
+  display: block;
+  min-height: 18px;
+  margin: 4px 16px 8px;
+  font-size: 12px;
 }
 
 .submit-btn {

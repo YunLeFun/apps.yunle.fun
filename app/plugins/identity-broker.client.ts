@@ -8,17 +8,16 @@ import {
   reportClientEvent,
 } from '~/utils/client-telemetry'
 import {
+  createHostAuthorizationResolutionRequest,
   HostIdentityBrokerError,
   readIssuedAuthorizationCode,
-  validateHostAuthorization,
+  readResolvedHostAuthorization,
 } from '~/utils/host-identity-broker'
 import {
   clearNativeAuthorizationLogin,
   NATIVE_AUTHORIZATION_LOGIN_RETURN_TO,
   rememberNativeAuthorizationLogin,
 } from '~/utils/native-authorization-login'
-
-const SSO_ISSUER = 'https://www.yunle.fun'
 
 function readHostname(origin: string): string {
   try {
@@ -54,7 +53,7 @@ export default defineNuxtPlugin(() => {
       const host = readHostname(event.sourceOrigin)
       let clientId = ''
       let flow = ''
-      let stage = 'validate'
+      let stage = 'validate_protocol'
       const report = (
         name: string,
         context: Record<string, boolean | null | number | string | undefined> = {},
@@ -74,10 +73,20 @@ export default defineNuxtPlugin(() => {
 
       report('auth.native_sso.requested')
       try {
-        const request = validateHostAuthorization(event)
+        const pendingRequest = createHostAuthorizationResolutionRequest(event)
+        clientId = pendingRequest.clientId
+        flow = await anonymizeTelemetryIdentifier(pendingRequest.nonce)
+        stage = 'resolve_policy'
+        const policyResponse = await useNuxtApp().$api('/api/auth/sso/resolve', {
+          method: 'POST',
+          body: pendingRequest,
+        })
+        const request = readResolvedHostAuthorization(policyResponse, pendingRequest)
         clientId = request.clientId
-        flow = await anonymizeTelemetryIdentifier(request.nonce)
-        report('auth.native_sso.validated', { prompt: request.prompt || 'default' })
+        report('auth.native_sso.resolved', {
+          policyVersion: request.policyVersion,
+          prompt: request.prompt || 'default',
+        })
         if (request.prompt === 'select_account') {
           stage = 'account_selection'
           await HostRuntime.authorizeWithOtherAccount({
@@ -133,9 +142,6 @@ export default defineNuxtPlugin(() => {
               ? { accountAvatarUrl: userInfo.avatar }
               : {}),
             permissionDescription: request.permissionDescription,
-            ...(request.authorizationNotice
-              ? { authorizationNotice: request.authorizationNotice }
-              : {}),
           })
           report('auth.native_sso.consent_decided', {
             outcome: decision.choice || (decision.allowed ? 'current' : 'cancel'),
@@ -157,21 +163,11 @@ export default defineNuxtPlugin(() => {
         }
 
         stage = 'issue_code'
-        const issueRequest = {
-          mode: 'redirect' as const,
-          clientId: request.clientId,
-          targetOrigin: request.targetOrigin,
-          returnUrl: request.redirectUri,
-          scope: request.scope,
-          nonce: request.nonce,
-          codeChallenge: request.codeChallenge,
-          codeChallengeMethod: 'S256' as const,
-        }
         const response = await app.callFunction({
           name: 'sso-ticket',
           data: {
             action: 'issueSsoCode',
-            ...issueRequest,
+            ...request.issueRequest,
           },
         })
         const issued = readIssuedAuthorizationCode(response)
@@ -185,7 +181,7 @@ export default defineNuxtPlugin(() => {
           result: {
             ok: true,
             code: issued.code,
-            issuer: SSO_ISSUER,
+            issuer: request.issuer,
             ...(issued.expiresAt ? { expiresAt: issued.expiresAt } : {}),
           },
         })

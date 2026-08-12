@@ -2,233 +2,178 @@ import type { HostAuthorizationEvent } from '~/host-runtime'
 
 import { describe, expect, it } from 'vitest'
 import {
+  createHostAuthorizationResolutionRequest,
   readIssuedAuthorizationCode,
-  validateHostAuthorization,
+  readResolvedHostAuthorization,
 } from '~/utils/host-identity-broker'
 
-const request = {
-  appId: 'play',
+const event = {
+  appId: 'dayun-kicker',
   requestId: 'native-request-1234',
-  sourceOrigin: 'https://play.yunle.fun',
+  sourceOrigin: 'https://dayun-kicker.yunle.fun',
   request: {
-    clientId: 'play-web',
+    clientId: 'dayun-kicker-web',
     codeChallenge: 'challenge_'.padEnd(43, 'c'),
     codeChallengeMethod: 'S256' as const,
     nonce: 'nonce_'.padEnd(43, 'n'),
-    redirectUri: 'https://play.yunle.fun/',
+    redirectUri: 'https://dayun-kicker.yunle.fun/',
     scope: ['identity:bootstrap'],
   },
 } satisfies HostAuthorizationEvent
 
+function resolvedResponse(
+  pending = createHostAuthorizationResolutionRequest(event),
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    result: {
+      ok: true,
+      issuer: 'https://www.yunle.fun',
+      policyVersion: '2026-08-03.2',
+      registrationFingerprint: 'f'.repeat(64),
+      request: {
+        mode: pending.mode,
+        clientId: pending.clientId,
+        targetOrigin: pending.targetOrigin,
+        returnUrl: pending.returnUrl,
+        scope: pending.scope,
+        nonce: pending.nonce,
+        codeChallenge: pending.codeChallenge,
+        codeChallengeMethod: pending.codeChallengeMethod,
+      },
+      presentation: {
+        appId: 'dayun-kicker',
+        applicationIconUrl: 'https://dayun-kicker.yunle.fun/favicon.svg',
+        applicationName: '暴力电驴',
+        applicationOrigin: pending.targetOrigin,
+        permissionDescription: '账号标识、昵称和头像',
+        consent: 'trusted',
+      },
+      ...overrides,
+    },
+  }
+}
+
 describe('host identity broker', () => {
-  it('accepts only the exact registered Play SSO binding', () => {
-    expect(validateHostAuthorization(request)).toEqual({
-      appId: 'play',
-      applicationName: 'Play',
-      applicationOrigin: 'https://play.yunle.fun',
-      clientId: 'play-web',
-      codeChallenge: request.request.codeChallenge,
-      nonce: request.request.nonce,
-      permissionDescription: '账号标识、昵称和头像',
-      redirectUri: 'https://play.yunle.fun/',
+  it('builds a central policy request from protocol facts and the actual source origin', () => {
+    expect(createHostAuthorizationResolutionRequest(event)).toEqual({
+      action: 'resolveSsoAuthorization',
+      mode: 'redirect',
+      clientId: 'dayun-kicker-web',
+      targetOrigin: 'https://dayun-kicker.yunle.fun',
+      returnUrl: 'https://dayun-kicker.yunle.fun/',
       scope: 'identity:bootstrap',
-      targetOrigin: 'https://play.yunle.fun',
+      nonce: event.request.nonce,
+      codeChallenge: event.request.codeChallenge,
+      codeChallengeMethod: 'S256',
     })
   })
 
-  it('accepts the separately registered CMS binding', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'yunjian',
-      sourceOrigin: 'https://cms.yunle.fun',
+  it('does not use marketplace appId or page display copy as authorization input', () => {
+    expect(createHostAuthorizationResolutionRequest({
+      ...event,
+      appId: 'unrelated-marketplace-slug',
       request: {
-        ...request.request,
-        clientId: 'cms-web',
-        redirectUri: 'https://cms.yunle.fun/',
-      },
-    })).toEqual({
-      appId: 'yunjian',
-      applicationName: '云栈',
-      applicationOrigin: 'https://cms.yunle.fun',
-      clientId: 'cms-web',
-      codeChallenge: request.request.codeChallenge,
-      nonce: request.request.nonce,
-      permissionDescription: '账号标识、昵称和头像',
-      redirectUri: 'https://cms.yunle.fun/',
-      scope: 'identity:bootstrap',
-      targetOrigin: 'https://cms.yunle.fun',
-    })
-  })
-
-  it('preserves an explicit consent prompt for the trusted host UI', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'yunjian',
-      sourceOrigin: 'https://cms.yunle.fun',
-      request: {
-        ...request.request,
-        clientId: 'cms-web',
-        redirectUri: 'https://cms.yunle.fun/',
-        prompt: 'consent',
-      },
-    })).toMatchObject({
-      appId: 'yunjian',
-      prompt: 'consent',
-    })
-  })
-
-  it('ignores page-supplied display copy and uses only registry metadata', () => {
-    const result = validateHostAuthorization({
-      ...request,
-      request: {
-        ...request.request,
+        ...event.request,
         applicationName: '伪造应用',
-        applicationOrigin: 'https://evil.example',
         permissionDescription: '读取全部数据',
       },
-    } as HostAuthorizationEvent)
+    } as HostAuthorizationEvent)).toEqual(
+      createHostAuthorizationResolutionRequest(event),
+    )
+  })
 
-    expect(result).toMatchObject({
-      applicationName: 'Play',
-      applicationOrigin: 'https://play.yunle.fun',
+  it('accepts only a fully bound central response and uses its presentation metadata', () => {
+    const pending = createHostAuthorizationResolutionRequest(event)
+    expect(readResolvedHostAuthorization(resolvedResponse(pending), pending)).toMatchObject({
+      appId: 'dayun-kicker',
+      applicationIconUrl: 'https://dayun-kicker.yunle.fun/favicon.svg',
+      applicationName: '暴力电驴',
+      applicationOrigin: 'https://dayun-kicker.yunle.fun',
+      clientId: 'dayun-kicker-web',
+      consent: 'trusted',
+      issuer: 'https://www.yunle.fun',
       permissionDescription: '账号标识、昵称和头像',
+      policyVersion: '2026-08-03.2',
+      registrationFingerprint: 'f'.repeat(64),
+      issueRequest: {
+        mode: 'redirect',
+        clientId: 'dayun-kicker-web',
+        targetOrigin: 'https://dayun-kicker.yunle.fun',
+        returnUrl: 'https://dayun-kicker.yunle.fun/',
+        scope: 'identity:bootstrap',
+      },
     })
   })
 
-  it('accepts AI SFC and derives its disclosure copy from the trusted registry', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'ai-sfc',
-      sourceOrigin: 'https://ai-sfc.yunle.fun',
-      request: {
-        ...request.request,
-        clientId: 'ai-sfc-web',
-        redirectUri: 'https://ai-sfc.yunle.fun/',
-        prompt: 'consent',
-      },
-    })).toMatchObject({
-      appId: 'ai-sfc',
-      applicationIconUrl: 'https://ai-sfc.yunle.fun/brand/ai-sfc-logo-256.png',
-      applicationName: 'AI 春联',
-      applicationOrigin: 'https://ai-sfc.yunle.fun',
-      authorizationNotice: '登录本身不会消耗云币；生成春联时会另行提示消耗。',
-      permissionDescription: '账号标识、昵称和头像',
-      targetOrigin: 'https://ai-sfc.yunle.fun',
-    })
+  it('allows central policy to require consent even when the page omitted a prompt', () => {
+    const pending = createHostAuthorizationResolutionRequest(event)
+    const response = resolvedResponse(pending)
+    response.result.presentation.consent = 'explicit'
+    Object.assign(response.result.presentation, { prompt: 'consent' })
+    expect(readResolvedHostAuthorization(response, pending).prompt).toBe('consent')
   })
 
-  it('preserves an explicit account-selection prompt for system authentication', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'yunjian',
-      sourceOrigin: 'https://cms.yunle.fun',
-      request: {
-        ...request.request,
-        clientId: 'cms-web',
-        redirectUri: 'https://cms.yunle.fun/',
-        prompt: 'select_account',
-      },
-    })).toMatchObject({
-      appId: 'yunjian',
-      prompt: 'select_account',
-    })
+  it('rejects an explicit-consent policy response that omits the prompt', () => {
+    const pending = createHostAuthorizationResolutionRequest(event)
+    const response = resolvedResponse(pending)
+    response.result.presentation.consent = 'explicit'
+    expect(() => readResolvedHostAuthorization(response, pending))
+      .toThrow('统一身份服务返回了无效的授权策略')
   })
 
-  it('accepts the private Admin control-plane binding without marketplace discovery', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'admin',
-      sourceOrigin: 'https://admin.yunle.fun',
-      request: {
-        ...request.request,
-        clientId: 'admin-web',
-        redirectUri: 'https://admin.yunle.fun/',
-      },
-    })).toEqual({
-      appId: 'admin',
-      applicationName: '云乐坊管理后台',
-      applicationOrigin: 'https://admin.yunle.fun',
-      clientId: 'admin-web',
-      codeChallenge: request.request.codeChallenge,
-      nonce: request.request.nonce,
-      permissionDescription: '账号标识、昵称和头像',
-      redirectUri: 'https://admin.yunle.fun/',
-      scope: 'identity:bootstrap',
-      targetOrigin: 'https://admin.yunle.fun',
+  it('preserves an explicit account-selection prompt end to end', () => {
+    const pending = createHostAuthorizationResolutionRequest({
+      ...event,
+      request: { ...event.request, prompt: 'select_account' },
     })
-  })
-
-  it('accepts the separately registered Saier binding', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'saier',
-      sourceOrigin: 'https://saier.yunle.fun',
-      request: {
-        ...request.request,
-        clientId: 'saier-web',
-        redirectUri: 'https://saier.yunle.fun/',
-      },
-    })).toEqual({
-      appId: 'saier',
-      applicationName: '赛尔',
-      applicationOrigin: 'https://saier.yunle.fun',
-      clientId: 'saier-web',
-      codeChallenge: request.request.codeChallenge,
-      nonce: request.request.nonce,
-      permissionDescription: '账号标识、昵称和头像',
-      redirectUri: 'https://saier.yunle.fun/',
-      scope: 'identity:bootstrap',
-      targetOrigin: 'https://saier.yunle.fun',
-    })
-  })
-
-  it('accepts the separately registered Wenta binding', () => {
-    expect(validateHostAuthorization({
-      ...request,
-      appId: 'wenta',
-      sourceOrigin: 'https://wenta.yunle.fun',
-      request: {
-        ...request.request,
-        clientId: 'wenta-web',
-        redirectUri: 'https://wenta.yunle.fun/',
-      },
-    })).toEqual({
-      appId: 'wenta',
-      applicationName: '闻塔',
-      applicationOrigin: 'https://wenta.yunle.fun',
-      clientId: 'wenta-web',
-      codeChallenge: request.request.codeChallenge,
-      nonce: request.request.nonce,
-      permissionDescription: '账号标识、昵称和头像',
-      redirectUri: 'https://wenta.yunle.fun/',
-      scope: 'identity:bootstrap',
-      targetOrigin: 'https://wenta.yunle.fun',
-    })
+    const response = resolvedResponse(pending)
+    Object.assign(response.result.presentation, { prompt: 'select_account' })
+    expect(readResolvedHostAuthorization(response, pending).prompt).toBe('select_account')
   })
 
   it.each([
     { sourceOrigin: 'https://evil.example' },
-    { appId: 'cms' },
-    { request: { ...request.request, clientId: 'other-web' } },
-    { request: { ...request.request, redirectUri: 'https://play.yunle.fun/callback' } },
-    { request: { ...request.request, scope: ['identity:bootstrap', 'profile'] } },
-    { request: { ...request.request, prompt: 'login' } },
-  ])('rejects altered origin/client/redirect/scope bindings', (patch) => {
-    expect(() => validateHostAuthorization({
-      ...request,
+    { sourceOrigin: 'https://dayun-kicker.yunle.fun/' },
+    { request: { ...event.request, clientId: 'Other Client' } },
+    { request: { ...event.request, scope: ['identity:bootstrap', 'profile'] } },
+    { request: { ...event.request, prompt: 'login' } },
+  ])('rejects malformed local protocol facts before contacting policy', (patch) => {
+    expect(() => createHostAuthorizationResolutionRequest({
+      ...event,
       ...patch,
-    } as HostAuthorizationEvent)).toThrow('内嵌应用请求的统一登录参数无效')
+    } as HostAuthorizationEvent)).toThrow('内嵌应用请求未获统一身份策略授权')
+  })
+
+  it.each([
+    { issuer: 'https://evil.example' },
+    { registrationFingerprint: 'short' },
+    { request: { mode: 'redirect' } },
+    { presentation: { appId: 'other-app' } },
+  ])('rejects an altered or incomplete central response', (patch) => {
+    const pending = createHostAuthorizationResolutionRequest(event)
+    expect(() => readResolvedHostAuthorization(
+      resolvedResponse(pending, patch),
+      pending,
+    )).toThrow('统一身份服务返回了无效的授权策略')
+  })
+
+  it('maps an authoritative policy rejection to an invalid host request', () => {
+    const pending = createHostAuthorizationResolutionRequest(event)
+    expect(() => readResolvedHostAuthorization({
+      result: { ok: false, reason: 'client_unknown' },
+    }, pending)).toThrow('内嵌应用请求未获统一身份策略授权')
   })
 
   it('reads the CloudBase callFunction envelope without exposing a token', () => {
     expect(readIssuedAuthorizationCode({
       result: {
         ok: true,
-        code: 'code_'.padEnd(43, 'c'),
+        code: 'c'.repeat(43),
         expiresAt: 1_234,
       },
     })).toEqual({
-      code: 'code_'.padEnd(43, 'c'),
+      code: 'c'.repeat(43),
       expiresAt: 1_234,
     })
   })

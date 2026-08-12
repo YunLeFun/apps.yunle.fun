@@ -1116,18 +1116,6 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         ("cms.yunle.fun", "h3"),
     ]
 
-    /// Kept-alive first-party pages whose local identity must follow Apps.
-    ///
-    /// Wenta keeps a CloudBase session in its own origin instead of a BFF cookie,
-    /// so it needs the identityChanged event even though there is no native cookie
-    /// for this plugin to delete.
-    private static let identityAwareHosts: Set<String> = [
-        "ai-sfc.yunle.fun",
-        "play.yunle.fun",
-        "cms.yunle.fun",
-        "wenta.yunle.fun",
-    ]
-
     /// Apps 退出或切换账号后清除第一方 HttpOnly BFF cookie，并通知保活页面刷新身份。
     @objc func clearIdentitySessions(_ call: CAPPluginCall) {
         let cookieStore = WKWebsiteDataStore.default().httpCookieStore
@@ -1149,10 +1137,6 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
             }
             group.notify(queue: .main) {
                 self?.sessions
-                    .filter { session in
-                        let host = (session.url?.host ?? "").lowercased()
-                        return Self.identityAwareHosts.contains(host)
-                    }
                     .forEach { $0.notifyHostIdentityChanged() }
                 call.resolve()
             }

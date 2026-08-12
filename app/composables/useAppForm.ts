@@ -214,6 +214,11 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       nameChecking.value = false
       return
     }
+    if (!userStore.isLoggedIn) {
+      // 创建页可被匿名访问，但名称预检属于账号能力；避免匿名 401 触发全局刷新/登录跳转。
+      nameChecking.value = false
+      return
+    }
 
     const request = nameCheckRequest
     nameChecking.value = true
@@ -289,6 +294,11 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       form.slug = slug
       checkSlugAvailability(slug)
     }
+  })
+
+  watch(() => userStore.isLoggedIn, (isLoggedIn) => {
+    if (isLoggedIn && form.name.trim())
+      checkNameAvailability(form.name)
   })
 
   watch(() => form.slug, (slug) => {

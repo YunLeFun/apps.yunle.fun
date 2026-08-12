@@ -31,6 +31,7 @@ describe('yunLeFun owner submission UI contract', () => {
     expect(appForm).toContain('isNameTaken')
     expect(appForm).toContain('nameChecking')
     expect(appForm).toContain('nameError')
+    expect(appForm).toContain('if (!userStore.isLoggedIn)')
     for (const page of [createPage, editPage]) {
       expect(page).toContain('nameChecking')
       expect(page).toContain('nameError')

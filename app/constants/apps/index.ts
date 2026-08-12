@@ -34,18 +34,8 @@ export const APP_CATEGORIES: AppCategory[] = [
  * 今日推荐应用
  */
 export const FEATURED_APP: YlfAppInfo = {
-  id: 'valaxy',
-  slug: 'valaxy',
-  name: 'Valaxy',
-  description: '新一代静态博客框架，快速、优雅、强大',
-  emoji: '🌌',
-  themeColor: '#0078e7',
-  websiteUrl: 'https://valaxy.yyj.moe',
-  category: '应用',
-  rating: 4.9,
-  age: '4+',
+  ...yunHomeApp,
   subtitle: '编辑精选',
-  tagline: '新一代静态博客框架',
 }
 
 /**

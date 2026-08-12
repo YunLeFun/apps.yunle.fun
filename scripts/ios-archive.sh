@@ -96,7 +96,7 @@ xcodebuild archive \
   -archivePath "$ARCHIVE_PATH" \
   -configuration "$CONFIGURATION" \
   -allowProvisioningUpdates \
-  "${auth_args[@]}" \
+  ${auth_args[@]+"${auth_args[@]}"} \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   CODE_SIGN_STYLE=Automatic
 

@@ -247,8 +247,6 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     internal fun notifyHostIdentityChanged() {
-        val host = Uri.parse(webView.url ?: initialUrl).host?.lowercase()
-        if (host !in IDENTITY_AWARE_HOSTS) return
         webView.evaluateJavascript(
             "window.dispatchEvent(new CustomEvent('ylf:host-identity-changed'));" +
                 "window.dispatchEvent(new CustomEvent('ylf:identityChanged'))",
@@ -925,12 +923,6 @@ class HostWebViewActivity : AppCompatActivity() {
         private const val SYSTEM_AUTHORIZATION_RETURN_GRACE_MS = 750L
 
         private val FIRST_PARTY_HOSTS = setOf("yunle.fun", "yunyoujun.cn")
-        private val IDENTITY_AWARE_HOSTS = setOf(
-            "ai-sfc.yunle.fun",
-            "play.yunle.fun",
-            "cms.yunle.fun",
-            "wenta.yunle.fun",
-        )
         private val SECOND_LEVEL_SUFFIXES = setOf(
             "com.cn", "net.cn", "org.cn", "gov.cn", "edu.cn",
             "co.uk", "org.uk", "co.jp", "com.hk", "com.tw", "com.au",

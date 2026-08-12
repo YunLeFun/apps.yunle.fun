@@ -200,6 +200,8 @@ export default defineNuxtConfig({
     appFirstPartySubmitterUids: firstPartySubmitterUids,
     // 诊断日志管理 API 独立白名单；默认沿用第一方维护者，可用逗号分隔多个 CloudBase UID。
     diagnosticAdminUids: process.env.NUXT_DIAGNOSTIC_ADMIN_UIDS || firstPartySubmitterUids,
+    // 未登录也可读取的中央 SSO 策略解析端点；只返回 Registry 元数据，不签发凭证。
+    ssoTicketUrl: process.env.NUXT_SSO_TICKET_URL || 'https://api.yunle.fun/sso-ticket',
     // 第三方模型与接口预留，但产品入口默认关闭并展示「敬请期待」。
     appThirdPartySubmissionsEnabled: process.env.NUXT_APP_THIRD_PARTY_SUBMISSIONS_ENABLED === 'true',
     tmsRegion: 'ap-guangzhou',

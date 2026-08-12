@@ -53,12 +53,17 @@ describe('native WebView authorization boundary', () => {
     expect(existsSync(new URL('../../server/api/jsapi/auth/exchange.post.ts', import.meta.url))).toBe(false)
   })
 
-  it('notifies kept-alive Wenta and AI SFC pages when the Apps identity changes', () => {
-    expect(nativePlugin).toContain(`private static let identityAwareHosts: Set<String>`)
-    expect(nativePlugin).toContain(`"wenta.yunle.fun"`)
-    expect(nativePlugin).toContain(`"ai-sfc.yunle.fun"`)
-    expect(androidWebView).toContain(`"ai-sfc.yunle.fun"`)
-    expect(nativePlugin).toContain(`return Self.identityAwareHosts.contains(host)`)
+  it('broadcasts identity changes generically while retaining only legacy native cookie cleanup', () => {
+    expect(nativePlugin).toContain(`("play.yunle.fun", "__Host-ylf_play_session")`)
+    expect(nativePlugin).toContain(`("cms.yunle.fun", "__Host-ylf-cms-session")`)
+    expect(androidPlugin).toContain(`Triple("https://play.yunle.fun/", "__Host-ylf_play_session", true)`)
+    expect(androidPlugin).toContain(`Triple("https://cms.yunle.fun/", "__Host-ylf-cms-session", true)`)
+    expect(nativePlugin).not.toContain('identityAwareHosts')
+    expect(androidWebView).not.toContain('IDENTITY_AWARE_HOSTS')
+    expect(nativePlugin).not.toContain('__Host-dayun-kicker-session')
+    expect(androidPlugin).not.toContain('__Host-dayun-kicker-session')
+    expect(nativePlugin).toContain(`self?.sessions\n                    .forEach { $0.notifyHostIdentityChanged() }`)
+    expect(androidWebView).toContain(`window.dispatchEvent(new CustomEvent('ylf:identityChanged'))`)
   })
 
   it('places the account consent prompt in the native plugin seam', () => {

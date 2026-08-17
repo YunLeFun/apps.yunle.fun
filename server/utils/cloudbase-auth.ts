@@ -233,7 +233,7 @@ function firstBoolean(records: Record<string, unknown>[], ...keys: string[]): bo
   }
 }
 
-function hasVerifiedPhone(profile: Record<string, unknown>, claims: Record<string, unknown> | null): boolean {
+export function hasVerifiedPhone(profile: Record<string, unknown>, claims: Record<string, unknown> | null): boolean {
   const records = nestedRecords(
     profile,
     claims,
@@ -245,9 +245,23 @@ function hasVerifiedPhone(profile: Record<string, unknown>, claims: Record<strin
   const verified = firstBoolean(records, 'phoneVerified', 'phone_verified', 'phone_number_verified')
   if (verified !== undefined)
     return verified
-  return records.some((record) => {
+  if (records.some((record) => {
     const phone = record.phone
     return isRecord(phone) && firstBoolean([phone], 'verified', 'is_verified') === true
+  })) {
+    return true
+  }
+
+  // CloudBase phone-number sessions currently expose the authenticated
+  // provider and normalized number without a separate `phone_verified` claim.
+  return records.some((record) => {
+    const provider = (
+      stringProp(record, 'provider_type')
+      || stringProp(record, 'providerType')
+      || ''
+    ).toLowerCase()
+    const phoneNumber = stringProp(record, 'phone_number') || stringProp(record, 'phoneNumber')
+    return provider === 'phone_number' && Boolean(phoneNumber)
   })
 }
 

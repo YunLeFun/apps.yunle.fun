@@ -10,6 +10,7 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 | `_openid`      | `string`   | 自动 | 创建者用户 ID，服务端自动注入                |
 | `ownerLogin`   | `string`   | 是   | 所有者用户名，用于展示                       |
 | `name`         | `string`   | 是   | 应用名称                                     |
+| `nameKey`      | `string`   | 是   | 应用名称规范化键，全局唯一                   |
 | `slug`         | `string`   | 是   | URL 标识符，全局唯一（唯一索引约束）         |
 | `description`  | `string`   | 否   | 应用描述                                     |
 | `githubRepo`   | `string`   | 否   | GitHub 仓库，格式 `owner/repo`               |
@@ -36,11 +37,15 @@ CloudBase NoSQL 集合，存储用户创建的应用信息。
 
 ## 索引
 
-| 索引名            | 字段      | 类型 | 说明              |
-| ----------------- | --------- | ---- | ----------------- |
-| `_id_`            | `_id`     | 默认 | 主键              |
-| `_openid_1`       | `_openid` | 升序 | 按创建者查询      |
-| `idx_slug_unique` | `slug`    | 唯一 | slug 全局唯一约束 |
+| 索引名                | 字段      | 类型 | 说明                       |
+| --------------------- | --------- | ---- | -------------------------- |
+| `_id_`                | `_id`     | 默认 | 主键                       |
+| `_openid_1`           | `_openid` | 升序 | 按创建者查询               |
+| `idx_slug_unique`     | `slug`    | 唯一 | slug 全局唯一约束          |
+| `idx_name_key_unique` | `nameKey` | 唯一 | 规范化应用名称全局唯一约束 |
+
+`nameKey` 由服务端根据 `name` 做 NFKC、首尾空白清理、连续空白折叠和小写转换后写入。
+创建与编辑应用时先做可用性预检，最终仍由 `idx_name_key_unique` 处理并发冲突。
 
 ## 安全规则
 

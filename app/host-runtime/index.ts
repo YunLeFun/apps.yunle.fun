@@ -13,6 +13,10 @@ export interface HostAppInfo {
   themeColor?: string
   description?: string
   category?: string
+  /** Stable, unique catalog owner handle used for profile routing. */
+  developer?: string
+  /** Non-unique display name shown in native application surfaces. */
+  developerName?: string
   rating?: number
   ratingCount?: number
 }

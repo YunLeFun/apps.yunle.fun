@@ -10,12 +10,14 @@ export const GENERATED_APPS: YlfAppInfo[] = [
     "name": "今天来做菜",
     "emoji": "🥘",
     "themeColor": "#16a34a",
-    "websiteUrl": "https://cook.yunyoujun.cn",
+    "websiteUrl": "https://cook.yunle.fun/",
     "description": "好的，今天我们来做菜！可以根据所选食材筛选菜谱",
+    "logo": "https://cook.yunle.fun/brand/cook-app-icon.svg",
     "category": "应用",
     "rating": 4.8,
     "age": "4+",
-    "developer": "YunYouJun"
+    "developer": "YunYouJun",
+    "developerName": "云游君"
   },
   {
     "id": "give-me-money",

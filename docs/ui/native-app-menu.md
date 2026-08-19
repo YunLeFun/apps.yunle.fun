@@ -16,15 +16,15 @@
 - **浅色**：背景 `#FFFBFA`、主文字 `#221E1E`、次文字 `#695F62`、分隔线 `#E2DCDC`。
 - **深色**：背景 `#211C1D`、主文字 `#FFF8F6`、次文字 `#CFC3C5`、分隔线 `#4D4244`。
 - **字体**：iOS 使用 San Francisco，Android 使用 Roboto / 系统字体；必须响应系统字号与粗体设置。
-- **图标**：iOS 使用 SF Symbols，Android 使用 Material 风格矢量图标；应用标识仅加载注册表 HTTPS
-  logo，失败时使用应用名称首字母，不使用 emoji 作为宿主可信标识。
+- **图标**：iOS 使用 SF Symbols，Android 使用 Material 风格矢量图标；应用标识优先加载注册表 HTTPS
+  logo，失败时使用可信目录中的 emoji 身份，最后回退应用名称首字母。emoji 仅用于应用身份，不能作为宿主操作图标。
 
 ## 信息结构
 
 从上到下固定为：
 
 1. Sheet 拖动指示器。
-2. 应用标识、应用名称和精确来源（`scheme://host[:port]`）。
+2. 应用标识、应用名称、精确来源（`scheme://host[:port]`）和可点击的作者名；作者缺失时整行隐藏。
 3. 最多两行的应用简介，可缺省。
 4. 应用与链接操作。
 5. 分隔线。
@@ -39,16 +39,18 @@
 
 | ID             | 中文语义       | iOS 表面                         | Android 表面                  |
 | -------------- | -------------- | -------------------------------- | ----------------------------- |
-| `details`      | 查看详情与评价 | Sheet 内评价入口，站内详情 Sheet | 首行动作，站内详情 Custom Tab |
+| `details`      | 查看详情与评价 | Sheet 内评价入口，站内详情 Sheet | 首行动作，本地全屏详情页       |
 | `share`        | 分享           | `UIActivityViewController`       | Android Sharesheet            |
 | `copy_link`    | 复制链接       | 系统剪贴板                       | 系统剪贴板 + 成功 Toast       |
 | `open_browser` | 外部浏览器打开 | Safari                           | 用户默认浏览器                |
 | `reload`       | 刷新当前页面   | 当前 `WKWebView`                 | 当前 `WebView`                |
 | `end`          | 结束当前会话   | 释放保活会话                     | 结束原生 Activity             |
 
-`details` 仅在应用具有稳定 slug/id 时出现。详情页固定使用
-`https://apps.yunle.fun/app/{slug-or-id}#reviews`，不得接受网页传入的详情 URL。点击任一动作先关闭菜单，
-再执行系统表面，避免两个 Sheet 叠加。
+`details` 仅在应用具有稳定 slug/id 时出现，不得接受网页传入的详情 URL。点击任一动作先关闭菜单，
+再执行系统表面，避免两个 Sheet 叠加。双端均从 App bundle 加载 `/app/{slug-or-id}`，通过版本化的
+宿主上下文定位评价区，并以独立 Capacitor Bridge 覆盖云应用。iOS 使用 page sheet，Android 使用
+全屏 `LocalPageActivity` 和系统返回手势；关闭后都恢复下层云应用的原状态。作者主页同样复用该
+本地容器，在当前容器内跳转第一方详情或作者路由，不重复叠加原生页面。
 
 ## 容器行为
 
@@ -56,7 +58,14 @@
 - 标题栏右侧统一显示“更多”图标并设置辅助功能名称“更多”，不能在有可用菜单时退化为无说明的关闭键。
 - 返回/下滑只关闭菜单，不结束应用；只有显式“结束”才释放会话。
 - 分享、复制和外部打开使用当时 `WebView` 的当前 URL，不使用初始 URL。
-- 应用名、logo、主题色、简介、slug/id 来自宿主目录元信息；当前来源由原生层从实际 URL 计算。
+- 应用名、logo、主题色、简介、作者、slug/id 来自宿主目录元信息；当前来源由原生层从实际 URL 计算。
+- 作者行只显示名称，不重复“作者”标签；点击后打开 `/developer/{login}`，返回时保留当前云应用会话。
+- 本地容器不导出给其他应用，只接受结构化的应用 key、作者 login 和固定 `reviews` target；禁止接收网页 URL。
+- 本地容器与主壳使用相同 first-party origin 共享正式登录存储，不从云应用 WebView 复制 Cookie 或 Token。
+- Android 记录 Bridge 创建到首屏可见耗时及 PSS 增量，不记录用户标识、评论内容、认证信息或完整路由参数。
+- bundled 页面启动失败时显示原生重试/关闭页；API 失败由页面内重试，不能静默替换为远程详情。
+- 当前保持共享页面、组件、认证和 API 客户端，不维护第二套轻量前端。首次内容可见 P95 超过 1.2 秒、
+  PSS 增量 P95 超过 80 MB，或三 WebView 场景出现可重复 OOM/系统回收时，才启动轻量入口拆分。
 - logo 复用原生授权面板的受限 HTTPS 图片加载器：禁止重定向，最多 2 MB，先验尺寸并只解码
   256 px 缩略图。失败不影响菜单操作。
 

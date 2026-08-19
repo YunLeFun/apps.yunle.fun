@@ -59,6 +59,8 @@ export function openCatalogAppInBrowser(app: CatalogBrowserApp): Promise<void> {
       themeColor: app.themeColor,
       description: app.description,
       category: app.category,
+      developer: app.developer,
+      developerName: app.developerName,
       rating: app.rating,
     },
     trustedHosts: app.trustedHosts,

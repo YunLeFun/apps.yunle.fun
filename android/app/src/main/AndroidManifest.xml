@@ -41,6 +41,12 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
+            android:name=".LocalPageActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".HostSsoCallbackActivity"
             android:excludeFromRecents="true"
             android:exported="true"

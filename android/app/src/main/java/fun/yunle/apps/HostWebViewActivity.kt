@@ -68,6 +68,8 @@ class HostWebViewActivity : AppCompatActivity() {
     private var appInfo = JSObject()
     private var extraTrustedHosts = emptySet<String>()
     private var documentStartBridgeInstalled = false
+    private var localPageLaunchPending = false
+    private var hostRuntimePlugin: HostRuntimePlugin? = null
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingAuthorizations = mutableMapOf<String, PendingAuthorization>()
@@ -91,7 +93,7 @@ class HostWebViewActivity : AppCompatActivity() {
 
         buildNativeChrome()
         configureWebView()
-        HostRuntimePlugin.instance()?.attach(this)
+        hostRuntimePlugin = HostRuntimePlugin.instance()?.also { it.attach(this) }
         webView.loadUrl(initialUrl)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -440,6 +442,8 @@ class HostWebViewActivity : AppCompatActivity() {
                 applicationIconUrl = appInfo.getString("logo")?.takeIf { it.isNotBlank() },
                 themeColor = appInfo.getString("themeColor")?.takeIf { it.isNotBlank() },
                 description = appInfo.getString("description")?.takeIf { it.isNotBlank() },
+                author = appInfo.getString("developer")?.takeIf { it.isNotBlank() },
+                authorDisplayName = appInfo.getString("developerName")?.takeIf { it.isNotBlank() },
                 detailsAvailable = applicationKey != null,
             ),
             onAction = { action ->
@@ -464,25 +468,23 @@ class HostWebViewActivity : AppCompatActivity() {
                     AppMenuAction.END -> finish()
                 }
             },
+            onAuthorClick = ::openDeveloperProfile,
         ).show()
     }
 
+    private fun openDeveloperProfile(developer: String) {
+        launchLocalPage(LocalPageActivity.developerIntent(this, developer))
+    }
+
     private fun openAppDetails(applicationKey: String) {
-        val detailsUri = Uri.Builder()
-            .scheme("https")
-            .authority("apps.yunle.fun")
-            .appendPath("app")
-            .appendPath(applicationKey)
-            .fragment("reviews")
-            .build()
-        runCatching {
-            CustomTabsIntent.Builder()
-                .setShowTitle(true)
-                .build()
-                .launchUrl(this, detailsUri)
-        }.onFailure {
-            runCatching { startActivity(Intent(Intent.ACTION_VIEW, detailsUri)) }
-        }
+        launchLocalPage(LocalPageActivity.appDetailIntent(this, applicationKey, scrollToReviews = true))
+    }
+
+    private fun launchLocalPage(intent: Intent) {
+        if (localPageLaunchPending) return
+        localPageLaunchPending = true
+        runCatching { startActivity(intent) }
+            .onFailure { localPageLaunchPending = false }
     }
 
     @Suppress("SetJavaScriptEnabled")
@@ -719,7 +721,7 @@ class HostWebViewActivity : AppCompatActivity() {
         sourceOrigin: Uri,
         request: JSObject,
     ) {
-        val plugin = HostRuntimePlugin.instance()
+        val plugin = hostRuntimePlugin
         if (plugin == null) {
             replyError(messageId, replyProxy, "authorization broker unavailable")
             return
@@ -865,6 +867,7 @@ class HostWebViewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        localPageLaunchPending = false
         activityResumed = true
         val actions = resumeActions.toList()
         resumeActions.clear()
@@ -885,7 +888,8 @@ class HostWebViewActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         cancelPendingAuthorizations("browser is gone")
-        HostRuntimePlugin.instance()?.detach(this)
+        hostRuntimePlugin?.detach(this)
+        hostRuntimePlugin = null
         if (::webView.isInitialized) {
             (webView.parent as? ViewGroup)?.removeView(webView)
             webView.stopLoading()

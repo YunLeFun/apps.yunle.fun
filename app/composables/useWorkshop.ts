@@ -1,5 +1,6 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { useDebounceFn } from '@vueuse/core'
+import { rankAppSearch } from '~/utils/app-search'
 import { getAvailableAppCategories } from '~/utils/appCategories'
 
 /**
@@ -47,13 +48,7 @@ export function useWorkshop() {
       list = list.filter(a => a.category?.trim() === selectedCategory.value)
     }
 
-    const keyword = searchQuery.value.trim().toLowerCase()
-    if (keyword) {
-      list = list.filter(a =>
-        a.name.toLowerCase().includes(keyword)
-        || (a.description && a.description.toLowerCase().includes(keyword)),
-      )
-    }
+    list = rankAppSearch(list, searchQuery.value, app => app)
 
     return list
   }

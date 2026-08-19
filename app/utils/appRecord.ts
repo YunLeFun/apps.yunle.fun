@@ -34,6 +34,7 @@ export function recordToAppInfo(record: AppRecord): CatalogAppInfo {
     supportUrl: record.supportUrl || undefined,
     trustedHosts: record.trustedHosts,
     category: record.category,
+    tags: record.tags,
     rating: record.rating,
     ratingCount: record.ratingCount,
     age: record.age,

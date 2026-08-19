@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { YlfAppInfo } from '@yunlefun/types'
 import type { WorkshopScopedApp } from '~/components/workshop/AppList.vue'
 import type { WorkshopPublicInfo, WorkshopView } from '~/types/workshop'
 import {
@@ -24,6 +23,7 @@ import {
   qrCodeOutline,
   refreshOutline,
 } from 'ionicons/icons'
+import { rankAppSearch } from '~/utils/app-search'
 import { getAvailableAppCategories } from '~/utils/appCategories'
 import { recordToAppInfo } from '~/utils/appRecord'
 
@@ -119,28 +119,19 @@ const categories = computed(() =>
     : getAvailableAppCategories(scopedCategoryApps.value),
 )
 
-function matchesCurrentFilters(app: YlfAppInfo) {
-  if (
-    selectedCategory.value !== '全部'
-    && app.category?.trim() !== selectedCategory.value
-  ) {
-    return false
-  }
+function rankCurrentItems(items: WorkshopScopedApp[]) {
+  const categoryItems = selectedCategory.value === '全部'
+    ? items
+    : items.filter(item => item.app.category?.trim() === selectedCategory.value)
 
-  const keyword = searchQuery.value.trim().toLocaleLowerCase()
-  if (!keyword)
-    return true
-
-  return app.name.toLocaleLowerCase().includes(keyword)
-    || app.description?.toLocaleLowerCase().includes(keyword)
-    || app.category?.toLocaleLowerCase().includes(keyword)
+  return rankAppSearch(categoryItems, searchQuery.value, item => item.app)
 }
 
 const privateScopeItems = computed<WorkshopScopedApp[]>(() => {
   if (!currentView.value)
     return []
 
-  return currentView.value.apps
+  const items = currentView.value.apps
     .map((record) => {
       const app = recordToAppInfo(record)
       return {
@@ -149,7 +140,8 @@ const privateScopeItems = computed<WorkshopScopedApp[]>(() => {
         private: record.audience === 'workshop',
       }
     })
-    .filter(item => matchesCurrentFilters(item.app))
+
+  return rankCurrentItems(items)
 })
 
 const allScopeItems = computed<WorkshopScopedApp[]>(() => {
@@ -181,7 +173,7 @@ const allScopeItems = computed<WorkshopScopedApp[]>(() => {
     }
   }
 
-  return Array.from(items.values()).filter(item => matchesCurrentFilters(item.app))
+  return rankCurrentItems(Array.from(items.values()))
 })
 
 const scopeLoading = computed(() => {

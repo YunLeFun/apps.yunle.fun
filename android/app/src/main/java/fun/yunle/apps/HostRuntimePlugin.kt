@@ -19,7 +19,10 @@ class HostRuntimePlugin : Plugin() {
     private var authorizationPromptActive = false
 
     override fun load() {
-        current = WeakReference(this)
+        synchronized(instances) {
+            instances.removeAll { it.get() == null || it.get() === this }
+            instances.add(WeakReference(this))
+        }
     }
 
     @PluginMethod
@@ -394,15 +397,20 @@ class HostRuntimePlugin : Plugin() {
     }
 
     override fun handleOnDestroy() {
-        if (current.get() === this) current.clear()
+        synchronized(instances) {
+            instances.removeAll { it.get() == null || it.get() === this }
+        }
         hostActivity.clear()
         super.handleOnDestroy()
     }
 
     companion object {
         private const val AUTHORIZATION_CONSENT_TIMEOUT_MS = 5 * 60 * 1000L
-        private var current = WeakReference<HostRuntimePlugin>(null)
+        private val instances = mutableListOf<WeakReference<HostRuntimePlugin>>()
 
-        internal fun instance(): HostRuntimePlugin? = current.get()
+        internal fun instance(): HostRuntimePlugin? = synchronized(instances) {
+            instances.removeAll { it.get() == null }
+            instances.lastOrNull()?.get()
+        }
     }
 }

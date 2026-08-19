@@ -4,11 +4,13 @@ import android.app.Activity
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -27,6 +29,10 @@ internal data class AppMenuContent(
     val applicationIconUrl: String?,
     val themeColor: String?,
     val description: String?,
+    /** Stable, unique account handle used for profile routing. */
+    val author: String?,
+    /** Non-unique display name used only for presentation. */
+    val authorDisplayName: String?,
     val detailsAvailable: Boolean,
 )
 
@@ -50,6 +56,7 @@ internal class AppMenuSheet(
     private val activity: Activity,
     private val content: AppMenuContent,
     private val onAction: (AppMenuAction) -> Unit,
+    private val onAuthorClick: ((String) -> Unit)? = null,
 ) {
     private val isDark = activity.resources.configuration.uiMode and
         Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
@@ -161,6 +168,51 @@ internal class AppMenuSheet(
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
             }, layout(top = dp(4)))
+            content.author?.trim()?.takeIf { it.isNotEmpty() }?.let { author ->
+                val authorDisplayName = content.authorDisplayName
+                    ?.trim()
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: author
+                val authorRow = LinearLayout(dialog.context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    background = AppCompatResources.getDrawable(
+                        dialog.context,
+                        android.R.drawable.list_selector_background,
+                    )
+                    isClickable = true
+                    isFocusable = true
+                    minimumHeight = dp(28)
+                    contentDescription = if (authorDisplayName == author) {
+                        "作者 $author，查看作者主页"
+                    } else {
+                        "作者 $authorDisplayName，账号 $author，查看作者主页"
+                    }
+                    addView(makeText(authorDisplayName, 13f, palette.secondary).apply {
+                        maxLines = 1
+                        ellipsize = TextUtils.TruncateAt.END
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                    addView(ImageView(dialog.context).apply {
+                        setImageResource(R.drawable.ic_app_menu_chevron)
+                        imageTintList = ColorStateList.valueOf(palette.secondary)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    }, LinearLayout.LayoutParams(dp(16), dp(16)).apply {
+                        marginStart = dp(4)
+                    })
+                    setOnClickListener {
+                        dialog.dismiss()
+                        onAuthorClick?.invoke(author)
+                    }
+                }
+                addView(authorRow, layout(top = dp(4)))
+                post {
+                    val hitRect = Rect()
+                    authorRow.getHitRect(hitRect)
+                    hitRect.inset(0, -dp(10))
+                    touchDelegate = TouchDelegate(hitRect, authorRow)
+                }
+            }
         }
 
         return LinearLayout(dialog.context).apply {

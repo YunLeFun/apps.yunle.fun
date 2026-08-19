@@ -15,6 +15,10 @@ struct WebAppInfo {
     var themeColor: String = "#007AFF"
     var description: String = ""
     var category: String = ""
+    /// Stable, unique account handle used for profile routing.
+    var developer: String = ""
+    /// Non-unique display name used only for presentation.
+    var developerName: String = ""
     var rating: Double = 0
     /// 评价条数（-1 = 未知，打开后由 JS 异步补充）
     var ratingCount: Int = -1
@@ -640,26 +644,47 @@ class WebViewController: UIViewController {
         presentAppDetail(scrollToReviews: false)
     }
 
-    /// 打开站内应用详情页（含评分评价）为模态 sheet，盖在当前应用之上；
-    /// 下滑 dismiss 即回到应用。详情页为远程第一方页面（apps.yunle.fun），JSAPI 自举登录。
-    /// 自身 present、不进插件层会话池，dismiss 即释放。
+    /// 打开 bundled 站内应用详情页（含评分评价）为模态 sheet，盖在当前应用之上；
+    /// 下滑 dismiss 即回到应用。sheet 使用独立 Capacitor Bridge，不改动底层主壳路由，
+    /// 也不进插件层云应用会话池，dismiss 即释放。
     private func presentAppDetail(scrollToReviews: Bool) {
         guard let info = appInfo else { return }
         let key = info.slug.isEmpty ? info.id : info.slug
         guard !key.isEmpty else { return }
-        var urlString = "https://apps.yunle.fun/app/\(key)"
-        if scrollToReviews { urlString += "#reviews" }
-        guard let url = URL(string: urlString) else { return }
+        let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
+        guard let encodedKey = key.addingPercentEncoding(withAllowedCharacters: pathAllowed) else { return }
 
-        let detailVC = WebViewController()
-        detailVC.url = url
-        detailVC.appInfo = info
-        detailVC.customTitle = info.name
-        detailVC.displayMode = .titlebar
-        detailVC.isDetailSheet = true
-        detailVC.extraTrustedHosts = extraTrustedHosts
-        // 默认 pageSheet：圆角卡片盖在应用之上，可下滑 dismiss 回到应用
+        let detailVC = AppViewController()
+        detailVC.configureLocalDetail(
+            routePath: "/app/\(encodedKey)",
+            target: scrollToReviews ? "reviews" : nil)
+        detailVC.modalPresentationStyle = .pageSheet
+        if let presentation = detailVC.sheetPresentationController {
+            presentation.detents = [.large()]
+            presentation.prefersGrabberVisible = true
+            presentation.preferredCornerRadius = 20
+        }
         present(detailVC, animated: true)
+    }
+
+    /// 作者主页沿用独立 bundled sheet，避免改写底层主壳或云应用的路由栈。
+    private func presentDeveloperProfile(_ developer: String) {
+        let login = developer.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !login.isEmpty else { return }
+        let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
+        guard let encodedLogin = login.addingPercentEncoding(withAllowedCharacters: pathAllowed) else { return }
+
+        let profileVC = AppViewController()
+        profileVC.configureLocalPage(
+            routePath: "/developer/\(encodedLogin)",
+            kind: "developer-sheet")
+        profileVC.modalPresentationStyle = .pageSheet
+        if let presentation = profileVC.sheetPresentationController {
+            presentation.detents = [.large()]
+            presentation.prefersGrabberVisible = true
+            presentation.preferredCornerRadius = 20
+        }
+        present(profileVC, animated: true)
     }
 
     @objc private func moreTapped() {
@@ -682,6 +707,9 @@ class WebViewController: UIViewController {
         // 评分行点击：收起 more 面板后，把站内详情页以 sheet 盖在应用之上（定位到评价区）
         sheet.onDetail = { [weak self] in
             self?.presentAppDetail(scrollToReviews: true)
+        }
+        sheet.onAuthor = { [weak self] developer in
+            self?.presentDeveloperProfile(developer)
         }
 
         if let presentation = sheet.sheetPresentationController {
@@ -1642,6 +1670,7 @@ class AppInfoSheetController: UIViewController {
     var onReload: (() -> Void)?
     var onClose: (() -> Void)?
     var onDetail: (() -> Void)?
+    var onAuthor: ((String) -> Void)?
     private var iconLoader: BoundedHTTPSImageLoader?
     /// 是否显示评分行（= 查看详情入口）；详情页 sheet 内隐藏，避免循环再弹详情
     var showRatingRow = true
@@ -1666,7 +1695,8 @@ class AppInfoSheetController: UIViewController {
             scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scroll.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 20),
+            // page sheet 的 grabber 不占 safe-area，顶部留出独立空间，避免身份标题被遮挡。
+            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 32),
             stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor, constant: 20),
             stack.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor, constant: -20),
             stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -20),
@@ -1674,7 +1704,13 @@ class AppInfoSheetController: UIViewController {
         ])
 
         stack.addArrangedSubview(makeHeader())
-        stack.setCustomSpacing(14, after: stack.arrangedSubviews.last!)
+        stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
+
+        // 评分是独立操作，不挤占图标右侧的应用身份区。
+        if let ratingView = showRatingRow ? makeRatingView() : nil {
+            stack.addArrangedSubview(ratingView)
+            stack.setCustomSpacing(12, after: ratingView)
+        }
 
         if let desc = appInfo?.description, !desc.isEmpty {
             let descLabel = UILabel()
@@ -1724,23 +1760,31 @@ class AppInfoSheetController: UIViewController {
         dismiss(animated: true, completion: action)
     }
 
-    // MARK: 头部：图标 + 名称 + 评分
+    // MARK: 头部：应用身份
 
     private func makeHeader() -> UIView {
         let container = UIView()
 
-        // 图标：受限 HTTPS logo 优先，否则用应用名称首字母 + 主题色背景
+        // 图标：受限 HTTPS logo 优先；未配置时使用可信目录里的 emoji 身份，最后回退名称首字。
         let iconView = UIView()
         iconView.layer.cornerRadius = 12
         iconView.clipsToBounds = true
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.backgroundColor = UIColor(hex: appInfo?.themeColor ?? "") ?? .systemBlue
+        let appName = appInfo?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        iconView.isAccessibilityElement = true
+        iconView.accessibilityLabel = "\(appName.isEmpty ? "应用" : appName)图标"
 
         let initialLabel = UILabel()
-        let fallbackName = appInfo?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        initialLabel.text = fallbackName.isEmpty ? "Y" : String(fallbackName.prefix(1))
-        initialLabel.font = .systemFont(ofSize: 22, weight: .semibold)
+        let trustedEmoji = appInfo?.emoji.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        initialLabel.text = !trustedEmoji.isEmpty
+            ? trustedEmoji
+            : (appName.isEmpty ? "Y" : String(appName.prefix(1)))
+        initialLabel.font = !trustedEmoji.isEmpty
+            ? .systemFont(ofSize: 27)
+            : .systemFont(ofSize: 22, weight: .semibold)
         initialLabel.textColor = iconView.backgroundColor?.isLight == true ? .black : .white
+        initialLabel.isAccessibilityElement = false
         initialLabel.translatesAutoresizingMaskIntoConstraints = false
         iconView.addSubview(initialLabel)
         NSLayoutConstraint.activate([
@@ -1754,7 +1798,7 @@ class AppInfoSheetController: UIViewController {
            !logo.isEmpty {
             let imageView = UIImageView()
             imageView.contentMode = .scaleAspectFill
-            imageView.accessibilityLabel = "\(appInfo?.name ?? "应用")图标"
+            imageView.isAccessibilityElement = false
             imageView.translatesAutoresizingMaskIntoConstraints = false
             iconView.addSubview(imageView)
             NSLayoutConstraint.activate([
@@ -1781,30 +1825,55 @@ class AppInfoSheetController: UIViewController {
         nameLabel.text = appInfo?.name.isEmpty == false ? appInfo?.name : (currentURL?.host ?? "")
         nameLabel.font = scaledFont(size: 17, weight: .semibold, textStyle: .headline)
         nameLabel.adjustsFontForContentSizeCategory = true
+        nameLabel.numberOfLines = 1
+        nameLabel.lineBreakMode = .byTruncatingTail
+        nameLabel.accessibilityTraits.insert(.header)
+        nameLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let originView = makeOriginView()
 
-        let metaLabel = UILabel()
-        metaLabel.font = scaledFont(size: 13, textStyle: .footnote)
-        metaLabel.adjustsFontForContentSizeCategory = true
-        metaLabel.textColor = .secondaryLabel
-        var metaParts: [String] = []
-        if let category = appInfo?.category, !category.isEmpty {
-            metaParts.append(category)
+        let developer = appInfo?.developer.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let developerName = appInfo?.developerName.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let authorDisplayName = developerName.isEmpty ? developer : developerName
+        let authorControl = ExpandedHitButton(type: .system)
+        var authorConfiguration = UIButton.Configuration.plain()
+        authorConfiguration.title = authorDisplayName
+        authorConfiguration.image = UIImage(systemName: "chevron.right", withConfiguration:
+            UIImage.SymbolConfiguration(pointSize: 9, weight: .semibold))
+        authorConfiguration.imagePlacement = .trailing
+        authorConfiguration.imagePadding = 4
+        authorConfiguration.contentInsets = .zero
+        authorConfiguration.baseForegroundColor = .secondaryLabel
+        authorConfiguration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { [weak self] attributes in
+            var transformed = attributes
+            transformed.font = self?.scaledFont(size: 13, textStyle: .footnote)
+                ?? UIFont.preferredFont(forTextStyle: .footnote)
+            return transformed
         }
-        if let downloads = appInfo?.downloads, !downloads.isEmpty {
-            metaParts.append("\(downloads) 次使用")
+        authorControl.configuration = authorConfiguration
+        authorControl.titleLabel?.adjustsFontForContentSizeCategory = true
+        authorControl.titleLabel?.lineBreakMode = .byTruncatingTail
+        authorControl.contentHorizontalAlignment = .leading
+        if !developer.isEmpty {
+            authorControl.accessibilityLabel = authorDisplayName == developer
+                ? "作者 \(developer)"
+                : "作者 \(authorDisplayName)，账号 \(developer)"
         }
-        metaLabel.text = metaParts.joined(separator: " · ")
-
-        let ratingView = showRatingRow ? makeRatingView() : nil
+        authorControl.accessibilityHint = developer.isEmpty ? nil : "查看作者主页"
+        authorControl.addAction(UIAction { [weak self] _ in
+            self?.dismissThen { self?.onAuthor?(developer) }
+        }, for: .touchUpInside)
 
         let textStack = UIStackView(
-            arrangedSubviews: [nameLabel, originView, metaLabel, ratingView].compactMap { $0 })
+            arrangedSubviews: [nameLabel, originView, developer.isEmpty ? nil : authorControl].compactMap { $0 })
         textStack.axis = .vertical
-        textStack.spacing = 3
-        textStack.alignment = .leading
+        textStack.spacing = 0
+        textStack.alignment = .fill
         textStack.translatesAutoresizingMaskIntoConstraints = false
+        textStack.setCustomSpacing(3, after: nameLabel)
+        if let originView {
+            textStack.setCustomSpacing(4, after: originView)
+        }
 
         container.addSubview(iconView)
         container.addSubview(textStack)
@@ -1813,14 +1882,15 @@ class AppInfoSheetController: UIViewController {
             iconView.widthAnchor.constraint(equalToConstant: 52),
             iconView.heightAnchor.constraint(equalToConstant: 52),
             iconView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            iconView.topAnchor.constraint(equalTo: container.topAnchor),
+            iconView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            iconView.topAnchor.constraint(greaterThanOrEqualTo: container.topAnchor),
             iconView.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor),
 
             textStack.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
-            textStack.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor),
-            textStack.centerYAnchor.constraint(equalTo: iconView.centerYAnchor),
-            textStack.topAnchor.constraint(greaterThanOrEqualTo: container.topAnchor),
-            textStack.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor),
+            textStack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            // 上下边明确绑定，Header 会随 Dynamic Type 增高，不再把域名/类别压进评分行。
+            textStack.topAnchor.constraint(equalTo: container.topAnchor),
+            textStack.bottomAnchor.constraint(equalTo: container.bottomAnchor),
             container.heightAnchor.constraint(greaterThanOrEqualToConstant: 52),
         ])
 
@@ -1856,7 +1926,10 @@ class AppInfoSheetController: UIViewController {
         row.axis = .horizontal
         row.spacing = 4
         row.alignment = .center
+        row.isAccessibilityElement = true
         row.accessibilityLabel = "已验证应用域名 \(label.text ?? "")"
+        lock.isAccessibilityElement = false
+        label.isAccessibilityElement = false
         return row
     }
 
@@ -1912,6 +1985,9 @@ class AppInfoSheetController: UIViewController {
         countLabel.font = scaledFont(size: 12, textStyle: .caption1)
         countLabel.adjustsFontForContentSizeCategory = true
         countLabel.textColor = .secondaryLabel
+        countLabel.numberOfLines = 1
+        countLabel.lineBreakMode = .byTruncatingTail
+        countLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         if info.ratingCount > 0 {
             countLabel.text = rating > 0 ? "· 共 \(info.ratingCount) 条评价" : "共 \(info.ratingCount) 条评价"
         }
@@ -1939,7 +2015,10 @@ class AppInfoSheetController: UIViewController {
             self?.dismiss(animated: true) { self?.onDetail?() }
         }
         control.accessibilityIdentifier = AppMenuAction.details.rawValue
-        control.accessibilityLabel = AppMenuAction.details.title
+        let ratingAccessibility = rating > 0 ? "评分 \(String(format: "%.1f", rating))" : "暂无评分"
+        let countAccessibility = info.ratingCount > 0 ? "共 \(info.ratingCount) 条评价" : "暂无评价"
+        control.accessibilityLabel = "\(ratingAccessibility)，\(countAccessibility)"
+        control.accessibilityHint = AppMenuAction.details.title
         stack.translatesAutoresizingMaskIntoConstraints = false
         control.addSubview(stack)
         control.translatesAutoresizingMaskIntoConstraints = false
@@ -2027,6 +2106,14 @@ class ActionRowControl: UIControl {
 
     @objc private func fire() {
         rowAction?()
+    }
+}
+
+/// 维持紧凑视觉行高，同时将作者入口的实际触控区域扩展到至少 44pt。
+private final class ExpandedHitButton: UIButton {
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let verticalExpansion = max(0, (44 - bounds.height) / 2)
+        return bounds.insetBy(dx: 0, dy: -verticalExpansion).contains(point)
     }
 }
 

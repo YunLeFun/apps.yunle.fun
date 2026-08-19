@@ -157,10 +157,12 @@ export async function createAppSubmission(
     updatedAt: now,
   }
   const projection = publicProjectionFromSubmission(normalized.snapshot)
+  const developerName = user.name?.trim()
   const app: AppRecord = {
     _id: appId,
     ownerUid: user.uid,
     ownerLogin: user.handle || user.name || 'YunLeFun',
+    ...(developerName ? { developerName } : {}),
     ...projection,
     nameKey,
     isPublic: normalized.snapshot.audience === 'public',
@@ -250,8 +252,10 @@ export async function updateAppSubmission(
     updatedAt: now,
   }
   const event = submissionEvent(eventId, appId, submissionId, user, 'submission.updated', now)
+  const developerName = user.name?.trim()
   const appPatch: Record<string, unknown> = {
     ...publicProjectionFromSubmission(normalized.snapshot),
+    ...(developerName ? { developerName } : {}),
     nameKey,
     audience: normalized.snapshot.audience || 'public',
     isPublic: normalized.snapshot.audience === 'public',

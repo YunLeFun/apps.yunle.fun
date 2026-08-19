@@ -2,6 +2,7 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
@@ -11,10 +12,12 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { chevronForward, logoGithub } from 'ionicons/icons'
+import { chevronForward, close, logoGithub } from 'ionicons/icons'
 
 const route = useRoute()
 const router = useRouter()
+const nativePresentation = useNativePresentation()
+const isNativeSheet = nativePresentation.presentation?.kind === 'developer-sheet'
 
 // Ionic + Nuxt 路由下 route.params 偶发为空，回退解析 URL（与 app/[id].vue 同款兜底）
 function resolveLoginFromUrl(): string {
@@ -65,6 +68,10 @@ function openGithubProfile() {
     openInAppBrowser(url)
 }
 
+function closeNativeSheet() {
+  nativePresentation.close()
+}
+
 onMounted(load)
 watch(login, load)
 </script>
@@ -74,7 +81,10 @@ watch(login, load)
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/apps" text="" />
+          <IonButton v-if="isNativeSheet" aria-label="关闭作者主页" @click="closeNativeSheet">
+            <IonIcon slot="icon-only" :icon="close" />
+          </IonButton>
+          <IonBackButton v-else default-href="/tabs/apps" text="" />
         </IonButtons>
         <IonTitle>个人主页</IonTitle>
       </IonToolbar>

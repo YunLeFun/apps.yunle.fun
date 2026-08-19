@@ -11,10 +11,18 @@ import {
   IonPage,
   IonToolbar,
 } from '@ionic/vue'
-import { chevronForward, ellipsisHorizontal, globeOutline, share } from 'ionicons/icons'
+import { chevronForward, close, ellipsisHorizontal, globeOutline, share } from 'ionicons/icons'
+
+type DetailWindow = Window & {
+  ylf?: {
+    inYunleApp?: boolean
+    invoke?: (method: string) => Promise<unknown>
+  }
+}
 
 const route = useRoute()
 const router = useRouter()
+const nativePresentation = useNativePresentation()
 const { ensureLoaded, getAppsByDeveloper } = useAppCatalog()
 
 function resolveAppIdFromUrl(): string {
@@ -133,22 +141,42 @@ const otherApps = computed(() => {
     .slice(0, 12)
 })
 
-// 嵌入态：详情页被原生容器以 sheet 盖在应用之上打开（window.ylf 注入）
-const isEmbedded = ref(false)
+// 嵌入态：兼容旧的远程详情 JSAPI，以及新的 bundled Capacitor 详情 sheet。
+const isEmbedded = shallowRef(false)
+const reviewTargetRequested = shallowRef(false)
+const didScrollToReviews = shallowRef(false)
+
+watch([displayData, reviewTargetRequested], async ([detail, shouldScroll]) => {
+  if (!detail || !shouldScroll || didScrollToReviews.value)
+    return
+  await nextTick()
+  const reviews = document.getElementById('app-reviews')
+  if (!reviews)
+    return
+  reviews.scrollIntoView({ block: 'start' })
+  didScrollToReviews.value = true
+})
 
 // 目录用于「其他 App」聚合，确保运行时已从集合回填 developer
 onMounted(() => {
   ensureLoaded()
-  isEmbedded.value = typeof window !== 'undefined' && Boolean((window as any).ylf?.inYunleApp)
-  // 从「查看评价」入口进来时定位到评价区
-  if (typeof window !== 'undefined' && window.location.hash === '#reviews') {
-    nextTick(() => document.getElementById('app-reviews')?.scrollIntoView({ block: 'start' }))
-  }
+  const detailWindow = window as DetailWindow
+  isEmbedded.value = Boolean(
+    detailWindow.ylf?.inYunleApp
+    || nativePresentation.presentation?.kind === 'app-detail-sheet',
+  )
+  reviewTargetRequested.value
+    = window.location.hash === '#reviews' || nativePresentation.presentation?.target === 'reviews'
 })
 
 // 嵌入态「回到应用」：收起详情 sheet 回到下层应用容器
 function backToApp() {
-  ;(window as any).ylf?.invoke?.('close')
+  const detailWindow = window as DetailWindow
+  if (nativePresentation.presentation?.kind === 'app-detail-sheet') {
+    nativePresentation.close()
+    return
+  }
+  detailWindow.ylf?.invoke?.('close')
 }
 
 function goDeveloper() {
@@ -225,7 +253,10 @@ async function openMoreMenu() {
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton default-href="/tabs/apps" text="" />
+          <IonButton v-if="isEmbedded" aria-label="回到应用" @click="backToApp">
+            <IonIcon slot="icon-only" :icon="close" />
+          </IonButton>
+          <IonBackButton v-else default-href="/tabs/apps" text="" />
         </IonButtons>
         <IonButtons slot="end">
           <IonButton @click="shareApp">

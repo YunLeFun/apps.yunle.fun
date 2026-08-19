@@ -1309,6 +1309,8 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         if let v = obj["themeColor"] as? String { info.themeColor = v }
         if let v = obj["description"] as? String { info.description = v }
         if let v = obj["category"] as? String { info.category = v }
+        if let v = obj["developer"] as? String { info.developer = v }
+        if let v = obj["developerName"] as? String { info.developerName = v }
         if let v = obj["downloads"] as? String { info.downloads = v }
         if let v = obj["rating"] as? Double { info.rating = v }
         else if let v = obj["rating"] as? Int { info.rating = Double(v) }

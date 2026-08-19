@@ -164,25 +164,42 @@ final class BoundedHTTPSImageLoader: NSObject, URLSessionDataDelegate,
     }
 }
 
+private let authorizationComfortableDetentIdentifier
+    = UISheetPresentationController.Detent.Identifier("authorization-comfortable")
+
+@MainActor
+private func configureAuthorizationConsentPresentation(
+    _ presentation: UISheetPresentationController,
+    contentSizeCategory: UIContentSizeCategory
+) {
+    if contentSizeCategory.isAccessibilityCategory {
+        presentation.detents = [.large()]
+        presentation.selectedDetentIdentifier = .large
+    } else {
+        let comfortable = UISheetPresentationController.Detent.custom(
+            identifier: authorizationComfortableDetentIdentifier
+        ) { context in
+            guard context.containerTraitCollection.verticalSizeClass != .compact else {
+                return nil
+            }
+            let proportionalHeight = context.maximumDetentValue * 0.76
+            return min(
+                context.maximumDetentValue,
+                max(540, min(640, proportionalHeight)))
+        }
+        presentation.detents = [comfortable, .large()]
+        presentation.selectedDetentIdentifier = authorizationComfortableDetentIdentifier
+    }
+    presentation.prefersGrabberVisible = true
+    presentation.prefersScrollingExpandsWhenScrolledToEdge = true
+    presentation.preferredCornerRadius = 28
+}
+
 /// 云乐坊第一方应用的可信原生授权 Sheet。所有展示字段均由宿主注册表或宿主会话提供。
 private final class AuthorizationConsentViewController: UIViewController,
     UIAdaptivePresentationControllerDelegate {
-    private static let brandColor = UIColor(red: 179 / 255, green: 38 / 255, blue: 30 / 255, alpha: 1)
-    private static let accentColor = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 1, green: 180 / 255, blue: 171 / 255, alpha: 1)
-            : UIColor(red: 179 / 255, green: 38 / 255, blue: 30 / 255, alpha: 1)
-    }
-    private static let noticeTintColor = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 1, green: 185 / 255, blue: 92 / 255, alpha: 1)
-            : UIColor(red: 168 / 255, green: 92 / 255, blue: 0, alpha: 1)
-    }
-    private static let noticeBackgroundColor = UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 58 / 255, green: 42 / 255, blue: 22 / 255, alpha: 1)
-            : UIColor(red: 1, green: 243 / 255, blue: 214 / 255, alpha: 1)
-    }
+    private static let accentColor = UIColor.systemBlue
+    private static let noticeTintColor = UIColor.systemOrange
     private static let maximumImageBytes = 2_000_000
 
     private let content: AuthorizationSheetContent
@@ -222,34 +239,30 @@ private final class AuthorizationConsentViewController: UIViewController,
 
     private func buildLayout() {
         let scrollView = UIScrollView()
-        scrollView.alwaysBounceVertical = false
+        scrollView.alwaysBounceVertical = true
+        scrollView.keyboardDismissMode = .interactive
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
         let contentStack = UIStackView()
         contentStack.axis = .vertical
-        contentStack.spacing = 18
+        contentStack.spacing = 16
         contentStack.isLayoutMarginsRelativeArrangement = true
-        contentStack.layoutMargins = UIEdgeInsets(top: 20, left: 20, bottom: 24, right: 20)
+        contentStack.layoutMargins = UIEdgeInsets(top: 8, left: 20, bottom: 24, right: 20)
         contentStack.translatesAutoresizingMaskIntoConstraints = false
 
-        contentStack.addArrangedSubview(makeIdentityConnection())
-
-        let titleLabel = makeLabel(
-            text: "登录到 \(content.applicationName)",
-            style: .title2,
-            weight: .bold,
-            color: .label,
-            alignment: .center)
-        contentStack.addArrangedSubview(titleLabel)
-        contentStack.setCustomSpacing(6, after: titleLabel)
+        contentStack.addArrangedSubview(makeHeader())
+        contentStack.setCustomSpacing(4, after: contentStack.arrangedSubviews.last!)
+        contentStack.addArrangedSubview(makeApplicationHero())
+        contentStack.setCustomSpacing(8, after: contentStack.arrangedSubviews.last!)
         contentStack.addArrangedSubview(makeOriginRow())
+        contentStack.addArrangedSubview(makeAccountPanel())
 
         contentStack.addArrangedSubview(makeInformationPanel(
             symbol: "person.text.rectangle",
             title: "将向 \(content.applicationName) 提供",
             body: content.permissionDescription,
             tint: Self.accentColor,
-            background: Self.accentColor.withAlphaComponent(0.08)))
+            background: .secondarySystemBackground))
 
         if let notice = content.authorizationNotice {
             contentStack.addArrangedSubview(makeInformationPanel(
@@ -257,7 +270,7 @@ private final class AuthorizationConsentViewController: UIViewController,
                 title: "费用说明",
                 body: notice,
                 tint: Self.noticeTintColor,
-                background: Self.noticeBackgroundColor))
+                background: Self.noticeTintColor.withAlphaComponent(0.10)))
         }
 
         contentStack.addArrangedSubview(makeSecurityRow())
@@ -285,66 +298,80 @@ private final class AuthorizationConsentViewController: UIViewController,
         ])
     }
 
-    private func makeIdentityConnection() -> UIView {
-        let app = makeIdentityEndpoint(
-            imageURL: content.applicationIconURL,
-            fallbackText: String(content.applicationName.prefix(1)),
-            title: content.applicationName,
-            subtitle: "申请登录",
-            circular: false)
-        let account = makeIdentityEndpoint(
-            imageURL: content.accountAvatarURL,
-            fallbackText: String(content.accountName.prefix(1)),
-            title: content.accountName,
-            subtitle: "当前账号",
-            circular: true)
+    private func makeHeader() -> UIView {
+        let spacer = UIView()
+        let close = UIButton(type: .system)
+        close.setImage(UIImage(systemName: "xmark"), for: .normal)
+        close.tintColor = .secondaryLabel
+        close.backgroundColor = .tertiarySystemFill
+        close.layer.cornerRadius = 22
+        close.translatesAutoresizingMaskIntoConstraints = false
+        close.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        close.accessibilityLabel = "关闭授权"
+        close.accessibilityIdentifier = "authorization-cancel"
+        NSLayoutConstraint.activate([
+            close.widthAnchor.constraint(equalToConstant: 44),
+            close.heightAnchor.constraint(equalToConstant: 44),
+        ])
 
-        let verifiedIcon = UIImageView(image: UIImage(systemName: "checkmark.shield.fill"))
-        verifiedIcon.tintColor = Self.accentColor
-        verifiedIcon.contentMode = .scaleAspectFit
-        verifiedIcon.translatesAutoresizingMaskIntoConstraints = false
-        verifiedIcon.heightAnchor.constraint(equalToConstant: 28).isActive = true
-        verifiedIcon.accessibilityLabel = "云乐坊认证连接"
-
-        let verifiedLabel = makeLabel(
-            text: "云乐坊认证",
-            style: .caption1,
-            weight: .semibold,
-            color: Self.accentColor,
-            alignment: .center)
-        let verified = UIStackView(arrangedSubviews: [verifiedIcon, verifiedLabel])
-        verified.axis = .vertical
-        verified.spacing = 5
-        verified.alignment = .fill
-
-        let row = UIStackView(arrangedSubviews: [app, verified, account])
+        let row = UIStackView(arrangedSubviews: [spacer, close])
         row.axis = .horizontal
-        row.alignment = .top
-        row.distribution = .fillEqually
-        row.spacing = 10
+        row.alignment = .center
         return row
     }
 
-    private func makeIdentityEndpoint(
+    private func makeApplicationHero() -> UIView {
+        let icon = makeIdentityImage(
+            imageURL: content.applicationIconURL,
+            fallbackText: String(content.applicationName.prefix(1)),
+            size: 64,
+            cornerRadius: 16)
+        icon.isAccessibilityElement = true
+        icon.accessibilityLabel = "\(content.applicationName) 应用图标"
+
+        let title = makeLabel(
+            text: "允许“\(content.applicationName)”登录？",
+            style: .title2,
+            weight: .bold,
+            color: .label,
+            alignment: .center)
+        title.numberOfLines = 0
+
+        let subtitle = makeLabel(
+            text: "云乐坊将使用你的当前账号完成安全授权",
+            style: .subheadline,
+            weight: .regular,
+            color: .secondaryLabel,
+            alignment: .center)
+        subtitle.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [icon, title, subtitle])
+        stack.axis = .vertical
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.setCustomSpacing(14, after: icon)
+        return stack
+    }
+
+    private func makeIdentityImage(
         imageURL: String?,
         fallbackText: String,
-        title: String,
-        subtitle: String,
-        circular: Bool
+        size: CGFloat,
+        cornerRadius: CGFloat
     ) -> UIView {
         let imageContainer = UIView()
         imageContainer.translatesAutoresizingMaskIntoConstraints = false
         imageContainer.backgroundColor = Self.accentColor.withAlphaComponent(0.10)
-        imageContainer.layer.cornerRadius = circular ? 28 : 14
+        imageContainer.layer.cornerRadius = cornerRadius
         imageContainer.clipsToBounds = true
         NSLayoutConstraint.activate([
-            imageContainer.widthAnchor.constraint(equalToConstant: 56),
-            imageContainer.heightAnchor.constraint(equalToConstant: 56),
+            imageContainer.widthAnchor.constraint(equalToConstant: size),
+            imageContainer.heightAnchor.constraint(equalToConstant: size),
         ])
 
         let fallback = makeLabel(
             text: fallbackText,
-            style: .title2,
+            style: size >= 60 ? .title1 : .headline,
             weight: .bold,
             color: Self.accentColor,
             alignment: .center)
@@ -366,28 +393,7 @@ private final class AuthorizationConsentViewController: UIViewController,
             imageView.bottomAnchor.constraint(equalTo: imageContainer.bottomAnchor),
         ])
         loadHTTPSImage(imageURL, into: imageView, hiding: fallback)
-
-        let titleLabel = makeLabel(
-            text: title,
-            style: .footnote,
-            weight: .semibold,
-            color: .label,
-            alignment: .center)
-        titleLabel.numberOfLines = 2
-        let subtitleLabel = makeLabel(
-            text: subtitle,
-            style: .caption1,
-            weight: .regular,
-            color: .secondaryLabel,
-            alignment: .center)
-
-        let endpoint = UIStackView(arrangedSubviews: [imageContainer, titleLabel, subtitleLabel])
-        endpoint.axis = .vertical
-        endpoint.spacing = 4
-        endpoint.alignment = .center
-        endpoint.isAccessibilityElement = true
-        endpoint.accessibilityLabel = "\(subtitle)，\(title)"
-        return endpoint
+        return imageContainer
     }
 
     private func makeOriginRow() -> UIView {
@@ -405,8 +411,79 @@ private final class AuthorizationConsentViewController: UIViewController,
         row.axis = .horizontal
         row.alignment = .center
         row.spacing = 6
-        row.distribution = .fill
-        return row
+        row.isLayoutMarginsRelativeArrangement = true
+        row.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+
+        let container = UIView()
+        container.backgroundColor = .tertiarySystemFill
+        container.layer.cornerRadius = 12
+        row.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(row)
+        NSLayoutConstraint.activate([
+            row.topAnchor.constraint(equalTo: container.topAnchor),
+            row.leadingAnchor.constraint(greaterThanOrEqualTo: container.leadingAnchor),
+            row.trailingAnchor.constraint(lessThanOrEqualTo: container.trailingAnchor),
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            row.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        ])
+        return container
+    }
+
+    private func makeAccountPanel() -> UIView {
+        let avatar = makeIdentityImage(
+            imageURL: content.accountAvatarURL,
+            fallbackText: String(content.accountName.prefix(1)),
+            size: 48,
+            cornerRadius: 24)
+
+        let context = makeLabel(
+            text: "使用此云乐坊账号",
+            style: .footnote,
+            weight: .regular,
+            color: .secondaryLabel,
+            alignment: .left)
+        let account = makeLabel(
+            text: content.accountName,
+            style: .headline,
+            weight: .semibold,
+            color: .label,
+            alignment: .left)
+        account.numberOfLines = 0
+        let labels = UIStackView(arrangedSubviews: [context, account])
+        labels.axis = .vertical
+        labels.spacing = 2
+
+        let check = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
+        check.tintColor = Self.accentColor
+        check.contentMode = .scaleAspectFit
+        check.setContentHuggingPriority(.required, for: .horizontal)
+        check.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            check.widthAnchor.constraint(equalToConstant: 24),
+            check.heightAnchor.constraint(equalToConstant: 24),
+        ])
+
+        let row = UIStackView(arrangedSubviews: [avatar, labels, check])
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+        row.translatesAutoresizingMaskIntoConstraints = false
+
+        let panel = UIView()
+        panel.backgroundColor = .secondarySystemBackground
+        panel.layer.cornerRadius = 16
+        panel.isAccessibilityElement = true
+        panel.accessibilityLabel = "当前云乐坊账号，\(content.accountName)，已选择"
+        panel.addSubview(row)
+        NSLayoutConstraint.activate([
+            row.topAnchor.constraint(equalTo: panel.topAnchor, constant: 14),
+            row.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 14),
+            row.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -14),
+            row.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -14),
+            panel.heightAnchor.constraint(greaterThanOrEqualToConstant: 76),
+        ])
+        return panel
     }
 
     private func makeInformationPanel(
@@ -439,7 +516,7 @@ private final class AuthorizationConsentViewController: UIViewController,
             text: body,
             style: .body,
             weight: .regular,
-            color: .label,
+            color: .secondaryLabel,
             alignment: .left)
         bodyLabel.numberOfLines = 0
         let text = UIStackView(arrangedSubviews: [titleLabel, bodyLabel])
@@ -481,11 +558,10 @@ private final class AuthorizationConsentViewController: UIViewController,
 
     private func makeActionContainer() -> UIView {
         let primary = makeButton(
-            title: "以「\(shortAccountName())」登录",
+            title: "使用此账号继续",
             configuration: .filled(),
             selector: #selector(allowTapped))
-        primary.configuration?.baseBackgroundColor = Self.brandColor
-        primary.configuration?.baseForegroundColor = .white
+        primary.tintColor = Self.accentColor
         primary.accessibilityLabel = "以 \(content.accountName) 登录"
         primary.accessibilityIdentifier = "authorization-current-account"
 
@@ -493,22 +569,14 @@ private final class AuthorizationConsentViewController: UIViewController,
             title: "使用其他账号",
             configuration: .tinted(),
             selector: #selector(otherTapped))
-        other.configuration?.baseBackgroundColor = Self.accentColor.withAlphaComponent(0.12)
         other.configuration?.baseForegroundColor = Self.accentColor
         other.accessibilityIdentifier = "authorization-other-account"
 
-        let cancel = makeButton(
-            title: "取消",
-            configuration: .plain(),
-            selector: #selector(cancelTapped))
-        cancel.configuration?.baseForegroundColor = .secondaryLabel
-        cancel.accessibilityIdentifier = "authorization-cancel"
-
-        let stack = UIStackView(arrangedSubviews: [primary, other, cancel])
+        let stack = UIStackView(arrangedSubviews: [primary, other])
         stack.axis = .vertical
         stack.spacing = 8
         stack.isLayoutMarginsRelativeArrangement = true
-        stack.layoutMargins = UIEdgeInsets(top: 12, left: 20, bottom: 8, right: 20)
+        stack.layoutMargins = UIEdgeInsets(top: 12, left: 20, bottom: 12, right: 20)
         stack.translatesAutoresizingMaskIntoConstraints = false
 
         let separator = UIView()
@@ -545,6 +613,9 @@ private final class AuthorizationConsentViewController: UIViewController,
         let button = UIButton(configuration: configuration)
         button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
         button.titleLabel?.adjustsFontForContentSizeCategory = true
+        button.titleLabel?.numberOfLines = 0
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
         button.addTarget(self, action: selector, for: .touchUpInside)
         return button
     }
@@ -565,12 +636,6 @@ private final class AuthorizationConsentViewController: UIViewController,
         label.textColor = color
         label.textAlignment = alignment
         return label
-    }
-
-    private func shortAccountName() -> String {
-        content.accountName.count > 20
-            ? String(content.accountName.prefix(19)) + "…"
-            : content.accountName
     }
 
     private func loadHTTPSImage(
@@ -920,9 +985,9 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
                     ])
                 })
             if let presentation = sheet.sheetPresentationController {
-                presentation.detents = [.medium(), .large()]
-                presentation.prefersGrabberVisible = true
-                presentation.preferredCornerRadius = 28
+                configureAuthorizationConsentPresentation(
+                    presentation,
+                    contentSizeCategory: sheet.traitCollection.preferredContentSizeCategory)
             }
             presenter.present(sheet, animated: true)
             let timeout = DispatchWorkItem { [weak self, weak sheet] in

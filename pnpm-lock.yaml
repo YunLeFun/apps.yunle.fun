@@ -108,6 +108,9 @@ importers:
       cordova-plugin-wechat:
         specifier: ^3.1.0
         version: 3.1.0(patch_hash=7239b725b64862d1edcf360c18724e217b622254dffe668d40cff1afc46ed388)
+      fuse.js:
+        specifier: ^7.5.0
+        version: 7.5.0
       h3:
         specifier: ^1.15.11
         version: 1.15.11
@@ -267,7 +270,7 @@ importers:
     devDependencies:
       vitepress:
         specifier: ^1.6.4
-        version: 1.6.4(@algolia/client-search@5.49.1)(@types/node@25.3.3)(axios@1.18.1)(change-case@5.4.4)(fuse.js@7.3.0)(lightningcss@1.32.0)(postcss@8.5.23)(qrcode@1.5.4)(sass@1.101.0)(search-insights@2.17.3)(terser@5.46.0)(typescript@5.9.3)
+        version: 1.6.4(@algolia/client-search@5.49.1)(@types/node@25.3.3)(axios@1.18.1)(change-case@5.4.4)(fuse.js@7.5.0)(lightningcss@1.32.0)(postcss@8.5.23)(qrcode@1.5.4)(sass@1.101.0)(search-insights@2.17.3)(terser@5.46.0)(typescript@5.9.3)
       vue:
         specifier: 3.5.40
         version: 3.5.40(typescript@5.9.3)
@@ -4453,6 +4456,7 @@ packages:
   '@xmldom/xmldom@0.8.13':
     resolution: {integrity: sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -5979,8 +5983,8 @@ packages:
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
-  fuse.js@7.3.0:
-    resolution: {integrity: sha512-plz8RVjfcDedTGfVngWH1jmJvBvAwi1v2jecfDerbEnMcmOYUEEwKFTHbNoCiYyzaK2Ws8lABkTCcRSqCY1q4w==}
+  fuse.js@7.5.0:
+    resolution: {integrity: sha512-sQtrEfA+ez/3G0cCZecF70oqpCRttCexYUG4mUrtWL49ULUzUyxokt5kyqwtKzj1270RaKih+hcP3qLcumccow==}
     engines: {node: '>=10'}
 
   fzf@0.5.2:
@@ -11445,7 +11449,7 @@ snapshots:
       debug: 4.4.3
       defu: 6.1.7
       exsolve: 1.0.8
-      fuse.js: 7.3.0
+      fuse.js: 7.5.0
       fzf: 0.5.2
       giget: 3.2.0
       jiti: 2.7.0
@@ -14091,7 +14095,7 @@ snapshots:
       '@vueuse/shared': 14.3.0(vue@3.5.40(typescript@5.9.3))
       vue: 3.5.40(typescript@5.9.3)
 
-  '@vueuse/integrations@12.8.2(axios@1.18.1)(change-case@5.4.4)(focus-trap@7.8.0)(fuse.js@7.3.0)(qrcode@1.5.4)(typescript@5.9.3)':
+  '@vueuse/integrations@12.8.2(axios@1.18.1)(change-case@5.4.4)(focus-trap@7.8.0)(fuse.js@7.5.0)(qrcode@1.5.4)(typescript@5.9.3)':
     dependencies:
       '@vueuse/core': 12.8.2(typescript@5.9.3)
       '@vueuse/shared': 12.8.2(typescript@5.9.3)
@@ -14100,7 +14104,7 @@ snapshots:
       axios: 1.18.1
       change-case: 5.4.4
       focus-trap: 7.8.0
-      fuse.js: 7.3.0
+      fuse.js: 7.5.0
       qrcode: 1.5.4
     transitivePeerDependencies:
       - typescript
@@ -15927,7 +15931,7 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
-  fuse.js@7.3.0: {}
+  fuse.js@7.5.0: {}
 
   fzf@0.5.2: {}
 
@@ -19771,7 +19775,7 @@ snapshots:
       terser: 5.46.0
       yaml: 2.9.0
 
-  vitepress@1.6.4(@algolia/client-search@5.49.1)(@types/node@25.3.3)(axios@1.18.1)(change-case@5.4.4)(fuse.js@7.3.0)(lightningcss@1.32.0)(postcss@8.5.23)(qrcode@1.5.4)(sass@1.101.0)(search-insights@2.17.3)(terser@5.46.0)(typescript@5.9.3):
+  vitepress@1.6.4(@algolia/client-search@5.49.1)(@types/node@25.3.3)(axios@1.18.1)(change-case@5.4.4)(fuse.js@7.5.0)(lightningcss@1.32.0)(postcss@8.5.23)(qrcode@1.5.4)(sass@1.101.0)(search-insights@2.17.3)(terser@5.46.0)(typescript@5.9.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.49.1)(search-insights@2.17.3)
@@ -19784,7 +19788,7 @@ snapshots:
       '@vue/devtools-api': 7.7.9
       '@vue/shared': 3.5.29
       '@vueuse/core': 12.8.2(typescript@5.9.3)
-      '@vueuse/integrations': 12.8.2(axios@1.18.1)(change-case@5.4.4)(focus-trap@7.8.0)(fuse.js@7.3.0)(qrcode@1.5.4)(typescript@5.9.3)
+      '@vueuse/integrations': 12.8.2(axios@1.18.1)(change-case@5.4.4)(focus-trap@7.8.0)(fuse.js@7.5.0)(qrcode@1.5.4)(typescript@5.9.3)
       focus-trap: 7.8.0
       mark.js: 8.11.1
       minisearch: 7.2.0

@@ -7,10 +7,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@cloudbase/node-sdk": "^3.18.3",
+    "fuse.js": "^7.5.0",
     "ws": "^8.21.0"
   }
 }

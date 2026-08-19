@@ -132,6 +132,24 @@ describe('useWorkshop', () => {
       expect(apps.value.map(a => a.slug)).toEqual(['alpha', 'beta'])
     })
 
+    it('搜索忽略名称中的标点并按字段相关性排序', async () => {
+      setCatalog([
+        makeApp('description-match', '开发', { description: 'advjs helper' }),
+        makeApp('slug-match', '开发', { slug: 'advjs' }),
+        makeApp('adv-js-studio', '开发', { name: 'Adv.js Studio' }),
+      ])
+
+      const { queryApps, apps, searchQuery } = await loadWorkshop()
+      searchQuery.value = 'advjs'
+      await queryApps(true)
+
+      expect(apps.value.map(a => a.slug)).toEqual([
+        'adv-js-studio',
+        'advjs',
+        'description-match',
+      ])
+    })
+
     it('分类 + 搜索过滤可叠加', async () => {
       setCatalog([
         makeApp('tool-1', '工具', { name: 'Hammer' }),

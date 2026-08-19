@@ -1,5 +1,6 @@
 import type { CloudbaseAdminDb } from './cloudbase-admin'
 import type { AppIconAssets, AppRecord } from '~/types/app'
+import { normalizeAppSearchText, tokenizeAppSearchQuery } from '~/utils/app-search'
 import { useCloudbaseAdmin } from './cloudbase-admin'
 
 export interface SearchAppsInput {
@@ -174,28 +175,9 @@ function normalizeLimit(limit: number | undefined) {
 }
 
 function tokenizeQuery(query: string) {
-  const normalized = normalizeText(query)
-  if (!normalized)
-    return []
-
-  const terms = new Set<string>()
-  terms.add(normalized)
-  for (const term of normalized.split(/[\s,，.。;；|/]+/)) {
-    if (term)
-      terms.add(term)
-  }
-
-  const cjk = [...normalized.matchAll(/\p{Script=Han}+/gu)].map(match => match[0])
-  for (const segment of cjk) {
-    if (segment.length <= 1)
-      continue
-    for (let index = 0; index < segment.length - 1; index += 1)
-      terms.add(segment.slice(index, index + 2))
-  }
-
-  return [...terms]
+  return tokenizeAppSearchQuery(query)
 }
 
 function normalizeText(value: unknown) {
-  return typeof value === 'string' ? value.trim().toLocaleLowerCase() : ''
+  return normalizeAppSearchText(value)
 }

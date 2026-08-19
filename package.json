@@ -53,6 +53,7 @@
     "@yunlefun/types": "^0.2.1",
     "aegis-web-sdk": "^1.41.14",
     "cordova-plugin-wechat": "^3.1.0",
+    "fuse.js": "^7.5.0",
     "h3": "^1.15.11",
     "ionicons": "^8.0.13",
     "jsqr": "^1.4.0",

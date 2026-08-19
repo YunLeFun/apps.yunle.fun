@@ -32,6 +32,9 @@ declare module '@yunlefun/types' {
     /** 启动器图标的完整图标 / 主体图标与可选深色资源。 */
     iconAssets?: AppIconAssets
 
+    /** Searchable catalog tags from the published application record. */
+    tags?: string[]
+
     // developer / developerName / screenshots / ratingCount 已随 @yunlefun/types@0.2.0 收编，移除增补。
     // displayMode / trustedHosts 仍为 apps 专属（内嵌浏览器），保留于此。
   }

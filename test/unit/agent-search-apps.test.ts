@@ -66,6 +66,14 @@ describe('agent search_apps tool', () => {
     })
   })
 
+  it('matches application names across punctuation variants', () => {
+    const cards = searchAppsInMemory([
+      makeApp('adv-js-studio', { name: 'Adv.js Studio' }),
+    ], { query: 'advjs' })
+
+    expect(cards.map(card => card.slug)).toEqual(['adv-js-studio'])
+  })
+
   it('filters by category and caps output at six cards with stable ordering', () => {
     const records = Array.from({ length: 8 }, (_, index) =>
       makeApp(`tool-${index}`, {

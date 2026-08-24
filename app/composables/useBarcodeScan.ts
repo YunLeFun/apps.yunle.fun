@@ -1,5 +1,9 @@
 import type { CapacitorBarcodeScannerScanResult } from '@capacitor/barcode-scanner'
-import { CapacitorBarcodeScanner } from '@capacitor/barcode-scanner'
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerCameraDirection,
+  CapacitorBarcodeScannerTypeHintALLOption,
+} from '@capacitor/barcode-scanner'
 
 export function useBarcodeScan() {
   const isScanning = ref(false)
@@ -12,9 +16,13 @@ export function useBarcodeScan() {
     try {
       isScanning.value = true
 
-      // 使用新的 API 扫描
       const result = await CapacitorBarcodeScanner.scanBarcode({
-        hint: 2, // 使用后置摄像头
+        hint: CapacitorBarcodeScannerTypeHintALLOption.ALL,
+        cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
+        scanInstructions: '将二维码或条形码放入框内',
+        cancelButtonAccessibilityLabel: '取消扫码',
+        torchButtonOnAccessibilityLabel: '关闭手电筒',
+        torchButtonOffAccessibilityLabel: '打开手电筒',
       })
 
       // 检查是否扫描成功
@@ -27,7 +35,7 @@ export function useBarcodeScan() {
     catch (error: any) {
       // 用户主动取消/关闭摄像头，静默返回 null
       const msg = String(error?.message || error).toLowerCase()
-      if (msg.includes('cancel') || msg.includes('dismissed') || msg.includes('denied') || msg.includes('aborted')) {
+      if (msg.includes('cancel') || msg.includes('dismissed') || msg.includes('aborted')) {
         return null
       }
       console.error('扫描失败:', error)

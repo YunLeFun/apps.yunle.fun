@@ -11,6 +11,15 @@ describe('canonical app domains', () => {
     }).websiteUrl).toBe('https://ai-sfc.yunle.fun')
   })
 
+  it('always opens Give Me Money on its yunle.fun primary domain', () => {
+    expect(withCanonicalAppDomain({
+      id: 'give-me-money',
+      slug: 'give-me-money',
+      name: '请给我钱！',
+      websiteUrl: 'https://gmm.yunyoujun.cn',
+    }).websiteUrl).toBe('https://gmm.yunle.fun/')
+  })
+
   it('leaves unrelated applications unchanged', () => {
     const app = {
       id: 'play',

@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useScanner } from '../../app/composables/useScanner'
 
 const cameraMocks = vi.hoisted(() => ({
@@ -27,6 +27,12 @@ mockNuxtImport('useToast', () => () => ({
   showError,
   showWarning,
 }))
+
+beforeAll(async () => {
+  // @nuxtjs/ionic starts initial navigation from onNuxtReady(). Keep its
+  // route component imports inside the active Vitest environment.
+  await useRouter().isReady()
+})
 
 describe('scanner album picker', () => {
   beforeEach(() => {

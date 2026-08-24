@@ -2,10 +2,11 @@
 /**
  * AppRunningEntry - 云居首页左上角「正在运行」入口
  *
- * 仅当有后台保活会话时出现（图标 + 数量角标）；点击展开 Popover 面板
- * （AppRunningPanel：恢复 / 单个关闭 / 一键清理）。放在 IonToolbar 的 slot="start"。
+ * 仅当有后台保活会话时出现（图标 + 数量角标）；紧凑屏使用 Bottom Sheet，
+ * 宽屏使用 Popover。两种容器复用 AppRunningPanel。
  */
-import { IonButton, IonIcon, IonPopover } from '@ionic/vue'
+import { IonButton, IonIcon, IonModal, IonPopover } from '@ionic/vue'
+import { useMediaQuery } from '@vueuse/core'
 import { copyOutline } from 'ionicons/icons'
 // 显式同步导入（不走自动导入）：避免 Nuxt 测试环境下该组件异步 import
 // 在环境拆除后才 resolve（EnvironmentTeardownError，CI 时序相关）
@@ -13,8 +14,23 @@ import RunningPanel from './RunningPanel.vue'
 
 const { sessions } = useBackgroundSessions()
 
-const open = ref(false)
-const triggerEvent = ref<Event | undefined>()
+const open = shallowRef(false)
+const triggerEvent = shallowRef<Event | undefined>()
+const isCompact = useMediaQuery('(max-width: 599px)')
+
+const sheetInitialBreakpoint = computed(() => {
+  if (sessions.value.length <= 3)
+    return 0.36
+  if (sessions.value.length <= 6)
+    return 0.56
+  return 0.72
+})
+
+const sheetBreakpoints = computed(() => [0, sheetInitialBreakpoint.value, 0.9])
+
+watch(isCompact, () => {
+  open.value = false
+})
 
 function openPanel(e: Event) {
   triggerEvent.value = e
@@ -34,14 +50,27 @@ function openPanel(e: Event) {
   </IonButton>
 
   <IonPopover
+    v-if="!isCompact"
     :is-open="open"
     :event="triggerEvent"
     :show-backdrop="false"
-    style="--width: 264px;"
+    css-class="ylf-elevated-popover running-sessions-popover"
     @did-dismiss="open = false"
   >
-    <RunningPanel v-if="open" @close="open = false" />
+    <RunningPanel v-if="open" presentation="popover" @close="open = false" />
   </IonPopover>
+
+  <IonModal
+    v-else
+    class="running-sessions-sheet"
+    :is-open="open"
+    :breakpoints="sheetBreakpoints"
+    :initial-breakpoint="sheetInitialBreakpoint"
+    handle-behavior="cycle"
+    @did-dismiss="open = false"
+  >
+    <RunningPanel v-if="open" presentation="sheet" @close="open = false" />
+  </IonModal>
 </template>
 
 <style scoped>

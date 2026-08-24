@@ -47,6 +47,58 @@ ion-tab-bar {
 }
 
 /*
+ * Elevated overlays
+ * Ionic 的 Popover / Modal 会提升到应用根节点，必须使用全局样式。
+ * 浅色与暗色值统一来自 css-vars.css，组件只选择对应的语义层级。
+ */
+ion-popover.ylf-elevated-popover {
+  --background: var(--ylf-surface-elevated);
+  --box-shadow: var(--ylf-shadow-popover);
+  --backdrop-opacity: 0;
+  --ion-item-background: transparent;
+}
+
+ion-popover.ylf-elevated-popover::part(content) {
+  border: 0.5px solid var(--ylf-overlay-border);
+  border-radius: var(--ylf-radius-popover);
+}
+
+ion-popover.ylf-elevated-popover ion-content {
+  --background: transparent;
+}
+
+ion-popover.ylf-elevated-popover ion-list {
+  background: transparent;
+}
+
+ion-popover.home-actions-popover {
+  --width: 200px;
+}
+
+ion-popover.running-sessions-popover {
+  --width: 284px;
+  --max-height: min(60vh, 480px);
+}
+
+ion-modal.running-sessions-sheet {
+  --background: var(--ylf-surface-elevated);
+  --backdrop-opacity: var(--ylf-backdrop-sheet-opacity);
+  --border-radius: var(--ylf-radius-sheet) var(--ylf-radius-sheet) 0 0;
+  --box-shadow: var(--ylf-shadow-sheet);
+}
+
+ion-modal.running-sessions-sheet::part(content) {
+  border: 0.5px solid var(--ylf-overlay-border);
+  border-bottom: 0;
+}
+
+ion-modal.running-sessions-sheet::part(handle) {
+  width: 36px;
+  height: 5px;
+  background: var(--ylf-label-tertiary);
+}
+
+/*
  * IonSearchbar already renders its own clear button. Chromium/WebKit also
  * adds a native cancel control for <input type="search">, which can produce
  * two visible clear buttons on web.

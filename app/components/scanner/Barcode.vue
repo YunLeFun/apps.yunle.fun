@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { IonButton, IonIcon, IonSpinner } from '@ionic/vue'
 import { closeOutline, flashlightOutline, imagesOutline, refreshOutline, videocamOffOutline } from 'ionicons/icons'
@@ -18,6 +19,7 @@ const emit = defineEmits<{
 
 const videoRef = shallowRef<HTMLVideoElement | null>(null)
 const { startScan: startWebScan, stopScan: stopWebScan, isSupported, stream } = useWebBarcodeScan()
+const { startScan: startNativeScan } = useBarcodeScan()
 
 // 手电筒：基于 W3C MediaStreamTrack.applyConstraints({ torch })
 // 仅当 stream 就绪且设备支持时按钮才会渲染（前置摄像头/不兼容设备自动隐藏）
@@ -38,6 +40,11 @@ let resultEmitted = false
 
 /** 启动相机 + 二维码检测，失败时进入错误状态（而非静默退出页面） */
 async function startCamera() {
+  if (Capacitor.isNativePlatform()) {
+    await startNativeCamera()
+    return
+  }
+
   const video = videoRef.value
   if (!video)
     return
@@ -68,6 +75,31 @@ async function startCamera() {
     else if (error?.name === 'NotFoundError' || error?.name === 'OverconstrainedError') {
       errorMessage.value = '未检测到可用的摄像头'
       errorHint.value = '可以点击下方按钮从相册选择二维码图片'
+    }
+    else {
+      errorMessage.value = '相机启动失败'
+      errorHint.value = '请重试，或从相册选择二维码图片'
+    }
+  }
+}
+
+async function startNativeCamera() {
+  status.value = 'starting'
+  try {
+    const result = await startNativeScan()
+    if (result?.ScanResult) {
+      handleDetected(result.ScanResult)
+      return
+    }
+
+    handleCancel()
+  }
+  catch (error: any) {
+    status.value = 'error'
+    const message = String(error?.message || error).toLowerCase()
+    if (message.includes('permission') || message.includes('denied') || message.includes('not allowed')) {
+      errorMessage.value = '相机权限未开启'
+      errorHint.value = '请在系统设置中允许「云乐坊」访问相机后重试'
     }
     else {
       errorMessage.value = '相机启动失败'

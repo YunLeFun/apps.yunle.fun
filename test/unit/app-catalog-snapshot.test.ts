@@ -24,7 +24,13 @@ describe('offline app catalog snapshot', () => {
     expect(getAppById('valaxy')).toBeUndefined()
     expect(getAppById('air-conditioner')?.name).toBe('云空调')
     expect(getAppById('electric-fan')?.name).toBe('云风扇')
-    expect(getAppById('give-me-money')?.name).toBe('请给我钱！')
+    expect(getAppById('give-me-money')).toMatchObject({
+      name: '请给我钱！',
+      websiteUrl: 'https://gmm.yunle.fun/',
+      iconAssets: {
+        mark: { src: 'https://gmm.yunle.fun/favicon.png' },
+      },
+    })
     expect(getAppById('cook')?.name).toBe('今天来做菜')
     expect(getAppById('dayun-kicker')?.name).toBe('暴力电驴')
     expect(getAppById('pachinko')?.name).toBe('云乐弹珠')

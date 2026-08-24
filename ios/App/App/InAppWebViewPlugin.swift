@@ -689,6 +689,24 @@ private final class AuthorizationConsentViewController: UIViewController,
     }
 }
 
+/// 根据设备物理内存选择保守的 WebView 自动上限；会员可手动提高到 7 个。
+private enum WebViewSessionPolicy {
+    private static let gibibyte: UInt64 = 1_024 * 1_024 * 1_024
+    private static let memberLimitRange = 2...7
+
+    static func automaticLimit(physicalMemory: UInt64) -> Int {
+        if physicalMemory < 5 * gibibyte { return 2 }
+        if physicalMemory < 7 * gibibyte { return 3 }
+        if physicalMemory < 10 * gibibyte { return 4 }
+        return 5
+    }
+
+    static func memberLimit(_ preferredLimit: Int?) -> Int? {
+        guard let preferredLimit, memberLimitRange.contains(preferredLimit) else { return nil }
+        return preferredLimit
+    }
+}
+
 @objc(HostRuntimePlugin)
 public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "HostRuntimePlugin"
@@ -697,6 +715,7 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "open", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "close", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateAppInfo", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "configureSessionPolicy", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listSessions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "confirmAuthorization", returnType: CAPPluginReturnPromise),
@@ -712,9 +731,32 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
     /// LRU 顺序：index 0 = 最近交互；超过上限淘汰最旧的暂停会话。
     /// 「最小化」「跳详情页」只暂停（dismiss 保留状态），「结束」才真正移除释放。
     private var sessions: [WebViewController] = []
-    private let maxSessions = 3
+    private lazy var automaticSessionLimit = WebViewSessionPolicy.automaticLimit(
+        physicalMemory: ProcessInfo.processInfo.physicalMemory)
+    private var preferredSessionLimit: Int?
+    private var hasMembership = false
+    private var maxSessions: Int {
+        guard hasMembership, let preferredSessionLimit else { return automaticSessionLimit }
+        return preferredSessionLimit
+    }
     private var authorizationPromptActive = false
     private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
+
+    override public func load() {
+        super.load()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleMemoryWarning),
+            name: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil)
+    }
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与 WebViewController.sessionKey 一致）
     private func indexOfSession(key: String) -> Int? {
@@ -744,9 +786,37 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    /// 内存警告时保留所有前台会话；若没有前台会话，仅保留最近使用的一个后台会话。
+    @objc private func handleMemoryWarning() {
+        DispatchQueue.main.async { [weak self] in
+            self?.evictForMemoryPressure()
+        }
+    }
+
+    private func evictForMemoryPressure() {
+        let hasForegroundSession = sessions.contains { $0.presentingViewController != nil }
+        let pausedSessionToKeep: WebViewController? = hasForegroundSession
+            ? nil
+            : sessions.first(where: { $0.presentingViewController == nil })
+        let sessionsToRemove = sessions.filter { session in
+            guard session.presentingViewController == nil else { return false }
+            guard let pausedSessionToKeep = pausedSessionToKeep else { return true }
+            return session !== pausedSessionToKeep
+        }
+
+        guard !sessionsToRemove.isEmpty else { return }
+        for session in sessionsToRemove {
+            removeSession(session)
+        }
+        notifySessionsChanged()
+    }
+
     /// 把当前后台会话列表推给 JS（悬浮球 / 托盘 / 主屏「正在运行」区据此渲染）
     private func notifySessionsChanged() {
-        notifyListeners("sessionsChanged", data: ["sessions": sessions.map { $0.sessionInfo() }])
+        notifyListeners("sessionsChanged", data: [
+            "sessions": sessions.map { $0.sessionInfo() },
+            "sessionLimit": maxSessions,
+        ])
     }
 
     @objc func open(_ call: CAPPluginCall) {
@@ -886,10 +956,30 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    /// 同步 Web 层账户权益与用户偏好；原生再次校验范围，避免越过安全硬上限。
+    @objc func configureSessionPolicy(_ call: CAPPluginCall) {
+        let hasMembership = call.getBool("isMember") ?? false
+        let preferredLimit = WebViewSessionPolicy.memberLimit(call.getInt("preferredLimit"))
+        DispatchQueue.main.async { [weak self] in
+            guard let self else {
+                call.resolve(["sessionLimit": 1])
+                return
+            }
+            self.hasMembership = hasMembership
+            self.preferredSessionLimit = preferredLimit
+            self.evictIfNeeded()
+            self.notifySessionsChanged()
+            call.resolve(["sessionLimit": self.maxSessions])
+        }
+    }
+
     /// 返回当前后台会话列表（供悬浮球 / 托盘 / 主屏「正在运行」区渲染）
     @objc func listSessions(_ call: CAPPluginCall) {
         DispatchQueue.main.async { [weak self] in
-            call.resolve(["sessions": self?.sessions.map { $0.sessionInfo() } ?? []])
+            call.resolve([
+                "sessions": self?.sessions.map { $0.sessionInfo() } ?? [],
+                "sessionLimit": self?.maxSessions ?? 1,
+            ])
         }
     }
 

@@ -10,6 +10,7 @@ import {
   cloudDoneOutline,
   cloudOutline,
   ellipsisHorizontalOutline,
+  layersOutline,
   moonOutline,
   openOutline,
   phonePortraitOutline,
@@ -28,11 +29,12 @@ import {
   kSegmentedButton,
   kToggle,
 } from 'konsta/vue'
-import { APP_ICON_STYLE_OPTIONS } from '~/stores/settings'
+import { APP_ICON_STYLE_OPTIONS, SESSION_LIMIT_OPTIONS } from '~/stores/settings'
 
 const settingsStore = useSettingsStore()
 const homeScreenStore = useHomeScreenStore()
 const userStore = useUserStore()
+const { isMember } = useCoin()
 
 const selectedTheme = ref<ThemeMode>(settingsStore.themeMode)
 const selectedAppIconStyle = ref<AppIconStyle>(settingsStore.appIconStyle)
@@ -55,6 +57,40 @@ function selectBrowserMode(value: InAppBrowserMode) {
   selectedBrowserMode.value = value
   settingsStore.inAppBrowserMode = value
 }
+
+const showSessionLimitAlert = shallowRef(false)
+const sessionLimitLabel = computed(() => {
+  if (!isMember.value)
+    return '自动（最高 5 个）'
+  const preference = settingsStore.sessionLimitPreference
+  return preference === 'auto' ? '自动（推荐）' : `${preference} 个`
+})
+const sessionLimitInputs = computed(() => SESSION_LIMIT_OPTIONS.map(option => ({
+  type: 'radio' as const,
+  label: option.label,
+  value: option.value,
+  checked: settingsStore.sessionLimitPreference === option.value,
+})))
+
+function openSessionLimitSettings() {
+  if (!isMember.value) {
+    navigateTo('/membership')
+    return
+  }
+  showSessionLimitAlert.value = true
+}
+
+function applySessionLimitPreference(value: unknown) {
+  const preference = value === 'auto' ? value : Number(value)
+  const option = SESSION_LIMIT_OPTIONS.find(item => item.value === preference)
+  if (option)
+    settingsStore.setSessionLimitPreference(option.value)
+}
+
+const sessionLimitAlertButtons = [
+  { text: '取消', role: 'cancel' },
+  { text: '完成', handler: applySessionLimitPreference },
+]
 
 onMounted(() => {
   settingsStore.initTheme()
@@ -279,6 +315,28 @@ async function handleManualSync() {
         </k-list-item>
       </k-list>
 
+      <!-- Background session policy only affects the native iOS container. -->
+      <k-block-title v-if="isIOS">
+        后台运行
+      </k-block-title>
+      <k-list v-if="isIOS" strong inset>
+        <k-list-item
+          link
+          title="后台应用数量"
+          :after="sessionLimitLabel"
+          :footer="isMember
+            ? '手动设置最多 7 个；设备内存紧张时仍会自动回收较早使用的应用'
+            : '自动适配设备，最高 5 个；会员可手动设置最多 7 个'"
+          @click="openSessionLimitSettings"
+        >
+          <template #media>
+            <span class="ios-icon-box ios-icon-blue">
+              <IonIcon :icon="layersOutline" />
+            </span>
+          </template>
+        </k-list-item>
+      </k-list>
+
       <!-- 主屏幕 -->
       <k-block-title>主屏幕</k-block-title>
       <k-list strong inset>
@@ -382,6 +440,16 @@ async function handleManualSync() {
       </k-list>
 
       <!-- 清除缓存确认弹窗 -->
+      <IonAlert
+        :is-open="showSessionLimitAlert"
+        css-class="session-limit-alert"
+        header="后台应用数量"
+        message="数量越多，占用的内存越高。发生内存警告时会优先回收较早使用的后台应用。"
+        :inputs="sessionLimitInputs"
+        :buttons="sessionLimitAlertButtons"
+        @did-dismiss="showSessionLimitAlert = false"
+      />
+
       <IonAlert
         :is-open="showClearAlert"
         header="清除本地缓存"
@@ -536,5 +604,9 @@ async function handleManualSync() {
 
 :global(.dark) .theme-block :deep(.k-segmented > span:last-child) {
   background: rgba(255, 255, 255, 0.2) !important;
+}
+
+:global(.session-limit-alert .alert-radio-group) {
+  max-height: 360px;
 }
 </style>

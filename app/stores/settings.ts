@@ -3,6 +3,8 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 export type AppIconStyle = 'original' | 'liquid-glass' | 'flat-color' | 'gradient' | 'minimal'
+/** Preferred number of native WebView sessions; automatic mode follows the device memory tier. */
+export type SessionLimitPreference = 'auto' | 2 | 3 | 4 | 5 | 6 | 7
 /**
  * iOS 内嵌浏览器模式（用户可在设置中选择）：
  * titlebar = 标题栏视图（顶部固定导航栏，自动套用应用主题色，右上角单菜单按钮，底部仍铺满）；
@@ -25,6 +27,17 @@ export const APP_ICON_STYLE_OPTIONS: { value: AppIconStyle, label: string }[] = 
   { value: 'minimal', label: '极简描边' },
 ]
 
+/** Session limits available to active members. */
+export const SESSION_LIMIT_OPTIONS: { value: SessionLimitPreference, label: string }[] = [
+  { value: 'auto', label: '自动（推荐）' },
+  { value: 2, label: '2 个' },
+  { value: 3, label: '3 个' },
+  { value: 4, label: '4 个' },
+  { value: 5, label: '5 个' },
+  { value: 6, label: '6 个' },
+  { value: 7, label: '7 个' },
+]
+
 /** 所有 localStorage 的 key 前缀 */
 const STORAGE_KEYS = [
   'ylf_theme_mode',
@@ -41,6 +54,7 @@ const STORAGE_KEYS = [
   'ylf:dock-visible',
   'ylf:in-app-browser-mode',
   'ylf:external-link-mode',
+  'ylf:session-limit-preference',
   'ylf:purchased-apps',
 ] as const
 
@@ -120,6 +134,15 @@ export const useSettingsStore = defineStore('settings', () => {
   /** 沉浸模式内跨站外链的打开方式（默认 App 内系统浏览器视图，不跳出） */
   const externalLinkMode = useStorage<ExternalLinkMode>('ylf:external-link-mode', 'safari-view')
 
+  /** Members may override the automatic native WebView session limit with a value from 2 to 7. */
+  const sessionLimitPreference = useStorage<SessionLimitPreference>('ylf:session-limit-preference', 'auto')
+  if (!SESSION_LIMIT_OPTIONS.some(option => option.value === sessionLimitPreference.value))
+    sessionLimitPreference.value = 'auto'
+
+  function setSessionLimitPreference(preference: SessionLimitPreference) {
+    sessionLimitPreference.value = preference
+  }
+
   // ==================== 主屏幕设置 ====================
 
   /** 是否显示 Dock 栏（默认隐藏） */
@@ -168,6 +191,8 @@ export const useSettingsStore = defineStore('settings', () => {
     // 浏览
     inAppBrowserMode,
     externalLinkMode,
+    sessionLimitPreference,
+    setSessionLimitPreference,
     // 云同步
     cloudSyncEnabled,
     cloudAutoSync,

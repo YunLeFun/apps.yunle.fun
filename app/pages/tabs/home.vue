@@ -412,6 +412,7 @@ function handleContentClick() {
       :event="menuEvent"
       :dismiss-on-select="true"
       :show-backdrop="false"
+      css-class="ylf-elevated-popover home-actions-popover"
       @did-dismiss="closeMenu"
     >
       <IonContent>
@@ -656,10 +657,5 @@ function handleContentClick() {
   font-size: 14px;
   color: var(--ion-color-medium);
   margin-bottom: 8px;
-}
-
-/* ==================== 顶部下拉菜单（IonPopover）==================== */
-ion-popover {
-  --width: 200px;
 }
 </style>

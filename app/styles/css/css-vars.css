@@ -26,6 +26,17 @@
   --ylf-fill-tertiary: #7676801e; /* rgba(118,118,128,0.12) */
   --ylf-fill-quaternary: #74748014; /* rgba(116,116,128,0.08) */
 
+  /* 浮层：Popover / Menu / Sheet 共用的 iOS elevated 层级 */
+  --ylf-surface-elevated: rgb(255 255 255 / 96%);
+  --ylf-overlay-border: rgb(60 60 67 / 14%);
+  --ylf-shadow-popover:
+    0 2px 8px rgb(0 0 0 / 8%),
+    0 12px 32px rgb(0 0 0 / 16%);
+  --ylf-shadow-sheet: 0 -18px 48px rgb(0 0 0 / 16%);
+  --ylf-backdrop-sheet-opacity: 0.16;
+  --ylf-radius-popover: 16px;
+  --ylf-radius-sheet: 22px;
+
   /* iOS 扩展色（Ionic 默认调色板没有的） */
   --ylf-color-purple: #af52de;
   --ylf-color-pink: #ff2d55;
@@ -57,6 +68,14 @@
   --ylf-fill-secondary: #78788052;
   --ylf-fill-tertiary: #7676803d;
   --ylf-fill-quaternary: #7676802e;
+
+  /* 深色模式前景浮层使用更亮的 elevated surface，避免与主页基底融合 */
+  --ylf-surface-elevated: rgb(44 44 46 / 98%);
+  --ylf-overlay-border: rgb(235 235 245 / 12%);
+  --ylf-shadow-popover:
+    0 2px 10px rgb(0 0 0 / 24%),
+    0 16px 40px rgb(0 0 0 / 48%);
+  --ylf-shadow-sheet: 0 -20px 52px rgb(0 0 0 / 48%);
 
   --ylf-color-purple: #bf5af2;
   --ylf-color-pink: #ff375f;

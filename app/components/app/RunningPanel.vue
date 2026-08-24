@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * AppRunningPanel - 「正在运行」展开面板（云居首页左上角按钮触发的 Popover 内容）
+ * AppRunningPanel - 「正在运行」展开面板（Popover / Bottom Sheet 共用内容）
  *
  * - 轻点某行：恢复该后台会话（秒回页面状态），并关闭面板
  * - 行尾 ✕：单个关闭
@@ -10,6 +10,12 @@ import type { BackgroundSession } from '~/composables/useBrowser'
 import { actionSheetController } from '@ionic/vue'
 import { closeOutline, trashOutline } from 'ionicons/icons'
 
+const props = withDefaults(defineProps<{
+  presentation?: 'popover' | 'sheet'
+}>(), {
+  presentation: 'popover',
+})
+
 const emit = defineEmits<{ close: [] }>()
 
 const { sessions, resume, end, clearAll } = useBackgroundSessions()
@@ -17,6 +23,12 @@ const { sessions, resume, end, clearAll } = useBackgroundSessions()
 function onResume(s: BackgroundSession) {
   emit('close')
   resume(s)
+}
+
+async function onEnd(s: BackgroundSession) {
+  await end(s)
+  if (sessions.value.length === 0)
+    emit('close')
 }
 
 /** 一键清理为破坏性操作，先确认（对齐 iOS「关闭全部标签页」的 action sheet 模式） */
@@ -36,7 +48,7 @@ async function onClearAll() {
 </script>
 
 <template>
-  <div class="running-panel">
+  <div class="running-panel" :class="`running-panel--${props.presentation}`">
     <div class="running-panel-head">
       <span class="running-panel-title">正在运行 · {{ sessions.length }}</span>
       <button
@@ -65,8 +77,8 @@ async function onClearAll() {
         <button
           type="button"
           class="running-row-close"
-          aria-label="关闭"
-          @click="end(s)"
+          :aria-label="`关闭${s.name}`"
+          @click="onEnd(s)"
         >
           <IonIcon :icon="closeOutline" />
         </button>
@@ -180,5 +192,56 @@ async function onClearAll() {
   text-align: center;
   font-size: 13px;
   color: var(--ion-color-medium, #8e8e93);
+}
+
+.running-panel--sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 4px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.running-panel--sheet .running-panel-head {
+  flex-shrink: 0;
+  min-height: 52px;
+  padding: 8px 0 10px;
+}
+
+.running-panel--sheet .running-panel-title {
+  font-size: 17px;
+  color: var(--ion-text-color);
+}
+
+.running-panel--sheet .running-clear {
+  min-height: 44px;
+  padding: 8px 4px 8px 12px;
+  font-size: 15px;
+}
+
+.running-panel--sheet .running-list {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overscroll-behavior: contain;
+}
+
+.running-panel--sheet .running-row-main {
+  min-height: 56px;
+  padding: 8px 4px;
+}
+
+.running-panel--sheet .running-row-name {
+  font-size: 17px;
+}
+
+.running-panel--sheet .running-row-close {
+  width: 44px;
+  height: 44px;
+  margin-right: 0;
+  font-size: 20px;
+}
+
+.running-panel--sheet .running-empty {
+  margin: auto 0;
 }
 </style>

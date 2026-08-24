@@ -34,6 +34,12 @@ export interface HostSession {
   displayMode?: 'immersive' | 'titlebar'
 }
 
+/** 原生会话池快照；旧版或单会话平台可以不返回自动上限。 */
+export interface HostSessionSnapshot {
+  sessions: HostSession[]
+  sessionLimit?: number
+}
+
 /** 页面向宿主申请当前账号授权时使用的统一 PKCE 请求。 */
 export interface HostAuthorizationRequest {
   clientId: string
@@ -71,7 +77,12 @@ export interface HostRuntimePlugin {
   }) => Promise<void>
   close: () => Promise<void>
   updateAppInfo: (options: { app: HostAppInfo }) => Promise<void>
-  listSessions: () => Promise<{ sessions: HostSession[] }>
+  /** Applies the account entitlement and preferred native WebView session limit. */
+  configureSessionPolicy: (options: {
+    isMember: boolean
+    preferredLimit?: number
+  }) => Promise<{ sessionLimit: number }>
+  listSessions: () => Promise<HostSessionSnapshot>
   endSession: (options: { id: string }) => Promise<void>
   confirmAuthorization: (options: {
     requestId: string
@@ -101,7 +112,7 @@ export interface HostRuntimePlugin {
   clearIdentitySessions: () => Promise<void>
   addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>)
     & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>)
-    & ((event: 'sessionsChanged', handler: (data: { sessions: HostSession[] }) => void) => Promise<PluginListenerHandle>)
+    & ((event: 'sessionsChanged', handler: (data: HostSessionSnapshot) => void) => Promise<PluginListenerHandle>)
     & ((event: 'browserMinimized', handler: (data: { name: string }) => void) => Promise<PluginListenerHandle>)
     & ((event: 'authorizationRequested', handler: (data: HostAuthorizationEvent) => void) => Promise<PluginListenerHandle>)
   removeAllListeners: () => Promise<void>

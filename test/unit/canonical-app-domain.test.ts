@@ -20,6 +20,17 @@ describe('canonical app domains', () => {
     }).websiteUrl).toBe('https://gmm.yunle.fun/')
   })
 
+  it('opens cached and bundled Web Resume entries on the registered login origin', () => {
+    for (const websiteUrl of ['https://resume.elpsy.cn', 'https://resume.yunyoujun.cn']) {
+      expect(withCanonicalAppDomain({
+        id: 'web-resume',
+        slug: 'web-resume',
+        name: 'Web Resume',
+        websiteUrl,
+      }).websiteUrl).toBe('https://resume.yunle.fun')
+    }
+  })
+
   it('leaves unrelated applications unchanged', () => {
     const app = {
       id: 'play',

@@ -1,6 +1,7 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 
 const CANONICAL_WEBSITE_URLS: Readonly<Record<string, string>> = Object.freeze({
+  'web-resume': 'https://resume.yunle.fun',
   'ai-sfc': 'https://ai-sfc.yunle.fun',
   'give-me-money': 'https://gmm.yunle.fun/',
 })

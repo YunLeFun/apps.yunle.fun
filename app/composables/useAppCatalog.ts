@@ -196,8 +196,12 @@ export function useAppCatalog() {
   function getApp(idOrSlug: string): YlfAppInfo | undefined {
     if (!idOrSlug)
       return undefined
-    return catalog.value.find(a => a.slug === idOrSlug || a.id === idOrSlug)
-      || accessibleApps.value.find(a => a.slug === idOrSlug || a.id === idOrSlug)
+    const apps = [...catalog.value, ...accessibleApps.value]
+    const exact = apps.find(app => app.id === idOrSlug)
+    if (exact)
+      return exact
+    const matches = apps.filter(app => app.slug === idOrSlug)
+    return new Set(matches.map(app => app.id)).size === 1 ? matches[0] : undefined
   }
 
   /** 按分类过滤（'全部' 返回全部） */

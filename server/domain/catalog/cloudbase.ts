@@ -33,6 +33,10 @@ export async function resolveOwnerUidByLogin(
   login: string,
   db: CloudbaseAdminDb = useCloudbaseAdmin().db,
 ): Promise<string | null> {
+  const normalized = await db.collection('apps').where({ ownerLoginKey: login.toLowerCase() }).limit(1).get()
+  const owner = first<AppRecord>(normalized.data)
+  if (owner)
+    return owner.ownerUid || owner._openid || null
   const { data } = await db.collection('apps')
     .where({ ownerLogin: login })
     .limit(1)
@@ -80,6 +84,7 @@ export function createCloudbaseCatalogDataSource(db: CloudbaseAdminDb): CatalogD
 export function catalogAppViewToRecord(view: CatalogAppView): AppRecord {
   return {
     _id: view._id,
+    marketShortName: view.marketShortName,
     ownerLogin: view.ownerLogin || '',
     name: view.name,
     slug: view.slug,

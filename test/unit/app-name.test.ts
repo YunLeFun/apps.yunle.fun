@@ -25,15 +25,12 @@ describe('application name uniqueness', () => {
     expect(isDuplicateKeyError(new Error('timeout'))).toBe(false)
   })
 
-  it('guards create, edit, and public-market submission paths', () => {
-    const source = readFileSync(
-      new URL('../../server/utils/app-submissions.ts', import.meta.url),
-      'utf8',
-    )
-    expect(source).toMatch(/createAppSubmission[\s\S]*assertAppNameAvailable/)
-    expect(source).toMatch(/updateAppSubmission[\s\S]*assertAppNameAvailable/)
-    expect(source).toMatch(/submitOwnedAppToPublicMarket[\s\S]*assertAppNameAvailable/)
-    expect(source).toContain('APP_NAME_TAKEN')
+  it('allows repeated display names while claiming namespace and market identities', () => {
+    const source = readFileSync(new URL('../../server/utils/app-submissions.ts', import.meta.url), 'utf8')
+    expect(source).toContain('available: true')
+    expect(source).toContain('claimAppIdentifier(transaction, \'namespace\'')
+    expect(source).toContain('claimAppIdentifier(transaction, \'market\'')
+    expect(source).not.toContain('APP_NAME_TAKEN')
   })
 
   it('only excludes an edited application owned by the signed-in user', () => {

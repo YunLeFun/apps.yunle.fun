@@ -3,6 +3,7 @@ import { createError, readBody } from 'h3'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
 import { buildModerationContent, logModerationTask, moderateText } from '../../utils/moderation'
+import { getPublicAppByKey } from '../../utils/public-apps'
 import { checkCooldown, validateReportInput } from '../../utils/reviews'
 
 export default defineEventHandler(async (event) => {
@@ -13,17 +14,15 @@ export default defineEventHandler(async (event) => {
 
   let appKey = input.appKey || ''
   if (input.targetType === 'app') {
-    const { data } = await db.collection('apps')
-      .where({ slug: input.targetId, isPublic: true, status: 'approved', publicationStatus: 'published' })
-      .limit(1)
-      .get()
-    if (!data?.[0]) {
+    const app = await getPublicAppByKey(input.targetId, db)
+    if (!app) {
       throw createError({
         statusCode: 404,
         message: '应用不存在或尚未公开',
       })
     }
-    appKey = input.targetId
+    appKey = app.marketShortName || app._id
+    input.targetId = appKey
   }
   else {
     const { data } = await db.collection('app_reviews')

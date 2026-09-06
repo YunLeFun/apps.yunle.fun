@@ -1,24 +1,19 @@
-import type { AppRecord } from '~/types/app'
 import type { ReviewModerationInfo, ReviewRecord, SubmitReviewResponse } from '~/types/review'
 import { createError, readBody } from 'h3'
 import { recomputeAppRating } from '../../utils/app-rating'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
 import { buildModerationContent, logModerationTask, moderateText } from '../../utils/moderation'
+import { getPublicAppByKey } from '../../utils/public-apps'
 import { checkCooldown, mapSuggestionToStatus, validateReviewInput } from '../../utils/reviews'
 
 export default defineEventHandler(async (event) => {
   const user = await requireCloudbaseUser(event)
   const input = validateReviewInput(await readBody(event))
   const { db } = useCloudbaseAdmin()
-  const appsCollection = db.collection('apps')
   const reviewsCollection = db.collection('app_reviews')
 
-  const { data: apps } = await appsCollection
-    .where({ slug: input.appKey, isPublic: true, status: 'approved', publicationStatus: 'published' })
-    .limit(1)
-    .get()
-  const app = normalizeAppRecord(apps?.[0])
+  const app = await getPublicAppByKey(input.appKey, db)
   if (!app) {
     throw createError({
       statusCode: 404,
@@ -26,6 +21,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  input.appKey = app.marketShortName || app._id
   await checkCooldown(reviewsCollection, user.uid)
 
   const content = buildModerationContent([input.title, input.content])
@@ -119,14 +115,6 @@ function statusMessage(status: ReviewRecord['status']): string {
   if (status === 'rejected')
     return '内容涉嫌违规，未能发布'
   return '已提交，审核通过后展示'
-}
-
-function normalizeAppRecord(value: unknown): Pick<AppRecord, '_id' | 'slug'> | null {
-  if (!isRecord(value))
-    return null
-  const _id = stringProp(value, '_id')
-  const slug = stringProp(value, 'slug')
-  return _id && slug ? { _id, slug } : null
 }
 
 function normalizeReviewRecord(value: unknown): Pick<ReviewRecord, '_id' | 'createdAt'> | null {

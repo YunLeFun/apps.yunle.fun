@@ -62,6 +62,7 @@ export interface CatalogRevision {
 }
 
 export interface PublicMarketListing {
+  shortName?: string
   appId: string
   status: 'unlisted' | 'listed' | 'suspended' | 'delisted'
   approvedRevisionId?: string
@@ -100,6 +101,7 @@ export interface CatalogDataSource {
 }
 
 export interface CatalogAppView extends CatalogRevisionSnapshot {
+  marketShortName?: string
   _id: string
   ownerUid: string
   revisionId: string
@@ -168,6 +170,7 @@ export function createCatalogResolver(source: CatalogDataSource): CatalogResolve
       const visibleListings = listings.filter((listing) => {
         const app = appById.get(listing.appId)
         return listing.status === 'listed'
+          && Boolean(listing.shortName)
           && Boolean(listing.approvedRevisionId)
           && app?.audience === 'public'
           && app.publicationStatus === 'published'
@@ -187,7 +190,7 @@ export function createCatalogResolver(source: CatalogDataSource): CatalogResolve
             : undefined
           if (!app || !revision || revision.appId !== app._id)
             return []
-          return [toAppView(app, revision)]
+          return [{ ...toAppView(app, revision), marketShortName: listing.shortName }]
         }),
       }
     },

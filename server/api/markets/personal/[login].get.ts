@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     surface: 'personal_market',
     ownerUid,
   }, null)
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
+  setResponseHeader(event, 'Cache-Control', 'no-store')
   return {
     ownerLogin: login,
     items: view.apps.map(catalogAppViewToRecord),

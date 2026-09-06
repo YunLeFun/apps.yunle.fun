@@ -75,6 +75,7 @@ describe('catalogResolver', () => {
         return [{
           appId: 'app-1',
           status: 'listed',
+          shortName: 'example',
           approvedRevisionId: 'revision-approved',
         }]
       },

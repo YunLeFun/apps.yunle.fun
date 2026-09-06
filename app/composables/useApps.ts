@@ -101,11 +101,11 @@ export function useApps() {
 
   async function submitPublicMarket(
     id: string,
-    options: { makePublic?: boolean } = {},
+    options: { makePublic?: boolean, shortName?: string } = {},
   ): Promise<void> {
     await $api(`/api/apps/${encodeURIComponent(id)}/public-market`, {
       method: 'POST',
-      body: { makePublic: options.makePublic === true },
+      body: { makePublic: options.makePublic === true, shortName: options.shortName },
     })
   }
 

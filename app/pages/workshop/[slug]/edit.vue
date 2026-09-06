@@ -141,7 +141,7 @@ watch(slug, (val) => {
             :color="nameError ? 'danger' : nameAvailable ? 'success' : 'medium'"
             aria-live="polite"
           >
-            {{ nameChecking ? '正在检查名称…' : nameError || (nameAvailable ? '名称可用' : '展示名称全局唯一') }}
+            {{ nameChecking ? '正在检查名称…' : nameError || (nameAvailable ? '名称可用' : '显示名称可重复，上架市场时另选唯一短名') }}
           </IonNote>
 
           <IonItem :class="{ 'ion-invalid': slugError, 'ion-valid': !slugError && !slugChecking && form.slug && SLUG_REGEX.test(form.slug) }">
@@ -159,7 +159,7 @@ watch(slug, (val) => {
               {{ slugError }}
             </IonNote>
             <IonNote v-else slot="helper">
-              唯一标识，用于 URL 路径
+              在你的命名空间内唯一，用于个人应用地址
             </IonNote>
           </IonItem>
 

@@ -4,11 +4,13 @@ import type {
   AppSubmission,
 } from '../../../app/types/app'
 import { randomUUID } from 'node:crypto'
+import { normalizeMarketShortName } from '../app-identifiers'
 
 export type PublicMarketListingStatus = 'unlisted' | 'listed' | 'suspended' | 'delisted'
 
 export interface PublicMarketListingRecord {
   appId: string
+  shortName?: string
   status: PublicMarketListingStatus
   approvedRevisionId: string
   activeSubmissionId: string
@@ -43,7 +45,7 @@ export interface PublicMarketSubmissionModule {
   submit: (
     appId: string,
     principal: PublicMarketSubmissionPrincipal,
-    options?: { makePublic?: boolean },
+    options?: { makePublic?: boolean, shortName?: string },
   ) => Promise<{ appId: string, submissionId: string, reviewStatus: 'pending' }>
 }
 
@@ -95,6 +97,10 @@ export function createPublicMarketSubmissionModule(
       if (!submission || submission.appId !== appId)
         throw new PublicMarketSubmissionError('APP_REVISION_MISSING', '应用版本不存在')
 
+      const shortName = normalizeMarketShortName(listing?.shortName || options.shortName || app.slug)
+      if (listing?.shortName && options.shortName && normalizeMarketShortName(options.shortName) !== listing.shortName)
+        throw new PublicMarketSubmissionError('MARKET_SHORT_NAME_IMMUTABLE', '已取得的市场短名不能修改')
+
       const makePublic = (app.audience || 'public') !== 'public' && options.makePublic === true
       if (makePublic) {
         const now = dependencies.now()
@@ -139,6 +145,7 @@ export function createPublicMarketSubmissionModule(
           submissionMode: 'create',
           listing: {
             appId,
+            shortName,
             status: listing?.status === 'listed' ? 'listed' : 'unlisted',
             approvedRevisionId: listing?.approvedRevisionId || '',
             activeSubmissionId: nextSubmissionId,
@@ -211,6 +218,7 @@ export function createPublicMarketSubmissionModule(
         submissionMode: 'update',
         listing: {
           appId,
+          shortName,
           status: listing?.status === 'listed' ? 'listed' : 'unlisted',
           approvedRevisionId: listing?.approvedRevisionId || '',
           activeSubmissionId: submissionId,

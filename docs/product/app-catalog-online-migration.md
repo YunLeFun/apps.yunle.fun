@@ -1,5 +1,7 @@
 # 应用目录在线化迁移方案
 
+> 历史方案：身份规则已由 [应用标识策略](./app-identifiers.md) 替代。业务主键为不可变 appId，所属空间 slug 不再全局唯一；请勿按本页旧索引和 slug 幂等示例执行新迁移。
+
 > 状态：草案，待评审
 > 目标：把当前**手维护的静态应用目录**（`ALL_APPS`）改造为**以 CloudBase `apps` 集合为唯一事实源**，同时保留离线 / 首屏能力。
 > 关联：[[discovery]]、[[workshop]]、admin「寻乐运营」模块、`apps` 集合（[database/apps](../database/apps.md)）。

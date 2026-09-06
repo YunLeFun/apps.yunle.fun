@@ -37,14 +37,14 @@
 
 动作 ID 是稳定协议；显示文案可遵循平台用词：
 
-| ID             | 中文语义       | iOS 表面                         | Android 表面                  |
-| -------------- | -------------- | -------------------------------- | ----------------------------- |
-| `details`      | 查看详情与评价 | Sheet 内评价入口，站内详情 Sheet | 首行动作，本地全屏详情页       |
-| `share`        | 分享           | `UIActivityViewController`       | Android Sharesheet            |
-| `copy_link`    | 复制链接       | 系统剪贴板                       | 系统剪贴板 + 成功 Toast       |
-| `open_browser` | 外部浏览器打开 | Safari                           | 用户默认浏览器                |
-| `reload`       | 刷新当前页面   | 当前 `WKWebView`                 | 当前 `WebView`                |
-| `end`          | 结束当前会话   | 释放保活会话                     | 结束原生 Activity             |
+| ID             | 中文语义       | iOS 表面                         | Android 表面             |
+| -------------- | -------------- | -------------------------------- | ------------------------ |
+| `details`      | 查看详情与评价 | Sheet 内评价入口，站内详情 Sheet | 首行动作，本地全屏详情页 |
+| `share`        | 分享           | `UIActivityViewController`       | Android Sharesheet       |
+| `copy_link`    | 复制链接       | 系统剪贴板                       | 系统剪贴板 + 成功 Toast  |
+| `open_browser` | 外部浏览器打开 | Safari                           | 用户默认浏览器           |
+| `reload`       | 刷新当前页面   | 当前 `WKWebView`                 | 当前 `WebView`           |
+| `end`          | 结束当前会话   | 释放保活会话                     | 结束原生 Activity        |
 
 `details` 仅在应用具有稳定 slug/id 时出现，不得接受网页传入的详情 URL。点击任一动作先关闭菜单，
 再执行系统表面，避免两个 Sheet 叠加。双端均从 App bundle 加载 `/app/{slug-or-id}`，通过版本化的

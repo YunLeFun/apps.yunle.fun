@@ -13,8 +13,8 @@ import type {
 } from '~/types/app'
 import { randomUUID } from 'node:crypto'
 import { createError } from 'h3'
+import { claimAppIdentifier } from '../domain/app-identifiers'
 import {
-  appNameConflict,
   isDuplicateKeyError,
   normalizeAppNameKey,
 } from '../domain/app-name'
@@ -33,60 +33,14 @@ import { useCloudbaseAdmin } from './cloudbase-admin'
 export const APPS_COLLECTION = 'apps'
 export const APP_SUBMISSIONS_COLLECTION = 'app_submissions'
 export const APP_REVIEW_EVENTS_COLLECTION = 'app_review_events'
-const APP_NAME_TAKEN = 'APP_NAME_TAKEN' as const
-
-function appNameTakenError(name: string) {
-  return createError({
-    statusCode: 409,
-    statusMessage: '应用名称已被占用',
-    data: {
-      code: APP_NAME_TAKEN,
-      field: 'name',
-      nameKey: normalizeAppNameKey(name),
-    },
-  })
+export async function checkAppNameAvailability(name: string, _excludeAppId?: string) {
+  return { available: true, nameKey: normalizeAppNameKey(name) }
 }
 
-export async function checkAppNameAvailability(name: string, excludeAppId?: string) {
-  const { db } = useCloudbaseAdmin()
-  const nameKey = normalizeAppNameKey(name)
-  const { data } = await db.collection(APPS_COLLECTION).where({ nameKey }).limit(2).get()
-  const conflict = appNameConflict((data || []) as AppRecord[], excludeAppId)
-  return { available: !conflict, nameKey }
-}
-
-async function assertAppNameAvailable(
-  db: ReturnType<typeof useCloudbaseAdmin>['db'],
-  name: string,
-  excludeAppId?: string,
-) {
-  const nameKey = normalizeAppNameKey(name)
-  const { data } = await db.collection(APPS_COLLECTION).where({ nameKey }).limit(2).get()
-  if (appNameConflict((data || []) as AppRecord[], excludeAppId))
-    throw appNameTakenError(name)
-  return nameKey
-}
-
-async function rethrowDuplicateIdentity(
-  db: ReturnType<typeof useCloudbaseAdmin>['db'],
-  error: unknown,
-  name: string,
-  slug: string,
-  appId: string,
-): Promise<never> {
+async function rethrowDuplicateIdentity(_db: unknown, error: unknown, _name: string, _slug: string, _appId: string): Promise<never> {
   if (!isDuplicateKeyError(error))
     throw error
-  const availability = await checkAppNameAvailability(name, appId)
-  if (!availability.available)
-    throw appNameTakenError(name)
-  const { data } = await db.collection(APPS_COLLECTION).where({ slug }).limit(2).get()
-  if (((data || []) as AppRecord[]).some(item => item._id !== appId))
-    throw createError({ statusCode: 409, statusMessage: '此 slug 已被占用' })
-  throw createError({
-    statusCode: 409,
-    statusMessage: '应用名称或 slug 已被占用',
-    data: { code: 'APP_IDENTITY_TAKEN' },
-  })
+  throw createError({ statusCode: 409, message: '应用标识冲突，请刷新重试', data: { code: 'APP_IDENTITY_TAKEN' } })
 }
 
 export async function getAppSubmissionAccess(user: ServerAuthUser): Promise<AppSubmissionAccess> {
@@ -120,14 +74,14 @@ export async function createAppSubmission(
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
   })
   await enforceSubmissionRateLimit(db, user.uid)
-  const nameKey = await assertAppNameAvailable(db, normalized.snapshot.name)
+  const nameKey = normalizeAppNameKey(normalized.snapshot.name)
 
   const { data: duplicates } = await db.collection(APPS_COLLECTION)
-    .where({ slug: normalized.snapshot.slug })
+    .where({ ownerUid: user.uid, slug: normalized.snapshot.slug })
     .limit(1)
     .get()
   if (duplicates?.length)
-    throw createError({ statusCode: 409, statusMessage: '此 slug 已被占用' })
+    throw createError({ statusCode: 409, statusMessage: '你的命名空间内已存在此 slug' })
 
   const now = Date.now()
   const appId = entityId('app')
@@ -160,8 +114,10 @@ export async function createAppSubmission(
   const developerName = user.name?.trim()
   const app: AppRecord = {
     _id: appId,
+    identityVersion: 2,
     ownerUid: user.uid,
-    ownerLogin: user.handle || user.name || 'YunLeFun',
+    ownerLogin: user.handle || user.uid,
+    ownerLoginKey: (user.handle || user.uid).toLowerCase(),
     ...(developerName ? { developerName } : {}),
     ...projection,
     nameKey,
@@ -180,6 +136,7 @@ export async function createAppSubmission(
 
   try {
     await db.runTransaction(async (transaction: CloudbaseTransaction) => {
+      await claimAppIdentifier(transaction, 'namespace', normalized.snapshot.slug, appId, user.uid)
       await transaction.collection(APPS_COLLECTION).doc(appId).set(documentPayload(app))
       await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).set(documentPayload(submission))
       await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
@@ -203,7 +160,7 @@ export async function updateAppSubmission(
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
   })
   await enforceSubmissionRateLimit(db, user.uid)
-  const nameKey = await assertAppNameAvailable(db, normalized.snapshot.name, appId)
+  const nameKey = normalizeAppNameKey(normalized.snapshot.name)
   if (app.currentRevisionId && normalized.snapshot.slug !== app.slug) {
     throw createError({
       statusCode: 409,
@@ -212,11 +169,11 @@ export async function updateAppSubmission(
   }
   if (normalized.snapshot.slug !== app.slug) {
     const { data: duplicates } = await db.collection(APPS_COLLECTION)
-      .where({ slug: normalized.snapshot.slug })
+      .where({ ownerUid: user.uid, slug: normalized.snapshot.slug })
       .limit(1)
       .get()
     if (duplicates?.some((item: AppRecord) => item._id !== appId))
-      throw createError({ statusCode: 409, statusMessage: '此 slug 已被占用' })
+      throw createError({ statusCode: 409, statusMessage: '你的命名空间内已存在此 slug' })
   }
 
   const { data: previous } = await db.collection(APP_SUBMISSIONS_COLLECTION)
@@ -270,6 +227,7 @@ export async function updateAppSubmission(
 
   try {
     await db.runTransaction(async (transaction: CloudbaseTransaction) => {
+      await claimAppIdentifier(transaction, 'namespace', normalized.snapshot.slug, appId, user.uid)
       await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).set(documentPayload(submission))
       await transaction.collection(APPS_COLLECTION).doc(appId).update(appPatch)
       await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
@@ -292,11 +250,9 @@ export async function updateAppSubmission(
 export async function submitOwnedAppToPublicMarket(
   user: ServerAuthUser,
   appId: string,
-  options: { makePublic?: boolean } = {},
+  options: { makePublic?: boolean, shortName?: string } = {},
 ): Promise<{ appId: string, submissionId: string, reviewStatus: 'pending' }> {
   const { db } = useCloudbaseAdmin()
-  const app = await ownedApp(db, appId, user.uid)
-  await assertAppNameAvailable(db, app.name, appId)
   const workflow = createPublicMarketSubmissionModule({
     async getOwnedApp(id, ownerUid) {
       return ownedApp(db, id, ownerUid)
@@ -371,11 +327,11 @@ export async function getOwnedAppById(user: ServerAuthUser, appId: string): Prom
   return apps.find(app => app._id === appId) ?? null
 }
 
-export async function isAppSlugTaken(slug: string): Promise<boolean> {
+export async function isAppSlugTaken(slug: string, ownerUid: string): Promise<boolean> {
   if (!/^[a-z][a-z0-9-]{1,49}$/.test(slug))
     return false
   const { db } = useCloudbaseAdmin()
-  const { data } = await db.collection(APPS_COLLECTION).where({ slug }).limit(1).get()
+  const { data } = await db.collection(APPS_COLLECTION).where({ ownerUid, slug }).limit(1).get()
   return Boolean(data?.length)
 }
 
@@ -477,6 +433,11 @@ async function commitPublicMarketSubmission(
   change: PublicMarketSubmissionChange,
 ): Promise<void> {
   await db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const currentListing = await transaction.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(change.appId).get()
+    const current = firstDocument<PublicMarketListingRecord>(currentListing.data)
+    if (current?.shortName && current.shortName !== change.listing.shortName)
+      throw createError({ statusCode: 409, message: '市场短名已确定，请刷新后重试' })
+    await claimAppIdentifier(transaction, 'market', change.listing.shortName!, change.appId)
     const submissionRef = transaction.collection(APP_SUBMISSIONS_COLLECTION)
       .doc(change.submission._id)
     if (change.submissionMode === 'create') {

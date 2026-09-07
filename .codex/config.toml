@@ -1,0 +1,3 @@
+# Enable the installed iOS plugin only for this project.
+[plugins."build-ios-apps@openai-curated-remote"]
+enabled = true

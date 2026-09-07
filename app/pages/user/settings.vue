@@ -29,7 +29,7 @@ import {
   kSegmentedButton,
   kToggle,
 } from 'konsta/vue'
-import { APP_ICON_STYLE_OPTIONS, SESSION_LIMIT_OPTIONS } from '~/stores/settings'
+import { APP_ICON_STYLE_OPTIONS, PREVIEW_WINDOW_SIZE_OPTIONS, SESSION_LIMIT_OPTIONS } from '~/stores/settings'
 
 const settingsStore = useSettingsStore()
 const homeScreenStore = useHomeScreenStore()
@@ -245,6 +245,20 @@ async function handleManualSync() {
         <p class="text-xs text-center mt-3 opacity-50">
           应用图标外观，全站统一生效
         </p>
+      </k-block>
+
+      <k-block-title>预览浮窗大小</k-block-title>
+      <k-block strong inset class="theme-block">
+        <k-segmented strong class="theme-segment">
+          <k-segmented-button
+            v-for="option in PREVIEW_WINDOW_SIZE_OPTIONS"
+            :key="option.value"
+            :active="settingsStore.previewWindowSize === option.value"
+            @click="settingsStore.previewWindowSize = option.value"
+          >
+            {{ option.label }}
+          </k-segmented-button>
+        </k-segmented>
       </k-block>
 
       <!-- 网页浏览器（仅 iOS） -->

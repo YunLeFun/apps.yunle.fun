@@ -57,6 +57,30 @@ class HostRuntimePlugin : Plugin() {
     }
 
     @PluginMethod
+    fun resumeSession(call: PluginCall) {
+        val key = call.getString("id").orEmpty()
+        activity.runOnUiThread {
+            val session = hostActivity.get()?.takeUnless { it.isFinishing || it.isDestroyed }
+            if (session == null || session.sessionKey != key) {
+                call.reject("Session is no longer available")
+                return@runOnUiThread
+            }
+            activity.startActivity(Intent(activity, HostWebViewActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            ))
+            call.resolve()
+        }
+    }
+
+    internal fun browserMinimized(session: HostWebViewActivity) {
+        notifySessionsChanged()
+        notifyListeners("browserFinished", JSObject())
+        notifyListeners("browserMinimized", JSObject()
+            .put("key", session.sessionKey)
+            .put("name", session.sessionInfo().getString("name")))
+    }
+
+    @PluginMethod
     fun close(call: PluginCall) {
         activity.runOnUiThread {
             hostActivity.get()?.finish()

@@ -1,6 +1,13 @@
 import { useStorage } from '@vueuse/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
+export type PreviewWindowSize = 'mini' | 'medium' | 'large'
+export const PREVIEW_WINDOW_SIZE_OPTIONS: { value: PreviewWindowSize, label: string }[] = [
+  { value: 'mini', label: '小' },
+  { value: 'medium', label: '中' },
+  { value: 'large', label: '大' },
+]
+
 export type ThemeMode = 'system' | 'light' | 'dark'
 export type AppIconStyle = 'original' | 'liquid-glass' | 'flat-color' | 'gradient' | 'minimal'
 /** Preferred number of native WebView sessions; automatic mode follows the device memory tier. */
@@ -42,6 +49,7 @@ export const SESSION_LIMIT_OPTIONS: { value: SessionLimitPreference, label: stri
 const STORAGE_KEYS = [
   'ylf_theme_mode',
   'ylf_icon_style',
+  'ylf:preview-window-size',
   'ylf_developer_mode',
   'ylf_api_environment',
   'ylf:homescreen-apps',
@@ -108,6 +116,11 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   // ==================== 外观设置 ====================
+
+  const previewWindowSize = useStorage<PreviewWindowSize>('ylf:preview-window-size', 'medium')
+  // Legacy small (168px) becomes medium; unknown values use the same default.
+  if (!PREVIEW_WINDOW_SIZE_OPTIONS.some(option => option.value === previewWindowSize.value))
+    previewWindowSize.value = 'medium'
 
   /** 主屏幕应用图标风格 */
   const appIconStyle = useStorage<AppIconStyle>('ylf_icon_style', 'original')
@@ -186,6 +199,7 @@ export const useSettingsStore = defineStore('settings', () => {
     applyTheme,
     initTheme,
     // 外观
+    previewWindowSize,
     appIconStyle,
     setAppIconStyle,
     // 浏览

@@ -92,9 +92,13 @@ class WebViewController: UIViewController {
             "url": (webView?.url ?? url)?.absoluteString ?? "",
             "title": webView?.title ?? customTitle,
             "displayMode": displayMode.rawValue,
+            "previewImage": previewImage,
         ]
     }
 
+    private var previewImage = ""
+    private var minimizePending = false
+    private var minimizeGeneration = 0
     private var webView: WKWebView!
     private var progressView: UIProgressView!
     private var backButton: UIButton!
@@ -415,9 +419,10 @@ class WebViewController: UIViewController {
         backButton.addTarget(self, action: #selector(goBackTapped), for: .touchUpInside)
         view.addSubview(backButton)
 
-        // 标题栏左上角常驻「最小化（压后台）」按钮；沉浸模式由胶囊关闭键兜底，不建
-        if displayMode == .titlebar {
+        // 两种形态都保留收起入口，沉浸模式使用悬浮按钮。
+        do {
             let mb = makeFloatingButton(icon: "chevron.down", pointSize: 15)
+            mb.accessibilityLabel = "收起应用"
             mb.addTarget(self, action: #selector(minimizeTapped), for: .touchUpInside)
             minimizeButton = mb
             view.addSubview(mb)
@@ -629,14 +634,38 @@ class WebViewController: UIViewController {
 
     /// 结束（彻底释放）：收起容器并通知插件层释放本会话，下次打开全新开始
     @objc private func closeTapped() {
+        minimizePending = false
         dismiss(animated: true)
         onClose?()
     }
 
     /// 最小化（压后台）：收起容器但插件层保活，重开同应用秒恢复（彻底释放走「结束」）
     @objc private func minimizeTapped() {
-        dismiss(animated: true)
-        onMinimize?()
+        guard !minimizePending else { return }
+        minimizePending = true
+        minimizeGeneration += 1
+        let generation = minimizeGeneration
+        previewImage = ""
+        let finish: (UIImage?) -> Void = { [weak self] image in
+            guard let self, self.minimizePending, self.minimizeGeneration == generation else { return }
+            self.minimizePending = false
+            if let data = image?.jpegData(compressionQuality: 0.7) {
+                self.previewImage = "data:image/jpeg;base64," + data.base64EncodedString()
+            }
+            self.dismiss(animated: true)
+            self.onMinimize?()
+        }
+        guard webView.bounds.width > 0, webView.bounds.height > 0 else {
+            finish(nil)
+            return
+        }
+        let config = WKSnapshotConfiguration()
+        config.rect = webView.bounds
+        // Bound the bitmap to 480 physical pixels wide; keep it only in memory.
+        config.snapshotWidth = NSNumber(value: Double(480 / max(traitCollection.displayScale, 1)))
+        webView.takeSnapshot(with: config) { image, _ in finish(image) }
+        // A failed/hung snapshot must never prevent the user from leaving the page.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { finish(nil) }
     }
 
     /// 点击标题栏应用名 → 打开站内详情页 sheet（不滚到评价区）

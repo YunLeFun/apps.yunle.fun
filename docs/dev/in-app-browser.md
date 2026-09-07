@@ -22,13 +22,13 @@ Android 适配器使用平台 `WebView`（`android/app/src/main/java/fun/yunle/a
   （`customTitle` 优先，缺省回退页面 `<title>` 并随导航更新）、**右侧单个「更多」菜单按钮**
   （点开展开面板，「结束」收口其中；不可拖动、不随滚动隐藏），网页从栏下开始、底部仍铺满；
 - **沉浸 `immersive`**（官方应用声明或页面收起标题栏）：网页全屏平铺（顶达屏幕最顶、底达屏幕最底），
-  右上角悬浮胶囊（更多 | 关闭，可拖动、随滚动隐藏），可后退时左上角悬浮返回键；
+  右上角悬浮胶囊（更多 | 关闭，可拖动、随滚动隐藏），可后退时左上角悬浮收起键和返回键；
 - **手机内置 `system`**：iOS 使用 SFSafariViewController，Android 使用 Custom Tabs，
   样式与生命周期由系统组件控制。
 
 形态在 `viewDidLoad` 定型；设置变更后再打开同一应用时，
 iOS 插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新建；Android 当前只维护
-一个原生 Activity，会话结束后释放 WebView，并通过标题栏或沉浸态右上角的「更多」入口提供分享、
+一个原生 Activity，收起时保活、会话结束后释放 WebView，并通过标题栏或沉浸态右上角的「更多」入口提供分享、
 复制链接、系统浏览器打开、刷新与「结束」。
 
 ### 形态决策优先级
@@ -77,24 +77,38 @@ iOS 插件层判定 `displayMode` 不一致则放弃恢复暂停会话、走新�
   系统浏览器打开 / 刷新与「结束」（彻底释放），并提供站内详情与评价入口。动作 ID、信息顺序、
   深浅色和辅助功能约束见[原生应用菜单设计规范](../ui/native-app-menu.md)。
 
-## iOS 生命周期：最小化（压后台）/ 结束
+## 收起与 App 内悬浮卡片
 
-标题栏左上角是**最小化**而非关闭，配合容器既有的「暂停保活」机制做小程序式压后台：
+标题栏和沉浸模式均保留向下箭头「收起应用」。收起返回云乐坊主界面，保留原生
+WebView 实例，并通过 `browserMinimized({ key, name })` 展示最近收起的应用卡片。
+卡片由 `app/pages/tabs/home.vue` 中的 `AppMinimizedCard` 接入云居，
+`AppMinimizedCardView` 负责两端共用的交互。原生 `browserMinimized` 事件由
+`inappbrowser.client.ts` 统一处理：从寻乐、工坊或详情页打开的网页，收起后也回到
+`/tabs/home`。Ionic 缓存的云居页面只在路由激活时展示卡片，其他 Tab 不残留浮层：
 
-- **最小化**（左上角 `chevron.down` → `minimizeTapped` → `onMinimize`）：dismiss 容器但
-  插件层**不释放** `presentedVC`，仅 `notifyListeners("browserFinished")` 通知前台已收起；
-  重新打开同一应用经 `isSameSession`（按 appId/URL 匹配）命中后直接恢复页面状态（滚动位置、表单、登录态都在）。
-- **结束**（「更多」→「结束」→ `closeTapped` → `onClose`）：置 `presentedVC = nil` 彻底释放，
-  下次打开全新开始。
-- 打开**另一个**应用时，`open()` 判定非同会话 → 释放旧的挂起会话再新建，**同一时刻仅挂起一个**，
-  不会堆积 WKWebView。
-- 「查看详情与评价」跳站内页同样走暂停保活（`onDetail`），从详情页再次打开即恢复。
-- 沉浸模式（官方应用专属）暂不提供最小化：胶囊关闭键 = 结束（释放），与现状一致。
-- **打开瞬间防白闪**：WKWebView 默认 `isOpaque`，首帧内容绘制前会铺一层不透明白底；
-  容器中已改为 `isOpaque = false` 并以 `systemBackground` 兜底
-  （含 `scrollView` 与 `underPageBackgroundColor`），避免暗色模式下开屏白闪。
-  注意：完全不声明背景色的网页会透出系统背景色（暗色模式下为黑色），
-  接入的应用页面应自行声明 `background-color`。
+- 小窗默认宽 168px、预览高 196px（低视口进一步收缩），展示收起时的网页快照，底部仅保留单行应用图标和名称（28px），不重复提示恢复动作；
+- iOS 使用 WKWebView.takeSnapshot，Android 使用 PixelCopy 捕获 WebView 可见区域，
+  缩略图最多 480px 宽、JPEG 压缩，仅随会话存于内存，不上传、不落盘；
+- 每次收起刷新快照，500ms 内截图失败则显示「暂无法预览」，不阻塞返回云居；
+  小窗不是实时视频或可交互网页，点击后恢复原生 WebView；
+- 拖动超过 8px 才开始移动，释放后左右吸边，拖动不会触发恢复或结束；
+- 避开状态栏与底部导航区，屏幕尺寸变化后重新限制位置；
+- 恢复与结束为独立按钮，结束按钮保留 44px 热区，视觉圆钮 24px；支持键盘、深色模式及减少动态效果；
+- 一次展示一个卡片，其他保活会话仍从云居左上角「正在运行」列表恢复；
+- 仅在 App 内展示，不申请跨 App 悬浮权限；「手机内置」模式继续由系统浏览器管理。
+
+`HostRuntime.resumeSession({ id: session.key })` 直接恢复原实例，不重新加载 URL 或
+重建 trustedHosts / 应用元信息。旧原生插件返回 UNIMPLEMENTED 时，运行列表恢复
+沿用旧的 open 流程。会话已被释放时不伪造恢复成功，卡片展示错误并刷新原生列表。
+
+iOS 使用已有多会话 LRU 池，dismiss 后保活、恢复时重新 present；内存压力与会话上限
+仍按原策略淘汰。Android 保留现有单 Activity 会话，使用 REORDER_TO_FRONT 在宿主
+与 WebView Activity 间切换；打开另一个不复用的应用或「结束」时销毁旧实例。收起
+不是持久存储保证，操作系统结束进程后不会保留表单与滚动状态。
+
+交互参考：[Chrome Minimized Custom Tabs](https://blog.google/chromium/multi-tasking-with-minimized-custom-tabs/)、
+[Android PiP 操作](https://developer.android.com/develop/ui/views/picture-in-picture)、
+[Apple 按钮热区](https://developer.apple.com/design/human-interface-guidelines/buttons)。
 
 ## JSAPI 架构
 
@@ -212,3 +226,5 @@ Android 的 WebMessage listener 只注册初始页面的精确 Origin，不使�
   仅通过一次性授权码静默兑换最小账号信息。
 - **跨端**：新增能力先修改 `HostRuntime` / `window.ylf` 统一协议，再分别落到 Swift 与
   Kotlin 适配器；页面代码不按平台分支，只通过 `canIUse` 做能力探测。
+
+浮窗大小可在「设置 → 预览浮窗大小」选择小、中、大，默认中；偏好保存在本机，两端共用。宽度分别为 136/168/216px，预览高度为 152/196/288px（不超过视口高度的 45%），变更尺寸后重新约束位置并保持贴边。底部标题栏浅色使用白底黑字，深色使用深灰底浅色字，跟随 App 外观设置。

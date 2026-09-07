@@ -5,6 +5,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Rect
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
@@ -12,6 +15,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
+import android.util.TypedValue
+import android.view.PixelCopy
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -22,8 +28,9 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -42,6 +49,7 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.getcapacitor.JSObject
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.security.SecureRandom
 import java.util.Base64
 import java.util.UUID
@@ -51,13 +59,18 @@ class HostWebViewActivity : AppCompatActivity() {
     private lateinit var root: FrameLayout
     private lateinit var content: LinearLayout
     private lateinit var webView: WebView
-    private lateinit var toolbar: LinearLayout
-    private lateinit var backButton: Button
+    private lateinit var toolbar: FrameLayout
+    private lateinit var minimizeButton: ImageButton
+    private lateinit var backButton: ImageButton
     private lateinit var titleView: TextView
-    private lateinit var menuButton: Button
-    private lateinit var floatingMenuButton: Button
+    private lateinit var menuButton: ImageButton
+    private lateinit var floatingMenuButton: ImageButton
+    private lateinit var floatingMinimizeButton: ImageButton
     private lateinit var progressView: ProgressBar
 
+    private var previewImage = ""
+    private var minimizePending = false
+    private var minimizeGeneration = 0
     private var initialUrl = ""
     private var customTitle = ""
     private var displayMode = "titlebar"
@@ -103,6 +116,52 @@ class HostWebViewActivity : AppCompatActivity() {
         })
     }
 
+    /** Capture the visible WebView before returning to 云居; never reload the page. */
+    private fun minimize() {
+        if (minimizePending) return
+        minimizePending = true
+        val generation = ++minimizeGeneration
+        previewImage = ""
+        fun finishPreview(image: String = "") {
+            if (!minimizePending || generation != minimizeGeneration || isFinishing || isDestroyed) return
+            minimizePending = false
+            previewImage = image
+            startActivity(Intent(this, MainActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            ))
+            hostRuntimePlugin?.browserMinimized(this)
+        }
+        if (webView.width <= 0 || webView.height <= 0) {
+            finishPreview()
+            return
+        }
+        val width = minOf(480, webView.width)
+        val height = (webView.height.toLong() * width / webView.width).toInt().coerceIn(1, 1920)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val location = IntArray(2)
+        webView.getLocationInWindow(location)
+        val rect = Rect(location[0], location[1], location[0] + webView.width, location[1] + webView.height)
+        try {
+            PixelCopy.request(window, rect, bitmap, { result ->
+                try {
+                    if (minimizePending && generation == minimizeGeneration && result == PixelCopy.SUCCESS) {
+                        val output = ByteArrayOutputStream()
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, output)
+                        finishPreview("data:image/jpeg;base64," + Base64.getEncoder().encodeToString(output.toByteArray()))
+                    } else {
+                        finishPreview()
+                    }
+                } finally {
+                    bitmap.recycle()
+                }
+            }, mainHandler)
+            mainHandler.postDelayed({ finishPreview() }, 500)
+        } catch (_: IllegalArgumentException) {
+            bitmap.recycle()
+            finishPreview()
+        }
+    }
+
     /** Reuse the current Android session when HostRuntime.open is called again. */
     internal fun canReuseFor(url: String): Boolean =
         HostNavigationPolicy.hasSameOrigin(initialUrl, url, isDebuggable())
@@ -134,6 +193,7 @@ class HostWebViewActivity : AppCompatActivity() {
         .put("url", initialUrl)
         .put("title", customTitle)
         .put("displayMode", displayMode)
+        .put("previewImage", previewImage)
 
     internal fun resolveAuthorization(
         requestId: String,
@@ -295,18 +355,10 @@ class HostWebViewActivity : AppCompatActivity() {
             setBackgroundColor(Color.WHITE)
         }
 
-        toolbar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
+        toolbar = FrameLayout(this).apply {
             setPadding(dp(8), 0, dp(8), 0)
         }
-        backButton = Button(this).apply {
-            text = "‹"
-            textSize = 28f
-            contentDescription = "返回"
-            minWidth = 0
-            minHeight = 0
-            setBackgroundColor(Color.TRANSPARENT)
+        backButton = chromeIconButton(R.drawable.ic_host_arrow_back, "返回").apply {
             setOnClickListener {
                 if (webView.canGoBack()) webView.goBack() else finish()
             }
@@ -315,25 +367,13 @@ class HostWebViewActivity : AppCompatActivity() {
             textSize = 17f
             gravity = Gravity.CENTER
             maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
         }
-        menuButton = Button(this).apply {
-            text = "•••"
-            textSize = 17f
-            contentDescription = "更多"
-            isAllCaps = false
-            minWidth = 0
-            minHeight = 0
-            setBackgroundColor(Color.TRANSPARENT)
+        menuButton = chromeIconButton(R.drawable.ic_host_more_vert, "更多").apply {
             setOnClickListener { showAppMenu() }
         }
-        floatingMenuButton = Button(this).apply {
-            text = "•••"
-            textSize = 17f
-            contentDescription = "更多"
-            isAllCaps = false
-            minWidth = 0
-            minHeight = 0
-            setTextColor(Color.WHITE)
+        floatingMenuButton = chromeIconButton(R.drawable.ic_host_more_vert, "更多").apply {
+            imageTintList = ColorStateList.valueOf(Color.WHITE)
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = dp(22).toFloat()
@@ -344,9 +384,25 @@ class HostWebViewActivity : AppCompatActivity() {
             elevation = dp(8).toFloat()
             setOnClickListener { showAppMenu() }
         }
-        toolbar.addView(backButton, LinearLayout.LayoutParams(dp(56), dp(56)))
-        toolbar.addView(titleView, LinearLayout.LayoutParams(0, dp(56), 1f))
-        toolbar.addView(menuButton, LinearLayout.LayoutParams(dp(56), dp(56)))
+        minimizeButton = chromeIconButton(R.drawable.ic_host_minimize, "收起应用").apply {
+            setOnClickListener { minimize() }
+        }
+        // Equal insets center the title in the whole bar and prevent action overlap.
+        toolbar.addView(titleView, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+        ).apply {
+            marginStart = dp(96)
+            marginEnd = dp(96)
+        })
+        toolbar.addView(minimizeButton, FrameLayout.LayoutParams(
+            dp(48), dp(48), Gravity.START or Gravity.CENTER_VERTICAL,
+        ))
+        toolbar.addView(backButton, FrameLayout.LayoutParams(
+            dp(48), dp(48), Gravity.START or Gravity.CENTER_VERTICAL,
+        ).apply { marginStart = dp(48) })
+        toolbar.addView(menuButton, FrameLayout.LayoutParams(
+            dp(48), dp(48), Gravity.END or Gravity.CENTER_VERTICAL,
+        ))
 
         progressView = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
@@ -365,8 +421,18 @@ class HostWebViewActivity : AppCompatActivity() {
         )
         root.addView(
             floatingMenuButton,
-            FrameLayout.LayoutParams(dp(64), dp(44), Gravity.TOP or Gravity.END),
+            FrameLayout.LayoutParams(dp(64), dp(48), Gravity.TOP or Gravity.END),
         )
+        floatingMinimizeButton = chromeIconButton(R.drawable.ic_host_minimize, "收起应用").apply {
+            imageTintList = ColorStateList.valueOf(Color.WHITE)
+            background = GradientDrawable().apply {
+                cornerRadius = dp(24).toFloat()
+                setColor(Color.argb(184, 22, 25, 35))
+            }
+            setOnClickListener { minimize() }
+        }
+        root.addView(floatingMinimizeButton,
+            FrameLayout.LayoutParams(dp(48), dp(48), Gravity.TOP or Gravity.START))
         setContentView(root)
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -376,6 +442,17 @@ class HostWebViewActivity : AppCompatActivity() {
         ViewCompat.requestApplyInsets(root)
         updateNativeChrome()
     }
+
+    private fun chromeIconButton(icon: Int, description: String): ImageButton =
+        ImageButton(this).apply {
+            setImageResource(icon)
+            scaleType = ImageView.ScaleType.CENTER
+            setPadding(0, 0, 0, 0)
+            contentDescription = description
+            val ripple = TypedValue()
+            theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, ripple, true)
+            setBackgroundResource(ripple.resourceId)
+        }
 
     private fun updateNativeChrome() {
         if (!::toolbar.isInitialized) return
@@ -392,9 +469,10 @@ class HostWebViewActivity : AppCompatActivity() {
             Color.WHITE
         }
         toolbar.setBackgroundColor(backgroundColor)
-        backButton.setTextColor(foregroundColor)
+        minimizeButton.imageTintList = ColorStateList.valueOf(foregroundColor)
+        backButton.imageTintList = ColorStateList.valueOf(foregroundColor)
         titleView.setTextColor(foregroundColor)
-        menuButton.setTextColor(foregroundColor)
+        menuButton.imageTintList = ColorStateList.valueOf(foregroundColor)
     }
 
     private fun setTitleBarVisible(visible: Boolean) {
@@ -407,6 +485,7 @@ class HostWebViewActivity : AppCompatActivity() {
         if (!::toolbar.isInitialized) return
         toolbar.visibility = if (titleBarVisible) View.VISIBLE else View.GONE
         floatingMenuButton.visibility = if (titleBarVisible) View.GONE else View.VISIBLE
+        floatingMinimizeButton.visibility = if (titleBarVisible) View.GONE else View.VISIBLE
         applyChromeInsets()
     }
 
@@ -418,6 +497,12 @@ class HostWebViewActivity : AppCompatActivity() {
             if (titleBarVisible) systemBarInsets.right else 0,
             if (titleBarVisible) systemBarInsets.bottom else 0,
         )
+        if (::floatingMinimizeButton.isInitialized) {
+            val layout = floatingMinimizeButton.layoutParams as FrameLayout.LayoutParams
+            layout.topMargin = systemBarInsets.top + dp(8)
+            layout.leftMargin = systemBarInsets.left + dp(8)
+            floatingMinimizeButton.layoutParams = layout
+        }
         if (::floatingMenuButton.isInitialized) {
             val layout = floatingMenuButton.layoutParams as FrameLayout.LayoutParams
             layout.topMargin = systemBarInsets.top + dp(8)
@@ -887,6 +972,7 @@ class HostWebViewActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        minimizePending = false
         cancelPendingAuthorizations("browser is gone")
         hostRuntimePlugin?.detach(this)
         hostRuntimePlugin = null

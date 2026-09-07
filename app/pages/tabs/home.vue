@@ -32,6 +32,7 @@ import { homeApps } from '~/constants/apps'
 import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
 
 const router = useRouter()
+const route = useRoute()
 const homeScreenStore = useHomeScreenStore()
 const settingsStore = useSettingsStore()
 const userStore = useUserStore()
@@ -562,6 +563,10 @@ function handleContentClick() {
       :visible="recentDrag.isDragging.value"
       :active-zone="recentDrag.activeDropZone.value"
     />
+    <!-- Ionic 缓存 Tab 页面；仅在云居可见时展示收起的原生网页会话。 -->
+    <ClientOnly>
+      <AppMinimizedCard v-if="route.path === '/tabs/home'" />
+    </ClientOnly>
   </IonPage>
 </template>
 

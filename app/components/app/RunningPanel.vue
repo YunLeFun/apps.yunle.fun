@@ -20,15 +20,25 @@ const emit = defineEmits<{ close: [] }>()
 
 const { sessions, resume, end, clearAll } = useBackgroundSessions()
 
-function onResume(s: BackgroundSession) {
+async function onResume(s: BackgroundSession) {
   emit('close')
-  resume(s)
+  try {
+    await resume(s)
+  }
+  catch {
+    useToast().showError('暂时无法恢复应用，请从应用列表重新打开')
+  }
 }
 
 async function onEnd(s: BackgroundSession) {
-  await end(s)
-  if (sessions.value.length === 0)
-    emit('close')
+  try {
+    await end(s)
+    if (sessions.value.length === 0)
+      emit('close')
+  }
+  catch {
+    useToast().showError('暂时无法结束应用，请重试')
+  }
 }
 
 /** 一键清理为破坏性操作，先确认（对齐 iOS「关闭全部标签页」的 action sheet 模式） */

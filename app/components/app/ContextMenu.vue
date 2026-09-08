@@ -10,6 +10,7 @@
 
 import type { YlfAppInfo } from '@yunlefun/types'
 import type { AppIconAssets } from '~/types/app'
+import { kGlass } from 'konsta/vue'
 
 interface IconPreview {
   icon?: string
@@ -200,8 +201,9 @@ function onOverlayClick() {
         </div>
 
         <!-- 菜单卡片 -->
-        <div
+        <k-glass
           class="ctx-menu"
+          :highlight="false"
           :style="menuStyle"
         >
           <button class="ctx-item" @click="handleAction('editHomeScreen')">
@@ -235,7 +237,7 @@ function onOverlayClick() {
               <line x1="14" y1="11" x2="14" y2="17" />
             </svg>
           </button>
-        </div>
+        </k-glass>
       </div>
     </Transition>
   </Teleport>
@@ -274,26 +276,9 @@ function onOverlayClick() {
 /* ==================== 菜单卡片 ==================== */
 .ctx-menu {
   position: fixed;
-  background: var(--ion-item-background);
-  background: color-mix(in srgb, var(--ion-item-background) 78%, transparent);
-  backdrop-filter: blur(34px) saturate(190%) brightness(1.06);
-  -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.06);
-  border-radius: 14px;
-  border: 0.5px solid rgba(255, 255, 255, 0.24);
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.2),
-    0 3px 10px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+  border-radius: var(--ylf-radius-popover);
   overflow: hidden;
   z-index: 100000;
-}
-
-.dark .ctx-menu {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.62),
-    0 3px 10px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.13);
 }
 
 /* ==================== 菜单项 ==================== */
@@ -312,6 +297,11 @@ function onOverlayClick() {
   color: var(--ion-text-color);
   -webkit-tap-highlight-color: transparent;
   transition: background 0.1s ease;
+}
+
+.ctx-item:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: -3px;
 }
 
 .ctx-item:active {

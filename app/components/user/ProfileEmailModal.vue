@@ -91,8 +91,8 @@ function handleSubmit() {
         </IonButtons>
         <IonTitle>{{ isEmailBound ? '换绑邮箱' : '绑定邮箱' }}</IonTitle>
         <IonButtons slot="end">
-          <IonButton :strong="true" :disabled="authLoading" @click="handleSubmit">
-            {{ emailStep === 'input' ? '发送验证' : '确认' }}
+          <IonButton :strong="true" :disabled="authLoading" :aria-busy="authLoading" @click="handleSubmit">
+            {{ authLoading ? '处理中…' : emailStep === 'input' ? '发送验证' : '确认' }}
           </IonButton>
         </IonButtons>
       </IonToolbar>

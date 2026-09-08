@@ -8,6 +8,7 @@ import type { YlfAppInfo } from '@yunlefun/types'
 import type { UseDraggableReturn } from 'vue-draggable-plus'
 import type { InstalledApp } from '~/types/homeScreen'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
+import { kGlass } from 'konsta/vue'
 import { VueDraggable } from 'vue-draggable-plus'
 
 interface Props {
@@ -139,7 +140,7 @@ function onPointerCancel() {
 
 <template>
   <div class="hs-dock">
-    <div class="dock-container">
+    <k-glass class="dock-container" :highlight="false">
       <VueDraggable
         ref="draggableRef"
         v-model="dockApps"
@@ -188,7 +189,7 @@ function onPointerCancel() {
           <AppIconBox v-else placeholder />
         </div>
       </VueDraggable>
-    </div>
+    </k-glass>
   </div>
 </template>
 
@@ -208,22 +209,10 @@ function onPointerCancel() {
 
 .dock-container {
   pointer-events: auto;
-  background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.7);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-radius: 20px;
+  border-radius: var(--ylf-radius-dock);
   padding: 8px 12px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 0 0.5px rgba(0, 0, 0, 0.05);
-  /* 宽度撑满与 Grid 对齐 */
   width: 100%;
-}
-
-.dark .dock-container {
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 0.5px rgba(255, 255, 255, 0.1);
+  max-width: calc(var(--ylf-content-max-width) - 40px);
 }
 
 .dock-items {

@@ -43,8 +43,8 @@ function handleSave() {
         </IonButtons>
         <IonTitle>编辑简介</IonTitle>
         <IonButtons slot="end">
-          <IonButton :strong="true" :disabled="authLoading" @click="handleSave">
-            完成
+          <IonButton :strong="true" :disabled="authLoading" :aria-busy="authLoading" @click="handleSave">
+            {{ authLoading ? '保存中…' : '完成' }}
           </IonButton>
         </IonButtons>
       </IonToolbar>

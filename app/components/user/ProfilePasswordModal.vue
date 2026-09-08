@@ -70,8 +70,8 @@ async function submitPasswordChange() {
         </IonButtons>
         <IonTitle>重设密码</IonTitle>
         <IonButtons slot="end">
-          <IonButton :strong="true" :disabled="authLoading" @click="submitPasswordChange">
-            完成
+          <IonButton :strong="true" :disabled="authLoading" :aria-busy="authLoading" @click="submitPasswordChange">
+            {{ authLoading ? '保存中…' : '完成' }}
           </IonButton>
         </IonButtons>
       </IonToolbar>

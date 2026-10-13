@@ -36,15 +36,15 @@ try {
       clearTimeout(timer)
       reject(error)
     })
-    child.once('exit', (code) => {
+    child.once('exit', (code, signal) => {
       clearTimeout(timer)
-      reject(new Error(`Packaged app exited (${code}): ${output}`))
+      reject(new Error(`Packaged app exited (${signal || code}): ${output}`))
     })
   })
   console.info('Verified native packaged app startup, static shell and runtime dependencies.')
 }
 finally {
-  if (child?.pid && child.exitCode === null) {
+  if (child?.pid && child.exitCode === null && child.signalCode === null) {
     const exited = new Promise(resolve => child.once('exit', resolve))
     child.kill('SIGTERM')
     const timer = setTimeout(() => child.kill('SIGKILL'), 5000)

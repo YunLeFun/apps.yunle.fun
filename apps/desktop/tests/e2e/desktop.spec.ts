@@ -1,11 +1,30 @@
-import type { ElectronApplication } from '@playwright/test'
+import type { ElectronApplication, TestInfo } from '@playwright/test'
 import fs from 'node:fs/promises'
 import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 import { _electron as electron, expect, test } from '@playwright/test'
 
-test('shared product catalog, static routes, restricted bridges, application isolation and cleanup', async () => {
+async function finishElectronTrace(application: ElectronApplication | undefined, testInfo: TestInfo, failed: boolean) {
+  if (!application)
+    return
+  try {
+    if (failed || testInfo.status !== testInfo.expectedStatus) {
+      const trace = testInfo.outputPath('electron-trace.zip')
+      await application.context().tracing.stop({ path: trace })
+      await testInfo.attach('Electron trace', { path: trace, contentType: 'application/zip' })
+    }
+    else {
+      await application.context().tracing.stop()
+    }
+  }
+  catch (error) {
+    console.warn('Could not save Electron trace:', error)
+  }
+}
+
+// eslint-disable-next-line no-empty-pattern -- Playwright requires destructured fixture arguments.
+test('shared product catalog, static routes, restricted bridges, application isolation and cleanup', async ({}, testInfo) => {
   let published = true
   let firstDocumentId = 'first'
   let origin = ''
@@ -35,6 +54,7 @@ test('shared product catalog, static routes, restricted bridges, application iso
   origin = `http://127.0.0.1:${address.port}`
   const userData = await fs.mkdtemp(path.join(os.tmpdir(), 'yunle-electron-test-'))
   let application: ElectronApplication | undefined
+  let failed = false
   try {
     const env: Record<string, string> = Object.fromEntries(Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
     env.YUNLE_DESKTOP_TEST_ORIGIN = origin
@@ -42,6 +62,7 @@ test('shared product catalog, static routes, restricted bridges, application iso
     delete env.ELECTRON_RUN_AS_NODE
     delete env.YUNLE_DESKTOP_DEV_ORIGIN
     application = await electron.launch({ args: [path.resolve('.'), `--user-data-dir=${userData}`], env })
+    await application.context().tracing.start({ screenshots: true, snapshots: true, sources: true })
     const shell = await application.firstWindow()
     const errors: string[] = []
     shell.on('pageerror', error => errors.push(error.message))
@@ -152,14 +173,20 @@ test('shared product catalog, static routes, restricted bridges, application iso
     expect(cache.items).toEqual([])
     expect(errors).toEqual([])
   }
+  catch (error) {
+    failed = true
+    throw error
+  }
   finally {
+    await finishElectronTrace(application, testInfo, failed)
     await application?.close()
     await new Promise<void>(resolve => server.close(() => resolve()))
     await fs.rm(userData, { recursive: true, force: true })
   }
 })
 
-test('real shared offline snapshot and catalog search remain usable when the API is unavailable', async () => {
+// eslint-disable-next-line no-empty-pattern -- Playwright requires destructured fixture arguments.
+test('real shared offline snapshot and catalog search remain usable when the API is unavailable', async ({}, testInfo) => {
   const server = http.createServer((_request, response) => {
     response.writeHead(503)
     response.end('Unavailable')
@@ -168,6 +195,7 @@ test('real shared offline snapshot and catalog search remain usable when the API
   const origin = `http://127.0.0.1:${(server.address() as { port: number }).port}`
   const userData = await fs.mkdtemp(path.join(os.tmpdir(), 'yunle-offline-test-'))
   let application: ElectronApplication | undefined
+  let failed = false
   try {
     const env: Record<string, string> = Object.fromEntries(Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
     env.YUNLE_DESKTOP_TEST_ORIGIN = origin
@@ -175,6 +203,7 @@ test('real shared offline snapshot and catalog search remain usable when the API
     delete env.ELECTRON_RUN_AS_NODE
     delete env.YUNLE_DESKTOP_DEV_ORIGIN
     application = await electron.launch({ args: [path.resolve('.'), `--user-data-dir=${userData}`], env })
+    await application.context().tracing.start({ screenshots: true, snapshots: true, sources: true })
     const shell = await application.firstWindow()
     await expect(shell.getByRole('heading', { name: '云乐坊', exact: true })).toBeVisible()
     await expect(shell.getByRole('button', { name: '打开今天来做菜' })).toBeEnabled()
@@ -184,9 +213,14 @@ test('real shared offline snapshot and catalog search remain usable when the API
     await expect(shell.getByRole('button', { name: '打开云空调' })).toBeVisible()
     await expect(shell.getByRole('button', { name: '打开今天来做菜' })).toHaveCount(0)
     await shell.getByRole('searchbox', { name: '搜索应用' }).fill('')
-    await shell.screenshot({ path: '/tmp/yunlefun-desktop.png' })
+    await shell.screenshot({ path: testInfo.outputPath('desktop-shell.png') })
+  }
+  catch (error) {
+    failed = true
+    throw error
   }
   finally {
+    await finishElectronTrace(application, testInfo, failed)
     await application?.close()
     await new Promise<void>(resolve => server.close(() => resolve()))
     await fs.rm(userData, { recursive: true, force: true })

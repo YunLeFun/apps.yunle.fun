@@ -152,7 +152,17 @@ async function openApp(id: string) {
 }
 
 async function createWindow() {
-  window = new BaseWindow({ width: 1180, height: 820, minWidth: 800, minHeight: 600, title: '云乐坊', backgroundColor: '#f5f6f8' })
+  window = new BaseWindow({
+    width: 1180,
+    height: 820,
+    minWidth: 800,
+    minHeight: 600,
+    title: '云乐坊',
+    backgroundColor: '#f5f6f8',
+    ...(process.platform === 'linux'
+      ? { icon: path.join(app.getAppPath(), app.isPackaged ? '.output/public' : 'public', 'pwa-512x512.png') }
+      : {}),
+  })
   const shellSession = session.fromPartition('persist:yunle-shell')
   shellSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false))
   shellSession.setPermissionCheckHandler(() => false)

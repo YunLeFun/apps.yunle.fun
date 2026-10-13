@@ -42,6 +42,10 @@
     "make:desktop": "pnpm --dir apps/desktop run make",
     "package:desktop": "pnpm --dir apps/desktop run package",
     "verify:desktop": "pnpm --dir apps/desktop run verify:package",
+    "verify:desktop-artifacts": "pnpm --dir apps/desktop run verify:artifacts",
+    "verify:desktop-launch": "pnpm --dir apps/desktop run verify:launch",
+    "check:desktop-release": "pnpm --dir apps/desktop run check:release",
+    "icons:desktop": "pnpm --dir apps/desktop run icons",
     "typecheck:desktop": "pnpm --dir apps/desktop run typecheck",
     "test:desktop": "pnpm --dir apps/desktop run test",
     "test:desktop:e2e": "pnpm --dir apps/desktop run test:e2e"

@@ -1,6 +1,7 @@
 import path from 'node:path'
 import process from 'node:process'
 import { api } from '@electron-forge/core'
+import { checkRelease } from './check-release.mjs'
 import { root } from './lib.mjs'
 
 export function parseForgeOptions(args) {
@@ -24,8 +25,11 @@ export async function runForge(args) {
   const { command, options } = parseForgeOptions(args)
   // The official API preserves Forge hooks, rebuilds, makers and fuses while
   // avoiding its CLI's obsolete pnpm config-get probes for hyphenated keys.
-  if (command === 'publish')
-    return api.release(options)
+  if (command === 'publish') {
+    await checkRelease()
+    const { dir, interactive, ...makeOptions } = options
+    return api.release({ dir, interactive, makeOptions })
+  }
   if (command !== 'start')
     return api[command](options)
   const child = await api.start(options)

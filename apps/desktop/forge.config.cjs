@@ -9,6 +9,7 @@ module.exports = {
   packagerConfig: {
     name: metadata.productName,
     executableName: 'YunLeFun',
+    icon: path.join(__dirname, 'build/icons/icon'),
     appBundleId: metadata.desktop.appId,
     appCategoryType: 'public.app-category.entertainment',
     asar: true,
@@ -43,12 +44,14 @@ module.exports = {
   makers: [
     { name: '@electron-forge/maker-squirrel', config: {
       name: 'yunlefun',
+      setupIcon: path.join(__dirname, 'build/icons/icon.ico'),
+      iconUrl: 'https://apps.yunle.fun/favicon.ico',
       certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
       certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD,
     } },
     { name: '@electron-forge/maker-zip', platforms: ['darwin'] },
-    { name: '@electron-forge/maker-dmg', config: { format: 'ULFO' } },
-    { name: '@electron-forge/maker-deb', config: { options: { name: 'yunlefun', bin: 'YunLeFun', maintainer: metadata.author.name, homepage: metadata.repository.url } } },
+    { name: '@electron-forge/maker-dmg', config: { format: 'ULFO', icon: path.join(__dirname, 'build/icons/icon.icns') } },
+    { name: '@electron-forge/maker-deb', config: { options: { name: 'yunlefun', bin: 'YunLeFun', icon: path.join(__dirname, 'build/icons/icon.png'), maintainer: metadata.author.name, homepage: metadata.repository.url } } },
   ],
   publishers: [{
     name: '@electron-forge/publisher-github',
@@ -65,8 +68,16 @@ module.exports = {
   })],
   hooks: {
     async preMake() {
+      const { cleanBuildArtifacts } = await import('./scripts/build-artifacts.mjs')
+      await cleanBuildArtifacts()
       const { prepareMacosMaker } = await import('./scripts/prepare-macos-maker.mjs')
       await prepareMacosMaker()
+    },
+    async postMake(config, results) {
+      const { createBuildArtifacts } = await import('./scripts/build-artifacts.mjs')
+      const manifest = await createBuildArtifacts(results, { forgeConfig: config })
+      console.info(`Verified ${manifest.artifacts.length} installers, build-manifest.json and SHA256SUMS in out/artifacts.`)
+      return results
     },
     async packageAfterCopy(_config, buildPath) {
       const { materializeRuntimeDependencies } = await import('./scripts/runtime-dependencies.mjs')

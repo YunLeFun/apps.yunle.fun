@@ -1,5 +1,6 @@
 import type { CloudbaseAdminDb } from './cloudbase-admin'
 import type { AppRecord } from '~/types/app'
+import { catalogAppViewToRecord, createCloudbaseCatalogResolver } from '../domain/catalog/cloudbase'
 import { useCloudbaseAdmin } from './cloudbase-admin'
 
 const PUBLIC_QUERY = {
@@ -37,22 +38,9 @@ export async function getPublicAppByKey(
   key: string,
   db: CloudbaseAdminDb = useCloudbaseAdmin().db,
 ): Promise<AppRecord | null> {
-  const normalizedKey = key.trim()
-  if (!normalizedKey)
-    return null
-
-  for (const identity of [{ _id: normalizedKey }, { slug: normalizedKey }]) {
-    const { data } = await db
-      .collection('apps')
-      .where({ ...identity, ...PUBLIC_QUERY })
-      .limit(1)
-      .get()
-    const record = toPublicAppRecord((data as AppRecord[] | undefined)?.[0])
-    if (record)
-      return record
-  }
-
-  return null
+  const catalog = await createCloudbaseCatalogResolver(db).resolveCatalog({ surface: 'public_market' }, null)
+  const app = catalog.apps.find(app => app._id === key || app.marketShortName === key.toLowerCase())
+  return app ? catalogAppViewToRecord(app) : null
 }
 
 /**

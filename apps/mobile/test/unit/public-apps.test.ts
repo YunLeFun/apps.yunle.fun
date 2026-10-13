@@ -78,9 +78,27 @@ describe('public app read model', () => {
     })
   })
 
-  it('resolves a public app by id or slug', async () => {
-    const { db } = mockDb([makeApp()])
-
-    await expect(getPublicAppByKey('wenta', db)).resolves.toMatchObject({ slug: 'wenta' })
+  it('resolves only a listed short name or immutable ID, never an unlisted owner slug', async () => {
+    const records: Record<string, unknown[]> = {
+      apps: [makeApp({ audience: 'public' })],
+      public_market_listings: [{ appId: 'app_1', shortName: 'ask-ta', status: 'listed', approvedRevisionId: 'submission_1' }],
+      app_submissions: [{ _id: 'submission_1', appId: 'app_1', revision: 1, snapshot: { name: '问 TA', slug: 'wenta' } }],
+    }
+    const db = {
+      command: { in: (value: unknown) => value },
+      collection: (name: string) => {
+        const get = async () => ({ data: records[name] || [] })
+        const limit = () => ({ get })
+        return { skip: () => ({ limit }), where: () => ({ limit }) }
+      },
+    } as unknown as Parameters<typeof getPublicAppByKey>[1]
+    await expect(getPublicAppByKey('ask-ta', db)).resolves.toMatchObject({ _id: 'app_1', marketShortName: 'ask-ta' })
+    await expect(getPublicAppByKey('app_1', db)).resolves.toMatchObject({ _id: 'app_1' })
+    await expect(getPublicAppByKey('wenta', db)).resolves.toBeNull()
+    records.public_market_listings = [{ appId: 'app_1', status: 'listed', approvedRevisionId: 'submission_1' }]
+    await expect(getPublicAppByKey('app_1', db)).resolves.toBeNull()
+    records.public_market_listings = [{ appId: 'app_1', shortName: 'ask-ta', status: 'listed', approvedRevisionId: 'submission_1' }]
+    records.apps = [makeApp({ audience: 'owner' })]
+    await expect(getPublicAppByKey('ask-ta', db)).resolves.toBeNull()
   })
 })

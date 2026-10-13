@@ -7,8 +7,9 @@ export default defineEventHandler(async (event) => {
   const appId = getRouterParam(event, 'id')?.trim()
   if (!appId)
     throw createError({ statusCode: 400, message: '应用 ID 必填' })
-  const body = await readBody<{ makePublic?: unknown } | undefined>(event)
+  const body = await readBody<{ makePublic?: unknown, shortName?: unknown } | undefined>(event)
   return submitOwnedAppToPublicMarket(user, appId, {
     makePublic: body?.makePublic === true,
+    shortName: typeof body?.shortName === 'string' ? body.shortName : undefined,
   })
 })

@@ -1,0 +1,6 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "app_identifiers",
+  "permission": "ADMINONLY"
+}

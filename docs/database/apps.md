@@ -1,280 +1,46 @@
-# apps 集合
+# apps — 应用身份与目录投影
 
-CloudBase NoSQL 集合，存储用户创建的应用信息。
+应用身份规则见 [应用标识、所属空间与市场短名](../product/app-identifiers.md)。本页替代旧版“显示名称和 slug 全局唯一、浏览器直写 apps”的设计。
 
-## 字段定义
+| 字段                           | 用途                                                   |
+| ------------------------------ | ------------------------------------------------------ |
+| `_id`                          | 不可变 appId，关联 revision、权限及业务数据            |
+| `ownerUid`                     | 稳定所有者 UID，由服务端认证确定                       |
+| `ownerLogin` / `ownerLoginKey` | 用户地址中的登录名及小写检索键                         |
+| `slug`                         | 所有者命名空间内唯一的 URL 标识                        |
+| `name` / `nameKey`             | 可重复显示名称及搜索归一化键                           |
+| `audience`                     | `public` / `workshop` / `owner`                        |
+| `publicationStatus`            | `published` / `unpublished` / `suspended` / `delisted` |
+| `currentRevisionId`            | 所有者当前版本                                         |
+| `publishedSubmissionId`        | 当前发布版本兼容指针                                   |
+| `activeSubmissionId`           | 当前审核提交兼容指针                                   |
+| `identityVersion`              | 命名空间策略版本；新记录为 2                           |
+| `legacyTipKey`                 | 仅历史应用保留原投币账本键，不向公开目录下发           |
 
-| 字段           | 类型       | 必填 | 说明                                         |
-| -------------- | ---------- | ---- | -------------------------------------------- |
-| `_id`          | `string`   | 自动 | 文档 ID，CloudBase 自动生成                  |
-| `_openid`      | `string`   | 自动 | 创建者用户 ID，服务端自动注入                |
-| `ownerLogin`   | `string`   | 是   | 所有者用户名，用于展示                       |
-| `name`         | `string`   | 是   | 应用名称                                     |
-| `nameKey`      | `string`   | 是   | 应用名称规范化键，全局唯一                   |
-| `slug`         | `string`   | 是   | URL 标识符，全局唯一（唯一索引约束）         |
-| `description`  | `string`   | 否   | 应用描述                                     |
-| `githubRepo`   | `string`   | 否   | GitHub 仓库，格式 `owner/repo`               |
-| `websiteUrl`   | `string`   | 否   | 应用网址                                     |
-| `trustedHosts` | `string[]` | 否   | 授信 JSAPI 域名，仅审核通过后配置            |
-| `backupUrl`    | `string`   | 否   | 备用链接                                     |
-| `logo`         | `string`   | 否   | 自定义 Logo 图片 URL（优先于 emoji 展示）    |
-| `emoji`        | `string`   | 否   | 应用 emoji 图标（无 logo 时展示，默认 `📱`） |
-| `themeColor`   | `string`   | 否   | 主题色，十六进制色值（默认 `#007AFF`）       |
-| `category`     | `string`   | 否   | 分类                                         |
-| `tags`         | `string[]` | 否   | 标签列表                                     |
-| `isPublic`     | `boolean`  | 是   | 是否公开可见                                 |
-| `createdAt`    | `number`   | 是   | 创建时间戳（ms）                             |
-| `updatedAt`    | `number`   | 是   | 更新时间戳（ms）                             |
+`description`、`websiteUrl`、隐私/支持链接、图标、分类、标签、截图、评分、访问方式和发布阶段继续按现有 AppRecord 与 revision 快照维护。
 
-## `_openid` 机制
+## 唯一性
 
-`_openid` 是 CloudBase NoSQL **系统字段**：
+- `apps` 建立 `ownerUid + slug` 唯一索引。
+- `nameKey` 不唯一。旧 `idx_name_key_unique` 与单字段 `slug` 唯一索引由迁移脚本在回填后移除。
+- `app_identifiers` 是 ADMINONLY 集合，以确定性文档 ID 登记所属空间 slug 与市场短名。读已有归属与写入占名必须与应用 / listing 写入处于同一事务。
+- `public_market_listings` 以 appId 关联应用，`shortName` 保存已取得的市场短名。投稿时原子占名，管理员上架、恢复及紧急发布必须验证短名。
+- 下架、暂停和私有化不删除身份或释放短名。
 
-- `collection.add()` 时服务端**自动注入**，值为当前登录用户 uid
-- 客户端手动传入会被服务端**覆盖**，不要手动传
-- 安全规则通过 `auth.uid == doc._openid` 校验文档归属
-- 不要创建冗余的 `userId` / `ownerId` 字段存储同样的值
+## 读取与写入
 
-## 索引
+浏览器经应用平台 Nitro API 读取白名单投影，不直接访问身份登记表，不直接写 `apps`。
 
-| 索引名                | 字段      | 类型 | 说明                       |
-| --------------------- | --------- | ---- | -------------------------- |
-| `_id_`                | `_id`     | 默认 | 主键                       |
-| `_openid_1`           | `_openid` | 升序 | 按创建者查询               |
-| `idx_slug_unique`     | `slug`    | 唯一 | slug 全局唯一约束          |
-| `idx_name_key_unique` | `nameKey` | 唯一 | 规范化应用名称全局唯一约束 |
+- `/api/apps/public`：只返回已上架、当前仍公开、已发布的应用，使用获批 revision。
+- `/api/apps/public/:key`：按 appId 或市场短名读取，不按全局 namespace slug 猜测目标。
+- `/api/markets/personal/:login`：所属用户的公开分享，使用当前 revision，不要求市场上架。
+- `/api/apps/mine` 与管理接口：验证当前用户身份，按 ownerUid 授权。
+- 所属空间地址 `/u/:owner/apps/:slug` 在官网展示；市场短地址 `/apps/:shortName` 独立。
 
-`nameKey` 由服务端根据 `name` 做 NFKC、首尾空白清理、连续空白折叠和小写转换后写入。
-创建与编辑应用时先做可用性预检，最终仍由 `idx_name_key_unique` 处理并发冲突。
+公开目录响应使用 `Cache-Control: no-store`，避免转私有后继续从共享缓存返回旧数据。发布切换还需清理此前已有 CDN 缓存。
 
-## 安全规则
+创建和修改通过 submission 服务生成 revision；投稿云乐坊单独取得市场短名并进入审核。公开分享不自动进入市场。
 
-类型：**CUSTOM**
+## 迁移
 
-```json
-{
-  "read": "(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid",
-  "create": "auth.uid != null && auth.loginType != 'ANONYMOUS'",
-  "update": "auth.uid == doc._openid",
-  "delete": "auth.uid == doc._openid"
-}
-```
-
-| 操作 | 权限                                                      |
-| ---- | --------------------------------------------------------- |
-| 读取 | 公开且审核通过的应用所有人可读；所有者可读自己的应用      |
-| 创建 | 已登录且非匿名用户可创建，`_openid` 由 CloudBase 自动注入 |
-| 更新 | 仅创建者可更新                                            |
-| 删除 | 仅创建者可删除                                            |
-
-### 安全规则对 `where` 查询的约束
-
-CloudBase 安全规则引擎要求 **`where` 条件必须能让引擎推导出每条结果都满足权限**。
-不满足时会返回 `DATABASE_PERMISSION_DENIED`。
-
-**合法查询模式：**
-
-```typescript
-// ✅ 查自己的数据 — where 含 _openid
-db.collection('apps').where({ _openid: userId })
-
-// ✅ 查公开数据 — where 含 isPublic: true 与 status: 'approved'
-db.collection('apps').where({ isPublic: true, status: 'approved' })
-
-// ✅ 组合条件 — 按 slug 查公开应用
-db.collection('apps').where({ slug: 'xxx', isPublic: true, status: 'approved' })
-
-// ✅ 组合条件 — 按 slug 查自己的应用
-db.collection('apps').where({ slug: 'xxx', _openid: userId })
-```
-
-**非法查询模式：**
-
-```typescript
-// ❌ 仅按 slug 查询 — 引擎无法判断结果是否有读权限
-db.collection('apps').where({ slug: 'xxx' })
-
-// ❌ 按任意非权限字段查询
-db.collection('apps').where({ category: 'game' })
-```
-
-## 查询模式
-
-### 查自己的所有应用
-
-```typescript
-db.collection('apps')
-  .where({ _openid: userId })
-  .orderBy('updatedAt', 'desc')
-  .get()
-```
-
-### 删除自己的应用
-
-删除时同时带上 `_id` 与 `_openid`，让安全规则可以从查询条件推导出文档归属。
-
-```typescript
-db.collection('apps')
-  .where({ _id: appId, _openid: userId })
-  .remove()
-```
-
-### 按 slug 查应用
-
-需要分两步：先查自己的（含私有），再查公开的。
-
-```typescript
-// 1. 先查自己的
-const { data } = await db.collection('apps')
-  .where({ slug, _openid: userId })
-  .limit(1)
-  .get()
-if (data.length > 0)
-  return data[0]
-
-// 2. 再查公开的
-const { data: pub } = await db.collection('apps')
-  .where({ slug, isPublic: true, status: 'approved' })
-  .limit(1)
-  .get()
-return pub[0] || null
-```
-
-### 检查 slug 是否被占用
-
-客户端只能查到本人数据 + 公开数据，**无法检测其他用户的私有 slug**。
-但 `idx_slug_unique` 唯一索引会在创建时保证全局唯一，重复则 `add()` 报错。
-
-```typescript
-// 客户端预检（不能覆盖他人私有数据）
-const pub = await db.collection('apps')
-  .where({ slug, isPublic: true, status: 'approved' })
-  .limit(1)
-  .get()
-const my = await db.collection('apps')
-  .where({ slug, _openid: userId })
-  .limit(1)
-  .get()
-
-// 最终由唯一索引兜底
-```
-
-### 创建应用
-
-```typescript
-// _openid 由服务端自动注入，不要手动传
-await db.collection('apps').add({
-  ownerLogin: 'username',
-  name: 'My App',
-  slug: 'my-app',
-  logo: '', // 自定义 Logo URL（可选）
-  emoji: '🚀', // emoji 图标（默认 📱）
-  themeColor: '#007AFF', // 主题色（默认 #007AFF）
-  isPublic: true,
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-})
-```
-
-## 公开应用查询模式（工坊页面）
-
-### 按分类查询公开应用
-
-```typescript
-db.collection('apps')
-  .where({ isPublic: true, status: 'approved', category: '工具' })
-  .orderBy('updatedAt', 'desc')
-  .skip(offset)
-  .limit(20)
-  .get()
-```
-
-### 搜索公开应用
-
-```typescript
-db.collection('apps')
-  .where({
-    isPublic: true,
-    status: 'approved',
-    name: db.RegExp({ regexp: keyword, options: 'i' }),
-  })
-  .limit(20)
-  .get()
-```
-
-### 查询所有公开应用（分页）
-
-```typescript
-db.collection('apps')
-  .where({ isPublic: true, status: 'approved' })
-  .orderBy('updatedAt', 'desc')
-  .skip(offset)
-  .limit(20)
-  .get()
-```
-
-### 根据多个 ID 批量查询
-
-```typescript
-db.collection('apps')
-  .where({
-    _id: _.in(appIds),
-    isPublic: true,
-    status: 'approved',
-  })
-  .get()
-```
-
-## 类型定义
-
-文件：`app/types/app.ts`
-
-```typescript
-interface AppRecord {
-  _id: string
-  _openid: string
-  ownerLogin: string
-  name: string
-  slug: string
-  description?: string
-  githubRepo?: string
-  websiteUrl?: string
-  trustedHosts?: string[]
-  backupUrl?: string
-  logo?: string
-  emoji?: string
-  themeColor?: string
-  category?: string
-  tags?: string[]
-  isPublic: boolean
-  createdAt: number
-  updatedAt: number
-}
-```
-
-## 图标展示规则
-
-优先级：`logo` > `emoji` > 默认 emoji `📱`
-
-```text
-有 logo URL → 展示 logo 图片（圆角矩形裁剪）
-无 logo → 展示 emoji 字符
-无 emoji → 展示默认 📱
-```
-
-背景色使用 `themeColor`，未设置时默认 `#007AFF`（iOS 蓝）。
-
-### 预设主题色
-
-```text
-#007AFF  iOS 蓝
-#34C759  iOS 绿
-#FF9500  iOS 橙
-#FF3B30  iOS 红
-#AF52DE  iOS 紫
-#FF2D55  iOS 粉
-#5856D6  iOS 靛蓝
-#00C7BE  iOS 青
-#FFD60A  iOS 黄
-#8E8E93  iOS 灰
-```
+使用 admin 仓库 `scripts/migrate-app-identifiers.ts`，默认 dry-run。具体顺序、冲突处理、账本兼容和回滚限制见 [迁移说明](../product/app-identifiers.md#旧数据与发布顺序)。新策略上线后不得重新运行旧版名称全局唯一迁移。

@@ -1,0 +1,12 @@
+<!-- Chrome Custom Tabs minimize chevron: 18dp visible width in a 24dp viewport.
+     Reference: https://chromium.googlesource.com/chromium/src/+/main/chrome/android/java/res/drawable/ic_minimize.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M3,8.298L4.597,6.7L12,14.103L19.403,6.7L21,8.298L12,17.298L3,8.298Z"/>
+</vector>

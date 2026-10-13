@@ -1,4 +1,5 @@
 import type { CloudbaseAdminDb } from './cloudbase-admin'
+import { getPublicAppByKey } from './public-apps'
 import { summarizeRatingGroups } from './reviews'
 
 /**
@@ -40,5 +41,7 @@ export async function recomputeAppRating(
     if (res?.updated)
       return
   }
-  await apps.where({ slug: appKey }).update(patch)
+  const app = await getPublicAppByKey(appKey, db)
+  if (app)
+    await apps.doc(app._id).update(patch)
 }

@@ -716,6 +716,7 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "close", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateAppInfo", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "configureSessionPolicy", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "resumeSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listSessions", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "confirmAuthorization", returnType: CAPPluginReturnPromise),
@@ -883,7 +884,7 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
                 guard let self = self, let vc = vc else { return }
                 self.moveToFront(vc)
                 self.notifyListeners("browserFinished", data: [:])
-                self.notifyListeners("browserMinimized", data: ["name": vc.appInfo?.name ?? ""])
+                self.notifyListeners("browserMinimized", data: ["name": vc.appInfo?.name ?? "", "key": vc.sessionKey])
                 self.notifySessionsChanged()
             }
             vc.onDetail = { [weak self] appId in
@@ -980,6 +981,27 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
                 "sessions": self?.sessions.map { $0.sessionInfo() } ?? [],
                 "sessionLimit": self?.maxSessions ?? 1,
             ])
+        }
+    }
+
+    /// Restore the exact WebView without reconstructing its trusted configuration.
+    @objc func resumeSession(_ call: CAPPluginCall) {
+        let key = call.getString("id") ?? ""
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let index = self.indexOfSession(key: key),
+                  let presenter = self.bridge?.viewController else {
+                call.reject("Session is no longer available")
+                return
+            }
+            let vc = self.sessions[index]
+            guard vc.presentingViewController == nil else { call.resolve(); return }
+            guard presenter.presentedViewController == nil else {
+                call.reject("Another view is being presented")
+                return
+            }
+            self.moveToFront(vc)
+            presenter.present(vc, animated: true) { call.resolve() }
+            self.notifySessionsChanged()
         }
     }
 

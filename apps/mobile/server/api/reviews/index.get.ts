@@ -2,11 +2,12 @@ import type { ReviewListResponse, ReviewPublic, ReviewRecord } from '~/types/rev
 import { createError, getQuery } from 'h3'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { tryGetCloudbaseUser } from '../../utils/cloudbase-auth'
+import { getPublicAppByKey } from '../../utils/public-apps'
 import { summarizeRatingGroups } from '../../utils/reviews'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
-  const appKey = typeof query.appKey === 'string' ? query.appKey.trim() : ''
+  let appKey = typeof query.appKey === 'string' ? query.appKey.trim() : ''
   if (!appKey) {
     throw createError({
       statusCode: 400,
@@ -16,6 +17,10 @@ export default defineEventHandler(async (event) => {
 
   const user = await tryGetCloudbaseUser(event)
   const { db } = useCloudbaseAdmin()
+  const app = await getPublicAppByKey(appKey, db)
+  if (!app)
+    throw createError({ statusCode: 404, message: '应用不存在或尚未公开' })
+  appKey = app.marketShortName || app._id
   const reviewsCollection = db.collection('app_reviews')
 
   // 评分统计用聚合分组（group by rating），不受拉取条数限制，也省去整表读取

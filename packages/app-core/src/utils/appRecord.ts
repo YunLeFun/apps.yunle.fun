@@ -17,12 +17,12 @@ export type CatalogAppInfo = YlfAppInfo & {
  * 字段已与集合命名对齐（themeColor/websiteUrl/logo），这里只做默认值兜底：
  * - 图标优先级 `logo > emoji > 📱`
  * - themeColor 默认 #007AFF
- * - 业务主键用 slug；id 取文档 _id
+ * - 业务主键用不可变 id；公开市场 slug 使用已登记短名
  */
 export function recordToAppInfo(record: AppRecord): CatalogAppInfo {
   return withCanonicalAppIcon(withCanonicalAppDomain({
     id: record._id,
-    slug: record.slug,
+    slug: record.marketShortName || record.slug,
     name: record.name,
     description: record.description,
     emoji: record.emoji || '📱',

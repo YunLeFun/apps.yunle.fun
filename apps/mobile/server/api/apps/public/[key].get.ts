@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   const resolver = createCloudbaseCatalogResolver()
   const view = await resolver.resolveCatalog({ surface: 'public_market' }, null)
-  const found = view.apps.find(app => app._id === key || app.slug === key)
+  const found = view.apps.find(app => app._id === key || app.marketShortName === key.toLowerCase())
   const app = found ? catalogAppViewToRecord(found) : null
   if (!app) {
     throw createError({
@@ -26,6 +26,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
+  setResponseHeader(event, 'Cache-Control', 'no-store')
   return { app }
 })

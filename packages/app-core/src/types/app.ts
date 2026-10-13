@@ -89,6 +89,7 @@ export type AppPublicationStatus
 export type YunLeFunListingStatus = 'unlisted' | 'listed' | 'suspended' | 'delisted'
 
 export interface YunLeFunListing {
+  shortName?: string
   appId: string
   status: YunLeFunListingStatus
   approvedRevisionId?: string
@@ -131,19 +132,23 @@ export interface AppOwnershipVerification {
 
 /** 应用数据模型 - 对应 CloudBase NoSQL 集合 `apps` */
 export interface AppRecord {
+  identityVersion?: number
+  /** 市场上架时取得的全局唯一短名；所属空间 slug 独立。 */
+  marketShortName?: string
   /** 文档 ID（CloudBase 自动生成） */
   _id: string
   /** 创建者用户 ID（CloudBase 服务端自动注入，用于安全规则校验） */
   _openid?: string
   /** 应用所有者用户名 */
+  ownerLoginKey?: string
   ownerLogin: string
   /** 稳定所有者 UID；新流程不再依赖浏览器可写的 _openid。 */
   ownerUid?: string
   /** 应用名称 */
   name: string
-  /** 展示名称的服务端标准化键；用于全局唯一约束，不向普通用户展示。 */
+  /** 展示名称的服务端标准化键；仅用于搜索归一化，不要求唯一，不向普通用户展示。 */
   nameKey?: string
-  /** 唯一标识符（URL slug） */
+  /** 所属空间内唯一标识符（URL slug） */
   slug: string
   /** 应用描述 */
   description?: string

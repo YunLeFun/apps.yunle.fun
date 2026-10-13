@@ -150,7 +150,7 @@ ion-button > ion-icon[slot='end'] {
 /* PC 端内容区最大宽度限制，移动端不受影响 */
 @media (min-width: 768px) {
   ion-content::part(scroll) {
-    max-width: 768px;
+    max-width: var(--ylf-content-max-width);
     margin-left: auto;
     margin-right: auto;
   }

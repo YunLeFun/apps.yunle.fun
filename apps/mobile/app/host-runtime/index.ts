@@ -23,6 +23,8 @@ export interface HostAppInfo {
 
 /** 平台原生容器保活的页面会话摘要。 */
 export interface HostSession {
+  /** Native viewport snapshot, kept in memory and refreshed on every minimize. */
+  previewImage?: string
   id: string
   key: string
   name: string
@@ -82,6 +84,7 @@ export interface HostRuntimePlugin {
     isMember: boolean
     preferredLimit?: number
   }) => Promise<{ sessionLimit: number }>
+  resumeSession: (options: { id: string }) => Promise<void>
   listSessions: () => Promise<HostSessionSnapshot>
   endSession: (options: { id: string }) => Promise<void>
   confirmAuthorization: (options: {
@@ -113,7 +116,7 @@ export interface HostRuntimePlugin {
   addListener: ((event: 'browserFinished', handler: () => void) => Promise<PluginListenerHandle>)
     & ((event: 'detailRequested', handler: (data: { appId: string }) => void) => Promise<PluginListenerHandle>)
     & ((event: 'sessionsChanged', handler: (data: HostSessionSnapshot) => void) => Promise<PluginListenerHandle>)
-    & ((event: 'browserMinimized', handler: (data: { name: string }) => void) => Promise<PluginListenerHandle>)
+    & ((event: 'browserMinimized', handler: (data: { name: string, key?: string }) => void) => Promise<PluginListenerHandle>)
     & ((event: 'authorizationRequested', handler: (data: HostAuthorizationEvent) => void) => Promise<PluginListenerHandle>)
   removeAllListeners: () => Promise<void>
 }

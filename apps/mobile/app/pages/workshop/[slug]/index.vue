@@ -134,12 +134,27 @@ async function confirmDelete() {
   await alert.present()
 }
 
-async function performYunLeFunSubmission(makePublic: boolean) {
+async function performYunLeFunSubmission(makePublic: boolean, shortName?: string) {
+  if (!app.value)
+    return
+  if (!shortName && !app.value.yunlefunListing?.shortName) {
+    const alert = await alertController.create({
+      header: '选择市场唯一短名',
+      message: '上架后使用 /apps/短名。显示名称可以重复；短名取得后保留，下架不释放。',
+      inputs: [{ name: 'shortName', type: 'text', value: app.value.slug, placeholder: '例如 my-app' }],
+      buttons: [
+        { text: '取消', role: 'cancel' },
+        { text: '投稿', handler: (values: { shortName: string }) => { void performYunLeFunSubmission(makePublic, values.shortName.trim()) } },
+      ],
+    })
+    await alert.present()
+    return
+  }
   if (!app.value)
     return
   try {
     submittingPublicMarket.value = true
-    await submitPublicMarket(app.value._id, { makePublic })
+    await submitPublicMarket(app.value._id, { makePublic, shortName })
     workshopDirty.value = true
     toast.showSuccess('已投稿云乐坊，等待审核')
     await loadApp(app.value.slug)

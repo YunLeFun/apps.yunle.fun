@@ -2,6 +2,8 @@
   --c-brand-wx: #07c160;
   --c-brand-qq: #1d8bf1;
 
+  --ylf-content-max-width: 768px;
+
   /* App Icon 尺寸 */
   --app-icon-size: 64px;
   --app-icon-radius: 16px;
@@ -32,6 +34,7 @@
   --ylf-shadow-popover: 0 2px 8px rgb(0 0 0 / 8%), 0 12px 32px rgb(0 0 0 / 16%);
   --ylf-shadow-sheet: 0 -18px 48px rgb(0 0 0 / 16%);
   --ylf-backdrop-sheet-opacity: 0.16;
+  --ylf-radius-dock: 20px;
   --ylf-radius-popover: 16px;
   --ylf-radius-sheet: 22px;
 

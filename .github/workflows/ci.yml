@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -19,7 +20,7 @@ concurrency:
 jobs:
   verify:
     name: Verify Web and mobile
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
@@ -52,7 +53,7 @@ jobs:
 
   e2e:
     name: Chromium smoke tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -80,3 +81,4 @@ jobs:
             apps/mobile/test-results/**
             apps/mobile/playwright-report/**
           if-no-files-found: ignore
+          retention-days: 7

@@ -1,6 +1,6 @@
 # 客户端工作区与部署
 
-更新日期：2026-10-13。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web、iOS 和 Android 客户端；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。
+更新日期：2026-10-14。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web、iOS 和 Android 客户端；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
 
 ## 目录与命令
 
@@ -57,7 +57,7 @@ pnpm make:desktop
 
 内置应用快照的 producer 位于相邻 `admin` 仓库：`admin/scripts/gen-app-snapshot.ts` 输出本仓库的 `packages/app-core/src/catalog/generated.ts`，Web／移动与桌面从公共包消费。生成文件应通过 producer 更新，避免两端分别维护目录副本。
 
-`admin/scripts/migrate-builtin-apps.ts` 的既有源码读取路径同步为 `apps/mobile/app/constants/apps/index.ts`。本次改造只更新跨仓库路径，没有运行数据库迁移或重新生成线上快照；后台工具执行和数据发布仍按各自原有流程验收。
+`admin/scripts/migrate-builtin-apps.ts` 的既有源码读取路径同步为 `apps/mobile/app/constants/apps/index.ts`。配套 [admin PR #41](https://github.com/YunLeFun/admin/pull/41) 优先使用迁移后的目录，并保留对旧布局的兼容，可先于产品迁移合并。本次改造只更新跨仓库路径，没有运行数据库迁移或重新生成线上快照；后台工具执行和数据发布仍按各自原有流程验收。
 
 ## EdgeOne 生产部署
 
@@ -118,15 +118,21 @@ macOS 的 `preMake` hook 检查 DMG maker 声明的 `macos-alias`／`fs-xattr` �
 
 根 CI 使用工作区锁文件安装，固定读取 `.node-version`，通过根转发命令验证 Web／移动类型、生产构建、服务端运行依赖、单元与 Nuxt 测试。Chromium 在 `apps/mobile` 执行，失败时上传该应用的截图和 trace。
 
-独立 Desktop CI 在 macOS arm64、Windows x64 和 Linux x64 执行桌面 lint、类型、单元、Electron 集成测试、Forge make、ASAR／fuse 检查与 `verify:launch` 打包后启动。Linux 使用 Xvfb，失败 trace 与安装包按平台上传；该流程不发布 GitHub Release。
+独立 Desktop CI 配置在 macOS arm64、Windows x64 和 Linux x64 执行桌面 lint、类型、单元、Electron 集成测试、Forge make、ASAR／fuse 检查与 `verify:launch` 打包后启动。Linux 使用 Xvfb，失败 trace 与安装包按平台上传；该流程不发布 GitHub Release。
 
-2026-10-13 的本机验收结果：
+2026-10-14 的独立 PR 工作区验收结果：
 
-- Web／移动：共享模块抽取后，类型检查、534 个单元测试、62 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端依赖检查通过；iOS Simulator 未签名编译、Android Debug 构建和 12 个原生 JUnit 测试通过。
+- PR 在最新 `main` 上整理迁移变更，排除原工作区尚未提交的其它功能。根 lint、Web／移动类型检查、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查通过。
+- 桌面 lint、类型检查、30 个单元测试和 2 个真实 Electron E2E 通过；另实测确认失败时可以保存 Electron trace。macOS arm64 的 Forge make 成功生成 `.app`、DMG 和 ZIP，最新产物通过 ASAR 完整生产依赖树、fuses 与原生打包启动检查。
+- [三平台 Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38426634680) 已触发，但 GitHub 提示“Actions budget is preventing further use”；所有 job 均未进入步骤，runner 没有启动。因此该轮失败不能作为代码执行结果，macOS／Windows／Linux 的远端验收仍待恢复 Actions 预算或接入可用 runner 后运行。
+
+2026-10-13 在原本机工作区的迁移阶段记录如下。该工作区包含其它尚未提交的功能，这些记录不替代当前 PR 的验收；当时的 534 个单元测试和 62 个 Nuxt 测试不作为本 PR 的测试数量：
+
+- Web／移动：5 个 Chromium smoke、生产构建与服务端依赖检查通过；iOS Simulator 未签名编译、Android Debug 构建和 12 个原生 JUnit 测试通过。
 - Web 全栈产物：本地生产 Node server 的 `/`、`/tabs/home`、`/login` 均返回 200；只读 `/api/apps/public` 返回 200 JSON，包含 25 个公开应用。
-- 桌面：lint、类型检查、27 个单元测试和 2 个真实 Electron E2E 通过；macOS arm64 的 `.app`、DMG、ZIP、ASAR 完整生产依赖树、fuses、原生启动及开发进程启动／退出清理通过。
+- 桌面：macOS arm64 的 `.app`、DMG、ZIP、ASAR 完整生产依赖树、fuses、原生启动及开发进程启动／退出清理通过。
 - 打包后的桌面 UI：实际 ASAR `.app` 从 `app://shell/` 加载，Electron 为 44.7.0；线上目录显示 `online` 和 25 项，无目录错误；`cook.yunle.fun` 在 WebContentsView 中加载“食用手册”，guest 的 `require` 和 `window.desktop` 均为 `undefined`。
-- 根 lint 与文档构建通过。Windows／Linux 的新三平台 CI 尚待实际运行；生产部署、签名、公证、真机登录与跨版本更新另行验收。
+- 根 lint 与文档构建通过。当前 PR 的原生工程构建、生产部署、签名、公证、真机登录与跨版本更新另行验收。
 
 依赖安装仍有 Nitro 安全覆盖的 esbuild 0.28.1 与旧 unplugin 声明 `^0.25` 的两项 optional peer 提示；实际构建和测试通过，保留安全覆盖。
 

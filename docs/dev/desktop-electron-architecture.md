@@ -1,14 +1,14 @@
 # 云乐坊 Electron 桌面端架构与模板接入方案
 
-更新日期：2026-10-13。状态：现有 Web／Capacitor 工程已迁入 `apps/mobile`，桌面入口在 `apps/desktop` 接入。通用模板已在 [PR #6](https://github.com/YunLeFun/vitesse-nuxt-electron/pull/6) 升级并通过三平台 CI；本文的多标签、产品登录与宿主授权等完整桌面能力仍分阶段实现。模板验证与产品验证分别验收。
+更新日期：2026-10-14。状态：现有 Web／Capacitor 工程已迁入 `apps/mobile`，桌面入口在 `apps/desktop` 接入，改造在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。通用模板已在 [PR #6](https://github.com/YunLeFun/vitesse-nuxt-electron/pull/6) 升级并通过三平台 CI；本文的多标签、产品登录与宿主授权等完整桌面能力仍分阶段实现。模板验证与产品验证分别验收。
 
-共享模块抽取后的移动迁移已在本机验证类型、534 个单元测试、62 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端依赖、iOS Simulator 未签名编译、Android Debug 及 12 个原生 JUnit 测试。桌面入口通过 lint、类型、27 个单元测试、2 个真实 Electron E2E 和 macOS arm64 打包／原生启动验证；独立三平台 CI 已配置，Windows／Linux 尚待运行，签名、正式发布和跨版本更新另行验收。
+当前独立 PR 工作区已基于最新 `main` 整理，排除了原本机工作区未提交的其它功能；根 lint、Web／移动类型检查、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查通过。桌面 lint、类型、30 个单元测试与 2 个真实 Electron E2E 通过，失败 trace 保存已实测；macOS arm64 的 `.app`、DMG、ZIP、ASAR 生产依赖树、fuses 与原生打包启动均通过。迁移阶段的原生工程编译和生产 API 记录见[验收说明](./monorepo.md#验证迁移)，不替代当前 PR 的原生工程验收。产品三平台 CI 已触发，但 GitHub Actions 预算阻止 runner 启动，远端跨平台执行尚未验收；签名、正式发布和跨版本更新另行验收。
 
 本次桌面接入提供匿名公开目录及允许开放的云应用容器，复用 `packages/app-core` 的 AppRecord、记录转换、域名／图标和目录快照。主进程从固定公开 API 获取和缓存目录，校验审核、公开和发布状态；应用无需登录、会员或付费才允许打开。离线只显示显式免费 slug 白名单，在线成功结果完整替换缓存，目录为空也不自动回退旧列表。目录刷新时，相同 slug 与规范化后的完整 URL 保留正在运行的视图、历史及会话，并同步变化的文档 ID；应用下架、访问门槛或目标 URL 改变才关闭。本次不建立账号、云币、云居、PKCE 或宿主 SSO，guest 不接收账户 token；下文这些能力属于后续架构目标。
 
 推荐移动端与桌面端继续在 `apps.yunle.fun` 产品仓库协作，首版保留 Nuxt/Vue 业务代码。桌面容器使用 `BaseWindow + WebContentsView`，构建采用 Nuxt 静态客户端、独立 Vite 主进程/预加载构建、Electron Forge 打包，客户端更新使用官方 `update-electron-app`。移动与桌面分别管理构建产物、平台配置和发布。`vitesse-nuxt-electron` 保持为独立的通用模板，云乐坊业务留在产品仓库。
 
-本方案依据当前工作区源码，包含正在修改的登录与原生容器代码，不能据此认定所有能力已在生产发布。实际模板接入来源为 PR #6 分支的 `3821916`，包含开发重建队列和退出治理；此前模板运行基线 `267ac2ca55c0ab7ba68b0b40cae9def5d656eccb` 的 [CI](https://github.com/YunLeFun/vitesse-nuxt-electron/actions/runs/38390155087) 已验证 macOS arm64、Windows x64、Linux x64。以下版本是模板基线，产品依赖以各应用 manifest 和工作区锁文件为准。
+本方案依据产品源码与后续能力设计，不能据此认定所有能力已在生产发布。实际模板接入来源为 PR #6 分支的 `3821916`，包含开发重建队列和退出治理；此前模板运行基线 `267ac2ca55c0ab7ba68b0b40cae9def5d656eccb` 的 [CI](https://github.com/YunLeFun/vitesse-nuxt-electron/actions/runs/38390155087) 已验证 macOS arm64、Windows x64、Linux x64。以下版本是模板基线，产品依赖以各应用 manifest 和工作区锁文件为准。
 
 ## 1. 产品与代码复用
 
@@ -198,7 +198,7 @@ shell preload 只暴露带 schema 校验的宿主操作、事件和取消订阅�
 | 开发编排 | 端口和健康检查、主进程／preload 构建、重建队列、变更重启与退出治理                               | 已扩展 `shared/` 与 `app-core` 监听并验证启动／退出清理；窗口状态、原生菜单和故障诊断后续建设                                             |
 | 打包     | Forge，静态客户端和运行时依赖进入 ASAR；生产二进制 fuse 校验                                     | 产品通过官方 Forge Core API 兼容 pnpm 11，物化完整生产依赖树；macOS arm64 `.app`／DMG／ZIP、ASAR 与 fuses 已验证                          |
 | 发布更新 | macOS DMG／ZIP、Windows Squirrel、Linux deb；草稿发布和 `update-electron-app`                    | 配置证书、验证签名／公证及真实跨版本更新；按产品需求选择更新分发源                                                                        |
-| CI       | 模板三平台 CI 通过，macOS x64 另配置发布任务                                                     | 产品三平台 CI 已配置，macOS arm64 本机验证通过；Windows／Linux 尚待运行，产品 macOS x64 与真实安装发布测试仍需补充                        |
+| CI       | 模板三平台 CI 通过，macOS x64 另配置发布任务                                                     | 产品三平台 CI 已触发，但 Actions 预算阻止 runner 启动；远端三平台尚未验收，产品 macOS x64 与真实安装发布测试仍需补充                      |
 | 依赖维护 | 人工升级，Dependabot 自动 PR 已停用；精确发布信任例外和 DevTools 兼容补丁已记录                  | 清理过期例外，跟进上游修复；运行时和开发工具链审计分别跟踪                                                                                |
 
 首版继续 Nuxt 的理由是复用现有业务：请求插件、运行时配置、路由和账户逻辑已经使用 Nuxt 接口。桌面只生成静态 SPA，服务端留在云端。移动导航和 Capacitor 判断需要平台适配；更换界面框架不会替代这些工作。
@@ -216,7 +216,9 @@ shell preload 只暴露带 schema 校验的宿主操作、事件和取消订阅�
 
 ## 10. 发布与验证顺序
 
-2026-10-13 已验证本地生产 Node server 的 `/`、`/tabs/home` 和 `/login` 返回 200，匿名 `/api/apps/public` 返回 200 JSON 与 25 个公开应用。打包后的 macOS ASAR `.app` 从 `app://shell/` 启动，线上目录为 `online`、25 项且无错误；实际 `cook.yunle.fun` 在 WebContentsView 加载“食用手册”，guest 的 `require` 和 `window.desktop` 均为 `undefined`。根 lint、文档构建、桌面类型／单元／Electron E2E、ASAR 生产依赖树、fuses、原生启动和开发退出清理均通过。Windows／Linux 产品 CI 与正式部署尚待验收。
+2026-10-14 的独立 PR 工作区通过根 lint、Web／移动类型、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查，桌面 lint／类型、30 个单元测试、2 个 Electron E2E 和失败 trace 保存验证。macOS arm64 的 Forge make 成功生成 `.app`、DMG、ZIP，最新产物通过 ASAR 完整生产依赖树、fuses 和 `verify:launch` 原生启动检查。[三平台 Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38426634680) 已触发，GitHub 注释为“Actions budget is preventing further use”，所有 job 均没有进入步骤。恢复预算或接入可用 runner 后仍需实际运行并验收三平台，不能将此轮失败归因于代码。
+
+2026-10-13 在原本机工作区的迁移阶段已验证本地生产 Node server 的 `/`、`/tabs/home` 和 `/login` 返回 200，匿名 `/api/apps/public` 返回 200 JSON 与 25 个公开应用。打包后的 macOS ASAR `.app` 从 `app://shell/` 启动，线上目录为 `online`、25 项且无错误；实际 `cook.yunle.fun` 在 WebContentsView 加载“食用手册”，guest 的 `require` 和 `window.desktop` 均为 `undefined`。当时的 Chromium、iOS Simulator、Android、macOS 打包、ASAR／fuses、原生启动与开发退出清理记录保留在[迁移验收说明](./monorepo.md#验证迁移)。该工作区包含其它未提交功能，当前 PR 的原生工程与正式部署仍需独立验收。
 
 当前保留 Nitro 安全覆盖的 esbuild 0.28.1；旧 unplugin 的 `^0.25` 声明产生两项 optional peer 提示，实际构建和测试通过。
 

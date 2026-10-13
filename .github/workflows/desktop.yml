@@ -1,0 +1,90 @@
+name: Desktop CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Desktop ${{ matrix.os }} ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: windows-latest
+            arch: x64
+          - os: ubuntu-latest
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Desktop lint
+        run: pnpm --dir apps/desktop run lint
+
+      - name: Desktop typecheck
+        run: pnpm --dir apps/desktop run typecheck
+
+      - name: Desktop unit tests
+        run: pnpm --dir apps/desktop run test
+
+      - name: Electron integration tests
+        if: runner.os != 'Linux'
+        run: pnpm --dir apps/desktop run test:e2e
+
+      - name: Electron integration tests on Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm --dir apps/desktop run test:e2e
+
+      - name: Make installers
+        run: pnpm --dir apps/desktop run make --arch=${{ matrix.arch }}
+
+      - name: Verify packaged runtime and fuses
+        run: pnpm --dir apps/desktop run verify:package
+
+      - name: Verify packaged app launch
+        if: runner.os != 'Linux'
+        run: pnpm --dir apps/desktop run verify:launch
+
+      - name: Verify packaged app launch on Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm --dir apps/desktop run verify:launch
+
+      - name: Upload failed desktop traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-traces-${{ runner.os }}-${{ matrix.arch }}
+          path: |
+            apps/desktop/test-results/**
+            apps/desktop/playwright-report/**
+          if-no-files-found: ignore
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-installers-${{ runner.os }}-${{ matrix.arch }}
+          path: apps/desktop/out/make/**
+          if-no-files-found: error

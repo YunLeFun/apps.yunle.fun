@@ -1,0 +1,128 @@
+:root {
+  color-scheme: light;
+  --background: #f5f7fa;
+  --surface: #fff;
+  --text: #172b45;
+  --muted: #708096;
+  --border: #e1e7ef;
+  --accent: #007aff;
+  --accent-soft: #ecf4ff;
+}
+:root.dark {
+  color-scheme: dark;
+  --background: #11161e;
+  --surface: #18212d;
+  --text: #eaf0f8;
+  --muted: #a3b2c4;
+  --border: #2c3b4d;
+  --accent: #5aa7ff;
+  --accent-soft: #20364f;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#__nuxt {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+button,
+a {
+  -webkit-app-region: no-drag;
+}
+button {
+  font: inherit;
+}
+.desktop {
+  height: 100dvh;
+  min-height: 520px;
+  display: flex;
+}
+.workspace {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+.workspace-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.appearance-control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.appearance-control select {
+  font: inherit;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px;
+}
+.button {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 9px 13px;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.button.compact {
+  padding: 7px 10px;
+}
+.button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.text-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+.text-link:hover {
+  text-decoration: underline;
+}
+.error {
+  color: #c43939;
+  font-size: 13px;
+}
+.about {
+  max-width: 760px;
+  padding: 60px 36px;
+  margin: auto;
+}
+.about h1 {
+  font-size: 28px;
+  margin-top: 40px;
+}
+.about p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.8;
+}

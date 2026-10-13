@@ -233,9 +233,29 @@ async function createWindow() {
     shellView = undefined
     window = undefined
   })
-  await shellView.webContents.loadURL(`${devOrigin || SHELL_ORIGIN}/`)
-  // eslint-disable-next-line no-console
-  console.info(`[desktop] ready: ${devOrigin || SHELL_ORIGIN}`)
+  const reportReady = () => {
+    if (!window || window.isDestroyed() || shellView?.webContents !== shellContents || shellContents.isDestroyed() || shellNavigating)
+      return
+    // eslint-disable-next-line no-console
+    console.info(`[desktop] ready: ${devOrigin || SHELL_ORIGIN}`)
+  }
+  try {
+    await shellContents.loadURL(`${devOrigin || SHELL_ORIGIN}/`)
+  }
+  catch (error) {
+    const aborted = error !== null && typeof error === 'object'
+      && (('errno' in error && error.errno === -3) || ('code' in error && error.code === 'ERR_ABORTED'))
+    if (!aborted)
+      throw error
+    // Reload or close can supersede the initial navigation while its assets load.
+    // A replacement document must finish loading before this window is ready.
+    if (!shellContents.isDestroyed() && shellView?.webContents === shellContents && shellNavigating)
+      shellContents.once('did-finish-load', reportReady)
+    else
+      reportReady()
+    return
+  }
+  reportReady()
 }
 
 registerScheme()

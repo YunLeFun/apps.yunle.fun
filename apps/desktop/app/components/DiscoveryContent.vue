@@ -72,7 +72,7 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
         <section v-if="featuredApp" class="cook-feature" :class="{ 'has-feature-art': showFeatureImage }" aria-label="精选应用：今天来做菜">
           <img
             v-if="showFeatureImage" class="feature-art" :src="featureImageUrl"
-            alt="" draggable="false" referrerpolicy="no-referrer" @error="featureImageError = true"
+            alt="" draggable="false" loading="lazy" referrerpolicy="no-referrer" @error="featureImageError = true"
           >
           <div class="feature-copy">
             <h2 class="feature-title">

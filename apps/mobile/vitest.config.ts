@@ -9,6 +9,13 @@ const nuxtProject = await defineVitestProject({
     name: 'nuxt',
     include: ['test/nuxt/*.{test,spec}.ts'],
     environment: 'nuxt',
+    server: {
+      deps: {
+        // Konsta ships Vue source files; transform them in Vite instead of
+        // loading the package directly through Node during initial navigation.
+        inline: ['konsta'],
+      },
+    },
     sequence: {
       setupFiles: 'list',
       hooks: 'list',

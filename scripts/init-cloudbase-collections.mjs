@@ -2,7 +2,7 @@
 /**
  * 初始化评价/举报/审核系统所需的 CloudBase 集合（幂等：已存在则跳过）。
  *
- * 运行：node --env-file=.env scripts/init-cloudbase-collections.mjs
+ * 运行：node --env-file=apps/mobile/.env scripts/init-cloudbase-collections.mjs
  * 依赖 .env 中的 NUXT_TENCENT_API_SECRET_ID / NUXT_TENCENT_API_SECRET_KEY
  * （envId 缺省用 yunlefun-8g7ybcxc7345c490，可用 NUXT_TCB_ENV_ID 覆盖）。
  */
@@ -17,7 +17,7 @@ const secretId = process.env.NUXT_TENCENT_API_SECRET_ID
 const secretKey = process.env.NUXT_TENCENT_API_SECRET_KEY
 
 if (!secretId || !secretKey) {
-  console.error('✗ 缺少 NUXT_TENCENT_API_SECRET_ID / NUXT_TENCENT_API_SECRET_KEY，请用 `node --env-file=.env` 运行')
+  console.error('✗ 缺少 NUXT_TENCENT_API_SECRET_ID / NUXT_TENCENT_API_SECRET_KEY，请用 `node --env-file=apps/mobile/.env` 运行')
   process.exit(1)
 }
 

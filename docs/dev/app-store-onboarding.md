@@ -1,11 +1,11 @@
 # App Store Connect 上架手册
 
-把 [app/config/index.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/config/index.ts) 里 `appStore.id` 从占位符 `'000000000'` 换成真实 App ID 的全流程。
+把 [app/config/index.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/config/index.ts) 里 `appStore.id` 从占位符 `'000000000'` 换成真实 App ID 的全流程。
 
 ## 前置条件
 
 - [ ] 已加入 [Apple Developer Program](https://developer.apple.com/programs/)（年费 $99，约 ¥698）
-- [ ] Team ID 为 `QT792GAY4C`（`scripts/ios-archive.sh` / `scripts/ios-testflight.sh` 的默认值，可用 `IOS_TEAM_ID` 覆盖）
+- [ ] Team ID 为 `QT792GAY4C`（`apps/mobile/scripts/ios-archive.sh` / `apps/mobile/scripts/ios-testflight.sh` 的默认值，可用 `IOS_TEAM_ID` 覆盖）
 - [ ] Bundle ID 为 `fun.yunle.apps`（Capacitor、Xcode 和导出脚本保持一致；`IOS_BUNDLE_ID` 只校验期望值）
 
 ## 步骤一：注册 Bundle ID（如未注册）
@@ -17,7 +17,7 @@
    - Description: `云乐坊 / yunle.fun`
    - Bundle ID: 选 **Explicit**，填 `fun.yunle.apps`
 5. Capabilities 勾选（按当前 App 实际使用）：
-   - ✅ Associated Domains（Universal Link 必需，对应 [public/.well-known/apple-app-site-association](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/.well-known/apple-app-site-association)）
+   - ✅ Associated Domains（Universal Link 必需，对应 [public/.well-known/apple-app-site-association](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/public/.well-known/apple-app-site-association)）
    - ✅ Push Notifications（如果以后要做推送）
    - ⬜ Sign in with Apple（除非决定上 SIWA）
 6. Continue → Register
@@ -29,13 +29,13 @@
 3. 平台勾选 **iOS**
 4. 填写：
 
-| 字段         | 值                                     | 说明                                                                                                                                        |
-| ------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 名称         | `云乐坊`                               | 必须与 [ios/App/App/Info.plist](https://github.com/YunYouJun/apps.yunle.fun/blob/main/ios/App/App/Info.plist) 的 `CFBundleDisplayName` 一致 |
-| 主要语言     | 简体中文                               |                                                                                                                                             |
-| Bundle ID    | `fun.yunle.apps`                       | 从下拉选已注册的（步骤一）                                                                                                                  |
-| SKU          | `fun.yunle.apps` 或 `yunlefun-ios-001` | 自定义唯一标识，不会展示给用户                                                                                                              |
-| 用户访问权限 | 完全访问权限                           | 个人开发者保持默认即可                                                                                                                      |
+| 字段         | 值                                     | 说明                                                                                                                                                   |
+| ------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 名称         | `云乐坊`                               | 必须与 [ios/App/App/Info.plist](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/ios/App/App/Info.plist) 的 `CFBundleDisplayName` 一致 |
+| 主要语言     | 简体中文                               |                                                                                                                                                        |
+| Bundle ID    | `fun.yunle.apps`                       | 从下拉选已注册的（步骤一）                                                                                                                             |
+| SKU          | `fun.yunle.apps` 或 `yunlefun-ios-001` | 自定义唯一标识，不会展示给用户                                                                                                                         |
+| 用户访问权限 | 完全访问权限                           | 个人开发者保持默认即可                                                                                                                                 |
 
 5. 点「创建」
 
@@ -65,12 +65,12 @@ export const config = {
 
 当前以下位置都应保持为同一个 App 标识：
 
-| 来源                                                                                                                                       | 当前值                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| [capacitor.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/capacitor.config.ts) `appId`                                   | `fun.yunle.apps`              |
-| Xcode 项目 `PRODUCT_BUNDLE_IDENTIFIER`                                                                                                     | `fun.yunle.apps`              |
-| [apple-app-site-association](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/.well-known/apple-app-site-association) `appIDs` | `QT792GAY4C.fun.yunle.apps` ✓ |
-| `IOS_BUNDLE_ID` 期望值                                                                                                                     | `fun.yunle.apps`              |
+| 来源                                                                                                                                                  | 当前值                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| [capacitor.config.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/capacitor.config.ts) `appId`                                   | `fun.yunle.apps`              |
+| Xcode 项目 `PRODUCT_BUNDLE_IDENTIFIER`                                                                                                                | `fun.yunle.apps`              |
+| [apple-app-site-association](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/public/.well-known/apple-app-site-association) `appIDs` | `QT792GAY4C.fun.yunle.apps` ✓ |
+| `IOS_BUNDLE_ID` 期望值                                                                                                                                | `fun.yunle.apps`              |
 
 每次修改 Bundle ID 后都要同时更新 Capacitor 配置、Xcode、AASA、provisioning profile 和发布环境变量，
 否则 Universal Link、签名或 App Store Connect 匹配会失败。WeChat App ID `wx925d6e320d64f30a`

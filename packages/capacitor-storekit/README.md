@@ -4,11 +4,11 @@
 
 ## 集成方式
 
-- **JS 侧**：经 `nuxt.config.ts` 的 alias 直接引用 TS 源码（同 `@yunlefun/auth`）
-- **iOS 侧**：`ios/App/Podfile` 手动挂载本地 pod（非 npm 包，`cap sync` 不会自动管理）：
+- **JS 侧**：经 `apps/mobile/nuxt.config.ts` 的 alias 直接引用 TS 源码（同 `@yunlefun/auth`）
+- **iOS 侧**：`apps/mobile/ios/App/Podfile` 手动挂载本地 pod（`cap sync` 不会自动管理本地 pod）：
 
   ```ruby
-  pod 'YunlefunCapacitorStorekit', :path => '../../packages/capacitor-storekit'
+  pod 'YunlefunCapacitorStorekit', :path => '../../../../packages/capacitor-storekit'
   ```
 
 ## 设计原则
@@ -24,5 +24,5 @@
 
 ## 本地测试
 
-Xcode 中将 `ios/App/Products.storekit` 配置到 scheme（Edit Scheme → Run →
+Xcode 中将 `apps/mobile/ios/App/Products.storekit` 配置到 scheme（Edit Scheme → Run →
 Options → StoreKit Configuration），模拟器即可走通购买流。

@@ -1,0 +1,115 @@
+:root {
+  --c-brand-wx: #07c160;
+  --c-brand-qq: #1d8bf1;
+
+  /* App Icon 尺寸 */
+  --app-icon-size: 64px;
+  --app-icon-radius: 16px;
+  --app-label-size: 12px;
+  --app-emoji-size: 32px;
+
+  /* ===========================================================
+   * iOS 系统标签色（语义化文本/分隔线，浅色模式）
+   * 参考 Apple HIG - System Colors
+   * 优先使用 --ion-* 变量；这里补 iOS 没覆盖的灰阶与扩展色
+   * =========================================================== */
+  --ylf-label: #000000;
+  --ylf-label-secondary: #3c3c4399; /* rgba(60,60,67,0.6) */
+  --ylf-label-tertiary: #3c3c434c; /* rgba(60,60,67,0.3) */
+  --ylf-label-quaternary: #3c3c432e; /* rgba(60,60,67,0.18) */
+
+  --ylf-separator: #3c3c4349; /* rgba(60,60,67,0.29) */
+  --ylf-separator-opaque: #c6c6c8;
+
+  --ylf-fill: #78788033; /* rgba(120,120,128,0.2) */
+  --ylf-fill-secondary: #78788028; /* rgba(120,120,128,0.16) */
+  --ylf-fill-tertiary: #7676801e; /* rgba(118,118,128,0.12) */
+  --ylf-fill-quaternary: #74748014; /* rgba(116,116,128,0.08) */
+
+  /* 浮层：Popover / Menu / Sheet 共用的 iOS elevated 层级 */
+  --ylf-surface-elevated: rgb(255 255 255 / 96%);
+  --ylf-overlay-border: rgb(60 60 67 / 14%);
+  --ylf-shadow-popover: 0 2px 8px rgb(0 0 0 / 8%), 0 12px 32px rgb(0 0 0 / 16%);
+  --ylf-shadow-sheet: 0 -18px 48px rgb(0 0 0 / 16%);
+  --ylf-backdrop-sheet-opacity: 0.16;
+  --ylf-radius-popover: 16px;
+  --ylf-radius-sheet: 22px;
+
+  /* iOS 扩展色（Ionic 默认调色板没有的） */
+  --ylf-color-purple: #af52de;
+  --ylf-color-pink: #ff2d55;
+  --ylf-color-teal: #5ac8fa;
+  --ylf-color-indigo: #5856d6;
+  --ylf-color-yellow: #ffcc00;
+  --ylf-color-cyan: #00c7be;
+
+  /* 会员与交易场景的可访问语义色 */
+  --ylf-color-warning-on: #5c3b00;
+  --ylf-color-warning-text: #7a4b00;
+  --ylf-color-success-on-surface: #197b3e;
+  --ylf-color-primary-action: #006bd6;
+  --ylf-color-primary-action-pressed: #0057b8;
+}
+
+/* 深色模式（与 .ion-palette-dark 同步） */
+.ion-palette-dark,
+.dark {
+  --ylf-label: #ffffff;
+  --ylf-label-secondary: #ebebf599;
+  --ylf-label-tertiary: #ebebf54c;
+  --ylf-label-quaternary: #ebebf528;
+
+  --ylf-separator: #54545899;
+  --ylf-separator-opaque: #38383a;
+
+  --ylf-fill: #7878805c;
+  --ylf-fill-secondary: #78788052;
+  --ylf-fill-tertiary: #7676803d;
+  --ylf-fill-quaternary: #7676802e;
+
+  /* 深色模式前景浮层使用更亮的 elevated surface，避免与主页基底融合 */
+  --ylf-surface-elevated: rgb(44 44 46 / 98%);
+  --ylf-overlay-border: rgb(235 235 245 / 12%);
+  --ylf-shadow-popover: 0 2px 10px rgb(0 0 0 / 24%), 0 16px 40px rgb(0 0 0 / 48%);
+  --ylf-shadow-sheet: 0 -20px 52px rgb(0 0 0 / 48%);
+
+  --ylf-color-purple: #bf5af2;
+  --ylf-color-pink: #ff375f;
+  --ylf-color-teal: #64d2ff;
+  --ylf-color-indigo: #5e5ce6;
+  --ylf-color-yellow: #ffd60a;
+  --ylf-color-cyan: #6ac4dc;
+
+  --ylf-color-warning-on: #5c3b00;
+  --ylf-color-warning-text: #ffce31;
+  --ylf-color-success-on-surface: #50d878;
+  --ylf-color-primary-action: #006bd6;
+  --ylf-color-primary-action-pressed: #0057b8;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --app-icon-size: 64px;
+    --app-icon-radius: 14px;
+    --app-label-size: 11px;
+    --app-emoji-size: 28px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --app-icon-size: 72px;
+    --app-icon-radius: 18px;
+    --app-label-size: 13px;
+    --app-emoji-size: 36px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --app-icon-size: 80px;
+    --app-icon-radius: 20px;
+    --app-label-size: 14px;
+    --app-emoji-size: 40px;
+  }
+}

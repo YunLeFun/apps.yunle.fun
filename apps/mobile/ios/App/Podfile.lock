@@ -1,0 +1,91 @@
+PODS:
+  - Capacitor (8.4.2):
+    - CapacitorCordova
+  - CapacitorApp (8.1.1):
+    - Capacitor
+  - CapacitorBarcodeScanner (3.1.0):
+    - Capacitor
+    - OSBarcodeLib (= 2.2.0)
+  - CapacitorBrowser (8.0.4):
+    - Capacitor
+  - CapacitorCamera (8.2.1):
+    - Capacitor
+    - IONCameraLib (~> 1.0.4)
+  - CapacitorCordova (8.4.2)
+  - CapacitorHaptics (8.0.1):
+    - Capacitor
+  - CapacitorKeyboard (8.0.5):
+    - Capacitor
+  - CapacitorStatusBar (8.0.3):
+    - Capacitor
+  - CordovaPlugins (8.4.2):
+    - CapacitorCordova
+    - WechatOpenSDK-XCFramework (~> 2.0.5)
+  - IONCameraLib (1.0.4)
+  - OSBarcodeLib (2.2.0)
+  - WechatOpenSDK-XCFramework (2.0.5)
+  - YunlefunCapacitorStorekit (0.1.0):
+    - Capacitor
+
+DEPENDENCIES:
+  - "Capacitor (from `../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../../../node_modules/.pnpm/@capacitor+app@8.1.1_@capacitor+core@8.4.2/node_modules/@capacitor/app`)"
+  - "CapacitorBarcodeScanner (from `../../../../node_modules/.pnpm/@capacitor+barcode-scanner@3.1.0_@capacitor+core@8.4.2/node_modules/@capacitor/barcode-scanner`)"
+  - "CapacitorBrowser (from `../../../../node_modules/.pnpm/@capacitor+browser@8.0.4_@capacitor+core@8.4.2/node_modules/@capacitor/browser`)"
+  - "CapacitorCamera (from `../../../../node_modules/.pnpm/@capacitor+camera@8.2.1_@capacitor+core@8.4.2/node_modules/@capacitor/camera`)"
+  - "CapacitorCordova (from `../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios`)"
+  - "CapacitorHaptics (from `../../../../node_modules/.pnpm/@capacitor+haptics@8.0.1_@capacitor+core@8.4.2/node_modules/@capacitor/haptics`)"
+  - "CapacitorKeyboard (from `../../../../node_modules/.pnpm/@capacitor+keyboard@8.0.5_@capacitor+core@8.4.2/node_modules/@capacitor/keyboard`)"
+  - "CapacitorStatusBar (from `../../../../node_modules/.pnpm/@capacitor+status-bar@8.0.3_@capacitor+core@8.4.2/node_modules/@capacitor/status-bar`)"
+  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
+  - YunlefunCapacitorStorekit (from `../../../../packages/capacitor-storekit`)
+
+SPEC REPOS:
+  trunk:
+    - IONCameraLib
+    - OSBarcodeLib
+    - WechatOpenSDK-XCFramework
+
+EXTERNAL SOURCES:
+  Capacitor:
+    :path: "../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../../../node_modules/.pnpm/@capacitor+app@8.1.1_@capacitor+core@8.4.2/node_modules/@capacitor/app"
+  CapacitorBarcodeScanner:
+    :path: "../../../../node_modules/.pnpm/@capacitor+barcode-scanner@3.1.0_@capacitor+core@8.4.2/node_modules/@capacitor/barcode-scanner"
+  CapacitorBrowser:
+    :path: "../../../../node_modules/.pnpm/@capacitor+browser@8.0.4_@capacitor+core@8.4.2/node_modules/@capacitor/browser"
+  CapacitorCamera:
+    :path: "../../../../node_modules/.pnpm/@capacitor+camera@8.2.1_@capacitor+core@8.4.2/node_modules/@capacitor/camera"
+  CapacitorCordova:
+    :path: "../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios"
+  CapacitorHaptics:
+    :path: "../../../../node_modules/.pnpm/@capacitor+haptics@8.0.1_@capacitor+core@8.4.2/node_modules/@capacitor/haptics"
+  CapacitorKeyboard:
+    :path: "../../../../node_modules/.pnpm/@capacitor+keyboard@8.0.5_@capacitor+core@8.4.2/node_modules/@capacitor/keyboard"
+  CapacitorStatusBar:
+    :path: "../../../../node_modules/.pnpm/@capacitor+status-bar@8.0.3_@capacitor+core@8.4.2/node_modules/@capacitor/status-bar"
+  CordovaPlugins:
+    :path: "../capacitor-cordova-ios-plugins"
+  YunlefunCapacitorStorekit:
+    :path: "../../../../packages/capacitor-storekit"
+
+SPEC CHECKSUMS:
+  Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3
+  CapacitorApp: 305bd13c44f6f9d164e2ee66a4faa956ed8c0e06
+  CapacitorBarcodeScanner: 94eb9e665cf2e60eddfd10e58917453799e1556d
+  CapacitorBrowser: 752e0208aa07c7aa63d1f7cde895a3e9519b2656
+  CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
+  CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
+  CapacitorHaptics: 4df2c625445cef39b67ea635a21802bc92df3b82
+  CapacitorKeyboard: b6b0744890cdb1d9a96e2cafcc9253fdcc55de3b
+  CapacitorStatusBar: eca7bc2b58d9f886f1ef9edb66e57a9b29c121af
+  CordovaPlugins: aa2458185792482d932aed02b242e70d249b05bb
+  IONCameraLib: f2349804460bd9e3f892e42109b8d996ab3fa19d
+  OSBarcodeLib: aa520d51576362d0dfea290b82653e31df1a6fc4
+  WechatOpenSDK-XCFramework: ff342ae616bb86df3d236aca38059dfd4bc4a949
+  YunlefunCapacitorStorekit: 1431b6f6bffde6bc66117ebb4cc012cecdf36bb7
+
+PODFILE CHECKSUM: 4b23b203e890488b770ddbcaa28c0b4b8a02f4bf
+
+COCOAPODS: 1.17.0

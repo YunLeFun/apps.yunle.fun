@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify
+    name: Verify Web and mobile
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -26,7 +26,7 @@ jobs:
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install
@@ -59,14 +59,24 @@ jobs:
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
       - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --dir apps/mobile exec playwright install --with-deps chromium
 
       - name: Chromium smoke tests
-        run: pnpm exec playwright test --project=chromium
+        run: pnpm run test:e2e --project=chromium
+
+      - name: Upload failed browser traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mobile-browser-traces
+          path: |
+            apps/mobile/test-results/**
+            apps/mobile/playwright-report/**
+          if-no-files-found: ignore

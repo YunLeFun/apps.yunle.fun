@@ -43,7 +43,9 @@ pnpm test:desktop
 pnpm make:desktop
 ```
 
-根目录还提供 `typecheck:desktop`、`test:desktop:e2e`、`package:desktop` 与 `verify:desktop`，分别对应桌面类型、Electron 集成测试、原生应用打包和已有包校验。安装包位于 `apps/desktop/out/make`。
+根目录还提供 `typecheck:desktop`、`test:desktop:e2e` 与 `package:desktop`，分别对应桌面类型、Electron 集成测试和原生应用打包。构建后运行 `verify:desktop` 检查 ASAR／生产依赖／fuses，`verify:desktop-artifacts` 检查安装包／构建记录／SHA256，`verify:desktop-launch` 实际启动原生包。Forge 的原始安装包保留在 `apps/desktop/out/make`；本次构建的可分发目录是 `apps/desktop/out/artifacts`，包含安装包、`build-manifest.json` 和 `SHA256SUMS`，不会混入旧产物。
+
+产品仓库现阶段保持私有，`desktop.updatesEnabled` 为 `false`，CI 不发布 Release，默认产物未配置分发签名。`check:desktop-release` 只校验稳定 Tag、桌面版本与目标仓库；启用公共 Electron 更新服务还要求明确确认目标仓库可见性为 public。图标从移动端既有标志导出，macOS 可用 `icons:desktop` 更新 ICNS／ICO／PNG，其它平台使用提交的导出文件。完整命令与产物字段见 [桌面构建与私有内测](./desktop-build.md)。
 
 桌面接入复用模板的 Electron 44.7.0、Forge 8.0.1 与 Vite 8.3.4 主进程构建；Nuxt、Vue、TypeScript 和 pnpm 先与原产品工作区保持兼容，分别采用 Nuxt 4.4.8、Vue 3.5.40、TypeScript 5.9.3 和 pnpm 11.13.1。renderer 使用对应 Nuxt builder 的 Vite 7.3.6；主进程通过 `vite-electron` 别名单独使用 Vite 8.3.4，各构建日志与锁文件记录实际版本。
 
@@ -118,12 +120,12 @@ macOS 的 `preMake` hook 检查 DMG maker 声明的 `macos-alias`／`fs-xattr` �
 
 根 CI 使用工作区锁文件安装，固定读取 `.node-version`，通过根转发命令验证 Web／移动类型、生产构建、服务端运行依赖、单元与 Nuxt 测试。Chromium 在 `apps/mobile` 执行，失败时上传该应用的截图和 trace。
 
-独立 Desktop CI 配置在 macOS arm64、Windows x64 和 Linux x64 执行桌面 lint、类型、单元、Electron 集成测试、Forge make、ASAR／fuse 检查与 `verify:launch` 打包后启动。Linux 使用 Xvfb，失败 trace 与安装包按平台上传；该流程不发布 GitHub Release。
+独立 Desktop CI 配置在 macOS arm64、Windows x64 和 Ubuntu 24.04 x64 执行桌面 lint、类型、单元、Electron 集成测试、Forge make、ASAR／fuse、安装包／构建记录／SHA256 检查与 `verify:launch` 打包后启动。Linux 使用 Xvfb，仅修改文档不触发桌面构建。workflow 进入默认分支后可手动选择 `all`、`macos`、`windows` 或 `linux`；安装包从 `out/artifacts` 上传并保留 3 天，失败 trace 保留 7 天。该流程不发布 GitHub Release，手动入口见 [构建说明](./desktop-build.md#三平台-ci)。
 
 2026-10-14 的独立 PR 工作区验收结果：
 
 - PR 在最新 `main` 上整理迁移变更，排除原工作区尚未提交的其它功能。根 lint、Web／移动类型检查、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查通过。
-- 桌面 lint、类型检查、30 个单元测试和 2 个真实 Electron E2E 通过；另实测确认失败时可以保存 Electron trace。macOS arm64 的 Forge make 成功生成 `.app`、DMG 和 ZIP，最新产物通过 ASAR 完整生产依赖树、fuses 与原生打包启动检查。
+- 桌面 lint、类型检查、45 个单元测试和 2 个真实 Electron E2E 通过；另实测确认失败时可以保存 Electron trace。macOS arm64 的 Forge make 成功生成带云乐坊品牌图标的 `.app`、DMG 和 ZIP，实际应用 ICNS 与提交的图标一致。最新产物通过三项根校验：ASAR 完整生产依赖树／fuses、安装包／构建记录／SHA256、原生打包启动；标准 `shasum` 也通过全部安装包与 manifest 校验。关闭自动更新时的私有 release 配置检查通过，没有执行发布。
 - [三平台 Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38426634680) 已触发，但 GitHub 提示“Actions budget is preventing further use”；所有 job 均未进入步骤，runner 没有启动。因此该轮失败不能作为代码执行结果，macOS／Windows／Linux 的远端验收仍待恢复 Actions 预算或接入可用 runner 后运行。
 
 2026-10-13 在原本机工作区的迁移阶段记录如下。该工作区包含其它尚未提交的功能，这些记录不替代当前 PR 的验收；当时的 534 个单元测试和 62 个 Nuxt 测试不作为本 PR 的测试数量：

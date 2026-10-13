@@ -64,11 +64,16 @@ pnpm dev:desktop   # 本地 Nuxt + Electron，独立于移动开发服务
 pnpm build:desktop # 生成静态 renderer 和主进程／preload
 pnpm test:desktop  # 桌面单元测试
 pnpm make:desktop  # 使用 Electron Forge 打包当前平台
+pnpm verify:desktop           # 检查原生包的 ASAR、生产依赖与 fuses
+pnpm verify:desktop-artifacts # 检查安装包、构建记录与 SHA256
+pnpm verify:desktop-launch    # 实际启动当前平台原生包
 ```
 
-还可执行 `pnpm typecheck:desktop`、`pnpm test:desktop:e2e`、`pnpm package:desktop` 和 `pnpm verify:desktop`；验证已打包产物时先运行 `make:desktop` 或 `package:desktop`。
+还可执行 `pnpm typecheck:desktop`、`pnpm test:desktop:e2e` 和 `pnpm package:desktop`。`package:desktop` 只生成原生应用目录；`make:desktop` 同时生成安装器，并把本次 Forge 产物、`build-manifest.json` 与 `SHA256SUMS` 整理到 `apps/desktop/out/artifacts/`，用于私有内测分发。
 
-桌面端复用升级后的 [vitesse-nuxt-electron](https://github.com/YunLeFun/vitesse-nuxt-electron/pull/6)：独立、安全的 shell／guest preload，`BaseWindow + WebContentsView` 容器和官方 Forge 打包流程。复用 `packages/app-core` 的目录类型、转换和快照，由主进程获取匿名公开目录，打开符合公开、免费和无登录要求的云应用。账号、云居、宿主 SSO 与正式签名／发布按 [桌面架构](./docs/dev/desktop-electron-architecture.md) 分阶段接入。各平台安装包输出到 `apps/desktop/out/make/`。
+桌面端复用升级后的 [vitesse-nuxt-electron](https://github.com/YunLeFun/vitesse-nuxt-electron/pull/6)：独立、安全的 shell／guest preload，`BaseWindow + WebContentsView` 容器和官方 Forge 打包流程。复用 `packages/app-core` 的目录类型、转换和快照，由主进程获取匿名公开目录，打开符合公开、免费和无登录要求的云应用。ICNS／ICO／PNG 使用移动端既有云乐坊标志；修改图标后在 macOS 执行 `pnpm icons:desktop` 重新导出。
+
+产品仓库现阶段保持私有，桌面自动更新关闭，默认产物未配置分发签名。`pnpm check:desktop-release` 只校验稳定 Tag、桌面版本、目标仓库及更新策略，不上传产物。完整构建、三项校验与单平台手动 CI 见 [桌面构建与私有内测](./docs/dev/desktop-build.md)；账号、云居、宿主 SSO 与正式签名／发布按 [桌面架构](./docs/dev/desktop-electron-architecture.md) 分阶段接入。
 
 ## 🏗️ 技术栈
 
@@ -120,6 +125,7 @@ pnpm-lock.yaml          # 所有工作区共用锁文件
 - [UI 规范](./docs/ui/index.md)
 - [开发笔记](./docs/dev/index.md)
 - [仓库迁移与部署](./docs/dev/monorepo.md)
+- [桌面构建与私有内测](./docs/dev/desktop-build.md)
 - [Electron 桌面架构](./docs/dev/desktop-electron-architecture.md)
 - [发布路线图](./docs/roadmap.md)
 - [App Store 上架手册](./docs/dev/app-store-onboarding.md)
@@ -132,7 +138,7 @@ pnpm test:e2e           # E2E（Chromium/Firefox/WebKit 三浏览器矩阵）
 pnpm test:coverage      # 覆盖率
 ```
 
-Web／移动 CI 在每次 push / PR 验证 lint、移动类型检查、生产构建、服务端运行依赖、单元及 Nuxt 测试，并单独运行 Chromium smoke。桌面 CI 在 macOS arm64、Windows x64、Linux x64 验证类型、单元、Electron 集成测试、安装包、ASAR／fuses 与打包后启动，上传安装包与失败 trace。移动原生构建使用本机对应 SDK 验证，商店签名和正式发布独立执行。
+Web／移动 CI 按源码和构建配置的路径过滤验证 lint、移动类型检查、生产构建、服务端运行依赖、单元及 Nuxt 测试，并单独运行 Chromium smoke。Desktop CI 在 macOS arm64、Windows x64、Ubuntu 24.04 x64 验证类型、单元、Electron 集成测试、安装包／构建记录、ASAR／fuses 与打包后启动；仅修改文档不触发桌面构建。workflow 进入默认分支后可手动选择 `all`、`macos`、`windows` 或 `linux`，安装包保留 3 天，失败 trace 保留 7 天。当前组织 Actions 预算阻止 runner 启动，远端三平台仍待实际运行。移动原生构建使用本机对应 SDK 验证，商店签名和正式发布独立执行。
 
 ## 🤝 贡献
 

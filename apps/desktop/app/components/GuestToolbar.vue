@@ -1,61 +1,67 @@
 <script setup lang="ts">
-import type { GuestCommand, GuestState } from '../../shared/desktop'
+import type { CatalogEntry, GuestCommand, GuestState } from '../../shared/desktop'
 
-defineProps<{ guest?: GuestState }>()
-defineEmits<{ command: [command: GuestCommand] }>()
+const props = defineProps<{ guest?: GuestState, app?: CatalogEntry, refreshing?: boolean }>()
+defineEmits<{ command: [command: GuestCommand], browse: [], refresh: [] }>()
+const host = computed(() => {
+  try {
+    return new URL(props.guest?.url || props.app?.websiteUrl || '').hostname
+  }
+  catch { return '' }
+})
 </script>
 
 <template>
-  <header class="guest-toolbar">
+  <header class="guest-toolbar shell-toolbar">
     <div class="navigation-actions">
-      <button class="button compact" :disabled="!guest?.canGoBack" aria-label="后退" @click="$emit('command', 'back')">
-        ←
+      <button class="icon-button" :disabled="!guest?.canGoBack" aria-label="后退" title="后退" @click="$emit('command', 'back')">
+        <ShellIcon name="back" />
       </button>
-      <button class="button compact" :disabled="!guest?.canGoForward" aria-label="前进" @click="$emit('command', 'forward')">
-        →
+      <button class="icon-button" :disabled="!guest?.canGoForward" aria-label="前进" title="前进" @click="$emit('command', 'forward')">
+        <ShellIcon name="forward" />
       </button>
-      <button class="button compact" :disabled="!guest?.open" aria-label="重新加载" @click="$emit('command', 'reload')">
-        ↻
+      <button class="icon-button" :disabled="!guest?.open" aria-label="重新加载" title="重新加载" @click="$emit('command', 'reload')">
+        <ShellIcon name="refresh" />
       </button>
     </div>
     <div class="guest-location">
-      <strong>{{ guest?.title || (guest?.open ? '正在打开应用…' : '你的云应用') }}</strong>
-      <span>{{ guest?.loading ? '正在加载…' : guest?.url || '从左侧目录选择应用' }}</span>
+      <strong>{{ app?.name || guest?.title || '正在打开应用…' }}</strong><span>{{ guest?.loading ? '正在加载…' : host }}</span>
     </div>
-    <button class="button" :disabled="!guest?.open" @click="$emit('command', 'close')">
-      关闭应用
+    <button class="toolbar-button" @click="$emit('browse')">
+      返回目录
+    </button>
+    <button class="icon-button" :disabled="refreshing" aria-label="刷新目录" title="刷新目录" @click="$emit('refresh')">
+      <ShellIcon name="grid" />
+    </button>
+    <button class="icon-button" :disabled="!guest?.open" aria-label="关闭应用" title="关闭应用" @click="$emit('command', 'close')">
+      <ShellIcon name="close" />
     </button>
   </header>
 </template>
 
 <style scoped>
-.guest-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-bottom: 18px;
-}
 .navigation-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 .guest-location {
   min-width: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 2px;
 }
 .guest-location strong {
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .guest-location span {
-  font-size: 11px;
   color: var(--muted);
+  font-size: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

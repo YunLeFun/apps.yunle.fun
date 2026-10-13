@@ -24,3 +24,7 @@ docs/.vitepress/cache
 **/out/
 **/playwright-report/
 **/test-results/
+
+# Desktop editorial media lives in COS; keep only its source documentation.
+apps/desktop/public/images/*
+!apps/desktop/public/images/README.md

@@ -17,6 +17,7 @@ onMounted(() => {
   if (viewport.value)
     observer.observe(viewport.value)
   window.addEventListener('resize', reportBounds)
+  window.addEventListener('load', reportBounds)
   window.addEventListener('scroll', reportBounds, true)
   reportBounds()
 })
@@ -24,6 +25,7 @@ onUnmounted(() => {
   cancelAnimationFrame(frame)
   observer?.disconnect()
   window.removeEventListener('resize', reportBounds)
+  window.removeEventListener('load', reportBounds)
   window.removeEventListener('scroll', reportBounds, true)
   void window.desktop?.setViewport(null).catch(() => undefined)
 })
@@ -45,9 +47,7 @@ onUnmounted(() => {
 <style scoped>
 .viewport {
   flex: 1;
-  min-height: 220px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  min-height: 0;
   overflow: hidden;
   background: var(--surface);
 }

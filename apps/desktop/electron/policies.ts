@@ -1,6 +1,8 @@
 import type { DesktopRequest, ViewportBounds } from '../shared/desktop'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
+import { EDITORIAL_MEDIA_ORIGIN } from '../shared/editorial-media'
+import { GUEST_MIN_TOP_INSET } from '../shared/window-layout'
 
 export function isLoopbackOrigin(input: string): boolean {
   try {
@@ -57,12 +59,14 @@ export function parseRequest(input: unknown): DesktopRequest {
 
 export function clampViewport(bounds: ViewportBounds, size: { width: number, height: number }, zoom = 1): ViewportBounds {
   const x = Math.max(0, Math.min(size.width, Math.round(bounds.x * zoom)))
-  const y = Math.max(0, Math.min(size.height, Math.round(bounds.y * zoom)))
+  const y = Math.min(size.height, Math.max(GUEST_MIN_TOP_INSET, Math.round(bounds.y * zoom)))
+  const right = Math.min(size.width, Math.round((bounds.x + Math.max(0, bounds.width)) * zoom))
+  const bottom = Math.min(size.height, Math.round((bounds.y + Math.max(0, bounds.height)) * zoom))
   return {
     x,
     y,
-    width: Math.max(0, Math.min(size.width - x, Math.round(bounds.width * zoom))),
-    height: Math.max(0, Math.min(size.height - y, Math.round(bounds.height * zoom))),
+    width: Math.max(0, right - x),
+    height: Math.max(0, bottom - y),
   }
 }
 
@@ -86,7 +90,7 @@ export function contentSecurityPolicy(html: string): string {
     'default-src \'self\'',
     `script-src 'self' ${hashes.join(' ')}`,
     'style-src \'self\' \'unsafe-inline\'',
-    'img-src \'self\' data:',
+    `img-src 'self' data:${EDITORIAL_MEDIA_ORIGIN ? ` ${EDITORIAL_MEDIA_ORIGIN}` : ''}`,
     'font-src \'self\'',
     'connect-src \'self\'',
     'object-src \'none\'',

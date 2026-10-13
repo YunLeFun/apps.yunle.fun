@@ -27,6 +27,10 @@ pnpm verify:desktop-launch
 
 `build:desktop` 只生成静态界面与 Electron JS；`package:desktop` 生成原生应用目录，供 `verify:desktop` 与 `verify:desktop-launch` 检查。需要分发安装包与构建记录时执行 `make:desktop`。
 
+启动后默认进入「探索」。可在侧栏搜索、选择分类或查看最近打开；打开应用后，「返回目录」会保留当前网页，「正在使用」恢复原页面，「关闭应用」销毁当前视图。左下角外观选择支持跟随系统、浅色与深色。macOS 使用原生交通灯和侧栏材质，Windows／Linux 使用各自原生窗口框；最小窗口为 800 × 600，目录列表在窄窗口变为单列。
+
+最近打开是设备本地的成功打开记录，最多 20 个应用 slug。它不等同于移动端云居的安装或云同步；搜索、分类与最近列表仍遵循主进程提供的当前应用访问策略。
+
 ## 图标来源
 
 `apps/desktop/build/icons/source.png` 来自移动端现有 1024 × 1024 云乐坊标志。提交的导出文件分别用于 macOS ICNS、Windows ICO、Linux PNG，以及桌面 favicon／PWA 图标。修改主源后在 macOS 执行：

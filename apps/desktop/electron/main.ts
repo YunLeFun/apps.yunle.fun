@@ -23,6 +23,7 @@ let window: BaseWindow | undefined
 let shellView: WebContentsView | undefined
 let guest: WebContentsView | undefined
 let viewport: ViewportBounds | null = null
+let shellNavigating = true
 let currentApp: CatalogEntry | undefined
 let catalog: PublicCatalog
 let updatesReady = false
@@ -61,7 +62,7 @@ function closeGuest() {
   sendState()
 }
 function layout() {
-  if (!window || !shellView)
+  if (!window || window.isDestroyed() || !shellView || shellView.webContents.isDestroyed())
     return
   const size = window.getContentBounds()
   shellView.setBounds({ x: 0, y: 0, width: size.width, height: size.height })
@@ -71,6 +72,17 @@ function layout() {
     guest.setVisible(bounds.width > 0 && bounds.height > 0)
   }
   else { guest?.setVisible(false) }
+}
+function clearViewport() {
+  viewport = null
+  guest?.setVisible(false)
+}
+function updateNativeAppearance() {
+  const background = nativeTheme.shouldUseDarkColors ? '#242426' : '#f5f5f7'
+  if (window && !window.isDestroyed())
+    window.setBackgroundColor(background)
+  if (shellView && !shellView.webContents.isDestroyed())
+    shellView.setBackgroundColor(process.platform === 'darwin' ? '#00000000' : background)
 }
 function refreshGuest() {
   if (!guest || guest.webContents.isDestroyed())
@@ -152,13 +164,18 @@ async function openApp(id: string) {
 }
 
 async function createWindow() {
+  viewport = null
+  shellNavigating = true
   window = new BaseWindow({
-    width: 1180,
-    height: 820,
+    width: 1280,
+    height: 840,
     minWidth: 800,
     minHeight: 600,
     title: '云乐坊',
-    backgroundColor: '#f5f6f8',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#242426' : '#f5f5f7',
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 18, y: 20 }, vibrancy: 'sidebar', visualEffectState: 'followWindow' }
+      : {}),
     ...(process.platform === 'linux'
       ? { icon: path.join(app.getAppPath(), app.isPackaged ? '.output/public' : 'public', 'pwa-512x512.png') }
       : {}),
@@ -175,10 +192,30 @@ async function createWindow() {
     session: shellSession,
     preload: path.join(__dirname, 'preload.shell.cjs'),
   } })
+  updateNativeAppearance()
   window.contentView.addChildView(shellView)
   layout()
   window.on('resize', layout)
   shellView.webContents.on('zoom-changed', layout)
+  const shellContents = shellView.webContents
+  shellContents.on('did-start-navigation', (details) => {
+    if (shellView?.webContents === shellContents && details.isMainFrame && !details.isSameDocument) {
+      shellNavigating = true
+      clearViewport()
+    }
+  })
+  shellContents.on('render-process-gone', () => {
+    if (shellView?.webContents === shellContents) {
+      shellNavigating = true
+      clearViewport()
+    }
+  })
+  shellContents.on('did-finish-load', () => {
+    if (shellView?.webContents === shellContents) {
+      clearViewport()
+      shellNavigating = false
+    }
+  })
   shellView.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   shellView.webContents.on('will-navigate', (event, url) => {
     try {
@@ -190,6 +227,7 @@ async function createWindow() {
     catch { event.preventDefault() }
   })
   window.on('closed', () => {
+    viewport = null
     closeGuest()
     shellView?.webContents.close()
     shellView = undefined
@@ -201,6 +239,7 @@ async function createWindow() {
 }
 
 registerScheme()
+nativeTheme.on('updated', updateNativeAppearance)
 if (squirrelStartup) {
   app.quit()
 }
@@ -283,8 +322,13 @@ else {
           }
           break
         case 'viewport':
-          viewport = request.bounds
-          layout()
+          if (request.bounds === null) {
+            clearViewport()
+          }
+          else if (!shellNavigating) {
+            viewport = request.bounds
+            layout()
+          }
           break
         case 'theme':
           nativeTheme.themeSource = request.preference

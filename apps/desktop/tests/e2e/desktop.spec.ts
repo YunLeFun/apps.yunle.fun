@@ -73,6 +73,7 @@ test('shared product catalog, static routes, restricted bridges, application iso
     delete env.ELECTRON_RUN_AS_NODE
     delete env.YUNLE_DESKTOP_DEV_ORIGIN
     application = await electron.launch({ args: [path.resolve('.'), `--user-data-dir=${userData}`], env })
+    await application.context().route(COOK_FEATURE_IMAGE_URL, route => route.abort())
     await application.context().tracing.start({ screenshots: true, snapshots: true, sources: true })
     const shell = await application.firstWindow()
     const errors: string[] = []

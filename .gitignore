@@ -28,3 +28,6 @@ docs/.vitepress/cache
 # Desktop editorial media lives in COS; keep only its source documentation.
 apps/desktop/public/images/*
 !apps/desktop/public/images/README.md
+
+# Source and optimized catalog artwork is hosted in COS, outside the app bundle.
+apps/desktop/.media/

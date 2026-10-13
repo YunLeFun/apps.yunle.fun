@@ -41,6 +41,8 @@ pnpm icons:desktop
 
 该脚本使用系统 `sips` 与 `iconutil`，检查 PNG 尺寸、ICNS 容器和 ICO 各帧；Windows 与 Linux 构建直接使用提交的图标，不重新导出。详细来源记录在 `apps/desktop/build/icons/README.md`。
 
+应用目录缩略图由固定 COS 清单提供，PNG 源图位于独立媒体目录，不进入原生品牌图标导出或安装包。当前 28 个缩略图覆盖在线与离线目录，详见[目录图标与素材维护](./desktop-app-icons.md)。
+
 ## 安装包与构建记录
 
 Forge 原生目录位于 `apps/desktop/out/<产品名>-<platform>-<arch>/`，原始 maker 输出位于 `out/make/`。可分发目录为 `apps/desktop/out/artifacts/`：

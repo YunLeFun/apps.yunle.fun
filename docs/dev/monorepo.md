@@ -125,7 +125,7 @@ macOS 的 `preMake` hook 检查 DMG maker 声明的 `macos-alias`／`fs-xattr` �
 2026-10-14 的独立 PR 工作区验收结果：
 
 - PR 在最新 `main` 上整理迁移变更，排除原工作区尚未提交的其它功能。根 lint、Web／移动类型检查、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查通过。
-- 桌面 lint、类型检查、68 个单元测试和 2 个真实 Electron E2E 通过；另实测确认失败时可以保存 Electron trace。macOS arm64 的 Forge make 成功生成带云乐坊品牌图标的 `.app`、DMG 和 ZIP，实际应用 ICNS 与提交的图标一致。最新产物通过三项根校验：ASAR 完整生产依赖树／fuses、安装包／构建记录／SHA256、原生打包启动；标准 `shasum` 也通过全部安装包与 manifest 校验。关闭自动更新时的私有 release 配置检查通过，没有执行发布。
+- 桌面 lint、类型检查、70 个单元测试和 2 个真实 Electron E2E 通过；另实测确认失败时可以保存 Electron trace。macOS arm64 的 Forge make 成功生成带云乐坊品牌图标的 `.app`、DMG 和 ZIP，实际应用 ICNS 与提交的图标一致。最新产物通过三项根校验：ASAR 完整生产依赖树／fuses、安装包／构建记录／SHA256、原生打包启动；标准 `shasum` 也通过全部安装包与 manifest 校验。关闭自动更新时的私有 release 配置检查通过，没有执行发布。
 - [三平台 Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38426634680) 已触发，但 GitHub 提示“Actions budget is preventing further use”；所有 job 均未进入步骤，runner 没有启动。因此该轮失败不能作为代码执行结果，macOS／Windows／Linux 的远端验收仍待恢复 Actions 预算或接入可用 runner 后运行。
 
 2026-10-13 在原本机工作区的迁移阶段记录如下。该工作区包含其它尚未提交的功能，这些记录不替代当前 PR 的验收；当时的 534 个单元测试和 62 个 Nuxt 测试不作为本 PR 的测试数量：

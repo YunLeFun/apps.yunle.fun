@@ -86,7 +86,7 @@ pnpm make:desktop
 
 Nuxt 生产服务器不自动读取 `.env`；运行时覆盖需要匹配已声明的 `NUXT_*` 配置，例如 `NUXT_TENCENT_API_SECRET_ID`、`NUXT_TENCENT_API_SECRET_KEY` 和 `NUXT_WX_OPEN_APP_SECRET`。私密值不能放入 `runtimeConfig.public`。平台普通 Node 函数的 `context.env` 契约不能直接证明 Nuxt 函数中的 `process.env` 已传入，必须通过实际页面／只读 API 验证变量可用性，不输出变量值。
 
-2026-10-14 的发布适配验收尚待完成。部署时核对：
+每次发布均应核对以下项目，构建成功不能替代实际请求验收：
 
 1. 控制台使用表中设置，日志确认启用 Nuxt 官方适配器，应用目录中的文件配置生效。
 2. 完整 `.edgeone` 包含静态资源、函数 handler、版本 3 路由和 CloudBase 服务端依赖，产物没有私有环境文件。

@@ -23,7 +23,7 @@
 | ---------- | ------------------------ | ------------------------------- |
 | Production | <https://apps.yunle.fun> | 合并到 `main` 后由 EdgeOne 发布 |
 
-EdgeOne 使用 Nuxt 框架和 `apps/mobile` 构建目录，通过 `apps/mobile/edgeone.json` 执行 `pnpm --dir ../.. install --frozen-lockfile` 和 `pnpm run build:edgeone`，Node.js 为 24.18.0。平台官方适配器生成完整 `.edgeone` 产物：`.edgeone/assets` 提供浏览器资源，`.edgeone/cloud-functions/ssr-node` 提供 Nitro API 和页面 fallback。新版生产发布与页面／API 验收尚待完成，详见 [仓库迁移与部署](./docs/dev/monorepo.md)。
+EdgeOne 使用 Nuxt 框架和 `apps/mobile` 构建目录，通过 `apps/mobile/edgeone.json` 执行 `pnpm --dir ../.. install --frozen-lockfile` 和 `pnpm run build:edgeone`，Node.js 为 24.18.0。平台官方适配器生成完整 `.edgeone` 产物：`.edgeone/assets` 提供浏览器资源，`.edgeone/cloud-functions/ssr-node` 提供 Nitro API 和页面 fallback。每次发布都应按 [仓库迁移与部署](./docs/dev/monorepo.md) 核验实际页面、API 和部署版本。
 
 专用 EdgeOne 构建入口要求干净检出，不允许应用目录或函数产物包含私有 `.env` 文件；服务器变量在平台配置。日常 `pnpm build` 和 Capacitor 构建继续使用原有 `.output` 流程。
 

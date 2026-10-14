@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
+    "build:edgeone": "node scripts/build-edgeone.mjs",
+    "check:edgeone-output": "node scripts/check-edgeone-output.mjs --adapted",
     "dev": "nuxt dev --host",
     "dev:pwa": "VITE_PLUGIN_PWA=true nuxt dev",
     "lint": "eslint .",

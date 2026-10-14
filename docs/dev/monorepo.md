@@ -63,28 +63,38 @@ pnpm make:desktop
 
 ## EdgeOne 生产部署
 
-生产站点继续使用现有 Nuxt 全栈适配：浏览器静态资源和 Nitro API 一起验收。根 `edgeone.json` 保留原有响应头，并记录迁移后的构建命令与静态资源路径。
+生产站点使用 EdgeOne 官方 Nuxt 自动适配器，浏览器资源、页面 fallback 和 Nitro API 一起验收。控制台的构建目录必须指向实际 Nuxt 工程；仓库根包只负责命令转发，不能让平台正确检测移动 Nuxt 应用。
 
-| 构建设置     | 值                                 |
-| ------------ | ---------------------------------- |
-| 仓库根目录   | `./`                               |
-| 安装命令     | `pnpm install --frozen-lockfile`   |
-| 构建命令     | `pnpm run build`                   |
-| 静态资源目录 | `apps/mobile/.output/public`       |
-| Node.js      | 与根 `.node-version` 保持一致      |
-| 框架适配     | 保留当前 Nuxt 全栈预设／服务端适配 |
+| 构建设置     | 值                                           |
+| ------------ | -------------------------------------------- |
+| 框架预设     | `Nuxt`                                       |
+| 构建根目录   | `apps/mobile`                                |
+| 安装命令     | `pnpm --dir ../.. install --frozen-lockfile` |
+| 构建命令     | `pnpm run build:edgeone`                     |
+| 静态资源目录 | `.edgeone/assets`                            |
+| Node.js      | `24.18.0`，与根 `.node-version` 保持一致     |
 
-`outputDirectory` 指静态资源目录，不能据此省略 Nitro API。平台的 Nuxt 适配需要定位迁移后的应用和服务端产物；如果既有适配从根 `.output/server` 收集运行时，需同步使用 `apps/mobile/.output/server`，或按平台的 Nuxt 输出规范收集。仓库改造没有修改外部控制台设置。
+根目录由控制台管理；进入 `apps/mobile` 后，平台读取该目录的 `edgeone.json`，其构建、安装和输出目录设置优先于控制台同名配置。应用配置保留 AASA 与工坊 API 的响应头。根 `edgeone.json` 也转发到专用构建入口；如果误用仓库根目录导致自动适配器未启用，构建检查会失败，避免再次发布只有静态资源的版本。
 
-第一次迁移部署需核对：
+当前 Nuxt 4.4.8 使用 Nitro 2.13.4，该版本没有内置 EdgeOne preset；采用平台官方适配器生成 `.edgeone`，不在产品工作区新增适配器 beta 依赖。客户端保持 `ssr: false`；生产仍保留运行 Nitro API 的 Node 服务。
 
-1. 控制台根目录仍为 `./`，不要切换到 `apps/mobile` 后再使用根工作区命令。
-2. 构建日志运行的是移动 Nuxt 工程，静态资源和服务端依赖都进入平台产物。
-3. `/tabs/home` 与登录回调可打开并刷新；`/.well-known/apple-app-site-association` 保持 JSON 响应头。
-4. `/api` 请求进入 Nitro；`/api/workshops` 及子路由仍返回 `private, no-store` 响应头。
-5. 云端 Secret、CloudBase 环境及允许的 Origin 保持原有部署策略，原生安装包不包含服务端配置。
+官方适配器先在 Nuxt 配置中注入临时模块，再运行 `build:edgeone`；该命令只执行 Nuxt 构建并检查本阶段的静态资源、Nitro 入口、chunk 和 CloudBase 运行依赖。命令返回后，适配器才生成 `handler.js`、版本 3 的 `config.json`，恢复 Nuxt 配置，并由平台补齐函数启动入口。完成适配后可从仓库根执行 `pnpm check:edgeone-output`，校验函数路由覆盖 `/login`、`/tabs/home` 和应用 API。直接运行普通 Nuxt 构建不会完成平台适配；无适配器预处理的 `build:edgeone` 会报错。
 
-文件配置支持覆盖构建、安装和输出目录，根目录仍由控制台管理。参考 [EdgeOne 配置](https://edgeone.ai/document/162316940299157504) 与 [构建设置](https://pages.edgeone.ai/document/build-guide)。
+完整部署产物位于 `apps/mobile/.edgeone`：`assets/` 包含浏览器资源，`cloud-functions/ssr-node/` 包含函数 handler、路由配置、Nitro chunk 和运行依赖。`outputDirectory` 只选择静态资源；发布必须同时收集函数目录，不能只上传 `.output/public` 或 `.edgeone/assets`。
+
+专用入口清理旧 `.edgeone`，使用空 dotenv 文件构建，并拒绝应用目录或函数产物中的 `.env`、`.env.production`、`.env.local` 和 `.env.production.local`。请在干净检出中部署，服务端变量通过 EdgeOne 环境设置提供；该限制不影响日常移动／Web 构建和 Capacitor 的 `.output` 流程。
+
+Nuxt 生产服务器不自动读取 `.env`；运行时覆盖需要匹配已声明的 `NUXT_*` 配置，例如 `NUXT_TENCENT_API_SECRET_ID`、`NUXT_TENCENT_API_SECRET_KEY` 和 `NUXT_WX_OPEN_APP_SECRET`。私密值不能放入 `runtimeConfig.public`。平台普通 Node 函数的 `context.env` 契约不能直接证明 Nuxt 函数中的 `process.env` 已传入，必须通过实际页面／只读 API 验证变量可用性，不输出变量值。
+
+每次发布均应核对以下项目，构建成功不能替代实际请求验收：
+
+1. 控制台使用表中设置，日志确认启用 Nuxt 官方适配器，应用目录中的文件配置生效。
+2. 完整 `.edgeone` 包含静态资源、函数 handler、版本 3 路由和 CloudBase 服务端依赖，产物没有私有环境文件。
+3. `/`、`/tabs/home`、`/login` 可直接打开和刷新，Nuxt JavaScript／CSS 可加载；`/.well-known/apple-app-site-association` 保持 JSON 响应头。
+4. 只读 `/api/apps/public` 返回 JSON，匿名 `/api/apps/access`、`/api/workshops/mine` 和 `/api/workshops/joined` 返回预期鉴权 JSON；工坊 API 保持 `private, no-store`。`/api/workshops` 根路由仅定义 POST，不用该路径的 GET 响应判断服务端是否部署成功。
+5. 云端 Secret、CloudBase 环境和允许的 Origin 在运行时可用，响应及浏览器资源不暴露服务端配置。登录回调与原生关联域另行验证。
+
+参考官方 [Nuxt 支持](https://pages.edgeone.ai/document/framework-nuxt)、[文件配置](https://pages.edgeone.ai/document/edgeone-json)、[构建设置](https://pages.edgeone.ai/document/build-guide)、[构建产物协议](https://pages.edgeone.ai/document/building-output-configuration) 与 [Nuxt 运行时配置](https://nuxt.com/docs/4.x/guide/going-further/runtime-config)。
 
 `netlify.toml` 作为历史备选配置更新 Node.js 和资源目录；启用 Netlify 时仍需验证它的 Nuxt 服务端适配与 monorepo package directory。`cloudbaserc.json` 没有源码路径，继续保留现有环境与 CloudRun 名称。参考 [Netlify monorepo 设置](https://docs.netlify.com/build/configure-builds/monorepos/)。
 

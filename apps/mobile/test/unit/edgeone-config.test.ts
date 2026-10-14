@@ -8,8 +8,23 @@ interface EdgeOneHeaderRule {
 }
 
 const config = JSON.parse(readFileSync(fileURLToPath(new URL('../../../../edgeone.json', import.meta.url)), 'utf8')) as {
+  buildCommand: string
+  installCommand: string
+  outputDirectory: string
   headers: EdgeOneHeaderRule[]
 }
+const appConfig = JSON.parse(readFileSync(fileURLToPath(new URL('../../edgeone.json', import.meta.url)), 'utf8')) as typeof config
+
+describe('edgeOne monorepo build entry', () => {
+  it('installs the workspace from the Nuxt application root and guards full-stack output', () => {
+    expect(appConfig.installCommand).toBe('pnpm --dir ../.. install --frozen-lockfile')
+    expect(appConfig.buildCommand).toBe('pnpm run build:edgeone')
+    expect(appConfig.outputDirectory).toBe('.edgeone/assets')
+    expect(config.buildCommand).toBe('pnpm run build:edgeone')
+    expect(config.outputDirectory).toBe('apps/mobile/.edgeone/assets')
+    expect(appConfig.headers).toEqual(config.headers)
+  })
+})
 
 describe('edgeOne workshop API headers', () => {
   for (const source of ['/api/workshops', '/api/workshops/*']) {

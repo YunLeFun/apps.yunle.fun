@@ -3,6 +3,8 @@ node_modules
 dist
 .output
 .nuxt
+**/.edgeone/
+**/.edgeone-nitro-config.mjs
 .env
 *.jks
 *.keystore

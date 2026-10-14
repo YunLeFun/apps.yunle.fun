@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./types/app": "./src/types/app.ts",
     "./utils/appRecord": "./src/utils/appRecord.ts",
+    "./utils/appBrowseCategories": "./src/utils/appBrowseCategories.ts",
     "./utils/canonical-app-domain": "./src/utils/canonical-app-domain.ts",
     "./utils/canonical-app-icon": "./src/utils/canonical-app-icon.ts",
     "./catalog/generated": "./src/catalog/generated.ts"

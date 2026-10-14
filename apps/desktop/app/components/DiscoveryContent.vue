@@ -93,7 +93,7 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
         <section v-if="dailyApps.length" class="collection-section" aria-labelledby="daily-apps-title">
           <div class="section-heading">
             <h2 id="daily-apps-title" class="section-title">
-              日常小工具
+              精选应用
             </h2>
             <button class="see-all" @click="$emit('navigate', 'all')">
               查看全部 <span aria-hidden="true">›</span>
@@ -105,7 +105,7 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
         <section v-if="otherApps.length" class="collection-section" aria-labelledby="more-apps-title">
           <div class="section-heading">
             <h2 id="more-apps-title" class="section-title">
-              所有应用
+              更多应用
             </h2>
             <button v-if="!dailyApps.length" class="see-all" @click="$emit('navigate', 'all')">
               查看全部 <span aria-hidden="true">›</span>
@@ -211,21 +211,21 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
   padding: 7px 20px;
   border: 1px solid var(--border);
   border-radius: var(--ylf-radius-pill);
-  background: var(--surface);
+  background: #f5f5f7;
   box-shadow: var(--ylf-shadow-control);
-  color: var(--ylf-c-brand);
+  color: #1d1d1f;
   font-size: var(--ylf-desktop-text-nav);
   font-weight: 600;
   line-height: 20px;
   cursor: pointer;
 }
 .feature-button:hover:not(:disabled) {
-  background: var(--ylf-c-brand-soft);
-  color: var(--ylf-c-brand-hover);
+  background: #fff;
+  color: #1d1d1f;
 }
 .feature-button:active:not(:disabled) {
-  background: var(--ylf-c-brand-active);
-  color: var(--ylf-c-text-on-accent);
+  background: #e8e8ed;
+  color: #1d1d1f;
   box-shadow: var(--ylf-shadow-inset);
 }
 .feature-button:disabled {
@@ -262,18 +262,18 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
   padding: 4px 0;
   border: 0;
   background: transparent;
-  color: var(--ylf-c-brand);
+  color: var(--ylf-desktop-link);
   font-size: var(--ylf-desktop-text-control);
   font-weight: 600;
   line-height: 18px;
   cursor: pointer;
 }
 .see-all:hover {
-  color: var(--ylf-c-brand-hover);
+  color: var(--ylf-desktop-link-hover);
   text-decoration: underline;
 }
 .see-all:active {
-  color: var(--ylf-c-brand-active);
+  color: var(--ylf-desktop-link-hover);
 }
 .empty-state {
   padding: 56px var(--ylf-space-4);

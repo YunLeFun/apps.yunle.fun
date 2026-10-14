@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { GuestCommand } from '../../shared/desktop'
 import { MACOS_TITLEBAR_HEIGHT, SHELL_TOOLBAR_HEIGHT, SIDEBAR_WIDTH } from '../../shared/window-layout'
-import { deriveCategories, resolveRecentApps } from '../utils/catalog-view'
+import { deriveBrowseCategories, resolveRecentApps } from '../utils/catalog-view'
 
 type CatalogView = 'explore' | 'all' | 'recent' | 'category'
 const { state, error, available, openApp, refreshCatalog, command } = useDesktop()
@@ -12,7 +12,7 @@ const category = ref('')
 const query = ref('')
 const opening = ref('')
 const apps = computed(() => state.value?.catalog.apps || [])
-const categories = computed(() => deriveCategories(apps.value))
+const categories = computed(() => deriveBrowseCategories(apps.value).filter(item => item.id !== 'all'))
 const recentApps = computed(() => resolveRecentApps(apps.value, slugs.value))
 const activeApp = computed(() => apps.value.find(app => app.id === state.value?.guest.appId))
 const inWorkspace = computed(() => view.value === 'workspace' && !!state.value?.guest.open)

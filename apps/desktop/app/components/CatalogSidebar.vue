@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import type { BrowseCategory } from '@yunlefun/app-core/utils/appBrowseCategories'
 import type { CatalogEntry } from '../../shared/desktop'
 
-defineProps<{ categories: readonly string[], view: string, category: string, query: string, activeApp?: CatalogEntry, appearance: string }>()
+defineProps<{ categories: readonly BrowseCategory[], view: string, category: string, query: string, activeApp?: CatalogEntry, appearance: string }>()
 defineEmits<{
   'navigate': [view: 'explore' | 'all' | 'recent' | 'workspace']
   'category': [category: string]
@@ -13,18 +14,20 @@ const navigation = [
   { view: 'all', label: '全部应用', icon: 'grid' },
   { view: 'recent', label: '最近打开', icon: 'clock' },
 ] as const
-function categoryIcon(category: string) {
-  if (category === '游戏')
+function categoryIcon(category: BrowseCategory) {
+  if (category.id === 'games')
     return 'game'
-  if (category === '设计')
+  if (category.id === 'design')
     return 'pen'
-  if (category === '生活')
+  if (category.id === 'life')
     return 'house'
-  if (category === '开发' || category === '插件')
+  if (category.id === 'development')
     return 'code'
-  if (category === 'AI' || category === '整活')
+  if (category.id === 'ai')
     return 'spark'
-  if (category.includes('工具'))
+  if (category.id === 'interesting')
+    return 'smile'
+  if (category.id === 'tools')
     return 'tool'
   return 'grid'
 }
@@ -48,8 +51,8 @@ function categoryIcon(category: string) {
       </nav>
       <nav v-if="categories.length" class="category-nav" aria-label="应用分类">
         <h2>分类</h2>
-        <button v-for="item in categories" :key="item" class="nav-item" :class="{ selected: view === 'category' && category === item && !query }" :aria-current="view === 'category' && category === item && !query ? 'page' : undefined" @click="$emit('category', item)">
-          <ShellIcon :name="categoryIcon(item)" /><span>{{ item }}</span>
+        <button v-for="item in categories" :key="item.id" class="nav-item" :class="{ selected: view === 'category' && category === item.name && !query }" :aria-label="item.name" :title="`${item.name} · ${item.count} 个应用`" :aria-current="view === 'category' && category === item.name && !query ? 'page' : undefined" @click="$emit('category', item.name)">
+          <ShellIcon :name="categoryIcon(item)" /><span>{{ item.name }}</span><span class="category-count" aria-hidden="true">{{ item.count }}</span>
         </button>
       </nav>
       <div v-if="activeApp" class="current-app">
@@ -78,7 +81,6 @@ function categoryIcon(category: string) {
   padding: 0 var(--ylf-space-3) var(--ylf-space-3);
   background: var(--sidebar);
   border-right: 1px solid var(--border);
-  box-shadow: inset -1px 0 0 var(--ylf-c-highlight);
 }
 .sidebar-titlebar {
   height: 20px;
@@ -102,7 +104,7 @@ function categoryIcon(category: string) {
   font-size: 21px;
   letter-spacing: -0.6px;
   font-weight: 650;
-  color: var(--ylf-c-brand);
+  color: var(--text);
 }
 .sidebar-search {
   display: flex;
@@ -114,7 +116,6 @@ function categoryIcon(category: string) {
   border: 1px solid var(--border);
   border-radius: var(--ylf-desktop-radius-control);
   background: var(--search);
-  box-shadow: var(--ylf-shadow-inset);
   color: var(--muted);
   transition:
     border-color var(--ylf-duration-fast) var(--ylf-ease-standard),
@@ -175,34 +176,36 @@ function categoryIcon(category: string) {
   color: var(--muted);
 }
 .nav-item:hover {
-  background: var(--surface);
-  box-shadow: var(--ylf-shadow-control);
+  background: var(--ylf-desktop-hover);
 }
 .nav-item:active {
   background: var(--ylf-desktop-inset);
-  box-shadow: var(--ylf-shadow-inset);
 }
 .nav-item.selected {
   background: var(--selection);
-  color: var(--ylf-accent-blue-text);
+  color: var(--text);
   font-weight: 600;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--ylf-c-brand) 16%, transparent),
-    inset 0 1px 0 var(--ylf-c-highlight);
 }
 .nav-item.selected:hover {
-  background: color-mix(in srgb, var(--ylf-c-brand) 7%, var(--selection));
-  color: var(--ylf-c-brand-hover);
+  background: color-mix(in srgb, var(--text) 4%, var(--selection));
+  color: var(--text);
 }
 .nav-item.selected:active {
-  color: var(--ylf-c-brand-hover);
-}
-.nav-item.selected:active {
-  background: color-mix(in srgb, var(--ylf-c-brand) 12%, var(--selection));
-  box-shadow: var(--ylf-shadow-inset);
+  background: color-mix(in srgb, var(--text) 8%, var(--selection));
+  color: var(--text);
 }
 .nav-item.selected .shell-icon {
-  color: var(--ylf-c-brand);
+  color: var(--ylf-desktop-link);
+}
+.category-count {
+  margin-left: auto;
+  flex: none;
+  color: var(--muted);
+  font-size: var(--ylf-desktop-text-meta);
+  font-variant-numeric: tabular-nums;
+}
+.nav-item.selected .category-count {
+  color: var(--text);
 }
 .nav-item:focus-visible {
   outline-offset: -2px;
@@ -259,7 +262,6 @@ function categoryIcon(category: string) {
   border: 1px solid var(--border);
   border-radius: var(--ylf-desktop-radius-control);
   background: var(--search);
-  box-shadow: var(--ylf-shadow-control);
   color: var(--text);
 }
 .appearance-control select:hover {

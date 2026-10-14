@@ -78,7 +78,7 @@ function clearViewport() {
   guest?.setVisible(false)
 }
 function updateNativeAppearance() {
-  const background = nativeTheme.shouldUseDarkColors ? '#242426' : '#f5f5f7'
+  const background = nativeTheme.shouldUseDarkColors ? '#1c1c1e' : '#f5f5f7'
   if (window && !window.isDestroyed())
     window.setBackgroundColor(background)
   if (shellView && !shellView.webContents.isDestroyed())
@@ -172,7 +172,7 @@ async function createWindow() {
     minWidth: 800,
     minHeight: 600,
     title: '云乐坊',
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#242426' : '#f5f5f7',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#1c1c1e' : '#f5f5f7',
     ...(process.platform === 'darwin'
       ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 18, y: 20 }, vibrancy: 'sidebar', visualEffectState: 'followWindow' }
       : {}),

@@ -1,4 +1,8 @@
+import type { BrowseCategory } from '@yunlefun/app-core/utils/appBrowseCategories'
 import type { CatalogEntry } from '../../shared/desktop'
+import { getAvailableBrowseCategories, getBrowseCategory, matchesBrowseCategory, normalizeBrowseCategorySelection } from '@yunlefun/app-core/utils/appBrowseCategories'
+
+export { getBrowseCategory } from '@yunlefun/app-core/utils/appBrowseCategories'
 
 export const DEFAULT_FEATURED_SLUGS = [
   'air-conditioner',
@@ -12,14 +16,20 @@ export const DEFAULT_FEATURED_SLUGS = [
 const RECENT_LIMIT = 20
 
 export function deriveCategories(apps: readonly CatalogEntry[]): string[] {
-  return [...new Set(apps.map(app => app.category))]
+  return deriveBrowseCategories(apps).filter(category => category.name !== '全部').map(category => category.name)
+}
+
+/** Use the complete catalog so sidebar counts stay stable during search. */
+export function deriveBrowseCategories(apps: readonly CatalogEntry[]): BrowseCategory[] {
+  return getAvailableBrowseCategories(apps)
 }
 
 export function filterCatalog(apps: readonly CatalogEntry[], options: { query?: string, category?: string } = {}): CatalogEntry[] {
   const search = options.query?.trim().toLocaleLowerCase() || ''
+  const category = normalizeBrowseCategorySelection(options.category || '')
   return apps.filter(app =>
-    (!options.category || options.category === app.category)
-    && (!search || `${app.name} ${app.description} ${app.slug}`.toLocaleLowerCase().includes(search)),
+    matchesBrowseCategory(app, category)
+    && (!search || `${app.name} ${app.description} ${app.slug} ${getBrowseCategory(app)} ${app.category}`.toLocaleLowerCase().includes(search)),
   )
 }
 

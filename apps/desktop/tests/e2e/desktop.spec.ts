@@ -98,15 +98,20 @@ test('shared product catalog, static routes, restricted bridges, application iso
     await expect(shell.locator('html')).not.toHaveClass(/dark/)
     await shell.getByRole('combobox', { name: '外观', exact: true }).selectOption('system')
     await expect.poll(() => application!.evaluate(({ nativeTheme }) => nativeTheme.themeSource)).toBe('system')
+    const categoryNavigation = shell.getByRole('navigation', { name: '应用分类' })
+    const categoryCounts = await categoryNavigation.locator('.category-count').allTextContents()
+    expect(categoryCounts).toEqual(['1', '1', '1'])
     await shell.getByRole('searchbox', { name: '搜索应用' }).fill('second')
     await expect(shell.getByRole('heading', { name: '搜索结果', exact: true })).toBeVisible()
     await expect(shell.getByRole('button', { name: '打开云应用二', exact: true })).toBeVisible()
     await expect(shell.getByRole('button', { name: '打开云应用一', exact: true })).toHaveCount(0)
-    await shell.getByRole('navigation', { name: '应用分类' }).getByRole('button', { name: '生活', exact: true }).click()
-    await expect(shell.getByRole('heading', { name: '生活', exact: true })).toBeVisible()
+    expect(await categoryNavigation.locator('.category-count').allTextContents()).toEqual(categoryCounts)
+    await categoryNavigation.getByRole('button', { name: '生活方式', exact: true }).click()
+    await expect(shell.getByRole('heading', { name: '生活方式', exact: true })).toBeVisible()
     await expect(shell.getByRole('searchbox', { name: '搜索应用' })).toHaveValue('')
     await expect(shell.getByRole('button', { name: '打开云应用一', exact: true })).toBeVisible()
     await expect(shell.getByRole('button', { name: '打开云应用二', exact: true })).toHaveCount(0)
+    expect(await categoryNavigation.locator('.category-count').allTextContents()).toEqual(categoryCounts)
     await shell.getByRole('button', { name: '最近打开', exact: true }).click()
     await expect(shell.getByRole('heading', { name: '还没有最近打开的应用', exact: true })).toBeVisible()
     await shell.getByRole('button', { name: '探索', exact: true }).click()
@@ -322,6 +327,8 @@ test('real shared offline snapshot and catalog search remain usable when the API
     // depends on the public bucket responding successfully.
     await application.context().route(COOK_FEATURE_IMAGE_URL, route => route.abort())
     const shell = await application.firstWindow()
+    const errors: string[] = []
+    shell.on('pageerror', error => errors.push(error.message))
     let bannerFailures = 0
     await shell.route(COOK_FEATURE_IMAGE_URL, (route) => {
       bannerFailures++
@@ -343,6 +350,49 @@ test('real shared offline snapshot and catalog search remain usable when the API
     await expect(shell.getByRole('button', { name: '打开云空调' })).toBeVisible()
     await expect(shell.getByRole('button', { name: '打开今天来做菜' })).toHaveCount(0)
     await shell.getByRole('searchbox', { name: '搜索应用' }).fill('')
+    const categoryNavigation = shell.getByRole('navigation', { name: '应用分类' })
+    for (const name of ['生活', '工具', '设计', '整活', '插件', '应用'])
+      await expect(categoryNavigation.getByRole('button', { name, exact: true })).toHaveCount(0)
+    await categoryNavigation.getByRole('button', { name: '创意设计', exact: true }).click()
+    await expect(shell.getByRole('button', { name: '打开Char Dust', exact: true })).toBeEnabled()
+    await expect(shell.getByRole('button', { name: '打开今天来做菜', exact: true })).toHaveCount(0)
+    await categoryNavigation.getByRole('button', { name: '游戏', exact: true }).click()
+    await expect(shell.getByRole('button', { name: '打开FC 红白机', exact: true })).toBeEnabled()
+    await expect(shell.getByRole('button', { name: '打开Char Dust', exact: true })).toHaveCount(0)
+    await categoryNavigation.getByRole('button', { name: '生活方式', exact: true }).click()
+    await expect(shell.getByRole('button', { name: '打开今天来做菜', exact: true })).toBeEnabled()
+    await shell.getByRole('button', { name: '全部应用', exact: true }).click()
+
+    for (const { appearance, width, height } of [
+      { appearance: 'dark', width: 1280, height: 840 },
+      { appearance: 'light', width: 1280, height: 840 },
+      { appearance: 'dark', width: 800, height: 600 },
+      { appearance: 'light', width: 800, height: 600 },
+    ] as const) {
+      await application.evaluate(({ BaseWindow }, size) => {
+        BaseWindow.getAllWindows()[0].setContentSize(size.width, size.height)
+      }, { width, height })
+      await shell.getByRole('combobox', { name: '外观', exact: true }).selectOption(appearance)
+      await expect.poll(() => application!.evaluate(({ nativeTheme }) => ({ source: nativeTheme.themeSource, dark: nativeTheme.shouldUseDarkColors })))
+        .toEqual({ source: appearance, dark: appearance === 'dark' })
+      await expect.poll(() => shell.evaluate(() => document.documentElement.classList.contains('dark')))
+        .toBe(appearance === 'dark')
+      // Theme classes and native colors update before the control transition
+      // finishes. Capture the settled palette rather than an intermediate gray.
+      await expect(shell.locator('.open-button').first()).toHaveCSS('background-color', appearance === 'dark' ? 'rgb(48, 48, 50)' : 'rgb(232, 232, 237)')
+      await expect.poll(() => shell.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight })))
+        .toEqual({ width, height })
+      await expect.poll(() => shell.evaluate(() => {
+        const elements = [document.documentElement, document.body, ...Array.from(document.querySelectorAll<HTMLElement>('.desktop, .workspace, .discovery-content, .discovery-inner'))]
+        return elements.every(element => element.scrollWidth <= element.clientWidth + 1)
+      })).toBe(true)
+      await expect(shell.getByRole('combobox', { name: '外观', exact: true })).toBeInViewport()
+      await expect(shell.getByRole('link', { name: '关于云乐坊桌面端' })).toBeInViewport()
+      const screenshot = testInfo.outputPath(`catalog-${appearance}-${width}x${height}.png`)
+      await shell.screenshot({ path: screenshot })
+      await testInfo.attach(`Catalog ${appearance} ${width}×${height}`, { path: screenshot, contentType: 'image/png' })
+    }
+    expect(errors).toEqual([])
   }
   catch (error) {
     failed = true

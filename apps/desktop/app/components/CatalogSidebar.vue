@@ -55,7 +55,7 @@ function categoryIcon(category: string) {
       <div v-if="activeApp" class="current-app">
         <h2>正在使用</h2>
         <button class="nav-item" :class="{ selected: view === 'workspace' }" :aria-label="`继续使用${activeApp.name}`" @click="$emit('navigate', 'workspace')">
-          <span class="current-emoji" aria-hidden="true">{{ activeApp.emoji }}</span><span>{{ activeApp.name }}</span><span class="running-dot" aria-hidden="true" />
+          <AppIcon :app="activeApp" class="current-app-icon" /><span>{{ activeApp.name }}</span><span class="running-dot" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -221,11 +221,13 @@ function categoryIcon(category: string) {
   color: var(--muted);
   margin: 0 10px 5px;
 }
-.current-emoji {
+.nav-item > .current-app-icon.app-icon {
   width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 4px;
   text-align: center;
-  font-size: 16px;
-  flex: none;
+  font-size: 12px;
 }
 .running-dot {
   width: 5px;

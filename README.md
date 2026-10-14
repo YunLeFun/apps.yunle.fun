@@ -23,7 +23,9 @@
 | ---------- | ------------------------ | ------------------------------- |
 | Production | <https://apps.yunle.fun> | 合并到 `main` 后由 EdgeOne 发布 |
 
-EdgeOne 保留仓库根目录作为安装、构建入口：执行 `pnpm install --frozen-lockfile` 和 `pnpm run build`，静态资源位于 `apps/mobile/.output/public`。生产环境继续使用 Nuxt 全栈适配，包含云端 Nitro API；首次部署迁移后需验证 `/api` 路由与运行依赖。控制台根目录和框架预设仍需与仓库配置保持一致，详见 [仓库迁移与部署](./docs/dev/monorepo.md)。
+EdgeOne 使用 Nuxt 框架和 `apps/mobile` 构建目录，通过 `apps/mobile/edgeone.json` 执行 `pnpm --dir ../.. install --frozen-lockfile` 和 `pnpm run build:edgeone`，Node.js 为 24.18.0。平台官方适配器生成完整 `.edgeone` 产物：`.edgeone/assets` 提供浏览器资源，`.edgeone/cloud-functions/ssr-node` 提供 Nitro API 和页面 fallback。新版生产发布与页面／API 验收尚待完成，详见 [仓库迁移与部署](./docs/dev/monorepo.md)。
+
+专用 EdgeOne 构建入口要求干净检出，不允许应用目录或函数产物包含私有 `.env` 文件；服务器变量在平台配置。日常 `pnpm build` 和 Capacitor 构建继续使用原有 `.output` 流程。
 
 ## 🚀 快速开始
 
@@ -42,6 +44,8 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 | ---------------------------- | ------------------------------------------------ |
 | `pnpm dev`                   | 启动开发服务器（端口 8001，`--host` 暴露）       |
 | `pnpm build`                 | 构建 Web 生产版本，输出到 `apps/mobile/.output/` |
+| `pnpm build:edgeone`         | 平台官方 Nuxt 适配器预处理后构建并检查全栈产物   |
+| `pnpm check:edgeone-output`  | 检查完成适配后的 EdgeOne 函数、路由和运行依赖    |
 | `pnpm dev:mobile`            | 显式启动 Web／移动客户端                         |
 | `pnpm build:mobile`          | 显式构建 Web／移动客户端                         |
 | `pnpm lint`                  | ESLint 检查（@antfu + UnoCSS + formatters）      |

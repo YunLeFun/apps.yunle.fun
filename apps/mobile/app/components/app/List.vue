@@ -1,111 +1,40 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { YlfAppInfo } from '@yunlefun/types'
-import { IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner } from '@ionic/vue'
-import { star, starOutline } from 'ionicons/icons'
+import { IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner } from '@ionic/vue'
 
 const router = useRouter()
-const { apps, loading, hasMore, initialized, loadMore } = useWorkshop()
+const { apps, loading, hasMore, initialized, loadMore, selectedCategory, searchQuery } = useWorkshop()
 
 function openAppDetail(app: YlfAppInfo) {
-  router.push(`/app/${app.id}`)
-}
-
-function renderStars(rating?: number) {
-  if (!rating)
-    return []
-  const stars = []
-  const fullStars = Math.floor(rating)
-  for (let i = 0; i < 5; i++) {
-    stars.push(i < fullStars ? star : starOutline)
-  }
-  return stars
+  router.push(`/app/${app.slug || app.id}`)
 }
 
 async function handleInfiniteScroll(event: CustomEvent) {
   loadMore()
-  // 等待加载结束
   await nextTick()
   ;(event.target as HTMLIonInfiniteScrollElement).complete()
 }
 </script>
 
 <template>
-  <div class="app-store-list">
-    <!-- 加载中骨架 -->
-    <div v-if="loading && !initialized" class="py-8 text-center">
+  <div class="catalog-list">
+    <div v-if="loading && !initialized" class="catalog-loading">
       <IonSpinner name="crescent" />
     </div>
-
-    <!-- 应用列表 -->
     <template v-else>
-      <div v-if="apps.length > 0" class="flex flex-col">
-        <div
-          v-for="(app, index) in apps"
+      <div v-if="apps.length" class="catalog-app-grid">
+        <WorkshopCatalogRow
+          v-for="app in apps"
           :key="app.id"
-          class="app-list-item cursor-pointer py-3"
-          :class="{ 'app-list-item--last': index === apps.length - 1 }"
-          @click="openAppDetail(app)"
-        >
-          <div class="flex items-center gap-3">
-            <!-- 应用图标 -->
-            <AppIconBox
-              class="flex-shrink-0"
-              :icon="app.logo"
-              :icon-assets="app.iconAssets"
-              :emoji="app.emoji"
-              :color="app.themeColor"
-              size="md"
-            />
-
-            <!-- 应用信息 -->
-            <div class="min-w-0 flex flex-1 flex-col gap-1">
-              <div class="truncate text-base font-medium">
-                {{ app.name }}
-              </div>
-              <div class="truncate text-sm text-gray-500 dark:text-gray-400">
-                {{ app.description }}
-              </div>
-              <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <!-- 仅在有真实评分（ratingCount>0）时展示星级，避免显示写死的假分 -->
-                <div v-if="app.ratingCount && app.rating" class="flex items-center gap-0.5">
-                  <IonIcon
-                    v-for="(starIcon, idx) in renderStars(app.rating)"
-                    :key="idx"
-                    :icon="starIcon"
-                    class="text-xs"
-                    style="color: #FFCC00"
-                  />
-                  <span class="ml-1">{{ app.rating }}</span>
-                </div>
-                <span v-if="app.ratingCount && app.rating && app.category">·</span>
-                <span>{{ app.category }}</span>
-              </div>
-            </div>
-
-            <!-- 安装按钮 -->
-            <AppInstallButton :app="app" />
-          </div>
-        </div>
+          :app="app"
+          @open="openAppDetail(app)"
+        />
       </div>
-
-      <!-- 空状态 -->
-      <div v-else class="py-16 text-center">
-        <div class="mb-3 text-5xl opacity-30">
-          🔍
-        </div>
-        <p class="text-base font-medium text-gray-400 dark:text-gray-500">
-          暂无应用
-        </p>
-        <p class="mt-1 text-sm text-gray-400 dark:text-gray-600">
-          换个关键词试试吧
-        </p>
+      <div v-else class="catalog-empty">
+        <strong>{{ searchQuery || selectedCategory !== '全部' ? '没有匹配的应用' : '这里还没有应用' }}</strong>
+        <p>{{ searchQuery || selectedCategory !== '全部' ? '试试其他分类，或换个关键词。' : '新应用发布后会显示在这里。' }}</p>
       </div>
-
-      <!-- 无限滚动 -->
-      <IonInfiniteScroll
-        v-if="hasMore && apps.length > 0"
-        @ion-infinite="handleInfiniteScroll"
-      >
+      <IonInfiniteScroll v-if="hasMore && apps.length" @ion-infinite="handleInfiniteScroll">
         <IonInfiniteScrollContent loading-spinner="crescent" />
       </IonInfiniteScroll>
     </template>
@@ -113,27 +42,38 @@ async function handleInfiniteScroll(event: CustomEvent) {
 </template>
 
 <style scoped>
-/* iOS 风格分隔线：从图标右侧起始 */
-.app-list-item {
-  position: relative;
-  transition: opacity 0.15s ease;
+.catalog-app-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.app-list-item:not(.app-list-item--last)::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 76px; /* 图标 64px + gap 12px */
-  right: 0;
-  height: 0.5px;
-  background: var(--ion-border-color, rgba(0, 0, 0, 0.1));
+.catalog-loading,
+.catalog-empty {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--ylf-catalog-text-secondary);
+  text-align: center;
 }
 
-.app-list-item:active {
-  opacity: 0.7;
+.catalog-empty strong {
+  color: var(--ylf-catalog-text);
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.dark .app-list-item:not(.app-list-item--last)::after {
-  background: rgba(255, 255, 255, 0.1);
+.catalog-empty p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (min-width: 1100px) {
+  .catalog-app-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
 }
 </style>

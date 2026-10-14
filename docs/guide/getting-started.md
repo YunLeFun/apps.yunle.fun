@@ -2,16 +2,16 @@
 
 ## 环境要求
 
-| 工具    | 版本                  |
-| ------- | --------------------- |
-| Node.js | >= 22                 |
-| pnpm    | >= 11                 |
-| Xcode   | >= 26（iOS 开发需要） |
+| 工具    | 版本                                    |
+| ------- | --------------------------------------- |
+| Node.js | 24，见根 `.node-version`                |
+| pnpm    | 见根 `package.json` 的 `packageManager` |
+| Xcode   | >= 26（iOS 开发需要）                   |
 
 ## 获取代码
 
 ```bash
-git clone https://github.com/YunYouJun/apps.yunle.fun.git
+git clone https://github.com/YunLeFun/apps.yunle.fun.git
 cd apps.yunle.fun
 ```
 
@@ -19,6 +19,7 @@ cd apps.yunle.fun
 
 ```bash
 pnpm i
+cp -n apps/mobile/.env.example apps/mobile/.env
 ```
 
 ## 启动开发
@@ -30,6 +31,8 @@ pnpm dev
 ```
 
 默认运行在 `http://localhost:8001`，自动启用 `--host` 暴露局域网访问。
+
+从仓库根执行命令即可，`pnpm dev` 转发到 `apps/mobile`。该应用继续提供 Web、iOS 和 Android 客户端；桌面使用独立 `apps/desktop` 入口。
 
 ### iOS 开发
 
@@ -57,6 +60,8 @@ pnpm start
 # Web 生产发布
 # 将验证通过的改动合并到 main，EdgeOne 会自动构建并发布
 ```
+
+Web 产物位于 `apps/mobile/.output/`。部署保留仓库根作为安装和构建入口，静态资源目录为 `apps/mobile/.output/public`，服务端继续使用 Nuxt 全栈适配。首次迁移部署需要核对控制台配置及 `/api` 路由，详见 [客户端工作区与部署](../dev/monorepo.md)。
 
 ## 代码质量
 
@@ -87,17 +92,18 @@ pnpm docs:build
 ## 项目结构
 
 ```text
-app/                    # Nuxt 4 应用层
-├── components/         # 组件（自动导入）
-├── composables/        # 组合式函数
-├── pages/              # 文件路由
-│   └── tabs/           # Tab 页（home, discovery, workshop, me）
-├── stores/             # Pinia 状态仓库
-├── plugins/            # Nuxt 插件
-├── styles/             # 全局样式
-├── constants/          # 常量定义
-└── types/              # 类型定义
-server/                 # Nitro 服务端 API
-packages/               # Monorepo 子包
+apps/
+├── mobile/             # 现有 Web／移动工程
+│   ├── app/            # Nuxt 页面、组件、状态和插件
+│   ├── server/         # 云端 Nitro API
+│   ├── ios/            # Capacitor iOS
+│   ├── android/        # Capacitor Android
+│   ├── scripts/        # 移动构建和发布
+│   └── test/           # Vitest 与 Playwright
+└── desktop/            # 独立 Nuxt + Electron + Forge
+packages/               # 共享包与移动原生插件
 docs/                   # VitePress 产品文档
+scripts/                # CloudBase 运营工具
+pnpm-workspace.yaml     # 工作区及安全策略
+pnpm-lock.yaml          # 统一依赖锁文件
 ```

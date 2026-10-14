@@ -1,0 +1,84 @@
+require_relative '../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios/scripts/pods_helpers'
+
+platform :ios, '16.0'
+use_frameworks!
+
+# workaround to avoid Xcode caching of Pods that requires
+# Product -> Clean Build Folder after new Cordova plugins installed
+# Requires CocoaPods 1.6 or newer
+install! 'cocoapods', :disable_input_output_paths => true
+
+def capacitor_pods
+  pod 'Capacitor', :path => '../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios'
+  pod 'CapacitorApp', :path => '../../../../node_modules/.pnpm/@capacitor+app@8.1.1_@capacitor+core@8.4.2/node_modules/@capacitor/app'
+  pod 'CapacitorBarcodeScanner', :path => '../../../../node_modules/.pnpm/@capacitor+barcode-scanner@3.1.0_@capacitor+core@8.4.2/node_modules/@capacitor/barcode-scanner'
+  pod 'CapacitorBrowser', :path => '../../../../node_modules/.pnpm/@capacitor+browser@8.0.4_@capacitor+core@8.4.2/node_modules/@capacitor/browser'
+  pod 'CapacitorCamera', :path => '../../../../node_modules/.pnpm/@capacitor+camera@8.2.1_@capacitor+core@8.4.2/node_modules/@capacitor/camera'
+  pod 'CapacitorHaptics', :path => '../../../../node_modules/.pnpm/@capacitor+haptics@8.0.1_@capacitor+core@8.4.2/node_modules/@capacitor/haptics'
+  pod 'CapacitorKeyboard', :path => '../../../../node_modules/.pnpm/@capacitor+keyboard@8.0.5_@capacitor+core@8.4.2/node_modules/@capacitor/keyboard'
+  pod 'CapacitorStatusBar', :path => '../../../../node_modules/.pnpm/@capacitor+status-bar@8.0.3_@capacitor+core@8.4.2/node_modules/@capacitor/status-bar'
+  pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
+end
+
+target 'App' do
+  capacitor_pods
+  # Add your Pods here
+  # 本地 StoreKit 2 内购插件（packages/capacitor-storekit，非 npm 包，cap sync 不会自动管理）
+  pod 'YunlefunCapacitorStorekit', :path => '../../../../packages/capacitor-storekit'
+end
+
+# WechatOpenSDK-XCFramework 是静态库，作为 CordovaPlugins（动态框架）的传递依赖会触发
+# CocoaPods 的 transitive static binaries 校验；跳过后静态库会被正常链接进
+# CordovaPlugins.framework（依赖声明见 patches/cordova-plugin-wechat@3.1.0.patch）
+pre_install do |installer|
+  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
+end
+
+post_install do |installer|
+  assertDeploymentTarget(installer)
+  # Fix deployment target mismatch: ensure all pods match the project minimum (16.0)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+    end
+    # CocoaPods 默认把传递性静态框架推迟到 App 目标链接，导致 CordovaPlugins
+    # （动态框架）链接时缺 WX* 符号；这里直接链进 CordovaPlugins（自带 -all_load，
+    # 会完整收入 WechatOpenSDK 静态库）
+    if target.name == 'CordovaPlugins'
+      target.build_configurations.each do |config|
+        config.build_settings['OTHER_LDFLAGS'] = ['$(inherited)', '-framework', 'WechatOpenSDK']
+      end
+
+      # WechatOpenSDK is a static XCFramework linked into CordovaPlugins.framework.
+      # Its privacy manifest lives at the XCFramework root, so CocoaPods does not
+      # copy it into the final executable bundle automatically. Apple requires the
+      # bundle containing the executable to carry the required-reason declaration.
+      phase_name = '[YLF] Embed WeChat Privacy Manifest'
+      privacy_phase = target.shell_script_build_phases.find { |phase| phase.name == phase_name }
+      privacy_phase ||= target.new_shell_script_build_phase(phase_name)
+      privacy_phase.input_paths = [
+        '${PODS_ROOT}/WechatOpenSDK-XCFramework/WechatOpenSDK.xcframework/PrivacyInfo.xcprivacy',
+      ]
+      privacy_phase.output_paths = [
+        '${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}/PrivacyInfo.xcprivacy',
+      ]
+      privacy_phase.shell_script = <<~'SCRIPT'
+        set -euo pipefail
+        install -m 0644 "${SCRIPT_INPUT_FILE_0}" "${SCRIPT_OUTPUT_FILE_0}"
+      SCRIPT
+    end
+  end
+  # App 链接行带 -ObjC，若再 -framework WechatOpenSDK 会把静态库整份拉进 App
+  # 二进制，与 CordovaPlugins.framework 内的副本产生 ObjC 类重复；从聚合
+  # xcconfig 中移除，只保留 CordovaPlugins 里的唯一一份
+  installer.aggregate_targets.each do |aggregate|
+    aggregate.user_build_configurations.each_key do |config_name|
+      xcconfig_path = aggregate.xcconfig_path(config_name)
+      next unless File.exist?(xcconfig_path)
+      text = File.read(xcconfig_path)
+      patched = text.gsub(' -framework "WechatOpenSDK"', '')
+      File.write(xcconfig_path, patched) if patched != text
+    end
+  end
+end

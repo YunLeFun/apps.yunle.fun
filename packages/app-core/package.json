@@ -1,0 +1,19 @@
+{
+  "name": "@yunlefun/app-core",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared YunLeFun catalog metadata and pure business utilities",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./types/app": "./src/types/app.ts",
+    "./utils/appRecord": "./src/utils/appRecord.ts",
+    "./utils/canonical-app-domain": "./src/utils/canonical-app-domain.ts",
+    "./utils/canonical-app-icon": "./src/utils/canonical-app-icon.ts",
+    "./catalog/generated": "./src/catalog/generated.ts"
+  },
+  "dependencies": {
+    "@yunlefun/types": "^0.2.1"
+  }
+}

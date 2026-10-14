@@ -4,6 +4,9 @@
 
 ## 目录
 
+- [客户端工作区与部署](./monorepo) — `apps/mobile`／`apps/desktop`、构建入口和部署路径
+- [桌面构建与私有内测](./desktop-build) — 本机打包、构建记录、SHA256 与单平台 CI
+- [Electron 桌面架构](./desktop-electron-architecture) — 安全 preload、内嵌应用与产品接入范围
 - [认证](./auth) — Universal Link、微信登录配置
 - [扫码功能](./barcode-scanner) — Capacitor 扫码集成
 - [沉浸式内嵌浏览器](./in-app-browser) — 胶囊视觉规范与页面 JSAPI（window.ylf）

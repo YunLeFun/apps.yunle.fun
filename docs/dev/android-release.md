@@ -14,7 +14,7 @@ export YUNLEFUN_ANDROID_RELEASE_KEY_PASSWORD='<key password>'
 export YUNLEFUN_ANDROID_RELEASE_CERT_SHA256='<pinned upload certificate SHA-256 fingerprint>'
 ```
 
-`versionName` 自动读取根目录 `package.json`；`versionCode` 必须是正整数，并且需要高于应用商店
+`versionName` 自动读取 `apps/mobile/package.json`；`versionCode` 必须是正整数，并且需要高于应用商店
 中已发布的构建。四个签名变量必须同时提供；发布脚本还要求固定的证书 SHA-256 指纹，并在构建前核对
 keystore、构建后核对 APK，防止误用另一把 upload key。只设置部分签名变量，或在完全未配置时直接运行
 Release 打包任务，Gradle 都会立即失败，避免误产出未签名的候选包。
@@ -23,6 +23,7 @@ Release 打包任务，Gradle 都会立即失败，避免误产出未签名的�
 ## 构建与验签
 
 ```bash
+# 从仓库根执行
 pnpm build:android:release
 ```
 
@@ -33,8 +34,8 @@ Android 发布脚本不会运行全平台 `cap sync`，避免 Android 构建被�
 
 验签后的默认产物：
 
-- `android/app/build/outputs/apk/release/app-release.apk`
-- `android/app/build/outputs/bundle/release/app-release.aab`
+- `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`
+- `apps/mobile/android/app/build/outputs/bundle/release/app-release.aab`
 
 构建完成后仍需在真机安装 APK，覆盖冷启动、后台恢复、授权同意、取消、其他账号与断网场景；
 AAB 上传应用商店前还应复核 versionCode、versionName、目标轨道和发布说明。

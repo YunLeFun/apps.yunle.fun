@@ -1,0 +1,84 @@
+{
+  "name": "@yunlefun/desktop",
+  "productName": "云乐坊",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.13.1",
+  "description": "云乐坊桌面客户端：共享应用目录与隔离 Web 应用",
+  "author": {
+    "name": "YunYouJun",
+    "email": "me@yunyoujun.cn"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YunLeFun/apps.yunle.fun"
+  },
+  "main": "dist-electron/main.cjs",
+  "engines": {
+    "node": ">=24.15.0 <25",
+    "pnpm": ">=11 <12"
+  },
+  "config": {
+    "forge": "./forge.config.cjs"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "nuxt dev --host 127.0.0.1",
+    "build": "node scripts/build.mjs",
+    "build:electron": "node scripts/build-electron.mjs",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "package": "node scripts/forge.mjs package",
+    "make": "node scripts/forge.mjs make",
+    "publish": "node scripts/forge.mjs publish",
+    "check:release": "node scripts/check-release.mjs",
+    "icons": "node scripts/build-icons.mjs",
+    "icons:sync": "node scripts/sync-catalog-icons.mjs",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck && tsc -p tsconfig.electron.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "pnpm build && playwright test",
+    "verify:package": "node scripts/verify-package.mjs",
+    "verify:artifacts": "node scripts/verify-artifacts.mjs",
+    "verify:launch": "node scripts/verify-launch.mjs",
+    "prepare": "nuxt prepare"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "1.0.1",
+    "update-electron-app": "3.3.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "8.0.1",
+    "@electron-forge/core": "8.0.1",
+    "@electron-forge/maker-deb": "8.0.1",
+    "@electron-forge/maker-dmg": "8.0.1",
+    "@electron-forge/maker-squirrel": "8.0.1",
+    "@electron-forge/maker-zip": "8.0.1",
+    "@electron-forge/plugin-fuses": "8.0.1",
+    "@electron-forge/publisher-github": "8.0.1",
+    "@electron/asar": "4.3.1",
+    "@electron/fuses": "2.1.3",
+    "@nuxtjs/color-mode": "^4.0.1",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^24.19.2",
+    "@yunlefun/app-core": "workspace:*",
+    "@yunlefun/ui": "0.0.6",
+    "electron": "44.7.0",
+    "eslint": "^10.7.0",
+    "nuxt": "4.4.8",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vite-electron": "npm:vite@8.3.4",
+    "vitest": "^4.1.10",
+    "vue": "3.5.40",
+    "vue-router": "5.1.0",
+    "vue-tsc": "^3.3.7"
+  },
+  "desktop": {
+    "appId": "fun.yunle.desktop",
+    "updateRepository": "YunLeFun/apps.yunle.fun",
+    "updatesEnabled": false
+  }
+}

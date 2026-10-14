@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -18,15 +19,15 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify
-    runs-on: ubuntu-latest
+    name: Verify Web and mobile
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install
@@ -52,21 +53,32 @@ jobs:
 
   e2e:
     name: Chromium smoke tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
       - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --dir apps/mobile exec playwright install --with-deps chromium
 
       - name: Chromium smoke tests
-        run: pnpm exec playwright test --project=chromium
+        run: pnpm run test:e2e --project=chromium
+
+      - name: Upload failed browser traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mobile-browser-traces
+          path: |
+            apps/mobile/test-results/**
+            apps/mobile/playwright-report/**
+          if-no-files-found: ignore
+          retention-days: 7

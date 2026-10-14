@@ -1,0 +1,130 @@
+name: Desktop CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Installer platform to build and verify
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - macos
+          - windows
+          - linux
+  push:
+    branches:
+      - main
+    paths:
+      - apps/desktop/**
+      - packages/app-core/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - patches/**
+      - .npmrc
+      - .node-version
+      - eslint.config.js
+      - .github/workflows/desktop.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/desktop/**
+      - packages/app-core/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - patches/**
+      - .npmrc
+      - .node-version
+      - eslint.config.js
+      - .github/workflows/desktop.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Desktop ${{ matrix.os }} ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: >-
+          ${{ fromJSON(
+            inputs.target == 'macos' && '[{"os":"macos-latest","arch":"arm64","platform":"darwin"}]' ||
+            inputs.target == 'windows' && '[{"os":"windows-latest","arch":"x64","platform":"win32"}]' ||
+            inputs.target == 'linux' && '[{"os":"ubuntu-24.04","arch":"x64","platform":"linux"}]' ||
+            '[{"os":"macos-latest","arch":"arm64","platform":"darwin"},{"os":"windows-latest","arch":"x64","platform":"win32"},{"os":"ubuntu-24.04","arch":"x64","platform":"linux"}]'
+          ) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Desktop lint
+        run: pnpm --dir apps/desktop run lint
+
+      - name: Desktop typecheck
+        run: pnpm --dir apps/desktop run typecheck
+
+      - name: Desktop unit tests
+        run: pnpm --dir apps/desktop run test
+
+      - name: Electron integration tests
+        if: runner.os != 'Linux'
+        run: pnpm --dir apps/desktop run test:e2e
+
+      - name: Electron integration tests on Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm --dir apps/desktop run test:e2e
+
+      - name: Make installers
+        run: pnpm --dir apps/desktop run make --arch=${{ matrix.arch }}
+
+      - name: Verify packaged runtime and fuses
+        run: pnpm --dir apps/desktop run verify:package
+
+      - name: Verify installer checksums and build manifest
+        run: pnpm --dir apps/desktop run verify:artifacts
+
+      - name: Verify packaged app launch
+        if: runner.os != 'Linux'
+        run: pnpm --dir apps/desktop run verify:launch
+
+      - name: Verify packaged app launch on Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm --dir apps/desktop run verify:launch
+
+      - name: Upload failed desktop traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-traces-${{ runner.os }}-${{ matrix.arch }}
+          path: |
+            apps/desktop/test-results/**
+            apps/desktop/playwright-report/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-installers-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.sha }}
+          path: apps/desktop/out/artifacts/**
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0

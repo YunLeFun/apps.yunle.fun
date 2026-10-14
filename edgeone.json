@@ -1,4 +1,7 @@
 {
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "apps/mobile/.output/public",
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",

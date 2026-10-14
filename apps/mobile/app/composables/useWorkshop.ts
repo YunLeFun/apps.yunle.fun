@@ -1,7 +1,7 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { useDebounceFn } from '@vueuse/core'
 import { rankAppSearch } from '~/utils/app-search'
-import { getAvailableAppCategories } from '~/utils/appCategories'
+import { getAvailableBrowseCategories, matchesBrowseCategory, normalizeBrowseCategorySelection } from '~/utils/appBrowseCategories'
 
 /**
  * 工坊数据 composable
@@ -38,14 +38,15 @@ export function useWorkshop() {
   const displayOffset = useState('workshop:displayOffset', () => 0)
 
   /** 分类列表 */
-  const categories = computed(() => getAvailableAppCategories(catalog.value))
+  const categories = computed(() => getAvailableBrowseCategories(catalog.value))
+  const totalCount = computed(() => allCandidates.value.length)
 
   /** 获取当前分类 + 搜索词过滤后的候选应用列表（数据源为 catalog） */
   function getFilteredStaticApps(): YlfAppInfo[] {
     let list = catalog.value
 
     if (selectedCategory.value !== '全部') {
-      list = list.filter(a => a.category?.trim() === selectedCategory.value)
+      list = list.filter(app => matchesBrowseCategory(app, selectedCategory.value))
     }
 
     list = rankAppSearch(list, searchQuery.value, app => app)
@@ -101,7 +102,7 @@ export function useWorkshop() {
 
   /** 切换分类 */
   function changeCategory(category: string) {
-    selectedCategory.value = category
+    selectedCategory.value = normalizeBrowseCategorySelection(category)
     queryApps(true)
   }
 
@@ -125,6 +126,7 @@ export function useWorkshop() {
     error,
     hasMore,
     categories,
+    totalCount,
     initialized,
     queryApps,
     changeCategory,

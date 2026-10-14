@@ -52,6 +52,34 @@
   --ylf-color-success-on-surface: #197b3e;
   --ylf-color-primary-action: #006bd6;
   --ylf-color-primary-action-pressed: #0057b8;
+
+  /* 应用目录专用层级：页面只消费这些 token，不覆盖其他标签页的 Ionic 主题。
+   * canvas 为内容基底；sidebar/surface 为导航与分组；control 为搜索和控件。
+   * accent 为图标与轮廓色，accent-text 为小字前景，accent-soft 为选中底色。
+   * 实心小字 CTA 使用 action 组。
+   * material 用于需要背景模糊的目录工具栏，shadow 用于前景分组。
+   */
+  --ylf-catalog-canvas: #ffffff;
+  --ylf-catalog-sidebar: #f5f5f7;
+  --ylf-catalog-surface: #f5f5f7;
+  --ylf-catalog-control: #eeeef0;
+  --ylf-catalog-control-secondary: #626268;
+  --ylf-catalog-control-hover: #e7e7eb;
+  --ylf-catalog-control-pressed: #dedee3;
+  --ylf-catalog-text: #1d1d1f;
+  --ylf-catalog-text-secondary: #6e6e73;
+  --ylf-catalog-text-tertiary: #86868b;
+  --ylf-catalog-border: #e8e8ed;
+  --ylf-catalog-divider: #d2d2d7;
+  --ylf-catalog-accent: #006bd6;
+  --ylf-catalog-accent-text: #0057b8;
+  --ylf-catalog-accent-hover: #0057b8;
+  --ylf-catalog-accent-soft: rgb(0 107 214 / 9%);
+  --ylf-catalog-action: var(--ylf-color-primary-action);
+  --ylf-catalog-action-pressed: var(--ylf-color-primary-action-pressed);
+  --ylf-catalog-action-on: #ffffff;
+  --ylf-catalog-material: rgb(245 245 247 / 88%);
+  --ylf-catalog-shadow: 0 1px 3px rgb(0 0 0 / 3%), 0 6px 22px rgb(0 0 0 / 5%);
 }
 
 /* 深色模式（与 .ion-palette-dark 同步） */
@@ -88,6 +116,26 @@
   --ylf-color-success-on-surface: #50d878;
   --ylf-color-primary-action: #006bd6;
   --ylf-color-primary-action-pressed: #0057b8;
+
+  /* 目录保持真正的炭黑基底，层级与浅色 token 一一对应。 */
+  --ylf-catalog-canvas: #1c1c1e;
+  --ylf-catalog-sidebar: #242426;
+  --ylf-catalog-surface: #242426;
+  --ylf-catalog-control: #2c2c2e;
+  --ylf-catalog-control-secondary: #a1a1a6;
+  --ylf-catalog-control-hover: #363638;
+  --ylf-catalog-control-pressed: #3b3b3e;
+  --ylf-catalog-text: #f5f5f7;
+  --ylf-catalog-text-secondary: #a1a1a6;
+  --ylf-catalog-text-tertiary: #85858b;
+  --ylf-catalog-border: #38383a;
+  --ylf-catalog-divider: #3a3a3c;
+  --ylf-catalog-accent: #0a84ff;
+  --ylf-catalog-accent-text: #64acff;
+  --ylf-catalog-accent-hover: #409cff;
+  --ylf-catalog-accent-soft: rgb(10 132 255 / 16%);
+  --ylf-catalog-material: rgb(36 36 38 / 88%);
+  --ylf-catalog-shadow: 0 1px 0 rgb(255 255 255 / 3%), 0 8px 28px rgb(0 0 0 / 22%);
 }
 
 @media (max-width: 480px) {

@@ -7,11 +7,7 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonLabel,
   IonPage,
-  IonSearchbar,
-  IonSegment,
-  IonSegmentButton,
   IonToolbar,
   onIonViewWillEnter,
 } from '@ionic/vue'
@@ -24,7 +20,7 @@ import {
   refreshOutline,
 } from 'ionicons/icons'
 import { rankAppSearch } from '~/utils/app-search'
-import { getAvailableAppCategories } from '~/utils/appCategories'
+import { getAvailableBrowseCategories, matchesBrowseCategory, normalizeBrowseCategorySelection } from '~/utils/appBrowseCategories'
 import { recordToAppInfo } from '~/utils/appRecord'
 
 const {
@@ -34,6 +30,8 @@ const {
   changeCategory,
   debouncedSearch,
   queryApps,
+  totalCount,
+  loading: publicLoading,
 } = useWorkshop()
 
 const SCOPE_STORAGE_KEY = 'ylf:workshop-scope:v1'
@@ -102,28 +100,28 @@ const searchPlaceholder = computed(() =>
 
 const scopedCategoryApps = computed(() => {
   if (isPrivateScope.value)
-    return currentView.value?.apps ?? []
+    return (currentView.value?.apps ?? []).map(recordToAppInfo)
 
-  const apps: Array<{ category?: string }> = [...catalog.value]
+  const apps = new Map(catalog.value.map(app => [app.id, app]))
   for (const workshop of availableWorkshops.value) {
-    const view = workshopViews.value[workshop._id]
-    if (view)
-      apps.push(...view.apps)
+    for (const record of workshopViews.value[workshop._id]?.apps ?? []) {
+      if (!apps.has(record._id))
+        apps.set(record._id, recordToAppInfo(record))
+    }
   }
-  return apps
+  return Array.from(apps.values())
 })
 
 const categories = computed(() =>
   isPublicScope.value
     ? publicCategories.value
-    : getAvailableAppCategories(scopedCategoryApps.value),
+    : getAvailableBrowseCategories(scopedCategoryApps.value),
 )
 
 function rankCurrentItems(items: WorkshopScopedApp[]) {
-  const categoryItems = selectedCategory.value === '全部'
-    ? items
-    : items.filter(item => item.app.category?.trim() === selectedCategory.value)
-
+  const categoryItems = items.filter(item =>
+    matchesBrowseCategory(item.app, selectedCategory.value),
+  )
   return rankAppSearch(categoryItems, searchQuery.value, item => item.app)
 }
 
@@ -352,34 +350,37 @@ watch(() => userStore.isLoggedIn, (loggedIn) => {
 })
 
 watch(categories, (availableCategories) => {
-  const selectedCategoryStillExists = availableCategories.some(
-    category => category.name === selectedCategory.value,
-  )
-  if (selectedCategoryStillExists)
-    return
-
-  if (isPublicScope.value)
-    changeCategory('全部')
-  else
-    selectedCategory.value = '全部'
+  const normalized = normalizeBrowseCategorySelection(selectedCategory.value)
+  const nextCategory = availableCategories.some(category => category.name === normalized)
+    ? normalized
+    : '全部'
+  if (nextCategory !== selectedCategory.value)
+    handleCategoryChange(nextCategory)
 }, { flush: 'sync' })
 
-function handleSegmentChange(event: CustomEvent) {
+function handleCategoryChange(category: string) {
   if (isPublicScope.value)
-    changeCategory(event.detail.value)
+    changeCategory(category)
   else
-    selectedCategory.value = event.detail.value
+    selectedCategory.value = category
 }
 
-function handleSearchInput() {
+function handleSearchInput(query: string) {
+  searchQuery.value = query
   if (isPublicScope.value)
     debouncedSearch()
 }
+
+const resultCount = computed(() => {
+  if (isPublicScope.value)
+    return totalCount.value
+  return isAllScope.value ? allScopeItems.value.length : privateScopeItems.value.length
+})
 </script>
 
 <template>
-  <IonPage>
-    <IonHeader :translucent="true">
+  <IonPage class="catalog-page">
+    <IonHeader class="catalog-header" :translucent="true">
       <IonToolbar class="scope-toolbar">
         <IonButtons slot="start" class="scope-buttons">
           <button
@@ -406,41 +407,19 @@ function handleSearchInput() {
           </IonButton>
         </IonButtons>
       </IonToolbar>
-
-      <IonToolbar>
-        <IonSearchbar
-          v-model="searchQuery"
-          aria-label="搜索应用"
-          :placeholder="searchPlaceholder"
-          :animated="true"
-          show-cancel-button="focus"
-          class="app-store-searchbar"
-          mode="ios"
-          @ion-input="handleSearchInput"
-          @ion-clear="handleSearchInput"
-        />
-      </IonToolbar>
-
-      <IonToolbar>
-        <IonSegment
-          :value="selectedCategory"
-          scrollable
-          mode="ios"
-          @ion-change="handleSegmentChange"
-        >
-          <IonSegmentButton
-            v-for="category in categories"
-            :key="category.id"
-            :value="category.name"
-          >
-            <IonLabel>{{ category.name }}</IonLabel>
-          </IonSegmentButton>
-        </IonSegment>
-      </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true">
-      <div class="content-wrapper">
+    <IonContent class="catalog-content" :fullscreen="true">
+      <WorkshopCatalogBrowser
+        :categories="categories"
+        :selected="selectedCategory"
+        :query="searchQuery"
+        :search-placeholder="searchPlaceholder"
+        :result-count="resultCount"
+        :loading="isPublicScope ? publicLoading : scopeLoading"
+        @select="handleCategoryChange"
+        @search="handleSearchInput"
+      >
         <AppList v-if="isPublicScope" />
 
         <template v-else>
@@ -491,7 +470,7 @@ function handleSearchInput() {
             @open="openScopedApp"
           />
         </template>
-      </div>
+      </WorkshopCatalogBrowser>
     </IonContent>
 
     <WorkshopPickerSheet
@@ -511,8 +490,33 @@ function handleSearchInput() {
 </template>
 
 <style scoped>
+.catalog-page {
+  --ion-background-color: var(--ylf-catalog-canvas);
+  --ion-text-color: var(--ylf-catalog-text);
+  --ion-toolbar-background: var(--ylf-catalog-canvas);
+  --ion-toolbar-color: var(--ylf-catalog-text);
+}
+
+.catalog-header {
+  box-shadow: none;
+}
+
+.catalog-header::after {
+  background-image: none;
+}
+
 .scope-toolbar {
-  --min-height: 58px;
+  --min-height: 64px;
+  --border-color: var(--ylf-catalog-divider);
+  padding-inline: max(8px, calc((100vw - 1160px) / 2 + 14px));
+}
+
+.catalog-content {
+  --background: var(--ylf-catalog-canvas);
+}
+
+.catalog-content::part(scroll) {
+  max-width: none;
 }
 
 .scope-buttons {
@@ -547,9 +551,9 @@ function handleSearchInput() {
   display: grid;
   place-items: center;
   border-radius: 10px;
-  color: #fff;
-  background: linear-gradient(145deg, var(--ion-color-primary), var(--ylf-color-indigo));
-  font-size: 17px;
+  color: var(--ylf-catalog-accent-text);
+  background: var(--ylf-catalog-accent-soft);
+  font-size: 19px;
 }
 
 .scope-trigger-copy {
@@ -584,34 +588,6 @@ function handleSearchInput() {
   flex: 0 0 auto;
   color: var(--ylf-label-secondary);
   font-size: 14px;
-}
-
-/* ==================== 搜索栏 ==================== */
-.app-store-searchbar {
-  --background: var(--ylf-fill-tertiary);
-  --border-radius: 10px;
-  --box-shadow: none;
-  --cancel-button-color: var(--ion-color-primary);
-  --placeholder-color: var(--ylf-label-secondary);
-  --icon-color: var(--ylf-label-secondary);
-  --clear-button-color: var(--ylf-label-secondary);
-  padding: 0 16px;
-  font-size: 17px;
-  font-weight: 400;
-}
-
-.app-store-searchbar::part(native) {
-  height: 36px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.app-store-searchbar::part(native):focus-within {
-  --background: var(--ylf-fill-secondary);
-}
-
-/* ==================== Content 区域 ==================== */
-.content-wrapper {
-  padding: 0 16px 16px;
 }
 
 .scope-context {
@@ -742,33 +718,9 @@ function handleSearchInput() {
   font-size: 13px;
 }
 
-/* ==================== 响应式设计 ==================== */
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .scope-buttons {
     max-width: 360px;
   }
-
-  .content-wrapper {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 0 24px 24px;
-  }
 }
-
-@media (min-width: 1024px) {
-  .content-wrapper {
-    max-width: 1200px;
-    padding: 0 32px 32px;
-  }
-}
-
-/* ==================== 无障碍优化 ==================== */
-@media (prefers-reduced-motion: reduce) {
-  .app-store-searchbar::part(native) {
-    transition: none;
-  }
-}
-
-/* Dark mode 不再需要单独覆盖 —— 所有颜色已经通过 CSS 变量
-   在浅/深色之间自动切换（见 css-vars.css 与 Ionic 调色板） */
 </style>

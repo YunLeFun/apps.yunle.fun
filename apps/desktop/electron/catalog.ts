@@ -5,6 +5,21 @@ import path from 'node:path'
 import { GENERATED_APPS, recordToAppInfo, withCanonicalAppDomain, withCanonicalAppIcon } from '@yunlefun/app-core'
 
 export const CATALOG_ENDPOINT = 'https://apps.yunle.fun/api/apps/public'
+export const CATALOG_NETWORK_PARTITION = 'yunle-public-catalog'
+
+const ERROR_NAMES = new Set(['Error', 'TypeError', 'SyntaxError', 'ReferenceError', 'RangeError', 'AbortError', 'TimeoutError'])
+function networkFailure(error: unknown, httpStatus?: number) {
+  const failure = error && typeof error === 'object' ? error as Record<string, unknown> : {}
+  const cause = failure.cause && typeof failure.cause === 'object' ? failure.cause as Record<string, unknown> : {}
+  const code = (value: unknown) => typeof value === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(value) ? value : undefined
+  const chromiumCode = typeof failure.message === 'string' ? /^net::(ERR_[A-Z_]{1,60})$/.exec(failure.message)?.[1] : undefined
+  return {
+    name: typeof failure.name === 'string' && ERROR_NAMES.has(failure.name) ? failure.name : 'Error',
+    code: code(failure.code) || chromiumCode,
+    causeCode: code(cause.code),
+    httpStatus,
+  }
+}
 
 // The old snapshot generator omits accessMode/audience. Only these known public,
 // anonymous applications are usable offline until the snapshot includes policy.
@@ -158,12 +173,14 @@ export class PublicCatalog {
   private async load() {
     this.state = { ...this.state, loading: true, error: '' }
     this.notify()
+    let httpStatus: number | undefined
     try {
       const response = await (this.options.fetcher || fetch)(this.options.endpoint || CATALOG_ENDPOINT, {
         redirect: 'error',
         credentials: 'omit',
         signal: AbortSignal.timeout(8000),
       })
+      httpStatus = response.status
       if (!response.ok)
         throw new Error(`Catalog returned ${response.status}`)
       const { records, entries } = parsePublicCatalog(await response.json(), this.options.testOrigin)
@@ -178,7 +195,9 @@ export class PublicCatalog {
       }
       catch { /* A storage failure must not revert the online catalog. */ }
     }
-    catch {
+    catch (error) {
+      // Never log response bodies, headers, URLs, messages or environment values.
+      console.warn('[catalog] refresh failed', networkFailure(error, httpStatus))
       this.state = { ...this.state, loading: false, error: '暂时无法刷新目录，正在使用本地快照或缓存' }
     }
     this.notify()

@@ -7,6 +7,7 @@ import { CATALOG_ENDPOINT, isCatalogUrl, offlineCatalog, parsePublicCatalog, Pub
 
 const temporary: string[] = []
 afterEach(async () => {
+  vi.restoreAllMocks()
   await Promise.all(temporary.splice(0).map(directory => fs.rm(directory, { recursive: true, force: true })))
 })
 function record(extra: Partial<AppRecord> = {}): AppRecord {
@@ -105,6 +106,19 @@ describe('trusted public application catalog', () => {
     expect(() => catalog.get('public-app')).toThrow()
     await catalog.refresh()
     expect(catalog.state.apps.map(app => app.id)).toEqual(['public-app'])
+    expect(catalog.state.error).toBeTruthy()
+  })
+  it('logs bounded network diagnostics without including request secrets or error messages', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const failure = new TypeError('https://private.example/?token=secret', { cause: { code: 'ECONNREFUSED', headers: { authorization: 'secret' } } })
+    const fetcher = vi.fn().mockRejectedValueOnce(failure).mockResolvedValueOnce(new Response('', { status: 503 }))
+    const catalog = new PublicCatalog({ cacheFile: path.join(await directory(), 'catalog.json'), onChange: vi.fn(), fetcher })
+    await catalog.refresh()
+    expect(warn).toHaveBeenLastCalledWith('[catalog] refresh failed', { name: 'TypeError', code: undefined, causeCode: 'ECONNREFUSED', httpStatus: undefined })
+    await catalog.refresh()
+    expect(warn).toHaveBeenLastCalledWith('[catalog] refresh failed', { name: 'Error', code: undefined, causeCode: undefined, httpStatus: 503 })
+    expect(JSON.stringify(warn.mock.calls)).not.toContain('secret')
+    expect(catalog.state.source).toBe('snapshot')
     expect(catalog.state.error).toBeTruthy()
   })
 })

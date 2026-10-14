@@ -6,7 +6,7 @@ import process from 'node:process'
 import { app, BaseWindow, ipcMain, nativeTheme, session, WebContentsView } from 'electron'
 import squirrelStartup from 'electron-squirrel-startup'
 import { GUEST_ENVIRONMENT, SHELL_ORIGIN, SHELL_REQUEST, SHELL_STATE } from '../shared/desktop'
-import { PublicCatalog } from './catalog'
+import { CATALOG_NETWORK_PARTITION, PublicCatalog } from './catalog'
 import { clampViewport, isAllowedPage, isLoopbackOrigin, parseRequest } from './policies'
 import { registerScheme, serveShell } from './protocol'
 import { initializeUpdates } from './updates'
@@ -290,10 +290,14 @@ else {
       guest: { open: false, appId: '', title: '', url: '', loading: false, canGoBack: false, canGoForward: false, error: '' },
       updates: { status: 'disabled', message: '桌面端自动更新将在正式发布后启用' },
     }
+    // Chromium supplies the same system networking as the WebContentsViews.
+    // Keep the anonymous API transport separate from shell and guest sessions.
+    const catalogSession = session.fromPartition(CATALOG_NETWORK_PARTITION, { cache: false })
     catalog = new PublicCatalog({
       cacheFile: path.join(app.getPath('userData'), 'public-catalog.json'),
       endpoint: testOrigin ? `${testOrigin}/api/apps/public` : undefined,
       testOrigin,
+      fetcher: (input, init) => catalogSession.fetch(input instanceof URL ? input.href : input, init),
       onChange(value) {
         state.catalog = value
         if (currentApp) {

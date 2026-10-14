@@ -20,8 +20,12 @@ describe('curated desktop icon assets', () => {
   })
 
   it('prefers dedicated existing brands over newly generated alternatives', () => {
-    for (const slug of ['cook', 'fc', 'pixi-painter', 'web-resume', 'everything-generator'])
+    for (const slug of ['cook', 'fc', 'web-resume', 'everything-generator'])
       expect(new URL(appIconUrl(slug)).pathname).toBe(`/desktop/app-icons/v2/${slug}.webp`)
+  })
+
+  it('uses the historical Saier brush artwork explicitly selected by its maintainer', () => {
+    expect(new URL(appIconUrl('pixi-painter')).pathname).toBe('/desktop/app-icons/v1/pixi-painter.webp')
   })
 
   it('selects fallback for unknown slugs, URLs and inherited property names', () => {

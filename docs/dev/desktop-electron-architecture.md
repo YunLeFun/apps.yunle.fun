@@ -2,7 +2,7 @@
 
 更新日期：2026-10-14。状态：现有 Web／Capacitor 工程已迁入 `apps/mobile`，桌面入口在 `apps/desktop` 接入，改造在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。通用模板已在 [PR #6](https://github.com/YunLeFun/vitesse-nuxt-electron/pull/6) 升级并通过三平台 CI；本文的多标签、产品登录与宿主授权等完整桌面能力仍分阶段实现。模板验证与产品验证分别验收。
 
-当前独立 PR 工作区已基于最新 `main` 整理，排除了原本机工作区未提交的其它功能；根 lint、Web／移动类型检查、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查通过。桌面 lint、类型、75 个单元测试与 3 个真实 Electron E2E 通过，失败 trace 保存已实测；macOS arm64 的品牌 `.app`、DMG、ZIP 以及包内运行时、构建记录／SHA256 与真实启动校验均通过。迁移阶段的原生工程编译和生产 API 记录见[验收说明](./monorepo.md#验证迁移)，不替代当前 PR 的原生工程验收。产品三平台 CI 已触发，但 GitHub Actions 预算阻止 runner 启动，远端跨平台执行尚未验收；签名、正式发布和跨版本更新另行验收。
+当前独立 PR 工作区已基于最新 `main` 整理，排除了原本机工作区未提交的其它功能；根 lint、Web／移动类型检查、476 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查通过。桌面 lint、类型、76 个单元测试与 3 个真实 Electron E2E 通过，失败 trace 保存已实测；macOS arm64 的品牌 `.app`、DMG、ZIP 以及包内运行时、构建记录／SHA256 与真实启动校验均通过。迁移阶段的原生工程编译和生产 API 记录见[验收说明](./monorepo.md#验证迁移)，不替代当前 PR 的原生工程验收。产品三平台 CI 已触发，但 GitHub Actions 预算阻止 runner 启动，远端跨平台执行尚未验收；签名、正式发布和跨版本更新另行验收。
 
 本次桌面接入提供匿名公开目录及允许开放的云应用容器，复用 `packages/app-core` 的 AppRecord、记录转换、域名／图标和目录快照。主进程从固定公开 API 获取和缓存目录，校验审核、公开和发布状态；应用无需登录、会员或付费才允许打开。离线只显示显式免费 slug 白名单，在线成功结果完整替换缓存，目录为空也不自动回退旧列表。目录刷新时，相同 slug 与规范化后的完整 URL 保留正在运行的视图、历史及会话，并同步变化的文档 ID；应用下架、访问门槛或目标 URL 改变才关闭。本次不建立账号、云币、云居、PKCE 或宿主 SSO，guest 不接收账户 token；下文这些能力属于后续架构目标。
 
@@ -12,7 +12,7 @@
 
 精选横幅作为在线装饰媒体发布到 COS 的公开 HTTPS 对象，二进制不进入 Git 或桌面安装包；原生品牌图标仍在仓库中维护。固定对象地址位于 `apps/desktop/shared/editorial-media.ts`，只有它的 Origin 获得 shell `img-src` 许可，不扩展脚本、API 或 frame 来源。图片请求使用 `no-referrer`；地址留空、无效或加载失败时只隐藏插画，保留橙色背景、文案和真实应用打开入口。替换同一 COS 对象可以更新媒体，变更路径或 CDN Origin 时需更新配置并重新验证。媒体维护说明位于 `apps/desktop/public/images/README.md`。
 
-应用目录的 28 个固定图标同样存于 COS，覆盖在线与离线目录；17 个保留正式品牌，11 个使用新绘桌面变体。256px WebP 合计 138,668 字节，PNG 源图与素材不进入 Git 或安装包。固定清单从 `YunLeFun/icons` 显式同步，候选、错误版本和任意外部 URL 不会被误采用。加载失败或未知应用保留同尺寸 emoji 回退，旧图片节点的迟到错误不能影响新图；正在使用的应用复用同一图标。完整设计与维护方式见[目录图标](./desktop-app-icons.md)和[Design 桌面适配](./desktop-design-adapter.md)。
+应用目录的 28 个固定图标同样存于 COS，覆盖在线与离线目录；16 个保留既有正式品牌，12 个使用新绘素材，其中 Saier 的历史画笔图已由维护者明确选用。256px WebP 合计 140,706 字节，PNG 源图与素材不进入 Git 或安装包。固定清单从 `YunLeFun/icons` 显式同步，候选、错误版本和任意外部 URL 不会被误采用。加载失败或未知应用保留同尺寸 emoji 回退，旧图片节点的迟到错误不能影响新图；正在使用的应用复用同一图标。完整设计与维护方式见[目录图标](./desktop-app-icons.md)和[Design 桌面适配](./desktop-design-adapter.md)。
 
 首版保持一个 guest：返回目录或进入关于页时隐藏原生视图，继续使用时恢复同一网页；明确关闭或访问策略撤回才销毁。macOS 使用原生 `hiddenInset` 交通灯和侧栏 vibrancy，Windows／Linux 保留原生窗口框。工具栏高 52 CSS px，主进程另外保留至少 52 DIP 的顶部安全区域；shell 整页刷新或崩溃会清除旧 viewport。浅色、深色和跟随系统外观同时同步 Nuxt 界面与 Electron `nativeTheme`。布局常量位于 `apps/desktop/shared/window-layout.ts`。
 
@@ -230,7 +230,7 @@ shell preload 只暴露带 schema 校验的宿主操作、事件和取消订阅�
 
 ## 10. 发布与验证顺序
 
-2026-10-14 的独立 PR 工作区通过根 lint、Web／移动类型、475 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查，桌面 lint／类型、75 个单元测试、3 个 Electron E2E 和失败 trace 保存验证。macOS arm64 的 Forge make 成功生成品牌 `.app`、DMG、ZIP，实际应用 ICNS 与提交的图标一致；`verify:desktop`、`verify:desktop-artifacts`、`verify:desktop-launch` 和标准 `shasum` 均通过，安装包与 manifest 完整性已验证。关闭自动更新时的私有 release 配置检查通过，没有执行发布。[三平台 Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38426634680) 已触发，GitHub 注释为“Actions budget is preventing further use”，所有 job 均没有进入步骤。恢复预算或接入可用 runner 后仍需实际运行并验收三平台，不能将此轮失败归因于代码。
+2026-10-14 的独立 PR 工作区通过根 lint、Web／移动类型、476 个单元测试、59 个 Nuxt 测试、5 个 Chromium smoke、生产构建与服务端运行依赖检查，桌面 lint／类型、76 个单元测试、3 个 Electron E2E 和失败 trace 保存验证。macOS arm64 的 Forge make 成功生成品牌 `.app`、DMG、ZIP，实际应用 ICNS 与提交的图标一致；`verify:desktop`、`verify:desktop-artifacts`、`verify:desktop-launch` 和标准 `shasum` 均通过，安装包与 manifest 完整性已验证。关闭自动更新时的私有 release 配置检查通过，没有执行发布。[三平台 Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38426634680) 已触发，GitHub 注释为“Actions budget is preventing further use”，所有 job 均没有进入步骤。恢复预算或接入可用 runner 后仍需实际运行并验收三平台，不能将此轮失败归因于代码。
 
 2026-10-13 在原本机工作区的迁移阶段已验证本地生产 Node server 的 `/`、`/tabs/home` 和 `/login` 返回 200，匿名 `/api/apps/public` 返回 200 JSON 与 25 个公开应用。打包后的 macOS ASAR `.app` 从 `app://shell/` 启动，线上目录为 `online`、25 项且无错误；实际 `cook.yunle.fun` 在 WebContentsView 加载“食用手册”，guest 的 `require` 和 `window.desktop` 均为 `undefined`。当时的 Chromium、iOS Simulator、Android、macOS 打包、ASAR／fuses、原生启动与开发退出清理记录保留在[迁移验收说明](./monorepo.md#验证迁移)。该工作区包含其它未提交功能，当前 PR 的原生工程与正式部署仍需独立验收。
 

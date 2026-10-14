@@ -71,7 +71,7 @@ onUnmounted(() => {
   line-height: 1.6;
 }
 .preview-mark {
-  color: var(--accent);
+  color: var(--ylf-c-brand);
   font-size: 34px;
 }
 </style>

@@ -1,30 +1,38 @@
 :root {
   color-scheme: light;
-  --background: #f5f5f7;
-  --surface: #fff;
-  --sidebar: #eeeeef;
-  --search: #e5e5e7;
-  --text: #242426;
-  --muted: #727278;
-  --border: #dedee1;
-  --accent: #007aff;
-  --selection: #dcdcdf;
-  --hover: #e5e5e7;
-  --pill: #e7e7ea;
+  /* Desktop adapts neutral surfaces and density; Design owns brand and semantics. */
+  --ylf-desktop-canvas: #f5f5f7;
+  --ylf-desktop-panel: #fff;
+  --ylf-desktop-sidebar: #f0f1f4;
+  --ylf-desktop-toolbar: #f8f8fa;
+  --ylf-desktop-field: #fff;
+  --ylf-desktop-inset: #edeef2;
+  --ylf-desktop-control: 28px;
+  --ylf-desktop-nav: 34px;
+  --ylf-desktop-radius-control: 6px;
+  --ylf-desktop-radius-panel: 12px;
+  --ylf-desktop-text-meta: 11px;
+  --ylf-desktop-text-control: 12px;
+  --ylf-desktop-text-nav: 13px;
+  --ylf-desktop-text-title: 15px;
+  --background: var(--ylf-desktop-canvas);
+  --surface: var(--ylf-desktop-panel);
+  --sidebar: var(--ylf-desktop-sidebar);
+  --search: var(--ylf-desktop-field);
+  --text: var(--ylf-c-text);
+  --muted: var(--ylf-c-text-3);
+  --border: color-mix(in srgb, var(--ylf-c-text) 12%, transparent);
+  --selection: var(--ylf-c-brand-soft);
 }
 :root.dark {
   color-scheme: dark;
-  --background: #242426;
-  --surface: #2d2d30;
-  --sidebar: #202022;
-  --search: #2b2b2e;
-  --text: #f4f4f5;
-  --muted: #a0a0a7;
-  --border: #373739;
-  --accent: #0a84ff;
-  --selection: #343436;
-  --hover: #2c2c2f;
-  --pill: #343436;
+  --ylf-desktop-canvas: #242426;
+  --ylf-desktop-panel: #2d2e31;
+  --ylf-desktop-sidebar: #202124;
+  --ylf-desktop-toolbar: #27282b;
+  --ylf-desktop-field: #313236;
+  --ylf-desktop-inset: #222326;
+  --border: color-mix(in srgb, var(--ylf-c-text) 14%, transparent);
 }
 * {
   box-sizing: border-box;
@@ -40,7 +48,9 @@ html {
   background: transparent;
 }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Segoe UI', sans-serif;
+  font-family: system-ui, var(--ylf-font-body);
+  font-size: var(--ylf-text-sm);
+  line-height: 1.45;
   color: var(--text);
   background: transparent;
   -webkit-font-smoothing: antialiased;
@@ -70,6 +80,9 @@ button:disabled {
 .desktop.mac .catalog-sidebar {
   background: color-mix(in srgb, var(--sidebar) 86%, transparent);
 }
+:is(.desktop, .about) :is(h1, h2, h3) {
+  font-family: var(--ylf-font-heading);
+}
 .workspace {
   flex: 1;
   min-width: 0;
@@ -84,101 +97,131 @@ button:disabled {
   min-height: var(--toolbar-height, 52px);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ylf-space-3);
   padding: 0 20px;
   border-bottom: 1px solid var(--border);
-  background: var(--background);
+  background: var(--ylf-desktop-toolbar);
+  box-shadow: inset 0 1px 0 var(--ylf-c-highlight);
   -webkit-app-region: drag;
   user-select: none;
 }
 .toolbar-title {
-  font-size: 13px;
+  font-size: var(--ylf-desktop-text-nav);
   font-weight: 600;
 }
 .toolbar-trailing {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ylf-space-3);
   margin-left: auto;
 }
 .catalog-status {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--ylf-desktop-text-meta);
 }
 .icon-button {
-  width: 28px;
-  height: 28px;
+  width: var(--ylf-desktop-control);
+  height: var(--ylf-desktop-control);
   display: grid;
   place-items: center;
   flex: none;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--ylf-desktop-radius-control);
   background: transparent;
   color: var(--muted);
 }
 .icon-button:hover:not(:disabled) {
-  background: var(--hover);
-  color: var(--text);
+  background: var(--surface);
+  color: var(--ylf-c-brand);
+  box-shadow: var(--ylf-shadow-control);
+}
+.icon-button:active:not(:disabled) {
+  background: var(--ylf-desktop-inset);
+  box-shadow: var(--ylf-shadow-inset);
+  color: var(--ylf-c-brand-active);
 }
 .icon-button:disabled {
   opacity: 0.35;
 }
 .toolbar-button {
-  border: 0;
-  border-radius: 6px;
-  padding: 5px 8px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 11px;
+  min-height: var(--ylf-desktop-control);
+  border: 1px solid var(--border);
+  border-radius: var(--ylf-desktop-radius-control);
+  padding: 4px var(--ylf-space-2);
+  background: var(--surface);
+  box-shadow: var(--ylf-shadow-control);
+  color: var(--text);
+  font-size: var(--ylf-desktop-text-control);
   flex: none;
 }
-.toolbar-button:hover {
-  background: var(--hover);
-  color: var(--text);
+.toolbar-button:hover:not(:disabled) {
+  border-color: var(--ylf-c-brand);
+  color: var(--ylf-c-brand);
 }
 .button {
+  min-height: var(--ylf-desktop-control);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--ylf-desktop-radius-control);
   background: var(--surface);
+  box-shadow: var(--ylf-shadow-control);
   color: var(--text);
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 6px var(--ylf-space-3);
+  font-size: var(--ylf-desktop-text-control);
 }
 .button:hover:not(:disabled) {
-  border-color: var(--accent);
+  border-color: var(--ylf-c-brand);
+  color: var(--ylf-c-brand-hover);
 }
 .button.compact {
   padding: 6px 9px;
 }
+.toolbar-button:active:not(:disabled),
+.button:active:not(:disabled) {
+  background: var(--ylf-desktop-inset);
+  box-shadow: var(--ylf-shadow-inset);
+}
+.toolbar-button:disabled,
 .button:disabled {
   opacity: 0.4;
+  box-shadow: none;
+}
+:is(.icon-button, .toolbar-button, .button, .nav-item, .open-button, .feature-button, .see-all) {
+  transition:
+    background-color var(--ylf-duration-fast) var(--ylf-ease-standard),
+    border-color var(--ylf-duration-fast) var(--ylf-ease-standard),
+    color var(--ylf-duration-fast) var(--ylf-ease-standard),
+    box-shadow var(--ylf-duration-fast) var(--ylf-ease-standard);
 }
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: 2px solid var(--ylf-c-brand);
+  outline-offset: 2px;
 }
 .text-link {
-  color: var(--accent);
+  color: var(--ylf-c-brand);
   text-decoration: none;
 }
 .text-link:hover {
+  color: var(--ylf-c-brand-hover);
   text-decoration: underline;
 }
 .inline-notice {
   margin: 0;
-  padding: 9px 24px;
-  color: var(--muted);
-  font-size: 11px;
+  padding: var(--ylf-space-2) var(--ylf-space-6);
+  color: var(--ylf-status-info-text);
+  font-size: var(--ylf-desktop-text-control);
   line-height: 1.5;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--ylf-status-info-soft);
 }
 .error {
-  color: #d85b53;
+  color: var(--ylf-status-danger-text);
+}
+.inline-notice.error {
+  background: var(--ylf-status-danger-soft);
 }
 .about-page {
   height: 100dvh;
@@ -187,32 +230,48 @@ select:focus-visible {
 }
 .about-titlebar {
   height: 52px;
+  background: var(--ylf-desktop-toolbar);
+  border-bottom: 1px solid var(--border);
   -webkit-app-region: drag;
 }
 .about {
-  max-width: 640px;
-  padding: 28px 36px 60px;
-  margin: auto;
+  width: calc(100% - var(--ylf-space-12));
+  max-width: var(--ylf-layout-reading);
+  padding: var(--ylf-space-8);
+  margin: var(--ylf-space-8) auto;
+  border: 1px solid var(--border);
+  border-radius: var(--ylf-desktop-radius-panel);
+  background: var(--surface);
+  box-shadow:
+    var(--ylf-shadow-sm),
+    inset 0 1px 0 var(--ylf-c-highlight);
 }
 .about-brand {
   width: 80px;
   height: 80px;
-  border-radius: 18px;
-  margin-top: 38px;
+  border-radius: var(--ylf-radius-lg);
+  margin-top: var(--ylf-space-8);
 }
 .about h1 {
-  font-size: 28px;
+  font-size: var(--ylf-text-2xl);
   letter-spacing: -0.5px;
   margin: 22px 0 14px;
 }
 .about p {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.8;
+  color: var(--ylf-c-text-2);
+  font-size: var(--ylf-text-sm);
+  line-height: var(--ylf-leading-body);
 }
 .about .status {
   border-top: 1px solid var(--border);
-  margin-top: 28px;
+  margin-top: var(--ylf-space-6);
+}
+@media (pointer: coarse) {
+  .icon-button,
+  .toolbar-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -75,9 +75,10 @@ function categoryIcon(category: string) {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 12px 12px;
+  padding: 0 var(--ylf-space-3) var(--ylf-space-3);
   background: var(--sidebar);
   border-right: 1px solid var(--border);
+  box-shadow: inset -1px 0 0 var(--ylf-c-highlight);
 }
 .sidebar-titlebar {
   height: 20px;
@@ -90,29 +91,34 @@ function categoryIcon(category: string) {
 .brand {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 2px 8px 20px;
+  gap: var(--ylf-space-3);
+  padding: 2px var(--ylf-space-2) 20px;
 }
 .brand img {
-  border-radius: 10px;
+  border-radius: var(--ylf-radius-sm);
 }
 .brand h1 {
   margin: 0;
   font-size: 21px;
   letter-spacing: -0.6px;
   font-weight: 650;
+  color: var(--ylf-c-brand);
 }
 .sidebar-search {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
+  gap: var(--ylf-space-2);
+  height: calc(var(--ylf-desktop-control) + var(--ylf-space-1));
   padding: 0 9px;
   margin: 0 4px 18px;
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--ylf-desktop-radius-control);
   background: var(--search);
+  box-shadow: var(--ylf-shadow-inset);
   color: var(--muted);
+  transition:
+    border-color var(--ylf-duration-fast) var(--ylf-ease-standard),
+    box-shadow var(--ylf-duration-fast) var(--ylf-ease-standard);
 }
 .sidebar-search .shell-icon {
   width: 15px;
@@ -126,10 +132,10 @@ function categoryIcon(category: string) {
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--ylf-desktop-text-control);
 }
 .sidebar-search:focus-within {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ylf-c-brand);
   outline-offset: 1px;
 }
 .sidebar-search input:focus-visible {
@@ -147,17 +153,17 @@ function categoryIcon(category: string) {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ylf-space-3);
   width: 100%;
-  min-height: 34px;
+  min-height: var(--ylf-desktop-nav);
   padding: 7px 10px;
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--ylf-desktop-radius-control);
   background: transparent;
   text-decoration: none;
   color: var(--text);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--ylf-desktop-text-nav);
   text-align: left;
 }
 .nav-item > span:not(.running-dot) {
@@ -169,13 +175,37 @@ function categoryIcon(category: string) {
   color: var(--muted);
 }
 .nav-item:hover {
-  background: var(--hover);
+  background: var(--surface);
+  box-shadow: var(--ylf-shadow-control);
+}
+.nav-item:active {
+  background: var(--ylf-desktop-inset);
+  box-shadow: var(--ylf-shadow-inset);
 }
 .nav-item.selected {
   background: var(--selection);
+  color: var(--ylf-accent-blue-text);
+  font-weight: 600;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--ylf-c-brand) 16%, transparent),
+    inset 0 1px 0 var(--ylf-c-highlight);
+}
+.nav-item.selected:hover {
+  background: color-mix(in srgb, var(--ylf-c-brand) 7%, var(--selection));
+  color: var(--ylf-c-brand-hover);
+}
+.nav-item.selected:active {
+  color: var(--ylf-c-brand-hover);
+}
+.nav-item.selected:active {
+  background: color-mix(in srgb, var(--ylf-c-brand) 12%, var(--selection));
+  box-shadow: var(--ylf-shadow-inset);
 }
 .nav-item.selected .shell-icon {
-  color: var(--accent);
+  color: var(--ylf-c-brand);
+}
+.nav-item:focus-visible {
+  outline-offset: -2px;
 }
 .primary-nav .nav-item {
   margin-bottom: 3px;
@@ -186,7 +216,7 @@ function categoryIcon(category: string) {
 }
 .current-app h2,
 .category-nav h2 {
-  font-size: 11px;
+  font-size: var(--ylf-desktop-text-meta);
   font-weight: 500;
   color: var(--muted);
   margin: 0 10px 5px;
@@ -201,19 +231,20 @@ function categoryIcon(category: string) {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #30b36b;
+  background: var(--ylf-status-success);
   margin-left: auto;
   flex: none;
 }
 .sidebar-footer {
-  padding-top: 8px;
+  padding-top: var(--ylf-space-2);
+  border-top: 1px solid var(--border);
 }
 .appearance-control {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ylf-space-3);
   padding: 7px 10px 0;
-  font-size: 12px;
+  font-size: var(--ylf-desktop-text-control);
   color: var(--muted);
 }
 .appearance-control select {
@@ -221,10 +252,24 @@ function categoryIcon(category: string) {
   min-width: 0;
   width: 90px;
   padding: 5px 2px 5px 6px;
-  font-size: 11px;
+  min-height: var(--ylf-desktop-control);
+  font-size: var(--ylf-desktop-text-meta);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--ylf-desktop-radius-control);
   background: var(--search);
+  box-shadow: var(--ylf-shadow-control);
   color: var(--text);
+}
+.appearance-control select:hover {
+  border-color: var(--ylf-c-brand);
+}
+@media (pointer: coarse) {
+  .nav-item {
+    min-height: 44px;
+  }
+  .sidebar-search,
+  .appearance-control select {
+    min-height: 40px;
+  }
 }
 </style>

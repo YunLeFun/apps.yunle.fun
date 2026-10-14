@@ -133,6 +133,9 @@ importers:
       '@yunlefun/app-core':
         specifier: workspace:*
         version: link:../../packages/app-core
+      '@yunlefun/ui':
+        specifier: 0.0.6
+        version: 0.0.6(sass@1.101.0)
       electron:
         specifier: 44.7.0
         version: 44.7.0
@@ -4735,6 +4738,14 @@ packages:
 
   '@yunlefun/types@0.2.1':
     resolution: {integrity: sha512-KwfJo4efOA4yb5652Q6MHwSDd/wr4BsuFm4CPDQCLRQ6xpVmBMamgVmp+y1Ouh4CMhOHOcgGee1etflREG8ECg==}
+
+  '@yunlefun/ui@0.0.6':
+    resolution: {integrity: sha512-XWvfNpKbTlF+0FA+dJg9koGbdx8/0QuXXQetB9GmCBT9kKZsreBMf89m5WpzML4DHxStBRxyb3GOBegl6TNidQ==}
+    peerDependencies:
+      sass: ^1.101.0
+    peerDependenciesMeta:
+      sass:
+        optional: true
 
   '@yunlefun/utils@0.1.2':
     resolution: {integrity: sha512-Veaa5bENBxV73ICvQM1dByOJO85v7BfJ56JyUqMVw9JjVTphiqJRFl1X/cmxXv4JHdbLLg/yLgB7MMZgFX0klA==}
@@ -15294,7 +15305,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.1.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@25.3.3)(@vitest/coverage-v8@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@7.3.6(@types/node@25.3.3)(jiti@2.7.0)(lightningcss@1.33.0)(sass@1.101.0)(terser@5.46.0)(yaml@2.9.0))
+      vitest: 4.1.10(@types/node@24.19.2)(@vitest/coverage-v8@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(vite@7.3.6(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(sass@1.101.0)(terser@5.46.0)(yaml@2.9.0))
 
   '@vitest/eslint-plugin@1.6.17(@typescript-eslint/eslint-plugin@8.59.2(@typescript-eslint/parser@8.59.2(eslint@10.7.0(jiti@2.7.0))(typescript@5.9.3))(eslint@10.7.0(jiti@2.7.0))(typescript@5.9.3))(eslint@10.7.0(jiti@2.7.0))(typescript@5.9.3)(vitest@4.1.10)':
     dependencies:
@@ -15681,6 +15692,10 @@ snapshots:
       - vue
 
   '@yunlefun/types@0.2.1': {}
+
+  '@yunlefun/ui@0.0.6(sass@1.101.0)':
+    optionalDependencies:
+      sass: 1.101.0
 
   '@yunlefun/utils@0.1.2': {}
 

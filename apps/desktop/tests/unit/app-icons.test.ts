@@ -10,13 +10,18 @@ describe('curated desktop icon assets', () => {
     for (const [slug, value] of entries) {
       const url = new URL(value)
       expect(url.origin).toBe('https://yunlefun-cos-1253292018.cos.ap-shanghai.myqcloud.com')
-      expect(url.pathname).toBe(`/desktop/app-icons/v1/${slug}.webp`)
+      expect(url.pathname).toMatch(new RegExp(`^/desktop/app-icons/v[12]/${slug}\\.webp$`))
       expect([url.username, url.password, url.port, url.search, url.hash]).toEqual(['', '', '', '', ''])
       expect(appIconUrl(slug)).toBe(value)
     }
     const offline = offlineCatalog()
     expect(offline.length).toBeGreaterThan(0)
     expect(offline.filter(app => !appIconUrl(app.slug)).map(app => app.slug)).toEqual([])
+  })
+
+  it('prefers dedicated existing brands over newly generated alternatives', () => {
+    for (const slug of ['cook', 'fc', 'pixi-painter', 'web-resume', 'everything-generator'])
+      expect(new URL(appIconUrl(slug)).pathname).toBe(`/desktop/app-icons/v2/${slug}.webp`)
   })
 
   it('selects fallback for unknown slugs, URLs and inherited property names', () => {

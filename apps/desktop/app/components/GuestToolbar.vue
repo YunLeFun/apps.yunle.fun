@@ -43,7 +43,9 @@ const host = computed(() => {
 .navigation-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--ylf-space-1);
+  padding-right: var(--ylf-space-2);
+  border-right: 1px solid var(--border);
 }
 .guest-location {
   min-width: 0;
@@ -53,7 +55,7 @@ const host = computed(() => {
   gap: 2px;
 }
 .guest-location strong {
-  font-size: 12px;
+  font-size: var(--ylf-desktop-text-nav);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -61,7 +63,7 @@ const host = computed(() => {
 }
 .guest-location span {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--ylf-desktop-text-meta);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

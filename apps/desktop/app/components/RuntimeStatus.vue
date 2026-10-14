@@ -20,17 +20,17 @@ defineEmits<{ checkUpdates: [] }>()
 
 <style scoped>
 .status {
-  padding-top: 16px;
-  font-size: 12px;
+  padding-top: var(--ylf-space-4);
+  font-size: var(--ylf-desktop-text-control);
   color: var(--muted);
   display: flex;
-  gap: 16px;
+  gap: var(--ylf-space-4);
   justify-content: space-between;
   flex-wrap: wrap;
 }
 .update-status {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ylf-space-3);
 }
 </style>

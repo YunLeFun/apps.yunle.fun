@@ -43,6 +43,8 @@ pnpm icons:desktop
 
 应用目录缩略图由固定 COS 清单提供，PNG 源图位于独立媒体目录，不进入原生品牌图标导出或安装包。当前 28 个缩略图覆盖在线与离线目录，详见[目录图标与素材维护](./desktop-app-icons.md)。
 
+桌面 renderer 的 Design token 依赖与中性表面适配见[Design 桌面适配](./desktop-design-adapter.md)；更新统一图标清单时执行桌面 `icons:sync --source /path/to/YunLeFun/icons`，正常构建无需中央仓库在线依赖。
+
 ## 安装包与构建记录
 
 Forge 原生目录位于 `apps/desktop/out/<产品名>-<platform>-<arch>/`，原始 maker 输出位于 `out/make/`。可分发目录为 `apps/desktop/out/artifacts/`：

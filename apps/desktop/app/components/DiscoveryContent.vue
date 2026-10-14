@@ -148,24 +148,24 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
 }
 .discovery-inner {
   width: 100%;
-  max-width: 1280px;
+  max-width: var(--ylf-layout-page);
   margin: 0 auto;
-  padding: 32px;
+  padding: var(--ylf-space-8);
 }
 .discovery-heading {
   margin-bottom: 20px;
 }
 .page-title {
   margin: 0;
-  font-size: 32px;
+  font-size: var(--ylf-text-2xl);
   font-weight: 700;
-  line-height: 39px;
+  line-height: var(--ylf-leading-heading);
   letter-spacing: -0.6px;
 }
 .page-subtitle {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 15px;
+  margin: var(--ylf-space-2) 0 0;
+  color: var(--ylf-c-text-2);
+  font-size: var(--ylf-text-sm);
   line-height: 22px;
 }
 .cook-feature {
@@ -174,9 +174,10 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
   min-height: 246px;
   overflow: hidden;
   align-items: center;
-  border-radius: 16px;
+  border-radius: var(--ylf-radius-lg);
   background: #b65238;
   color: #fff;
+  box-shadow: var(--ylf-shadow);
 }
 .feature-art {
   position: absolute;
@@ -190,11 +191,11 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
 .feature-copy {
   position: relative;
   z-index: 1;
-  padding: 32px;
+  padding: var(--ylf-space-8);
 }
 .feature-title {
   margin: 0;
-  font-size: 32px;
+  font-size: var(--ylf-text-2xl);
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.4px;
@@ -206,37 +207,50 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
 }
 .feature-button {
   min-width: 112px;
+  min-height: 34px;
   padding: 7px 20px;
-  border: 1px solid rgb(255 255 255 / 70%);
-  border-radius: 999px;
-  background: #fff;
-  color: #292626;
-  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--ylf-radius-pill);
+  background: var(--surface);
+  box-shadow: var(--ylf-shadow-control);
+  color: var(--ylf-c-brand);
+  font-size: var(--ylf-desktop-text-nav);
   font-weight: 600;
   line-height: 20px;
   cursor: pointer;
 }
 .feature-button:hover:not(:disabled) {
-  background: #f1f1f1;
+  background: var(--ylf-c-brand-soft);
+  color: var(--ylf-c-brand-hover);
+}
+.feature-button:active:not(:disabled) {
+  background: var(--ylf-c-brand-active);
+  color: var(--ylf-c-text-on-accent);
+  box-shadow: var(--ylf-shadow-inset);
 }
 .feature-button:disabled {
   opacity: 0.6;
+  box-shadow: none;
   cursor: default;
 }
+.feature-button:focus-visible {
+  outline-color: currentColor;
+  outline-offset: -3px;
+}
 .collection-section {
-  margin-top: 28px;
+  margin-top: var(--ylf-space-8);
 }
 .section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: var(--ylf-space-3);
+  margin-bottom: var(--ylf-space-3);
 }
 .section-title {
   margin: 0;
   color: var(--text);
-  font-size: 20px;
+  font-size: var(--ylf-text-lg);
   font-weight: 650;
   line-height: 26px;
   letter-spacing: -0.2px;
@@ -248,16 +262,25 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
   padding: 4px 0;
   border: 0;
   background: transparent;
-  color: var(--accent);
-  font-size: 12px;
+  color: var(--ylf-c-brand);
+  font-size: var(--ylf-desktop-text-control);
+  font-weight: 600;
   line-height: 18px;
   cursor: pointer;
 }
 .see-all:hover {
+  color: var(--ylf-c-brand-hover);
   text-decoration: underline;
 }
+.see-all:active {
+  color: var(--ylf-c-brand-active);
+}
 .empty-state {
-  padding: 56px 16px;
+  padding: 56px var(--ylf-space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--ylf-desktop-radius-panel);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 var(--ylf-c-highlight);
   text-align: center;
 }
 .empty-title {
@@ -269,12 +292,12 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
 .empty-description {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--ylf-text-sm);
   line-height: 22px;
 }
 @container discovery (max-width: 750px) {
   .discovery-inner {
-    padding: 26px;
+    padding: var(--ylf-space-6);
   }
   .cook-feature {
     min-height: 220px;
@@ -286,7 +309,7 @@ const emptyDescription = computed(() => props.loading ? '稍等片刻，新的�
     right: 0;
   }
   .feature-copy {
-    padding: 26px;
+    padding: var(--ylf-space-6);
   }
   .feature-title {
     font-size: 27px;

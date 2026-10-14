@@ -8,9 +8,9 @@
 
 **关键架构事实**（执行前必读）：
 - Nuxt 4 `ssr: false` SPA，生产部署在 EdgeOne Pages；`server/api/*` 由 EdgeOne Cloud Functions 承载。
-- 客户端认证：CloudBase v2 auth，accessToken 为 JWT（claims 含 `sub`/`exp`），[app/plugins/api.ts](app/plugins/api.ts) 的 `$api` 自动带 `Authorization: Bearer`，**401 时自动刷新 token 重试**——服务端必须返回真实 HTTP 401 才能触发此机制。
+- 客户端认证：CloudBase v2 auth，accessToken 为 JWT（claims 含 `sub`/`exp`），[app/plugins/api.ts](../../apps/mobile/app/plugins/api.ts) 的 `$api` 自动带 `Authorization: Bearer`，**401 时自动刷新 token 重试**——服务端必须返回真实 HTTP 401 才能触发此机制。
 - **server/ 目前没有任何鉴权代码**，这是本计划新增的基础设施。
-- 客户端验 token 先例：[useCloudbaseAuthCore.ts](app/composables/auth/useCloudbaseAuthCore.ts) 148-206 行调 `https://{envId}.api.tcloudbasegateway.com/auth/v1/user/me`。
+- 客户端验 token 先例：[useCloudbaseAuthCore.ts](../../apps/mobile/app/composables/auth/useCloudbaseAuthCore.ts) 148-206 行调 `https://{envId}.api.tcloudbasegateway.com/auth/v1/user/me`。
 - 安全规则源文件在 `scripts/cloudbase-rules/*.json`，用 `bash scripts/cloudbase-rules/apply.sh`（mcporter + CloudBase MCP）应用，格式参照 `apps.json`。
 - 应用提交是客户端直写 apps 集合（status='pending' 人工审核），**本期不动、不加预检接口**（已确认），moderation util 留注释扩展点即可。
 - 类型定义放本仓库 `app/types/review.ts`（已确认，不进 @yunlefun/types）。
@@ -38,7 +38,7 @@
 ### 1.1 依赖与配置
 
 - `package.json` **dependencies**（非 dev，Nitro 要打包进 .output）：`@cloudbase/node-sdk`、`tencentcloud-sdk-nodejs-tms`。
-- [nuxt.config.ts](nuxt.config.ts) runtimeConfig 新增：
+- [nuxt.config.ts](../../apps/mobile/nuxt.config.ts) runtimeConfig 新增：
 
 ```ts
 runtimeConfig: {
@@ -52,7 +52,7 @@ runtimeConfig: {
 }
 ```
 
-- [app/plugins/api.ts](app/plugins/api.ts)：`$fetch.create({ baseURL: config.public.apiBaseUrl || undefined, ... })`，401 重试逻辑不动。
+- [app/plugins/api.ts](../../apps/mobile/app/plugins/api.ts)：`$fetch.create({ baseURL: config.public.apiBaseUrl || undefined, ... })`，401 重试逻辑不动。
 
 ### 1.2 `server/utils/cloudbase-admin.ts` — node-sdk 单例
 
@@ -216,7 +216,7 @@ state：`summary / reviews / myReview / loading / error`。方法：`load()`（`
 
 ## 阶段 5：测试
 
-unit project（node 环境，沿用 [test/unit/useApps.test.ts](test/unit/useApps.test.ts) 的 `createMockDb` 链式 mock + `vi.stubGlobal` 风格）：
+unit project（node 环境，沿用 [test/unit/useApps.test.ts](../../apps/mobile/test/unit/useApps.test.ts) 的 `createMockDb` 链式 mock + `vi.stubGlobal` 风格）：
 
 | 文件 | 覆盖 | mock |
 |---|---|---|

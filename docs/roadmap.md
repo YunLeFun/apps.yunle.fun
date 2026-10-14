@@ -17,7 +17,7 @@
 满足任一条件即可发版：
 
 - **仅 Web 发版**：合并到 `main` 后由 EdgeOne 自动发布；需要版本 Tag 时运行 `pnpm release`
-- **iOS TestFlight 内测**：跑 `pnpm build` + `pnpm sync` + `pnpm build:ios`，再按发布文档显式设置签名变量并运行 `scripts/ios-testflight.sh`
+- **iOS TestFlight 内测**：跑 `pnpm build` + `pnpm sync` + `pnpm build:ios`，再按发布文档显式设置签名变量并运行 `apps/mobile/scripts/ios-testflight.sh`
 - **App Store 正式上架**：等 ICP 备案 + 设计交付齐
 
 ---
@@ -30,7 +30,7 @@
   - 删除过时的 `armv7`，改为 `arm64`
   - `CFBundleDevelopmentRegion` 由 `en` 改为 `zh-Hans`，并新增 `CFBundleLocalizations`
   - 添加 `ITSAppUsesNonExemptEncryption = false`（声明无加密导出，避免 TestFlight 卡合规）
-  - 文件：[ios/App/App/Info.plist](https://github.com/YunYouJun/apps.yunle.fun/blob/main/ios/App/App/Info.plist)
+  - 文件：[ios/App/App/Info.plist](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/ios/App/App/Info.plist)
 - [x] **修复 workshop 编辑页 typecheck 报错**
   - `app/pages/workshop/[slug]/edit.vue` 缺失 `import { checkmark } from 'ionicons/icons'`
 - [x] **修正 `capacitor.config.ts` 的 appId**
@@ -40,7 +40,7 @@
   - `app/config/index.ts` 中 `appStore.id` 已更新为 `'6759859441'`
   - 同时简化 URL 为 `https://apps.apple.com/app/id${id}`（去掉占位 slug）
 - [x] **iOS 端隐藏 GitHub 登录入口**（替代 SIWA 的策略）
-  - 在 [app/config/auth.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/config/auth.ts) 用 `Capacitor.isNativePlatform()` 强制原生平台 `github: false`
+  - 在 [app/config/auth.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/config/auth.ts) 用 `Capacitor.isNativePlatform()` 强制原生平台 `github: false`
   - 即使将来把 `baseAuthMethods.github` 改成 `true`，iOS 端仍然隐藏，安全 by default
   - 兜底：如果首次提交被 4.8 拒，再补 SIWA（半天工作量）
 
@@ -51,7 +51,7 @@
 ### 1.x backlog（推迟到首版上线后）
 
 - [ ] **WeChat 登录 iOS 上架合规**（**v1.0 不做**，原因如下）
-  - 当前 [`app/config/auth.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/config/auth.ts) `wechat: false`，登录页 WeChat 按钮不渲染
+  - 当前 [`app/config/auth.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/config/auth.ts) `wechat: false`，登录页 WeChat 按钮不渲染
   - `cordova-plugin-wechat` SDK 已 bundle 但 dormant，不触发就不会报错
   - 没有任何 `wx.*` 调用入口暴露给用户 → 没有合规风险
   - 1.x 决定开 WeChat 登录时再做：
@@ -66,15 +66,15 @@
 ### P1 已完成
 
 - [x] **Workshop 应用审核流程**
-  - 数据模型新增 `status: 'pending' | 'approved' | 'rejected'`、`rejectedReason`、`reviewedAt`（[app/types/app.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/types/app.ts)）
-  - 表单默认 `isPublic: false`，创建强制 `status: 'pending'`，更新会重置为 `pending`（[useAppForm.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useAppForm.ts) + [useApps.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useApps.ts)）
+  - 数据模型新增 `status: 'pending' | 'approved' | 'rejected'`、`rejectedReason`、`reviewedAt`（[app/types/app.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/types/app.ts)）
+  - 表单默认 `isPublic: false`，创建强制 `status: 'pending'`，更新会重置为 `pending`（[useAppForm.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/useAppForm.ts) + [useApps.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/useApps.ts)）
   - 公开查询（useApps / useWorkshop / useDiscovery / useAppDetail）全部加 `status: 'approved'` 过滤
   - 我的应用列表显示「审核中 / 已拒绝」状态徽章及拒绝原因
   - 应用详情页加「举报此应用」入口（mailto 模板，自动带应用信息）
 - [x] **CloudBase 安全规则文档化**（用户需手动同步到控制台）
   - read: `(doc.isPublic == true && doc.status == 'approved') || auth.uid == doc._openid`
   - write: `auth.uid == doc._openid`
-  - 详见 [useApps.ts 头部注释](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useApps.ts)
+  - 详见 [useApps.ts 头部注释](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/useApps.ts)
 
 ### P1 待办
 
@@ -89,8 +89,8 @@
 ### P1 已完成
 
 - [x] **接入腾讯云 RUM 错误监控**
-  - 安装 `aegis-web-sdk`，AppID `nG8jRFK2e30nRrle5R` 已写入 [`nuxt.config.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts)
-  - [`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts) 用户登录后自动 setConfig({ uin })，便于按用户聚合错误
+  - 安装 `aegis-web-sdk`，AppID `nG8jRFK2e30nRrle5R` 已写入 [`nuxt.config.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/nuxt.config.ts)
+  - [`app/plugins/rum.client.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/plugins/rum.client.ts) 用户登录后自动 setConfig({ uin })，便于按用户聚合错误
   - 上报项：JS 异常 + 资源 4xx/5xx + 接口测速 + Web Vitals + SPA pv
   - 验证：发版后到 <https://console.cloud.tencent.com/rum> 看上报数据
 
@@ -101,19 +101,19 @@
 ### P1 已完成
 
 - [x] **底部 Dock 栏**
-  - 实测发现：组件 ([`HomeScreenDock.vue`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/app/HomeScreenDock.vue)) / store (`dockApps`) / 同步链路全部 100% 实现，只是被 `tabs/home.vue:42` 一行 `computed(() => false)` 临时禁用
+  - 实测发现：组件 ([`HomeScreenDock.vue`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/components/app/HomeScreenDock.vue)) / store (`dockApps`) / 同步链路全部 100% 实现，只是被 `tabs/home.vue:42` 一行 `computed(() => false)` 临时禁用
   - 启用：`showDock = computed(() => settingsStore.dockVisible)`
-  - 设置页 [`user/settings.vue`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/pages/user/settings.vue) 解除 disabled，接 `settingsStore.dockVisible` v-model
+  - 设置页 [`user/settings.vue`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/pages/user/settings.vue) 解除 disabled，接 `settingsStore.dockVisible` v-model
   - 默认关闭，用户在「设置 → 主屏幕 → 显示 Dock 栏」打开
 - [x] **扫码手电筒切换**
-  - 新增 [`useTorch.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useTorch.ts) 通用 composable —— 基于 W3C `MediaStreamTrack.applyConstraints({ torch })` 标准 API，无第三方依赖
-  - [`Barcode.vue`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/scanner/Barcode.vue) 接入：按钮仅在设备支持时显示（前置摄像头/Firefox 自动隐藏），开关时图标变色
+  - 新增 [`useTorch.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/useTorch.ts) 通用 composable —— 基于 W3C `MediaStreamTrack.applyConstraints({ torch })` 标准 API，无第三方依赖
+  - [`Barcode.vue`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/components/scanner/Barcode.vue) 接入：按钮仅在设备支持时显示（前置摄像头/Firefox 自动隐藏），开关时图标变色
   - 支持矩阵：Chrome/Edge mobile + iOS Safari 17.4+ + Capacitor WebView，其他平台静默降级
 
 ### P1 待办
 
 - [ ] **PC 端微信扫码登录卡片**（推迟到 1.x）
-  - [`app/components/wx/LoginCard.vue:68`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/components/wx/LoginCard.vue) TODO
+  - [`app/components/wx/LoginCard.vue:68`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/components/wx/LoginCard.vue) TODO
   - 用户已确认：可后续再做（手机号/邮箱/密码登录已经覆盖 PC 主链路）
 
 ---
@@ -131,7 +131,7 @@
 - [x] **bump 版本号 + iOS TestFlight 上架**
   - `package.json` version → `0.1.0`（pre-release 语义）
   - iOS `MARKETING_VERSION=0.1.0` / `CURRENT_PROJECT_VERSION=67`，与 package.json 自动对齐
-    （[`scripts/sync-ios-version.sh`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
+    （[`scripts/sync-ios-version.sh`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
   - git tag `v0.1.0`
   - ✅ **已成功上传 TestFlight**（build 67，Delivery UUID 5a473656-…）
   - 踩坑与完整流程见 [`docs/dev/testflight.md`](./dev/testflight.md)（关键：`uploadSymbols=false` 绕过 Xcode 26 的 Copy failed）
@@ -139,12 +139,12 @@
 ### P2 已完成
 
 - [x] **iOS StatusBar / Splash 显式配置**
-  - [capacitor.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/capacitor.config.ts) 添加 `StatusBar`（style: DEFAULT, overlaysWebView: true）和 `SplashScreen` 配置
+  - [capacitor.config.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/capacitor.config.ts) 添加 `StatusBar`（style: DEFAULT, overlaysWebView: true）和 `SplashScreen` 配置
 - [x] **SEO + 分享卡**
-  - [nuxt.config.ts](https://github.com/YunYouJun/apps.yunle.fun/blob/main/nuxt.config.ts) `app.head` 补 Open Graph + Twitter Card + theme-color
-  - [public/robots.txt](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/robots.txt) 加 sitemap 引用 + Disallow 私有路由
-  - [public/sitemap.xml](https://github.com/YunYouJun/apps.yunle.fun/blob/main/public/sitemap.xml) 新增基础站点地图（三大 Tab + 静态页）
-  - ✅ `public/og-image.png` 已生成（1200×630，品牌渐变 + logo + iOS app 网格），脚本 [`scripts/gen-og-image.mjs`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/scripts/gen-og-image.mjs)（playwright 渲染，可重新生成）
+  - [nuxt.config.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/nuxt.config.ts) `app.head` 补 Open Graph + Twitter Card + theme-color
+  - [public/robots.txt](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/public/robots.txt) 加 sitemap 引用 + Disallow 私有路由
+  - [public/sitemap.xml](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/public/sitemap.xml) 新增基础站点地图（三大 Tab + 静态页）
+  - ✅ `public/og-image.png` 已生成（1200×630，品牌渐变 + logo + iOS app 网格），脚本 [`scripts/gen-og-image.mjs`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/scripts/gen-og-image.mjs)（playwright 渲染，可重新生成）
 - [x] **README 完善**
   - 加徽章、架构图、命令表、目录结构说明、贡献流程
 - [x] **iOS Splash Light/Dark 两套**

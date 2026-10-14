@@ -18,3 +18,16 @@ docs/.vitepress/cache
 
 # Claude Code 本地文件
 .claude/
+
+# Electron and workspace build artifacts
+**/.vite-electron/
+**/out/
+**/playwright-report/
+**/test-results/
+
+# Desktop editorial media lives in COS; keep only its source documentation.
+apps/desktop/public/images/*
+!apps/desktop/public/images/README.md
+
+# Source and optimized catalog artwork is hosted in COS, outside the app bundle.
+apps/desktop/.media/

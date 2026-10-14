@@ -32,7 +32,7 @@
 
 ✅ 当前接入 SDK：`aegis-web-sdk@latest`（腾讯官方 Web 端 SDK）
 ✅ 默认 AppID 已写入 `nuxt.config.ts`：`nG8jRFK2e30nRrle5R`（线上 `yunle.fun` 项目）
-✅ Plugin 已启用：[`app/plugins/rum.client.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts)
+✅ Plugin 已启用：[`app/plugins/rum.client.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/plugins/rum.client.ts)
 ✅ 自动绑定 `uin`：用户登录后自动用 `userStore.userInfo.id` 标记，便于按用户聚合错误
 
 ## 如果要切换 AppID（多环境）
@@ -98,13 +98,13 @@ NUXT_PUBLIC_RUM_DEBUG=true
 
 发版前至少补这几处（卡在登录是最高频流失点）：
 
-| 位置                                                                                                                                             | 上报事件                 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
-| [`composables/auth/useCloudbaseOtp.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/auth/useCloudbaseOtp.ts) 错误分支  | `auth.otp.failed`        |
-| [`composables/auth/useCloudbaseOAuth.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/auth/useCloudbaseOAuth.ts) catch | `auth.oauth.failed`      |
-| [`plugins/api.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/plugins/api.ts) 401 刷新失败分支                                    | `auth.refresh.failed`    |
-| [`composables/useApps.ts`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/app/composables/useApps.ts) createApp / updateApp catch         | `cloudbase.write.failed` |
-| Capacitor 扫码失败                                                                                                                               | `scan.failed`            |
+| 位置                                                                                                                                                        | 上报事件                 |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| [`composables/auth/useCloudbaseOtp.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/auth/useCloudbaseOtp.ts) 错误分支  | `auth.otp.failed`        |
+| [`composables/auth/useCloudbaseOAuth.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/auth/useCloudbaseOAuth.ts) catch | `auth.oauth.failed`      |
+| [`plugins/api.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/plugins/api.ts) 401 刷新失败分支                                    | `auth.refresh.failed`    |
+| [`composables/useApps.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/composables/useApps.ts) createApp / updateApp catch         | `cloudbase.write.failed` |
+| Capacitor 扫码失败                                                                                                                                          | `scan.failed`            |
 
 原生 SSO 已完成埋点，RUM 可按 `surface=native_sso`、`stage`、目标 host、App 版本和匿名 `flow`
 筛选。验收时必须确认成功链路以 `auth.native_sso.completed` 结束，取消链路以
@@ -122,7 +122,7 @@ NUXT_PUBLIC_RUM_DEBUG=true
 
 Capacitor WebView origin 是 `capacitor://localhost`（iOS）/`https://localhost`（部分版本）。RUM 的页面维度面向 Web URL，直接使用该地址会导致原生壳 PV 无法与线上应用页面聚合。
 
-[`app/plugins/rum.client.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/app/plugins/rum.client.ts) 会通过 SDK 的 `pageUrl` / `urlHandler` 把原生壳页面映射到公开 origin，并保留当前路由：
+[`app/plugins/rum.client.ts`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/plugins/rum.client.ts) 会通过 SDK 的 `pageUrl` / `urlHandler` 把原生壳页面映射到公开 origin，并保留当前路由：
 
 ```text
 capacitor://localhost/tabs/home

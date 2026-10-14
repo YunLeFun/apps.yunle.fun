@@ -1,7 +1,7 @@
 {
-  "buildCommand": "pnpm run build",
+  "buildCommand": "pnpm run build:edgeone",
   "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": "apps/mobile/.output/public",
+  "outputDirectory": "apps/mobile/.edgeone/assets",
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",

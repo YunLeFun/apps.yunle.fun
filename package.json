@@ -5,6 +5,8 @@
   "packageManager": "pnpm@11.13.1",
   "scripts": {
     "build": "pnpm --dir apps/mobile run build",
+    "build:edgeone": "pnpm --dir apps/mobile run build:edgeone",
+    "check:edgeone-output": "pnpm --dir apps/mobile run check:edgeone-output",
     "dev": "pnpm --dir apps/mobile run dev",
     "dev:pwa": "pnpm --dir apps/mobile run dev:pwa",
     "lint": "eslint .",

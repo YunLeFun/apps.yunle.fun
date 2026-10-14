@@ -1,18 +1,6 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// --- Mock ~/constants/apps ---
-// 应用目录在线化后 useWorkshop 仅用 APP_CATEGORIES 保持已有分类的展示顺序，
-// 候选数据源统一走 useAppCatalog().catalog（在下方 stub）。
-vi.mock('~/constants/apps', () => ({
-  APP_CATEGORIES: [
-    { id: 'all', name: '全部', icon: '📱' },
-    { id: 'interesting', name: '整活', icon: '🤣' },
-    { id: 'tools', name: '工具', icon: '🔧' },
-    { id: 'design', name: '设计', icon: '🎨' },
-  ],
-}))
-
 // Mock useDebounceFn to execute immediately
 vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: () => void) => fn,
@@ -165,20 +153,41 @@ describe('useWorkshop', () => {
       expect(apps.value.map(a => a.slug)).toEqual(['tool-1'])
     })
 
+    it('浏览分类合并旧分类且继续按关键词筛选', async () => {
+      setCatalog([
+        makeApp('tool-1', '工具', { name: 'Focus Timer' }),
+        makeApp('efficient-1', '效率工具', { name: 'Focus Notes' }),
+        makeApp('unrelated-tool', '工具', { name: 'Calculator' }),
+        makeApp('design-1', '设计', { name: 'Focus Canvas' }),
+      ])
+
+      const { queryApps, apps, selectedCategory, searchQuery, totalCount, categories } = await loadWorkshop()
+      selectedCategory.value = '效率工具'
+      searchQuery.value = 'focus'
+      await queryApps(true)
+
+      expect(apps.value.map(app => app.slug)).toEqual(['tool-1', 'efficient-1'])
+      expect(totalCount.value).toBe(2)
+      expect(categories.value.find(category => category.name === '效率工具')?.count).toBe(3)
+      expect(apps.value.map(app => app.category)).toEqual(['工具', '效率工具'])
+    })
+
     it('客户端分页：首屏展示 PAGE_SIZE(20)，loadMore 追加剩余', async () => {
       // 候选 25 条 → 首屏 20 条，loadMore 再展示剩余 5 条
       setCatalog(Array.from({ length: 25 }, (_, i) => makeApp(`s${i}`, '整活')))
 
-      const { queryApps, apps, hasMore, loadMore } = await loadWorkshop()
+      const { queryApps, apps, hasMore, loadMore, totalCount } = await loadWorkshop()
       await queryApps(true)
       expect(apps.value).toHaveLength(20)
       expect(hasMore.value).toBe(true)
+      expect(totalCount.value).toBe(25)
 
       loadMore()
       await flushPromises()
 
       expect(apps.value).toHaveLength(25)
       expect(hasMore.value).toBe(false)
+      expect(totalCount.value).toBe(25)
     })
 
     it('候选恰好一页时 hasMore 收敛为 false', async () => {
@@ -221,7 +230,7 @@ describe('useWorkshop', () => {
       changeCategory('设计')
       await flushPromises()
 
-      expect(selectedCategory.value).toBe('设计')
+      expect(selectedCategory.value).toBe('创意设计')
       expect(apps.value.map(a => a.slug)).toEqual(['design-1'])
     })
   })
@@ -278,9 +287,9 @@ describe('useWorkshop', () => {
       const { categories } = await loadWorkshop()
       expect(categories.value.map(category => category.name)).toEqual([
         '全部',
-        '整活',
-        '工具',
-        '设计',
+        '效率工具',
+        '创意设计',
+        '趣味娱乐',
       ])
     })
 
@@ -293,9 +302,29 @@ describe('useWorkshop', () => {
       const { categories } = await loadWorkshop()
       expect(categories.value.map(category => category.name)).toEqual([
         '全部',
-        '工具',
+        '效率工具',
         '音乐',
       ])
+    })
+
+    it('为当前目录中未分类的作品保留其他分组', async () => {
+      setCatalog([
+        makeApp('cook', '应用'),
+        makeApp('unknown-generic', '应用'),
+        makeApp('uncategorized', ''),
+      ])
+
+      const { categories, changeCategory, apps, totalCount } = await loadWorkshop()
+      expect(categories.value.map(({ name, count }) => [name, count])).toEqual([
+        ['全部', 3],
+        ['生活方式', 1],
+        ['其他', 2],
+      ])
+      changeCategory('其他')
+      await flushPromises()
+
+      expect(apps.value.map(app => app.slug)).toEqual(['unknown-generic', 'uncategorized'])
+      expect(totalCount.value).toBe(2)
     })
   })
 })

@@ -8,6 +8,7 @@
  */
 import { Capacitor } from '@capacitor/core'
 import { getErrorMessage } from '@yunlefun/auth'
+import { useAppsAuthAcquisition } from './useAppsAcquisition'
 
 /** state 前缀，用于标识来自原生 App 的 OAuth 请求 */
 export const NATIVE_OAUTH_STATE_PREFIX = 'app-'
@@ -17,6 +18,7 @@ const ONLINE_CALLBACK_URL = 'https://www.yunle.fun/auth/callback'
 
 export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>) {
   const { auth, loading, error, toast } = core
+  const { beginAuthentication, bindOAuthState, recordAfterAuthentication } = useAppsAuthAcquisition(core)
 
   /**
    * 移动端原生 OAuth 登录
@@ -28,6 +30,7 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
     // 生成带 app- 前缀的 state，让 callback 页面识别来源
     // 格式：app-{provider}_{random}（用 _ 分隔 provider 和 random，避免和 provider 名中的 - 冲突）
     const state = `${NATIVE_OAUTH_STATE_PREFIX}${provider}_${Math.random().toString(36).slice(2)}`
+    const attempt = beginAuthentication(provider, state)
 
     const { data, error: oauthError } = await auth.signInWithOAuth({
       provider,
@@ -43,6 +46,7 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
 
     if (!data?.url)
       throw new Error('未获取到授权地址')
+    bindOAuthState(attempt.id, readReturnedOAuthState(data.url, state))
 
     // 用系统浏览器打开授权页（iOS: SFSafariViewController）
     await Browser.open({ url: data.url })
@@ -58,9 +62,11 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
       error.value = null
 
       // 从 state 中解析 provider（格式: app-{provider}_{random}）
-      const withoutPrefix = state.replace(NATIVE_OAUTH_STATE_PREFIX, '')
-      const underscoreIdx = withoutPrefix.indexOf('_')
-      const provider = underscoreIdx > 0 ? withoutPrefix.slice(0, underscoreIdx) : withoutPrefix
+      // Provider ids themselves can contain underscores (wx_open).
+      const provider = (['github', 'wx_open'] as const).find((candidate) => {
+        const prefix = `${NATIVE_OAUTH_STATE_PREFIX}${candidate}_`
+        return state.startsWith(prefix) && state.length > prefix.length
+      })
       if (!provider)
         throw new Error('无法识别登录来源')
 
@@ -82,6 +88,7 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
 
       // 3. 刷新用户数据
       await core.fetchUser()
+      await recordAfterAuthentication(state)
       toast.showSuccess(`欢迎回来，${core.user.value?.nickname || core.user.value?.login || ''}！`)
 
       // 4. 跳转到个人页
@@ -112,13 +119,18 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
 
       // Web 端：走原有 SDK 自动跳转流程
       const callbackUrl = `${window.location.origin}/auth/callback`
-      const { error: oauthError } = await auth.signInWithOAuth({
+      const state = `apps-${provider}_${globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)}`
+      const attempt = beginAuthentication(provider, state)
+      const { data, error: oauthError } = await auth.signInWithOAuth({
         provider,
-        options: { redirectTo: callbackUrl },
+        options: { redirectTo: callbackUrl, state, skipBrowserRedirect: true },
       })
       if (oauthError)
         throw new Error(oauthError.message || 'OAuth 登录失败')
-      // SDK 会自动执行 window.location.assign 跳转到授权页面
+      if (!data?.url)
+        throw new Error('未获取到授权地址')
+      bindOAuthState(attempt.id, readReturnedOAuthState(data.url, state))
+      window.location.assign(data.url)
     }
     catch (err: unknown) {
       console.error(`OAuth 登录失败 (${provider}):`, err)
@@ -185,5 +197,14 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
     unlinkProvider,
     linkProvider,
     handleNativeOAuthCallback,
+  }
+}
+
+function readReturnedOAuthState(url: string, requested: string) {
+  try {
+    return new URL(url).searchParams.get('state') || requested
+  }
+  catch {
+    return requested
   }
 }

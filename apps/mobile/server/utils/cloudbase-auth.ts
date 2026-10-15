@@ -287,7 +287,9 @@ function isAnonymousCloudbaseUser(profile: Record<string, unknown>, claims: Reco
       : {}
   const loginType = stringProp(profile, 'loginType') || stringProp(profile, 'login_type')
   return booleanProp(profile, 'is_anonymous') === true
+    || booleanProp(profile, 'isAnonymous') === true
     || booleanProp(claims ?? {}, 'is_anonymous') === true
+    || booleanProp(claims ?? {}, 'isAnonymous') === true
     || loginType?.toUpperCase() === 'ANONYMOUS'
     || stringProp(profile, 'scope') === 'anonymous'
     || stringProp(claims ?? {}, 'scope') === 'anonymous'

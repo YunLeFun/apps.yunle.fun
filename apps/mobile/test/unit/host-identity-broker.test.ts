@@ -6,6 +6,7 @@ import {
   readIssuedAuthorizationCode,
   readResolvedHostAuthorization,
 } from '~/utils/host-identity-broker'
+import { acquisition } from './acquisition-fixture'
 
 const event = {
   appId: 'dayun-kicker',
@@ -55,6 +56,32 @@ function resolvedResponse(
 }
 
 describe('host identity broker', () => {
+  it('keeps only sanitized client-reported acquisition in the resolved issue payload', () => {
+    const pending = createHostAuthorizationResolutionRequest({
+      ...event,
+      request: {
+        ...event.request,
+        acquisition: {
+          ...acquisition,
+          firstTouch: { ...acquisition.firstTouch, landingPath: '/random?secret=private#token' },
+        },
+      },
+    })
+    expect(pending.acquisition?.firstTouch.landingPath).toBe('/random')
+    expect(readResolvedHostAuthorization(resolvedResponse(pending), pending).issueRequest.acquisition)
+      .toEqual(acquisition)
+    expect(JSON.stringify(pending)).not.toContain('private')
+  })
+
+  it('drops malformed optional acquisition without rejecting valid authorization', () => {
+    const pending = createHostAuthorizationResolutionRequest({
+      ...event,
+      request: { ...event.request, acquisition: { version: 9 } as never },
+    })
+    expect(pending).not.toHaveProperty('acquisition')
+    expect(readResolvedHostAuthorization(resolvedResponse(pending), pending).clientId).toBe(event.request.clientId)
+  })
+
   it('builds a central policy request from protocol facts and the actual source origin', () => {
     expect(createHostAuthorizationResolutionRequest(event)).toEqual({
       action: 'resolveSsoAuthorization',

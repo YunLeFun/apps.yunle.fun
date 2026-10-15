@@ -19,10 +19,14 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { checkmarkCircle, closeCircle } from 'ionicons/icons'
+import { useAppsAuthAcquisition } from '~/composables/auth/useAppsAcquisition'
 import { NATIVE_OAUTH_STATE_PREFIX } from '~/composables/auth/useCloudbaseOAuth'
 
 const router = useRouter()
 const { checkAuthStatus, isAuthenticated, user } = useCloudbaseAuth()
+const { recordAfterAuthentication } = useAppsAuthAcquisition(useCloudbaseAuthCore())
+// The pre plugin preserves our matching state before SDK cleanup; this is an optional direct echo.
+const callbackState = import.meta.client ? new URLSearchParams(window.location.search).get('state') || undefined : undefined
 const toast = useToast()
 
 const status = ref<'checking' | 'success' | 'error'>('checking')
@@ -69,6 +73,7 @@ onMounted(async () => {
     await checkAuthStatus()
 
     if (isAuthenticated.value && user.value) {
+      await recordAfterAuthentication(callbackState)
       status.value = 'success'
       message.value = '登录成功！正在跳转...'
       toast.showSuccess(`欢迎回来，${user.value.nickname || user.value.login}！`)
@@ -84,6 +89,7 @@ onMounted(async () => {
     await checkAuthStatus()
 
     if (isAuthenticated.value && user.value) {
+      await recordAfterAuthentication(callbackState)
       status.value = 'success'
       message.value = '登录成功！正在跳转...'
       toast.showSuccess(`欢迎回来，${user.value.nickname || user.value.login}！`)

@@ -1,3 +1,5 @@
+import { sanitizeAcquisitionContext } from '../../app/utils/acquisition'
+
 export interface SsoAuthorizationResolverOptions {
   endpoint: string
   request?: (url: string, options: Record<string, unknown>) => Promise<unknown>
@@ -48,6 +50,7 @@ export function normalizeSsoAuthorizationProtocolRequest(input: unknown) {
       && input.prompt !== 'select_account')) {
     throw new SsoAuthorizationResolverInputError('SSO authorization request is invalid')
   }
+  const acquisition = sanitizeAcquisitionContext(input.acquisition)
   return {
     mode: 'redirect' as const,
     clientId: input.clientId,
@@ -60,6 +63,7 @@ export function normalizeSsoAuthorizationProtocolRequest(input: unknown) {
     ...(input.prompt
       ? { prompt: input.prompt as 'consent' | 'select_account' }
       : {}),
+    ...(acquisition ? { acquisition } : {}),
   }
 }
 

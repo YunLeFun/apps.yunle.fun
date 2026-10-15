@@ -1001,6 +1001,7 @@ class HostWebViewActivity : AppCompatActivity() {
             nonce = request.getString("nonce") ?: return null,
             redirectUri = request.getString("redirectUri") ?: return null,
             scope = scopes.optString(0),
+            acquisitionJSON = HostSsoProtocol.readAcquisitionJson(request.opt("acquisition")),
         )
     }
 

@@ -1,7 +1,9 @@
+import type { AcquisitionContext } from './acquisition'
 import type {
   HostAuthorizationEvent,
   HostAuthorizationRequest,
 } from '~/host-runtime'
+import { sanitizeAcquisitionContext } from './acquisition'
 
 const SSO_ISSUER = 'https://www.yunle.fun'
 const IDENTITY_SCOPE = 'identity:bootstrap'
@@ -24,6 +26,7 @@ export interface HostAuthorizationResolutionRequest {
   codeChallenge: string
   codeChallengeMethod: 'S256'
   prompt?: 'consent' | 'select_account'
+  acquisition?: AcquisitionContext
 }
 
 export interface ValidatedHostAuthorization {
@@ -74,6 +77,7 @@ export function createHostAuthorizationResolutionRequest(
     throw invalidRequest()
   }
 
+  const acquisition = sanitizeAcquisitionContext(request.acquisition)
   return {
     action: 'resolveSsoAuthorization',
     mode: 'redirect',
@@ -85,6 +89,7 @@ export function createHostAuthorizationResolutionRequest(
     codeChallenge: request.codeChallenge,
     codeChallengeMethod: 'S256',
     ...(request.prompt ? { prompt: request.prompt } : {}),
+    ...(acquisition ? { acquisition } : {}),
   }
 }
 
@@ -174,6 +179,7 @@ export function readResolvedHostAuthorization(
       nonce: pending.nonce,
       codeChallenge: pending.codeChallenge,
       codeChallengeMethod: pending.codeChallengeMethod,
+      ...(pending.acquisition ? { acquisition: pending.acquisition } : {}),
     },
   }
 }

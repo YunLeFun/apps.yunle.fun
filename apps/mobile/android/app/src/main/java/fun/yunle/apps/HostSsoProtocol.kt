@@ -18,6 +18,7 @@ internal object HostSsoProtocol {
         val nonce: String,
         val redirectUri: String,
         val scope: String,
+        val acquisitionJSON: String? = null,
     )
 
     sealed interface Result {
@@ -28,7 +29,7 @@ internal object HostSsoProtocol {
     fun buildAuthorizationUrl(request: Request, state: String): String {
         require(isValid(request) && VALUE_RE.matches(state))
         val callback = "yunlefun://auth/sso?state=$state"
-        val query = listOf(
+        val fields = mutableListOf(
             "client_id" to request.clientId,
             "redirect_uri" to request.redirectUri,
             "scope" to request.scope,
@@ -37,8 +38,57 @@ internal object HostSsoProtocol {
             "code_challenge_method" to "S256",
             "prompt" to "select_account",
             "native_callback_uri" to callback,
-        ).joinToString("&") { (key, value) -> "${encode(key)}=${encode(value)}" }
+        )
+        request.acquisitionJSON?.let { raw ->
+            readAcquisitionJson(runCatching { JSONObject(raw) }.getOrNull())?.let {
+                fields.add("acquisition" to it)
+            }
+        }
+        val query = fields.joinToString("&") { (key, value) -> "${encode(key)}=${encode(value)}" }
         return "$ISSUER/auth/sso?$query"
+    }
+
+    /** Bounded allowlist; invalid optional attribution never prevents authentication. */
+    fun readAcquisitionJson(input: Any?): String? = runCatching {
+        val context = input as? JSONObject ?: return null
+        if (context.toString().toByteArray(Charsets.UTF_8).size > 4096 || context.opt("version") != 1) return null
+        val first = readAcquisitionTouch(context.optJSONObject("firstTouch")) ?: return null
+        val current = readAcquisitionTouch(context.optJSONObject("registerTouch")) ?: return null
+        JSONObject().put("version", 1).put("firstTouch", first).put("registerTouch", current)
+            .toString().takeIf { it.toByteArray(Charsets.UTF_8).size <= 4096 }
+    }.getOrNull()
+
+    private fun readAcquisitionTouch(input: JSONObject?): JSONObject? {
+        if (input == null) return null
+        val timestamp = (input.opt("capturedAt") as? Number)?.toDouble() ?: return null
+        if (!timestamp.isFinite() || timestamp <= 0 || timestamp > 9007199254740991.0 ||
+            timestamp != kotlin.math.floor(timestamp)) return null
+        val output = JSONObject().put("capturedAt", timestamp.toLong())
+        for (key in listOf("landingHost", "referrerHost", "landingPath", "utmSource", "utmMedium", "utmCampaign")) {
+            val value = input.opt(key) as? String ?: return null
+            if (value.any { it.code < 32 || it.code in 127..159 }) return null
+            val normalized = when (key) {
+                "landingHost", "referrerHost" -> {
+                    val host = value.lowercase(java.util.Locale.ROOT)
+                    if (host.length > 253 || !(host.isEmpty() && key == "referrerHost") &&
+                        (!Regex("^[a-z0-9.-]+$").matches(host) || host.split('.').any {
+                            it.isEmpty() || it.length > 63 || it.startsWith('-') || it.endsWith('-')
+                        })) return null
+                    host
+                }
+                "landingPath" -> {
+                    if (!value.startsWith('/') || value.startsWith("//") || value.contains('\\') ||
+                        Regex("%0[0-9a-f]|%1[0-9a-f]|%7f", RegexOption.IGNORE_CASE).containsMatchIn(value)) return null
+                    value.substringBefore('?').substringBefore('#').take(256)
+                }
+                else -> {
+                    if (value.length > 120 || !Regex("^[\\p{L}\\p{N}\\p{M} ._/-]*$").matches(value)) return null
+                    value.trim()
+                }
+            }
+            output.put(key, normalized)
+        }
+        return output
     }
 
     fun readCallback(raw: String, expectedState: String, request: Request): Result? {

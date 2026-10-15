@@ -202,6 +202,8 @@ export default defineNuxtConfig({
     diagnosticAdminUids: process.env.NUXT_DIAGNOSTIC_ADMIN_UIDS || firstPartySubmitterUids,
     // 未登录也可读取的中央 SSO 策略解析端点；只返回 Registry 元数据，不签发凭证。
     ssoTicketUrl: process.env.NUXT_SSO_TICKET_URL || 'https://api.yunle.fun/sso-ticket',
+    // Private Apps-to-account-api acquisition credential; never expose it in public runtime config.
+    appsAcquisitionInternalToken: process.env.NUXT_APPS_ACQUISITION_INTERNAL_TOKEN || process.env.APPS_ACQUISITION_INTERNAL_TOKEN || '',
     // 第三方模型与接口预留，但产品入口默认关闭并展示「敬请期待」。
     appThirdPartySubmissionsEnabled: process.env.NUXT_APP_THIRD_PARTY_SUBMISSIONS_ENABLED === 'true',
     tmsRegion: 'ap-guangzhou',

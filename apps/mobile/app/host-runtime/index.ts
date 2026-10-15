@@ -49,6 +49,7 @@ export interface HostAuthorizationRequest {
   redirectUri: string
   scope: string[]
   prompt?: 'consent' | 'select_account'
+  acquisition?: import('../utils/acquisition').AcquisitionContext
 }
 
 /** 平台适配器上报给 Web 身份代理的授权事件。 */

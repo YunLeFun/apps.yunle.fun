@@ -11,6 +11,8 @@
 import { App } from '@capacitor/app'
 import { Browser } from '@capacitor/browser'
 import { Capacitor } from '@capacitor/core'
+import { useAppsAcquisitionStorage } from '~/composables/auth/useAppsAcquisition'
+import { readAppsLaunchAcquisitionUrl } from '~/utils/apps-acquisition-storage'
 import { resolveNativeDeepLink } from '~/utils/nativeDeepLink'
 
 export default defineNuxtPlugin(() => {
@@ -44,6 +46,10 @@ export default defineNuxtPlugin(() => {
         await handleNativeOAuthCallback(target.code, target.state)
         return
       }
+
+      const landing = readAppsLaunchAcquisitionUrl(url, target.path)
+      if (landing)
+        useAppsAcquisitionStorage().captureEntry(landing, '', 'navigation')
 
       await router.isReady()
       if (router.currentRoute.value.fullPath !== target.path)

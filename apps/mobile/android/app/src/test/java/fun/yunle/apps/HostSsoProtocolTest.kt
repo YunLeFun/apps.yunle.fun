@@ -7,6 +7,7 @@ import java.util.Base64
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.json.JSONObject
 
 class HostSsoProtocolTest {
     private val request = HostSsoProtocol.Request(
@@ -17,6 +18,29 @@ class HostSsoProtocolTest {
         scope = "identity:bootstrap",
     )
     private val state = "s".repeat(43)
+
+    @Test
+    fun `optional acquisition is allowlisted and never changes PKCE fields`() {
+        val touch = JSONObject().put("capturedAt", 1000).put("landingHost", "cook.yunle.fun")
+            .put("landingPath", "/random?token=private#code").put("referrerHost", "www.baidu.com")
+            .put("utmSource", "百度").put("utmMedium", "organic").put("utmCampaign", "")
+        val context = JSONObject().put("version", 1).put("firstTouch", touch).put("registerTouch", touch)
+            .put("privateKey", "private")
+        val optional = HostSsoProtocol.readAcquisitionJson(context)
+        val fields = query(URI(HostSsoProtocol.buildAuthorizationUrl(request.copy(acquisitionJSON = optional), state)).rawQuery)
+        val returned = JSONObject(fields["acquisition"]!!)
+        assertEquals("/random", returned.getJSONObject("firstTouch").getString("landingPath"))
+        assertEquals(false, returned.has("privateKey"))
+        assertEquals("百度", returned.getJSONObject("firstTouch").getString("utmSource"))
+        assertEquals(request.codeChallenge, fields["code_challenge"])
+        assertEquals(request.nonce, fields["nonce"])
+        assertEquals(request.redirectUri, fields["redirect_uri"])
+        assertNull(HostSsoProtocol.readAcquisitionJson(JSONObject().put("version", 2)))
+        assertNull(HostSsoProtocol.readAcquisitionJson(context.put("extra", "x".repeat(4097))))
+        val invalid = query(URI(HostSsoProtocol.buildAuthorizationUrl(request.copy(acquisitionJSON = "invalid"), state)).rawQuery)
+        assertEquals(false, invalid.containsKey("acquisition"))
+        assertEquals(request.nonce, invalid["nonce"])
+    }
 
     @Test
     fun `system authorization URL preserves the registered PKCE binding`() {

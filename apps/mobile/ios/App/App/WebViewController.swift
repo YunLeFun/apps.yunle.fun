@@ -1137,6 +1137,7 @@ private struct NativeSsoRequest {
     let nonce: String
     let redirectUri: String
     let scope: String
+    let acquisitionJSON: String?
 }
 
 private enum NativeSsoResult {
@@ -1167,7 +1168,8 @@ private enum NativeSsoProtocol {
             codeChallenge: codeChallenge,
             nonce: nonce,
             redirectUri: redirectUri,
-            scope: scopes[0])
+            scope: scopes[0],
+            acquisitionJSON: readAcquisitionJSON(input["acquisition"]))
     }
 
     static func authorizationURL(request: NativeSsoRequest, state: String) -> URL? {
@@ -1184,7 +1186,63 @@ private enum NativeSsoProtocol {
             URLQueryItem(name: "prompt", value: "select_account"),
             URLQueryItem(name: "native_callback_uri", value: callback),
         ]
+        if let acquisitionJSON = request.acquisitionJSON {
+            components?.queryItems?.append(URLQueryItem(name: "acquisition", value: acquisitionJSON))
+        }
         return components?.url
+    }
+
+    // Optional analytics never changes the authorization/PKCE acceptance rules.
+    static func readAcquisitionJSON(_ input: Any?) -> String? {
+        guard let context = input as? [String: Any],
+              JSONSerialization.isValidJSONObject(context),
+              let raw = try? JSONSerialization.data(withJSONObject: context), raw.count <= 4096,
+              let version = context["version"] as? NSNumber,
+              String(cString: version.objCType) != "c", version.doubleValue == 1,
+              let first = readAcquisitionTouch(context["firstTouch"]),
+              let current = readAcquisitionTouch(context["registerTouch"]),
+              let data = try? JSONSerialization.data(withJSONObject: [
+                "version": 1, "firstTouch": first, "registerTouch": current,
+              ]), data.count <= 4096
+        else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private static func readAcquisitionTouch(_ input: Any?) -> [String: Any]? {
+        guard let touch = input as? [String: Any],
+              let timestamp = touch["capturedAt"] as? NSNumber,
+              String(cString: timestamp.objCType) != "c",
+              timestamp.doubleValue > 0, timestamp.doubleValue <= 9007199254740991,
+              timestamp.doubleValue.rounded() == timestamp.doubleValue
+        else { return nil }
+        var output: [String: Any] = ["capturedAt": timestamp]
+        for key in ["landingHost", "referrerHost", "landingPath", "utmSource", "utmMedium", "utmCampaign"] {
+            guard let value = touch[key] as? String,
+                  !value.unicodeScalars.contains(where: { $0.value < 32 || (127...159).contains($0.value) })
+            else { return nil }
+            if key == "landingHost" || key == "referrerHost" {
+                let host = value.lowercased()
+                guard host.count <= 253,
+                      (host.isEmpty && key == "referrerHost") ||
+                      (host.range(of: "^[a-z0-9.-]+$", options: .regularExpression) != nil &&
+                       host.split(separator: ".", omittingEmptySubsequences: false).allSatisfy {
+                         !$0.isEmpty && $0.count <= 63 && !$0.hasPrefix("-") && !$0.hasSuffix("-")
+                       })
+                else { return nil }
+                output[key] = host
+            } else if key == "landingPath" {
+                guard value.hasPrefix("/"), !value.hasPrefix("//"), !value.contains("\\"),
+                      value.range(of: "%0[0-9a-f]|%1[0-9a-f]|%7f", options: [.regularExpression, .caseInsensitive]) == nil
+                else { return nil }
+                output[key] = String(value.split(whereSeparator: { $0 == "?" || $0 == "#" }).first?.prefix(256) ?? "")
+            } else {
+                guard value.count <= 120,
+                      value.range(of: "^[\\p{L}\\p{N}\\p{M} ._/-]*$", options: .regularExpression) != nil
+                else { return nil }
+                output[key] = value.trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return output
     }
 
     static func readCallback(

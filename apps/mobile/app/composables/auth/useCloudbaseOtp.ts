@@ -3,6 +3,7 @@
  * 参考 www.yunle.fun 的 useOtp.ts，适配全局 AppToast
  */
 import { getErrorMessage } from '@yunlefun/auth'
+import { useAppsAuthAcquisition } from './useAppsAcquisition'
 
 /** OTP data type - 从 CloudBase Auth SDK 返回 */
 export type TcbOtpData = Awaited<ReturnType<ReturnType<typeof useCloudbase>['auth']['signInWithOtp']>>['data']
@@ -10,11 +11,13 @@ export type TcbSignUpData = Awaited<ReturnType<ReturnType<typeof useCloudbase>['
 
 export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
   const { auth, router, toast, loading, error, fetchUser } = core
+  const { beginAuthentication, recordAfterAuthentication } = useAppsAuthAcquisition(core)
 
   const sendPhoneOtp = async (phone: string) => {
     try {
       loading.value = true
       error.value = null
+      beginAuthentication('phone_otp')
       const { data, error: otpError } = await auth.signInWithOtp({ phone })
       if (otpError)
         throw new Error(otpError.message || '发送验证码失败')
@@ -42,6 +45,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
       if (verifyError)
         throw new Error(verifyError.message || '验证码验证失败')
       await fetchUser()
+      await recordAfterAuthentication()
       toast.showSuccess('登录成功，欢迎回来！')
       await router.replace('/tabs/me')
     }
@@ -60,6 +64,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
     try {
       loading.value = true
       error.value = null
+      beginAuthentication('email_otp')
       const { data, error: otpError } = await auth.signInWithOtp({ email })
       if (otpError)
         throw new Error(otpError.message || '发送验证码失败')
@@ -87,6 +92,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
       if (verifyError)
         throw new Error(verifyError.message || '验证码验证失败')
       await fetchUser()
+      await recordAfterAuthentication()
       toast.showSuccess('登录成功，欢迎回来！')
       await router.replace('/tabs/me')
     }
@@ -105,6 +111,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
     try {
       loading.value = true
       error.value = null
+      beginAuthentication('phone_otp')
       const { data, error: signUpError } = await auth.signUp({ phone } as Parameters<typeof auth.signUp>[0])
       if (signUpError)
         throw new Error(signUpError.message || '注册失败')
@@ -132,6 +139,7 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
       if (verifyError)
         throw new Error(verifyError.message || '验证码验证失败')
       await fetchUser()
+      await recordAfterAuthentication()
       toast.showSuccess('注册成功，欢迎加入！')
       await router.replace('/tabs/me')
     }
@@ -150,10 +158,12 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
     try {
       loading.value = true
       error.value = null
+      beginAuthentication('unknown')
       const { error: signInError } = await auth.signInWithPassword(params)
       if (signInError)
         throw new Error(signInError.message || '密码登录失败')
       await fetchUser()
+      await recordAfterAuthentication()
       toast.showSuccess('登录成功，欢迎回来！')
       await router.replace('/tabs/me')
     }

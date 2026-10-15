@@ -37,14 +37,14 @@
     "publish:ios:testflight": "node scripts/ios-testflight-publish.mjs"
   },
   "dependencies": {
-    "@capacitor/android": "8.4.2",
+    "@capacitor/android": "8.4.3",
     "@capacitor/app": "8.1.1",
     "@capacitor/barcode-scanner": "3.1.0",
     "@capacitor/browser": "8.0.4",
     "@capacitor/camera": "8.2.1",
     "@capacitor/core": "8.4.2",
     "@capacitor/haptics": "8.0.1",
-    "@capacitor/ios": "8.4.2",
+    "@capacitor/ios": "8.5.3",
     "@capacitor/keyboard": "8.0.5",
     "@capacitor/status-bar": "8.0.3",
     "@cloudbase/node-sdk": "^3.18.3",
@@ -73,7 +73,7 @@
     "@iconify-json/ri": "^1.2.10",
     "@iconify-json/simple-icons": "^1.2.90",
     "@iconify-json/twemoji": "^1.2.5",
-    "@nuxt/devtools": "^3.3.1",
+    "@nuxt/devtools": "^3.4.3",
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/icon": "^2.3.1",
     "@nuxt/test-utils": "^4.0.3",
@@ -106,7 +106,7 @@
     "tailwindcss": "^4.3.2",
     "typescript": "^5.9.3",
     "vite": "8.3.4",
-    "vitest": "^4.1.10",
+    "vitest": "^5.0.5",
     "vue-router": "5.1.0",
     "vue-tsc": "^3.3.7"
   }

@@ -78,7 +78,7 @@ overrides:
   tar: ^7.5.21 # 路径穿越 / 符号链接 / 栈溢出（@capacitor/cli、node-pre-gyp）
   tmp: ^0.2.7 # 路径穿越（@nuxtjs/ionic > inquirer）
   undici@>=7.0.0 <7.28.0: ^7.28.0 # TLS / WebSocket / header 处理（jsdom 测试链）
-  unhead: ^2.1.15 # useHeadSafe XSS 绕过（@nuxtjs/ionic > @unhead/vue）
+  unhead@>=2.0.0 <2.1.15: ^2.1.15 # 修复 Ionic 的旧版依赖，同时保留 Nuxt 4.5 所需的 Unhead 3
   uuid@<11.1.1: ^11.1.1 # v3/v5/v6 buffer 越界（腾讯云 SDK）
   valibot: ^1.4.2 # issue path 继承属性导致 flatten 崩溃（Nuxt ESLint）
   vite@>=7.0.0 <7.3.5: ^7.3.5 # fs.deny 绕过 / Windows UNC（Nuxt 构建链）

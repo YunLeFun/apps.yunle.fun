@@ -27,7 +27,7 @@ BFF 使用 Node SDK 调用 `account-api`，单次请求 timeout 为 1 秒、SDK 
 
 在 Apps Nitro 服务端配置 `NUXT_APPS_ACQUISITION_INTERNAL_TOKEN`，与 `account-api` 服务端的 `APPS_ACQUISITION_INTERNAL_TOKEN` 一致；也支持同一个来源专用的 `APPS_ACQUISITION_INTERNAL_TOKEN` 服务端变量。该凭据只允许来源写入动作，不接受通用资产服务 `ACCOUNT_API_INTERNAL_TOKEN` 作为替代。字段位于私有 runtimeConfig，禁止 `NUXT_PUBLIC_` 前缀，不需要打进 Native 静态包。Node SDK 沿用现有 CloudBase 环境、地域和服务端凭证配置。
 
-先发布支持内部 Apps 动作的 account-api 与私有来源集合，再发布 Apps Nitro BFF 与 Web。已发布 Native 包需按原生发布流程更新前端静态资源；本次仅本地代码、测试和 Web 构建，没有部署、修改生产数据或原生 release。
+先发布支持内部 Apps 动作的 account-api 与私有来源集合，再发布 Apps Nitro BFF 与 Web。2026-10-15 已发布 Web/BFF 提交 `b56a209` 到 apps.yunle.fun，并核对来源专用配置与 API 一致，原有 6 项平台配置未变。未登录请求实际返回 401/no-store。已安装 Native 包仍需按原生发布流程更新静态资源与容器；本次未执行商店或原生 release。
 
 上线验收使用专门的新账号核对手机号/邮箱 OTP、Web OAuth、Native OAuth、workshop UTM launch 与 Native broker 未登录注册：Admin 分母应匹配真实注册 UID，直接路径入口应为 Apps，broker 路径应为 Registry 请求应用，后续登录不覆盖。模拟临时写入失败应保持登录成功，最多 3 次；账号切换后原任务不得写到新 UID。
 

@@ -374,14 +374,16 @@ test('real shared offline snapshot and catalog search remain usable when the API
         const frame = window.getBounds()
         const content = window.getContentBounds()
         const { workArea } = screen.getDisplayMatching(frame)
-        // macOS constrains native windows to the runner's available display.
-        const width = Math.min(size.width, workArea.width - (frame.width - content.width))
-        const height = Math.min(size.height, workArea.height - (frame.height - content.height))
-        window.setPosition(workArea.x, workArea.y)
+        // macOS limits window height even when a wider window is permitted.
+        const width = size.width
+        const height = process.platform === 'darwin'
+          ? Math.min(size.height, workArea.height - (frame.height - content.height))
+          : size.height
+        if (process.platform === 'darwin')
+          window.setPosition(workArea.x, workArea.y)
         window.setContentSize(width, height)
         return { width, height }
       }, { width, height })
-      expect(viewport.width).toBe(width)
       expect(viewport.height).toBeGreaterThanOrEqual(600)
       await shell.getByRole('combobox', { name: '外观', exact: true }).selectOption(appearance)
       await expect.poll(() => application!.evaluate(({ nativeTheme }) => ({ source: nativeTheme.themeSource, dark: nativeTheme.shouldUseDarkColors })))

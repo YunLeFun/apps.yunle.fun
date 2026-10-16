@@ -311,8 +311,10 @@ export async function listOwnedApps(user: ServerAuthUser): Promise<AppRecord[]> 
     db.collection(APPS_COLLECTION).where({ _openid: user.uid }).limit(100).get(),
   ])
   const map = new Map<string, AppRecord>()
-  for (const row of [...(ownerResult.data || []), ...(legacyResult.data || [])] as AppRecord[])
-    map.set(row._id, row)
+  for (const row of [...(ownerResult.data || []), ...(legacyResult.data || [])] as AppRecord[]) {
+    if (row.ownerUid ? row.ownerUid === user.uid : row._openid === user.uid)
+      map.set(row._id, row)
+  }
   const apps = [...map.values()].sort((a, b) => b.updatedAt - a.updatedAt)
   return attachLatestSubmissions(db, apps)
 }
@@ -413,13 +415,16 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
         ...(listing ? { yunlefunListing: listing } : {}),
       }
     }
-    const visibleSnapshot = latest.snapshot
+    const currentId = app.currentRevisionId || app.publishedSubmissionId
+    const reviewsCurrent = !currentId || latest._id === currentId
+    const visibleSnapshot = reviewsCurrent ? latest.snapshot : undefined
     return {
       ...app,
       ...visibleSnapshot,
-      isPublic: app.publicationStatus === 'published' && (app.audience || visibleSnapshot.audience || 'public') === 'public',
-      status: reviewStatusToLegacy(latest.reviewStatus, app.status),
-      rejectedReason: latest.reviewStatus === 'rejected' || latest.reviewStatus === 'changes_requested'
+      ownerMetadataRevisionId: currentId || latest._id,
+      isPublic: app.publicationStatus === 'published' && (app.audience || visibleSnapshot?.audience || 'public') === 'public',
+      status: reviewsCurrent ? reviewStatusToLegacy(latest.reviewStatus, app.status) : app.status,
+      rejectedReason: reviewsCurrent && (latest.reviewStatus === 'rejected' || latest.reviewStatus === 'changes_requested')
         ? latest.reviewNote || ''
         : app.rejectedReason,
       latestSubmission: latest,
@@ -491,7 +496,7 @@ async function ownedApp(db: any, appId: string, uid: string): Promise<AppRecord>
   const app = (Array.isArray(data) ? data[0] : data) as AppRecord | undefined
   if (!app)
     throw createError({ statusCode: 404, statusMessage: '应用不存在' })
-  if (app.ownerUid !== uid && app._openid !== uid)
+  if (app.ownerUid ? app.ownerUid !== uid : app._openid !== uid)
     throw createError({ statusCode: 403, statusMessage: '无权管理此应用' })
   return app
 }

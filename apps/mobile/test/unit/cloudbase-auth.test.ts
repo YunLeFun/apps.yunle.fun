@@ -106,4 +106,34 @@ describe('cloudbase auth utils', () => {
     const { requireCloudbaseUser } = await import('../../server/utils/cloudbase-auth')
     await expect(requireCloudbaseUser(makeEvent())).rejects.toMatchObject({ statusCode: 401 })
   })
+
+  it('preserves upstream outages and malformed identity responses as 503 instead of signing the caller out', async () => {
+    const { requireCloudbaseUser } = await import('../../server/utils/cloudbase-auth')
+    const event = makeEvent(makeToken({ exp: Math.floor(Date.now() / 1000) + 3600 }))
+    vi.mocked(fetch).mockRejectedValueOnce(new Error('network unavailable'))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 503 })
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('{}', { status: 503 }))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 503 })
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('<html>unexpected</html>'))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 503 })
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('{}'))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 503 })
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('{}', { status: 401 }))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 401 })
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ error: 'failed_precondition', error_code: 9 }), { status: 400 }))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 401 })
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ error: 'invalid_argument' }), { status: 400 }))
+    await expect(requireCloudbaseUser(event)).rejects.toMatchObject({ statusCode: 503 })
+  })
+
+  it('rejects the official BLOCKED profile status for registered-only APIs', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ sub: 'uid-blocked', status: 'BLOCKED' }),
+    } as unknown as Response)
+    const { requireRegisteredCloudbaseUser } = await import('../../server/utils/cloudbase-auth')
+    await expect(requireRegisteredCloudbaseUser(makeEvent(makeToken({ exp: Math.floor(Date.now() / 1000) + 3600 }))))
+      .rejects
+      .toMatchObject({ statusCode: 403 })
+  })
 })

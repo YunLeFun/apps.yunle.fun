@@ -38,9 +38,22 @@ export async function getPublicAppByKey(
   key: string,
   db: CloudbaseAdminDb = useCloudbaseAdmin().db,
 ): Promise<AppRecord | null> {
+  return (await getPublicAppsByKeys([key], db)).get(key) || null
+}
+
+/** Resolve names and identities in one public-catalog snapshot, without private slug fallback. */
+export async function getPublicAppsByKeys(
+  keys: string[],
+  db: CloudbaseAdminDb = useCloudbaseAdmin().db,
+): Promise<Map<string, AppRecord>> {
   const catalog = await createCloudbaseCatalogResolver(db).resolveCatalog({ surface: 'public_market' }, null)
-  const app = catalog.apps.find(app => app._id === key || app.marketShortName === key.toLowerCase())
-  return app ? catalogAppViewToRecord(app) : null
+  const result = new Map<string, AppRecord>()
+  for (const key of new Set(keys)) {
+    const app = catalog.apps.find(app => app._id === key || app.marketShortName === key.toLowerCase())
+    if (app)
+      result.set(key, catalogAppViewToRecord(app))
+  }
+  return result
 }
 
 /**

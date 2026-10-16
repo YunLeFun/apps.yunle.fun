@@ -216,6 +216,8 @@ export interface AppRecord {
   activeSubmissionId?: string
   /** 管理/所有者视图附带的最近提交；公开目录不会返回。 */
   latestSubmission?: AppSubmission
+  /** 仅所有者视图：表单元数据对应的 revision，独立于仍在审核的 submission。 */
+  ownerMetadataRevisionId?: string
   /** 所有者视图附带的云乐坊上架指针；公开目录不会返回。 */
   yunlefunListing?: YunLeFunListing
   /** 审核状态（必填，默认 pending） */

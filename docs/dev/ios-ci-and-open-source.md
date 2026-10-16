@@ -103,3 +103,7 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 `842cef1` 的[第二轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38945616136) 为 **267 通过 / 1 失败 / 0 跳过**：262 项单元 / 集成与其余五条 UI 通过，标准字号登录用例在进入表单前按组合文字查找入口时卡住，超过原有 120 秒限制；Release 未执行。导入旅程已通过，两次失败原因分别保留，不能归为同一键盘失败。
 
 访客登录入口补充 `me.login` 标识，旅程先确认“我”页导航就绪，再按标识进入，并继续核对“登录云乐坊”的可访问文字。新建隔离模拟器的全部 **6 UI 通过，0 失败 / 跳过**：`test_sim_2026-10-16T18-34-51-200Z_pid44279_82a73a01.xcresult`。没有扩大用例时限；最新提交的完整远端执行仍以终态为准。
+
+`8793087` 的[第三轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38949308097) 为 **267 通过 / 1 失败 / 0 跳过**，六条 UI 全部通过。失败来自既有 `NativeApplicationMenuTests.testMenuActionEndsExactlyOneSessionAfterDismissal` 的两条回调计数断言，Release 未执行。夹具原先固定等待呈现 150ms、菜单 450ms、退出 650ms；现等待 UIKit 呈现完成、控制器稳定进入 / 离开窗口及实际关闭回调。重复动作只执行一次、身份失效丢弃动作、保留回调不能干扰后续状态等断言保留，局部启用的动画设置在结束时恢复。
+
+该菜单专项本机 **5 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-16T18-58-10-745Z_pid44279_f733d6b0.xcresult`。初次测试修正的两处 await / 断言编译错误已修正，构建失败记录保留。下一提交仍需完整远端终态，不以 UI 六例通过覆盖菜单失败。

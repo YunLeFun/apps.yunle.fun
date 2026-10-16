@@ -1,6 +1,6 @@
 # 原生登录键盘布局诊断
 
-> 2026-10-16。iPhone 18 Pro / iOS 27.0（24A434）。告警仍未修复；现有登录 Sheet、键盘完成按钮和表单交互保留。
+> 2026-10-17 更新。iPhone 18 Pro / iOS 27.0（24A434）。原生登录已改用系统导航栏收起键盘，避开原 keyboard toolbar 组合的告警；原始最小对照仍失败，系统问题未被宣布修复。
 
 ## 可复现范围
 
@@ -10,14 +10,14 @@ UIKit 以 pageSheet 展示 UIHostingController 时，聚焦 SwiftUI 密码字段
 
 这证明当前模拟器上存在该系统组件组合的问题，不证明所有系统 / 设备都受影响，也不表示其他布局与无障碍项目已经验收。
 
-| 检查                                                 | 结果                                                         |
-| ---------------------------------------------------- | ------------------------------------------------------------ |
-| 原生 LoginView / UIKit pageSheet / 密码焦点          | 产生同一告警                                                 |
-| 纯 SwiftUI 最小表单 / UIKit pageSheet                | 产生同一告警                                                 |
-| 同一最小表单 / fullScreen                            | 通过，无该告警                                               |
-| 移除 Spacer、改为单个 keyboard ToolbarItem           | 告警仍在                                                     |
-| preferredContentSize / intrinsicContentSize 自动尺寸 | 告警仍在                                                     |
-| 用 bottomBar 承载完成操作                            | 告警消失，但完成按钮被数字键盘遮挡，交互验收失败；候选已撤回 |
+| 检查                                                       | 结果                                                         |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| 原 LoginView keyboard toolbar / UIKit pageSheet / 密码焦点 | 产生同一告警                                                 |
+| 纯 SwiftUI 最小表单 / UIKit pageSheet                      | 产生同一告警                                                 |
+| 同一最小表单 / fullScreen                                  | 通过，无该告警                                               |
+| 移除 Spacer、改为单个 keyboard ToolbarItem                 | 告警仍在                                                     |
+| preferredContentSize / intrinsicContentSize 自动尺寸       | 告警仍在                                                     |
+| 用 bottomBar 承载完成操作                                  | 告警消失，但完成按钮被数字键盘遮挡，交互验收失败；候选已撤回 |
 
 bottomBar 候选的真实 AI 春联登录 / 授权 / 退出旅程通过，不能证明键盘操作可用。该次工具观察在 300 秒超时后，通过同一进程与日志确认执行已终止，读取原 xcresult 核实 1 项通过及测试会话清理，没有因此重新启动测试。
 
@@ -39,9 +39,26 @@ TEST_RUNNER_YUNLEFUN_UI_LAYOUT_DIAGNOSTICS=1 xcodebuild \
 
 在上述环境的实际结果为 1 项通过、2 项失败，失败分别对应纯 SwiftUI Sheet 和原生登录 Sheet 的同一告警。未启用时的跳过不代表问题已修复，不计为 UI 验收通过。聊天附件 ios-native/keyboard-layout 保存实验、原始结果引用和调用栈；生产源文件未保留候选布局或调试插桩。
 
-后续在其他系统、真机或更新 SDK 后复测，核对完成按钮、焦点、滚动、大字体与授权连续流程。当前先保留可用交互，继续迁移矩阵中其他原生界面的实施。
+后续仍需在其他系统、真机或更新 SDK 后复测，核对焦点、滚动、大字体与授权连续流程。上述表格与早期三例结果保留为原方案的诊断证据。
+
+## 原生表单调整 · 2026-10-17
+
+登录仍使用原生 Form、TextField、SecureField 和 Sheet。收起键盘移至系统导航栏尾端，仅在字段聚焦时显示；iOS 17 起使用 `topBarTrailing`，iOS 16 使用系统导航项回退。按钮明确标为“收起键盘”，保持取消和登录操作各自的含义。手机号、邮箱、用户名、密码、验证码补齐独立无障碍名称与稳定标识，字段有内容时仍能辨认用途。
+
+原生密码焦点诊断已通过；同轮 fullScreen 最小对照通过，原 pageSheet / keyboard toolbar 对照仍失败，整组三例为 **2 通过 / 1 失败**，不是整组通过。结果为 `test_sim_2026-10-16T16-31-16-316Z_pid44279_f62dd416.xcresult`。
+
+新增真实 XCUITest 检查标准字号的手机号 / 密码输入及最大辅助字号的数字键盘。测试输入一次性字符，不提交登录；要求键盘在屏幕内、按键可交互、收起按钮可点击且位于键盘上方，点击后键盘与按钮消失。兼容系统将按键暴露为 Key 或 Button 的两种角色。软件键盘模式下两例通过，无新增告警：`test_sim_2026-10-16T16-44-33-694Z_pid44279_1088846b.xcresult`，全屏截图已复核。
+
+初轮仅检查键盘元素存在，截图未覆盖软件键盘，证据不足；补齐可见性后保留了失败。另一次因只查询 Key 角色而漏掉字母键，独立实际操作确认后修正查询，保留可见性断言。原有模拟器恢复硬件键盘模拟后，完整日常结果为 **264 通过 / 2 失败**，两项均因软件键盘处于屏幕外失败；不合并为完整通过。隔离环境验证与 CI 按各自终态另外记录。
+
+新建独立 iPhone 18 Pro / iOS 27 模拟器，不连接 Device Hub 的桌面硬件键盘，等待首次系统迁移完成后运行完整日常 Scheme，最终 **266 通过 / 0 失败 / 0 跳过**（260 单元 / 集成 + 6 UI）：`test_sim_2026-10-16T16-51-41-396Z_pid44279_53e18db2.xcresult`。保留键盘全部可见性 / 可操作性断言；没有改变全局偏好或注入线上账号。专用模拟器在验证后删除，原有设备与设置保留。此通过与前述硬件键盘模式失败分开记录，后续远端 CI 以新提交自身结果为准。
+
+相同最终表单源码的实际 AI 春联 SSO UI 与原生密码焦点诊断随后同次运行，**2 通过 / 0 失败 / 0 跳过，无新增告警**：`test_sim_2026-10-16T16-57-33-952Z_pid44279_65b772f5.xcresult`。完成真实密码登录、原生授权、网页身份与退出，测试会话和一次性输入已清理，见[SSO 复验](./ios-runtime-navigation.md#新导航容器真实-sso-复验-2026-10-17)。这不改写原 pageSheet / keyboard toolbar 最小对照的失败。
+
+该调整不代表完整 VoiceOver、所有登录方式、最低系统或真机验收完成。标准字号“我”页的裁切 / 动态字号 / 对比度审计仍失败，见[辅助功能审计](./ios-accessibility-audits.md)。
 
 ## 依据
 
 - [XCTSourceCodeFrame](https://developer.apple.com/documentation/xctest/xctsourcecodeframe)：读取告警的原始栈帧；没有将异步处理告警时的线程栈当成触发栈。
 - [UIHostingController](https://developer.apple.com/documentation/swiftui/uihostingcontroller)：使用公开的 UIKit / SwiftUI 承载与尺寸配置。
+- [topBarTrailing](https://developer.apple.com/documentation/swiftui/toolbaritemplacement/topbartrailing)：由系统管理导航栏尾端的辅助操作。

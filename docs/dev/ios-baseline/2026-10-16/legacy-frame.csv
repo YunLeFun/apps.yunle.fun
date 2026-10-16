@@ -1,0 +1,2 @@
+"Destination","Configuration","Duration (ApplicationFirstFramePresentationResponsive) (Average)","Duration (ApplicationFirstFramePresentationResponsive) (Iterations)","Duration (ApplicationFirstFramePresentationResponsive) (Baseline)"
+"iPhone 16 Pro iOS Simulator 18.6","Test Scheme Action","0.6883995664 s","[0.683967333, 0.6836126250000001, 0.7140902910000001, 0.678880625, 0.681446958]","0"

@@ -1,0 +1,71 @@
+# iOS 原生 UI 规范
+
+> 2026-10-16：依据用户“直接使用最新 iOS 规范、原生组件”的要求制定。适用于 `apps/ios`，并持续取代兼容工程中的第一方 Web 界面。
+
+## 设计规格
+
+- **目的**：让用户轻松发现有用的云应用，加入自己的云居并快速返回使用。账户、授权、购买和应用内容的边界清楚，状态和操作结果易于理解。
+- **视觉方向**：内容驱动的原生编辑式界面。以最新 Apple HIG 和系统组件为基础，云居突出个人空间，寻乐用精选内容建立层级，目录与设置保留系统列表的可读性。
+- **色彩**：以系统 `tint` 品牌蓝（浅色参考 `#007AFF`）、`label`（浅色参考 `#000000`）、`secondaryLabel`（浅色参考 `#8E8E93`）、`systemBackground`（浅色参考 `#FFFFFF`）、`systemGroupedBackground`（浅色参考 `#F2F2F7`）组成语义色板。代码使用动态语义颜色，不用这些参考值替代深浅色、对比度与系统设置适配。
+- **字体**：SwiftUI 系统动态文本样式；系统使用 SF Pro 与中文 PingFang SC 等字体。沿用原生字体是用户明确要求的平台约束，覆盖面向 Web 原型的默认字体限制。
+- **布局**：由系统导航、列表、表单与内容边距构成。云居网格根据宽度和动态字号调整；寻乐使用左对齐的标题、重点内容和分组列表；其余页面遵循各自 iOS 内容模式，不为装饰强行打破网格。
+- **图标**：系统操作统一 SF Symbols。应用内容使用真实目录图标；缺失时可保留该应用已有品牌 emoji 或首字占位，不能用 emoji 代替系统操作图标。
+
+## 原生组件映射
+
+| 区域           | 优先组件                                                             | 约束                                                         |
+| -------------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 主导航         | `TabView` / `Tab`、`NavigationStack`；适用时 `NavigationSplitView`   | 云居、寻乐、工坊、我；各 Tab 独立导航历史，保留系统返回手势  |
+| 标题与动作     | `.navigationTitle`、`.toolbar`、`ToolbarItem`                        | 不自绘导航栏、不覆盖系统玻璃背景；按钮使用可访问的 `Label`   |
+| 搜索           | `.searchable`、系统搜索建议与提交行为                                | 支持取消、空结果、可访问键盘焦点和查询任务取消               |
+| 目录与设置     | `List`、`Section`、`Form`、`LabeledContent`、`Toggle`、`Picker`      | 默认分组、分隔与文字层级；不把每一行包装为自定义玻璃卡片     |
+| 详情与表单     | `ScrollView`、`TextField`、`SecureField`、`TextEditor`               | 系统选择 / 复制、自动填充、键盘类型、焦点与提交反馈          |
+| 页面弹层       | `.sheet(item:)`、`.fullScreenCover(item:)`、系统 detents             | 明确关闭与取消；模态互斥，不堆叠布尔状态                     |
+| 菜单与确认     | `Menu`、`.contextMenu`、`.confirmationDialog`、`.alert`              | 删除等操作使用系统 destructive role，动作语义一致            |
+| 反馈           | `ProgressView`、系统内容不可用视图或兼容组件                         | 页面内说明原因与重试入口；不伪造成功或把网络失败显示为空列表 |
+| 分享与系统能力 | `ShareLink` / `UIActivityViewController`、系统照片 / 文件 / 认证组件 | 遵循系统权限与取消流程                                       |
+| 云居与云应用   | `LazyVGrid`、原生拖放、已有 UIKit / WKWebView 容器                   | 定制范围集中于产品差异；不重造系统通用控件                   |
+
+## 最新系统表现
+
+用最新 SDK 构建，先让标准控件自动采用系统设计。支持 Liquid Glass 的系统会对导航栏、Tab、工具栏和适用控件提供材质、滚动边缘与交互表现，不额外叠加手工 blur。
+
+需要定制浮动控件时才使用原生 glass API，并按系统版本判断。多个相关玻璃元素按需放入 `GlassEffectContainer`，只给交互元素设置交互效果。内容卡片保持清晰的实体层级，避免玻璃叠玻璃。
+
+使用现代 `Tab` API 等能力时按 availability 适配。当前保留 iOS 16 部署基线；低版本使用自身标准控件。没有使用旧视觉兼容开关来冻结界面。
+
+## 验收
+
+每个主要界面验证浅深色、最大辅助字号、VoiceOver、减少透明度、减少动态效果、紧凑宽度与横屏；检查系统返回、键盘与焦点、按钮点击范围、错误 / 空 / 离线状态及弹层关闭后的状态保留。
+
+以实际运行截图和交互作为判断依据。采用原生组件不能替代信息架构、文案、布局密度和用户旅程的逐项验证。
+
+登录表单已在当前模拟器检查浅深色与最大辅助字号。普通字号使用系统分段 Picker，辅助字号使用系统菜单 Picker，避免分段文字固定过小；Form 保持滚动以访问验证码和提交动作。错误采用图标与文字，同时提供 VoiceOver 错误焦点。手机号、邮箱、密码与验证码分别使用合适的系统键盘和内容类型。该检查尚未覆盖完整 VoiceOver、iPad 与真机矩阵。
+
+待授权登录复用同一系统表单，显示“登录并继续”与可信应用上下文，明确登录后仍需确认；取消返回原云应用并允许再试。AI 春联的真实取消 / 再试旅程已在 iOS 27 和 iOS 18.6 模拟器验证；真实已登录账号授权面板与完整辅助功能矩阵仍待验。
+
+工坊搜索使用系统 `.searchable`，明确设置 `.navigationBarDrawer(displayMode: .always)`，让目录初始页面就有可发现的搜索入口，保持系统样式与动态字号。依据见 [Apple 搜索界面说明](https://developer.apple.com/documentation/swiftui/adding-a-search-interface-to-your-app)和[常显配置](https://developer.apple.com/documentation/swiftui/searchfieldplacement/navigationbardrawerdisplaymode/always)。
+
+评价与举报使用原生 List / Form / Picker / TextEditor / sheet / confirmationDialog。待审核和拒绝与已发布明确区分，网络失败不显示为空记录，未确认提交保留文本；账号切换关闭旧草稿和删除确认。访客评价 / 举报入口与取消旅程已在 iOS 27 / 18.6 检查，真实已登录编辑、审核和完整无障碍矩阵仍待验，见[实现记录](../dev/ios-community.md)。
+
+个人工坊沿用原生 List / Form / Picker / Menu / confirmationDialog / ShareLink，区分审批、暂停和离开；相机与相册入口使用下述原生扫码流程。工坊访客、登录取消和无效链接旅程已在 iOS 27 / 18.6 检查，真实账号管理表单与完整辅助功能矩阵尚待验，见[个人工坊实现记录](../dev/ios-workshops.md)。
+
+扫码使用系统照片选择器、原生列表 / 导航和平台相机 API，明确区分无设备、未授权、受限、中断、加载与识别结果。iOS 27 / 18.6 的实际相册选择、取消、重复识别和详情跳转已验证；实景相机、真机权限与完整视觉 / 无障碍矩阵仍待验，见[扫码与链接接收](../dev/ios-scanner.md)。
+
+应用管理与编辑使用原生 List / Form / Picker / PhotosPicker / 文件选择器和系统确认框，字段内容填入后仍保留可见标签。浅色创建与深色辅助字号编辑表单已用隔离测试数据渲染并检查；iOS 27 / 18.6 的真实访客入口与登录取消旅程通过。真实账号保存 / 投稿 / 上传 / 下架、完整辅助功能和 iPad 布局仍待验，见[应用管理与发布](../dev/ios-publishing.md)。
+
+应用图标由原生 Image 展示，支持公开云图标、深色变体和独立 SVG；完整图标保留自带背景，透明主体不重复缩小安全区。浅深色样例和真实品牌 SVG 已检查，目录中的两个远端 404 仍待修复，见[图标资产记录](../dev/ios-icon-assets.md)。
+
+钱包 / 会员采用原生 List / Section / LabeledContent / Button / ProgressView；未知余额不显示为零，价格只使用 StoreKit 本地化结果。登录与旧交易确认在页面层呈现，取消返回原页面，账号切换撤销旧确认。浅色钱包与深色辅助字号会员首屏使用隔离样例检查，访客旅程在 iOS 27 / 18.6 通过；真实金融数据、完整辅助功能和 iPad 仍待验，见[钱包与会员](../dev/ios-wallet.md)。
+
+## 官方依据
+
+- [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines)
+- [Adopting Liquid Glass](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)
+- [SwiftUI](https://developer.apple.com/swiftui/)
+
+应用获取复用系统列表、登录 Sheet 与 confirmationDialog，显示当前账号及服务端核定的价格 / 余额 / 会员 / 邀请条件；切换账号撤销旧确认。已购和会员不会再次扣币，扣币失败不会安装或打开应用。真实交易与完整界面矩阵仍待验，见[原生应用获取](../dev/ios-acquisition.md)。
+
+## 原生助手
+
+云居导航栏的助手入口使用系统导航；对话使用系统列表、原生 Markdown 文本、可选择文字、应用行与原生输入栏，支持停止、重试、新对话和复制回复。卡片匹配已发布目录后进入现有详情与获取流程，不直接打开模型提供的网址。访客登录取消保留草稿，离开页面停止生成，切换账号清空旧投影。浅深色与辅助字号截图使用隔离样例，真实账号服务已联调；完整 VoiceOver、iPad、真机与长对话滚动仍需验收。详见[原生助手](../dev/ios-assistant.md)。

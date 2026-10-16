@@ -1,0 +1,86 @@
+[
+  {
+    "label": "legacy-frame",
+    "metric": "Duration (ApplicationFirstFramePresentationResponsive)",
+    "destination": "iPhone 16 Pro iOS Simulator 18.6",
+    "sourceCSV": "legacy-frame.csv",
+    "count": 5,
+    "seconds": [
+      0.683967333,
+      0.6836126250000001,
+      0.7140902910000001,
+      0.678880625,
+      0.681446958
+    ],
+    "meanSeconds": 0.6883995664,
+    "medianSeconds": 0.6836126250000001,
+    "minimumSeconds": 0.678880625,
+    "maximumSeconds": 0.7140902910000001,
+    "sampleStandardDeviationSeconds": 0.014504497925579354,
+    "p95Seconds": null,
+    "note": "No P95 estimate for fewer than 20 measurements"
+  },
+  {
+    "label": "native-frame",
+    "metric": "Duration (ApplicationFirstFramePresentationResponsive)",
+    "destination": "iPhone 16 Pro iOS Simulator 18.6",
+    "sourceCSV": "native-frame.csv",
+    "count": 5,
+    "seconds": [
+      1.1744022090000001,
+      1.142279583,
+      1.191205125,
+      1.110569667,
+      1.163758292
+    ],
+    "meanSeconds": 1.1564429752,
+    "medianSeconds": 1.163758292,
+    "minimumSeconds": 1.110569667,
+    "maximumSeconds": 1.191205125,
+    "sampleStandardDeviationSeconds": 0.03118259563084939,
+    "p95Seconds": null,
+    "note": "No P95 estimate for fewer than 20 measurements"
+  },
+  {
+    "label": "legacy-content",
+    "metric": "Clock Monotonic Time",
+    "destination": "iPhone 16 Pro iOS Simulator 18.6",
+    "sourceCSV": "legacy-content.csv",
+    "count": 5,
+    "seconds": [
+      2.8336381250000002,
+      2.806829537,
+      2.790560245,
+      2.8381646070000004,
+      3.580068176
+    ],
+    "meanSeconds": 2.9698521380000003,
+    "medianSeconds": 2.8336381250000002,
+    "minimumSeconds": 2.790560245,
+    "maximumSeconds": 3.580068176,
+    "sampleStandardDeviationSeconds": 0.34168019679342926,
+    "p95Seconds": null,
+    "note": "No P95 estimate for fewer than 20 measurements"
+  },
+  {
+    "label": "native-content",
+    "metric": "Clock Monotonic Time",
+    "destination": "iPhone 16 Pro iOS Simulator 18.6",
+    "sourceCSV": "native-content.csv",
+    "count": 5,
+    "seconds": [
+      3.287749164,
+      3.2233286110000003,
+      3.2872050120000003,
+      3.270285173,
+      3.3426536990000004
+    ],
+    "meanSeconds": 3.2822443318000003,
+    "medianSeconds": 3.2872050120000003,
+    "minimumSeconds": 3.2233286110000003,
+    "maximumSeconds": 3.3426536990000004,
+    "sampleStandardDeviationSeconds": 0.042773492982478206,
+    "p95Seconds": null,
+    "note": "No P95 estimate for fewer than 20 measurements"
+  }
+]

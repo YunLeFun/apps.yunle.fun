@@ -97,6 +97,7 @@ pnpm verify:desktop-launch    # 实际启动当前平台原生包
 
 ```text
 apps/
+├── ios/                # 独立 SwiftUI 原生客户端（改造进行中）
 ├── mobile/             # Web + Ionic + Capacitor
 │   ├── app/            # Nuxt 4 页面、组件、composables、stores、plugins
 │   ├── server/         # 云端 Nitro API
@@ -129,6 +130,8 @@ pnpm-lock.yaml          # 所有工作区共用锁文件
 - [UI 规范](./docs/ui/index.md)
 - [开发笔记](./docs/dev/index.md)
 - [仓库迁移与部署](./docs/dev/monorepo.md)
+- [iOS 原生改造 Goal](./docs/dev/ios-native-migration.md)
+- [原生 iOS 开发入口](./apps/ios/README.md)
 - [桌面构建与私有内测](./docs/dev/desktop-build.md)
 - [Electron 桌面架构](./docs/dev/desktop-electron-architecture.md)
 - [发布路线图](./docs/roadmap.md)

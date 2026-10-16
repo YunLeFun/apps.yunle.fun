@@ -2,6 +2,30 @@ import XCTest
 
 @MainActor
 final class NativeNavigationUITests: XCTestCase {
+    func testGuestCanUseHomeOptionsAtLargestTextSize() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["云居"].waitForExistence(timeout: 10))
+        let addApplication = app.buttons["home.add"], options = app.buttons["home.options"]
+        XCTAssertTrue(addApplication.isHittable); XCTAssertTrue(options.isHittable)
+        options.tap()
+        XCTAssertTrue(app.navigationBars["云居选项"].waitForExistence(timeout: 5))
+        let optionsAttachment = XCTAttachment(screenshot: app.screenshot())
+        optionsAttachment.name = "native-home-options-largest-text"; optionsAttachment.lifetime = .keepAlways; add(optionsAttachment)
+        let scan = app.buttons["home.scan"]
+        XCTAssertTrue(scan.waitForExistence(timeout: 5)); scan.tap()
+        XCTAssertTrue(app.navigationBars["扫一扫"].waitForExistence(timeout: 5))
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "native-home-scanner-largest-text"; attachment.lifetime = .keepAlways; add(attachment)
+        app.navigationBars.buttons["完成"].tap()
+        app.navigationBars["云居选项"].buttons["云居"].tap()
+        XCTAssertTrue(options.waitForExistence(timeout: 5))
+        addApplication.tap()
+        XCTAssertTrue(app.tabBars.buttons["工坊"].isSelected)
+    }
+
     func testGuestCanReadEmptyHomeBackupsAndReturn() {
         continueAfterFailure = false
         let app = XCUIApplication(); app.launch()

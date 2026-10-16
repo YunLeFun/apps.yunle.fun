@@ -77,20 +77,40 @@ struct ApplicationAssetThumbnail: View {
 
 struct ApplicationRow: View {
     let application: CloudApplication
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(spacing: 12) {
-            ApplicationIcon(application: application)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(application.name).font(.headline)
-                Text(application.summary).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            if let label = application.accessLabel {
-                Text(label).font(.caption).foregroundStyle(.secondary)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 12) {
+                    ApplicationIcon(application: application)
+                    description
+                    if let label = application.accessLabel { accessLabel(label) }
+                }
+            } else {
+                HStack(spacing: 12) {
+                    ApplicationIcon(application: application)
+                    description
+                    if let label = application.accessLabel { accessLabel(label) }
+                }
             }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+    }
+
+    private var description: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(application.name).font(.headline).fixedSize(horizontal: false, vertical: true)
+            Text(application.summary).font(.subheadline).foregroundStyle(.secondary)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func accessLabel(_ label: String) -> some View {
+        Text(label).font(.caption).foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }

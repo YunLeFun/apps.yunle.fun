@@ -84,9 +84,11 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertTrue(rendered, "The real web document must render")
         minimize.tap()
         XCTAssertTrue(open.waitForExistence(timeout: 5))
+        app.buttons["home.options"].tap()
         let running = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "正在运行")).firstMatch
         XCTAssertTrue(running.exists)
         attach(app, name: "cloud-air-minimized")
+        app.tabBars.buttons["云居"].tap()
         open.tap()
         XCTAssertTrue(content.waitForExistence(timeout: 5))
         attach(app, name: "cloud-air-restored")
@@ -95,7 +97,9 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertTrue(end.waitForExistence(timeout: 5))
         end.tap()
         XCTAssertTrue(open.waitForExistence(timeout: 5))
+        app.buttons["home.options"].tap()
         XCTAssertFalse(running.exists)
+        app.tabBars.buttons["云居"].tap()
         XCTAssertFalse(app.webViews.firstMatch.exists)
         attach(app, name: "cloud-air-ended")
     }
@@ -284,6 +288,7 @@ final class ApplicationBenchmarks: XCTestCase {
         app.buttons["结束"].tap()
         XCTAssertTrue(app.buttons["打开云空调"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.webViews.firstMatch.exists)
+        app.buttons["home.options"].tap()
         let running = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "正在运行")).firstMatch
         XCTAssertTrue(running.exists); running.tap()
         let spring = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "AI 春联")).firstMatch
@@ -460,6 +465,7 @@ final class ApplicationBenchmarks: XCTestCase {
         let app = app
         app.launch()
         app.tabBars.buttons["云居"].tap()
+        app.buttons["home.options"].tap()
         app.buttons["home.scan"].tap()
         XCTAssertTrue(app.navigationBars["扫一扫"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["scanner.camera.unavailable"].waitForExistence(timeout: 5))

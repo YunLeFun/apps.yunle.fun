@@ -10,9 +10,9 @@ final class NativeRuntimeSessionTests: XCTestCase {
         defer { fixture.close() }
         try await fixture.presentNestedSheets()
         fixture.runtime.resetIdentity(to: "another-fixture-account")
-        try await Task.sleep(nanoseconds: 100_000_000)
         XCTAssertFalse(fixture.runtime.contains(fixture.application))
         XCTAssertTrue(fixture.runtime.applications.isEmpty)
+        try await fixture.waitForDismissal()
         XCTAssertNil(fixture.root.presentedViewController, "No old account's application may remain behind a dismissed sheet")
         XCTAssertNil(fixture.browser.viewIfLoaded?.window)
     }
@@ -22,8 +22,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         defer { fixture.close() }
         try await fixture.presentNestedSheets()
         fixture.runtime.end(fixture.application)
-        try await Task.sleep(nanoseconds: 100_000_000)
         XCTAssertFalse(fixture.runtime.contains(fixture.application))
+        try await fixture.waitForDismissal()
         XCTAssertNil(fixture.root.presentedViewController)
         XCTAssertNil(fixture.browser.viewIfLoaded?.window)
         XCTAssertTrue(fixture.library.contains(fixture.application), "Ending a session must not uninstall the application")
@@ -68,6 +68,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         try await Task.sleep(nanoseconds: 600_000_000)
         XCTAssertTrue(fixture.runtime.applications.isEmpty)
         XCTAssertFalse(fixture.runtime.contains(second))
+        try await fixture.waitForDismissal()
         XCTAssertNil(fixture.root.presentedViewController)
         let fresh = fixture.app("fresh")
         fixture.runtime.open(fresh, catalog: fixture.catalog, library: fixture.library)
@@ -78,8 +79,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let fixture = try await Fixture(); defer { fixture.close() }
         try await fixture.presentNestedSheets()
         _ = fixture.browser.perform(NSSelectorFromString("closeTapped"))
-        try await Task.sleep(nanoseconds: 100_000_000)
         XCTAssertFalse(fixture.runtime.contains(fixture.application))
+        try await fixture.waitForDismissal()
         XCTAssertNil(fixture.root.presentedViewController)
         XCTAssertTrue(fixture.library.contains(fixture.application))
     }
@@ -89,7 +90,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let old = fixture.browser
         let lateClose = try XCTUnwrap(old?.onClose)
         fixture.runtime.end(fixture.application)
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await fixture.waitForDismissal()
         fixture.runtime.open(fixture.application, catalog: fixture.catalog, library: fixture.library)
         let replacement = try await fixture.waitForApplication(fixture.application)
         XCTAssertFalse(replacement === old)
@@ -103,9 +104,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let original = fixture.browser
         try await fixture.presentNestedSheets()
         _ = fixture.browser.perform(NSSelectorFromString("minimizeTapped"))
-        for _ in 0..<30 where fixture.root.presentedViewController != nil {
-            try await Task.sleep(nanoseconds: 50_000_000)
-        }
+        try await fixture.waitForDismissal()
         XCTAssertNil(fixture.root.presentedViewController)
         XCTAssertNil(original?.viewIfLoaded?.window)
         XCTAssertTrue(fixture.runtime.contains(fixture.application))
@@ -173,8 +172,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
                 runtime.open(application, catalog: catalog, library: library)
                 try await Task.sleep(nanoseconds: 50_000_000)
             }
-            let navigation = try XCTUnwrap(root.presentedViewController as? UINavigationController)
-            browser = try XCTUnwrap(navigation.topViewController as? WebViewController)
+            browser = try await waitForApplication(application)
             browser.view.subviews.compactMap { $0 as? WKWebView }.first?.stopLoading()
             XCTAssertTrue(runtime.contains(application))
         }
@@ -182,14 +180,30 @@ final class NativeRuntimeSessionTests: XCTestCase {
         func presentNestedSheets() async throws {
             let detail = try XCTUnwrap(browser.localPageFactory?("/app/session-fixture", "app-detail-sheet", nil))
             detail.modalPresentationStyle = .pageSheet
-            browser.present(detail, animated: false)
-            try await Task.sleep(nanoseconds: 50_000_000)
+            try await present(detail, from: browser)
             let child = UIViewController()
             child.modalPresentationStyle = .pageSheet
-            detail.present(child, animated: false)
-            try await Task.sleep(nanoseconds: 50_000_000)
+            try await present(child, from: detail)
             XCTAssertNotNil(detail.presentingViewController)
             XCTAssertNotNil(child.presentingViewController)
+        }
+
+        private func present(_ controller: UIViewController, from presenter: UIViewController) async throws {
+            let completed = XCTestExpectation(description: "UIKit completed the nested presentation")
+            presenter.present(controller, animated: false) { completed.fulfill() }
+            guard await XCTWaiter.fulfillment(of: [completed], timeout: 5) == .completed else {
+                XCTFail("UIKit did not complete the nested presentation")
+                throw NSError(domain: "NativeRuntimeSessionTests", code: 2)
+            }
+        }
+
+        func waitForDismissal() async throws {
+            for _ in 0..<100 {
+                if root.presentedViewController == nil && browser.viewIfLoaded?.window == nil { return }
+                try await Task.sleep(nanoseconds: 50_000_000)
+            }
+            XCTFail("The old application and its sheets did not leave the window")
+            throw NSError(domain: "NativeRuntimeSessionTests", code: 3)
         }
 
         func app(_ id: String) -> CloudApplication {
@@ -201,7 +215,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
                 if let navigation = root.presentedViewController as? UINavigationController,
                    let browser = navigation.topViewController as? WebViewController,
                    browser.appInfo?.id == application.id, browser.url == application.launchURL,
-                   !navigation.isBeingPresented, !navigation.isBeingDismissed {
+                   !navigation.isBeingPresented, !navigation.isBeingDismissed, browser.viewIfLoaded?.window != nil {
                     browser.view.subviews.compactMap { $0 as? WKWebView }.first?.stopLoading()
                     return browser
                 }

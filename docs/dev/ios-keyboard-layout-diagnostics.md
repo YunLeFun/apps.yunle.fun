@@ -57,6 +57,12 @@ TEST_RUNNER_YUNLEFUN_UI_LAYOUT_DIAGNOSTICS=1 xcodebuild \
 
 该调整不代表完整 VoiceOver、所有登录方式、最低系统或真机验收完成。标准字号“我”页的裁切 / 动态字号 / 对比度审计仍失败，见[辅助功能审计](./ios-accessibility-audits.md)。
 
+## 托管执行中的按键查询
+
+`6051799` 的托管 CI 在标准字号手机号键盘处失败，截图实际显示键盘和已输入的字符；日志记录测试先反复查询不存在的 Key 角色，耗尽 5 秒等待，未能完成后续 Button 查询。现改为按已知按键名称跨角色定位，先核对屏幕范围，再检查该按键可点击；就绪等待为 10 秒，失败时额外保存完整树。键盘不能在屏幕外、按键必须可操作、收起按钮必须在其上方并实际完成收起等断言保留。
+
+新查询下的两条键盘 UI 在独立模拟器分别通过，首轮集合因旧版导入另有失败，不能合并为整组通过。该托管运行共 264 通过 / 2 失败，另一项为旧版导入读取失败，Release 编译未执行；完整 CI 与修正后的终态见[执行记录](./ios-ci-and-open-source.md)和 PR #48。
+
 ## 依据
 
 - [XCTSourceCodeFrame](https://developer.apple.com/documentation/xctest/xctsourcecodeframe)：读取告警的原始栈帧；没有将异步处理告警时的线程栈当成触发栈。

@@ -91,3 +91,11 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 `2bcee4b` 的 [Web / 移动端](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475588) 通过，[桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475488) 的 macOS 与 Linux 通过。Windows 打包启动已输出成功标记，但退出后的临时 profile 删除遇到 `Network/Trust Tokens-journal` 文件占用，整项仍判失败。清理改用 Node 的有上限重试（最多五次、初始间隔 200ms），持续占用仍返回失败，未跳过启动或吞掉清理错误。重试行为依据 [Node fs.rm](https://nodejs.org/docs/latest-v24.x/api/fs.html#fspromisesrmpath-options)；脚本三项单元测试与专项 lint 通过，实际 Windows 验证仍以新提交的工作流为准。
 
 同一提交的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475502) 最终 **成功**：官方 Xcode 27 runner 新建独立模拟器后，260 项单元 / 集成与 4 项访客 UI 测试全部通过，随后 Release 模拟器编译通过，专用模拟器删除完成。日志分别记录 `TEST SUCCEEDED` 与 `BUILD SUCCEEDED`，没有测试失败或跳过。这是本轮首份完整远端冷环境通过证据；不代表线上账号、正式安装升级、真机、完整辅助功能或发布验收完成。原先失败和取消的记录继续保留，后续提交以其自身 CI 为准。
+
+## 登录改进后的冷环境执行 · 2026-10-17
+
+`6051799` 的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38936977208) 为 **264 通过 / 2 失败**：260 项单元 / 集成通过，6 项 UI 中标准字号键盘可操作性查询和旧版导入空状态失败，Release 编译未执行。失败日志、xcresult 和附件已取得，专用模拟器删除完成。同提交 Web / 移动端、Chromium、macOS / Linux / Windows 桌面与 GitGuardian 六项检查通过；没有据此将原生项改记成功。
+
+键盘改为按名称跨角色查询，保留实际可见 / 可点击与收起断言；导入将超时单独提示，只允许显式点击一次原生重试后核对真正的空状态，未将错误或无响应视为空记录。首次冷启动成功率仍未验收。拒绝了可能漏读真实 localStorage 的网站数据记录捷径，未提交该候选；已有记录与凭据不改写的检查保留。中间失败、环境清理与新建模拟器的恢复旅程分别记录，见[键盘](./ios-keyboard-layout-diagnostics.md#托管执行中的按键查询)与[导入](./ios-upgrade-migration.md#冷启动超时与原生重试-2026-10-17)。
+
+修正后的本机完整日常回归 **268 通过 / 0 失败 / 0 跳过**（262 单元 / 集成 + 6 UI）：`test_sim_2026-10-16T18-02-29-211Z_pid44279_5d51481a.xcresult`，没有临时日志插桩。测试存储释放的等待上限调整后单项复核另 **1 项通过**：`test_sim_2026-10-16T18-07-30-695Z_pid44279_e2e452d4.xcresult`，不减少内容或清理断言。新提交 CI 以其终态记录在 PR #48，不能用本机通过或先前提交的绿色检查替代。

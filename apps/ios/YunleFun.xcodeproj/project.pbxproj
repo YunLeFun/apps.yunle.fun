@@ -42,6 +42,7 @@
 		54DA859FABDDDF03DE7C2E4A /* PublicIconLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D1CF174CA2F91B416E92D7 /* PublicIconLiveTests.swift */; };
 		5B96680135BF27ED34DDA8A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09C1FCD85CC1C05CE2FC1E36 /* LoginView.swift */; };
 		5FC29553AB7C2D58D307F0FF /* ApplicationIconSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E8BA15000F0663C8B3815B /* ApplicationIconSource.swift */; };
+		60FA64FB27A0A53A8CB97730 /* KeyboardLayoutDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */; };
 		66D09E5420FCA119881C6D7A /* ApplicationAcquisitionVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A783B2878E8485F7552CCD87 /* ApplicationAcquisitionVisualTests.swift */; };
 		6DF818D3A9FE9875F18D90AC /* NativeAuthorizationPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84644E9373ABFDA4E76B0AD1 /* NativeAuthorizationPage.swift */; };
 		7056931A4D1BC40CACACE31D /* CloudbaseAuthServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A155F7BEB354FA2853BD5BB4 /* CloudbaseAuthServiceTests.swift */; };
@@ -226,6 +227,7 @@
 		8F7E20307BE7EBBCC7D47FED /* WalletTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletTests.swift; sourceTree = "<group>"; };
 		91EEF88CF96019AB5203CADA /* PublishingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingService.swift; sourceTree = "<group>"; };
 		93F4870F29D6C930BF6AA0E6 /* WalletStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletStore.swift; sourceTree = "<group>"; };
+		97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutDiagnostics.swift; sourceTree = "<group>"; };
 		9DB5DA2365D8E76A88C4B1B2 /* AssistantTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantTests.swift; sourceTree = "<group>"; };
 		A155F7BEB354FA2853BD5BB4 /* CloudbaseAuthServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudbaseAuthServiceTests.swift; sourceTree = "<group>"; };
 		A34202F9F06A469796DBC94C /* MyWorkshopsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyWorkshopsView.swift; sourceTree = "<group>"; };
@@ -404,6 +406,7 @@
 			children = (
 				6E11781B68CFA29A03F01A3D /* HomeSyncLiveTests.swift */,
 				717E85C04C50681D8D783BAC /* HostAuthorizationLiveTests.swift */,
+				97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */,
 				6B4852DB61BBB9719B249882 /* ManagedAccountLiveTests.swift */,
 				C0D1CF174CA2F91B416E92D7 /* PublicIconLiveTests.swift */,
 			);
@@ -931,6 +934,7 @@
 			files = (
 				BC7321977A67B7B0500388E1 /* HomeSyncLiveTests.swift in Sources */,
 				BC7406F16D4DE12D55B8EBCE /* HostAuthorizationLiveTests.swift in Sources */,
+				60FA64FB27A0A53A8CB97730 /* KeyboardLayoutDiagnostics.swift in Sources */,
 				C84CD9EC1F69F26D2EABE8E5 /* ManagedAccountLiveTests.swift in Sources */,
 				54DA859FABDDDF03DE7C2E4A /* PublicIconLiveTests.swift in Sources */,
 			);

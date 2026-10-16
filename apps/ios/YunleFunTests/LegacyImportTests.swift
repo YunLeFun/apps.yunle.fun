@@ -250,11 +250,15 @@ final class LegacyImportTests: XCTestCase {
         let configuration = WKWebViewConfiguration(); configuration.websiteDataStore = dataStore
         configuration.setURLSchemeHandler(LegacyImportSchemeHandler(), forURLScheme: "capacitor")
         let old = WKWebView(frame: .zero, configuration: configuration)
+        defer { old.navigationDelegate = nil; old.stopLoading() }
         let navigation = LegacyTestNavigation(); old.navigationDelegate = navigation
         old.load(URLRequest(url: LegacyLocalDataReader.url))
-        for _ in 0..<100 where !navigation.loaded {
-            try await Task.sleep(nanoseconds: 50_000_000)
+        let ready = await XCTWaiter.fulfillment(of: [navigation.completed], timeout: 20)
+        guard ready == .completed else {
+            XCTFail("The real WebKit fixture must finish navigation before storage is seeded")
+            throw NSError(domain: "LegacyImportTests", code: 2)
         }
+        if let failure = navigation.failure { throw failure }
         XCTAssertTrue(navigation.loaded)
         var values = legacyValues(); values["ylf_access_token"] = "fixture-secret-must-stay-in-old-storage"
         _ = try await old.callAsyncJavaScript("for (const [key,value] of Object.entries(values)) localStorage.setItem(key,value); return true;", arguments: ["values": values], in: nil, contentWorld: .page)
@@ -269,7 +273,6 @@ final class LegacyImportTests: XCTestCase {
         let token = try await old.evaluateJavaScript("localStorage.getItem('ylf_access_token')") as? String
         let apps = try await old.evaluateJavaScript("localStorage.getItem('ylf:homescreen-apps')") as? String
         XCTAssertEqual(token, values["ylf_access_token"]); XCTAssertEqual(apps, values["ylf:homescreen-apps"])
-        old.stopLoading()
     }
 
     func testNativeImportStateScreenshots() async throws {
@@ -343,7 +346,21 @@ private final class LegacyReaderFixture: LegacyLocalDataReading {
 @MainActor
 private final class LegacyTestNavigation: NSObject, WKNavigationDelegate {
     var loaded = false
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { loaded = true }
+    var failure: Error?
+    let completed = XCTestExpectation(description: "The real WebKit storage fixture completed navigation")
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard webView.url == LegacyLocalDataReader.url else { return }
+        complete()
+    }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { complete(error) }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { complete(error) }
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        complete(NSError(domain: "LegacyImportTests.WebContent", code: 1))
+    }
+    private func complete(_ error: Error? = nil) {
+        guard !loaded, failure == nil else { return }
+        failure = error; loaded = error == nil; completed.fulfill()
+    }
 }
 
 private func legacyValues() -> [String: String] {

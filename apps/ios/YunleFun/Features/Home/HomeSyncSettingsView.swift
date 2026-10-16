@@ -1,0 +1,80 @@
+import SwiftUI
+
+struct HomeSyncSettingsView: View {
+    @EnvironmentObject private var accounts: AccountStore
+    @EnvironmentObject private var library: HomeLibrary
+    @EnvironmentObject private var sync: HomeSyncCoordinator
+    @State private var showLogin = false
+    @State private var resolution: HomeSyncCoordinator.Resolution?
+
+    var body: some View {
+        Form {
+            Section {
+                Label(sync.message, systemImage: sync.isSyncing ? "arrow.triangle.2.circlepath" : "icloud")
+                if sync.isSyncing { ProgressView() }
+                if accounts.user == nil {
+                    Button("登录云乐坊") { showLogin = true }
+                } else {
+                    Toggle("云同步", isOn: Binding(get: { library.snapshot.syncEnabled }, set: library.setSyncEnabled))
+                    if library.snapshot.syncEnabled {
+                        Toggle("自动同步", isOn: Binding(get: { library.snapshot.autoSyncEnabled }, set: library.setAutoSyncEnabled))
+                        Button("立即同步") { Task { await sync.recheck() } }
+                            .disabled(sync.isSyncing)
+                        if let date = library.snapshot.base?.configuration.updatedAt, date > 0 {
+                            LabeledContent("云端更新时间", value: Date(timeIntervalSince1970: Double(date) / 1000).formatted(date: .abbreviated, time: .shortened))
+                        }
+                    }
+                }
+            } footer: {
+                Text(accounts.user == nil ? "访客云居保存在此设备，登录后使用账号独立的云居。"
+                     : "同步安装顺序、常用应用和最近使用。关闭同步后，更改仍保存在此设备。")
+            }
+            if case .conflict(let conflict) = sync.phase {
+                Section("有两个不同版本") {
+                    Text("两边都有更改。查看内容后，选择要继续使用的版本。")
+                    NavigationLink("查看此设备版本") {
+                        HomeConfigurationView(title: "此设备版本", configuration: library.snapshot.configuration, snapshot: library.snapshot)
+                    }
+                    NavigationLink("查看云端版本") {
+                        HomeConfigurationView(title: "云端版本", configuration: conflict.remote.configuration, snapshot: library.snapshot)
+                    }
+                    Button("保留此设备版本") { resolution = .device }
+                    Button("使用云端版本") { resolution = .cloud }
+                }
+                .confirmationDialog(resolution == .device ? "用此设备版本更新云端？" : "用云端版本替换此设备的更改？",
+                                    isPresented: Binding(get: { resolution != nil }, set: { if !$0 { resolution = nil } }),
+                                    titleVisibility: .visible, presenting: resolution) { choice in
+                    Button("确认使用此版本", role: .destructive) {
+                        Task { await sync.resolve(choice, conflict: conflict) }
+                    }
+                } message: { _ in Text("选择云端版本时，会先保留此设备更改的恢复副本。") }
+            }
+        }
+        .navigationTitle("云居同步")
+        .sheet(isPresented: $showLogin) { LoginView() }
+    }
+}
+
+private struct HomeConfigurationView: View {
+    let title: String
+    let configuration: HomeConfiguration
+    let snapshot: HomeLibrarySnapshot
+    var body: some View {
+        List {
+            section("我的应用", references: configuration.installedApps.map(\.appId))
+            section("常用应用", references: configuration.dockApps.map(\.appId))
+            section("最近使用", references: configuration.recentApps.map(\.appId))
+        }
+        .navigationTitle(title)
+    }
+    private func section(_ title: String, references: [String]) -> some View {
+        Section(title) {
+            if references.isEmpty { Text("没有应用").foregroundStyle(.secondary) }
+            ForEach(references, id: \.self) { reference in
+                let app = snapshot.application(reference: reference)
+                ApplicationRow(application: app)
+                if app.isUnavailable == true { Text(reference).font(.caption).foregroundStyle(.secondary).textSelection(.enabled) }
+            }
+        }
+    }
+}

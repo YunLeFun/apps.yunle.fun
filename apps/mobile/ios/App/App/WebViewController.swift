@@ -69,6 +69,8 @@ class WebViewController: UIViewController {
     var onDetail: ((String) -> Void)?
     /// 可信页面请求宿主代为签发一次性 SSO code；宿主不会向页面暴露自身 token。
     var onAuthorizationRequest: ((String, String, [String: Any]) -> Void)?
+    /// Native hosts provide first-party screens without loading a web shell.
+    var localPageFactory: ((String, String, String?) -> UIViewController)?
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与插件层 sessionKey 一致）
     var sessionKey: String {
@@ -562,6 +564,7 @@ class WebViewController: UIViewController {
     /// 标题栏右上角单个「更多」菜单按钮（点开展开面板；材质由 styleBarButton 决定）
     private func makeMenuButton() -> UIButton {
         let button = UIButton(type: .system)
+        button.accessibilityLabel = "更多操作"
         button.setImage(UIImage(systemName: "ellipsis", withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)), for: .normal)
         button.layer.cornerRadius = 16
@@ -580,6 +583,7 @@ class WebViewController: UIViewController {
         capsule.translatesAutoresizingMaskIntoConstraints = false
 
         let moreButton = UIButton(type: .system)
+        moreButton.accessibilityLabel = "更多操作"
         moreButton.setImage(UIImage(systemName: "ellipsis", withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 15, weight: .medium)), for: .normal)
         moreButton.tintColor = .white
@@ -591,6 +595,7 @@ class WebViewController: UIViewController {
         divider.translatesAutoresizingMaskIntoConstraints = false
 
         let closeButton = UIButton(type: .system)
+        closeButton.accessibilityLabel = "结束应用"
         closeButton.setImage(UIImage(systemName: "xmark", withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 13, weight: .medium)), for: .normal)
         closeButton.tintColor = .white
@@ -683,10 +688,23 @@ class WebViewController: UIViewController {
         let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
         guard let encodedKey = key.addingPercentEncoding(withAllowedCharacters: pathAllowed) else { return }
 
-        let detailVC = AppViewController()
-        detailVC.configureLocalDetail(
-            routePath: "/app/\(encodedKey)",
-            target: scrollToReviews ? "reviews" : nil)
+        let detailVC: UIViewController
+        if let factory = localPageFactory {
+            detailVC = factory("/app/\(encodedKey)", "app-detail-sheet", scrollToReviews ? "reviews" : nil)
+        } else {
+#if canImport(Capacitor)
+            let detailVC = AppViewController()
+            detailVC.configureLocalDetail(
+                routePath: "/app/\(encodedKey)",
+                target: scrollToReviews ? "reviews" : nil)
+            presentLocalPage(detailVC)
+#endif
+            return
+        }
+        presentLocalPage(detailVC)
+    }
+
+    private func presentLocalPage(_ detailVC: UIViewController) {
         detailVC.modalPresentationStyle = .pageSheet
         if let presentation = detailVC.sheetPresentationController {
             presentation.detents = [.large()]
@@ -703,10 +721,17 @@ class WebViewController: UIViewController {
         let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
         guard let encodedLogin = login.addingPercentEncoding(withAllowedCharacters: pathAllowed) else { return }
 
-        let profileVC = AppViewController()
-        profileVC.configureLocalPage(
-            routePath: "/developer/\(encodedLogin)",
-            kind: "developer-sheet")
+        let profileVC: UIViewController
+        if let factory = localPageFactory {
+            profileVC = factory("/developer/\(encodedLogin)", "developer-sheet", nil)
+        } else {
+#if canImport(Capacitor)
+            let profileVC = AppViewController()
+            profileVC.configureLocalPage(routePath: "/developer/\(encodedLogin)", kind: "developer-sheet")
+            presentLocalPage(profileVC)
+#endif
+            return
+        }
         profileVC.modalPresentationStyle = .pageSheet
         if let presentation = profileVC.sheetPresentationController {
             presentation.detents = [.large()]
@@ -1160,7 +1185,7 @@ private struct NativeSsoSystemAuthorization {
     let request: NativeSsoRequest
 }
 
-private struct NativeSsoRequest {
+struct NativeSsoRequest {
     let clientId: String
     let codeChallenge: String
     let nonce: String
@@ -1169,12 +1194,12 @@ private struct NativeSsoRequest {
     let acquisitionJSON: String?
 }
 
-private enum NativeSsoResult {
+enum NativeSsoResult {
     case success(code: String, issuer: String)
     case denied
 }
 
-private enum NativeSsoProtocol {
+enum NativeSsoProtocol {
     private static let issuer = "https://www.yunle.fun"
 
     static func readRequest(_ input: [String: Any]) -> NativeSsoRequest? {
@@ -2174,12 +2199,14 @@ class AppInfoSheetController: UIViewController {
     }
 }
 
-/// 携带闭包的点击热区（评分行用）
-class ActionRowControl: UIControl {
+/// 原生按钮保留操作行闭包，同时向 VoiceOver 和系统自动化暴露按钮语义。
+class ActionRowControl: UIButton {
     var rowAction: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        isAccessibilityElement = true
+        accessibilityTraits.insert(.button)
         addTarget(self, action: #selector(fire), for: .touchUpInside)
     }
 

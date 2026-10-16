@@ -8,6 +8,214 @@ import XCTest
 /// Only explicitly provisioned, managed synthetic identities are accepted.
 @MainActor
 final class HomeSyncLiveTests: XCTestCase {
+    func testAccountBackupRestoreSyncConflictAndUndo() async throws {
+        guard ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_HOME_BACKUP"] == "1" else {
+            throw XCTSkip("Requires managed synthetic accounts and an explicitly enabled real backup/sync validation")
+        }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let input = cache.appendingPathComponent("iOSNativeValidation/home-backup-accounts.json")
+        let secret = try Data(contentsOf: input)
+        try FileManager.default.removeItem(at: input)
+        let pool = try JSONDecoder().decode(Pool.self, from: secret)
+        guard let zero = pool.accounts.first(where: { $0.id == "production-zero-balance" }),
+              let standard = pool.accounts.first(where: { $0.id == "production-standard" }),
+              zero.environment == "production", zero.username == "ylf_prod_zero",
+              standard.environment == "production", standard.username == "ylf_prod_standard"
+        else { return XCTFail("Only the approved fixed synthetic accounts may run this test") }
+
+        let directory = cache.appendingPathComponent("HomeBackupLiveValidation-" + UUID().uuidString)
+        let homeDirectory = directory.appendingPathComponent("home")
+        let origin = try pool.target?.validatedOrigin() ?? URL(string: "http://127.0.0.1:18746")!
+        let previewSession = try pool.target?.makeSession()
+        defer { previewSession?.invalidateAndCancel() }
+        let service = HomeSyncService(session: previewSession, origin: origin)
+        let keychainService = "fun.yunle.apps.home-backup-live." + UUID().uuidString
+        let vault = KeychainAccountVault(service: keychainService)
+        defer { SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: keychainService] as CFDictionary) }
+        let library = HomeLibrary(directory: homeDirectory)
+        let accounts = AccountStore(session: AccountSession(vault: vault)) { id in
+            library.activateAccount(id); library.setAutoSyncEnabled(false)
+        }
+        var activeAccounts = accounts
+        var baseline: RemoteHomeScreen?, standardBaseline: RemoteHomeScreen?
+        var owner: String?, standardOwner: String?
+        var submitted: [HomeConfiguration] = []
+        var cloudRestored = false, standardUnchanged = false, signedOut = false
+        var failure: Error?
+        var stages: [String] = []
+        do {
+            try await accounts.passwordSignIn(identifier: zero.username, password: zero.password, captcha: nil)
+            let identity = try await accounts.authorization(forceRefresh: false); owner = identity.userID
+            let before = try await service.load(identity: identity); baseline = before
+            guard before.configuration.installedApps.count < 990 else { throw LiveFailure.fixtureCapacity }
+            try library.adopt(before)
+            try JSONEncoder().encode(before).write(to: directory.appendingPathComponent("baseline.json"),
+                options: [.atomic, .completeFileProtectionUnlessOpen])
+            let catalog = try await CatalogService().applications()
+            let app = try XCTUnwrap(catalog.first { $0.marketShortName == "air-conditioner" })
+            library.add(app)
+            let unknown = CloudApplication(id: "backup-live-" + UUID().uuidString, name: "待解析的备份应用", isUnavailable: true)
+            library.add(unknown); library.recordUse(app); library.setDockVisible(true)
+            if library.snapshot.configuration.dockApps.count < 4 { library.setPinned(app, true) }
+            let candidate = library.snapshot
+            let backup = library.fileURL.deletingPathExtension().appendingPathExtension("conflict-\(UUID().uuidString).json")
+            try JSONEncoder().encode(candidate).write(to: backup, options: [.atomic, .completeFileProtectionUnlessOpen])
+            let sync = HomeSyncCoordinator(accounts: accounts, library: library, service: service, monitorNetwork: false)
+            submitted.append(library.snapshot.configuration); await sync.synchronize()
+            guard sync.phase == .idle, !library.snapshot.hasPendingChanges else { throw LiveFailure.upload }
+            library.add(CloudApplication(id: "after-backup-" + UUID().uuidString, name: "备份后的编辑", isUnavailable: true))
+            library.setDockVisible(false)
+            submitted.append(library.snapshot.configuration); await sync.synchronize()
+            guard sync.phase == .idle, !library.snapshot.hasPendingChanges else { throw LiveFailure.upload }
+            let latest = try await service.load(identity: identity)
+            guard latest.configuration == library.snapshot.configuration, latest.revision != candidate.base?.revision else { throw LiveFailure.backup }
+            let store = HomeBackupStore(library: library, accounts: accounts)
+            await store.load(); await store.select(backup.lastPathComponent)
+            let stale = try XCTUnwrap(store.confirmation(restoreSettings: true))
+
+            try await accounts.passwordSignIn(identifier: standard.username, password: standard.password, captcha: nil)
+            standardOwner = accounts.user?.id
+            standardBaseline = try await service.load(identity: accounts.authorization(forceRefresh: false))
+            try JSONEncoder().encode(standardBaseline).write(to: directory.appendingPathComponent("standard-baseline.json"),
+                options: [.atomic, .completeFileProtectionUnlessOpen])
+            guard standardOwner != owner, store.visibleItems.isEmpty, store.visiblePreview == nil else { throw LiveFailure.isolation }
+            let otherAccountStore = HomeBackupStore(library: library, accounts: accounts)
+            await otherAccountStore.load()
+            guard otherAccountStore.visibleItems.isEmpty else { throw LiveFailure.isolation }
+            try await accounts.select(identity.userID)
+            await store.restore(stale)
+            guard store.error == HomeBackupError.identityChanged.localizedDescription,
+                  library.snapshot.configuration == latest.configuration else { throw LiveFailure.isolation }
+            stages.append("real account A-B-A hides backups and rejects the earlier confirmation")
+
+            let current = library.snapshot
+            let restoreStore = HomeBackupStore(library: library, accounts: accounts)
+            await restoreStore.select(backup.lastPathComponent)
+            if ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_BACKUP_UI_TAP"] == "1" {
+                try await interactiveBackupRestore(restoreStore, backupID: backup.lastPathComponent)
+                stages.append("real account native detail and system confirmation clicked")
+            } else {
+                await restoreStore.restore(try XCTUnwrap(restoreStore.confirmation(restoreSettings: true)))
+            }
+            guard restoreStore.didRestore, restoreStore.error == nil,
+                  library.snapshot.configuration == candidate.configuration,
+                  library.snapshot.base == current.base, library.snapshot.base?.revision == latest.revision,
+                  library.snapshot.mutationId != current.mutationId, library.snapshot.hasPendingChanges,
+                  library.snapshot.dockVisible, library.snapshot.containsReference(unknown.id)
+            else { throw LiveFailure.backup }
+            let receipt = try XCTUnwrap(library.snapshot.lastRestoreID)
+            let undo = library.fileURL.deletingPathExtension().appendingPathExtension("before-restore-\(receipt).json")
+            let savedCurrent = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(contentsOf: undo))
+            guard savedCurrent == current else { throw LiveFailure.backup }
+            stages.append("old backup restores layout/settings while keeping latest cloud revision and current safety copy")
+
+            let reopened = HomeLibrary(directory: homeDirectory, accountID: identity.userID)
+            let resumedAccounts = AccountStore(session: AccountSession(vault: vault)) { id in
+                reopened.activateAccount(id); reopened.setAutoSyncEnabled(false)
+            }
+            activeAccounts = resumedAccounts
+            await resumedAccounts.restore()
+            guard resumedAccounts.user?.id == owner, resumedAccounts.notice == nil,
+                  reopened.snapshot == library.snapshot else { throw LiveFailure.restart }
+            let resumed = HomeSyncCoordinator(accounts: resumedAccounts, library: reopened, service: service, monitorNetwork: false)
+            submitted.append(reopened.snapshot.configuration); await resumed.synchronize()
+            let restoredRemote = try await service.load(identity: resumedAccounts.authorization(forceRefresh: false))
+            guard resumed.phase == .idle, !reopened.snapshot.hasPendingChanges,
+                  restoredRemote.configuration.hasSameContent(as: candidate.configuration),
+                  restoredRemote.revision != latest.revision, reopened.snapshot.lastRestoreID == receipt else { throw LiveFailure.upload }
+            stages.append("Keychain and disk object restart retains restore receipt and uploads against current revision")
+
+            let peer = HomeLibrary(directory: directory.appendingPathComponent("peer"), accountID: identity.userID)
+            peer.setAutoSyncEnabled(false); try peer.adopt(restoredRemote)
+            peer.add(CloudApplication(id: "peer-backup-live-" + UUID().uuidString, name: "另一客户端的编辑", isUnavailable: true))
+            let peerSync = HomeSyncCoordinator(accounts: resumedAccounts, library: peer, service: service, monitorNetwork: false)
+            submitted.append(peer.snapshot.configuration); await peerSync.synchronize()
+            guard peerSync.phase == .idle, !peer.snapshot.hasPendingChanges else { throw LiveFailure.secondClient }
+            let peerRemote = try await service.load(identity: resumedAccounts.authorization(forceRefresh: false))
+            let undoStore = HomeBackupStore(library: reopened, accounts: resumedAccounts)
+            await undoStore.select(undo.lastPathComponent)
+            await undoStore.restore(try XCTUnwrap(undoStore.confirmation(restoreSettings: false)))
+            guard undoStore.didRestore, reopened.snapshot.configuration == savedCurrent.configuration,
+                  reopened.snapshot.base?.revision == restoredRemote.revision else { throw LiveFailure.backup }
+            await resumed.synchronize()
+            guard case .conflict(let conflict) = resumed.phase,
+                  conflict.remote == peerRemote, reopened.snapshot.configuration == savedCurrent.configuration else { throw LiveFailure.conflict }
+            let stillPeer = try await service.load(identity: resumedAccounts.authorization(forceRefresh: false))
+            guard stillPeer == peerRemote else { throw LiveFailure.conflict }
+            try await snapshot(resumedAccounts, reopened, resumed, name: "live-backup-newer-cloud-conflict", dark: true, accessibility: true)
+            await resumed.resolve(.cloud, conflict: conflict)
+            guard resumed.phase == .idle, reopened.snapshot.configuration == peerRemote.configuration else { throw LiveFailure.conflict }
+            let recoveryItems = try await HomeBackupRepository(directory: homeDirectory).list(ownerFileName: reopened.fileURL.lastPathComponent)
+            var preservedLocal = false
+            for item in recoveryItems where item.kind == .conflict && item.id != backup.lastPathComponent {
+                let value = try await HomeBackupRepository(directory: homeDirectory).preview(id: item.id, ownerFileName: reopened.fileURL.lastPathComponent)
+                if value.snapshot.configuration == savedCurrent.configuration && value.snapshot.hasPendingChanges { preservedLocal = true }
+            }
+            guard preservedLocal else { throw LiveFailure.backup }
+            stages.append("restoring safety copy meets newer real cloud revision: conflict preserves both choices")
+        } catch { failure = error }
+
+        // Every changed cloud configuration is recorded before submitting. A
+        // third party's intervening content is never replaced by cleanup.
+        do {
+            if let baseline, let owner {
+                if activeAccounts.user?.id != owner { try await activeAccounts.select(owner) }
+                let identity = try await activeAccounts.authorization(forceRefresh: false)
+                let current = try await service.load(identity: identity)
+                if current.configuration.hasSameContent(as: baseline.configuration) { cloudRestored = true }
+                else if submitted.contains(where: { $0.hasSameContent(as: current.configuration) }) {
+                    _ = try await service.save(HomeScreenWrite(baseRevision: current.revision,
+                        mutationId: UUID().uuidString, configuration: baseline.configuration), identity: identity)
+                    let verified = try await service.load(identity: identity)
+                    cloudRestored = verified.configuration.hasSameContent(as: baseline.configuration)
+                }
+            }
+            if let standardBaseline, let standardOwner {
+                try await activeAccounts.select(standardOwner)
+                let verified = try await service.load(identity: activeAccounts.authorization(forceRefresh: false))
+                standardUnchanged = verified == standardBaseline
+            }
+        } catch { if failure == nil { failure = error } }
+        do {
+            for user in activeAccounts.overview.users {
+                try await activeAccounts.remove(user.id)
+                guard activeAccounts.notice == nil else { throw LiveFailure.signout }
+            }
+            signedOut = activeAccounts.overview.users.isEmpty
+        } catch { if failure == nil { failure = error } }
+        if cloudRestored && standardUnchanged && signedOut { try FileManager.default.removeItem(at: directory) }
+        let report: [String: Any] = ["origin": origin.absoluteString, "account": "production-zero-balance", "stages": stages,
+            "restoredCloudContent": cloudRestored, "standardAccountUnchanged": standardUnchanged, "signedOut": signedOut,
+            "fixtureRemoved": !FileManager.default.fileExists(atPath: directory.path), "realPayments": false,
+            "deviceScope": "one simulator; Keychain/disk object restart and an independent local client"]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "native-home-backup-live"; attachment.lifetime = .keepAlways; add(attachment)
+        XCTAssertTrue(cloudRestored); XCTAssertTrue(standardUnchanged); XCTAssertTrue(signedOut)
+        if let failure = failure as? LiveFailure { XCTFail("Native backup validation failed at \(failure)") }
+        else if let failure { XCTFail("Native backup request failed: \(safeMessage(failure))") }
+    }
+
+    private func interactiveBackupRestore(_ store: HomeBackupStore, backupID: String) async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
+        let previous = window.rootViewController
+        let controller = UIHostingController(rootView: NavigationStack { HomeBackupDetailView(store: store, backupID: backupID) })
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.rootViewController = previous; window.makeKeyAndVisible() }
+        try await Task.sleep(nanoseconds: 300_000_000); controller.view.layoutIfNeeded()
+        print("YLF_UI_HOME_BACKUP_READY")
+        let deadline = Date().addingTimeInterval(120)
+        while Date() < deadline {
+            if store.didRestore {
+                let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true) }
+                let attachment = XCTAttachment(image: image); attachment.name = "live-backup-native-restored"; attachment.lifetime = .keepAlways; add(attachment)
+                return
+            }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        throw LiveFailure.backup
+    }
+
     func testOfflineRestartSyncConflictAndAccountIsolation() async throws {
         guard ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_HOME_SYNC"] == "1" else {
             throw XCTSkip("Requires a full-stack server or approved preview and managed synthetic credentials")
@@ -305,7 +513,7 @@ final class HomeSyncLiveTests: XCTestCase {
         }
     }
     private struct Credential: Decodable { let id: String; let environment: String; let username: String; let password: String }
-    private enum LiveFailure: Error { case fixtureCapacity, offline, restart, upload, secondClient, conflict, isolation, target }
+    private enum LiveFailure: Error { case fixtureCapacity, offline, restart, upload, secondClient, conflict, isolation, target, backup, signout }
 }
 private extension HomeLibrarySnapshot {
     func containsReference(_ id: String) -> Bool { configuration.installedApps.contains { $0.appId == id } }

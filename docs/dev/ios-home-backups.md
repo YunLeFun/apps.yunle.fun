@@ -44,7 +44,36 @@
 
 这条实际旅程先于最后两处小修正：损坏原文件的已有副本在重试时也设置文件保护；详情失效后显示重新打开入口。最终日常回归与状态截图使用修正后的源码，实际旅程覆盖的正常恢复路径没有变化。
 
-仓库外证据目录为 `ios-native/home-backups`。原生文件保护的锁屏 / 重启、最低系统、iPad、VoiceOver、真实账号云同步及正式旧版覆盖升级仍待验，M2 / M4 的整体升级验收保持未完成。
+仓库外证据目录为 `ios-native/home-backups`。原生文件保护的锁屏 / 重启、最低系统、iPad、VoiceOver 与正式旧版覆盖升级仍待验；真实账号联调的范围见下一节，M2 / M4 的整体升级验收保持未完成。
+
+## 真实账号恢复与云同步
+
+2026-10-16，新增独立显式用例 `HomeSyncLiveTests/testAccountBackupRestoreSyncConflictAndUndo`。当前完整 Nitro 构建在 `127.0.0.1:18746` 连接既有 CloudBase 环境 `yunlefun-8g7ybcxc7345c490`；使用固定受管合成账号 `production-zero-balance` 和 `production-standard`，不改认证配置、集合或安全规则。
+
+本次 iOS 27 真实联调 1 项通过：
+
+- 账号 A → B → A 后，其他账号不显示备份，原确认失效，当前云居保持。
+- 先上传备份时的内容，再上传后续编辑，形成真实的新修订；在原生详情页实际点击系统“确认恢复”，核对旧布局、设置、未知引用及恢复前副本，同时保留当前云端修订。
+- 从 Keychain 和磁盘重建账号 / 云居对象，恢复标记和待上传内容仍在；上传按当前修订成功，服务端再次读取与恢复内容一致。
+- 同一模拟器的另一独立本地目录上传新内容后，再从恢复前副本找回本机布局；同步进入真实修订冲突，云端新内容未被覆盖。选择云端后，待同步本地版本也保存为可读副本。
+- 最后按当前修订恢复原云居三组引用内容并再次读取核对；第二账号的完整远端快照未变化。远端退出两个测试会话，清除专用 Keychain 项和本地测试目录，一次性凭据输入也已删除。
+
+结果为 `test_sim_2026-10-16T08-53-54-571Z_pid92585_581c144f.xcresult`，无构建诊断或测试失败。安全报告、原生恢复完成、深色大字号冲突与系统确认截图位于仓库外 `ios-native/home-backups-live`。日志另有一条 `IOSurfaceClientSetSurfaceNotify failed e00002c7`，没有测试失败；不将本轮结果作为完整渲染或性能验收。
+
+这里的重启是对象与本地存储重建；另一客户端仍在同一模拟器中。本次没有终止 / 重启进程、覆盖安装、硬件跨设备或正式域名部署，也没有进行支付。实际点击覆盖备份详情及系统恢复确认；冲突选择由测试调用真实协调器完成，不能冒充这次实际点击证据。
+
+复测使用 `YunleFunLiveValidation` Scheme 和专用测试模拟器。先启动当前完整服务，再将仓库外 0600 文件中的两个固定账号一次性写入当前应用容器的 `Library/Caches/iOSNativeValidation/home-backup-accounts.json`；顶层为 `accounts` 数组，每项包含 `id`、`environment`、`username`、`password`。不把值写入源码、启动参数、环境变量或附件。测试在读取后立即删除输入，使用独立 Keychain service。
+
+```sh
+TEST_RUNNER_YUNLEFUN_LIVE_HOME_BACKUP=1 xcodebuild \
+  -project apps/ios/YunleFun.xcodeproj -scheme YunleFunLiveValidation \
+  -destination 'platform=iOS Simulator,id=SIMULATOR_UUID' \
+  -derivedDataPath /tmp/yunlefun-ios-live-validation \
+  CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- -parallel-testing-enabled NO \
+  -only-testing:YunleFunLiveTests/HomeSyncLiveTests/testAccountBackupRestoreSyncConflictAndUndo test
+```
+
+需要实际点击时，再显式启用 `TEST_RUNNER_YUNLEFUN_LIVE_BACKUP_UI_TAP=1`；测试等待原生详情页的外部输入，120 秒内完成系统确认。无人操作的 CI 不启用此模式。未启用主开关的默认跳过已验证，不计作真实联调通过。若清理遇到无关云端变化，保留基线和测试目录，不强行覆盖。
 
 ## 本机 API 用途
 

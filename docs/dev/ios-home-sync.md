@@ -104,3 +104,7 @@ node scripts/ios/home-sync-smoke.mjs --origin=http://127.0.0.1:18746 --write --c
 HTTP 脚本可用 --target=/private/preview-receipt.json 替代固定本地 --origin 参数，仍须显式 --write 与 --confirm-account=production-zero-balance。Node 目的地 / 平台会话校验 3 项通过；同一预览的 6 项真实 HTTP 检查通过，最终恢复内容和远端退出均核验成功。HomeSyncLiveTests 输入可包含同一 target 对象；iOS 27 通过完整真实旅程及两项目的地 / 访问会话校验，共 3 项。测试输入读取后删除，报告仅记录安全元数据，截图使用系统原生表单。
 
 正式 HomeSyncService 先验证 application/json MIME 和 2 MiB 上限，再分类 401 / 403，避免平台 HTML 页面错误触发账号刷新。此处不改变正式应用的服务地址。预览测试仍是同一模拟器的独立本地客户端，不替代正式域名上线、跨硬件、进程终止、旧版并发和覆盖升级。
+
+## 备份恢复后的真实同步
+
+2026-10-16，独立显式备份联调在当前本地完整服务连接真实 CloudBase 通过 1 项。真实账号恢复旧备份后保留当前云端修订，再从 Keychain / 磁盘重建对象上传；另一独立本地客户端已更新时，恢复前副本的同步正确进入冲突，未覆盖云端新内容。账号 A → B → A 拒绝旧确认，结束后原云居内容和第二账号未变化、远端退出及本机清理均核验。详情与系统确认有实际点击证据，冲突选择由协调器调用验证。完整范围、结果与显式复测要求见[备份与恢复](./ios-home-backups.md#真实账号恢复与云同步)。

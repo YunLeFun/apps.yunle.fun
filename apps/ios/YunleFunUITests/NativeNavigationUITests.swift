@@ -19,8 +19,11 @@ final class NativeNavigationUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
         app.tabBars.buttons["我"].tap()
-        let login = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch
-        XCTAssertTrue(login.waitForExistence(timeout: 5)); login.tap()
+        XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+        let login = app.buttons["me.login"]
+        XCTAssertTrue(login.waitForExistence(timeout: 5))
+        XCTAssertTrue(login.label.hasPrefix("登录云乐坊"))
+        login.tap()
         let phone = app.textFields["login.phone"]
         XCTAssertTrue(phone.waitForExistence(timeout: 5))
         XCTAssertEqual(phone.label, "手机号")

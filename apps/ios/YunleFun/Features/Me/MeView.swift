@@ -25,6 +25,7 @@ struct MeView: View {
                         }
                         .padding(.vertical, 8)
                     }
+                    .accessibilityIdentifier("me.login")
                 }
                 LabeledContent("云居中的应用", value: "\(library.snapshot.applications.count)")
             }

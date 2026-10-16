@@ -36,7 +36,7 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 测试包含实际 Keychain 读写，模拟器构建必须保留本地 ad-hoc 签名；完全关闭签名会使 Keychain 返回权限错误。该命令不上传构建，也不需要分发证书。
 
-原生自动检查使用 `.github/workflows/ios.yml`：官方 `xcode-27` 预览 runner 上固定 Xcode 27.0，解析锁定包、新建 iOS 27 模拟器、运行日常测试并编译 Release 模拟器产物。它不注入线上账号或签名凭据，也不发布构建。私有仓库预算阻断与开源选项见 [CI 与开源调研](../../docs/dev/ios-ci-and-open-source.md)。
+原生自动检查使用 `.github/workflows/ios.yml`：官方 `xcode-27` 预览 runner 上固定 Xcode 27.0，解析锁定包、新建 iOS 27 模拟器、运行日常测试并编译 Release 模拟器产物。它不注入线上账号或签名凭据，也不发布构建。公开仓库决定与实际运行记录见 [CI 与开源调研](../../docs/dev/ios-ci-and-open-source.md)。
 
 ## 当前能力与缺口
 

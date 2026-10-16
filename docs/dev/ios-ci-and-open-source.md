@@ -1,12 +1,12 @@
 # 原生 iOS CI 与开源选择
 
-调研日期：2026-10-16。当前 `YunLeFun/apps.yunle.fun` 为私有仓库，根目录已有 MIT License，组织计划为 GitHub Free。此次保持仓库可见性、账单预算和 runner 注册状态不变。
+调研日期：2026-10-16。初次调研时 `YunLeFun/apps.yunle.fun` 为私有仓库，根目录已有 MIT License，组织计划为 GitHub Free。后续按用户确认范围清理 Git 历史并公开仓库，账单预算与 runner 注册未改，实际执行见文末。
 
 ## 判断
 
 可以考虑开源，尤其是希望长期吸引贡献、展示原生设计与形成云应用生态时。开源能解决标准托管 runner 的计算费用问题，但不应只凭一次预算阻断就直接公开全部历史。
 
-用户已明确普通历史、后端与运维资料可以公开，因此可以按整仓开源准备，无需仅因这些内容存在而拆分客户端。当前确认需要排除的是一份真实云居数据导出及其历史副本，详见[公开内容复核](./open-source-review.md)。此轮整理源码和核对证据，尚未重写远端历史或改变可见性；私有仓库也支持付费托管 runner 或隔离的自托管 Mac。
+用户已明确普通历史、后端与运维资料可以公开，因此按整仓开源执行，无需仅因这些内容存在而拆分客户端。已从可写分支历史精确过滤一份真实云居导出路径，保留其余历史；用户随后决定暂缓 PR 缓存处理，详见[公开内容复核](./open-source-review.md)。私有仓库也支持付费托管 runner 或隔离的自托管 Mac，本项目最终选择公开仓库。
 
 ## GitHub 当前规则
 
@@ -52,7 +52,7 @@ GitHub 明确说明，私有转公开会使代码和 Actions 历史 / 日志可�
 
 官方 `macos-latest` 当前仍可能提供较旧的默认 Xcode，不能把它等同于最新 iOS SDK。`xcode-27` 镜像及 Xcode 27.0 / iOS 27.0 的来源已核对：[官方镜像清单](https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md)。actionlint 1.7.12 尚未内置这个标准预览标签，`.github/actionlint.yaml` 仅扩展标签白名单，不注册自托管机器。
 
-配置和本机验证不能代替远端执行通过；组织 Actions 预算仍需独立解决。完整原生迁移、真机、最低系统、升级和发布验收继续按[原生改造 Goal](./ios-native-migration.md)推进。
+配置和本机验证不能代替远端执行通过；公开后以实际工作流结果验证标准 runner。完整原生迁移、真机、最低系统、升级和发布验收继续按[原生改造 Goal](./ios-native-migration.md)推进。
 
 ## 冷启动验证记录
 
@@ -69,3 +69,21 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 原有模拟器上的首次当前源码复测也出现 Cookie 读取超时（259 通过 / 1 失败）；只保持数据存储存活还不足以通过该轮。在夹具中按实际宿主创建 `WKWebViewConfiguration` / `WKWebView`，从其配置取得 Cookie store，并让两个所有者跨过异步回调后，原有设备完整日常回归为 260 项通过（257 单元 / 集成 + 3 UI），无跳过或构建诊断。结果为 `test_sim_2026-10-16T10-00-43-026Z_pid91503_7e6a9cad.xcresult`。此处没有修改产品的 Cookie 清理实现，也没有减少原有删除 / 保留断言；这是原有可运行环境的回归证据，不替代新建模拟器与远端验证。
 
 锁定依赖的独立 Release 模拟器编译通过，无构建诊断；产物核对为 `fun.yunle.apps`、最低 iOS 16，且包含原生隐私用途资源。未安装此 Release 产物。actionlint、根 lint 与文档构建通过，文档仅有既有高亮 / 包大小提示。
+
+## 公开后的实际执行
+
+按用户后续确认，将已清理可写 Git 历史的仓库公开；PR 缓存暂缓处理，没有提交 Support 工单。已核对匿名 GitHub API 返回 200、`private: false`。
+
+在同一清理后提交 `6f2d1eb` 重跑三条工作流的第二次尝试：[原生 iOS](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38895225888/attempts/2)、[Web / 移动端](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38895225919/attempts/2)、[桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38895225899/attempts/2)。六个 job 均已实际启动，不再因组织 Actions 预算而停在运行前；原生已核对 Xcode / 锁包并进入独立模拟器创建。这只证明预算阻断解除，最终结果仍以工作流终态为准。
+
+该轮 Web / 移动端与 Chromium 两项通过，Windows 桌面通过。macOS 桌面请求 840pt 内容高度，runner 实际限制为 677pt，尺寸断言失败；Linux 未安装目录中的 Chromium 沙箱辅助程序缺少 root / 4755 权限，启动检查中止。
+
+桌面工作流为临时 runner 配置打包目录下的沙箱辅助程序，保留沙箱运行；`0d9d05c` 的 Linux 检查随后通过。第一次屏幕适配错误地同时限制宽度，macOS / Windows 分别得到 1024 / 1008pt，而原宽屏测试需要 1280pt；这轮失败保留。后续修正只适配 macOS 内容高度，保留两种请求宽度、精确视口尺寸、最小 600pt 高度、溢出与操作入口可见性断言，截图标明实际尺寸。本机重新构建后的专项通过；首次本机试跑在 Electron 启动处超时，记录保留。
+
+窗口高度调整依据 [Electron BaseWindow](https://www.electronjs.org/docs/latest/api/base-window) 的原生尺寸与 macOS 屏幕限制，使用窗口外框 / 内容差和 [screen 的工作区](https://www.electronjs.org/docs/latest/api/screen/)计算。沙箱权限依据 [Chromium SUID sandbox](https://chromium.googlesource.com/chromium/src/+/26b424af1258efd1d49bd9e2c68bdd8db4ae4d1e/docs/linux/suid_sandbox_development.md)，没有给应用增加 `--no-sandbox`。
+
+原生首轮日志中 4 个访客 UI 旅程通过；会话测试出现 4 处断言失败，集中于两个嵌套呈现用例。该轮被后续提交的 concurrency 规则取消，不能计为完整回归通过。夹具原先只等待 50 / 100ms，现改为等待 UIKit 呈现完成、控制器稳定进入窗口，以及旧控制器和视图实际离开；账号模型必须立即清空的断言保留。修改后本机会话专项 **10 项通过**：`test_sim_2026-10-16T15-09-19-495Z_pid91503_d07c27ab.xcresult`。没有修改产品的账号清理逻辑或跳过嵌套弹层断言，远端冷环境仍以修正后工作流终态为准。
+
+后续提交的运行与最终结论同步记录在[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)；未验证的真机、完整辅助功能、Sandbox 与升级范围继续保留。
+
+原生 CI 还显式关闭 Xcode 的自动机器级测试诊断采集，与本机工具的执行条件一致；测试失败仍返回失败状态，日志、xcresult 和测试附件继续上传。没有关闭测试、重试后改记通过或取消原有断言。

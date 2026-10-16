@@ -1,6 +1,6 @@
 # 原生 iOS 宿主授权接入
 
-> 2026-10-16。已接入原生账号与现有 WKWebView 授权协议，并验证真实访客取消 / 再试旅程；真实账号签码、系统其他账号与真机仍待联调。完整目标见 [原生改造 Goal](./ios-native-migration.md)。
+> 2026-10-16。已接入原生账号与现有 WKWebView 授权协议，完成受管账号的真实签码 / 消费、原生密码表单 / 授权确认和 AI 春联登录 / 退出；系统其他账号与真机仍待联调。完整目标见 [原生改造 Goal](./ios-native-migration.md)。
 
 ## 协议与服务
 
@@ -32,7 +32,7 @@
 
 “使用其他账号”复用既有系统认证会话、state / nonce / PKCE 与 callback 验证，不替换宿主存储的账号。原生工程已注册现有 `yunlefun` callback scheme，并检查生成的 Debug / Benchmark 应用 Info.plist；这不等于系统账号成功回跳已经验收。
 
-## 本轮实测
+## 早期访客实测
 
 - 生产公开目录确认 AI 春联和暴力电驴为公开应用；中央只读策略查询均返回 HTTP 200，应用名称 / 精确来源 / scope 信息有效。未发送验证码、登录账号或申请真实 code。
 - iPhone 18 Pro / iOS 27：从真实目录获取 AI 春联，打开网页，进入原生“登录并继续”，检查 AI 春联上下文和手机号表单；取消回到同一网页，再试仍能进入原生登录，随后再次取消。XCUITest 通过，已导出截图。
@@ -46,10 +46,22 @@
 
 ## 仍待验收
 
-真实账号登录 / 刷新、授权面板确认后的正式 code 签发 / 消费、系统其他账号完整回跳、真实切换 / 退出、无障碍与浅深色完整矩阵、前后台 / 弱网 / 进程回收、iOS 最低版本和真机均保留未完成。关闭 WebView 与清理现有 Cookie 允许名单不能单独证明所有云应用的持久身份隔离，仍须逐应用核对。单元测试中的模拟 code 不能算生产签码成功；本轮真实旅程只证明访客入口、取消和再试。
+系统其他账号完整回跳、SSO 期间切换 / 退出的真实多应用行为、无障碍与浅深色完整矩阵、前后台 / 弱网 / 进程回收、iOS 最低版本和真机均保留未完成。关闭 WebView 与清理现有 Cookie 允许名单不能单独证明所有云应用的持久身份隔离，仍须逐应用核对。早期访客旅程仅证明入口 / 取消 / 再试；新增真实账号证据见下节。
 
 ## 参考
 
 - [CloudBase Functions HTTP API](https://docs.cloudbase.net/http-api/functions/functions-post)
 - [原生授权面板规范](../ui/native-authorization-sheet.md)
 - [原生接口盘点](./ios-native-api-audit.md)
+
+## 受管账号真实授权（2026-10-16）
+
+新增独立 HostAuthorizationLiveTests，限定 Admin 受管 production-zero-balance。输入来自仓库外 0600 文件，一次性注入专用模拟器缓存后立即删除；测试 Keychain 使用独立服务名。没有更改中央注册表、云函数部署、账号权限或余额。
+
+协议测试在 iOS 27 通过：实际 HostAuthorizationService 查询 AI 春联的注册策略并签发 PKCE 绑定 code；消费端向既有 HTTPS sso-ticket 发送自己的 verifier。错误 verifier 返回 403 / pkce_invalid，正确兑换返回 ticket 与签名身份断言，第二次兑换返回 409 / code_used。使用官方 Auth HTTP 自定义登录和资料读取，核对临时会话仍对应原宿主账号；临时会话和宿主会话均远端退出。JSAPI 的 scope 数组在 HTTP 兑换边界按既有契约转换为空格字符串；最初验证请求的编码错误已修正，未改动业务服务来放宽校验。
+
+另一个显式 UI 测试通过真实 NativeWebRuntime、NativeAuthorizationBroker 与 AI 春联生产页面运行：点击网页登录 → 原生密码表单输入固定账号 → 系统键盘提交 → 回到同一 WebView → 原生授权面板再次确认 → 网页账号菜单显示 ylf_prod_zero / 云币 0 → 点击网页退出登录 → 宿主测试会话远端退出。原生面板被测试实际观察到，网页身份和退出状态通过真实 DOM 与 Device Hub 截图核对；未把宿主凭据注入 WebView，也未通过注入脚本伪造页面登录。
+
+两个方法均默认跳过线上操作。协议方法需显式 YUNLEFUN_LIVE_HOST_SSO=1；界面方法另需 YUNLEFUN_LIVE_HOST_SSO_UI=1 和外部 UI 驱动，不适合无人操作的 CI。界面用例最多等待 5 分钟完成原生登录与确认，再等待 90 秒验证应用退出。首次 UI 驱动漏输密码中的特殊字符并超时，改用安全字段的原生文本接口后完整通过；失败结果保留。
+
+证据位于本聊天附件 ios-native/host-sso-live：protocol-27、ui-27、真实原生授权面板与网页账号截图。实际 UI 运行在键盘提交附近出现一条 SwiftUI invalid frame dimension 运行时告警，来源尚未查明，继续列入布局专项；截图中未见内容裁切。本次仅覆盖同一模拟器、同一合成账号和 AI 春联，不能推广为所有应用身份隔离、BFF 会话实现、其他系统账号、真机或升级验收。

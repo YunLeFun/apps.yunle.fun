@@ -42,7 +42,7 @@
 
 登录表单已在当前模拟器检查浅深色与最大辅助字号。普通字号使用系统分段 Picker，辅助字号使用系统菜单 Picker，避免分段文字固定过小；Form 保持滚动以访问验证码和提交动作。错误采用图标与文字，同时提供 VoiceOver 错误焦点。手机号、邮箱、密码与验证码分别使用合适的系统键盘和内容类型。该检查尚未覆盖完整 VoiceOver、iPad 与真机矩阵。
 
-待授权登录复用同一系统表单，显示“登录并继续”与可信应用上下文，明确登录后仍需确认；取消返回原云应用并允许再试。AI 春联的真实取消 / 再试旅程已在 iOS 27 和 iOS 18.6 模拟器验证；真实已登录账号授权面板与完整辅助功能矩阵仍待验。
+待授权登录复用同一系统表单，显示“登录并继续”与可信应用上下文，明确登录后仍需确认；取消返回原云应用并允许再试。AI 春联的真实取消 / 再试旅程已在 iOS 27 和 iOS 18.6 模拟器验证；iOS 27 的受管账号已实际使用密码表单、键盘提交和原生授权面板，在 AI 春联完成同一身份登录 / 退出；完整辅助功能矩阵、其他账号及真机仍待验。
 
 工坊搜索使用系统 `.searchable`，明确设置 `.navigationBarDrawer(displayMode: .always)`，让目录初始页面就有可发现的搜索入口，保持系统样式与动态字号。依据见 [Apple 搜索界面说明](https://developer.apple.com/documentation/swiftui/adding-a-search-interface-to-your-app)和[常显配置](https://developer.apple.com/documentation/swiftui/searchfieldplacement/navigationbardrawerdisplaymode/always)。
 

@@ -294,3 +294,17 @@ Issue #46 原先记录“仅规划、首发平台待定”。本计划依据本�
 - Web 的 71 项 Nuxt、桌面的 79 项单元及类型检查、5 项 Chromium 登录回归和根 lint 通过。现有 EdgeOne 项目绑定 GitHub main，CLI 只允许直接上传到 Upload 类型项目；当前准备分支评审和预览，不把本地接口通过视为生产部署完成。
 
 - 真实同步冲突补充：iOS 27 已实际点击“使用云端版本 → 系统确认”，通过后核对恢复副本与原数据清理。此点击需要显式 UI 驱动；默认线上测试仍可独立验证协调器。根 lint、638 单元、71 Nuxt、79 桌面、桌面 / 移动类型、5 Chromium 和文档构建通过。继续准备草稿 PR 与分支预览。
+
+### 草稿评审与远端状态
+
+- 已推送 codex/ios-native-app，建立[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)，按 API、Agent、原生客户端与文档拆为 4 个 Conventional Commits；PR 保持 Draft，尚未合并。
+- GitHub CI [38848306134](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38848306134) 与 Desktop CI [38848306166](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38848306166) 的 annotation 均明确为 Actions 预算阻止运行，job 没有进入步骤；不是远端代码测试通过。GitGuardian 检查通过。
+- EdgeOne yunlefun-apps 为 Github 类型项目，生产分支 main，RootDir apps/mobile。控制台核实预览环境覆盖未分配的分支，自动部署关闭；RepoPreBranches 为空不代表禁止预览。已从控制台手动构建 codex/ios-native-app 的 be0aafd，预览部署 dpiab6dfwnm5 成功，未修改项目设置或生产部署。
+
+### 已部署预览的真实同步验证
+
+- 预览地址为 https://yunlefun-apps-dpiab6dfwnm5.edgeone.cool。保留 EdgeOne 的预览访问保护；平台签发的短期访问会话仅保存在仓库外的 0600 回执中，测试严格校验项目、环境、分支、成功状态、提交、域名和有效期，拒绝重定向。
+- 带平台访问会话、未登录应用时，公开目录返回 JSON 200 / 25 个应用，云居、获取与个人工坊接口返回 JSON 401。随后受管账号在真实部署的云居接口完成 6 项 HTTP 检查，包括事务写入、幂等和并发单一胜出；按基线恢复并验证内容，远端退出成功。
+- iOS 27 的 HomeSyncLiveTests 对此预览通过 3 项测试。真实账号完成离线保留、磁盘 / Keychain 对象重建恢复、独立本地客户端同步、真实修订冲突、离线恢复副本和账号隔离，清理后原云端内容已恢复。另两项校验测试拒绝错误凭据目的地及过期 / 非法平台会话。浅色已同步、离线、深色辅助字号冲突截图及安全报告已导出。
+- 修正原生云居 HTTP 错误分类：先核对 JSON MIME 与 2 MiB 响应上限，再处理账号 401 / 403，平台 HTML 访问页不再触发账号过期。原生日常回归 208 项（207 单元 / 集成 + 1 UI）通过。预览访问 Cookie 只由独立测试会话携带；正式应用的服务地址和凭据边界保持不变。
+- 本轮证明分支预览的真实服务闭环；正式域名新接口、旧版并发与升级、跨硬件、签名真机、Sandbox 和完整 UI / 无障碍 / 性能验收仍未完成。M2 / M3 保持未勾选，草稿 PR #48 继续评审。

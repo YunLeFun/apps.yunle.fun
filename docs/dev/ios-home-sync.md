@@ -94,3 +94,13 @@ node scripts/ios/home-sync-smoke.mjs --origin=http://127.0.0.1:18746 --write --c
 这些证据证明当前服务代码能和真实 CloudBase 读写，不代表 apps.yunle.fun 的新接口已上线，也不证明旧版 JS SDK 的首次并发新建竞态、跨硬件、UI 点击、进程重启与旧版升级已经完成。完整记录保存在本聊天附件 ios-native/home-sync-live，M2 继续保留待验项。
 
 实际点击补充：iOS 27 受管账号冲突场景已通过 Device Hub 点击“使用云端版本 → 确认使用此版本”，随后测试核对云端选择、离线恢复副本、账号切换及清理。显式 YUNLEFUN_LIVE_SYNC_UI_TAP=1 模式复用当前应用窗口并等待外部 UI 自动化操作，不能在无人操作的 CI 中直接启用。MCP 点击未改变界面后改用 Device Hub 的实际输入，确认框正常呈现；本轮未因此修改产品按钮实现。系统确认截图和通过报告已保存。
+
+## EdgeOne 预览实测（2026-10-16）
+
+现有 Github 项目从控制台手动构建 codex/ios-native-app，提交 be0aafdb1018ef2a2f8c57062c8887b04e5a08dd；Preview 部署 dpiab6dfwnm5 已成功。项目设置与生产部署未变。该环境的裸域名受 EdgeOne 保护，会返回 HTML 401；不能把它解释为 CloudBase 登录失效，也不应关闭平台访问保护来测试。
+
+测试使用控制台等价的短期平台访问会话。完整回执包含项目、分支、环境、部署状态、提交、唯一预览 origin，以及 previewAccess 中的 cookie / expiresAt，必须留在仓库外的 0600 文件中。平台 Cookie 有效期最多 3 小时，仅发送给核准的同源预览 API，不传给 CloudBase 登录网关或正式目录，不接受重定向。原生的独立 LiveValidation 会话同样使用 ephemeral URLSession，禁用 Cookie 存储、缓存和系统凭据。不要将带签名的预览 URL、回执或 Cookie 放进 PR、日志或附件。
+
+HTTP 脚本可用 --target=/private/preview-receipt.json 替代固定本地 --origin 参数，仍须显式 --write 与 --confirm-account=production-zero-balance。Node 目的地 / 平台会话校验 3 项通过；同一预览的 6 项真实 HTTP 检查通过，最终恢复内容和远端退出均核验成功。HomeSyncLiveTests 输入可包含同一 target 对象；iOS 27 通过完整真实旅程及两项目的地 / 访问会话校验，共 3 项。测试输入读取后删除，报告仅记录安全元数据，截图使用系统原生表单。
+
+正式 HomeSyncService 先验证 application/json MIME 和 2 MiB 上限，再分类 401 / 403，避免平台 HTML 页面错误触发账号刷新。此处不改变正式应用的服务地址。预览测试仍是同一模拟器的独立本地客户端，不替代正式域名上线、跨硬件、进程终止、旧版并发和覆盖升级。

@@ -767,6 +767,7 @@ class WebViewController: UIViewController {
     /// 结束（彻底释放）：收起容器并通知插件层释放本会话，下次打开全新开始
     @objc private func closeTapped() {
         minimizePending = false
+        if usesSystemNavigationBar, let onClose { onClose(); return }
         dismiss(animated: true)
         onClose?()
     }
@@ -784,7 +785,9 @@ class WebViewController: UIViewController {
             if let data = image?.jpegData(compressionQuality: 0.7) {
                 self.previewImage = "data:image/jpeg;base64," + data.base64EncodedString()
             }
-            self.dismiss(animated: true)
+            if self.usesSystemNavigationBar, let owner = self.navigationController?.presentingViewController {
+                owner.dismiss(animated: true)
+            } else { self.dismiss(animated: true) }
             self.onMinimize?()
         }
         guard webView.bounds.width > 0, webView.bounds.height > 0 else {

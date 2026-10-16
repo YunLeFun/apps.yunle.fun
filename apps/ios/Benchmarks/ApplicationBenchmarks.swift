@@ -239,6 +239,62 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertFalse(app.webViews.firstMatch.exists)
     }
 
+    func testNativeCanSwitchApplicationsFromAuthorDetailsAndRestore() throws {
+        guard !isLegacy else { throw XCTSkip("Verifies native session ownership across application switches") }
+        continueAfterFailure = false
+        let app = app
+        prepareNativeHome(app)
+        app.buttons["打开云空调"].tap()
+        let airDocument = app.webViews.staticTexts["便携小空调"].firstMatch
+        XCTAssertTrue(airDocument.waitForExistence(timeout: 20))
+
+        func openFromAuthor(_ name: String) {
+            app.buttons["更多操作"].tap()
+            let author = app.buttons["runtime.menu.author"]
+            XCTAssertTrue(author.waitForExistence(timeout: 5)); author.tap()
+            XCTAssertTrue(app.staticTexts["公开作品"].waitForExistence(timeout: 5))
+            let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", name)).firstMatch
+            for _ in 0..<5 where !row.isHittable { app.swipeUp() }
+            XCTAssertTrue(row.exists && row.isHittable); row.tap()
+            XCTAssertTrue(app.staticTexts["关于这个应用"].waitForExistence(timeout: 5))
+            attach(app, name: "switch-author-detail-\(name)")
+            let open = app.buttons["打开"]
+            if open.waitForExistence(timeout: 2) { open.tap() }
+            else {
+                let trial = app.buttons["试用"]
+                XCTAssertTrue(trial.exists); trial.tap()
+            }
+        }
+
+        openFromAuthor("AI 春联")
+        let login = app.navigationBars["登录并继续"]
+        if login.waitForExistence(timeout: 3) { app.buttons["取消"].tap() }
+        let springDocument = app.webViews.buttons.matching(NSPredicate(format: "label CONTAINS %@", "登录")).firstMatch
+        XCTAssertTrue(springDocument.waitForExistence(timeout: 20))
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label == %@", "收起应用")).count, 1)
+        XCTAssertFalse(app.staticTexts["公开作品"].exists)
+        attach(app, name: "switch-second-application")
+
+        openFromAuthor("云空调")
+        XCTAssertTrue(airDocument.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label == %@", "收起应用")).count, 1)
+        XCTAssertFalse(app.staticTexts["公开作品"].exists)
+        attach(app, name: "switch-original-restored")
+        app.buttons["更多操作"].tap()
+        app.buttons["结束"].tap()
+        XCTAssertTrue(app.buttons["打开云空调"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.webViews.firstMatch.exists)
+        let running = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "正在运行")).firstMatch
+        XCTAssertTrue(running.exists); running.tap()
+        let spring = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "AI 春联")).firstMatch
+        XCTAssertTrue(spring.waitForExistence(timeout: 5)); spring.tap()
+        XCTAssertTrue(app.buttons["收起应用"].waitForExistence(timeout: 5))
+        app.buttons["更多操作"].tap(); app.buttons["结束"].tap()
+        XCTAssertTrue(app.navigationBars["正在运行"].waitForExistence(timeout: 5))
+        XCTAssertFalse(spring.exists)
+        XCTAssertFalse(app.webViews.firstMatch.exists)
+    }
+
     func testNativeGuestCanReadReviewsAndReachReports() throws {
         guard !isLegacy else { throw XCTSkip("Verifies native community screens") }
         continueAfterFailure = false

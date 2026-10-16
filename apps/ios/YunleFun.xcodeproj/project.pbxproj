@@ -81,6 +81,7 @@
 		B7F304B652EA60375B86DDA5 /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30600513D47FB7C283B23686 /* MeView.swift */; };
 		BC7321977A67B7B0500388E1 /* HomeSyncLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E11781B68CFA29A03F01A3D /* HomeSyncLiveTests.swift */; };
 		BC7406F16D4DE12D55B8EBCE /* HostAuthorizationLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717E85C04C50681D8D783BAC /* HostAuthorizationLiveTests.swift */; };
+		BE2577AB27247AE737786852 /* NativeRuntimeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD2ACC46A15815DE5714A400 /* NativeRuntimeSessionTests.swift */; };
 		BEA5A07D60821D4F4A0467AD /* WalletStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F4870F29D6C930BF6AA0E6 /* WalletStore.swift */; };
 		BF37AC3F5C0ADDB1D2E85368 /* HomeSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406175AD7F2531EA795BA37E /* HomeSyncTests.swift */; };
 		BFEF421A5EB58D120FAD5076 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43B586E7C4A4CDC49E141BF /* WalletView.swift */; };
@@ -259,6 +260,7 @@
 		C8CC582D7ABAC5D80A5D64FA /* NativeApplicationMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeApplicationMenuView.swift; sourceTree = "<group>"; };
 		C9B030A9E7CFC94AB775172E /* YunleFunUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = YunleFunUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA6704E6702EC5E8C9E0F36A /* PurchaseOwnershipJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseOwnershipJournal.swift; sourceTree = "<group>"; };
+		CD2ACC46A15815DE5714A400 /* NativeRuntimeSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRuntimeSessionTests.swift; sourceTree = "<group>"; };
 		CE3FBCBE02747467F7CA00C5 /* CatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTests.swift; sourceTree = "<group>"; };
 		CEE7EF9B75AF44185997988B /* Community.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Community.swift; sourceTree = "<group>"; };
 		D0EF59D82409EC05C152CEC2 /* HomeSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncService.swift; sourceTree = "<group>"; };
@@ -338,6 +340,7 @@
 				5F8B3C154BFAA042DAAA85DF /* HostIdentitySessionsTests.swift */,
 				63AEABB76F5959C8CEAC15A1 /* NativeApplicationMenuTests.swift */,
 				783F4EEAD2D44D50F438E724 /* NativeAuthorizationBrokerTests.swift */,
+				CD2ACC46A15815DE5714A400 /* NativeRuntimeSessionTests.swift */,
 				EF06F6B83794882B6121256F /* NativeWebNavigationTests.swift */,
 				6C044F213AAF9F02B4A8950A /* PublishingTests.swift */,
 				044EEB65D428F912A3FD4988 /* ScannerTests.swift */,
@@ -980,6 +983,7 @@
 				00A93EACF04D72910025811C /* HostIdentitySessionsTests.swift in Sources */,
 				0EB4E8C774EAA0FD9001B691 /* NativeApplicationMenuTests.swift in Sources */,
 				89B708B191838298C952B250 /* NativeAuthorizationBrokerTests.swift in Sources */,
+				BE2577AB27247AE737786852 /* NativeRuntimeSessionTests.swift in Sources */,
 				B182472BB3DE904E87F89FF4 /* NativeWebNavigationTests.swift in Sources */,
 				C419E88370B8E6E61517177C /* PublishingTests.swift in Sources */,
 				251644AA403BABB6FD61B664 /* ScannerTests.swift in Sources */,

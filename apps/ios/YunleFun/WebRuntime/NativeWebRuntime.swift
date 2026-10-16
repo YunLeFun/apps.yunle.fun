@@ -15,11 +15,21 @@ final class NativeWebRuntime: ObservableObject {
     private var scopedOpenTask: Task<Void, Never>?
     private var scopedOpenID = UUID()
     weak var anchor: UIViewController?
+    private weak var presentationWindow: UIWindow?
     private struct Session {
         let browser: WebViewController
         let presentation: UINavigationController
     }
     private var sessions: [String: Session] = [:]
+    private struct PendingOpen {
+        let application: CloudApplication
+        let url: URL
+        let catalog: CatalogStore
+        let library: HomeLibrary
+        let identity: UUID
+    }
+    private var pendingOpen: PendingOpen?
+    private var presentationTransition: UUID?
     private var authorizationPages: [String: NativeAuthorizationPage] = [:]
     private var authorizationBroker: NativeAuthorizationBroker?
     private weak var accounts: AccountStore?
@@ -59,7 +69,7 @@ final class NativeWebRuntime: ObservableObject {
     func acquire(_ app: CloudApplication, intent: ApplicationAcquisitionIntent, catalog: CatalogStore, library: HomeLibrary) {
         guard app.accessWorkshopID == nil, app.accessOwnerID == nil else { return }
         guard let accounts, let wallet, let purchases,
-              var presenter = anchor?.view.window?.rootViewController, acquisitionController == nil, !isClearingIdentity else { return }
+              var presenter = presentationRootController(), acquisitionController == nil, !isClearingIdentity else { return }
         let requestID = UUID(); acquisitionID = requestID
         let store = ApplicationAcquisitionStore(application: app, accounts: accounts)
         let page = UIHostingController(rootView: ApplicationAcquisitionView(store: store, intent: intent) { [weak self] permit in
@@ -138,21 +148,69 @@ final class NativeWebRuntime: ObservableObject {
     }
 
     private func present(_ app: CloudApplication, url: URL, catalog: CatalogStore, library: HomeLibrary) {
-        guard var presenter = anchor?.view.window?.rootViewController else {
+        pendingOpen = PendingOpen(application: app, url: url, catalog: catalog, library: library, identity: identityReset)
+        drainPendingOpen()
+    }
+
+    private func drainPendingOpen() {
+        guard presentationTransition == nil, !isClearingIdentity, let request = pendingOpen else { return }
+        guard request.identity == identityReset else { pendingOpen = nil; return }
+        guard let presenter = presentationRootController() else {
+            pendingOpen = nil
             issue = RuntimeIssue(title: "暂时无法打开", message: "请稍后再试。")
             return
         }
-        if let saved = sessions[app.id], saved.browser.url != url || applications.first(where: { $0.id == app.id })?.runtimeScope != app.runtimeScope {
-            if saved.presentation.presentingViewController != nil {
-                let identity = identityReset
-                saved.presentation.dismiss(animated: true) { [weak self] in
-                    guard let self, self.identityReset == identity, !self.isClearingIdentity else { return }
-                    self.removeSession(app)
-                    self.present(app, url: url, catalog: catalog, library: library)
+        if let saved = sessions[request.application.id], presenter.presentedViewController === saved.presentation,
+           saved.browser.url == request.url,
+           applications.first(where: { $0.id == request.application.id })?.runtimeScope == request.application.runtimeScope {
+            pendingOpen = nil
+            return
+        }
+        if let presented = presenter.presentedViewController {
+            let transition = UUID()
+            presentationTransition = transition
+            if presented.isBeingPresented || presented.isBeingDismissed {
+                guard let coordinator = presented.transitionCoordinator,
+                      coordinator.animate(alongsideTransition: nil, completion: { [weak self] _ in self?.finishPresentation(transition) }) else {
+                    presentationTransition = nil; pendingOpen = nil
+                    issue = RuntimeIssue(title: "界面正在切换", message: "请稍后再打开应用。")
+                    return
                 }
-                return
+            } else {
+                for session in sessions.values where session.presentation.presentingViewController != nil {
+                    if let page = authorizationPages[session.browser.appInfo?.id ?? ""] { authorizationBroker?.cancel(page: page) }
+                    session.browser.cancelPendingAuthorizations()
+                }
+                // Dismiss from the owner of the entire hierarchy, including first-party sheets.
+                presenter.dismiss(animated: true) { [weak self] in self?.finishPresentation(transition) }
             }
-            end(app)
+            return
+        }
+        pendingOpen = nil
+        showSession(request, from: presenter)
+    }
+
+    private func finishPresentation(_ transition: UUID) {
+        guard presentationTransition == transition else { return }
+        presentationTransition = nil
+        drainPendingOpen()
+    }
+
+    private func presentationRootController() -> UIViewController? {
+        guard let anchor else { return nil }
+        if let window = anchor.viewIfLoaded?.window { presentationWindow = window }
+        guard let root = presentationWindow?.rootViewController else { return nil }
+        // Full-screen presentation removes the covered anchor's view from its window.
+        // Its containment must still belong to this root before using the cached window.
+        var ancestor = anchor
+        while let parent = ancestor.parent { ancestor = parent }
+        return ancestor === root ? root : nil
+    }
+
+    private func showSession(_ request: PendingOpen, from presenter: UIViewController) {
+        let app = request.application, url = request.url, catalog = request.catalog, library = request.library
+        if let saved = sessions[app.id], saved.browser.url != url || applications.first(where: { $0.id == app.id })?.runtimeScope != app.runtimeScope {
+            removeSession(app)
         }
         let controller: WebViewController
         if let saved = sessions[app.id] {
@@ -163,10 +221,15 @@ final class NativeWebRuntime: ObservableObject {
             controller.url = url
             controller.displayMode = .titlebar
             controller.usesSystemNavigationBar = true
-            controller.onClose = { [weak self] in self?.removeSession(app) }
-            controller.onMinimize = { [weak self] in
-                if let page = self?.authorizationPages[app.id] { self?.authorizationBroker?.cancel(page: page) }
-                self?.markRecent(app)
+            controller.onClose = { [weak self, weak controller] in
+                guard let self, let controller, self.sessions[app.id]?.browser === controller else { return }
+                self.end(app)
+            }
+            controller.onMinimize = { [weak self, weak controller] in
+                guard let self, let controller, !self.isClearingIdentity, self.sessions[app.id]?.browser === controller else { return }
+                if let page = self.authorizationPages[app.id] { self.authorizationBroker?.cancel(page: page) }
+                controller.cancelPendingAuthorizations()
+                self.markRecent(self.applications.first(where: { $0.id == app.id }) ?? app)
             }
             if let accounts {
                 let page = NativeAuthorizationPage(browser: controller, accounts: accounts)
@@ -215,18 +278,19 @@ final class NativeWebRuntime: ObservableObject {
             description: app.summary, category: app.browseCategory,
             developer: app.ownerLogin ?? "", developerName: app.developerName ?? "",
             rating: app.displayRating ?? 0, ratingCount: app.ratingCount ?? 0)
-        while let presented = presenter.presentedViewController { presenter = presented }
-        guard !presenter.isBeingDismissed, !presenter.isBeingPresented else { return }
         markRecent(app)
         evictIfNeeded(except: app.id)
         guard let session = sessions[app.id] else { return }
-        presenter.present(session.presentation, animated: true)
+        let transition = UUID()
+        presentationTransition = transition
+        presenter.present(session.presentation, animated: true) { [weak self] in self?.finishPresentation(transition) }
         library.recordUse(app)
     }
 
     func end(_ app: CloudApplication) {
+        if pendingOpen?.application.id == app.id { pendingOpen = nil }
         guard let session = sessions[app.id] else { return }
-        if session.presentation.presentingViewController != nil { session.presentation.dismiss(animated: true) }
+        session.presentation.presentingViewController?.dismiss(animated: true)
         removeSession(app)
     }
 
@@ -234,12 +298,13 @@ final class NativeWebRuntime: ObservableObject {
         scopedOpenID = UUID(); scopedOpenTask?.cancel(); scopedOpenTask = nil; verifyingScopedApplicationID = nil
         let reset = UUID()
         identityReset = reset
+        pendingOpen = nil
         isClearingIdentity = true
         let continuation = authorizationBroker?.identityWillChange(to: id) as? NativeAuthorizationPage
         let kept = continuation?.browser
         for session in sessions.values where session.browser !== kept {
             session.browser.cancelPendingAuthorizations()
-            if session.presentation.presentingViewController != nil { session.presentation.dismiss(animated: false) }
+            session.presentation.presentingViewController?.dismiss(animated: false)
         }
         sessions = sessions.filter { $0.value.browser === kept }
         authorizationPages = authorizationPages.filter { $0.value === continuation }
@@ -249,6 +314,7 @@ final class NativeWebRuntime: ObservableObject {
             guard let self, self.identityReset == reset else { return }
             self.isClearingIdentity = false
             self.authorizationBroker?.identityCookiesCleared()
+            self.drainPendingOpen()
         }
     }
 
@@ -326,12 +392,13 @@ struct DeveloperApplicationsView: View {
         List {
             Section("公开作品") {
                 ForEach(catalog.applications.filter { $0.ownerLogin?.lowercased() == login.lowercased() }) { app in
-                    NavigationLink(value: app) { ApplicationRow(application: app) }
+                    NavigationLink {
+                        ApplicationDetailView(application: app)
+                    } label: { ApplicationRow(application: app) }
                 }
             }
         }
         .navigationTitle(login)
-        .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
         .runtimeMenuToolbar()
     }
 }

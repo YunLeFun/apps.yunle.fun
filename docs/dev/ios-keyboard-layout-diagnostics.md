@@ -63,6 +63,8 @@ TEST_RUNNER_YUNLEFUN_UI_LAYOUT_DIAGNOSTICS=1 xcodebuild \
 
 新查询下的两条键盘 UI 在独立模拟器分别通过，首轮集合因旧版导入另有失败，不能合并为整组通过。该托管运行共 264 通过 / 2 失败，另一项为旧版导入读取失败，Release 编译未执行；完整 CI 与修正后的终态见[执行记录](./ios-ci-and-open-source.md)和 PR #48。
 
+下一轮 `842cef1` 为 267 通过 / 1 失败：标准字号方法在进入登录表单前的组合文字入口查询卡住，触及 120 秒用例限制，并未执行到键盘；其余五条 UI 和全部 262 项单元 / 集成通过。登录入口现按 `me.login` 直接定位，并等待“我”页导航就绪，保留可访问文字断言。新建模拟器完整 6 UI 通过，`test_sim_2026-10-16T18-34-51-200Z_pid44279_82a73a01.xcresult`。该变化用于稳定自动化入口定位，不改写剩余页面辅助功能审计或系统最小对照的失败。
+
 ## 依据
 
 - [XCTSourceCodeFrame](https://developer.apple.com/documentation/xctest/xctsourcecodeframe)：读取告警的原始栈帧；没有将异步处理告警时的线程栈当成触发栈。

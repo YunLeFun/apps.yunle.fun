@@ -70,6 +70,7 @@ struct SettingsView: View {
                 Toggle("显示最近使用", isOn: $showRecent)
                 Toggle("显示常用应用", isOn: Binding(get: { library.snapshot.dockVisible }, set: library.setDockVisible))
                 NavigationLink("云居同步") { HomeSyncSettingsView() }
+                NavigationLink("云居备份") { HomeBackupsView(library: library, accounts: accounts) }
                 Button("清空最近使用", role: .destructive) { confirmClear = true }
                     .disabled(library.snapshot.recentIDs.isEmpty)
             }

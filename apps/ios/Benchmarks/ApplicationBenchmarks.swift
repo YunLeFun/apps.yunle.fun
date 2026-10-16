@@ -374,6 +374,54 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertFalse(app.buttons["导入到当前云居"].exists)
     }
 
+    func testNativeHomeBackupCancellationRestoreRestartAndUndo() throws {
+        guard !isLegacy, ProcessInfo.processInfo.environment["YLF_HOME_BACKUP_UI"] == "1" else {
+            throw XCTSkip("Requires an explicitly staged and backed-up guest Benchmark fixture")
+        }
+        continueAfterFailure = false
+        let app = app; app.launch(); app.tabBars.buttons["云居"].tap()
+        func homeLabels() -> [String] {
+            app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开")).allElementsBoundByIndex.map(\.label)
+        }
+        let original = homeLabels()
+        app.tabBars.buttons["我"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch.waitForExistence(timeout: 5))
+        app.buttons["设置"].tap(); app.buttons["云居备份"].tap()
+        let fixture = "home.backup.guest.before-legacy-" + String(repeating: "b", count: 64) + ".json"
+        XCTAssertTrue(app.buttons[fixture].waitForExistence(timeout: 5)); app.buttons[fixture].tap()
+        XCTAssertTrue(app.buttons["查看应用与顺序"].waitForExistence(timeout: 5)); app.buttons["查看应用与顺序"].tap()
+        XCTAssertTrue(app.navigationBars["备份内容"].waitForExistence(timeout: 5))
+        attach(app, name: "home-backup-content")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        func showRestore() {
+            let button = app.buttons["恢复此备份"]
+            for _ in 0..<5 where !button.isHittable { app.swipeUp() }
+            XCTAssertTrue(button.exists && button.isHittable); button.tap()
+            XCTAssertTrue(app.buttons["确认恢复"].waitForExistence(timeout: 5))
+        }
+        showRestore(); attach(app, name: "home-backup-confirmation")
+        if app.buttons["取消"].exists { app.buttons["取消"].tap() }
+        else {
+            let outside = app.otherElements["PopoverDismissRegion"]
+            XCTAssertTrue(outside.exists); outside.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: 0.5)).tap()
+        }
+        app.tabBars.buttons["云居"].tap(); XCTAssertEqual(homeLabels(), original)
+        app.tabBars.buttons["我"].tap(); showRestore(); app.buttons["确认恢复"].tap()
+        XCTAssertTrue(app.staticTexts["已恢复云居"].waitForExistence(timeout: 5))
+        attach(app, name: "home-backup-restored")
+        app.terminate(); app.launch(); app.tabBars.buttons["云居"].tap()
+        XCTAssertTrue(app.buttons["打开云空调"].firstMatch.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["打开暂不可用的应用"].firstMatch.exists)
+        attach(app, name: "home-backup-home-after-restart")
+        app.tabBars.buttons["我"].tap(); app.buttons["设置"].tap(); app.buttons["云居备份"].tap()
+        let undo = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "恢复其他备份前")).firstMatch
+        XCTAssertTrue(undo.waitForExistence(timeout: 5)); undo.tap()
+        showRestore(); app.buttons["确认恢复"].tap()
+        XCTAssertTrue(app.staticTexts["已恢复云居"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["云居"].tap(); XCTAssertEqual(homeLabels(), original)
+        attach(app, name: "home-backup-original-found-again")
+    }
+
     func testNativeGuestWorkshopEntryAndInvalidLink() throws {
         guard !isLegacy else { throw XCTSkip("Verifies native personal workshop screens") }
         continueAfterFailure = false

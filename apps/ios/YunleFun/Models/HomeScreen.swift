@@ -78,6 +78,7 @@ struct HomeLibrarySnapshot: Codable, Equatable {
     var autoSyncEnabled = true
     var dockVisible = false
     var legacyImportID: String?
+    var lastRestoreID: String?
 
     var applications: [CloudApplication] { configuration.installedApps.map { application(reference: $0.appId) } }
     var dockApplications: [CloudApplication] { configuration.dockApps.map { application(reference: $0.appId) } }
@@ -97,7 +98,7 @@ struct HomeLibrarySnapshot: Codable, Equatable {
     init() {}
     enum CodingKeys: String, CodingKey {
         case version, configuration, cachedApplications, base, mutationId, hasPendingChanges
-        case syncEnabled, autoSyncEnabled, dockVisible, applications, recentIDs, legacyImportID
+        case syncEnabled, autoSyncEnabled, dockVisible, applications, recentIDs, legacyImportID, lastRestoreID
     }
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -120,9 +121,11 @@ struct HomeLibrarySnapshot: Codable, Equatable {
             autoSyncEnabled = try c.decodeIfPresent(Bool.self, forKey: .autoSyncEnabled) ?? true
             dockVisible = try c.decodeIfPresent(Bool.self, forKey: .dockVisible) ?? false
             legacyImportID = try c.decodeIfPresent(String.self, forKey: .legacyImportID)
+            lastRestoreID = try c.decodeIfPresent(String.self, forKey: .lastRestoreID)
         }
         guard UUID(uuidString: mutationId) != nil else { throw HomeSyncError.invalidResponse }
         if let legacyImportID, legacyImportID.count != 64 || !legacyImportID.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) { throw HomeSyncError.invalidResponse }
+        if let lastRestoreID, UUID(uuidString: lastRestoreID) == nil { throw HomeSyncError.invalidResponse }
         try configuration.validate()
         try base?.validate()
     }
@@ -130,6 +133,7 @@ struct HomeLibrarySnapshot: Codable, Equatable {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(version, forKey: .version)
         try c.encodeIfPresent(legacyImportID, forKey: .legacyImportID)
+        try c.encodeIfPresent(lastRestoreID, forKey: .lastRestoreID)
         try c.encode(configuration, forKey: .configuration)
         try c.encode(cachedApplications, forKey: .cachedApplications)
         try c.encodeIfPresent(base, forKey: .base)

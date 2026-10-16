@@ -11,6 +11,8 @@ final class HomeLibrary: ObservableObject {
     private let directory: URL
     private var canWrite = true
     var onUserChange: (() -> Void)?
+    var needsRecovery: Bool { !canWrite }
+    var restoreBaseline: HomeRestoreBaseline { HomeRestoreBaseline(snapshot, needsRecovery: needsRecovery) }
 
     init(directory: URL? = nil, accountID: String? = nil) {
         self.directory = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -160,6 +162,63 @@ final class HomeLibrary: ObservableObject {
         onUserChange?()
     }
 
+    func restoreBackup(_ candidate: HomeLibrarySnapshot, confirmation: HomeBackupRestoreConfirmation) throws {
+        guard accountID == confirmation.boundary.accountID else { throw HomeBackupError.identityChanged }
+        if snapshot.lastRestoreID == confirmation.id.uuidString { return }
+        guard generation == confirmation.boundary.libraryGeneration else { throw HomeBackupError.identityChanged }
+        guard confirmation.baseline.matches(snapshot, includingSettings: confirmation.restoreSettings),
+              confirmation.baseline.needsRecovery == needsRecovery else { throw HomeBackupError.currentChanged }
+        do { try candidate.configuration.validate() } catch { throw HomeBackupError.unreadable }
+        try preserveBeforeRestore(confirmation)
+        var next = snapshot
+        next.configuration = candidate.configuration
+        let currentCache = snapshot.cachedApplications
+        next.cachedApplications = candidate.cachedApplications
+        for app in currentCache { cache(app, in: &next) }
+        if confirmation.restoreSettings {
+            next.syncEnabled = candidate.syncEnabled; next.autoSyncEnabled = candidate.autoSyncEnabled; next.dockVisible = candidate.dockVisible
+        }
+        next.legacyImportID = snapshot.legacyImportID ?? candidate.legacyImportID
+        next.mutationId = UUID().uuidString; next.hasPendingChanges = true
+        next.lastRestoreID = confirmation.id.uuidString
+        guard persist(next, allowRecovery: true) else { throw HomeBackupError.storage }
+        generation = UUID()
+        onUserChange?()
+    }
+
+    private func preserveBeforeRestore(_ confirmation: HomeBackupRestoreConfirmation) throws {
+        let suffix = (needsRecovery ? "before-repair-" : "before-restore-") + confirmation.id.uuidString
+        let backup = fileURL.deletingPathExtension().appendingPathExtension(suffix).appendingPathExtension(needsRecovery ? "bin" : "json")
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            if needsRecovery {
+                let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+                guard values.isRegularFile == true, values.isSymbolicLink != true else { throw HomeBackupError.storage }
+                if FileManager.default.fileExists(atPath: backup.path) {
+                    guard FileManager.default.contentsEqual(atPath: fileURL.path, andPath: backup.path) else { throw HomeBackupError.currentChanged }
+                } else {
+                    try FileManager.default.copyItem(at: fileURL, to: backup)
+                }
+                try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUnlessOpen], ofItemAtPath: backup.path)
+            } else {
+                var data: Data
+                do {
+                    let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey, .fileSizeKey])
+                    guard values.isRegularFile == true, values.isSymbolicLink != true, (values.fileSize ?? 0) <= HomeBackupRepository.maximumBytes else { throw HomeBackupError.storage }
+                    data = try Data(contentsOf: fileURL)
+                    let disk = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: data)
+                    guard restoreBaseline.matchesDiskContent(disk) else { throw HomeBackupError.currentChanged }
+                } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+                    let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]; data = try encoder.encode(snapshot)
+                }
+                if FileManager.default.fileExists(atPath: backup.path) {
+                    guard try Data(contentsOf: backup) == data else { throw HomeBackupError.currentChanged }
+                } else { try data.write(to: backup, options: [.atomic, .completeFileProtectionUnlessOpen]) }
+            }
+        } catch let error as HomeBackupError { throw error }
+        catch { throw HomeBackupError.storage }
+    }
+
     private func edit(_ update: (inout HomeLibrarySnapshot) -> Void) {
         var next = snapshot
         update(&next)
@@ -186,14 +245,15 @@ final class HomeLibrary: ObservableObject {
         }
         else { state.cachedApplications.append(app) }
     }
-    @discardableResult private func persist(_ proposed: HomeLibrarySnapshot) -> Bool {
-        guard canWrite else { return false }
+    @discardableResult private func persist(_ proposed: HomeLibrarySnapshot, allowRecovery: Bool = false) -> Bool {
+        guard canWrite || allowRecovery else { return false }
         do {
             try proposed.configuration.validate()
             let data = try JSONEncoder().encode(proposed)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             try data.write(to: fileURL, options: [.atomic, .completeFileProtectionUnlessOpen])
             snapshot = proposed
+            canWrite = true
             storageError = nil
             return true
         } catch {

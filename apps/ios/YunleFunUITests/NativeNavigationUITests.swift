@@ -2,6 +2,19 @@ import XCTest
 
 @MainActor
 final class NativeNavigationUITests: XCTestCase {
+    func testGuestCanReadEmptyHomeBackupsAndReturn() {
+        continueAfterFailure = false
+        let app = XCUIApplication(); app.launch()
+        XCTAssertTrue(app.tabBars.buttons["云居"].waitForExistence(timeout: 10))
+        let installed = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开")).allElementsBoundByIndex.map(\.label)
+        app.tabBars.buttons["我"].tap(); app.buttons["设置"].tap(); app.buttons["云居备份"].tap()
+        XCTAssertTrue(app.navigationBars["云居备份"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["还没有云居备份"].waitForExistence(timeout: 5))
+        let attachment = XCTAttachment(screenshot: app.screenshot()); attachment.name = "native-home-backups-empty"; attachment.lifetime = .keepAlways; add(attachment)
+        app.tabBars.buttons["云居"].tap()
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开")).allElementsBoundByIndex.map(\.label), installed)
+    }
+
     func testGuestCanReadLegacyImportEmptyStateAndReturn() {
         continueAfterFailure = false
         let app = XCUIApplication(); app.launch()

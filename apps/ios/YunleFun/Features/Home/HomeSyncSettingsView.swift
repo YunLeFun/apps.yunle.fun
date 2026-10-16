@@ -55,7 +55,7 @@ struct HomeSyncSettingsView: View {
     }
 }
 
-private struct HomeConfigurationView: View {
+struct HomeConfigurationView: View {
     let title: String
     let configuration: HomeConfiguration
     let snapshot: HomeLibrarySnapshot

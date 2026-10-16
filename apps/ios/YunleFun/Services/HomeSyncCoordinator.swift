@@ -29,13 +29,19 @@ final class HomeSyncCoordinator: ObservableObject {
     private var scheduled: Task<Void, Never>?
     private var flightID: UUID?
     private var repeatRequested = false
+    private var observedLibraryGeneration: UUID
 
     init(accounts: AccountAuthorizing, library: HomeLibrary, service: HomeSyncServing = HomeSyncService(), monitorNetwork: Bool = true) {
         self.accounts = accounts
         self.library = library
         self.service = service
+        observedLibraryGeneration = library.generation
         monitor = monitorNetwork ? NWPathMonitor() : nil
-        library.onUserChange = { [weak self] in self?.schedule() }
+        library.onUserChange = { [weak self] in
+            guard let self else { return }
+            if self.observedLibraryGeneration != self.library.generation { self.identityChanged() }
+            else { self.schedule() }
+        }
         monitor?.pathUpdateHandler = { [weak self] path in
             if path.status == .satisfied { Task { @MainActor in self?.schedule() } }
         }
@@ -57,6 +63,7 @@ final class HomeSyncCoordinator: ObservableObject {
         }
     }
     func identityChanged() {
+        observedLibraryGeneration = library.generation
         scheduled?.cancel()
         operation?.cancel()
         scheduled = nil

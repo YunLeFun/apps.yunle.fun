@@ -4,13 +4,13 @@ import SwiftUI
 import XCTest
 @testable import YunleFun
 
-/// The HTTP server runs on the host and uses the existing production database.
+/// The local server or approved preview uses the existing production database.
 /// Only explicitly provisioned, managed synthetic identities are accepted.
 @MainActor
 final class HomeSyncLiveTests: XCTestCase {
     func testOfflineRestartSyncConflictAndAccountIsolation() async throws {
         guard ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_HOME_SYNC"] == "1" else {
-            throw XCTSkip("Requires the local full-stack server and managed synthetic credentials")
+            throw XCTSkip("Requires a full-stack server or approved preview and managed synthetic credentials")
         }
         let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let input = cache.appendingPathComponent("iOSNativeValidation/home-sync-accounts.json")
@@ -24,7 +24,10 @@ final class HomeSyncLiveTests: XCTestCase {
         else { return XCTFail("Only the approved fixed synthetic accounts may run this test") }
 
         let directory = cache.appendingPathComponent("HomeSyncLiveValidation-" + UUID().uuidString)
-        let service = HomeSyncService(origin: URL(string: "http://127.0.0.1:18746")!)
+        let serviceOrigin = try pool.target?.validatedOrigin() ?? URL(string: "http://127.0.0.1:18746")!
+        let previewSession = try pool.target?.makeSession()
+        defer { previewSession?.invalidateAndCancel() }
+        let service = HomeSyncService(session: previewSession, origin: serviceOrigin)
         let unavailable = HomeSyncService(origin: URL(string: "http://127.0.0.1:1")!)
         let keychainService = "fun.yunle.apps.home-sync-live." + UUID().uuidString
         let vault = KeychainAccountVault(service: keychainService)
@@ -148,7 +151,7 @@ final class HomeSyncLiveTests: XCTestCase {
         } catch { if failure == nil { failure = error } }
         for user in activeAccounts.overview.users { try? await activeAccounts.remove(user.id) }
         if restored { try? FileManager.default.removeItem(at: directory) }
-        let report: [String: Any] = ["origin": "local HTTP server + existing CloudBase",
+        let report: [String: Any] = ["origin": serviceOrigin.absoluteString,
             "account": "production-zero-balance", "stages": stages, "restoredCloudContent": restored,
             "realPayments": false, "deviceScope": "one simulator, two independent local clients"]
         let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]),
@@ -221,9 +224,88 @@ final class HomeSyncLiveTests: XCTestCase {
         }
         throw LiveFailure.conflict
     }
-    private struct Pool: Decodable { let accounts: [Credential] }
+    func testPreviewReceiptRejectsUnexpectedCredentialDestinations() throws {
+        let good = PreviewTarget(projectId: "pages-duzdocfvhq4g", environment: "Preview", status: "Success",
+            branch: "codex/ios-native-app", deploymentId: "dpiab6dfwnm5",
+            commit: "be0aafdb1018ef2a2f8c57062c8887b04e5a08dd",
+            origin: "https://yunlefun-apps-dpiab6dfwnm5.edgeone.cool")
+        XCTAssertEqual(try good.validatedOrigin().host, "yunlefun-apps-dpiab6dfwnm5.edgeone.cool")
+        for suffix in [":8443", "/redirect", "?next=other", "#fragment", ".evil.test"] {
+            var bad = good; bad.origin += suffix; XCTAssertThrowsError(try bad.validatedOrigin())
+        }
+        var bad = good; bad.origin = "http://yunlefun-apps-dpiab6dfwnm5.edgeone.cool"; XCTAssertThrowsError(try bad.validatedOrigin())
+        bad = good; bad.projectId = "other"; XCTAssertThrowsError(try bad.validatedOrigin())
+        bad = good; bad.status = "Process"; XCTAssertThrowsError(try bad.validatedOrigin())
+        bad = good; bad.environment = "Production"; XCTAssertThrowsError(try bad.validatedOrigin())
+        bad = good; bad.branch = "main"; XCTAssertThrowsError(try bad.validatedOrigin())
+    }
+    func testPreviewAccessRequiresFreshBoundedPlatformCookies() throws {
+        let now = Date().timeIntervalSince1970 * 1000
+        let good = PreviewAccess(cookie: "eo_token=test-only; eo_time=1792120000", expiresAt: now + 3600000)
+        XCTAssertEqual(try good.validatedCookie(now: now), good.cookie)
+        for bad in [
+            PreviewAccess(cookie: good.cookie, expiresAt: now),
+            PreviewAccess(cookie: good.cookie, expiresAt: now + 4 * 3600000),
+            PreviewAccess(cookie: "other=test-only; eo_time=1", expiresAt: good.expiresAt),
+            PreviewAccess(cookie: "eo_token=test-only; eo_time=1\r\nX-Injected: value", expiresAt: good.expiresAt),
+        ] { XCTAssertThrowsError(try bad.validatedCookie(now: now)) }
+    }
+    private struct Pool: Decodable { let accounts: [Credential]; let target: PreviewTarget? }
+    private struct PreviewTarget: Decodable {
+        var projectId: String
+        var environment: String
+        var status: String
+        var branch: String
+        var deploymentId: String
+        var commit: String
+        var origin: String
+        var previewAccess: PreviewAccess? = nil
+        func validatedOrigin() throws -> URL {
+            guard projectId == "pages-duzdocfvhq4g", environment == "Preview", status == "Success",
+                  branch == "codex/ios-native-app",
+                  deploymentId.range(of: #"^dp[a-z0-9]{8,24}$"#, options: .regularExpression) != nil,
+                  commit.range(of: #"^[a-f0-9]{40}$"#, options: .regularExpression) != nil,
+                  origin == "https://yunlefun-apps-" + deploymentId + ".edgeone.cool",
+                  let url = URL(string: origin) else { throw LiveFailure.target }
+            return url
+        }
+        func makeSession() throws -> URLSession {
+            _ = try validatedOrigin()
+            guard let previewAccess else { throw LiveFailure.target }
+            let config = URLSessionConfiguration.ephemeral
+            config.httpCookieStorage = nil
+            config.httpShouldSetCookies = false
+            config.httpCookieAcceptPolicy = .never
+            config.urlCredentialStorage = nil
+            config.urlCache = nil
+            config.httpAdditionalHeaders = ["Cookie": try previewAccess.validatedCookie()]
+            config.timeoutIntervalForRequest = 20
+            config.timeoutIntervalForResource = 30
+            return URLSession(configuration: config, delegate: PreviewRedirectPolicy(), delegateQueue: nil)
+        }
+    }
+    private struct PreviewAccess: Decodable {
+        let cookie: String
+        let expiresAt: Double
+        func validatedCookie(now: Double = Date().timeIntervalSince1970 * 1000) throws -> String {
+            let parts = cookie.components(separatedBy: "; ")
+            guard expiresAt.isFinite, expiresAt > now, expiresAt <= now + 3 * 3600000 + 60000,
+                  cookie.utf8.count <= 8192, cookie.utf8.allSatisfy({ (32...126).contains($0) }),
+                  parts.count == 2,
+                  parts[0].range(of: #"^eo_token=[^;\s]+$"#, options: .regularExpression) != nil,
+                  parts[1].range(of: #"^eo_time=\d{1,16}$"#, options: .regularExpression) != nil
+            else { throw LiveFailure.target }
+            return cookie
+        }
+    }
+    private final class PreviewRedirectPolicy: NSObject, URLSessionTaskDelegate {
+        func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+                        newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+            completionHandler(nil)
+        }
+    }
     private struct Credential: Decodable { let id: String; let environment: String; let username: String; let password: String }
-    private enum LiveFailure: Error { case fixtureCapacity, offline, restart, upload, secondClient, conflict, isolation }
+    private enum LiveFailure: Error { case fixtureCapacity, offline, restart, upload, secondClient, conflict, isolation, target }
 }
 private extension HomeLibrarySnapshot {
     func containsReference(_ id: String) -> Bool { configuration.installedApps.contains { $0.appId == id } }

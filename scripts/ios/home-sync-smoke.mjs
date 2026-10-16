@@ -4,18 +4,24 @@ import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
+import { previewHeaders, readPreviewTarget } from './live-target.mjs'
 
 const args = process.argv.slice(2)
+const targetFile = args.find(value => value.startsWith('--target='))?.slice('--target='.length)
+const localTarget = args.includes('--origin=http://127.0.0.1:18746')
 if (
-  !args.includes('--write')
+  args.length !== 3
+  || !args.includes('--write')
   || !args.includes('--confirm-account=production-zero-balance')
-  || !args.includes('--origin=http://127.0.0.1:18746')
+  || !!targetFile === localTarget
 ) {
   console.log(
-    'Usage: node scripts/ios/home-sync-smoke.mjs --origin=http://127.0.0.1:18746 --write --confirm-account=production-zero-balance',
+    'Usage: node scripts/ios/home-sync-smoke.mjs (--origin=http://127.0.0.1:18746 | --target=/private/preview-receipt.json) --write --confirm-account=production-zero-balance',
   )
   process.exit(0)
 }
+const previewTarget = targetFile ? await readPreviewTarget(targetFile) : undefined
+const origin = previewTarget?.origin ?? 'http://127.0.0.1:18746'
 const root = join(homedir(), '.config/yunlefun')
 const path = join(root, 'test-accounts.json')
 assert.equal((await stat(path)).mode & 0o077, 0)
@@ -25,7 +31,6 @@ const account = JSON.parse(await readFile(path, 'utf8')).accounts.find(
 assert.equal(account?.username, 'ylf_prod_zero')
 assert.equal(account.environment, 'production')
 const authOrigin = 'https://yunlefun-8g7ybcxc7345c490.api.tcloudbasegateway.com'
-const origin = 'http://127.0.0.1:18746'
 const device = randomUUID()
 async function request(url, { token, method = 'GET', fields } = {}) {
   const response = await fetch(url, {
@@ -35,6 +40,7 @@ async function request(url, { token, method = 'GET', fields } = {}) {
     headers: {
       'Accept': 'application/json',
       'x-device-id': device,
+      ...(previewTarget && new URL(url).origin === origin ? previewHeaders(previewTarget) : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(fields ? { 'Content-Type': 'application/json' } : {}),
     },

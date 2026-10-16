@@ -18,7 +18,7 @@
 
 动作在 UIKit 弹层关闭完成后执行，避免分享弹层与菜单同时呈现。菜单 ID、重复点击保护、可见宿主、当前控制器、账号 generation 与运行时 identity reset 在执行前后校验；退出、切换账号或关闭旧会话后，保留的旧回调不得结束或操作新会话。
 
-标题进入详情的原生工厂同时修正了 reviews 目标，并读取当前会话元数据。现有自绘标题栏、沉浸胶囊、JSAPI 几何协议及完整运行时设计仍需后续迁移与验证。
+标题进入详情的原生工厂同时修正了 reviews 目标，并读取当前会话元数据。标题入口已进一步接入[系统导航栏](./ios-runtime-navigation.md)，显隐与几何也有专项验证；沉浸胶囊、多层弹层与账号变化等完整运行时行为继续按迁移计划验证。
 
 ## 验证记录
 
@@ -28,7 +28,7 @@
 
 初次测试发现 medium 初始高度隐藏结束入口、工具栏在子页面未配置，以及测试误以为系统分享面板有 Close 按钮。菜单改为默认 large，各原生目的页面通过共享环境上下文显示系统工具栏，分享测试使用当前系统实际提供的外部关闭区域。失败结果保留，不计入通过数量。
 
-最终原生日常回归 213 项（212 单元 / 集成 + 1 UI）全部通过，无新增运行时告警。菜单旅程结果为 `test_sim_2026-10-16T05-35-40-626Z_pid92585_e928e167.xcresult`，日常回归结果为 `test_sim_2026-10-16T05-37-00-722Z_pid92585_5d6ff6c7.xcresult`。截图导出到仓库外 `ios-native/native-menu/journey-27` 与 `daily-27`；完整路径见本轮 `verification.json`。
+本菜单阶段的原生日常回归 213 项（212 单元 / 集成 + 1 UI）全部通过，无新增运行时告警。菜单旅程结果为 `test_sim_2026-10-16T05-35-40-626Z_pid92585_e928e167.xcresult`，日常回归结果为 `test_sim_2026-10-16T05-37-00-722Z_pid92585_5d6ff6c7.xcresult`。截图导出到仓库外 `ios-native/native-menu/journey-27` 与 `daily-27`；完整路径见本轮 `verification.json`。
 
 复测入口：日常 Scheme 为 `YunleFun`，专项类为 `YunleFunTests/NativeApplicationMenuTests`；真实界面 Scheme 为 `YunleFunBenchmarks`，选择 `ApplicationBenchmarks/testNativeCloudApplicationMenuRoutesAndCommands` 和 `ApplicationBenchmarks/testNativeCloudAirCanMinimizeRestoreAndEnd`。真实界面测试依赖公开目录与云空调网站，不登录、不购买、不提交分享目标。
 

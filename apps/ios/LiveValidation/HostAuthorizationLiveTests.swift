@@ -67,7 +67,7 @@ final class HostAuthorizationLiveTests: XCTestCase {
             print("YLF_UI_HOST_SSO_READY")
             let deadline = Date().addingTimeInterval(300)
             while Date() < deadline {
-                if let browser = window.rootViewController?.presentedViewController as? WebViewController {
+                if let browser = presentedBrowser(in: window) {
                     if browser.presentedViewController is AuthorizationConsentViewController { consentSeen = true }
                     if let web = webView(in: browser.view),
                        let body = try? await web.evaluateJavaScript("document.body.innerText") as? String,
@@ -83,7 +83,7 @@ final class HostAuthorizationLiveTests: XCTestCase {
             print("YLF_UI_CLOUD_IDENTITY_READY")
             let logoutDeadline = Date().addingTimeInterval(90)
             while Date() < logoutDeadline {
-                if let browser = window.rootViewController?.presentedViewController as? WebViewController,
+                if let browser = presentedBrowser(in: window),
                    let web = webView(in: browser.view),
                    let user = accounts.user,
                    let body = try? await web.evaluateJavaScript("document.body.innerText") as? String,
@@ -108,6 +108,13 @@ final class HostAuthorizationLiveTests: XCTestCase {
         attachment.name = "native-host-sso-ui-live"; attachment.lifetime = .keepAlways; add(attachment)
         XCTAssertNil(failure.map { _ in "Live UI authorization journey failed; response contents omitted" })
         XCTAssertTrue(appSignedIn); XCTAssertTrue(appSignedOut); XCTAssertTrue(consentSeen); XCTAssertTrue(hostSignedOut)
+    }
+    private func presentedBrowser(in window: UIWindow) -> WebViewController? {
+        let presented = window.rootViewController?.presentedViewController
+        if let navigation = presented as? UINavigationController {
+            return navigation.viewControllers.compactMap { $0 as? WebViewController }.first
+        }
+        return presented as? WebViewController
     }
     private func webView(in view: UIView) -> WKWebView? {
         if let web = view as? WKWebView { return web }

@@ -209,6 +209,36 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertFalse(app.webViews.firstMatch.exists)
     }
 
+    func testNativeCloudApplicationSystemTitleMenu() throws {
+        guard !isLegacy else { throw XCTSkip("Verifies the system navigation controller") }
+        continueAfterFailure = false
+        let app = app
+        prepareNativeHome(app)
+        app.buttons["打开云空调"].tap()
+        let document = app.webViews.staticTexts["便携小空调"].firstMatch
+        XCTAssertTrue(document.waitForExistence(timeout: 20))
+        let bar = app.navigationBars["云空调"]
+        XCTAssertTrue(bar.waitForExistence(timeout: 5))
+        XCTAssertTrue(bar.buttons["收起应用"].exists)
+        XCTAssertTrue(bar.buttons["更多操作"].exists)
+        attach(app, name: "cloud-system-navigation")
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label == %@", "收起应用")).count, 1)
+        bar.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "云空调")).firstMatch.tap()
+        XCTAssertTrue(app.buttons["应用详情"].waitForExistence(timeout: 5))
+        attach(app, name: "cloud-system-title-menu")
+        app.buttons["应用详情"].tap()
+        XCTAssertTrue(app.staticTexts["关于这个应用"].waitForExistence(timeout: 5))
+        attach(app, name: "cloud-system-title-detail")
+        XCTAssertTrue(app.buttons["完成"].exists)
+        app.buttons["返回应用"].tap()
+        XCTAssertTrue(document.waitForExistence(timeout: 5))
+        bar.buttons["更多操作"].tap()
+        XCTAssertTrue(app.buttons["结束"].waitForExistence(timeout: 5))
+        app.buttons["结束"].tap()
+        XCTAssertTrue(app.buttons["打开云空调"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.webViews.firstMatch.exists)
+    }
+
     func testNativeGuestCanReadReviewsAndReachReports() throws {
         guard !isLegacy else { throw XCTSkip("Verifies native community screens") }
         continueAfterFailure = false

@@ -28,12 +28,14 @@ final class NativeApplicationMenuTests: XCTestCase {
         var current = true, ended = 0
         var action: ((WebAppMenuAction) -> Void)?
         browser.onClose = { ended += 1 }
+        browser.usesSystemNavigationBar = true
         browser.localMenuPageFactory = { _, perform in
             action = perform
             return WebAppMenuPage(controller: UIViewController(), isCurrent: { current })
         }
-        browser.modalPresentationStyle = .fullScreen
-        root.present(browser, animated: false)
+        let navigation = UINavigationController(rootViewController: browser)
+        navigation.modalPresentationStyle = .fullScreen
+        root.present(navigation, animated: false)
         try await Task.sleep(nanoseconds: 150_000_000)
         browser.perform(NSSelectorFromString("moreTapped"))
         try await Task.sleep(nanoseconds: 450_000_000)

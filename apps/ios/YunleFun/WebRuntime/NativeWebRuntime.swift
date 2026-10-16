@@ -15,7 +15,11 @@ final class NativeWebRuntime: ObservableObject {
     private var scopedOpenTask: Task<Void, Never>?
     private var scopedOpenID = UUID()
     weak var anchor: UIViewController?
-    private var controllers: [String: WebViewController] = [:]
+    private struct Session {
+        let browser: WebViewController
+        let presentation: UINavigationController
+    }
+    private var sessions: [String: Session] = [:]
     private var authorizationPages: [String: NativeAuthorizationPage] = [:]
     private var authorizationBroker: NativeAuthorizationBroker?
     private weak var accounts: AccountStore?
@@ -41,7 +45,7 @@ final class NativeWebRuntime: ObservableObject {
         if let memoryObserver { NotificationCenter.default.removeObserver(memoryObserver) }
     }
 
-    func contains(_ app: CloudApplication) -> Bool { controllers[app.id] != nil }
+    func contains(_ app: CloudApplication) -> Bool { sessions[app.id] != nil }
 
     func configureAuthorization(accounts: AccountStore) {
         self.accounts = accounts
@@ -138,10 +142,10 @@ final class NativeWebRuntime: ObservableObject {
             issue = RuntimeIssue(title: "暂时无法打开", message: "请稍后再试。")
             return
         }
-        if let saved = controllers[app.id], saved.url != url || applications.first(where: { $0.id == app.id })?.runtimeScope != app.runtimeScope {
-            if saved.presentingViewController != nil {
+        if let saved = sessions[app.id], saved.browser.url != url || applications.first(where: { $0.id == app.id })?.runtimeScope != app.runtimeScope {
+            if saved.presentation.presentingViewController != nil {
                 let identity = identityReset
-                saved.dismiss(animated: true) { [weak self] in
+                saved.presentation.dismiss(animated: true) { [weak self] in
                     guard let self, self.identityReset == identity, !self.isClearingIdentity else { return }
                     self.removeSession(app)
                     self.present(app, url: url, catalog: catalog, library: library)
@@ -151,14 +155,14 @@ final class NativeWebRuntime: ObservableObject {
             end(app)
         }
         let controller: WebViewController
-        if let saved = controllers[app.id] {
-            if saved.presentingViewController != nil { return }
-            controller = saved
+        if let saved = sessions[app.id] {
+            if saved.presentation.presentingViewController != nil { return }
+            controller = saved.browser
         } else {
             controller = WebViewController()
             controller.url = url
             controller.displayMode = .titlebar
-            controller.modalPresentationStyle = .fullScreen
+            controller.usesSystemNavigationBar = true
             controller.onClose = { [weak self] in self?.removeSession(app) }
             controller.onMinimize = { [weak self] in
                 if let page = self?.authorizationPages[app.id] { self?.authorizationBroker?.cancel(page: page) }
@@ -177,18 +181,20 @@ final class NativeWebRuntime: ObservableObject {
                 let current = self.applications.first(where: { $0.id == app.id }) ?? app
                 if kind == "developer-sheet" {
                     let login = String(path.split(separator: "/").last ?? "").removingPercentEncoding ?? ""
-                    return self.localPage(DeveloperApplicationsView(login: login), catalog: catalog, library: library)
+                    return self.localPage(DeveloperApplicationsView(login: login), applicationID: app.id, catalog: catalog, library: library)
                 }
                 if target == "reviews" {
-                    return self.localPage(ApplicationReviewsView(application: current), catalog: catalog, library: library)
+                    return self.localPage(ApplicationReviewsView(application: current), applicationID: app.id, catalog: catalog, library: library)
                 }
-                return self.localPage(ApplicationDetailView(application: current), catalog: catalog, library: library)
+                return self.localPage(ApplicationDetailView(application: current), applicationID: app.id, catalog: catalog, library: library)
             }
-            controllers[app.id] = controller
+            let navigation = NativeWebNavigationController(rootViewController: controller)
+            navigation.modalPresentationStyle = .fullScreen
+            sessions[app.id] = Session(browser: controller, presentation: navigation)
         }
         controller.localMenuPageFactory = { [weak self, weak controller] currentURL, perform in
             guard let self, let controller, let accounts = self.accounts,
-                  self.controllers[app.id] === controller, !self.isClearingIdentity else { return nil }
+                  self.sessions[app.id]?.browser === controller, !self.isClearingIdentity else { return nil }
             let identity = self.identityReset
             let generation = accounts.identityGeneration
             let current = self.applications.first(where: { $0.id == app.id }) ?? app
@@ -198,7 +204,7 @@ final class NativeWebRuntime: ObservableObject {
             return WebAppMenuPage(controller: UIHostingController(rootView: menu), isCurrent: { [weak self, weak controller] in
                 guard let self, let controller else { return false }
                 return self.identityReset == identity && !self.isClearingIdentity
-                    && accounts.identityGeneration == generation && self.controllers[app.id] === controller
+                    && accounts.identityGeneration == generation && self.sessions[app.id]?.browser === controller
             })
         }
         controller.customTitle = app.name
@@ -213,13 +219,14 @@ final class NativeWebRuntime: ObservableObject {
         guard !presenter.isBeingDismissed, !presenter.isBeingPresented else { return }
         markRecent(app)
         evictIfNeeded(except: app.id)
-        presenter.present(controller, animated: true)
+        guard let session = sessions[app.id] else { return }
+        presenter.present(session.presentation, animated: true)
         library.recordUse(app)
     }
 
     func end(_ app: CloudApplication) {
-        guard let controller = controllers[app.id] else { return }
-        if controller.presentingViewController != nil { controller.dismiss(animated: true) }
+        guard let session = sessions[app.id] else { return }
+        if session.presentation.presentingViewController != nil { session.presentation.dismiss(animated: true) }
         removeSession(app)
     }
 
@@ -230,13 +237,13 @@ final class NativeWebRuntime: ObservableObject {
         isClearingIdentity = true
         let continuation = authorizationBroker?.identityWillChange(to: id) as? NativeAuthorizationPage
         let kept = continuation?.browser
-        for controller in controllers.values where controller !== kept {
-            controller.cancelPendingAuthorizations()
-            if controller.presentingViewController != nil { controller.dismiss(animated: false) }
+        for session in sessions.values where session.browser !== kept {
+            session.browser.cancelPendingAuthorizations()
+            if session.presentation.presentingViewController != nil { session.presentation.dismiss(animated: false) }
         }
-        controllers = controllers.filter { $0.value === kept }
+        sessions = sessions.filter { $0.value.browser === kept }
         authorizationPages = authorizationPages.filter { $0.value === continuation }
-        applications = applications.filter { controllers[$0.id] != nil }
+        applications = applications.filter { sessions[$0.id] != nil }
         issue = nil
         HostIdentitySessions.clear { [weak self] in
             guard let self, self.identityReset == reset else { return }
@@ -247,15 +254,15 @@ final class NativeWebRuntime: ObservableObject {
 
     private func removeSession(_ app: CloudApplication) {
         if let page = authorizationPages.removeValue(forKey: app.id) { authorizationBroker?.cancel(page: page) }
-        controllers.removeValue(forKey: app.id)?.cancelPendingAuthorizations()
+        sessions.removeValue(forKey: app.id)?.browser.cancelPendingAuthorizations()
         applications.removeAll { $0.id == app.id }
     }
 
-    private func localPage<Content: View>(_ content: Content, catalog: CatalogStore, library: HomeLibrary) -> UIViewController {
+    private func localPage<Content: View>(_ content: Content, applicationID: String, catalog: CatalogStore, library: HomeLibrary) -> UIViewController {
         guard let accounts else {
             return UIHostingController(rootView: Text("账号服务暂时不可用，请返回主界面重试。").padding())
         }
-        return UIHostingController(rootView: RuntimeLocalPage(content: content)
+        return UIHostingController(rootView: RuntimeLocalPage(content: content, applicationID: applicationID)
             .environmentObject(catalog).environmentObject(library).environmentObject(self).environmentObject(accounts))
     }
 
@@ -265,19 +272,24 @@ final class NativeWebRuntime: ObservableObject {
     }
 
     private func evictIfNeeded(except activeID: String) {
-        while controllers.count > limit {
+        while sessions.count > limit {
             guard let oldest = applications.last(where: {
-                $0.id != activeID && controllers[$0.id]?.presentingViewController == nil
+                $0.id != activeID && sessions[$0.id]?.presentation.presentingViewController == nil
             }) else { return }
             end(oldest)
         }
     }
 
     private func releasePausedSessions() {
-        let hasForeground = controllers.values.contains { $0.presentingViewController != nil }
+        let hasForeground = sessions.values.contains { $0.presentation.presentingViewController != nil }
         let keep = hasForeground ? nil : applications.first?.id
-        for app in applications where app.id != keep && controllers[app.id]?.presentingViewController == nil { end(app) }
+        for app in applications where app.id != keep && sessions[app.id]?.presentation.presentingViewController == nil { end(app) }
     }
+}
+
+private final class NativeWebNavigationController: UINavigationController {
+    override var childForStatusBarStyle: UIViewController? { topViewController }
+    override var childForStatusBarHidden: UIViewController? { topViewController }
 }
 
 struct RuntimePresentationAnchor: UIViewControllerRepresentable {
@@ -296,13 +308,13 @@ struct RuntimePresentationAnchor: UIViewControllerRepresentable {
 private struct RuntimeLocalPage<Content: View>: View {
     @Environment(\.dismiss) private var dismiss
     let content: Content
+    let applicationID: String
 
     var body: some View {
         NavigationStack {
-            content.toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("完成") { dismiss() } }
-            }
+            content
         }
+        .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: applicationID, dismiss: { dismiss() }))
     }
 }
 

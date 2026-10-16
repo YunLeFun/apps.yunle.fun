@@ -57,6 +57,8 @@ final class NativeAuthorizationPage: HostAuthorizationPage {
     private var presenter: WebViewController? {
         guard let browser, browser.viewIfLoaded?.window != nil, browser.presentedViewController == nil,
               !browser.isBeingDismissed, !browser.isBeingPresented else { return nil }
+        let container = browser.navigationController ?? browser
+        guard !container.isBeingDismissed, !container.isBeingPresented else { return nil }
         return browser
     }
 }

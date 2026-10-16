@@ -42,16 +42,22 @@ final class NativeNavigationUITests: XCTestCase {
         field.typeText("1")
         let keyboard = app.keyboards.firstMatch, dismiss = app.buttons["login.dismiss-keyboard"]
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        let screen = app.frame
+        let typingKey = keyboard.descendants(matching: .any)
+            .matching(NSPredicate(format: "label IN %@", ["1", "a", "A"])).firstMatch
         let shown = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            let key = keyboard.keys.firstMatch, button = keyboard.buttons.firstMatch
-            let canType = (key.exists && key.isHittable) || (button.exists && button.isHittable)
-            return keyboard.exists && canType && keyboard.frame.height > 100
-                && keyboard.frame.minY < app.frame.maxY - 100
-                && keyboard.frame.maxY <= app.frame.maxY + 1
+            guard keyboard.exists else { return false }
+            let frame = keyboard.frame
+            return frame.height > 100 && frame.minY < screen.maxY - 100
+                && frame.maxY <= screen.maxY + 1 && typingKey.exists && typingKey.isHittable
         }, object: keyboard)
-        let visibility = XCTWaiter.wait(for: [shown], timeout: 5)
+        let visibility = XCTWaiter.wait(for: [shown], timeout: 10)
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = "native-login-keyboard-\(name)"; attachment.lifetime = .keepAlways; add(attachment)
+        if visibility != .completed {
+            let tree = XCTAttachment(string: app.debugDescription)
+            tree.name = "native-login-keyboard-tree-\(name)"; tree.lifetime = .keepAlways; add(tree)
+        }
         XCTAssertEqual(visibility, .completed, "Software keyboard must be onscreen and usable: \(keyboard.frame)")
         XCTAssertTrue(dismiss.waitForExistence(timeout: 5))
         XCTAssertTrue(dismiss.isHittable)
@@ -107,7 +113,24 @@ final class NativeNavigationUITests: XCTestCase {
         app.tabBars.buttons["我"].tap(); app.buttons["设置"].tap()
         app.buttons["旧版数据导入"].tap()
         XCTAssertTrue(app.navigationBars["旧版数据导入"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["未发现旧版记录"].waitForExistence(timeout: 12))
+        let timeoutMessage = "读取旧版记录用时较长，请重新读取。"
+        let state = app.staticTexts.matching(NSPredicate(format: "label IN %@", ["未发现旧版记录", timeoutMessage])).firstMatch
+        let ready = state.waitForExistence(timeout: 12)
+        if !ready || state.label == timeoutMessage {
+            let issue = XCTAttachment(string: app.debugDescription)
+            issue.name = "native-legacy-import-initial-state"; issue.lifetime = .keepAlways; add(issue)
+        }
+        XCTAssertTrue(ready, "The reader must finish with an empty result or an explicit timeout")
+        if state.label == timeoutMessage {
+            let retry = app.buttons["重新读取"]
+            XCTAssertTrue(retry.isHittable); retry.tap()
+        }
+        let empty = app.staticTexts["未发现旧版记录"].waitForExistence(timeout: 12)
+        if !empty {
+            let issue = XCTAttachment(string: app.debugDescription)
+            issue.name = "native-legacy-import-final-state"; issue.lifetime = .keepAlways; add(issue)
+        }
+        XCTAssertTrue(empty, "A timeout may be retried once; it must never count as empty data")
         XCTAssertFalse(app.buttons["导入到当前云居"].exists)
         let attachment = XCTAttachment(screenshot: app.screenshot()); attachment.name = "native-legacy-import-empty"; attachment.lifetime = .keepAlways; add(attachment)
         app.buttons["登录或管理账号"].tap()

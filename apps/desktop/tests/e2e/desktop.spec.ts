@@ -369,9 +369,20 @@ test('real shared offline snapshot and catalog search remain usable when the API
       { appearance: 'dark', width: 800, height: 600 },
       { appearance: 'light', width: 800, height: 600 },
     ] as const) {
-      await application.evaluate(({ BaseWindow }, size) => {
-        BaseWindow.getAllWindows()[0].setContentSize(size.width, size.height)
+      const viewport = await application.evaluate(({ BaseWindow, screen }, size) => {
+        const window = BaseWindow.getAllWindows()[0]
+        const frame = window.getBounds()
+        const content = window.getContentBounds()
+        const { workArea } = screen.getDisplayMatching(frame)
+        // macOS constrains native windows to the runner's available display.
+        const width = Math.min(size.width, workArea.width - (frame.width - content.width))
+        const height = Math.min(size.height, workArea.height - (frame.height - content.height))
+        window.setPosition(workArea.x, workArea.y)
+        window.setContentSize(width, height)
+        return { width, height }
       }, { width, height })
+      expect(viewport.width).toBe(width)
+      expect(viewport.height).toBeGreaterThanOrEqual(600)
       await shell.getByRole('combobox', { name: '外观', exact: true }).selectOption(appearance)
       await expect.poll(() => application!.evaluate(({ nativeTheme }) => ({ source: nativeTheme.themeSource, dark: nativeTheme.shouldUseDarkColors })))
         .toEqual({ source: appearance, dark: appearance === 'dark' })
@@ -381,16 +392,16 @@ test('real shared offline snapshot and catalog search remain usable when the API
       // finishes. Capture the settled palette rather than an intermediate gray.
       await expect(shell.locator('.open-button').first()).toHaveCSS('background-color', appearance === 'dark' ? 'rgb(48, 48, 50)' : 'rgb(232, 232, 237)')
       await expect.poll(() => shell.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight })))
-        .toEqual({ width, height })
+        .toEqual(viewport)
       await expect.poll(() => shell.evaluate(() => {
         const elements = [document.documentElement, document.body, ...Array.from(document.querySelectorAll<HTMLElement>('.desktop, .workspace, .discovery-content, .discovery-inner'))]
         return elements.every(element => element.scrollWidth <= element.clientWidth + 1)
       })).toBe(true)
       await expect(shell.getByRole('combobox', { name: '外观', exact: true })).toBeInViewport()
       await expect(shell.getByRole('link', { name: '关于云乐坊桌面端' })).toBeInViewport()
-      const screenshot = testInfo.outputPath(`catalog-${appearance}-${width}x${height}.png`)
+      const screenshot = testInfo.outputPath(`catalog-${appearance}-${viewport.width}x${viewport.height}.png`)
       await shell.screenshot({ path: screenshot })
-      await testInfo.attach(`Catalog ${appearance} ${width}×${height}`, { path: screenshot, contentType: 'image/png' })
+      await testInfo.attach(`Catalog ${appearance} ${viewport.width}×${viewport.height}`, { path: screenshot, contentType: 'image/png' })
     }
     expect(errors).toEqual([])
   }

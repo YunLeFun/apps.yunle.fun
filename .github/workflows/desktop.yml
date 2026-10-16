@@ -107,7 +107,12 @@ jobs:
 
       - name: Verify packaged app launch on Linux
         if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum pnpm --dir apps/desktop run verify:launch
+        run: |
+          helper="apps/desktop/out/云乐坊-linux-${{ matrix.arch }}/chrome-sandbox"
+          test -f "$helper"
+          sudo chown root:root "$helper"
+          sudo chmod 4755 "$helper"
+          xvfb-run --auto-servernum pnpm --dir apps/desktop run verify:launch
 
       - name: Upload failed desktop traces
         if: failure()

@@ -87,3 +87,7 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 后续提交的运行与最终结论同步记录在[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)；未验证的真机、完整辅助功能、Sandbox 与升级范围继续保留。
 
 原生 CI 还显式关闭 Xcode 的自动机器级测试诊断采集，与本机工具的执行条件一致；测试失败仍返回失败状态，日志、xcresult 和测试附件继续上传。没有关闭测试、重试后改记通过或取消原有断言。
+
+`2bcee4b` 的 [Web / 移动端](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475588) 通过，[桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475488) 的 macOS 与 Linux 通过。Windows 打包启动已输出成功标记，但退出后的临时 profile 删除遇到 `Network/Trust Tokens-journal` 文件占用，整项仍判失败。清理改用 Node 的有上限重试（最多五次、初始间隔 200ms），持续占用仍返回失败，未跳过启动或吞掉清理错误。重试行为依据 [Node fs.rm](https://nodejs.org/docs/latest-v24.x/api/fs.html#fspromisesrmpath-options)；脚本三项单元测试与专项 lint 通过，实际 Windows 验证仍以新提交的工作流为准。
+
+同一提交的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475502) 最终 **成功**：官方 Xcode 27 runner 新建独立模拟器后，260 项单元 / 集成与 4 项访客 UI 测试全部通过，随后 Release 模拟器编译通过，专用模拟器删除完成。日志分别记录 `TEST SUCCEEDED` 与 `BUILD SUCCEEDED`，没有测试失败或跳过。这是本轮首份完整远端冷环境通过证据；不代表线上账号、正式安装升级、真机、完整辅助功能或发布验收完成。原先失败和取消的记录继续保留，后续提交以其自身 CI 为准。

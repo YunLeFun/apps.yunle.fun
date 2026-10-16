@@ -17,7 +17,7 @@ final class LegacyLocalDataReader: NSObject, LegacyLocalDataReading, WKNavigatio
     private var timeout: Task<Void, Never>?
     private let timeoutNanoseconds: UInt64
 
-    init(dataStore: WKWebsiteDataStore? = nil, timeoutNanoseconds: UInt64 = 8_000_000_000) {
+    init(dataStore: WKWebsiteDataStore? = nil, timeoutNanoseconds: UInt64 = 20_000_000_000) {
         self.dataStore = dataStore ?? .default(); self.timeoutNanoseconds = timeoutNanoseconds
     }
 

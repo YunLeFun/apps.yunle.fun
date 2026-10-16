@@ -118,7 +118,7 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["旧版数据导入"].waitForExistence(timeout: 5))
         let timeoutMessage = "读取旧版记录用时较长，请重新读取。"
         let state = app.staticTexts.matching(NSPredicate(format: "label IN %@", ["未发现旧版记录", timeoutMessage])).firstMatch
-        let ready = state.waitForExistence(timeout: 12)
+        let ready = state.waitForExistence(timeout: 25)
         if !ready || state.label == timeoutMessage {
             let issue = XCTAttachment(string: app.debugDescription)
             issue.name = "native-legacy-import-initial-state"; issue.lifetime = .keepAlways; add(issue)
@@ -128,7 +128,7 @@ final class NativeNavigationUITests: XCTestCase {
             let retry = app.buttons["重新读取"]
             XCTAssertTrue(retry.isHittable); retry.tap()
         }
-        let empty = app.staticTexts["未发现旧版记录"].waitForExistence(timeout: 12)
+        let empty = app.staticTexts["未发现旧版记录"].waitForExistence(timeout: 25)
         if !empty {
             let issue = XCTAttachment(string: app.debugDescription)
             issue.name = "native-legacy-import-final-state"; issue.lifetime = .keepAlways; add(issue)

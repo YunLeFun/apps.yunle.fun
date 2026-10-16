@@ -2,6 +2,66 @@ import XCTest
 
 @MainActor
 final class NativeNavigationUITests: XCTestCase {
+    func testGuestCanDismissPhoneAndPasswordKeyboards() {
+        checkLoginKeyboardDismissal(large: false)
+    }
+
+    func testGuestCanDismissPhoneKeyboardAtLargestTextSize() {
+        checkLoginKeyboardDismissal(large: true)
+    }
+
+    private func checkLoginKeyboardDismissal(large: Bool) {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        if large {
+            app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        }
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["我"].tap()
+        let login = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch
+        XCTAssertTrue(login.waitForExistence(timeout: 5)); login.tap()
+        let phone = app.textFields["login.phone"]
+        XCTAssertTrue(phone.waitForExistence(timeout: 5))
+        XCTAssertEqual(phone.label, "手机号")
+        checkDismissal(app, field: phone, name: large ? "phone-largest" : "phone-standard")
+        if !large {
+            app.segmentedControls.buttons["密码"].tap()
+            let username = app.textFields["login.username"], password = app.secureTextFields["login.password"]
+            XCTAssertTrue(username.waitForExistence(timeout: 5))
+            XCTAssertEqual(username.label, "用户名、邮箱或手机号")
+            XCTAssertEqual(password.label, "密码")
+            checkDismissal(app, field: password, name: "password-standard")
+        }
+        app.buttons["取消"].tap()
+        XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+    }
+
+    private func checkDismissal(_ app: XCUIApplication, field: XCUIElement, name: String) {
+        field.tap()
+        field.typeText("1")
+        let keyboard = app.keyboards.firstMatch, dismiss = app.buttons["login.dismiss-keyboard"]
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        let shown = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            let key = keyboard.keys.firstMatch, button = keyboard.buttons.firstMatch
+            let canType = (key.exists && key.isHittable) || (button.exists && button.isHittable)
+            return keyboard.exists && canType && keyboard.frame.height > 100
+                && keyboard.frame.minY < app.frame.maxY - 100
+                && keyboard.frame.maxY <= app.frame.maxY + 1
+        }, object: keyboard)
+        let visibility = XCTWaiter.wait(for: [shown], timeout: 5)
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = "native-login-keyboard-\(name)"; attachment.lifetime = .keepAlways; add(attachment)
+        XCTAssertEqual(visibility, .completed, "Software keyboard must be onscreen and usable: \(keyboard.frame)")
+        XCTAssertTrue(dismiss.waitForExistence(timeout: 5))
+        XCTAssertTrue(dismiss.isHittable)
+        XCTAssertLessThan(dismiss.frame.maxY, keyboard.frame.minY)
+        dismiss.tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: keyboard)
+        waitForExpectations(timeout: 5)
+        XCTAssertFalse(dismiss.exists)
+    }
+
     func testGuestCanUseHomeOptionsAtLargestTextSize() {
         continueAfterFailure = false
         let app = XCUIApplication()

@@ -58,12 +58,16 @@ struct LoginView: View {
                     identifierField
                     if method == .password {
                         SecureField("密码", text: $password)
+                            .accessibilityLabel("密码")
+                            .accessibilityIdentifier("login.password")
                             .textContentType(.password)
                             .focused($focus, equals: .password)
                             .submitLabel(.go)
                             .onSubmit { perform(.signIn) }
                     } else {
                         TextField("6 位验证码", text: $code)
+                            .accessibilityLabel("验证码")
+                            .accessibilityIdentifier("login.code")
                             .textContentType(.oneTimeCode)
                             .keyboardType(.numberPad)
                             .focused($focus, equals: .code)
@@ -104,9 +108,13 @@ struct LoginView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("取消") { cancel(); dismiss() } }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("完成") { focus = nil }
+                if focus != nil {
+                    ToolbarItem(placement: keyboardDismissPlacement) {
+                        Button { focus = nil } label: {
+                            Label("收起键盘", systemImage: "keyboard.chevron.compact.down")
+                        }
+                        .accessibilityIdentifier("login.dismiss-keyboard")
+                    }
                 }
             }
             .interactiveDismissDisabled(isBusy)
@@ -123,6 +131,12 @@ struct LoginView: View {
         Picker("登录方式", selection: $method) {
             ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
         }
+        .accessibilityIdentifier("login.method")
+    }
+
+    private var keyboardDismissPlacement: ToolbarItemPlacement {
+        if #available(iOS 17, *) { return .topBarTrailing }
+        return .navigationBarTrailing
     }
 
     @ViewBuilder private var identifierField: some View {
@@ -131,16 +145,22 @@ struct LoginView: View {
             HStack {
                 Text("+86").foregroundStyle(.secondary).accessibilityLabel("中国大陆，区号 86")
                 TextField("手机号", text: $identifier)
+                    .accessibilityLabel("手机号")
+                    .accessibilityIdentifier("login.phone")
                     .textContentType(.telephoneNumber).keyboardType(.phonePad)
                     .focused($focus, equals: .identifier)
             }
         case .email:
             TextField("邮箱地址", text: $identifier)
+                .accessibilityLabel("邮箱地址")
+                .accessibilityIdentifier("login.email")
                 .textContentType(.emailAddress).keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .focused($focus, equals: .identifier)
         case .password:
             TextField("用户名、邮箱或手机号", text: $identifier)
+                .accessibilityLabel("用户名、邮箱或手机号")
+                .accessibilityIdentifier("login.username")
                 .textContentType(.username).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .focused($focus, equals: .identifier).submitLabel(.next)
                 .onSubmit { focus = .password }

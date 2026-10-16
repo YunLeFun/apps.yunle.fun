@@ -19,6 +19,9 @@ final class NativeApplicationMenuTests: XCTestCase {
     }
 
     private func checkAction(invalidateDuringDismissal: Bool) async throws {
+        let animationsEnabled = UIView.areAnimationsEnabled
+        UIView.setAnimationsEnabled(true)
+        defer { UIView.setAnimationsEnabled(animationsEnabled) }
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previous = scene.windows.first(where: \.isKeyWindow)
         let window = UIWindow(windowScene: scene)
@@ -27,7 +30,9 @@ final class NativeApplicationMenuTests: XCTestCase {
         defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
         var current = true, ended = 0
         var action: ((WebAppMenuAction) -> Void)?
-        browser.onClose = { ended += 1 }
+        let closed = invalidateDuringDismissal ? nil : XCTestExpectation(description: "The current session ends after menu dismissal")
+        closed?.assertForOverFulfill = true
+        browser.onClose = { ended += 1; closed?.fulfill() }
         browser.usesSystemNavigationBar = true
         browser.localMenuPageFactory = { _, perform in
             action = perform
@@ -35,18 +40,44 @@ final class NativeApplicationMenuTests: XCTestCase {
         }
         let navigation = UINavigationController(rootViewController: browser)
         navigation.modalPresentationStyle = .fullScreen
-        root.present(navigation, animated: false)
-        try await Task.sleep(nanoseconds: 150_000_000)
+        let presented = XCTestExpectation(description: "UIKit completed the application presentation")
+        root.present(navigation, animated: false) { presented.fulfill() }
+        let presentationResult = await XCTWaiter.fulfillment(of: [presented], timeout: 5)
+        XCTAssertEqual(presentationResult, .completed)
+        try await waitForState("The application must be stable in its window") {
+            navigation.presentingViewController === root && browser.viewIfLoaded?.window != nil
+                && !navigation.isBeingPresented && !navigation.isBeingDismissed
+        }
         browser.perform(NSSelectorFromString("moreTapped"))
-        try await Task.sleep(nanoseconds: 450_000_000)
-        XCTAssertNotNil(browser.presentedViewController)
+        try await waitForState("The menu must finish presenting before an action") {
+            guard let menu = browser.presentedViewController else { return false }
+            return menu.viewIfLoaded?.window != nil && !menu.isBeingPresented && !menu.isBeingDismissed
+        }
+        let menu = try XCTUnwrap(browser.presentedViewController)
         let perform = try XCTUnwrap(action)
         perform(.end); perform(.end)
         if invalidateDuringDismissal { current = false }
-        try await Task.sleep(nanoseconds: 650_000_000)
+        try await waitForState("The menu must actually leave the window") {
+            browser.presentedViewController == nil && menu.presentingViewController == nil
+                && menu.viewIfLoaded?.window == nil && !menu.isBeingDismissed
+                && menu.transitionCoordinator == nil
+        }
+        if let closed {
+            let closeResult = await XCTWaiter.fulfillment(of: [closed], timeout: 5)
+            XCTAssertEqual(closeResult, .completed)
+        }
         XCTAssertEqual(ended, invalidateDuringDismissal ? 0 : 1)
         perform(.end)
         XCTAssertEqual(ended, invalidateDuringDismissal ? 0 : 1, "A retained callback must not affect another presentation")
+    }
+
+    private func waitForState(_ message: String, condition: () -> Bool) async throws {
+        for _ in 0..<100 {
+            if condition() { return }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTFail(message)
+        throw NSError(domain: "NativeApplicationMenuTests", code: 1)
     }
 
     func testLightMenu() async throws { try await render(accessibility: false) }

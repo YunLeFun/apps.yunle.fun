@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CatalogView: View {
     @EnvironmentObject private var catalog: CatalogStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var query = ""
     @State private var category = "全部"
     @State private var showScanner = false
@@ -13,9 +14,9 @@ struct CatalogView: View {
     var body: some View {
         List {
             Section {
-                NavigationLink { MyApplicationsView() } label: { Label("我的应用", systemImage: "square.and.pencil") }
-                NavigationLink { MyWorkshopsView() } label: { Label("个人工坊", systemImage: "person.2") }
-                NavigationLink { WorkshopLookupView() } label: { Label("打开个人工坊", systemImage: "number") }
+                NavigationLink { MyApplicationsView() } label: { shortcutLabel("我的应用", systemImage: "square.and.pencil") }
+                NavigationLink { MyWorkshopsView() } label: { shortcutLabel("个人工坊", systemImage: "person.2") }
+                NavigationLink { WorkshopLookupView() } label: { shortcutLabel("打开个人工坊", systemImage: "number") }
             }
             CatalogStatusView()
             if catalog.isLoading && catalog.applications.isEmpty {
@@ -39,7 +40,8 @@ struct CatalogView: View {
         }
         .navigationTitle("工坊")
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .workshop) }
-        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "搜索应用、用途或作者")
+        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
         .refreshable { await catalog.load() }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -53,6 +55,14 @@ struct CatalogView: View {
                     }
                 } label: { Label("分类", systemImage: "line.3.horizontal.decrease") }
             }
+        }
+    }
+
+    @ViewBuilder private func shortcutLabel(_ title: String, systemImage: String) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Text(title).fixedSize(horizontal: false, vertical: true)
+        } else {
+            Label(title, systemImage: systemImage)
         }
     }
 }

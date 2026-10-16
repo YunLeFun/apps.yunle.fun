@@ -1,0 +1,114 @@
+name: Native iOS CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - apps/ios/**
+      - apps/mobile/ios/App/App/**
+      - .github/workflows/ios.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - apps/ios/**
+      - apps/mobile/ios/App/App/**
+      - .github/workflows/ios.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Native iOS · Xcode 27
+    # GitHub's standard Xcode 27 image is currently a public preview.
+    runs-on: xcode-27
+    timeout-minutes: 35
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Verify Xcode and locked package versions
+        env:
+          YLF_CI_OUTPUT: ${{ runner.temp }}/yunlefun-ios-ci
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks
+          mkdir -p "$YLF_CI_OUTPUT"
+          echo "YLF_CI_OUTPUT=$YLF_CI_OUTPUT" >> "$GITHUB_ENV"
+          xcodebuild -resolvePackageDependencies \
+            -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
+            -onlyUsePackageVersionsFromResolvedFile \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages"
+          git diff --exit-code -- apps/ios/YunleFun.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+      - name: Create isolated iOS 27 simulator
+        id: simulator
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          simulator = subprocess.check_output([
+              "xcrun", "simctl", "create", "YunleFun CI",
+              "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+              "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+          ], text=True).strip()
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("id=" + simulator + "\n")
+          print("Created isolated iOS 27 test simulator: " + simulator)
+          subprocess.run(["xcrun", "simctl", "bootstatus", simulator, "-b"], check=True)
+          PY
+
+      - name: Native unit, integration and guest UI tests
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+        run: |
+          set -o pipefail
+          xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
+            -configuration Debug -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
+            -derivedDataPath "$YLF_CI_OUTPUT/debug" \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
+            -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
+            -resultBundlePath "$YLF_CI_OUTPUT/native-tests.xcresult" \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
+            -maximum-test-execution-time-allowance 180 \
+            -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
+            2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
+
+      - name: Compile native Release for simulator
+        run: |
+          set -o pipefail
+          xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
+            -configuration Release -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$YLF_CI_OUTPUT/release" \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
+            -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
+            CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build \
+            2>&1 | tee "$YLF_CI_OUTPUT/release.log"
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: native-ios-failure-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/yunlefun-ios-ci/*.log
+            ${{ runner.temp }}/yunlefun-ios-ci/native-tests.xcresult
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Remove isolated simulator
+        if: always() && steps.simulator.outputs.id != ''
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+        run: |
+          xcrun simctl shutdown "$YLF_CI_SIMULATOR" || true
+          xcrun simctl delete "$YLF_CI_SIMULATOR"

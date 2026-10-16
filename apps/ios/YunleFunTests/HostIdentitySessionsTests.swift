@@ -8,7 +8,12 @@ final class HostIdentitySessionsTests: XCTestCase {
         // A separate non-persistent store keeps the test away from the user's
         // real web sessions and the development app's default cookie store.
         let dataStore = WKWebsiteDataStore.nonPersistent()
-        let store = dataStore.httpCookieStore
+        defer { withExtendedLifetime(dataStore) {} }
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = dataStore
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        defer { withExtendedLifetime(webView) {} }
+        let store = webView.configuration.websiteDataStore.httpCookieStore
         let entries = [
             ("play.yunle.fun", "__Host-ylf_play_session"),
             ("cms.yunle.fun", "__Host-ylf-cms-session"),
@@ -21,14 +26,12 @@ final class HostIdentitySessionsTests: XCTestCase {
             let cookie = try XCTUnwrap(HTTPCookie(properties: [
                 .domain: domain, .path: "/", .name: name, .value: "test-only", .secure: "TRUE",
             ]))
-            await withCheckedContinuation { continuation in store.setCookie(cookie) { continuation.resume() } }
+            try await callback("set fixture cookie " + name) { done in store.setCookie(cookie, completionHandler: done) }
         }
-        let before = await cookies(in: store)
+        let before = try await cookies(in: store)
         XCTAssertEqual(before.count, 6)
-        await withCheckedContinuation { continuation in
-            HostIdentitySessions.clear(in: store) { continuation.resume() }
-        }
-        let after = await cookies(in: store)
+        try await callback("clear allowed identity cookies") { done in HostIdentitySessions.clear(in: store, completion: done) }
+        let after = try await cookies(in: store)
         let remaining = Set(after.map { $0.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")) + "/" + $0.name })
         XCTAssertEqual(remaining, [
             "play.yunle.fun/preferences",
@@ -37,7 +40,19 @@ final class HostIdentitySessionsTests: XCTestCase {
         ])
     }
 
-    private func cookies(in store: WKHTTPCookieStore) async -> [HTTPCookie] {
-        await withCheckedContinuation { continuation in store.getAllCookies { continuation.resume(returning: $0) } }
+    private func cookies(in store: WKHTTPCookieStore) async throws -> [HTTPCookie] {
+        var values: [HTTPCookie] = []
+        try await callback("read fixture cookies") { done in store.getAllCookies { values = $0; done() } }
+        return values
     }
+
+    private func callback(_ operation: String, action: (@escaping @Sendable () -> Void) -> Void) async throws {
+        let completed = expectation(description: operation)
+        action { completed.fulfill() }
+        guard await XCTWaiter.fulfillment(of: [completed], timeout: 10) == .completed else {
+            XCTFail("WebKit callback timed out: " + operation)
+            throw CallbackError.timedOut
+        }
+    }
+    private enum CallbackError: Error { case timedOut }
 }

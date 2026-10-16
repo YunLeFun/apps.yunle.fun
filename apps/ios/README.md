@@ -58,3 +58,6 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 
 原生 AI 助手已接入现有 Agent，使用原生 SSE / Markdown / 应用卡片，包含会员门控、停止 / 重试、登录取消与身份隔离。iOS 27 受管会员号真实请求通过；现有服务是应用检索，不新增通用大模型。Agent 账户鉴权、次数事务与公开目录加固尚未部署。受管账号输入与真实联调的显式运行要求见[原生助手与受管账号验证](../../docs/dev/ios-assistant.md)，测试凭据必须留在仓库外安全文件中。
+
+
+键盘布局另有显式启用的 KeyboardLayoutDiagnostics，当前 iOS 27 的 UIKit Sheet / SwiftUI keyboard toolbar 组合仍有可复现告警（1 通过 / 2 失败）。它不属于日常功能验收；未启用时跳过不表示修复。现有 Sheet 与键盘完成操作保留，候选底部工具栏因遮挡已撤回，见[诊断与复测入口](../../docs/dev/ios-keyboard-layout-diagnostics.md)。

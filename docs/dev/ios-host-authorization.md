@@ -64,4 +64,4 @@
 
 两个方法均默认跳过线上操作。协议方法需显式 YUNLEFUN_LIVE_HOST_SSO=1；界面方法另需 YUNLEFUN_LIVE_HOST_SSO_UI=1 和外部 UI 驱动，不适合无人操作的 CI。界面用例最多等待 5 分钟完成原生登录与确认，再等待 90 秒验证应用退出。首次 UI 驱动漏输密码中的特殊字符并超时，改用安全字段的原生文本接口后完整通过；失败结果保留。
 
-证据位于本聊天附件 ios-native/host-sso-live：protocol-27、ui-27、真实原生授权面板与网页账号截图。实际 UI 运行在键盘提交附近出现一条 SwiftUI invalid frame dimension 运行时告警，来源尚未查明，继续列入布局专项；截图中未见内容裁切。本次仅覆盖同一模拟器、同一合成账号和 AI 春联，不能推广为所有应用身份隔离、BFF 会话实现、其他系统账号、真机或升级验收。
+证据位于本聊天附件 ios-native/host-sso-live：protocol-27、ui-27、真实原生授权面板与网页账号截图。实际 UI 运行在键盘阶段出现 SwiftUI invalid frame dimension 告警，现已在纯 SwiftUI 表单 / UIKit Sheet 组合复现并定位到 InputAccessoryBar 系统路径；仍未修复，详见[独立诊断](./ios-keyboard-layout-diagnostics.md)。截图中未见内容裁切。本次仅覆盖同一模拟器、同一合成账号和 AI 春联，不能推广为所有应用身份隔离、BFF 会话实现、其他系统账号、真机或升级验收。

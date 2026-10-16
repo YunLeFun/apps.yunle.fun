@@ -316,3 +316,9 @@ Issue #46 原先记录“仅规划、首发平台待定”。本计划依据本�
 - 默认日常 Scheme 不执行线上测试；新 UI 方法还要求显式外部驱动。首次输入工具漏输特殊字符、超时与协议测试 scope 编码错误的失败结果保留，修正验证方式后通过。
 - UI 运行在键盘提交附近出现 SwiftUI invalid frame dimension 告警，尚未定因，列入布局复核。其他系统账号、逐应用身份隔离、全量 UI / 无障碍、最低版本、真机和升级仍待验，M2 / M3 不据此整体勾选。详见[真实宿主授权记录](./ios-host-authorization.md)。
 - 最新推送 6081efd 的 GitHub CI 38850322090 与 Desktop CI 38850322073 仍在启动前被 Actions budget 拒绝；本机通过与远端执行状态分开记录。
+
+### 键盘布局诊断与候选复核
+
+- 告警已缩减为 UIKit pageSheet 承载 SwiftUI keyboard toolbar 的聚焦场景。纯 SwiftUI 最小表单同样失败，全屏对照通过；XCTest 原始栈经 LLDB 定位到 InputAccessoryBar / FrameLayout 系统路径，不依赖账号或业务请求。
+- 新增独立显式诊断入口，当前 iOS 27 结果为 1 通过 / 2 失败；默认跳过不计作修复或 UI 验收。底部工具栏候选虽无告警且登录旅程通过，但数字键盘遮住完成操作，已撤回。
+- 保留现有登录 Sheet 与键盘完成按钮，告警仍列未完成；没有为通过日志检查而减少交互能力。原始实验、运行终止与会话清理结果已保留。下一步继续运行时标题栏、菜单及其余界面原生化，见[键盘布局诊断](./ios-keyboard-layout-diagnostics.md)。

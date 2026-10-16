@@ -3,7 +3,7 @@ import SwiftUI
 struct ApplicationReviewsView: View {
     let application: CloudApplication
     @EnvironmentObject private var accounts: AccountStore
-    var body: some View { ReviewsContent(application: application, accounts: accounts) }
+    var body: some View { ReviewsContent(application: application, accounts: accounts).runtimeMenuToolbar() }
 }
 
 private struct ReviewsContent: View {

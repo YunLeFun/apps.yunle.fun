@@ -42,6 +42,13 @@ enum WebViewDisplayMode: String {
     case titlebar
 }
 
+enum WebAppMenuAction { case share, copyLink, openBrowser, reload, end }
+
+struct WebAppMenuPage {
+    let controller: UIViewController
+    let isCurrent: () -> Bool
+}
+
 /// 自定义网页容器，按 displayMode 分两种形态：
 /// 沉浸式 = 无导航栏，网页全屏平铺，右上角悬浮小程序风格胶囊（更多 | 关闭），
 /// 可后退时左上角出现悬浮返回键（官方应用声明专属）；
@@ -71,6 +78,10 @@ class WebViewController: UIViewController {
     var onAuthorizationRequest: ((String, String, [String: Any]) -> Void)?
     /// Native hosts provide first-party screens without loading a web shell.
     var localPageFactory: ((String, String, String?) -> UIViewController)?
+    var localMenuPageFactory: ((URL?, @escaping (WebAppMenuAction) -> Void) -> WebAppMenuPage?)?
+    private weak var nativeMenuController: UIViewController?
+    private var nativeMenuID: UUID?
+    private var nativeMenuActionPending = false
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与插件层 sessionKey 一致）
     var sessionKey: String {
@@ -742,6 +753,26 @@ class WebViewController: UIViewController {
     }
 
     @objc private func moreTapped() {
+        guard presentedViewController == nil else { return }
+        if let factory = localMenuPageFactory {
+            let menuID = UUID()
+            guard let page = factory(webView.url ?? url, { [weak self] action in
+                self?.performNativeMenuAction(action, menuID: menuID)
+            }) else { return }
+            nativeMenuID = menuID
+            nativeMenuActionPending = false
+            nativeMenuController = page.controller
+            nativeMenuIsCurrent = page.isCurrent
+            page.controller.modalPresentationStyle = .pageSheet
+            if let presentation = page.controller.sheetPresentationController {
+                presentation.detents = [.medium(), .large()]
+                presentation.selectedDetentIdentifier = .large
+                presentation.prefersGrabberVisible = true
+                presentation.prefersScrollingExpandsWhenScrolledToEdge = true
+            }
+            present(page.controller, animated: true)
+            return
+        }
         let sheet = AppInfoSheetController()
         sheet.appInfo = appInfo
         sheet.currentURL = webView.url ?? url
@@ -772,6 +803,32 @@ class WebViewController: UIViewController {
             presentation.preferredCornerRadius = 20
         }
         present(sheet, animated: true)
+    }
+
+    private var nativeMenuIsCurrent: (() -> Bool)?
+
+    private func performNativeMenuAction(_ action: WebAppMenuAction, menuID: UUID) {
+        guard nativeMenuID == menuID, !nativeMenuActionPending,
+              nativeMenuIsCurrent?() == true,
+              let menu = nativeMenuController, presentedViewController === menu,
+              !isBeingDismissed, !menu.isBeingDismissed else { return }
+        nativeMenuActionPending = true
+        // Sharing requires the sheet's dismissal to finish before presenting another controller.
+        menu.dismiss(animated: true) { [weak self] in
+            guard let self, self.nativeMenuID == menuID else { return }
+            defer { self.nativeMenuID = nil; self.nativeMenuIsCurrent = nil }
+            guard self.nativeMenuIsCurrent?() == true, !self.isBeingDismissed,
+                  self.presentingViewController != nil, self.viewIfLoaded?.window != nil,
+                  self.presentedViewController == nil else { return }
+            switch action {
+            case .share: self.shareCurrent()
+            case .copyLink: UIPasteboard.general.string = (self.webView.url ?? self.url)?.absoluteString
+            case .openBrowser:
+                if let url = self.webView.url ?? self.url { UIApplication.shared.open(url) }
+            case .reload: self.webView.reload()
+            case .end: self.closeTapped()
+            }
+        }
     }
 
     private func shareCurrent() {

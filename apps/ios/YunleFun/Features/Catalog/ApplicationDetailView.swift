@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ApplicationDetailView: View {
     let application: CloudApplication
+    @Environment(\.runtimeMenu) private var runtimeMenu
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var runtime: NativeWebRuntime
@@ -16,6 +17,7 @@ struct ApplicationDetailView: View {
             else { ContentStateView(title: "账号已变化", systemImage: "person.crop.circle", message: "请返回工坊重新打开应用详情。").navigationTitle("工坊应用") }
         }
         .onAppear { if workshopIdentity == nil { workshopIdentity = accounts.identityGeneration } }
+        .runtimeMenuToolbar()
     }
 
     private var content: some View {
@@ -83,7 +85,9 @@ struct ApplicationDetailView: View {
     }
 
     @ViewBuilder private var action: some View {
-        if let condition = app.accessOwnerID != nil ? app.ownerPreviewRestriction : (app.accessWorkshopID != nil ? app.launchRestriction : (app.isUnavailable == true ? app.launchRestriction : nil)) {
+        if let menu = runtimeMenu, menu.applicationID == app.id {
+            Button("返回应用", action: menu.dismiss).buttonStyle(.borderedProminent)
+        } else if let condition = app.accessOwnerID != nil ? app.ownerPreviewRestriction : (app.accessWorkshopID != nil ? app.launchRestriction : (app.isUnavailable == true ? app.launchRestriction : nil)) {
             Label(condition, systemImage: "lock").font(.subheadline).foregroundStyle(.secondary)
         } else if app.launchURL == nil {
             Text("暂时无法打开").font(.subheadline).foregroundStyle(.secondary)

@@ -174,13 +174,32 @@ final class NativeWebRuntime: ObservableObject {
             }
             controller.localPageFactory = { [weak self] path, kind, target in
                 guard let self else { return UIViewController() }
+                let current = self.applications.first(where: { $0.id == app.id }) ?? app
                 if kind == "developer-sheet" {
                     let login = String(path.split(separator: "/").last ?? "").removingPercentEncoding ?? ""
                     return self.localPage(DeveloperApplicationsView(login: login), catalog: catalog, library: library)
                 }
-                return self.localPage(ApplicationDetailView(application: app), catalog: catalog, library: library)
+                if target == "reviews" {
+                    return self.localPage(ApplicationReviewsView(application: current), catalog: catalog, library: library)
+                }
+                return self.localPage(ApplicationDetailView(application: current), catalog: catalog, library: library)
             }
             controllers[app.id] = controller
+        }
+        controller.localMenuPageFactory = { [weak self, weak controller] currentURL, perform in
+            guard let self, let controller, let accounts = self.accounts,
+                  self.controllers[app.id] === controller, !self.isClearingIdentity else { return nil }
+            let identity = self.identityReset
+            let generation = accounts.identityGeneration
+            let current = self.applications.first(where: { $0.id == app.id }) ?? app
+            let menu = NativeApplicationMenuView(application: current, currentURL: currentURL, perform: perform)
+                .environmentObject(catalog).environmentObject(library)
+                .environmentObject(self).environmentObject(accounts)
+            return WebAppMenuPage(controller: UIHostingController(rootView: menu), isCurrent: { [weak self, weak controller] in
+                guard let self, let controller else { return false }
+                return self.identityReset == identity && !self.isClearingIdentity
+                    && accounts.identityGeneration == generation && self.controllers[app.id] === controller
+            })
         }
         controller.customTitle = app.name
         controller.extraTrustedHosts = app.trustedHosts ?? []
@@ -287,7 +306,7 @@ private struct RuntimeLocalPage<Content: View>: View {
     }
 }
 
-private struct DeveloperApplicationsView: View {
+struct DeveloperApplicationsView: View {
     let login: String
     @EnvironmentObject private var catalog: CatalogStore
 
@@ -301,5 +320,6 @@ private struct DeveloperApplicationsView: View {
         }
         .navigationTitle(login)
         .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
+        .runtimeMenuToolbar()
     }
 }

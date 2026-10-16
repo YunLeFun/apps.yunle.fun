@@ -155,6 +155,60 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertTrue(app.buttons["收起应用"].waitForExistence(timeout: 5))
     }
 
+    func testNativeCloudApplicationMenuRoutesAndCommands() throws {
+        guard !isLegacy else { throw XCTSkip("Verifies the native menu") }
+        continueAfterFailure = false
+        let app = app
+        prepareNativeHome(app)
+        app.buttons["打开云空调"].tap()
+        let document = app.webViews.staticTexts["便携小空调"].firstMatch
+        XCTAssertTrue(document.waitForExistence(timeout: 20))
+        let documentCount = app.webViews.count
+        func showMenu() {
+            app.buttons["更多操作"].tap()
+            XCTAssertTrue(app.navigationBars["更多操作"].waitForExistence(timeout: 5))
+            if !app.buttons["结束"].exists || !app.buttons["结束"].isHittable { app.swipeUp() }
+        }
+        showMenu(); attach(app, name: "cloud-menu-native")
+        app.buttons["应用详情"].tap()
+        XCTAssertTrue(app.staticTexts["关于这个应用"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.webViews.count, documentCount, "First-party details must stay native above the same cloud app")
+        attach(app, name: "cloud-menu-details")
+        app.buttons["返回应用"].tap()
+        XCTAssertTrue(document.waitForExistence(timeout: 5))
+        showMenu()
+        app.buttons["评分与评价"].tap()
+        XCTAssertTrue(app.navigationBars["评分与评价"].waitForExistence(timeout: 5))
+        attach(app, name: "cloud-menu-reviews")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["runtime.menu.author"].tap()
+        XCTAssertTrue(app.staticTexts["公开作品"].waitForExistence(timeout: 5))
+        attach(app, name: "cloud-menu-author")
+        app.buttons["完成"].tap()
+        XCTAssertTrue(document.waitForExistence(timeout: 5))
+        showMenu(); app.buttons["复制链接"].tap()
+        XCTAssertTrue(document.waitForExistence(timeout: 5))
+        showMenu(); app.buttons["在浏览器中打开"].tap()
+        let safari = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+        XCTAssertTrue(safari.wait(for: .runningForeground, timeout: 10))
+        XCTAssertTrue(safari.webViews.staticTexts["便携小空调"].firstMatch.waitForExistence(timeout: 20))
+        attach(safari, name: "cloud-menu-external-browser")
+        app.activate()
+        XCTAssertTrue(document.waitForExistence(timeout: 5))
+        showMenu(); app.buttons["分享"].tap()
+        XCTAssertTrue(app.otherElements["ActivityListView"].waitForExistence(timeout: 5))
+        attach(app, name: "cloud-menu-system-share")
+        // iOS 27 exposes an outside-dismiss region instead of a Close button.
+        let dismissShare = app.otherElements["PopoverDismissRegion"]
+        XCTAssertTrue(dismissShare.exists)
+        dismissShare.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15)).tap()
+        showMenu(); app.buttons["重新载入"].tap()
+        XCTAssertTrue(document.waitForExistence(timeout: 20))
+        showMenu(); app.buttons["结束"].tap()
+        XCTAssertTrue(app.buttons["打开云空调"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.webViews.firstMatch.exists)
+    }
+
     func testNativeGuestCanReadReviewsAndReachReports() throws {
         guard !isLegacy else { throw XCTSkip("Verifies native community screens") }
         continueAfterFailure = false

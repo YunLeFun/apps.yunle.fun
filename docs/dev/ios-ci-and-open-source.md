@@ -107,3 +107,9 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 `8793087` 的[第三轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38949308097) 为 **267 通过 / 1 失败 / 0 跳过**，六条 UI 全部通过。失败来自既有 `NativeApplicationMenuTests.testMenuActionEndsExactlyOneSessionAfterDismissal` 的两条回调计数断言，Release 未执行。夹具原先固定等待呈现 150ms、菜单 450ms、退出 650ms；现等待 UIKit 呈现完成、控制器稳定进入 / 离开窗口及实际关闭回调。重复动作只执行一次、身份失效丢弃动作、保留回调不能干扰后续状态等断言保留，局部启用的动画设置在结束时恢复。
 
 该菜单专项本机 **5 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-16T18-58-10-745Z_pid44279_f733d6b0.xcresult`。初次测试修正的两处 await / 断言编译错误已修正，构建失败记录保留。下一提交仍需完整远端终态，不以 UI 六例通过覆盖菜单失败。
+
+`7e62fbf` 的[第四轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38952150899) 为 **267 通过 / 1 失败 / 0 跳过**：全部 262 单元 / 集成与其余五条 UI 通过，导入的初次和一次原生重试均在附件中记录明确的 8 秒超时，Release 未执行。只读 WebKit 加载预算调整为 20 秒，UI 等待实际结果 / 超时为 25 秒；用例总时限、固定来源、取消、一次重试和数据校验保持。冷启动耗时仍需性能验收，新提交按自身完整执行核对。
+
+上述预算调整后的新建隔离模拟器专项 **25 通过 / 0 失败 / 0 跳过**（19 导入检查 + 6 UI）：`test_sim_2026-10-16T19-35-11-698Z_pid44279_b76e41f8.xcresult`。四轮失败原始包均已保留在仓库外；更长等待不代表冷启动性能改善，最新托管结果继续单独记录。
+
+同一产品源码的独立锁包 Release 模拟器编译另通过，无构建诊断：`build_sim_2026-10-16T19-40-08-815Z_pid44279_dcfe8b2e.log`。正式 Bundle ID `fun.yunle.apps`、最低 iOS 16 与原生隐私用途资源已核对，锁文件无变化。此本机结果不能代替下一轮完整远端 CI，也不代表正式安装、签名归档或发布。

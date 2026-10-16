@@ -77,6 +77,7 @@ struct HomeLibrarySnapshot: Codable, Equatable {
     var syncEnabled = true
     var autoSyncEnabled = true
     var dockVisible = false
+    var legacyImportID: String?
 
     var applications: [CloudApplication] { configuration.installedApps.map { application(reference: $0.appId) } }
     var dockApplications: [CloudApplication] { configuration.dockApps.map { application(reference: $0.appId) } }
@@ -96,7 +97,7 @@ struct HomeLibrarySnapshot: Codable, Equatable {
     init() {}
     enum CodingKeys: String, CodingKey {
         case version, configuration, cachedApplications, base, mutationId, hasPendingChanges
-        case syncEnabled, autoSyncEnabled, dockVisible, applications, recentIDs
+        case syncEnabled, autoSyncEnabled, dockVisible, applications, recentIDs, legacyImportID
     }
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -118,14 +119,17 @@ struct HomeLibrarySnapshot: Codable, Equatable {
             syncEnabled = try c.decodeIfPresent(Bool.self, forKey: .syncEnabled) ?? true
             autoSyncEnabled = try c.decodeIfPresent(Bool.self, forKey: .autoSyncEnabled) ?? true
             dockVisible = try c.decodeIfPresent(Bool.self, forKey: .dockVisible) ?? false
+            legacyImportID = try c.decodeIfPresent(String.self, forKey: .legacyImportID)
         }
         guard UUID(uuidString: mutationId) != nil else { throw HomeSyncError.invalidResponse }
+        if let legacyImportID, legacyImportID.count != 64 || !legacyImportID.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) { throw HomeSyncError.invalidResponse }
         try configuration.validate()
         try base?.validate()
     }
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(version, forKey: .version)
+        try c.encodeIfPresent(legacyImportID, forKey: .legacyImportID)
         try c.encode(configuration, forKey: .configuration)
         try c.encode(cachedApplications, forKey: .cachedApplications)
         try c.encodeIfPresent(base, forKey: .base)

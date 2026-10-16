@@ -333,6 +333,47 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertTrue(app.navigationBars["我的举报"].waitForExistence(timeout: 5))
     }
 
+    func testNativeLegacyImportConfirmationCancellationAndRestart() throws {
+        guard !isLegacy, ProcessInfo.processInfo.environment["YLF_LEGACY_IMPORT_UI"] == "1" else {
+            throw XCTSkip("Requires a backed-up, explicitly staged guest Benchmark fixture")
+        }
+        continueAfterFailure = false
+        let app = app; app.launch()
+        app.tabBars.buttons["我"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch.waitForExistence(timeout: 5), "Never imports into a signed-in real account")
+        app.buttons["设置"].tap(); app.buttons["旧版数据导入"].tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "本机访客云居")).firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["旧版样例账号"].exists)
+        func reachImport() -> XCUIElement {
+            let button = app.buttons["导入到当前云居"]
+            for _ in 0..<5 where !button.isHittable { app.swipeUp() }
+            XCTAssertTrue(button.exists && button.isHittable)
+            return button
+        }
+        reachImport().tap()
+        XCTAssertTrue(app.buttons["确认导入"].waitForExistence(timeout: 5))
+        attach(app, name: "legacy-import-native-confirmation")
+        if app.buttons["取消"].exists { app.buttons["取消"].tap() }
+        else {
+            let outside = app.otherElements["PopoverDismissRegion"]
+            XCTAssertTrue(outside.exists)
+            outside.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65)).tap()
+        }
+        XCTAssertFalse(app.staticTexts["旧版数据已导入"].exists)
+        reachImport().tap(); app.buttons["确认导入"].tap()
+        for _ in 0..<5 where !app.staticTexts["旧版数据已导入"].exists { app.swipeDown() }
+        XCTAssertTrue(app.staticTexts["旧版数据已导入"].waitForExistence(timeout: 5))
+        attach(app, name: "legacy-import-native-completed")
+        app.terminate(); app.launch()
+        app.tabBars.buttons["云居"].tap()
+        XCTAssertTrue(app.buttons["打开云空调"].firstMatch.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["打开暂不可用的应用"].firstMatch.exists)
+        attach(app, name: "legacy-import-home-after-restart")
+        app.tabBars.buttons["我"].tap(); app.buttons["设置"].tap(); app.buttons["旧版数据导入"].tap()
+        XCTAssertTrue(app.staticTexts["旧版数据已导入"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["导入到当前云居"].exists)
+    }
+
     func testNativeGuestWorkshopEntryAndInvalidLink() throws {
         guard !isLegacy else { throw XCTSkip("Verifies native personal workshop screens") }
         continueAfterFailure = false

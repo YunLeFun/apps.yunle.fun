@@ -137,6 +137,29 @@ final class HomeLibrary: ObservableObject {
         try adopt(remote)
     }
 
+    func importLegacy(_ record: LegacyLocalData, expectedGeneration: UUID) throws {
+        guard generation == expectedGeneration else { throw LegacyImportError.identityChanged }
+        guard canWrite else { throw LegacyImportError.storage }
+        guard snapshot.legacyImportID != record.id else { return }
+        let backup = fileURL.deletingPathExtension().appendingPathExtension("before-legacy-\(record.id).json")
+        do {
+            if !FileManager.default.fileExists(atPath: backup.path) {
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                try JSONEncoder().encode(snapshot).write(to: backup, options: [.atomic, .completeFileProtectionUnlessOpen])
+            } else { _ = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(contentsOf: backup)) }
+        } catch { throw LegacyImportError.storage }
+        var next = snapshot
+        if let configuration = record.configuration, configuration != next.configuration {
+            next.configuration = configuration; next.hasPendingChanges = true; next.mutationId = UUID().uuidString
+        }
+        next.syncEnabled = record.syncEnabled ?? next.syncEnabled
+        next.autoSyncEnabled = record.autoSyncEnabled ?? next.autoSyncEnabled
+        next.dockVisible = record.dockVisible ?? next.dockVisible
+        next.legacyImportID = record.id
+        guard persist(next) else { throw LegacyImportError.storage }
+        onUserChange?()
+    }
+
     private func edit(_ update: (inout HomeLibrarySnapshot) -> Void) {
         var next = snapshot
         update(&next)

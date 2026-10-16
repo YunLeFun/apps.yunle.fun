@@ -54,6 +54,7 @@ struct MeView: View {
 
 struct SettingsView: View {
     @EnvironmentObject private var library: HomeLibrary
+    @EnvironmentObject private var accounts: AccountStore
     @AppStorage("appearance") private var appearance = AppAppearance.system
     @AppStorage("home.showRecent") private var showRecent = true
     @State private var confirmClear = false
@@ -71,6 +72,9 @@ struct SettingsView: View {
                 NavigationLink("云居同步") { HomeSyncSettingsView() }
                 Button("清空最近使用", role: .destructive) { confirmClear = true }
                     .disabled(library.snapshot.recentIDs.isEmpty)
+            }
+            Section {
+                NavigationLink("旧版数据导入") { LegacyMigrationView(library: library, accounts: accounts) }
             }
         }
         .navigationTitle("设置")

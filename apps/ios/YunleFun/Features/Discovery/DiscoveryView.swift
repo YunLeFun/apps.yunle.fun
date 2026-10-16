@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiscoveryView: View {
     @EnvironmentObject private var catalog: CatalogStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private var official: [CloudApplication] { catalog.applications.filter { $0.isOfficial == true } }
 
     var body: some View {
@@ -11,7 +12,7 @@ struct DiscoveryView: View {
                 Section {
                     NavigationLink(value: featured) {
                         VStack(alignment: .leading, spacing: 20) {
-                            Label("云乐坊出品", systemImage: "sparkle").font(.subheadline).foregroundStyle(.secondary)
+                            officialLabel.font(.subheadline).foregroundStyle(Color.primary)
                             ApplicationIcon(application: featured, size: 76)
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(featured.name).font(.title2.bold())
@@ -20,7 +21,7 @@ struct DiscoveryView: View {
                         }
                         .padding(.vertical, 16)
                     }
-                } header: { Text("发现一点小乐趣") }
+                } header: { Text("发现一点小乐趣").foregroundStyle(Color.primary) }
             }
             if !official.isEmpty {
                 Section("官方出品") {
@@ -45,5 +46,13 @@ struct DiscoveryView: View {
         }
         .navigationTitle("寻乐")
         .refreshable { await catalog.load() }
+    }
+
+    @ViewBuilder private var officialLabel: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Text("云乐坊出品").fixedSize(horizontal: false, vertical: true)
+        } else {
+            Label("云乐坊出品", systemImage: "sparkle")
+        }
     }
 }

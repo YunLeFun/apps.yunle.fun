@@ -42,6 +42,8 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 另有按需运行的 `YunleFunBenchmarks` Scheme，使用 release 优化和独立的 `fun.yunle.apps.benchmark-dev` 标识，包含四 Tab、真实云空调旅程与显式启用的启动测量。测量条件、环境变量、结果导出和首轮原始数据见 [性能基线](../../docs/dev/ios-performance-baseline.md)。它要求独立访客测试模拟器，不包含在日常单元测试 Scheme 中。
 
+同一 Benchmark Scheme 提供显式启用的系统辅助功能审计，检查四个 Tab 在标准和最大辅助字号下的当前可见区域。使用 iOS 17 起的 Apple Audit API，不过滤报告的问题；执行方式、失败记录与覆盖边界见[辅助功能审计](../../docs/dev/ios-accessibility-audits.md)。
+
 已实现真实公开目录读取、原生分类 / 本地搜索、详情、免费公开应用获取到本地云居、排序 / 移除、最近使用与系统外观设置。使用现有运行时管理打开 / 收起 / 会话恢复 / 结束，仍需按真实网页内容逐项验证。邀请、会员与付费条件不会被当作免费公开应用绕过。
 
 已接入官方 CloudBase Auth HTTP 协议：手机号 / 邮箱验证码登录或注册、密码登录、图片验证、资料读取 / 编辑、刷新、退出与本机多账号。原生登录、账号管理和资料表单使用系统组件。凭据与设备标识保存在 Keychain；刷新请求合并，账号切换先清空旧数据投影、结束运行会话并清理现有允许名单内的身份 Cookie。云居本地文件按账号分开，访客数据不自动并入账号。
@@ -62,8 +64,6 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 本地内购验证使用独立 `YunleFunStoreKitValidation` Scheme，显式绑定测试配置；它的交易只完成本地清理，不调用线上发放。日常 `YunleFun` / `YunleFunBenchmarks` 及 Release 归档不启用该配置。实际 StoreKit 本地购买和已完成非续期会员恢复在 iOS 27 / 18.6 各 2 项通过，不能替代 Sandbox。测试命令和接口范围见[钱包与会员](../../docs/dev/ios-wallet.md)。
 
-
 原生 AI 助手已接入现有 Agent，使用原生 SSE / Markdown / 应用卡片，包含会员门控、停止 / 重试、登录取消与身份隔离。iOS 27 受管会员号真实请求通过；现有服务是应用检索，不新增通用大模型。Agent 账户鉴权、次数事务与公开目录加固尚未部署。受管账号输入与真实联调的显式运行要求见[原生助手与受管账号验证](../../docs/dev/ios-assistant.md)，测试凭据必须留在仓库外安全文件中。
-
 
 键盘布局另有显式启用的 KeyboardLayoutDiagnostics，当前 iOS 27 的 UIKit Sheet / SwiftUI keyboard toolbar 组合仍有可复现告警（1 通过 / 2 失败）。它不属于日常功能验收；未启用时跳过不表示修复。现有 Sheet 与键盘完成操作保留，候选底部工具栏因遮挡已撤回，见[诊断与复测入口](../../docs/dev/ios-keyboard-layout-diagnostics.md)。

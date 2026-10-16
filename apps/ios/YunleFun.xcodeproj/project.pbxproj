@@ -52,6 +52,7 @@
 		60FA64FB27A0A53A8CB97730 /* KeyboardLayoutDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */; };
 		66D09E5420FCA119881C6D7A /* ApplicationAcquisitionVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A783B2878E8485F7552CCD87 /* ApplicationAcquisitionVisualTests.swift */; };
 		69FD12419C6D76F962CAC022 /* LegacyImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643B9A5E32C5015ADA4D2572 /* LegacyImportTests.swift */; };
+		6A4ADF2647D98A919E3CEA8B /* NativeAccessibilityAudits.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56D69025168D38F1ACB25FF /* NativeAccessibilityAudits.swift */; };
 		6DF818D3A9FE9875F18D90AC /* NativeAuthorizationPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84644E9373ABFDA4E76B0AD1 /* NativeAuthorizationPage.swift */; };
 		7056931A4D1BC40CACACE31D /* CloudbaseAuthServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A155F7BEB354FA2853BD5BB4 /* CloudbaseAuthServiceTests.swift */; };
 		75B26700C2E4337D3621545D /* Assistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 208E0C78A488ED3FD3DB510A /* Assistant.swift */; };
@@ -257,6 +258,7 @@
 		A38B37B32771268E6D169ADF /* YunleFunBenchmarksTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = YunleFunBenchmarksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3C2FA3CD44A87AA76311B25 /* CommunityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityStore.swift; sourceTree = "<group>"; };
 		A3DB0F68420E7B54EFAB978D /* ApplicationEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationEditorView.swift; sourceTree = "<group>"; };
+		A56D69025168D38F1ACB25FF /* NativeAccessibilityAudits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAccessibilityAudits.swift; sourceTree = "<group>"; };
 		A5CCBB719CCA8FCE720CC9F6 /* PublishingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingStore.swift; sourceTree = "<group>"; };
 		A6AB7D569EF605BBFD7CEDE3 /* ApplicationAcquisitionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationAcquisitionTests.swift; sourceTree = "<group>"; };
 		A783B2878E8485F7552CCD87 /* ApplicationAcquisitionVisualTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationAcquisitionVisualTests.swift; sourceTree = "<group>"; };
@@ -553,6 +555,7 @@
 			isa = PBXGroup;
 			children = (
 				8356600EF2C46252EFFEE984 /* ApplicationBenchmarks.swift */,
+				A56D69025168D38F1ACB25FF /* NativeAccessibilityAudits.swift */,
 			);
 			path = Benchmarks;
 			sourceTree = "<group>";
@@ -1003,6 +1006,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				46C882D1A907D5708AB1C4AA /* ApplicationBenchmarks.swift in Sources */,
+				6A4ADF2647D98A919E3CEA8B /* NativeAccessibilityAudits.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

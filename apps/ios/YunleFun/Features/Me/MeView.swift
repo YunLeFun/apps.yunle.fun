@@ -3,6 +3,7 @@ import SwiftUI
 struct MeView: View {
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var accounts: AccountStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showLogin = false
 
     var body: some View {
@@ -12,12 +13,16 @@ struct MeView: View {
                     NavigationLink { AccountProfileView() } label: { AccountIdentityLabel(user: user) }
                 } else {
                     Button { showLogin = true } label: {
-                        Label {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("登录云乐坊").font(.headline)
-                                Text("继续你的应用生活").font(.subheadline).foregroundStyle(.secondary)
+                        Group {
+                            if dynamicTypeSize.isAccessibilitySize {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    loginIcon
+                                    loginText
+                                }
+                            } else {
+                                Label { loginText } icon: { loginIcon }
                             }
-                        } icon: { Image(systemName: "person.crop.circle").font(.largeTitle) }
+                        }
                         .padding(.vertical, 8)
                     }
                 }
@@ -39,16 +44,31 @@ struct MeView: View {
                 NavigationLink { SettingsView() } label: { Label("设置", systemImage: "gearshape") }
                 NavigationLink { AboutView() } label: { Label("关于云乐坊", systemImage: "info.circle") }
             }
-            Section("支持") {
+            Section {
                 NavigationLink { MyReportsView() } label: { Label("我的举报", systemImage: "flag") }
                 Link(destination: URL(string: "https://www.yunle.fun/docs")!) { Label("使用帮助", systemImage: "questionmark.circle") }
                 Link(destination: URL(string: "https://github.com/YunLeFun/apps.yunle.fun/issues")!) {
                     Label("反馈与建议", systemImage: "bubble.left.and.bubble.right")
                 }
+            } header: {
+                Text("支持").foregroundStyle(Color.primary)
             }
         }
         .navigationTitle("我")
         .sheet(isPresented: $showLogin) { LoginView() }
+    }
+
+    private var loginIcon: some View {
+        Image(systemName: "person.crop.circle").font(.largeTitle)
+    }
+
+    private var loginText: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("登录云乐坊").font(.headline)
+            Text("继续你的应用生活").font(.subheadline).foregroundStyle(Color.primary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

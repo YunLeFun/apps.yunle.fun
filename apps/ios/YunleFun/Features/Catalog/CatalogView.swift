@@ -27,10 +27,13 @@ struct CatalogView: View {
                 ContentStateView(title: query.isEmpty ? "还没有应用" : "没有找到相关应用", systemImage: "magnifyingglass",
                                  message: query.isEmpty ? "稍后再来看看。" : "试试其他关键词或分类。")
             } else {
-                Section(category == "全部" ? "全部应用 · \(filtered.count)" : "\(category) · \(filtered.count)") {
+                Section {
                     ForEach(filtered) { app in
                         NavigationLink(value: app) { ApplicationRow(application: app) }
                     }
+                } header: {
+                    Text(category == "全部" ? "全部应用 · \(filtered.count)" : "\(category) · \(filtered.count)")
+                        .foregroundStyle(Color.primary)
                 }
             }
         }

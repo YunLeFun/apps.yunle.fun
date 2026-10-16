@@ -2,15 +2,19 @@ import XCTest
 
 @MainActor
 final class NativeNavigationUITests: XCTestCase {
-    func testGuestCanDismissPhoneAndPasswordKeyboards() {
+    func testGuestCanDismissPhoneKeyboardAtStandardTextSize() {
         checkLoginKeyboardDismissal(large: false)
+    }
+
+    func testGuestCanDismissPasswordKeyboardAtStandardTextSize() {
+        checkLoginKeyboardDismissal(large: false, passwordMethod: true)
     }
 
     func testGuestCanDismissPhoneKeyboardAtLargestTextSize() {
         checkLoginKeyboardDismissal(large: true)
     }
 
-    private func checkLoginKeyboardDismissal(large: Bool) {
+    private func checkLoginKeyboardDismissal(large: Bool, passwordMethod: Bool = false) {
         continueAfterFailure = false
         let app = XCUIApplication()
         if large {
@@ -24,17 +28,18 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(login.waitForExistence(timeout: 5))
         XCTAssertTrue(login.label.hasPrefix("登录云乐坊"))
         login.tap()
-        let phone = app.textFields["login.phone"]
-        XCTAssertTrue(phone.waitForExistence(timeout: 5))
-        XCTAssertEqual(phone.label, "手机号")
-        checkDismissal(app, field: phone, name: large ? "phone-largest" : "phone-standard")
-        if !large {
+        if passwordMethod {
             app.segmentedControls.buttons["密码"].tap()
             let username = app.textFields["login.username"], password = app.secureTextFields["login.password"]
             XCTAssertTrue(username.waitForExistence(timeout: 5))
             XCTAssertEqual(username.label, "用户名、邮箱或手机号")
             XCTAssertEqual(password.label, "密码")
             checkDismissal(app, field: password, name: "password-standard")
+        } else {
+            let phone = app.textFields["login.phone"]
+            XCTAssertTrue(phone.waitForExistence(timeout: 5))
+            XCTAssertEqual(phone.label, "手机号")
+            checkDismissal(app, field: phone, name: large ? "phone-largest" : "phone-standard")
         }
         app.buttons["取消"].tap()
         XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))

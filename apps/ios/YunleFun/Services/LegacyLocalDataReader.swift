@@ -15,8 +15,11 @@ final class LegacyLocalDataReader: NSObject, LegacyLocalDataReading, WKNavigatio
     private var continuation: CheckedContinuation<[String: String], Error>?
     private var operationID: UUID?
     private var timeout: Task<Void, Never>?
+    private let timeoutNanoseconds: UInt64
 
-    init(dataStore: WKWebsiteDataStore? = nil) { self.dataStore = dataStore ?? .default() }
+    init(dataStore: WKWebsiteDataStore? = nil, timeoutNanoseconds: UInt64 = 8_000_000_000) {
+        self.dataStore = dataStore ?? .default(); self.timeoutNanoseconds = timeoutNanoseconds
+    }
 
     func read() async throws -> [String: String] {
         let id = UUID()
@@ -31,8 +34,9 @@ final class LegacyLocalDataReader: NSObject, LegacyLocalDataReading, WKNavigatio
                 let web = WKWebView(frame: .zero, configuration: configuration)
                 web.navigationDelegate = self; webView = web
                 timeout = Task { @MainActor [weak self] in
-                    do { try await Task.sleep(nanoseconds: 8_000_000_000) } catch { return }
-                    self?.finish(id, result: .failure(LegacyImportError.unreadable))
+                    guard let duration = self?.timeoutNanoseconds else { return }
+                    do { try await Task.sleep(nanoseconds: duration) } catch { return }
+                    self?.finish(id, result: .failure(LegacyImportError.timedOut))
                 }
                 web.load(URLRequest(url: Self.url))
             }
@@ -42,7 +46,7 @@ final class LegacyLocalDataReader: NSObject, LegacyLocalDataReading, WKNavigatio
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard let id = operationID, webView.url == Self.url else { return }
+        guard self.webView === webView, let id = operationID, webView.url == Self.url else { return }
         Task { @MainActor [weak self] in
             do {
                 let value = try await webView.callAsyncJavaScript("""
@@ -66,14 +70,18 @@ final class LegacyLocalDataReader: NSObject, LegacyLocalDataReading, WKNavigatio
             } catch { self?.finish(id, result: .failure(error as? LegacyImportError ?? .unreadable)) }
         }
     }
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { fail() }
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { fail() }
-    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { fail() }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { fail(webView) }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { fail(webView) }
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { fail(webView) }
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        decisionHandler(navigationAction.request.url == Self.url && navigationAction.targetFrame?.isMainFrame == true ? .allow : .cancel)
+        decisionHandler(self.webView === webView && navigationAction.request.url == Self.url
+                        && navigationAction.targetFrame?.isMainFrame == true ? .allow : .cancel)
     }
-    private func fail() { if let id = operationID { finish(id, result: .failure(LegacyImportError.unreadable)) } }
+    private func fail(_ webView: WKWebView) {
+        guard self.webView === webView, let id = operationID else { return }
+        finish(id, result: .failure(LegacyImportError.unreadable))
+    }
     private func finish(_ id: UUID, result: Result<[String: String], Error>) {
         guard operationID == id else { return }
         operationID = nil; timeout?.cancel(); timeout = nil

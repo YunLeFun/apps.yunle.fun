@@ -217,8 +217,36 @@ final class LegacyImportTests: XCTestCase {
         XCTAssertNotNil(f.store.archive)
     }
 
+    func testRealWebKitReaderFindsNoLegacyDataInFreshStore() async throws {
+        let reader = LegacyLocalDataReader(dataStore: .nonPersistent())
+        let values = try await reader.read()
+        XCTAssertTrue(values.isEmpty)
+    }
+
     func testRealWebKitReaderUsesSameOriginAndNeverReadsCredentialKeys() async throws {
-        let dataStore = WKWebsiteDataStore.nonPersistent()
+        try await verifyRealWebKitReader(dataStore: .nonPersistent())
+    }
+
+    func testRealPersistentWebKitRecordsAreNotMistakenForEmptyStorage() async throws {
+        guard #available(iOS 17, *) else { throw XCTSkip("Named isolated persistent WebKit stores require iOS 17") }
+        let id = UUID()
+        var failure: Error?
+        do { try await verifyRealWebKitReader(dataStore: WKWebsiteDataStore(forIdentifier: id)) }
+        catch { failure = error }
+        var cleanupError: Error?
+        for attempt in 0..<100 {
+            cleanupError = await withCheckedContinuation { continuation in
+                WKWebsiteDataStore.remove(forIdentifier: id) { continuation.resume(returning: $0) }
+            }
+            guard let issue = cleanupError as NSError?, issue.domain == "WKWebSiteDataStore", issue.code == 1 else { break }
+            // WebKit releases cancelled and completed views asynchronously.
+            if attempt < 99 { try await Task.sleep(nanoseconds: 100_000_000) }
+        }
+        XCTAssertNil(cleanupError)
+        if let failure { throw failure }
+    }
+
+    private func verifyRealWebKitReader(dataStore: WKWebsiteDataStore) async throws {
         let configuration = WKWebViewConfiguration(); configuration.websiteDataStore = dataStore
         configuration.setURLSchemeHandler(LegacyImportSchemeHandler(), forURLScheme: "capacitor")
         let old = WKWebView(frame: .zero, configuration: configuration)
@@ -230,6 +258,10 @@ final class LegacyImportTests: XCTestCase {
         XCTAssertTrue(navigation.loaded)
         var values = legacyValues(); values["ylf_access_token"] = "fixture-secret-must-stay-in-old-storage"
         _ = try await old.callAsyncJavaScript("for (const [key,value] of Object.entries(values)) localStorage.setItem(key,value); return true;", arguments: ["values": values], in: nil, contentWorld: .page)
+        do {
+            _ = try await LegacyLocalDataReader(dataStore: dataStore, timeoutNanoseconds: 1).read()
+            XCTFail("The expired read must not report empty or partial data")
+        } catch LegacyImportError.timedOut { }
         let first = try await LegacyLocalDataReader(dataStore: dataStore).read()
         let second = try await LegacyLocalDataReader(dataStore: dataStore).read()
         XCTAssertEqual(first, try LegacyLocalData(values: legacyValues()).values); XCTAssertEqual(second, first)

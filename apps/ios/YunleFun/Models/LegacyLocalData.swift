@@ -2,11 +2,12 @@ import CryptoKit
 import Foundation
 
 enum LegacyImportError: LocalizedError {
-    case invalidData, unreadable, storage, identityChanged, alreadyClaimed, recordChanged
+    case invalidData, unreadable, timedOut, storage, identityChanged, alreadyClaimed, recordChanged
     var errorDescription: String? {
         switch self {
         case .invalidData: return "旧版记录的格式暂时无法导入，原记录已保留。"
         case .unreadable: return "暂时无法读取旧版记录，请稍后重试。"
+        case .timedOut: return "读取旧版记录用时较长，请重新读取。"
         case .storage: return "未能保存导入记录，请检查设备存储空间后重试。"
         case .identityChanged: return "当前账号或云居已变化，请重新确认导入位置。"
         case .alreadyClaimed: return "这份旧版记录已为另一个云居保留，请切换到原来的账号后继续。"

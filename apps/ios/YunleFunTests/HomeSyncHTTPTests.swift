@@ -54,10 +54,25 @@ final class HomeSyncHTTPTests: XCTestCase {
         catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Unexpected error") } }
     }
 
-    private func service(_ replies: [(Int, String)]) -> (HomeSyncService, AuthHTTPFixture) {
+    func testGatewayHTMLCannotInvalidateAnAuthenticatedSession() async {
+        let (service, _) = service([(200, "<html>Preview</html>"), (401, "<html>Access gate</html>"),
+                                    (403, "<html>Access gate</html>")], contentType: "text/html; charset=utf-8")
+        for _ in 0..<3 {
+            do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+            catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Gateway HTML must not expire app login") } }
+        }
+    }
+
+    func testOversizedJSONIsRejectedBeforeAuthenticationClassification() async {
+        let (service, _) = service([(401, String(repeating: " ", count: 2 * 1024 * 1024 + 1))])
+        do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+        catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Oversized response must fail protocol validation") } }
+    }
+
+    private func service(_ replies: [(Int, String)], contentType: String = "application/json") -> (HomeSyncService, AuthHTTPFixture) {
         let host = UUID().uuidString.lowercased() + ".invalid"
         hosts.append(host)
-        let fixture = AuthHTTPFixture(replies: replies)
+        let fixture = AuthHTTPFixture(replies: replies, contentType: contentType)
         AuthHTTPProtocol.register(host, fixture: fixture)
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [AuthHTTPProtocol.self]

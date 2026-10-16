@@ -45,7 +45,9 @@ struct HomeSyncService: HomeSyncServing {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
         let (data, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse else { throw HomeSyncError.invalidResponse }
+        guard let http = response as? HTTPURLResponse,
+              http.mimeType?.lowercased() == "application/json",
+              data.count <= 2 * 1024 * 1024 else { throw HomeSyncError.invalidResponse }
         if http.statusCode == 401 { throw HomeSyncError.unauthorized }
         if http.statusCode == 403 { throw HomeSyncError.forbidden }
         if http.statusCode == 409,

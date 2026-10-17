@@ -12,6 +12,14 @@
 - 本轮隔离 guard 已恢复 `PasteboardAutomaticSync` 原值 `true` 并核对，主账号池从未读取。下一轮需重新建立隔离、保留成功录屏及输入阶段 AX，不能沿用本次开关或 UI 通过作为安全批准。
 - Store/coordinator 中直接调用模型 dismissal 的测试，不能证明真实 `LoginView` 提交、系统 sheet 消失或新 Feedback 页面恢复。
 
+## Xcode 27 的控制界面边界
+
+本机实际前端为 `/Applications/Xcode.app/Contents/Applications/DeviceHub.app`，名称 DeviceHub、Bundle ID `com.apple.dt.Devices`，版本 27.0。旧 `Simulator.app` 路径不存在。DeviceKit 的静态资源中有“Use Shared Clipboard”菜单文案及按 device 同步的描述，但这不证明菜单当前状态或 `pasteboardSyncEnabled` 是可写偏好键；不能编造内部设置命令。
+
+因此旧 `com.apple.iphonesimulator` 的 `PasteboardAutomaticSync=false` 即使读回成功，也不能证明 DeviceHub 的实际桥接已关闭。必须核验专用模拟器的真实界面设置，并重新观测 Mac 计数。UI 工具最初因 Mac 锁屏未能读取界面；用户解锁后，已实际选中本轮专用模拟器，并在 Mac 的 Edit 菜单读到 Use Shared Clipboard、Get Clipboard 和 Send Clipboard。该工具未返回菜单勾选状态，菜单截图也不可用，因而尚未确认开关关闭，未切换这个开关或读取任何剪贴板正文。工具可后台操作窗口但没有前台激活接口，已向用户说明先切到 Device Hub，再查看 Mac 顶部 Edit 菜单；没有操作手机，真实凭据验证继续等待可靠隔离。
+
+随后仅扩充 canary 的输入阶段完整 App / SpringBoard AX 保留，真实输入路径的抓取规则未变；这一源代码调整尚未执行新一轮 canary。旧成功包缺少输入阶段完整 AX 和录屏的边界继续保留。
+
 ## 隔离与开关
 
 仅运行新建、独占的 **iPhone iOS 模拟器**，不得操作真机或用户已有数据。App 固定为 `fun.yunle.apps.benchmark-dev`；要求空访客云居、没有安装或运行中的应用、没有已登录账号。失败即停止，不能自动清除无关账号。

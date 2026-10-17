@@ -23,7 +23,7 @@ final class FeedbackLoginBenchmarks: XCTestCase {
             try prepareFeedbackLogin(app)
             phase = "enter non-secret canary"
             try fillPasswordForm(app, username: "feedback-canary", password: canary)
-            capture(app, name: "feedback-canary-secure-field", includeTree: false)
+            capture(app, name: "feedback-canary-secure-field", allowCanarySecureTree: true)
             // Do not tap login.submit or press Return. This audits the same
             // local-paste channel that the later real journey uses.
             phase = "cancel and verify guest draft"

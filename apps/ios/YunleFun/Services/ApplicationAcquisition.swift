@@ -26,6 +26,7 @@ struct ApplicationAcquisitionQuote: Decodable {
     let balance: Int64
     func validate(appID: String, uid: String) throws {
         guard userId == uid, application.id == appID, application.accessOwnerID == nil, application.accessWorkshopID == nil,
+              application.personalMarketOwnerLogin == nil,
               application.isUnavailable != true, application.isPublic != false,
               coinCost >= 0, coinCost <= 9_007_199_254_740_991, coinCost == (application.coinCost ?? 0),
               (0...9_007_199_254_740_991).contains(balance) else { throw ApplicationAcquisitionError.invalidResponse }

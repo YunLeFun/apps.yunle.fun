@@ -98,7 +98,7 @@ final class HomeLibrary: ObservableObject {
 
     func updateCatalog(_ applications: [CloudApplication]) {
         var next = snapshot
-        for app in applications { cache(app, in: &next) }
+        for app in applications { cache(app, in: &next, preservingSavedSource: true) }
         if next.cachedApplications != snapshot.cachedApplications { _ = persist(next) }
     }
 
@@ -174,7 +174,7 @@ final class HomeLibrary: ObservableObject {
         next.configuration = candidate.configuration
         let currentCache = snapshot.cachedApplications
         next.cachedApplications = candidate.cachedApplications
-        for app in currentCache { cache(app, in: &next) }
+        for app in currentCache { cache(app, in: &next, preservingSavedSource: true) }
         if confirmation.restoreSettings {
             next.syncEnabled = candidate.syncEnabled; next.autoSyncEnabled = candidate.autoSyncEnabled; next.dockVisible = candidate.dockVisible
         }
@@ -232,15 +232,18 @@ final class HomeLibrary: ObservableObject {
         update(&next)
         if persist(next) { onUserChange?() }
     }
-    private func cache(_ app: CloudApplication, in state: inout HomeLibrarySnapshot) {
+    private func cache(_ app: CloudApplication, in state: inout HomeLibrarySnapshot, preservingSavedSource: Bool = false) {
         guard app.isUnavailable != true else { return }
         var app = app
         app.homeReference = nil
         if let index = state.cachedApplications.firstIndex(where: { $0.id == app.id }) {
-            // Public discovery uses the approved market revision. It must not
-            // replace a saved workshop edition or erase its revalidation scope.
-            guard (state.cachedApplications[index].accessWorkshopID == nil && state.cachedApplications[index].accessOwnerID == nil)
-                || app.accessWorkshopID != nil || app.accessOwnerID != nil else { return }
+            // Passive metadata merges must not erase the source needed for
+            // the next launch. Explicit use or installation selects its source.
+            if preservingSavedSource {
+                guard (state.cachedApplications[index].accessWorkshopID == nil && state.cachedApplications[index].accessOwnerID == nil
+                       && state.cachedApplications[index].personalMarketOwnerLogin == nil)
+                    || app.accessWorkshopID != nil || app.accessOwnerID != nil || app.personalMarketOwnerLogin != nil else { return }
+            }
             state.cachedApplications[index] = app
         }
         else { state.cachedApplications.append(app) }

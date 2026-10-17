@@ -39,8 +39,17 @@ struct ApplicationDetailView: View {
                 .padding(.vertical, 12)
             }
             Section("关于这个应用") { Text(app.summary).textSelection(.enabled) }
-            if app.accessWorkshopID == nil && app.accessOwnerID == nil {
+            if app.accessWorkshopID == nil && app.accessOwnerID == nil && app.personalMarketOwnerLogin == nil {
                 Section { NavigationLink("评分与评价") { ApplicationReviewsView(application: app) } }
+            }
+            if app.personalMarketOwnerLogin != nil {
+                Section {
+                    Label("作者公开发布的版本", systemImage: "person.crop.circle")
+                    Text("此版本可能与云乐坊上架版本不同。").foregroundStyle(.secondary)
+                    if let marketVersion = catalog.applications.first(where: { $0.id == app.id }) {
+                        NavigationLink("查看云乐坊版本") { ApplicationDetailView(application: marketVersion) }
+                    }
+                }
             }
             Section("信息") {
                 LabeledContent("分类", value: app.browseCategory)
@@ -81,16 +90,24 @@ struct ApplicationDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                ShareLink(item: app.accessWorkshopID.map { CatalogService.productionOrigin.appendingPathComponent("w/\($0)") } ?? CatalogService.productionOrigin.appendingPathComponent("app/\(app.publicKey)")) {
-                    Label("分享应用", systemImage: "square.and.arrow.up")
+                ShareLink(item: app.shareURL) {
+                    Label(app.personalMarketOwnerLogin == nil ? "分享应用" : "分享作者主页", systemImage: "square.and.arrow.up")
                 }
             }
         }
     }
 
     @ViewBuilder private var action: some View {
-        if let menu = runtimeMenu, menu.applicationID == app.id {
+        if let menu = runtimeMenu, menu.represents(app) {
             Button("返回应用", action: menu.dismiss).buttonStyle(.borderedProminent)
+        } else if app.personalMarketOwnerLogin != nil && !app.canOpenAsGuest {
+            VStack(alignment: .leading, spacing: 6) {
+                Label(app.accessLabel ?? "暂时无法打开", systemImage: "lock").font(.subheadline)
+                if app.launchRestriction != nil {
+                    Text("作者版本的使用权限需要进一步确认。可查看云乐坊版本或联系作者。")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }
+            }
         } else if let condition = app.accessOwnerID != nil ? app.ownerPreviewRestriction : (app.accessWorkshopID != nil ? app.launchRestriction : (app.isUnavailable == true ? app.launchRestriction : nil)) {
             Label(condition, systemImage: "lock").font(.subheadline).foregroundStyle(.secondary)
         } else if app.launchURL == nil {

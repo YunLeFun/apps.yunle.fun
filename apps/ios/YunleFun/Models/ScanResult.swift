@@ -4,6 +4,7 @@ enum ScanPurpose { case general, workshop }
 enum NativeDestination: Hashable {
     case workshop(String)
     case application(String)
+    case developer(String)
 }
 enum ScanResult: Equatable {
     case destination(NativeDestination)
@@ -20,6 +21,7 @@ struct ScanCandidate: Identifiable, Equatable {
         switch result {
         case .destination(.workshop): return "个人工坊"
         case .destination(.application): return "云应用"
+        case .destination(.developer): return "作者主页"
         case .website(let url): return url.host ?? "网址"
         case .text: return "文本"
         case .unsupportedWorkshop: return "不是工坊二维码"
@@ -35,7 +37,7 @@ enum NativeLink {
         if parts.scheme?.lowercased() == "https", parts.host?.lowercased() == "apps.yunle.fun", parts.port == nil || parts.port == 443 {
             path = parts.path
         } else if parts.scheme?.lowercased() == "yunlefun", parts.port == nil,
-                  let host = parts.host?.lowercased(), host == "w" || host == "workshop" || host == "app" {
+                  let host = parts.host?.lowercased(), host == "w" || host == "workshop" || host == "app" || host == "developer" {
             path = "/" + (host == "workshop" ? "w" : host) + parts.path
         } else { return nil }
         var segments = path.split(separator: "/", omittingEmptySubsequences: false)
@@ -44,6 +46,7 @@ enum NativeLink {
         let key = String(segments[2])
         if segments[1] == "w", let id = WorkshopLink.normalize(key) { return .workshop(id) }
         if segments[1] == "app", validAppKey(key) { return .application(key) }
+        if segments[1] == "developer", DeveloperProfile.normalizedLogin(key) == key { return .developer(key) }
         return nil
     }
     static func validAppKey(_ key: String) -> Bool {

@@ -131,7 +131,7 @@ private struct QRScannerContent: View {
         }
     }
     private func destinationLabel(_ destination: NativeDestination) -> String {
-        switch destination { case .workshop: return "打开个人工坊"; case .application: return "查看云应用" }
+        switch destination { case .workshop: return "打开个人工坊"; case .application: return "查看云应用"; case .developer: return "查看作者主页" }
     }
 }
 private struct ScanWebsite: Identifiable { let id = UUID(); let url: URL }
@@ -147,6 +147,7 @@ struct NativeDestinationView: View {
         switch destination {
         case .workshop(let id): PublicWorkshopView(id: id)
         case .application(let key): LinkedApplicationView(key: key)
+        case .developer(let login): DeveloperApplicationsView(login: login)
         }
     }
 }

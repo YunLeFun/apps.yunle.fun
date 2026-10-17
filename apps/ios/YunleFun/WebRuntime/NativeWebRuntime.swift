@@ -41,8 +41,10 @@ final class NativeWebRuntime: ObservableObject {
     private var identityReset = UUID()
     private var isClearingIdentity = false
     private let limit = WebViewSessionPolicy.automaticLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
+    private let personalMarketService: DeveloperProfileServing
 
-    init() {
+    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService()) {
+        self.personalMarketService = personalMarketService
         memoryObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: .main
         ) { [weak self] _ in Task { @MainActor in self?.releasePausedSessions() } }
@@ -69,7 +71,7 @@ final class NativeWebRuntime: ObservableObject {
     }
 
     func acquire(_ app: CloudApplication, intent: ApplicationAcquisitionIntent, catalog: CatalogStore, library: HomeLibrary) {
-        guard app.accessWorkshopID == nil, app.accessOwnerID == nil else { return }
+        guard app.accessWorkshopID == nil, app.accessOwnerID == nil, app.personalMarketOwnerLogin == nil else { return }
         guard let accounts, let wallet, let purchases,
               var presenter = presentationRootController(), acquisitionController == nil, !isClearingIdentity else { return }
         let requestID = UUID(); acquisitionID = requestID
@@ -94,17 +96,39 @@ final class NativeWebRuntime: ObservableObject {
         page.modalPresentationStyle = .pageSheet
         while let presented = presenter.presentedViewController { presenter = presented }
         guard !presenter.isBeingDismissed, !presenter.isBeingPresented else { return }
+        invalidateOpenRequest()
         acquisitionController = page
         presenter.present(page, animated: true)
     }
 
     func open(_ app: CloudApplication, catalog: CatalogStore, library: HomeLibrary) {
+        // A handled new intent, including an unavailable application, must not
+        // later be replaced by an earlier asynchronous publication lookup.
+        invalidateOpenRequest()
         guard app.isUnavailable != true else {
             issue = RuntimeIssue(title: "应用资料尚未载入", message: "安装记录仍保留在云居。请联网更新应用资料后再试。")
             return
         }
         guard !isClearingIdentity else {
             issue = RuntimeIssue(title: "正在切换账号", message: "请稍后再打开应用。")
+            return
+        }
+        if app.personalMarketOwnerLogin != nil {
+            let identity = identityReset, operationID = UUID()
+            scopedOpenID = operationID; verifyingScopedApplicationID = app.id
+            scopedOpenTask = Task { [weak self] in
+                guard let self else { return }
+                defer { if self.scopedOpenID == operationID { self.verifyingScopedApplicationID = nil; self.scopedOpenTask = nil } }
+                do {
+                    let current = try await PersonalMarketLaunchAuthorization(service: self.personalMarketService).resolve(app)
+                    guard !Task.isCancelled, self.scopedOpenID == operationID, self.identityReset == identity,
+                          !self.isClearingIdentity, let url = current.launchURL else { return }
+                    self.present(current, url: url, catalog: catalog, library: library)
+                } catch {
+                    guard !Task.isCancelled, self.scopedOpenID == operationID, self.identityReset == identity else { return }
+                    self.issue = RuntimeIssue(title: "无法打开作者作品", message: (error as? DeveloperProfileError)?.message ?? DeveloperProfileError.unavailable.message)
+                }
+            }
             return
         }
         if app.accessWorkshopID != nil || app.accessOwnerID != nil {
@@ -152,6 +176,11 @@ final class NativeWebRuntime: ObservableObject {
     private func present(_ app: CloudApplication, url: URL, catalog: CatalogStore, library: HomeLibrary) {
         pendingOpen = PendingOpen(application: app, url: url, catalog: catalog, library: library, identity: identityReset)
         drainPendingOpen()
+    }
+
+    private func invalidateOpenRequest() {
+        scopedOpenTask?.cancel(); scopedOpenID = UUID(); scopedOpenTask = nil
+        verifyingScopedApplicationID = nil; pendingOpen = nil
     }
 
     private func drainPendingOpen() {
@@ -246,12 +275,15 @@ final class NativeWebRuntime: ObservableObject {
                 let current = self.applications.first(where: { $0.id == app.id }) ?? app
                 if kind == "developer-sheet" {
                     let login = String(path.split(separator: "/").last ?? "").removingPercentEncoding ?? ""
-                    return self.localPage(DeveloperApplicationsView(login: login), applicationID: app.id, catalog: catalog, library: library)
+                    return self.localPage(DeveloperApplicationsView(login: login), applicationID: app.id, runtimeScope: current.runtimeScope,
+                                          launchURL: current.launchURL, catalog: catalog, library: library)
                 }
-                if target == "reviews" {
-                    return self.localPage(ApplicationReviewsView(application: current), applicationID: app.id, catalog: catalog, library: library)
+                if target == "reviews", current.personalMarketOwnerLogin == nil {
+                    return self.localPage(ApplicationReviewsView(application: current), applicationID: app.id, runtimeScope: current.runtimeScope,
+                                          launchURL: current.launchURL, catalog: catalog, library: library)
                 }
-                return self.localPage(ApplicationDetailView(application: current), applicationID: app.id, catalog: catalog, library: library)
+                return self.localPage(ApplicationDetailView(application: current), applicationID: app.id, runtimeScope: current.runtimeScope,
+                                      launchURL: current.launchURL, catalog: catalog, library: library)
             }
             let navigation = NativeWebNavigationController(rootViewController: controller)
             navigation.modalPresentationStyle = .fullScreen
@@ -273,12 +305,12 @@ final class NativeWebRuntime: ObservableObject {
             })
         }
         controller.customTitle = app.name
-        controller.extraTrustedHosts = app.trustedHosts ?? []
+        controller.extraTrustedHosts = app.runtimeTrustedHosts
         controller.appInfo = WebAppInfo(
             id: app.id, slug: app.publicKey, name: app.name, emoji: app.emoji ?? "",
             logo: app.iconURL?.absoluteString ?? "", themeColor: app.themeColor ?? "#007AFF",
             description: app.summary, category: app.browseCategory,
-            developer: app.ownerLogin ?? "", developerName: app.developerName ?? "",
+            developer: app.personalMarketOwnerLogin ?? app.ownerLogin ?? "", developerName: app.developerName ?? "",
             rating: app.displayRating ?? 0, ratingCount: app.ratingCount ?? 0)
         markRecent(app)
         evictIfNeeded(except: app.id)
@@ -290,6 +322,7 @@ final class NativeWebRuntime: ObservableObject {
     }
 
     func end(_ app: CloudApplication) {
+        if verifyingScopedApplicationID == app.id { invalidateOpenRequest() }
         if pendingOpen?.application.id == app.id { pendingOpen = nil }
         guard let session = sessions[app.id] else { return }
         session.presentation.presentingViewController?.dismiss(animated: true)
@@ -326,11 +359,11 @@ final class NativeWebRuntime: ObservableObject {
         applications.removeAll { $0.id == app.id }
     }
 
-    private func localPage<Content: View>(_ content: Content, applicationID: String, catalog: CatalogStore, library: HomeLibrary) -> UIViewController {
+    private func localPage<Content: View>(_ content: Content, applicationID: String, runtimeScope: String, launchURL: URL?, catalog: CatalogStore, library: HomeLibrary) -> UIViewController {
         guard let accounts else {
             return UIHostingController(rootView: Text("账号服务暂时不可用，请返回主界面重试。").padding())
         }
-        return UIHostingController(rootView: RuntimeLocalPage(content: content, applicationID: applicationID)
+        return UIHostingController(rootView: RuntimeLocalPage(content: content, applicationID: applicationID, runtimeScope: runtimeScope, launchURL: launchURL)
             .environmentObject(catalog).environmentObject(library).environmentObject(self).environmentObject(accounts))
     }
 
@@ -377,30 +410,13 @@ private struct RuntimeLocalPage<Content: View>: View {
     @Environment(\.dismiss) private var dismiss
     let content: Content
     let applicationID: String
+    let runtimeScope: String
+    let launchURL: URL?
 
     var body: some View {
         NavigationStack {
             content
         }
-        .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: applicationID, dismiss: { dismiss() }))
-    }
-}
-
-struct DeveloperApplicationsView: View {
-    let login: String
-    @EnvironmentObject private var catalog: CatalogStore
-
-    var body: some View {
-        List {
-            Section("公开作品") {
-                ForEach(catalog.applications.filter { $0.ownerLogin?.lowercased() == login.lowercased() }) { app in
-                    NavigationLink {
-                        ApplicationDetailView(application: app)
-                    } label: { ApplicationRow(application: app) }
-                }
-            }
-        }
-        .navigationTitle(login)
-        .runtimeMenuToolbar()
+        .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: applicationID, runtimeScope: runtimeScope, launchURL: launchURL, dismiss: { dismiss() }))
     }
 }

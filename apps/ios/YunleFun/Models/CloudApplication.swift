@@ -29,11 +29,14 @@ struct CloudApplication: Codable, Identifiable, Hashable {
     var accessOwnerID: String?
     var homeReference: String?
     var isUnavailable: Bool?
+    /// Local metadata provenance, never an access or host-authorization grant.
+    /// The home sync protocol still carries only the existing application ID.
+    var personalMarketOwnerLogin: String?
 
     var homeKey: String { homeReference ?? id }
 
     func refreshingPublicMetadata(with candidate: Self?) -> Self {
-        guard accessWorkshopID == nil && accessOwnerID == nil else { return self }
+        guard accessWorkshopID == nil && accessOwnerID == nil && personalMarketOwnerLogin == nil else { return self }
         var current = candidate ?? self
         current.homeReference = homeReference
         return current
@@ -44,7 +47,7 @@ struct CloudApplication: Codable, Identifiable, Hashable {
         case name, slug, marketShortName, description, websiteUrl, logo, emoji
         case themeColor, category, tags, ownerLogin, developerName, rating, ratingCount
         case screenshots, iconAssets, isOfficial, accessMode, coinCost, requiresMembership, trustedHosts
-        case audience, isPublic, accessWorkshopID, accessOwnerID, homeReference, isUnavailable
+        case audience, isPublic, accessWorkshopID, accessOwnerID, homeReference, isUnavailable, personalMarketOwnerLogin
     }
 
     struct IconAssets: Codable, Hashable {
@@ -72,7 +75,7 @@ struct CloudApplication: Codable, Identifiable, Hashable {
             "ai-sfc": "https://ai-sfc.yunle.fun/",
             "give-me-money": "https://gmm.yunle.fun/",
         ]
-        guard let raw = accessWorkshopID == nil && accessOwnerID == nil ? (canonical[marketShortName ?? slug ?? id] ?? websiteUrl) : websiteUrl,
+        guard let raw = accessWorkshopID == nil && accessOwnerID == nil && personalMarketOwnerLogin == nil ? (canonical[marketShortName ?? slug ?? id] ?? websiteUrl) : websiteUrl,
               let url = URL(string: raw), url.scheme?.lowercased() == "https",
               url.host?.isEmpty == false, url.user == nil, url.password == nil
         else { return nil }
@@ -99,7 +102,22 @@ struct CloudApplication: Codable, Identifiable, Hashable {
         if requiresMembership == true || (coinCost ?? 0) > 0 { return "需要先确认会员或购买权益" }
         return nil
     }
-    var runtimeScope: String { accessOwnerID.map { "owner:" + $0 } ?? accessWorkshopID.map { "workshop:" + $0 } ?? "public" }
+    var runtimeScope: String {
+        accessOwnerID.map { "owner:" + $0 } ?? accessWorkshopID.map { "workshop:" + $0 }
+            ?? personalMarketOwnerLogin.map { "personal:" + $0.lowercased() } ?? "public"
+    }
+    var runtimeTrustedHosts: [String] {
+        // A public personal revision has not necessarily passed market review.
+        // It cannot extend the bridge/SSO host allowlist using its own metadata.
+        personalMarketOwnerLogin == nil ? trustedHosts ?? [] : []
+    }
+    var shareURL: URL {
+        if let login = personalMarketOwnerLogin, DeveloperProfile.normalizedLogin(login) == login {
+            return CatalogService.productionOrigin.appendingPathComponent("developer").appendingPathComponent(login)
+        }
+        return accessWorkshopID.map { CatalogService.productionOrigin.appendingPathComponent("w/\($0)") }
+            ?? CatalogService.productionOrigin.appendingPathComponent("app/\(publicKey)")
+    }
     var canRequestWorkshopLaunch: Bool { accessWorkshopID != nil && launchRestriction == nil && launchURL != nil }
 
 

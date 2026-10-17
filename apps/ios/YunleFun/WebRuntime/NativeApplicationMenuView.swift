@@ -25,12 +25,12 @@ struct NativeApplicationMenuView: View {
                     NavigationLink {
                         ApplicationDetailView(application: application)
                     } label: { Label("应用详情", systemImage: "info.circle") }
-                    if application.accessWorkshopID == nil && application.accessOwnerID == nil {
+                    if application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
                         NavigationLink {
                             ApplicationReviewsView(application: application)
                         } label: { Label("评分与评价", systemImage: "star.bubble") }
                     }
-                    if let login = application.ownerLogin?.nilIfEmpty {
+                    if let login = (application.personalMarketOwnerLogin ?? application.ownerLogin)?.nilIfEmpty {
                         NavigationLink {
                             DeveloperApplicationsView(login: login)
                         } label: {
@@ -53,7 +53,8 @@ struct NativeApplicationMenuView: View {
             .navigationBarTitleDisplayMode(.inline)
             .runtimeMenuToolbar()
         }
-        .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: application.id, dismiss: { dismiss() }))
+        .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: application.id, runtimeScope: application.runtimeScope,
+                                                       launchURL: application.launchURL, dismiss: { dismiss() }))
     }
 
     static func originLabel(_ url: URL?) -> String? {
@@ -67,7 +68,17 @@ struct NativeApplicationMenuView: View {
 
 struct RuntimeMenuContext {
     let applicationID: String
+    let runtimeScope: String
+    let launchURL: URL?
     let dismiss: () -> Void
+
+    init(applicationID: String, runtimeScope: String = "public", launchURL: URL?, dismiss: @escaping () -> Void) {
+        self.applicationID = applicationID; self.runtimeScope = runtimeScope; self.launchURL = launchURL; self.dismiss = dismiss
+    }
+
+    func represents(_ application: CloudApplication) -> Bool {
+        launchURL != nil && applicationID == application.id && runtimeScope == application.runtimeScope && launchURL == application.launchURL
+    }
 }
 
 private struct RuntimeMenuKey: EnvironmentKey {

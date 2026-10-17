@@ -55,8 +55,14 @@ describe('home screen authenticated HTTP routes', () => {
   it('uses the verified identity rather than a query UID', async () => {
     const response = await nativeFetch(`${origin}/api/home-screen?uid=victim`, { headers: { Authorization: 'Bearer test-only' } })
     expect(response.status).toBe(200)
-    expect(services.get).toHaveBeenCalledWith('verified-user')
+    expect(services.get).toHaveBeenCalledWith('verified-user', undefined, 1)
     expect(response.headers.get('cache-control')).toBe('private, no-store')
+  })
+  it('serves schema 2 (folders) only to clients that ask for it', async () => {
+    await nativeFetch(`${origin}/api/home-screen?schema=2`, { headers: { Authorization: 'Bearer test-only' } })
+    expect(services.get).toHaveBeenCalledWith('verified-user', undefined, 2)
+    await nativeFetch(`${origin}/api/home-screen?schema=9`, { headers: { Authorization: 'Bearer test-only' } })
+    expect(services.get).toHaveBeenLastCalledWith('verified-user', undefined, 1)
   })
   it('binds a write to the verified account even when the body supplies a different UID', async () => {
     const body = { uid: 'victim', baseRevision: null, mutationId: 'test-only', configuration: {} }

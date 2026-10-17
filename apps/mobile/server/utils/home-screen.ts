@@ -1,4 +1,4 @@
-import type { HomeScreenDocument, RemoteHomeScreen } from '../domain/home-screen'
+import type { HomeSchemaVersion, HomeScreenDocument, RemoteHomeScreen } from '../domain/home-screen'
 import type { CloudbaseAdminDb, CloudbaseTransaction } from './cloudbase-admin'
 import { createError } from 'h3'
 import { homeDocumentId, latestHome, planHomeWrite, readHomeDocument, remoteHome, validateHomeWrite } from '../domain/home-screen'
@@ -20,8 +20,8 @@ async function ownerDocuments(uid: string, db: CloudbaseAdminDb): Promise<HomeSc
   return response.data.map(record => readHomeDocument(record, uid))
 }
 
-export async function getHomeScreen(uid: string, db: CloudbaseAdminDb = useCloudbaseAdmin().db): Promise<RemoteHomeScreen> {
-  return remoteHome(latestHome(await ownerDocuments(uid, db)))
+export async function getHomeScreen(uid: string, db: CloudbaseAdminDb = useCloudbaseAdmin().db, schemaVersion: HomeSchemaVersion = 1): Promise<RemoteHomeScreen> {
+  return remoteHome(latestHome(await ownerDocuments(uid, db)), schemaVersion)
 }
 
 export async function putHomeScreen(uid: string, input: unknown, db: CloudbaseAdminDb = useCloudbaseAdmin().db): Promise<RemoteHomeScreen> {

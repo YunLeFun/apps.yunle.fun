@@ -109,6 +109,21 @@ describe('home screen CloudBase storage adapter', () => {
     expect(foreign.writes).not.toHaveBeenCalled()
   })
 
+  it('keeps folders through a whole-document write from a client without folder support', async () => {
+    const withFolders = { ...legacy, installedApps: [{ appId: 'original' }, { appId: 'second' }], folders: [{ id: 'f', name: '收藏', appIds: ['original', 'second'] }] }
+    const store = storage([withFolders])
+    const base = await getHomeScreen(owner, store.db)
+    expect(base.configuration).not.toHaveProperty('folders')
+    await putHomeScreen(owner, {
+      baseRevision: base.revision,
+      mutationId,
+      configuration: { ...config, installedApps: [{ appId: 'second' }] },
+    }, store.db)
+    expect(store.records.get(homeDocumentId(owner))).toMatchObject({ folders: [{ id: 'f', name: '收藏', appIds: ['second'] }] })
+    const upgraded = await getHomeScreen(owner, store.db, 2)
+    expect(upgraded).toMatchObject({ schemaVersion: 2, configuration: { folders: [{ id: 'f', appIds: ['second'] }] } })
+  })
+
   it('does not acknowledge a non-throwing SDK write error as success', async () => {
     const store = storage()
     store.writes.mockResolvedValueOnce({ code: 'SERVICE_ERROR' })

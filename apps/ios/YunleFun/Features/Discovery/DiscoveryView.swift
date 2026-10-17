@@ -23,21 +23,24 @@ struct DiscoveryView: View {
                         }
                         .padding(.vertical, 16)
                     }
+                    .accessibilityIdentifier("discovery.featured")
                 } header: { Text("发现一点小乐趣").foregroundStyle(Color.primary) }
             }
             if !official.isEmpty {
-                Section("官方出品") {
+                Section {
                     ForEach(official.dropFirst().prefix(5)) { app in
                         NavigationLink(value: app) { ApplicationRow(application: app) }
+                            .accessibilityIdentifier("discovery.application.\(app.id)")
                     }
-                }
+                } header: { Text("官方出品").foregroundStyle(Color.primary) }
             }
             if !catalog.applications.isEmpty {
-                Section("随手发现") {
+                Section {
                     ForEach(catalog.applications.filter { $0.isOfficial != true }.prefix(8)) { app in
                         NavigationLink(value: app) { ApplicationRow(application: app) }
+                            .accessibilityIdentifier("discovery.application.\(app.id)")
                     }
-                }
+                } header: { Text("随手发现").foregroundStyle(Color.primary) }
             } else if catalog.isLoading {
                 ProgressView("正在寻找小乐趣").frame(maxWidth: .infinity).padding()
             } else {

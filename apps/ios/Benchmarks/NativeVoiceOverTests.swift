@@ -34,6 +34,10 @@ final class NativeVoiceOverTests: XCTestCase {
     func testLoginAtLargestText() throws { try checkLogin(large: true) }
     func testCatalogApplicationAtStandardText() throws { try checkCatalogApplication(large: false) }
     func testCatalogApplicationAtLargestText() throws { try checkCatalogApplication(large: true) }
+    func testDiscoveryFeaturedAtStandardText() throws { try checkDiscoveryApplication(large: false, featured: true) }
+    func testDiscoveryFeaturedAtLargestText() throws { try checkDiscoveryApplication(large: true, featured: true) }
+    func testDiscoveryApplicationAtStandardText() throws { try checkDiscoveryApplication(large: false, featured: false) }
+    func testDiscoveryApplicationAtLargestText() throws { try checkDiscoveryApplication(large: true, featured: false) }
 
     private func guestApp(tab: String, large: Bool) throws -> XCUIApplication {
         guard ProcessInfo.processInfo.environment["YLF_VOICEOVER_VALIDATION"] == "1" else {
@@ -56,6 +60,8 @@ final class NativeVoiceOverTests: XCTestCase {
         XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 5))
         if tab == "工坊" {
             XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "全部应用 · ")).firstMatch.waitForExistence(timeout: 15))
+        } else if tab == "寻乐" {
+            XCTAssertTrue(app.staticTexts["发现一点小乐趣"].waitForExistence(timeout: 15))
         }
         return app
     }
@@ -144,6 +150,37 @@ final class NativeVoiceOverTests: XCTestCase {
                            "VoiceOver must reveal the focused title and summary between the system bars")
             let screenshot = XCTAttachment(screenshot: app.screenshot())
             screenshot.name = "voiceover-application-revealed-\(large ? "largest" : "standard")"
+            screenshot.lifetime = .keepAlways; add(screenshot)
+        }
+    }
+
+    private func checkDiscoveryApplication(large: Bool, featured: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "寻乐", large: large)
+        let title = featured ? "今天来做菜" : "云栈"
+        let summary = featured ? "好的，今天我们来做菜！可以根据所选食材筛选菜谱" : "面向 Valaxy、VitePress 与 Git 内容站点的轻量内容工作台"
+        try withVoiceOver(app: app, name: "discovery-\(featured ? "featured" : "application")-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek(title, service: voiceOver, speech: speech)
+            let row = featured ? app.buttons["discovery.featured"] : app.buttons.matching(NSPredicate(
+                format: "identifier BEGINSWITH %@ AND label BEGINSWITH %@", "discovery.application.", title)).firstMatch
+            XCTAssertTrue(row.exists)
+            let utterance = try voiceOver.currentSpeech().utterance
+            XCTAssertTrue(normalized(utterance).contains(normalized(title)))
+            XCTAssertTrue(normalized(utterance).contains(normalized(summary)), "Read the full public application summary")
+            var content = [row.staticTexts[title], row.staticTexts[summary]]
+            if !featured {
+                XCTAssertTrue(utterance.contains("需要邀请"), "Read the access condition together with the application")
+                content.append(row.staticTexts["需要邀请"])
+            }
+            let revealed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                let top = app.navigationBars["寻乐"].frame.maxY
+                let bottom = app.tabBars.firstMatch.frame.minY
+                return content.allSatisfy { $0.exists && $0.frame.minY >= top - 1 && $0.frame.maxY <= bottom + 1 }
+            }, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [revealed], timeout: 5), .completed,
+                           "VoiceOver must reveal the complete application text between the system bars")
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "voiceover-discovery-revealed-\(featured ? "featured" : "application")-\(large ? "largest" : "standard")"
             screenshot.lifetime = .keepAlways; add(screenshot)
         }
     }

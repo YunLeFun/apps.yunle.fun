@@ -52,6 +52,7 @@ final class NativeAccessibilityAudits: XCTestCase {
             type=\(issue.auditType.rawValue)
             \(issue.compactDescription)
             \(issue.detailedDescription)
+            elementProvided=\(issue.element != nil)
             element=\(element?.label ?? "none")
             identifier=\(element?.identifier ?? "none")
             frame=\(element.map { String(describing: $0.frame) } ?? "none")

@@ -143,3 +143,5 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 `c548960` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289451)完整成功：**266 单元 / 集成 + 7 UI，共 273 项通过，0 失败 / 跳过**。日志已核对两类测试计数、`TEST SUCCEEDED` 和 `BUILD SUCCEEDED`；Release 模拟器编译与隔离模拟器删除均成功。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289495)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289463)及 GitGuardian 一并通过，共七项检查成功。
 
 新增四项详情布局样例属于日常 273 项。独立 Benchmark 的 VoiceOver、系统审计与尺寸专项不在该集合中，仍按[详情布局](./ios-detail-accessibility.md)与[朗读记录](./ios-voiceover-validation.md)保留各自通过和失败。本机完整集合中的三条键盘失败没有被远端通过改写；后续仅模拟器测试的范围见[当前 Goal](./ios-native-migration.md)。
+
+`ceee732` 的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013218418)也已完整成功：**266 单元 / 集成 + 7 UI，共 273 项通过，0 失败 / 跳过**；Release 模拟器编译与隔离设备清理成功，日志中的两组计数、`TEST SUCCEEDED`、`BUILD SUCCEEDED` 已核对。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013219007)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013218419)及 GitGuardian 均成功，共七项检查通过。该提交只补充 Benchmark 的原生 iPad 导航适配和验证记录，不包括后续云居状态修复。

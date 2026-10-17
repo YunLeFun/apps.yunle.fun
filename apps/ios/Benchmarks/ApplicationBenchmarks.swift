@@ -1,6 +1,7 @@
 import XCTest
+import Vision
 
-/// Opt-in simulator benchmarks. The compatibility app must be installed
+/// Opt-in benchmarks in a separate test environment. The compatibility app must be installed
 /// separately. Never install either variant over the user's production app.
 @MainActor
 final class ApplicationBenchmarks: XCTestCase {
@@ -30,6 +31,36 @@ final class ApplicationBenchmarks: XCTestCase {
             XCTAssertTrue(tab.isSelected, "The requested tab must actually become selected")
             attach(app, name: title)
         }
+    }
+
+    func testNativeDiscoveryDetailAtLargestText() throws {
+        guard !isLegacy else { throw XCTSkip("Verifies the native discovery and detail route") }
+        continueAfterFailure = false
+        let app = app
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        if let appearance = ProcessInfo.processInfo.environment["YLF_ACCESSIBILITY_APPEARANCE"] {
+            XCTAssertTrue(["system", "light", "dark"].contains(appearance))
+            app.launchArguments += ["-appearance", appearance]
+        }
+        app.launch()
+        app.tabBars.buttons["寻乐"].tap()
+        let featured = app.buttons["discovery.featured"]
+        XCTAssertTrue(featured.waitForExistence(timeout: 15))
+        featured.tap()
+        let navigation = app.navigationBars["今天来做菜"]
+        XCTAssertTrue(navigation.waitForExistence(timeout: 5))
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            app.buttons["获取"].exists || app.buttons["打开"].exists
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed)
+        let primary = app.buttons["获取"].exists ? app.buttons["获取"] : app.buttons["打开"]
+        XCTAssertTrue(primary.isHittable)
+        XCTAssertGreaterThanOrEqual(primary.frame.minY, navigation.frame.maxY - 1)
+        XCTAssertLessThanOrEqual(primary.frame.maxY, app.tabBars.firstMatch.frame.minY + 1)
+        attach(app, name: "discovery-detail-largest")
+        navigation.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
+        XCTAssertTrue(featured.isHittable)
     }
 
     func testLaunchResponsiveFrame() throws {
@@ -79,9 +110,8 @@ final class ApplicationBenchmarks: XCTestCase {
         let minimize = app.buttons["收起应用"]
         XCTAssertTrue(minimize.waitForExistence(timeout: 10))
         let content = app.webViews.staticTexts["便携小空调"].firstMatch
-        let rendered = content.waitForExistence(timeout: 20)
-        attach(app, name: "cloud-air-open")
-        XCTAssertTrue(rendered, "The real web document must render")
+        XCTAssertTrue(content.waitForExistence(timeout: 20))
+        try expectPaintedCloudAir(app, name: "cloud-air-open")
         minimize.tap()
         XCTAssertTrue(open.waitForExistence(timeout: 5))
         app.buttons["home.options"].tap()
@@ -91,7 +121,7 @@ final class ApplicationBenchmarks: XCTestCase {
         app.tabBars.buttons["云居"].tap()
         open.tap()
         XCTAssertTrue(content.waitForExistence(timeout: 5))
-        attach(app, name: "cloud-air-restored")
+        try expectPaintedCloudAir(app, name: "cloud-air-restored")
         app.buttons["更多操作"].tap()
         let end = app.buttons["结束"]
         XCTAssertTrue(end.waitForExistence(timeout: 5))
@@ -681,6 +711,32 @@ final class ApplicationBenchmarks: XCTestCase {
         guard ProcessInfo.processInfo.environment["YLF_BENCHMARK_METRICS"] == "1" else {
             throw XCTSkip("Enable metrics explicitly after the public-screen readiness check passes")
         }
+    }
+
+    private func expectPaintedCloudAir(_ app: XCUIApplication, name: String) throws {
+        var lastScreenshot: XCUIScreenshot?
+        var recognized = ""
+        let painted = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            let screenshot = app.screenshot()
+            lastScreenshot = screenshot
+            guard let image = screenshot.image.cgImage else { return false }
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["zh-Hans", "en-US"]
+            request.usesLanguageCorrection = false
+            do {
+                try VNImageRequestHandler(cgImage: image).perform([request])
+                recognized = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: " ")
+                return recognized.contains("便携小空调")
+            } catch { return false }
+        }, object: nil)
+        let result = XCTWaiter.wait(for: [painted], timeout: 15)
+        if let lastScreenshot {
+            let attachment = XCTAttachment(screenshot: lastScreenshot)
+            attachment.name = "native-\(name)"; attachment.lifetime = .keepAlways; add(attachment)
+        }
+        XCTAssertEqual(result, .completed,
+                       "The screenshot must contain the cloud-air heading; accessibility-tree presence alone is insufficient. Recognized: \(recognized)")
     }
     private func attach(_ app: XCUIApplication, name: String) {
         let screenshot = XCTAttachment(screenshot: app.screenshot())

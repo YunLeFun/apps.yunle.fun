@@ -14,6 +14,9 @@ final class HostIdentitySessionsTests: XCTestCase {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         defer { withExtendedLifetime(webView) {} }
         let store = webView.configuration.websiteDataStore.httpCookieStore
+        // Complete a round trip before the first write to the cold WebKit store.
+        let initial = try await cookies(in: store)
+        XCTAssertTrue(initial.isEmpty)
         let entries = [
             ("play.yunle.fun", "__Host-ylf_play_session"),
             ("cms.yunle.fun", "__Host-ylf-cms-session"),
@@ -22,22 +25,40 @@ final class HostIdentitySessionsTests: XCTestCase {
             ("elsewhere.example.invalid", "__Host-ylf_play_session"),
             ("play.yunle.fun", "h3"),
         ]
+        var expected: Set<String> = []
         for (domain, name) in entries {
-            let cookie = try XCTUnwrap(HTTPCookie(properties: [
-                .domain: domain, .path: "/", .name: name, .value: "test-only", .secure: "TRUE",
-            ]))
+            let url = try XCTUnwrap(URL(string: "https://\(domain)/"))
+            let parsed = HTTPCookie.cookies(withResponseHeaderFields: [
+                "Set-Cookie": "\(name)=test-only; Path=/; Secure",
+            ], for: url)
+            XCTAssertEqual(parsed.count, 1)
+            let cookie = try XCTUnwrap(parsed.first)
+            XCTAssertTrue(cookie.isSecure)
+            XCTAssertEqual(cookie.path, "/")
             try await callback("set fixture cookie " + name) { done in store.setCookie(cookie, completionHandler: done) }
+            expected.insert(domain + "/" + name)
+            let recorded = try await cookies(in: store)
+            let keys = Set(recorded.map(identity))
+            guard keys == expected, recorded.count == expected.count else {
+                XCTFail("Cookie fixture was not retained before cleanup: expected \(expected.sorted()), found \(keys.sorted())")
+                throw FixtureError.notRetained
+            }
         }
         let before = try await cookies(in: store)
         XCTAssertEqual(before.count, 6)
+        XCTAssertEqual(Set(before.map(identity)), expected)
         try await callback("clear allowed identity cookies") { done in HostIdentitySessions.clear(in: store, completion: done) }
         let after = try await cookies(in: store)
-        let remaining = Set(after.map { $0.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")) + "/" + $0.name })
+        let remaining = Set(after.map(identity))
         XCTAssertEqual(remaining, [
             "play.yunle.fun/preferences",
             "elsewhere.example.invalid/__Host-ylf_play_session",
             "play.yunle.fun/h3",
         ])
+    }
+
+    private func identity(_ cookie: HTTPCookie) -> String {
+        cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")) + "/" + cookie.name
     }
 
     private func cookies(in store: WKHTTPCookieStore) async throws -> [HTTPCookie] {
@@ -55,4 +76,5 @@ final class HostIdentitySessionsTests: XCTestCase {
         }
     }
     private enum CallbackError: Error { case timedOut }
+    private enum FixtureError: Error { case notRetained }
 }

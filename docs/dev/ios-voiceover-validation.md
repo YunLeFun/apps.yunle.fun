@@ -54,5 +54,6 @@ iPhone 18 Pro / iOS 27.0（24A434）、Xcode 27.0（27A266a）上，完整浅色
 - 系统 `.all` 审计仍报告对比度问题，详见[系统辅助功能审计](./ios-accessibility-audits.md)。本记录不把模拟器的朗读通过扩大为全量无障碍通过。
 - 已登录资料、登录成功后的资料焦点、密码 / 自动填充 / 验证码、SSO 授权、错误反馈及所有业务页面尚未完成 VoiceOver 矩阵；本轮没有重跑真实账号登录。
 - 真机手势、屏幕幕帘、转子、盲文、Voice Control / Switch Control，以及 iPad、横屏、最低系统和减少动态效果等组合仍待验。新 API 的模拟器结果不能替代这些人工与设备验收。
+- 本轮已连通的真机为 iOS 26.6.1，不能运行该 iOS 27 API。Benchmark 的 iPhoneOS 未签名构建通过，但可运行构建受 Xcode 账号、开发签名私钥及 Associated Domains 描述文件阻断；自动配置尝试也未解决。没有安装真机包或在真机启用 VoiceOver，见[设备验收条件](./ios-accessibility-audits.md)。
 
 原始结果包与导出媒体保留在本机工作记录中，不进入 Git；没有安装正式 Bundle、归档或发布。

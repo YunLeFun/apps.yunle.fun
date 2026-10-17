@@ -123,3 +123,11 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 `167aed5` 的[第六轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38962372915)完整成功：**262 单元 / 集成 + 7 UI，共 269 项通过，0 失败 / 跳过**；Release 模拟器编译及隔离模拟器删除成功。同提交的 Web / 移动端、Chromium、macOS / Windows / Linux 桌面与 GitGuardian 一并通过，共七项检查成功。前五轮失败记录继续保留。
 
 后续字号与 VoiceOver 改进的本机专项分别见[系统审计](./ios-accessibility-audits.md)和[VoiceOver 验证](./ios-voiceover-validation.md)。显式 Benchmark 审计与 VoiceOver 不在日常 269 项之内；系统审计失败不能被日常绿色检查覆盖。当前提交的远端终态继续记录在[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)，不使用上一提交的结果代替。
+
+## Cookie 夹具完整性复核 · 2026-10-17
+
+字号与 VoiceOver 提交 `0a4249d` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38989327105)为 **268 通过 / 1 失败 / 0 跳过**：七项 UI 均通过，Cookie 清理用例在清理前仅读到五条样例，预期为六条；清理后的三条无关 Cookie 保留断言通过。Release 未执行，隔离模拟器已删除，其余六项检查成功。这个日志没有记录缺少的具体名称，不能据此认定产品删除规则有误，也未证明冷启动的唯一根因。
+
+夹具现先完成非持久化 store 的一次读取，再通过 HTTPS 响应头解析不带 Domain、具有 Secure 和根路径的 Cookie；每条只写入一次，随后读回并核对累计的完整域名 / 名称集合及数量。准备不完整立即失败，停止清理断言并报告具体差异。最终六条准备和三条保留断言继续执行，10 秒回调时限保持；产品清理代码、允许清理的主机与名称未改，没有睡眠、写入重试或忽略失败。
+
+全新隔离 iPhone 18 Pro / iOS 27 上，该用例的三次进程重启执行均通过：`test_sim_2026-10-17T01-29-37-509Z_pid44279_99ba521b.xcresult`，为 **1 个不同用例、3 次通过执行，0 失败 / 跳过**。此项不能代替修正后提交的完整远端回归；其终态仍在 PR #48 记录。

@@ -59,6 +59,8 @@ struct PersonalMarketLaunchAuthorization {
         guard current.personalMarketOwnerLogin?.lowercased() == login.lowercased(), current.canOpenAsGuest,
               current.audience == "public", current.isPublic == true,
               current.accessOwnerID == nil, current.accessWorkshopID == nil else { throw DeveloperProfileError.restricted }
-        return current
+        var resolved = current
+        resolved.homeReference = app.homeReference
+        return resolved
     }
 }

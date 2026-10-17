@@ -238,6 +238,23 @@ final class PersonalMarketVersionTests: XCTestCase {
         catch { XCTAssertEqual(error as? DeveloperProfileError, .notFound) }
     }
 
+    func testSyncedSourceWithoutCachedURLUsesTheCurrentPublicationAndKeepsItsHomeReference() async throws {
+        var snapshot = HomeLibrarySnapshot()
+        snapshot.configuration = HomeConfiguration(installedApps: [.init(appId: "current")],
+                                                    applicationSources: [.init(appId: "current", ownerLogin: "Author")])
+        let selection = snapshot.application(reference: "current")
+        XCTAssertNil(selection.launchURL)
+        var fresh = personalApp(); fresh.websiteUrl = "https://fresh.invalid/current"
+        let service = DeveloperProfileFixture(replies: [.success(DeveloperProfile(ownerLogin: "Author", items: [fresh]))])
+        let resolved = try await PersonalMarketLaunchAuthorization(service: service).resolve(selection)
+        XCTAssertEqual(resolved.launchURL, fresh.launchURL)
+        XCTAssertEqual(resolved.homeReference, "current")
+        XCTAssertTrue(resolved.runtimeTrustedHosts.isEmpty)
+        let missing = DeveloperProfileFixture(replies: [.success(DeveloperProfile(ownerLogin: "Author", items: []))])
+        do { _ = try await PersonalMarketLaunchAuthorization(service: missing).resolve(selection); XCTFail("Withdrawn authors must not fall back to the market URL") }
+        catch { XCTAssertEqual(error as? DeveloperProfileError, .notFound) }
+    }
+
     func testMarketAcquisitionReceiptCannotBeReusedAsAnAuthorRevisionGrant() {
         let quote = ApplicationAcquisitionQuote(userId: "member", application: personalApp(), state: .allowed, reason: "free", coinCost: 0, balance: 0)
         XCTAssertThrowsError(try quote.validate(appID: "current", uid: "member"))

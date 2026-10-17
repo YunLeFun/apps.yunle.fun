@@ -53,9 +53,11 @@ struct HomeBackupRepository: HomeBackupReading {
         let prefix = String(ownerFileName.dropLast(5)) + "."
         guard name.hasPrefix(prefix), name.hasSuffix(".json"), !name.contains("/"), !name.contains("\\") else { return nil }
         let suffix = String(name.dropFirst(prefix.count).dropLast(5))
-        if suffix.hasPrefix("before-legacy-") {
-            let digest = suffix.dropFirst("before-legacy-".count)
-            return digest.count == 64 && digest.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) ? .legacy : nil
+        for (key, kind) in [("before-legacy-", HomeBackupItem.Kind.legacy), ("before-native-migration-", .nativeMigration)] {
+            if suffix.hasPrefix(key) {
+                let digest = suffix.dropFirst(key.count)
+                return digest.count == 64 && digest.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) ? kind : nil
+            }
         }
         for (key, kind) in [("conflict-", HomeBackupItem.Kind.conflict), ("before-restore-", .restore)] {
             if suffix.hasPrefix(key), UUID(uuidString: String(suffix.dropFirst(key.count))) != nil { return kind }

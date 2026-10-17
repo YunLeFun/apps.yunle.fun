@@ -34,13 +34,14 @@ struct HomeSyncService: HomeSyncServing {
     func save(_ write: HomeScreenWrite, identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
         try write.configuration.validate()
         let saved = try await request(identity: identity, write: write)
+        guard saved.carriesSources else { throw HomeSyncError.unsupportedSchema }
         guard saved.revision != nil, write.configuration.matches(saved) else {
             throw HomeSyncError.invalidResponse
         }
         return saved
     }
     private func request(identity: AuthorizedAccount, write: HomeScreenWrite?) async throws -> RemoteHomeScreen {
-        // Reads opt in to schema 2 (folders); writes carry the version in the body.
+        // Reads opt in to schema 3 (source selections); writes carry it in the body.
         var request = URLRequest(url: write == nil ? readEndpoint : endpoint)
         request.httpMethod = write == nil ? "GET" : "PUT"
         request.cachePolicy = .reloadIgnoringLocalCacheData

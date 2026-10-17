@@ -14,7 +14,7 @@ const sha = (value: unknown) => createHash('sha256').update(JSON.stringify(value
 describe('home screen folders (schema 2)', () => {
   it('negotiates the schema: only an explicit request gets folders', () => {
     expect(requestedHomeSchema('2')).toBe(2)
-    expect([requestedHomeSchema(undefined), requestedHomeSchema('1'), requestedHomeSchema('3')]).toEqual([1, 1, 1])
+    expect([requestedHomeSchema(undefined), requestedHomeSchema('1'), requestedHomeSchema('4')]).toEqual([1, 1, 1])
     expect(remoteHome(stored(), 1).configuration).not.toHaveProperty('folders')
     expect(remoteHome(stored(), 2)).toMatchObject({ schemaVersion: 2, configuration: { folders: [games] } })
   })
@@ -78,7 +78,7 @@ describe('home screen folders (schema 2)', () => {
     ]) {
       expect(() => validateHomeWrite({ ...base, configuration: { ...apps, folders } })).toThrow()
     }
-    expect(() => validateHomeWrite({ ...base, schemaVersion: 3, configuration: apps })).toThrow()
+    expect(() => validateHomeWrite({ ...base, schemaVersion: 4, configuration: apps })).toThrow()
   })
 
   it('reads data edited by clients without folder support', () => {

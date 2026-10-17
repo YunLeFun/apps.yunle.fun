@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CryptoKit
 
 @MainActor
 final class HomeLibrary: ObservableObject {
@@ -10,6 +11,7 @@ final class HomeLibrary: ObservableObject {
     private(set) var generation = UUID()
     private let directory: URL
     private var canWrite = true
+    private var pendingMigrationBackup: Data?
     var onUserChange: (() -> Void)?
     var needsRecovery: Bool { !canWrite }
     var restoreBaseline: HomeRestoreBaseline { HomeRestoreBaseline(snapshot, needsRecovery: needsRecovery) }
@@ -27,10 +29,16 @@ final class HomeLibrary: ObservableObject {
         snapshot = HomeLibrarySnapshot()
         storageError = nil
         canWrite = true
+        pendingMigrationBackup = nil
         let name = accountID.map { Data($0.utf8).base64EncodedString()
             .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "+", with: "-") } ?? "guest"
         fileURL = directory.appendingPathComponent(name).appendingPathExtension("json")
-        do { snapshot = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(contentsOf: fileURL)) }
+        do {
+            let data = try Data(contentsOf: fileURL)
+            snapshot = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: data)
+            struct Version: Decodable { let version: Int? }
+            if (try JSONDecoder().decode(Version.self, from: data).version ?? 1) < 3 { pendingMigrationBackup = data }
+        }
         catch let error as CocoaError where error.code == .fileReadNoSuchFile { }
         catch {
             canWrite = false
@@ -43,10 +51,12 @@ final class HomeLibrary: ObservableObject {
     }
 
     func add(_ app: CloudApplication) {
-        guard !contains(app), snapshot.configuration.installedApps.count < 1000 else { return }
+        let alreadyInstalled = contains(app)
+        guard alreadyInstalled || snapshot.configuration.installedApps.count < 1000 else { return }
         edit { state in
+            if !alreadyInstalled { state.configuration.installedApps.append(HomeAppReference(appId: app.id)) }
+            selectSource(app, in: &state)
             cache(app, in: &state)
-            state.configuration.installedApps.append(HomeAppReference(appId: app.id))
         }
     }
 
@@ -93,10 +103,11 @@ final class HomeLibrary: ObservableObject {
     func recordUse(_ app: CloudApplication) {
         let reference = app.homeReference ?? (snapshot.applications + snapshot.dockApplications).first { $0.id == app.id }?.homeKey ?? app.id
         edit { state in
-            cache(app, in: &state)
             state.configuration.recentApps.removeAll { $0.appId == reference }
             state.configuration.recentApps.insert(HomeRecentReference(appId: reference, usedAt: Int64(Date().timeIntervalSince1970 * 1000)), at: 0)
             state.configuration.recentApps = Array(state.configuration.recentApps.prefix(100))
+            selectSource(app, in: &state)
+            cache(app, in: &state)
         }
     }
 
@@ -105,9 +116,12 @@ final class HomeLibrary: ObservableObject {
     func setPinned(_ app: CloudApplication, _ pinned: Bool) {
         guard !pinned || snapshot.configuration.dockApps.count < 4 else { return }
         edit { state in
-            cache(app, in: &state)
             state.configuration.dockApps.removeAll { $0.appId == app.homeKey }
-            if pinned { state.configuration.dockApps.append(HomeAppReference(appId: app.homeKey)) }
+            if pinned {
+                state.configuration.dockApps.append(HomeAppReference(appId: app.homeKey))
+                selectSource(app, in: &state)
+            }
+            cache(app, in: &state)
         }
     }
 
@@ -122,8 +136,8 @@ final class HomeLibrary: ObservableObject {
         if pinned { guard snapshot.configuration.dockApps.count + adding.count <= 4 else { return false } }
         edit { state in
             if pinned {
-                for app in apps { cache(app, in: &state) }
                 state.configuration.dockApps.append(contentsOf: adding.map(HomeAppReference.init))
+                for app in apps { selectSource(app, in: &state); cache(app, in: &state) }
             } else {
                 state.configuration.dockApps.removeAll { keys.contains($0.appId) }
             }
@@ -257,12 +271,18 @@ final class HomeLibrary: ObservableObject {
         var next = snapshot
         next.configuration = snapshot.configuration.adopting(remote)
         next.base = remote
-        next.hasPendingChanges = false
+        next.hasPendingChanges = !remote.carriesSources && (!next.configuration.applicationSources.isEmpty || snapshot.hasPendingChanges)
+        if next.hasPendingChanges && !next.configuration.hasSameContent(as: snapshot.configuration) {
+            // A legacy cloud choice can preserve local sources while changing
+            // the pending payload. Never reuse its previous retry identity.
+            next.mutationId = UUID().uuidString
+        }
         guard persist(next) else { throw HomeSyncError.storage }
     }
 
     func acknowledge(_ remote: RemoteHomeScreen, uploadedMutationId: String) throws {
         try remote.validate()
+        guard remote.carriesSources else { throw HomeSyncError.unsupportedSchema }
         var next = snapshot
         next.base = remote
         if next.mutationId == uploadedMutationId {
@@ -385,6 +405,17 @@ final class HomeLibrary: ObservableObject {
         update(&next)
         if persist(next) { onUserChange?() }
     }
+    private func selectSource(_ app: CloudApplication, in state: inout HomeLibrarySnapshot) {
+        guard app.isUnavailable != true else { return }
+        let references = Set(state.configuration.installedApps.map(\.appId) + state.configuration.dockApps.map(\.appId) + state.configuration.recentApps.map(\.appId))
+        let selected = references.filter { $0 == app.id || $0 == app.homeKey || state.cachedApplication(reference: $0)?.id == app.id }
+        state.configuration.applicationSources.removeAll { selected.contains($0.appId) }
+        if let login = app.personalMarketOwnerLogin {
+            // Validation in persist rejects malformed author identifiers without
+            // writing any of the proposed selection or cache changes.
+            state.configuration.applicationSources += selected.map { HomeApplicationSource(appId: $0, ownerLogin: login) }
+        }
+    }
     private func cache(_ app: CloudApplication, in state: inout HomeLibrarySnapshot, preservingSavedSource: Bool = false) {
         guard app.isUnavailable != true else { return }
         var app = app
@@ -393,8 +424,17 @@ final class HomeLibrary: ObservableObject {
             // Passive metadata merges must not erase the source needed for
             // the next launch. Explicit use or installation selects its source.
             if preservingSavedSource {
+                let selected = state.configuration.applicationSources.first {
+                    $0.appId == app.id || state.cachedApplication(reference: $0.appId)?.id == app.id
+                }
+                if let selected {
+                    guard app.personalMarketOwnerLogin?.lowercased() == selected.ownerLogin.lowercased(),
+                          app.accessWorkshopID == nil, app.accessOwnerID == nil else { return }
+                } else if app.personalMarketOwnerLogin != nil {
+                    return
+                }
                 guard (state.cachedApplications[index].accessWorkshopID == nil && state.cachedApplications[index].accessOwnerID == nil
-                       && state.cachedApplications[index].personalMarketOwnerLogin == nil)
+                       && (state.cachedApplications[index].personalMarketOwnerLogin == nil || selected == nil))
                     || app.accessWorkshopID != nil || app.accessOwnerID != nil || app.personalMarketOwnerLogin != nil else { return }
             }
             state.cachedApplications[index] = app
@@ -407,8 +447,17 @@ final class HomeLibrary: ObservableObject {
             try proposed.configuration.validate()
             let data = try JSONEncoder().encode(proposed)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            if let original = pendingMigrationBackup {
+                guard try Data(contentsOf: fileURL) == original else { throw HomeSyncError.storage }
+                let digest = SHA256.hash(data: original).map { String(format: "%02x", $0) }.joined()
+                let backup = fileURL.deletingPathExtension().appendingPathExtension("before-native-migration-" + digest).appendingPathExtension("json")
+                if FileManager.default.fileExists(atPath: backup.path) {
+                    guard try Data(contentsOf: backup) == original else { throw HomeSyncError.storage }
+                } else { try original.write(to: backup, options: [.atomic, .completeFileProtectionUnlessOpen]) }
+            }
             try data.write(to: fileURL, options: [.atomic, .completeFileProtectionUnlessOpen])
             snapshot = proposed
+            pendingMigrationBackup = nil
             canWrite = true
             storageError = nil
             return true

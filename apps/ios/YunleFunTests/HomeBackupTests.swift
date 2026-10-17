@@ -1,4 +1,5 @@
 import SwiftUI
+import Vision
 import XCTest
 @testable import YunleFun
 
@@ -88,6 +89,38 @@ final class HomeBackupTests: XCTestCase {
         f.library.setDockVisible(!f.library.snapshot.dockVisible)
         await f.store.restore(second)
         XCTAssertEqual(f.store.error, HomeBackupError.currentChanged.localizedDescription)
+    }
+
+    func testRestoreKeepsTheBackupsAuthorSourceAcrossPassiveMarketMetadataAndRestart() async throws {
+        let f = try Fixture(); defer { f.close() }
+        var candidate = f.candidate
+        candidate.configuration.applicationSources = [.init(appId: "restored", ownerLogin: "Author")]
+        candidate.cachedApplications = [CloudApplication(id: "restored", name: "作者版本", websiteUrl: "https://author.invalid/", personalMarketOwnerLogin: "Author")]
+        let backup = try f.backup(candidate)
+        f.library.add(CloudApplication(id: "restored", name: "市场版本", websiteUrl: "https://market.invalid/"))
+        let before = f.library.snapshot
+        await f.store.select(backup.lastPathComponent)
+        let confirmation = try XCTUnwrap(f.store.confirmation(restoreSettings: false))
+        await f.store.restore(confirmation)
+        XCTAssertNil(f.store.error)
+        XCTAssertEqual(f.library.snapshot.configuration.applicationSources, candidate.configuration.applicationSources)
+        XCTAssertEqual(f.library.snapshot.application(reference: "restored").launchURL?.host, "author.invalid")
+        XCTAssertEqual(HomeLibrary(directory: f.directory).snapshot, f.library.snapshot)
+        let preserved = f.directory.appendingPathComponent("guest.before-restore-\(confirmation.id.uuidString).json")
+        XCTAssertEqual(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(contentsOf: preserved)), before)
+    }
+
+    func testRestoringAMarketBackupDoesNotReplaceItsMetadataWithTheCurrentAuthorCache() async throws {
+        let f = try Fixture(); defer { f.close() }
+        var candidate = f.candidate
+        candidate.cachedApplications = [CloudApplication(id: "restored", name: "市场版本", websiteUrl: "https://market.invalid/")]
+        let backup = try f.backup(candidate)
+        f.library.add(CloudApplication(id: "restored", name: "作者版本", websiteUrl: "https://author.invalid/", personalMarketOwnerLogin: "Author"))
+        await f.store.select(backup.lastPathComponent)
+        await f.store.restore(try XCTUnwrap(f.store.confirmation(restoreSettings: false)))
+        XCTAssertNil(f.store.error)
+        XCTAssertTrue(f.library.snapshot.configuration.applicationSources.isEmpty)
+        XCTAssertEqual(f.library.snapshot.application(reference: "restored").launchURL?.host, "market.invalid")
     }
 
     func testAccountRoundTripInvalidatesConfirmationAndHidesPrivateContent() async throws {
@@ -200,6 +233,53 @@ final class HomeBackupTests: XCTestCase {
         XCTAssertEqual(sync.phase, .idle)
         await sync.resolve(.cloud, conflict: conflict)
         XCTAssertEqual(f.library.snapshot.configuration, f.candidate.configuration)
+    }
+
+    func testSourceComparisonRendersTheComparedVersionAtStandardAndLargestTextSizes() async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        for size in [DynamicTypeSize.large, .accessibility5] {
+            for author in [true, false] {
+                var local = HomeLibrarySnapshot()
+                local.configuration = HomeConfiguration(installedApps: [.init(appId: "current")],
+                    applicationSources: [.init(appId: "current", ownerLogin: "LocalAuthor")])
+                local.cachedApplications = [CloudApplication(id: "current", name: "版本比较", personalMarketOwnerLogin: "LocalAuthor")]
+                var compared = local.configuration
+                compared.applicationSources = author ? [.init(appId: "current", ownerLogin: "CloudAuthor")] : []
+                let controller = UIHostingController(rootView: NavigationStack {
+                    HomeConfigurationView(title: "云端版本", configuration: compared, snapshot: local)
+                }.dynamicTypeSize(size))
+                let window = UIWindow(windowScene: scene)
+                window.overrideUserInterfaceStyle = size == .large ? .light : .dark
+                window.rootViewController = controller; window.makeKeyAndVisible()
+                defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
+                let expected = author ? "CloudAuthor" : "云乐坊版本"
+                let deadline = Date().addingTimeInterval(5)
+                var rendered: UIImage?, lines: [String] = []
+                repeat {
+                    try await Task.sleep(nanoseconds: 100_000_000)
+                    controller.view.layoutIfNeeded()
+                    let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
+                        controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+                    }
+                    rendered = image
+                    let request = VNRecognizeTextRequest()
+                    request.recognitionLevel = .accurate; request.recognitionLanguages = ["zh-Hans", "en-US"]
+                    request.usesLanguageCorrection = false
+                    try VNImageRequestHandler(cgImage: XCTUnwrap(image.cgImage)).perform([request])
+                    lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
+                    if lines.joined().replacingOccurrences(of: " ", with: "").contains(expected) { break }
+                } while Date() < deadline
+                let name = "home-source-\(author ? "author" : "market")-\(size == .large ? "standard-light" : "largest-dark")"
+                if let rendered {
+                    let image = XCTAttachment(image: rendered); image.name = name; image.lifetime = .keepAlways; add(image)
+                }
+                let text = XCTAttachment(string: lines.joined(separator: "\n")); text.name = name + "-ocr"; text.lifetime = .keepAlways; add(text)
+                let visible = lines.joined().replacingOccurrences(of: " ", with: "")
+                XCTAssertTrue(visible.contains(expected), "\(name): \(lines)")
+                XCTAssertFalse(visible.contains("LocalAuthor"), "The cloud comparison must not show the local source")
+            }
+        }
     }
 
     func testNativeBackupListPreviewErrorAndRecoveryScreenshots() async throws {

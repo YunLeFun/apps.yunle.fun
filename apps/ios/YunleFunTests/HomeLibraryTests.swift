@@ -214,4 +214,141 @@ final class HomeLibraryTests: XCTestCase {
         XCTAssertEqual(library.snapshot.applications.map(\.id), ["guest"])
         XCTAssertNil(library.storageError)
     }
+
+    func testExplicitSourceSelectionChangesAlreadyInstalledAppAndSurvivesRestart() throws {
+        let library = HomeLibrary(directory: directory, accountID: "a")
+        let market = CloudApplication(id: "cook", name: "市场版本", websiteUrl: "https://market.invalid/")
+        let author = CloudApplication(id: "cook", name: "作者版本", websiteUrl: "https://author.invalid/", personalMarketOwnerLogin: "Author")
+        library.add(market)
+        let before = library.snapshot.mutationId
+        library.add(author)
+        XCTAssertNotEqual(library.snapshot.mutationId, before)
+        XCTAssertEqual(library.snapshot.configuration.applicationSources, [.init(appId: "cook", ownerLogin: "Author")])
+        XCTAssertEqual(library.snapshot.configuration.installedApps.count, 1)
+        library.updateCatalog([market])
+        let reopened = HomeLibrary(directory: directory, accountID: "a")
+        XCTAssertEqual(reopened.snapshot.applications.first?.launchURL, author.launchURL)
+        library.add(market)
+        XCTAssertTrue(library.snapshot.configuration.applicationSources.isEmpty)
+        XCTAssertEqual(HomeLibrary(directory: directory, accountID: "a").snapshot.applications.first?.launchURL, market.launchURL)
+        library.activateAccount("b")
+        XCTAssertTrue(library.snapshot.configuration.applicationSources.isEmpty)
+        XCTAssertTrue(library.snapshot.cachedApplications.isEmpty)
+    }
+
+    func testAnotherDeviceUsesSelectedAuthorWithoutTrustingItsMarketCache() throws {
+        let library = HomeLibrary(directory: directory)
+        library.updateCatalog([CloudApplication(id: "cook", name: "市场资料", websiteUrl: "https://market.invalid/", trustedHosts: ["market.invalid"])])
+        let content = HomeConfiguration(installedApps: [.init(appId: "cook"), .init(appId: "author-only")],
+                                        applicationSources: [.init(appId: "cook", ownerLogin: "Author"), .init(appId: "author-only", ownerLogin: "Other")])
+        try library.adopt(RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: content))
+        for app in library.snapshot.applications {
+            XCTAssertNotNil(app.personalMarketOwnerLogin)
+            XCTAssertNil(app.launchURL, "The selected author must be resolved online before any URL can run")
+            XCTAssertTrue(app.runtimeTrustedHosts.isEmpty)
+            XCTAssertFalse(app.canOpenAsGuest)
+            XCTAssertNotEqual(app.isUnavailable, true, "The existing personal resolver must be reachable for an uncached source")
+        }
+        XCTAssertEqual(HomeLibrary(directory: directory).snapshot.applications.map(\.personalMarketOwnerLogin), ["Author", "Other"])
+    }
+
+    func testRemoteMarketSelectionCannotReusePreviousAuthorURLAndCanRefreshPublicMetadata() throws {
+        let library = HomeLibrary(directory: directory)
+        library.add(CloudApplication(id: "cook", name: "作者版本", websiteUrl: "https://author.invalid/", personalMarketOwnerLogin: "Author"))
+        let marketContent = HomeConfiguration(installedApps: [.init(appId: "cook")])
+        try library.adopt(RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: marketContent))
+        XCTAssertNil(library.snapshot.applications.first?.launchURL)
+        XCTAssertNil(library.snapshot.applications.first?.personalMarketOwnerLogin)
+        XCTAssertEqual(library.snapshot.applications.first?.isUnavailable, true)
+        library.updateCatalog([CloudApplication(id: "cook", name: "市场版本", websiteUrl: "https://market.invalid/")])
+        XCTAssertEqual(library.snapshot.applications.first?.launchURL?.host, "market.invalid")
+        XCTAssertNil(library.snapshot.applications.first?.personalMarketOwnerLogin)
+    }
+
+    func testVersionTwoMigratesAuthorProvenanceWithoutChangingReferencesOrLosingPendingEdits() throws {
+        var old = HomeLibrarySnapshot()
+        old.configuration = HomeConfiguration(installedApps: [.init(appId: "legacy")], dockApps: [.init(appId: "legacy")],
+                                              recentApps: [.init(appId: "legacy", usedAt: 42)])
+        old.cachedApplications = [CloudApplication(id: "record", name: "旧作者版本", slug: "legacy", websiteUrl: "https://author.invalid/", personalMarketOwnerLogin: "Author")]
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(old)) as? [String: Any])
+        json["version"] = 2
+        var configuration = try XCTUnwrap(json["configuration"] as? [String: Any])
+        configuration.removeValue(forKey: "applicationSources"); json["configuration"] = configuration
+        let oldData = try JSONSerialization.data(withJSONObject: json)
+        let file = HomeLibrary(directory: directory).fileURL
+        try oldData.write(to: file)
+        let library = HomeLibrary(directory: directory)
+        XCTAssertNil(library.storageError)
+        XCTAssertEqual(library.snapshot.version, 3)
+        XCTAssertEqual(library.snapshot.configuration.installedApps, old.configuration.installedApps)
+        XCTAssertEqual(library.snapshot.configuration.recentApps, old.configuration.recentApps)
+        XCTAssertEqual(library.snapshot.configuration.applicationSources, [.init(appId: "legacy", ownerLogin: "Author")])
+        XCTAssertTrue(library.snapshot.hasPendingChanges)
+        XCTAssertNotEqual(library.snapshot.mutationId, old.mutationId)
+        XCTAssertEqual(HomeLibrary(directory: directory).snapshot.mutationId, library.snapshot.mutationId, "Unwritten migration must keep the retry identity across restart")
+        XCTAssertEqual(try Data(contentsOf: file), oldData, "Reading alone must not rewrite the old file")
+        library.setDockVisible(true)
+        XCTAssertEqual(HomeLibrary(directory: directory).snapshot, library.snapshot)
+        let backup = try XCTUnwrap(FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil).first { $0.lastPathComponent.contains(".before-native-migration-") })
+        XCTAssertEqual(try Data(contentsOf: backup), oldData)
+        XCTAssertEqual(HomeBackupRepository.kind(name: backup.lastPathComponent, ownerFileName: "guest.json"), .nativeMigration)
+    }
+
+    func testSourceLifetimeFollowsAllReferencesAndOldServersCannotEraseIt() throws {
+        let library = HomeLibrary(directory: directory)
+        let author = CloudApplication(id: "cook", name: "作者版本", personalMarketOwnerLogin: "Author")
+        library.recordUse(author)
+        XCTAssertEqual(library.snapshot.configuration.applicationSources.count, 1, "A recent-only app retains its selected source")
+        let previousMutation = library.snapshot.mutationId
+        let v2 = RemoteHomeScreen(schemaVersion: 2, revision: String(repeating: "a", count: 64),
+                                  configuration: HomeConfiguration(recentApps: [.init(appId: "cook", usedAt: 42)]))
+        try library.adopt(v2)
+        XCTAssertEqual(library.snapshot.recentApplications.first?.personalMarketOwnerLogin, "Author")
+        XCTAssertEqual(library.snapshot.configuration.recentApps.first?.usedAt, 42)
+        XCTAssertNotEqual(library.snapshot.mutationId, previousMutation, "A changed pending payload must not reuse the earlier request identity")
+        XCTAssertTrue(library.snapshot.hasPendingChanges, "An old response cannot acknowledge the selected source")
+        XCTAssertThrowsError(try library.acknowledge(v2, uploadedMutationId: library.snapshot.mutationId))
+        library.clearRecent()
+        XCTAssertTrue(library.snapshot.configuration.applicationSources.isEmpty)
+    }
+
+    func testSourceValidationRejectsAmbiguityDanglingReferencesAndInvalidAuthorNames() throws {
+        for sources in [
+            [HomeApplicationSource(appId: "missing", ownerLogin: "Author")],
+            [.init(appId: "cook", ownerLogin: "../other")],
+            [.init(appId: "cook", ownerLogin: " Author")],
+            [.init(appId: "cook", ownerLogin: "Author"), .init(appId: "cook", ownerLogin: "Other")],
+        ] {
+            let content = HomeConfiguration(installedApps: [.init(appId: "cook")], applicationSources: sources)
+            XCTAssertThrowsError(try content.validate())
+        }
+        let content = HomeConfiguration(installedApps: [.init(appId: "cook")], applicationSources: [.init(appId: "cook", ownerLogin: "Author")])
+        XCTAssertThrowsError(try RemoteHomeScreen(schemaVersion: 2, revision: String(repeating: "a", count: 64), configuration: content).validate())
+        var snapshot = HomeLibrarySnapshot(); snapshot.configuration = content
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(snapshot)) as? [String: Any])
+        var invalid = try XCTUnwrap(json["configuration"] as? [String: Any]); invalid.removeValue(forKey: "applicationSources")
+        json["configuration"] = invalid
+        XCTAssertThrowsError(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: JSONSerialization.data(withJSONObject: json)))
+    }
+
+    func testMigrationCannotOverwriteAChangedOldFileAndCanRetryAfterRestoringThatFile() throws {
+        let data = Data(#"{"version":1,"applications":[{"_id":"cook","name":"作者版本","personalMarketOwnerLogin":"Author"}],"recentIDs":[]}"#.utf8)
+        let file = HomeLibrary(directory: directory).fileURL
+        try data.write(to: file)
+        let library = HomeLibrary(directory: directory)
+        let initial = library.snapshot
+        let changed = Data("a different writer's data".utf8)
+        try changed.write(to: file)
+        library.setDockVisible(true)
+        XCTAssertNotNil(library.storageError)
+        XCTAssertEqual(library.snapshot, initial)
+        XCTAssertEqual(try Data(contentsOf: file), changed)
+        try data.write(to: file)
+        library.setDockVisible(true)
+        XCTAssertNil(library.storageError)
+        XCTAssertTrue(library.snapshot.dockVisible)
+        let backups = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil).filter { $0.lastPathComponent.contains(".before-native-migration-") }
+        XCTAssertEqual(backups.count, 1)
+        XCTAssertEqual(try Data(contentsOf: XCTUnwrap(backups.first)), data)
+    }
 }

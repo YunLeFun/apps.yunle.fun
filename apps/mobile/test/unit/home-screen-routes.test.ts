@@ -64,6 +64,12 @@ describe('home screen authenticated HTTP routes', () => {
     await nativeFetch(`${origin}/api/home-screen?schema=9`, { headers: { Authorization: 'Bearer test-only' } })
     expect(services.get).toHaveBeenLastCalledWith('verified-user', undefined, 1)
   })
+  it('negotiates schema 3 sources using the authenticated identity', async () => {
+    const response = await nativeFetch(`${origin}/api/home-screen?schema=3&uid=victim`, { headers: { Authorization: 'Bearer test-only' } })
+    expect(response.status).toBe(200)
+    expect(services.get).toHaveBeenCalledWith('verified-user', undefined, 3)
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
+  })
   it('binds a write to the verified account even when the body supplies a different UID', async () => {
     const body = { uid: 'victim', baseRevision: null, mutationId: 'test-only', configuration: {} }
     const response = await nativeFetch(`${origin}/api/home-screen`, {

@@ -118,7 +118,7 @@ struct HomeBackupDetailView: View {
                         LabeledContent("自动同步", value: preview.snapshot.autoSyncEnabled ? "开启" : "关闭")
                         LabeledContent("常用应用显示", value: preview.snapshot.dockVisible ? "显示" : "隐藏")
                     }
-                } footer: { Text("恢复的是云居布局、最近使用及选中的云居设置。当前云端版本会继续参与同步检查。") }
+                } footer: { Text("恢复的是云居布局、作者来源、最近使用及选中的云居设置。当前云端版本会继续参与同步检查。") }
                 Section {
                     if store.didRestore { Label("已恢复云居", systemImage: "checkmark.circle") }
                     if store.isRestoring { ProgressView("正在恢复云居") }

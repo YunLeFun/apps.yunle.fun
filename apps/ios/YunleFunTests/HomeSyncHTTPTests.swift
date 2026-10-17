@@ -18,7 +18,7 @@ final class HomeSyncHTTPTests: XCTestCase {
         XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")
         XCTAssertNil(request.value(forHTTPHeaderField: "Cookie"))
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body(request)) as? [String: Any])
-        XCTAssertEqual(json["schemaVersion"] as? Int, 2)
+        XCTAssertEqual(json["schemaVersion"] as? Int, 3)
         XCTAssertTrue(json["baseRevision"] is NSNull)
         XCTAssertNil(json["uid"])
         XCTAssertNil(json["_openid"])
@@ -32,7 +32,7 @@ final class HomeSyncHTTPTests: XCTestCase {
         let (service, fixture) = service([(200, v2), (200, v1), (200, badV1)])
         let identity = AuthorizedAccount(userID: "test-owner", accessToken: "test-token")
         let folders = try await service.load(identity: identity)
-        XCTAssertEqual(fixture.requests.first?.url?.query, "schema=2")
+        XCTAssertEqual(fixture.requests.first?.url?.query, "schema=3")
         XCTAssertEqual(folders.configuration.folders.first?.appIds, ["a", "b"])
         let legacy = try await service.load(identity: identity)
         XCTAssertFalse(legacy.carriesFolders)
@@ -76,6 +76,34 @@ final class HomeSyncHTTPTests: XCTestCase {
         for _ in 0..<3 {
             do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
             catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Gateway HTML must not expire app login") } }
+        }
+    }
+
+    func testSourceWriteRequiresAnExactSchemaThreeAcknowledgement() async throws {
+        let content = HomeConfiguration(installedApps: [.init(appId: "cook")], applicationSources: [.init(appId: "cook", ownerLogin: "Author")])
+        let old = RemoteHomeScreen(schemaVersion: 2, revision: String(repeating: "a", count: 64), configuration: HomeConfiguration(installedApps: content.installedApps))
+        let wrong = RemoteHomeScreen(revision: String(repeating: "b", count: 64), configuration: old.configuration)
+        let saved = RemoteHomeScreen(revision: String(repeating: "c", count: 64), configuration: content)
+        let (service, fixture) = service(try [old, wrong, saved].map { (200, String(decoding: try JSONEncoder().encode($0), as: UTF8.self)) })
+        let write = HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString, configuration: content)
+        let identity = AuthorizedAccount(userID: "test-owner", accessToken: "test-token")
+        do { _ = try await service.save(write, identity: identity); XCTFail("Old servers cannot acknowledge sources") }
+        catch { guard case HomeSyncError.unsupportedSchema = error else { return XCTFail("Unexpected error") } }
+        do { _ = try await service.save(write, identity: identity); XCTFail("A different source is not the uploaded content") }
+        catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Unexpected error") } }
+        let response = try await service.save(write, identity: identity)
+        XCTAssertEqual(response, saved)
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: body(XCTUnwrap(fixture.requests.last))) as? [String: Any])
+        let configuration = try XCTUnwrap(payload["configuration"] as? [String: Any])
+        XCTAssertEqual(configuration["applicationSources"] as? [[String: String]], [["appId": "cook", "ownerLogin": "Author"]])
+    }
+
+    func testSchemaThreeMustExplicitlyCarrySourcesRatherThanOmittingOrNullingThem() async {
+        let prefix = #"{"schemaVersion":3,"revision":null,"configuration":{"installedApps":[],"dockApps":[],"recentApps":[],"folders":[],"updatedAt":0"#
+        let (service, _) = service([(200, prefix + "}}"), (200, prefix + #", "applicationSources":null}}"#)])
+        for _ in 0..<2 {
+            do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+            catch { XCTAssertTrue(error is HomeSyncError) }
         }
     }
 

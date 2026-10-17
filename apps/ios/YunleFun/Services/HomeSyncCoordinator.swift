@@ -141,9 +141,10 @@ final class HomeSyncCoordinator: ObservableObject {
             }
             try ensureCurrent(uid: uid, generation: generation)
             let local = library.snapshot
-            if !local.hasPendingChanges || local.configuration.matches(remote) {
+            if !local.hasPendingChanges || (remote.carriesSources && local.configuration.matches(remote)) {
                 try library.adopt(remote)
             } else if local.base?.revision == remote.revision {
+                guard remote.carriesSources else { throw HomeSyncError.unsupportedSchema }
                 let write = HomeScreenWrite(baseRevision: remote.revision, mutationId: local.mutationId, configuration: local.configuration)
                 let saved = try await authorized(uid: uid, generation: generation) { identity in
                     try await self.service.save(write, identity: identity)

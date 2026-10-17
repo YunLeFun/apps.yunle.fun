@@ -29,8 +29,8 @@ struct CloudApplication: Codable, Identifiable, Hashable {
     var accessOwnerID: String?
     var homeReference: String?
     var isUnavailable: Bool?
-    /// Local metadata provenance, never an access or host-authorization grant.
-    /// The home sync protocol still carries only the existing application ID.
+    /// Metadata provenance, never an access or host-authorization grant.
+    /// Home sync carries only the selected author, never this cached URL.
     var personalMarketOwnerLogin: String?
 
     var homeKey: String { homeReference ?? id }

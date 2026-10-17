@@ -3,6 +3,8 @@ import { createError } from 'h3'
 
 export interface HomeAppReference { appId: string }
 export interface HomeRecentReference extends HomeAppReference { usedAt: number }
+/** A source selection, never launch metadata or an authorization grant. */
+export interface HomeApplicationSource extends HomeAppReference { ownerLogin: string }
 /**
  * A Home Screen folder (schema 2). Members stay in `installedApps`; the folder
  * sits where its first member is. Clients that predate folders therefore keep
@@ -15,6 +17,8 @@ export interface HomeContent {
   recentApps: HomeRecentReference[]
   /** Present for schema 2. Schema 1 writes omit it and keep the stored folders. */
   folders?: HomeFolder[]
+  /** Schema 3. Absence on older writes preserves the stored selections. */
+  applicationSources?: HomeApplicationSource[]
 }
 export interface HomeConfiguration extends HomeContent { updatedAt: number }
 export interface HomeScreenDocument extends HomeConfiguration {
@@ -25,8 +29,8 @@ export interface HomeScreenDocument extends HomeConfiguration {
   lastMutationId?: string
   lastMutationHash?: string
 }
-/** 1: apps, dock and recents. 2: adds `configuration.folders`. */
-export type HomeSchemaVersion = 1 | 2
+/** 1: apps, dock and recents. 2: folders. 3: explicit author source selections. */
+export type HomeSchemaVersion = 1 | 2 | 3
 export interface RemoteHomeScreen {
   schemaVersion: HomeSchemaVersion
   revision: string | null
@@ -42,20 +46,26 @@ export interface HomeWrite {
 export const HOME_FOLDER_LIMIT = 200
 export const HOME_FOLDER_NAME_LIMIT = 40
 
-/** Reads understand schema 2 only when asked (`?schema=2`); everyone else gets schema 1. */
+/** New fields are returned only to clients that explicitly opt in. */
 export function requestedHomeSchema(value: unknown): HomeSchemaVersion {
+  if (value === '3' || value === 3)
+    return 3
   return value === '2' || value === 2 ? 2 : 1
 }
 
 export function emptyHome(schemaVersion: HomeSchemaVersion = 1): RemoteHomeScreen {
   const configuration: HomeConfiguration = { installedApps: [], dockApps: [], recentApps: [], updatedAt: 0 }
-  return { schemaVersion, revision: null, configuration: schemaVersion === 2 ? { ...configuration, folders: [] } : configuration }
+  if (schemaVersion >= 2)
+    configuration.folders = []
+  if (schemaVersion >= 3)
+    configuration.applicationSources = []
+  return { schemaVersion, revision: null, configuration }
 }
 
 export function validateHomeWrite(input: unknown): HomeWrite {
-  if (!isRecord(input) || !(input.schemaVersion === undefined || input.schemaVersion === 1 || input.schemaVersion === 2))
+  if (!isRecord(input) || !(input.schemaVersion === undefined || input.schemaVersion === 1 || input.schemaVersion === 2 || input.schemaVersion === 3))
     throw invalidInput()
-  const schemaVersion: HomeSchemaVersion = input.schemaVersion === 2 ? 2 : 1
+  const schemaVersion: HomeSchemaVersion = input.schemaVersion === 3 ? 3 : input.schemaVersion === 2 ? 2 : 1
   if (!isRecord(input)
     || !(input.baseRevision === null || (typeof input.baseRevision === 'string' && /^[a-f0-9]{64}$/.test(input.baseRevision)))
     || typeof input.mutationId !== 'string'
@@ -63,10 +73,15 @@ export function validateHomeWrite(input: unknown): HomeWrite {
     throw invalidInput()
   }
   const content = homeContent(input.configuration)
-  if (schemaVersion === 2) {
+  if (schemaVersion >= 2) {
     if (!isRecord(input.configuration))
       throw invalidInput()
     content.folders = folders(input.configuration.folders, content.installedApps, true)
+  }
+  if (schemaVersion >= 3) {
+    if (!isRecord(input.configuration))
+      throw invalidInput()
+    content.applicationSources = applicationSources(input.configuration.applicationSources, content, true)
   }
   return {
     schemaVersion,
@@ -90,6 +105,7 @@ export function readHomeDocument(input: unknown, uid: string): HomeScreenDocumen
     // Clients without folder support may have removed members since; their
     // references are dropped here, never the folder data that is still valid.
     const storedFolders = folders(input.folders ?? [], content.installedApps, false)
+    const storedSources = applicationSources(input.applicationSources === undefined ? [] : input.applicationSources, content, false)
     const updatedAt = timestamp(input.updatedAt ?? 0)
     const createdAt = timestamp(input.createdAt ?? 0)
     return {
@@ -97,6 +113,7 @@ export function readHomeDocument(input: unknown, uid: string): HomeScreenDocumen
       _openid: uid,
       ...content,
       folders: storedFolders,
+      applicationSources: storedSources,
       updatedAt,
       createdAt,
       ...(typeof input.lastMutationId === 'string' ? { lastMutationId: input.lastMutationId } : {}),
@@ -125,11 +142,21 @@ export function remoteHome(document?: HomeScreenDocument, schemaVersion: HomeSch
   // client is still a conflict for a schema 1 writer. Documents without
   // folders keep the exact revision they had before folders existed.
   const folders = document.folders ?? []
-  const revision = hash({ id: document._id, configuration: folders.length ? { ...configuration, folders } : configuration })
+  const sources = document.applicationSources ?? []
+  const revisionContent = {
+    ...configuration,
+    ...(folders.length ? { folders } : {}),
+    ...(sources.length ? { applicationSources: sources } : {}),
+  }
+  const revision = hash({ id: document._id, configuration: revisionContent })
+  if (schemaVersion >= 2)
+    configuration.folders = folders
+  if (schemaVersion >= 3)
+    configuration.applicationSources = sources
   return {
     schemaVersion,
     revision,
-    configuration: schemaVersion === 2 ? { ...configuration, folders } : configuration,
+    configuration,
   }
 }
 
@@ -144,11 +171,11 @@ export function planHomeWrite(uid: string, records: HomeScreenDocument[], write:
 } {
   const current = latestHome(records)
   const remote = remoteHome(current, write.schemaVersion)
-  const withFolders = write.schemaVersion === 2
-  const payloadHash = contentHash(write.configuration, withFolders)
+  const withFolders = write.schemaVersion >= 2
+  const payloadHash = contentHash(write.configuration, write.schemaVersion)
   if (current?.lastMutationId === write.mutationId
     && current.lastMutationHash === payloadHash
-    && contentHash(current, withFolders) === payloadHash) {
+    && contentHash(current, write.schemaVersion) === payloadHash) {
     return { response: remote }
   }
   if (current?.lastMutationId === write.mutationId && current.lastMutationHash !== payloadHash) {
@@ -166,6 +193,9 @@ export function planHomeWrite(uid: string, records: HomeScreenDocument[], write:
   const nextFolders = withFolders
     ? write.configuration.folders ?? []
     : folders(current?.folders ?? [], write.configuration.installedApps, false)
+  const nextSources = write.schemaVersion >= 3
+    ? write.configuration.applicationSources ?? []
+    : applicationSources(current?.applicationSources ?? [], write.configuration, false)
   const document: HomeScreenDocument = {
     _id: homeDocumentId(uid),
     _openid: uid,
@@ -173,6 +203,7 @@ export function planHomeWrite(uid: string, records: HomeScreenDocument[], write:
     dockApps: write.configuration.dockApps,
     recentApps: write.configuration.recentApps,
     folders: nextFolders,
+    applicationSources: nextSources,
     createdAt: current?.createdAt || now,
     // Server time drives legacy LWW readers; client clocks cannot force a win.
     updatedAt: Math.max(now, (current?.updatedAt ?? 0) + 1),
@@ -255,17 +286,46 @@ function validName(name: string): boolean {
     && ![...name].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
 }
 
+/** Keep selections for installed, docked or recent apps; never store URLs or credentials. */
+function applicationSources(input: unknown, content: HomeContent, strict: boolean): HomeApplicationSource[] {
+  if (!Array.isArray(input) || input.length > 1104)
+    throw invalidInput()
+  const referenced = new Set([...content.installedApps, ...content.dockApps, ...content.recentApps].map(app => app.appId))
+  const ids = references(input, 1104, false)
+  const result: HomeApplicationSource[] = []
+  for (const [index, entry] of input.entries()) {
+    if (!isRecord(entry) || Object.keys(entry).some(key => key !== 'appId' && key !== 'ownerLogin')
+      || typeof entry.ownerLogin !== 'string' || entry.ownerLogin !== entry.ownerLogin.trim() || !/^[\w.-]{1,64}$/.test(entry.ownerLogin)
+      || entry.ownerLogin === '.' || entry.ownerLogin === '..') {
+      throw invalidInput()
+    }
+    const appId = ids[index]!.appId
+    if (!referenced.has(appId)) {
+      if (strict)
+        throw invalidInput()
+      continue
+    }
+    result.push({ appId, ownerLogin: entry.ownerLogin })
+  }
+  return result.sort((a, b) => a.appId < b.appId ? -1 : a.appId > b.appId ? 1 : 0)
+}
+
 function timestamp(value: unknown): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0)
     throw invalidInput()
   return value
 }
-function contentHash(content: HomeContent, withFolders: boolean): string {
+function contentHash(content: HomeContent, schema: HomeSchemaVersion): string {
   const base = { installedApps: content.installedApps, dockApps: content.dockApps, recentApps: content.recentApps }
   const stored = content.folders ?? []
   // Without folders the hash matches what schema 1 always produced, so
   // acknowledgements recorded before folders existed still retry cleanly.
-  return hash(withFolders && stored.length ? { ...base, folders: stored } : base)
+  const sources = content.applicationSources ?? []
+  return hash({
+    ...base,
+    ...(schema >= 2 && stored.length ? { folders: stored } : {}),
+    ...(schema >= 3 && sources.length ? { applicationSources: sources } : {}),
+  })
 }
 function hash(value: unknown): string {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex')

@@ -132,4 +132,23 @@ describe('home screen CloudBase storage adapter', () => {
       .toMatchObject({ statusCode: 503 })
     expect(store.records.size).toBe(0)
   })
+
+  it('persists source selections transactionally and returns them to a second client only when requested', async () => {
+    const store = storage([legacy])
+    const base = await getHomeScreen(owner, store.db, 3)
+    const applicationSources = [{ appId: 'original', ownerLogin: 'author' }]
+    const request = {
+      schemaVersion: 3,
+      baseRevision: base.revision,
+      mutationId,
+      configuration: { ...config, folders: [], applicationSources },
+    }
+    const saved = await putHomeScreen(owner, request, store.db)
+    expect(store.records.get(homeDocumentId(owner))).toMatchObject({ _openid: owner, applicationSources })
+    expect(await getHomeScreen(owner, store.db, 3)).toEqual(saved)
+    expect((await getHomeScreen(owner, store.db, 2)).configuration).not.toHaveProperty('applicationSources')
+    expect(await putHomeScreen(owner, request, store.db)).toEqual(saved)
+    expect(store.writes).toHaveBeenCalledTimes(1)
+    expect((await getHomeScreen('other-owner', store.db, 3)).configuration.applicationSources).toEqual([])
+  })
 })

@@ -153,12 +153,12 @@ final class HomeSyncTests: XCTestCase {
     func testVersionOneMigrationPreservesOrderAndUnknownTimestamps() throws {
         let data = Data(#"{"version":1,"applications":[{"_id":"legacy","name":"旧应用"}],"recentIDs":["legacy","missing"]}"#.utf8)
         let state = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: data)
-        XCTAssertEqual(state.version, 2)
+        XCTAssertEqual(state.version, 3)
         XCTAssertEqual(state.applications.map(\.id), ["legacy"])
         XCTAssertEqual(state.recentIDs, ["legacy", "missing"])
         XCTAssertEqual(state.configuration.recentApps.map(\.usedAt), [0, 0])
         XCTAssertTrue(state.hasPendingChanges)
-        XCTAssertThrowsError(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(#"{"version":3}"#.utf8)))
+        XCTAssertThrowsError(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(#"{"version":4}"#.utf8)))
     }
 
     func testDockAndLegacyRemovalKeepTheCloudReference() throws {
@@ -178,12 +178,89 @@ final class HomeSyncTests: XCTestCase {
     private func coordinator(_ library: HomeLibrary, _ service: HomeTestService) -> HomeSyncCoordinator {
         HomeSyncCoordinator(accounts: HomeTestAuthorizer("a"), library: library, service: service, monitorNetwork: false)
     }
+
+    func testTwoLocalClientsSyncTheSourceAndAnExplicitMarketSelection() async throws {
+        let first = HomeLibrary(directory: directory.appendingPathComponent("one"), accountID: "a")
+        first.setAutoSyncEnabled(false)
+        let service = HomeTestService(remote: cloud(nil))
+        first.add(CloudApplication(id: "cook", name: "作者版本", websiteUrl: "https://author.invalid/", personalMarketOwnerLogin: "Author"))
+        let sync = coordinator(first, service)
+        await sync.synchronize()
+        XCTAssertFalse(first.snapshot.hasPendingChanges)
+        let second = HomeLibrary(directory: directory.appendingPathComponent("two"), accountID: "a")
+        second.setAutoSyncEnabled(false)
+        let secondSync = coordinator(second, service)
+        await secondSync.synchronize()
+        XCTAssertEqual(second.snapshot.configuration.applicationSources, first.snapshot.configuration.applicationSources)
+        XCTAssertEqual(second.snapshot.applications.first?.personalMarketOwnerLogin, "Author")
+        XCTAssertNil(second.snapshot.applications.first?.launchURL)
+        first.add(CloudApplication(id: "cook", name: "市场版本", websiteUrl: "https://market.invalid/"))
+        await sync.synchronize()
+        await secondSync.synchronize()
+        XCTAssertTrue(second.snapshot.configuration.applicationSources.isEmpty)
+        XCTAssertNil(second.snapshot.applications.first?.personalMarketOwnerLogin)
+    }
+
+    func testOlderServerKeepsSourceOnlyChangesPendingWithAnExplicitError() async throws {
+        let library = HomeLibrary(directory: directory, accountID: "a")
+        library.setAutoSyncEnabled(false)
+        let old = RemoteHomeScreen(schemaVersion: 2, revision: nil, configuration: HomeConfiguration())
+        library.add(CloudApplication(id: "cook", name: "作者版本", personalMarketOwnerLogin: "Author"))
+        let mutation = library.snapshot.mutationId
+        let service = HomeTestService(remote: old)
+        let sync = coordinator(library, service)
+        await sync.synchronize()
+        XCTAssertEqual(sync.phase, .failed(HomeSyncError.unsupportedSchema.localizedDescription))
+        XCTAssertEqual(library.snapshot.mutationId, mutation)
+        XCTAssertTrue(library.snapshot.hasPendingChanges)
+        let writes = await service.writes
+        XCTAssertTrue(writes.isEmpty, "Do not send a schema 3 payload to a server declaring only schema 2")
+    }
+
+    func testSourceOnlyConflictKeepsBothVersionsAndBacksUpTheDeviceSelection() async throws {
+        let library = HomeLibrary(directory: directory, accountID: "a")
+        library.setAutoSyncEnabled(false)
+        let base = cloud("a", installed: ["cook"])
+        try library.adopt(base)
+        library.add(CloudApplication(id: "cook", name: "本机作者", personalMarketOwnerLogin: "LocalAuthor"))
+        let local = library.snapshot
+        var remoteContent = base.configuration
+        remoteContent.applicationSources = [.init(appId: "cook", ownerLogin: "RemoteAuthor")]
+        let remote = RemoteHomeScreen(revision: String(repeating: "b", count: 64), configuration: remoteContent)
+        let sync = coordinator(library, HomeTestService(remote: remote))
+        await sync.synchronize()
+        guard case .conflict(let conflict) = sync.phase else { return XCTFail("A source-only change must not silently choose a revision") }
+        await sync.resolve(.cloud, conflict: conflict)
+        XCTAssertEqual(library.snapshot.applications.first?.personalMarketOwnerLogin, "RemoteAuthor")
+        XCTAssertNil(library.snapshot.applications.first?.launchURL)
+        let file = try XCTUnwrap(FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil).first { $0.lastPathComponent.contains(".conflict-") })
+        XCTAssertEqual(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(contentsOf: file)), local)
+    }
     private func cloud(_ revision: String?, installed: [String] = [], dock: [String] = [], recent: [String] = []) -> RemoteHomeScreen {
         RemoteHomeScreen(revision: revision.map { String(repeating: $0, count: 64) },
                          configuration: HomeConfiguration(installedApps: installed.map { HomeAppReference(appId: $0) },
                                                           dockApps: dock.map { HomeAppReference(appId: $0) },
                                                           recentApps: recent.map { HomeRecentReference(appId: $0, usedAt: 10) },
                                                           updatedAt: revision == nil ? 0 : 100))
+    }
+
+    func testSourceResponseCannotBeAppliedAfterAnAccountRoundTrip() async throws {
+        let library = HomeLibrary(directory: directory, accountID: "a")
+        library.setAutoSyncEnabled(false)
+        library.add(CloudApplication(id: "cook", name: "本机版本", personalMarketOwnerLogin: "LocalAuthor"))
+        let local = library.snapshot
+        let gate = HomeTestGate()
+        let remote = RemoteHomeScreen(revision: String(repeating: "a", count: 64),
+                                      configuration: HomeConfiguration(installedApps: [.init(appId: "cook")], applicationSources: [.init(appId: "cook", ownerLogin: "LateAuthor")]))
+        let auth = HomeTestAuthorizer("a")
+        let sync = HomeSyncCoordinator(accounts: auth, library: library, service: HomeTestService(remote: remote, loadGate: gate), monitorNetwork: false)
+        let loading = Task { await sync.synchronize() }
+        await gate.waitUntilEntered()
+        library.activateAccount("b"); auth.user = AccountUser(id: "b"); sync.identityChanged()
+        library.activateAccount("a"); auth.user = AccountUser(id: "a"); sync.identityChanged()
+        await gate.open(); await loading.value
+        XCTAssertEqual(library.snapshot, local)
+        XCTAssertEqual(library.snapshot.applications.first?.personalMarketOwnerLogin, "LocalAuthor")
     }
 }
 

@@ -15,12 +15,13 @@ enum HomeBackupError: LocalizedError {
 
 struct HomeBackupItem: Identifiable, Equatable, Sendable {
     enum Kind: String, Sendable {
-        case legacy, conflict, restore
+        case legacy, conflict, restore, nativeMigration
         var label: String {
             switch self {
             case .legacy: return "旧版导入前"
             case .conflict: return "选择云端版本前"
             case .restore: return "恢复其他备份前"
+            case .nativeMigration: return "原生云居升级前"
             }
         }
     }

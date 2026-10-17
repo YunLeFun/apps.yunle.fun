@@ -27,7 +27,7 @@ struct HomeSyncSettingsView: View {
                 }
             } footer: {
                 Text(accounts.user == nil ? "访客云居保存在此设备，登录后使用账号独立的云居。"
-                     : "同步安装顺序、常用应用和最近使用。关闭同步后，更改仍保存在此设备。")
+                     : "同步安装顺序、文件夹、常用应用、最近使用和所选作者来源。关闭同步后，更改仍保存在此设备。")
             }
             if case .conflict(let conflict) = sync.phase {
                 Section("有两个不同版本") {
@@ -36,7 +36,9 @@ struct HomeSyncSettingsView: View {
                         HomeConfigurationView(title: "此设备版本", configuration: library.snapshot.configuration, snapshot: library.snapshot)
                     }
                     NavigationLink("查看云端版本") {
-                        HomeConfigurationView(title: "云端版本", configuration: conflict.remote.configuration, snapshot: library.snapshot)
+                        HomeConfigurationView(title: "云端版本", configuration: library.snapshot.configuration.adopting(conflict.remote),
+                                              snapshot: library.snapshot,
+                                              sourceNotice: conflict.remote.carriesSources ? nil : "云端未记录应用来源，使用此版本时会保留此设备的来源选择。")
                     }
                     Button("保留此设备版本") { resolution = .device }
                     Button("使用云端版本") { resolution = .cloud }
@@ -59,8 +61,15 @@ struct HomeConfigurationView: View {
     let title: String
     let configuration: HomeConfiguration
     let snapshot: HomeLibrarySnapshot
+    var sourceNotice: String? = nil
+    private var displayedSnapshot: HomeLibrarySnapshot {
+        var value = snapshot
+        value.configuration = configuration
+        return value
+    }
     var body: some View {
         List {
+            if let sourceNotice { Section { Text(sourceNotice) } }
             section("我的应用", references: configuration.installedApps.map(\.appId))
             section("常用应用", references: configuration.dockApps.map(\.appId))
             section("最近使用", references: configuration.recentApps.map(\.appId))
@@ -71,9 +80,16 @@ struct HomeConfigurationView: View {
         Section(title) {
             if references.isEmpty { Text("没有应用").foregroundStyle(.secondary) }
             ForEach(references, id: \.self) { reference in
-                let app = snapshot.application(reference: reference)
-                ApplicationRow(application: app)
-                if app.isUnavailable == true { Text(reference).font(.caption).foregroundStyle(.secondary).textSelection(.enabled) }
+                let app = displayedSnapshot.application(reference: reference)
+                VStack(alignment: .leading, spacing: 4) {
+                    ApplicationRow(application: app)
+                    if let source = configuration.applicationSources.first(where: { $0.appId == reference }) {
+                        Text("作者版本 · \(source.ownerLogin)").font(.callout)
+                    } else if app.accessOwnerID == nil, app.accessWorkshopID == nil {
+                        Text("云乐坊版本").font(.callout)
+                    }
+                    if app.isUnavailable == true { Text(reference).font(.caption).foregroundStyle(.secondary).textSelection(.enabled) }
+                }
             }
         }
     }

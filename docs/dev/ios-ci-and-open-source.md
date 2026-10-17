@@ -133,3 +133,7 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 全新隔离 iPhone 18 Pro / iOS 27 上，该用例的三次进程重启执行均通过：`test_sim_2026-10-17T01-29-37-509Z_pid44279_99ba521b.xcresult`，为 **1 个不同用例、3 次通过执行，0 失败 / 跳过**。此项不能代替修正后提交的完整远端回归；其终态仍在 PR #48 记录。
 
 同一后续提交 `a51bd93` 的[Windows 桌面执行](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991315161/job/117274108734)在目录网络专项的首次窗口中等待“探索”标题五秒超时，Electron 集成为 2 通过 / 1 失败；不是 Cookie 清理失败。trace 的 `app://shell/` 快照当时只有文档头，没有正文，尚不能据此判定具体资源或系统耗时根因。夹具增加等待实际 `domcontentloaded` 事件，上限 15 秒，再执行原有五秒标题断言；整体 30 秒时限、代理路由、请求 / 响应 Cookie 隔离、拒绝跳转与清理断言保留。本机该网络专项 1 项通过，修正后的 Windows 与完整 CI 仍以最新提交终态为准，不将本机 macOS 结果算作 Windows 通过。
+
+修正后的 `2a8ab45` [Windows job](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991942710/job/117276027659)已成功，Web / 移动端、Chromium、macOS / Linux 桌面与 GitGuardian 同提交成功。`a51bd93` 原生运行由后续提交的 concurrency 自动取消，未完成 Release，专用模拟器删除成功，不能计为完整通过。后续 VoiceOver 夹具收紧与 iPad 专项单列于[验证记录](./ios-voiceover-validation.md)，日常原生 CI 的最新终态继续记录在 PR #48。
+
+`2a8ab45` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991942668)随后完整成功：**262 单元 / 集成 + 7 UI，共 269 项通过，0 失败 / 跳过**；Release 模拟器编译与专用模拟器删除成功，共七项检查通过。Cookie 夹具完整性修正与 Windows 启动同步在该提交均有完整远端通过证据；这不覆盖仍失败的独立系统审计或真机验收，后续提交按自身终态核对。

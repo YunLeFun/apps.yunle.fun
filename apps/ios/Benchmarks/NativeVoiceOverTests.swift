@@ -47,19 +47,37 @@ final class NativeVoiceOverTests: XCTestCase {
             app.launchArguments += ["-appearance", appearance]
         }
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
-        app.tabBars.buttons["我"].tap()
+        try selectTab("我", in: app)
         XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
         guard app.buttons["me.login"].waitForExistence(timeout: 5) else {
             throw XCTSkip("Use a guest Benchmark app; do not sign out an existing account")
         }
-        if tab != "我" { app.tabBars.buttons[tab].tap() }
+        if tab != "我" { try selectTab(tab, in: app) }
         XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 5))
         if tab == "工坊" {
             XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "全部应用 · ")).firstMatch.waitForExistence(timeout: 15))
         }
         return app
     }
+
+    private func selectTab(_ title: String, in app: XCUIApplication) throws {
+        let symbols = ["云居": "house", "寻乐": "safari", "工坊": "square.grid.2x2", "我": "person.crop.circle"]
+        let symbol = try XCTUnwrap(symbols[title])
+        let phoneTab = app.tabBars.buttons[title]
+        // iPad's native floating tabs expose symbol-identified buttons outside a TabBar.
+        let floatingTab = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label == %@", symbol, title)).firstMatch
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            phoneTab.exists || floatingTab.exists
+        }, object: nil)
+        let result = XCTWaiter.wait(for: [ready], timeout: 10)
+        XCTAssertEqual(result, .completed, "The native tab must exist before selecting it")
+        guard result == .completed else { throw NavigationError.missingTab }
+        let button = phoneTab.exists ? phoneTab : floatingTab
+        XCTAssertTrue(button.isHittable)
+        button.tap()
+    }
+
+    private enum NavigationError: Error { case missingTab }
 
     private func checkMe(large: Bool) throws {
         guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
@@ -89,7 +107,12 @@ final class NativeVoiceOverTests: XCTestCase {
             try seek("登录云乐坊", service: voiceOver, speech: speech)
             app.buttons["me.login"].doubleTap()
             XCTAssertTrue(app.navigationBars["账号"].waitForExistence(timeout: 5))
-            try seek("手机号", service: voiceOver, speech: speech)
+            let phoneField = app.textFields["login.phone"]
+            XCTAssertTrue(phoneField.exists)
+            try seek("手机号", service: voiceOver, speech: speech, labelBoundary: true)
+            let utterance = try voiceOver.currentSpeech().utterance
+            XCTAssertTrue(utterance.contains("文本栏"), "Read the phone text field, not the login-method picker: \(utterance)")
+            XCTAssertTrue(phoneField.isHittable, "VoiceOver must reveal the actual phone field")
             let screenshot = XCTAttachment(screenshot: app.screenshot())
             screenshot.name = "voiceover-login-field-\(large ? "largest" : "standard")"
             screenshot.lifetime = .keepAlways; add(screenshot)

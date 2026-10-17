@@ -59,7 +59,11 @@ final class NativeNavigationUITests: XCTestCase {
             return frame.height > 100 && frame.minY < screen.maxY - 100
                 && frame.maxY <= screen.maxY + 1 && typingKey.exists && typingKey.isHittable
         }, object: keyboard)
-        let visibility = XCTWaiter.wait(for: [shown], timeout: 10)
+        // CI simulators can take well over 10s before a freshly shown keyboard
+        // accepts taps (these journeys run 30-100s there); the reported frame
+        // was already in place when the 10s ceiling expired. The condition is
+        // unchanged; a longer ceiling only stops slow runners failing by chance.
+        let visibility = XCTWaiter.wait(for: [shown], timeout: 30)
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = "native-login-keyboard-\(name)"; attachment.lifetime = .keepAlways; add(attachment)
         if visibility != .completed {

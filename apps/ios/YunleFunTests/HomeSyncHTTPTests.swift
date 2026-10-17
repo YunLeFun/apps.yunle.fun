@@ -18,10 +18,26 @@ final class HomeSyncHTTPTests: XCTestCase {
         XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")
         XCTAssertNil(request.value(forHTTPHeaderField: "Cookie"))
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body(request)) as? [String: Any])
+        XCTAssertEqual(json["schemaVersion"] as? Int, 2)
         XCTAssertTrue(json["baseRevision"] is NSNull)
         XCTAssertNil(json["uid"])
         XCTAssertNil(json["_openid"])
         XCTAssertEqual(json["mutationId"] as? String, write.mutationId)
+    }
+
+    func testReadsOptInToFoldersAndAcceptBothSchemas() async throws {
+        let v2 = #"{"schemaVersion":2,"revision":"\#(String(repeating: "b", count: 64))","configuration":{"installedApps":[{"appId":"a"},{"appId":"b"}],"dockApps":[],"recentApps":[],"updatedAt":5,"folders":[{"id":"f","name":"组","appIds":["a","b"]}]}}"#
+        let v1 = #"{"schemaVersion":1,"revision":"\#(String(repeating: "c", count: 64))","configuration":{"installedApps":[{"appId":"a"}],"dockApps":[],"recentApps":[],"updatedAt":5}}"#
+        let badV1 = #"{"schemaVersion":1,"revision":"\#(String(repeating: "c", count: 64))","configuration":{"installedApps":[{"appId":"a"}],"dockApps":[],"recentApps":[],"updatedAt":5,"folders":[{"id":"f","name":"组","appIds":["a"]}]}}"#
+        let (service, fixture) = service([(200, v2), (200, v1), (200, badV1)])
+        let identity = AuthorizedAccount(userID: "test-owner", accessToken: "test-token")
+        let folders = try await service.load(identity: identity)
+        XCTAssertEqual(fixture.requests.first?.url?.query, "schema=2")
+        XCTAssertEqual(folders.configuration.folders.first?.appIds, ["a", "b"])
+        let legacy = try await service.load(identity: identity)
+        XCTAssertFalse(legacy.carriesFolders)
+        do { _ = try await service.load(identity: identity); XCTFail("schema 1 cannot claim folders") }
+        catch { XCTAssertTrue(error is HomeSyncError) }
     }
 
     func testAConflictCarriesTheRemoteVersionInsteadOfBecomingAnEmptySuccess() async throws {

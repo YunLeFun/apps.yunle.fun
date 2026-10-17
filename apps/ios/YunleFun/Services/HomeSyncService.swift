@@ -8,6 +8,11 @@ protocol HomeSyncServing: Sendable {
 struct HomeSyncService: HomeSyncServing {
     private let session: URLSession
     private let endpoint: URL
+    private var readEndpoint: URL {
+        var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "schema", value: String(HomeScreenWrite.schemaVersion))]
+        return components.url!
+    }
     init(session: URLSession? = nil, origin: URL = URL(string: "https://apps.yunle.fun")!) {
         endpoint = origin.appendingPathComponent("api/home-screen")
         if let session { self.session = session }
@@ -29,13 +34,14 @@ struct HomeSyncService: HomeSyncServing {
     func save(_ write: HomeScreenWrite, identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
         try write.configuration.validate()
         let saved = try await request(identity: identity, write: write)
-        guard saved.revision != nil, saved.configuration.hasSameContent(as: write.configuration) else {
+        guard saved.revision != nil, write.configuration.matches(saved) else {
             throw HomeSyncError.invalidResponse
         }
         return saved
     }
     private func request(identity: AuthorizedAccount, write: HomeScreenWrite?) async throws -> RemoteHomeScreen {
-        var request = URLRequest(url: endpoint)
+        // Reads opt in to schema 2 (folders); writes carry the version in the body.
+        var request = URLRequest(url: write == nil ? readEndpoint : endpoint)
         request.httpMethod = write == nil ? "GET" : "PUT"
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.setValue("application/json", forHTTPHeaderField: "Accept")

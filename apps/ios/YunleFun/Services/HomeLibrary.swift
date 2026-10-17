@@ -71,6 +71,25 @@ final class HomeLibrary: ObservableObject {
         }
     }
 
+    /// Applies a reordered subset of installed (or dock) references in one write.
+    /// The given keys take the slots they already occupy, so references the
+    /// caller did not show — pinned apps hidden from 我的应用 — keep their place.
+    /// Unknown or duplicate keys are ignored; an unchanged order writes nothing.
+    func reorder(_ keys: [String], inDock: Bool) {
+        edit { state in
+            var references = inDock ? state.configuration.dockApps : state.configuration.installedApps
+            let present = Set(references.map(\.appId))
+            var seen = Set<String>()
+            let ordered = keys.filter { present.contains($0) && seen.insert($0).inserted }
+            let slots = references.indices.filter { seen.contains(references[$0].appId) }
+            guard slots.count == ordered.count else { return }
+            var byKey: [String: HomeAppReference] = [:]
+            for slot in slots { byKey[references[slot].appId] = references[slot] }
+            for (slot, key) in zip(slots, ordered) { if let reference = byKey[key] { references[slot] = reference } }
+            if inDock { state.configuration.dockApps = references } else { state.configuration.installedApps = references }
+        }
+    }
+
     func recordUse(_ app: CloudApplication) {
         let reference = app.homeReference ?? (snapshot.applications + snapshot.dockApplications).first { $0.id == app.id }?.homeKey ?? app.id
         edit { state in
@@ -92,6 +111,137 @@ final class HomeLibrary: ObservableObject {
         }
     }
 
+    /// Pins or unpins several apps in one write (one sync). Pinning fails as a
+    /// whole, changing nothing, when the dock can't take every app.
+    @discardableResult
+    func setPinned(_ apps: [CloudApplication], _ pinned: Bool) -> Bool {
+        let keys = apps.map(\.homeKey)
+        let docked = Set(snapshot.configuration.dockApps.map(\.appId))
+        var seen = Set<String>()
+        let adding = keys.filter { !docked.contains($0) && seen.insert($0).inserted }
+        if pinned { guard snapshot.configuration.dockApps.count + adding.count <= 4 else { return false } }
+        edit { state in
+            if pinned {
+                for app in apps { cache(app, in: &state) }
+                state.configuration.dockApps.append(contentsOf: adding.map(HomeAppReference.init))
+            } else {
+                state.configuration.dockApps.removeAll { keys.contains($0.appId) }
+            }
+        }
+        return true
+    }
+
+    // MARK: Folders
+
+    /// Grid key for a folder tile; app tiles use the app's home key.
+    nonisolated static func folderKey(_ id: String) -> String { "folder:\(id)" }
+
+    /// Makes a folder from `keys` (in order) where `anchor` sits, as when one
+    /// icon is dropped on another. Members leave any folder they were in.
+    @discardableResult
+    func createFolder(named name: String, with keys: [String], at anchor: String) -> String? {
+        let installed = Set(snapshot.configuration.installedApps.map(\.appId))
+        let members = keys.reduce(into: [String]()) { if installed.contains($1) && !$0.contains($1) { $0.append($1) } }
+        guard !members.isEmpty, snapshot.configuration.folders.count < HomeFolder.limit else { return nil }
+        let id = UUID().uuidString.lowercased()
+        let name = Self.folderName(name)
+        edit { state in
+            for index in state.configuration.folders.indices {
+                state.configuration.folders[index].appIds.removeAll { members.contains($0) }
+            }
+            state.configuration.dockApps.removeAll { members.contains($0.appId) }
+            state.configuration.installedApps = Self.gathering(members, at: anchor, in: state.configuration.installedApps)
+            state.configuration.folders.append(HomeFolder(id: id, name: name, appIds: members))
+        }
+        return snapshot.configuration.folders.contains { $0.id == id } ? id : nil
+    }
+
+    /// Adds apps to the end of a folder, moving them next to its members.
+    func addToFolder(_ id: String, keys: [String]) {
+        guard let folder = snapshot.configuration.folders.first(where: { $0.id == id }) else { return }
+        let adding = keys.filter { !folder.appIds.contains($0) }
+        guard !adding.isEmpty, let last = folder.appIds.last else { return }
+        edit { state in
+            for index in state.configuration.folders.indices where state.configuration.folders[index].id != id {
+                state.configuration.folders[index].appIds.removeAll { adding.contains($0) }
+            }
+            state.configuration.dockApps.removeAll { adding.contains($0.appId) }
+            state.configuration.installedApps = Self.gathering(folder.appIds + adding, at: last, in: state.configuration.installedApps)
+            if let index = state.configuration.folders.firstIndex(where: { $0.id == id }) {
+                state.configuration.folders[index].appIds += adding
+            }
+        }
+    }
+
+    /// Takes an app out of its folder; it lands right after the folder.
+    func removeFromFolder(_ key: String) {
+        guard let folder = snapshot.configuration.folder(containing: key) else { return }
+        edit { state in
+            guard let index = state.configuration.folders.firstIndex(where: { $0.id == folder.id }) else { return }
+            state.configuration.folders[index].appIds.removeAll { $0 == key }
+            let rest = state.configuration.folders[index].appIds
+            var apps = state.configuration.installedApps
+            guard let from = apps.firstIndex(where: { $0.appId == key }) else { return }
+            let moving = apps.remove(at: from)
+            let after = apps.lastIndex { rest.contains($0.appId) }.map { $0 + 1 } ?? from
+            apps.insert(moving, at: min(after, apps.count))
+            state.configuration.installedApps = apps
+        }
+    }
+
+    func renameFolder(_ id: String, to name: String) {
+        edit { state in
+            if let index = state.configuration.folders.firstIndex(where: { $0.id == id }) {
+                state.configuration.folders[index].name = Self.folderName(name)
+            }
+        }
+    }
+
+    /// Removes the folder; its apps stay on the Home Screen where they were.
+    func dissolveFolder(_ id: String) {
+        edit { $0.configuration.folders.removeAll { $0.id == id } }
+    }
+
+    func reorderFolder(_ id: String, appIds: [String]) {
+        guard let folder = snapshot.configuration.folders.first(where: { $0.id == id }),
+              Set(appIds) == Set(folder.appIds), appIds.count == folder.appIds.count else { return }
+        edit { state in
+            if let index = state.configuration.folders.firstIndex(where: { $0.id == id }) {
+                state.configuration.folders[index].appIds = appIds
+            }
+            if let first = folder.appIds.first {
+                state.configuration.installedApps = Self.gathering(appIds, at: first, in: state.configuration.installedApps)
+            }
+        }
+    }
+
+    /// Reorders grid items where folders appear as `folderKey(id)`: each folder
+    /// expands to its members, kept together, in one write.
+    func reorderItems(_ itemKeys: [String]) {
+        let folders = Dictionary(snapshot.configuration.folders.map { (Self.folderKey($0.id), $0.appIds) },
+                                 uniquingKeysWith: { first, _ in first })
+        reorder(itemKeys.flatMap { folders[$0] ?? [$0] }, inDock: false)
+    }
+
+    /// A trimmed, length-limited name; blank becomes the generic "文件夹".
+    static func folderName(_ name: String) -> String {
+        let cleaned = String(name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .unicodeScalars.filter { $0.value >= 32 && $0.value != 127 }.map(Character.init))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return cleaned.isEmpty ? "文件夹" : String(cleaned.prefix(HomeFolder.nameLimit))
+    }
+
+    /// Moves `members` together, in order, to where `anchor` currently is.
+    private static func gathering(_ members: [String], at anchor: String, in apps: [HomeAppReference]) -> [HomeAppReference] {
+        guard let anchorIndex = apps.firstIndex(where: { $0.appId == anchor }) else { return apps }
+        let set = Set(members)
+        let before = apps[..<anchorIndex].filter { !set.contains($0.appId) }.count
+        var rest = apps.filter { !set.contains($0.appId) }
+        let moving = members.compactMap { key in apps.first { $0.appId == key } }
+        rest.insert(contentsOf: moving, at: min(before, rest.count))
+        return rest
+    }
+
     func setSyncEnabled(_ enabled: Bool) { preference { $0.syncEnabled = enabled } }
     func setAutoSyncEnabled(_ enabled: Bool) { preference { $0.autoSyncEnabled = enabled } }
     func setDockVisible(_ visible: Bool) { preference { $0.dockVisible = visible } }
@@ -105,7 +255,7 @@ final class HomeLibrary: ObservableObject {
     func adopt(_ remote: RemoteHomeScreen) throws {
         try remote.validate()
         var next = snapshot
-        next.configuration = remote.configuration
+        next.configuration = snapshot.configuration.adopting(remote)
         next.base = remote
         next.hasPendingChanges = false
         guard persist(next) else { throw HomeSyncError.storage }
@@ -116,7 +266,7 @@ final class HomeLibrary: ObservableObject {
         var next = snapshot
         next.base = remote
         if next.mutationId == uploadedMutationId {
-            next.configuration = remote.configuration
+            next.configuration = snapshot.configuration.adopting(remote)
             next.hasPendingChanges = false
         }
         guard persist(next) else { throw HomeSyncError.storage }
@@ -222,6 +372,9 @@ final class HomeLibrary: ObservableObject {
     private func edit(_ update: (inout HomeLibrarySnapshot) -> Void) {
         var next = snapshot
         update(&next)
+        // Removing or pinning an app takes it out of its folder; a folder left
+        // empty disappears, as on the Home Screen.
+        next.configuration = next.configuration.sanitizingFolders()
         guard next.configuration != snapshot.configuration else { return }
         next.hasPendingChanges = true
         next.mutationId = UUID().uuidString

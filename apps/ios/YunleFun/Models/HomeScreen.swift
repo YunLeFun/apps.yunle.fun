@@ -7,15 +7,65 @@ struct HomeRecentReference: Codable, Equatable, Sendable {
     let appId: String
     let usedAt: Int64
 }
+/// A Home Screen folder (sync schema 2). Members stay in `installedApps`, so
+/// clients without folder support still show every app; the folder sits where
+/// its first member is.
+struct HomeFolder: Codable, Equatable, Hashable, Sendable, Identifiable {
+    static let limit = 200
+    static let nameLimit = 40
+    let id: String
+    var name: String
+    var appIds: [String]
+
+    static func isValidName(_ name: String) -> Bool {
+        !name.isEmpty && name == name.trimmingCharacters(in: .whitespacesAndNewlines) && name.count <= nameLimit
+            && !name.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 })
+    }
+}
+
 struct HomeConfiguration: Codable, Equatable, Sendable {
     var installedApps: [HomeAppReference] = []
     var dockApps: [HomeAppReference] = []
     var recentApps: [HomeRecentReference] = []
     var updatedAt: Int64 = 0
+    var folders: [HomeFolder] = []
 
-    func hasSameContent(as other: Self) -> Bool {
+    func hasSameContent(as other: Self, includingFolders: Bool = true) -> Bool {
         installedApps == other.installedApps && dockApps == other.dockApps && recentApps == other.recentApps
+            && (!includingFolders || folders == other.folders)
     }
+
+    /// Compares with a server copy. A schema 1 server can't store folders, so
+    /// they are left out of the comparison instead of looking like a change.
+    func matches(_ remote: RemoteHomeScreen) -> Bool {
+        hasSameContent(as: remote.configuration, includingFolders: remote.carriesFolders)
+    }
+
+    /// Takes a server copy. From a schema 1 server the local folders are kept
+    /// (minus apps that are gone) rather than wiped.
+    func adopting(_ remote: RemoteHomeScreen) -> HomeConfiguration {
+        guard !remote.carriesFolders else { return remote.configuration }
+        var next = remote.configuration
+        next.folders = folders
+        return next.sanitizingFolders()
+    }
+
+    /// Drops folder members that are no longer installed, pinned to the dock or
+    /// already in an earlier folder, then folders left empty.
+    func sanitizingFolders() -> HomeConfiguration {
+        var next = self
+        let installed = Set(installedApps.map(\.appId)), docked = Set(dockApps.map(\.appId))
+        var seen = Set<String>()
+        next.folders = folders.compactMap { folder in
+            var folder = folder
+            folder.appIds = folder.appIds.filter { installed.contains($0) && !docked.contains($0) && seen.insert($0).inserted }
+            return folder.appIds.isEmpty ? nil : folder
+        }
+        return next
+    }
+
+    func folder(containing appId: String) -> HomeFolder? { folders.first { $0.appIds.contains(appId) } }
+
     func validate() throws {
         let groups = [installedApps.map(\.appId), dockApps.map(\.appId), recentApps.map(\.appId)]
         guard installedApps.count <= 1000, dockApps.count <= 4, recentApps.count <= 100, updatedAt >= 0, updatedAt <= 9_007_199_254_740_991,
@@ -26,6 +76,25 @@ struct HomeConfiguration: Codable, Equatable, Sendable {
                       && !$0.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 })
                   }
               }) else { throw HomeSyncError.invalidResponse }
+        let installed = Set(installedApps.map(\.appId))
+        var folderIDs = Set<String>(), members = Set<String>()
+        guard folders.count <= HomeFolder.limit, folders.allSatisfy({ folder in
+            folder.id.range(of: #"^[A-Za-z0-9_-]{1,64}$"#, options: .regularExpression) != nil
+                && folderIDs.insert(folder.id).inserted && HomeFolder.isValidName(folder.name) && !folder.appIds.isEmpty
+                && folder.appIds.allSatisfy { installed.contains($0) && members.insert($0).inserted }
+        }) else { throw HomeSyncError.invalidResponse }
+    }
+}
+extension HomeConfiguration {
+    enum CodingKeys: String, CodingKey { case installedApps, dockApps, recentApps, updatedAt, folders }
+    /// `folders` is absent from schema 1 data and from snapshots saved before folders.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        installedApps = try c.decode([HomeAppReference].self, forKey: .installedApps)
+        dockApps = try c.decode([HomeAppReference].self, forKey: .dockApps)
+        recentApps = try c.decode([HomeRecentReference].self, forKey: .recentApps)
+        updatedAt = try c.decode(Int64.self, forKey: .updatedAt)
+        folders = try c.decodeIfPresent([HomeFolder].self, forKey: .folders) ?? []
     }
 }
 struct RemoteHomeScreen: Codable, Equatable, Sendable {
@@ -33,8 +102,10 @@ struct RemoteHomeScreen: Codable, Equatable, Sendable {
     let revision: String?
     let configuration: HomeConfiguration
     enum CodingKeys: String, CodingKey { case schemaVersion, revision, configuration }
+    /// Schema 2 servers store folders; schema 1 responses never mention them.
+    var carriesFolders: Bool { schemaVersion >= 2 }
     func validate() throws {
-        guard schemaVersion == 1,
+        guard schemaVersion == 1 || schemaVersion == 2, schemaVersion == 2 || configuration.folders.isEmpty,
               revision == nil || (revision?.count == 64 && revision?.allSatisfy({ $0.isHexDigit && !$0.isUppercase }) == true)
         else { throw HomeSyncError.invalidResponse }
         try configuration.validate()
@@ -54,12 +125,23 @@ extension RemoteHomeScreen {
     }
 }
 struct HomeScreenWrite: Codable, Sendable {
+    static let schemaVersion = 2
     let baseRevision: String?
     let mutationId: String
     let configuration: HomeConfiguration
-    enum CodingKeys: String, CodingKey { case baseRevision, mutationId, configuration }
+    enum CodingKeys: String, CodingKey { case schemaVersion, baseRevision, mutationId, configuration }
+    init(baseRevision: String?, mutationId: String, configuration: HomeConfiguration) {
+        self.baseRevision = baseRevision; self.mutationId = mutationId; self.configuration = configuration
+    }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        baseRevision = try c.decodeIfPresent(String.self, forKey: .baseRevision)
+        mutationId = try c.decode(String.self, forKey: .mutationId)
+        configuration = try c.decode(HomeConfiguration.self, forKey: .configuration)
+    }
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(Self.schemaVersion, forKey: .schemaVersion)
         if let baseRevision { try container.encode(baseRevision, forKey: .baseRevision) }
         else { try container.encodeNil(forKey: .baseRevision) }
         try container.encode(mutationId, forKey: .mutationId)

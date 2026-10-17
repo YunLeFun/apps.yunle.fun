@@ -141,7 +141,7 @@ final class HomeSyncCoordinator: ObservableObject {
             }
             try ensureCurrent(uid: uid, generation: generation)
             let local = library.snapshot
-            if !local.hasPendingChanges || local.configuration.hasSameContent(as: remote.configuration) {
+            if !local.hasPendingChanges || local.configuration.matches(remote) {
                 try library.adopt(remote)
             } else if local.base?.revision == remote.revision {
                 let write = HomeScreenWrite(baseRevision: remote.revision, mutationId: local.mutationId, configuration: local.configuration)

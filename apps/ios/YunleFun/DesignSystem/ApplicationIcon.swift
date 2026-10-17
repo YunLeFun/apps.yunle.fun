@@ -20,11 +20,50 @@ struct ApplicationIcon: View {
     private var fallback: some View {
         ZStack {
             Color(uiColor: .tertiarySystemFill)
-            Text(application.emoji?.nilIfEmpty ?? String(application.name.prefix(1)))
-                .font(.system(size: size * 0.48, weight: .medium))
-                .foregroundStyle(.primary)
-                .minimumScaleFactor(0.5)
+            ApplicationPlaceholderImage(text: application.emoji?.nilIfEmpty ?? String(application.name.prefix(1)),
+                                        size: size, scale: displayScale, colorScheme: colorScheme)
         }
+    }
+}
+
+private struct ApplicationPlaceholderImage: View {
+    let text: String
+    let size: CGFloat
+    let scale: CGFloat
+    let colorScheme: ColorScheme
+
+    var body: some View {
+        Group {
+            if let image = ApplicationPlaceholderImages.image(text: text, size: size, scale: scale, colorScheme: colorScheme) {
+                Image(uiImage: image).renderingMode(.original).resizable().scaledToFit()
+            } else { Image(systemName: "app") }
+        }
+    }
+}
+
+@MainActor
+private enum ApplicationPlaceholderImages {
+    private static let cache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.countLimit = 128
+        cache.totalCostLimit = 8 * 1024 * 1024
+        return cache
+    }()
+
+    static func image(text: String, size: CGFloat, scale: CGFloat, colorScheme: ColorScheme) -> UIImage? {
+        let key = "\(text)|\(size)|\(scale)|\(colorScheme)" as NSString
+        if let image = cache.object(forKey: key) { return image }
+        let renderer = ImageRenderer(content: Text(text)
+            .font(.system(size: size * 0.48, weight: .medium))
+            .foregroundStyle(Color.primary)
+            .minimumScaleFactor(0.5)
+            .frame(width: size, height: size)
+            .environment(\.colorScheme, colorScheme))
+        renderer.scale = scale
+        guard let image = renderer.uiImage else { return nil }
+        let cost = image.cgImage.map { $0.bytesPerRow * $0.height } ?? 0
+        cache.setObject(image, forKey: key, cost: cost)
+        return image
     }
 }
 
@@ -101,16 +140,15 @@ struct ApplicationRow: View {
 
     private var description: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(application.name).font(.headline).fixedSize(horizontal: false, vertical: true)
-            Text(application.summary).font(.subheadline).foregroundStyle(.secondary)
-                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+            Text(application.name).font(.headline).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
+            Text(application.summary).font(.subheadline).foregroundStyle(Color.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func accessLabel(_ label: String) -> some View {
-        Text(label).font(.caption).foregroundStyle(.secondary)
+        Text(label).font(.caption).foregroundStyle(Color.primary)
             .fixedSize(horizontal: false, vertical: true)
     }
 }

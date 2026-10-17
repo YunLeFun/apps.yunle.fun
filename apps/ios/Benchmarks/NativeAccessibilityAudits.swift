@@ -19,12 +19,17 @@ final class NativeAccessibilityAudits: XCTestCase {
         continueAfterFailure = false
         let app = XCUIApplication(bundleIdentifier: "fun.yunle.apps.benchmark-dev")
         app.launchArguments += ["-UIPreferredContentSizeCategoryName", large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
+        if let appearance = ProcessInfo.processInfo.environment["YLF_ACCESSIBILITY_APPEARANCE"] {
+            XCTAssertTrue(["system", "light", "dark"].contains(appearance))
+            app.launchArguments += ["-appearance", appearance]
+        }
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
         app.tabBars.buttons["我"].tap()
-        guard app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch.waitForExistence(timeout: 5) else {
+        guard app.buttons["me.login"].waitForExistence(timeout: 5) else {
             throw XCTSkip("This audit requires a guest Benchmark app; do not sign out an existing account")
         }
+        XCTAssertTrue(app.buttons["me.login"].label.hasPrefix("登录云乐坊"))
         if tab != "我" { app.tabBars.buttons[tab].tap() }
         XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 5))
         if tab == "寻乐" {
@@ -50,6 +55,8 @@ final class NativeAccessibilityAudits: XCTestCase {
             element=\(element?.label ?? "none")
             identifier=\(element?.identifier ?? "none")
             frame=\(element.map { String(describing: $0.frame) } ?? "none")
+            hittable=\(element.map { String($0.isHittable) } ?? "none")
+            window=\(app.frame)
             """
             let attachment = XCTAttachment(string: description)
             attachment.name = "accessibility-issue-\(tab)-\(large ? "largest" : "standard")"

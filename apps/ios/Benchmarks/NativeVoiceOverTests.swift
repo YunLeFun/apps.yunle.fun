@@ -1,0 +1,202 @@
+import XCTest
+
+@MainActor
+final class NativeVoiceOverTests: XCTestCase {
+    private final class SpeechLog { var lines: [String] = [] }
+    private let transcript = SpeechLog()
+    private var transcriptName = ""
+    private var inspectedApp: XCUIApplication?
+    private var originalVoiceOverState: Bool?
+
+    override func tearDownWithError() throws {
+        if #available(iOS 27, *), let originalVoiceOverState {
+            let service = XCUIDevice.shared.voiceOverService
+            if service.isEnabled != originalVoiceOverState {
+                if originalVoiceOverState { try service.enable() } else { try service.disable() }
+            }
+            transcript.lines.append("restoredEnabled: \(service.isEnabled); expected: \(originalVoiceOverState)")
+            XCTAssertEqual(service.isEnabled, originalVoiceOverState, "Restore the original VoiceOver state")
+        }
+        let attachment = XCTAttachment(string: transcript.lines.joined(separator: "\n"))
+        attachment.name = "voiceover-speech-\(transcriptName)"; attachment.lifetime = .keepAlways; add(attachment)
+        if inspectedApp != nil {
+            let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            screenshot.name = "voiceover-return-screen-\(transcriptName)"; screenshot.lifetime = .keepAlways; add(screenshot)
+        }
+        try super.tearDownWithError()
+    }
+
+    func testMeAtStandardText() throws { try checkMe(large: false) }
+    func testMeAtLargestText() throws { try checkMe(large: true) }
+    func testCatalogAtStandardText() throws { try checkCatalog(large: false) }
+    func testCatalogAtLargestText() throws { try checkCatalog(large: true) }
+    func testLoginAtStandardText() throws { try checkLogin(large: false) }
+    func testLoginAtLargestText() throws { try checkLogin(large: true) }
+    func testCatalogApplicationAtStandardText() throws { try checkCatalogApplication(large: false) }
+    func testCatalogApplicationAtLargestText() throws { try checkCatalogApplication(large: true) }
+
+    private func guestApp(tab: String, large: Bool) throws -> XCUIApplication {
+        guard ProcessInfo.processInfo.environment["YLF_VOICEOVER_VALIDATION"] == "1" else {
+            throw XCTSkip("Enable the explicit guest VoiceOver journeys separately from daily tests")
+        }
+        continueAfterFailure = false
+        let app = XCUIApplication(bundleIdentifier: "fun.yunle.apps.benchmark-dev")
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName", large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
+        if let appearance = ProcessInfo.processInfo.environment["YLF_ACCESSIBILITY_APPEARANCE"] {
+            XCTAssertTrue(["system", "light", "dark"].contains(appearance))
+            app.launchArguments += ["-appearance", appearance]
+        }
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["我"].tap()
+        XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+        guard app.buttons["me.login"].waitForExistence(timeout: 5) else {
+            throw XCTSkip("Use a guest Benchmark app; do not sign out an existing account")
+        }
+        if tab != "我" { app.tabBars.buttons[tab].tap() }
+        XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 5))
+        if tab == "工坊" {
+            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "全部应用 · ")).firstMatch.waitForExistence(timeout: 15))
+        }
+        return app
+    }
+
+    private func checkMe(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "我", large: large)
+        try withVoiceOver(app: app, name: "me-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek("登录云乐坊", service: voiceOver, speech: speech)
+            for label in ["云居中的应用", "钱包", "云乐坊会员", "我的应用", "个人工坊", "账号管理", "设置"] {
+                try next(label, service: voiceOver, speech: speech)
+            }
+            app.buttons["设置"].doubleTap()
+            XCTAssertTrue(app.navigationBars["设置"].waitForExistence(timeout: 5))
+            try seek("显示模式", service: voiceOver, speech: speech)
+            try seek("我", service: voiceOver, speech: speech, forward: false, labelBoundary: true)
+            app.navigationBars["设置"].buttons.element(boundBy: 0).doubleTap()
+            XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+            expectFocus("设置", service: voiceOver, speech: speech)
+            for label in ["关于云乐坊", "支持", "我的举报", "使用帮助", "反馈与建议"] {
+                try next(label, service: voiceOver, speech: speech)
+            }
+        }
+    }
+
+    private func checkLogin(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "我", large: large)
+        try withVoiceOver(app: app, name: "login-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek("登录云乐坊", service: voiceOver, speech: speech)
+            app.buttons["me.login"].doubleTap()
+            XCTAssertTrue(app.navigationBars["账号"].waitForExistence(timeout: 5))
+            try seek("手机号", service: voiceOver, speech: speech)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "voiceover-login-field-\(large ? "largest" : "standard")"
+            screenshot.lifetime = .keepAlways; add(screenshot)
+            try seek("取消", service: voiceOver, speech: speech, forward: false)
+            app.buttons["取消"].doubleTap()
+            XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+            expectFocus("登录云乐坊", service: voiceOver, speech: speech)
+        }
+    }
+
+    private func checkCatalogApplication(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "工坊", large: large)
+        try withVoiceOver(app: app, name: "catalog-application-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek("FC 红白机", service: voiceOver, speech: speech)
+            let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "catalog.application.", "FC 红白机")).firstMatch
+            XCTAssertTrue(row.exists)
+            let utterance = try voiceOver.currentSpeech().utterance
+            XCTAssertTrue(normalized(utterance).contains(normalized(row.label)), "Read the full application title and summary")
+            let title = app.staticTexts["FC 红白机"]
+            let summary = app.staticTexts["基于 JSNES 与 Vue 实现的红白机 FC"]
+            let revealed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                guard title.exists, summary.exists else { return false }
+                let top = app.navigationBars["工坊"].frame.maxY
+                let bottom = app.tabBars.firstMatch.frame.minY
+                return title.frame.minY >= top - 1 && summary.frame.maxY <= bottom + 1
+            }, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [revealed], timeout: 5), .completed,
+                           "VoiceOver must reveal the focused title and summary between the system bars")
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "voiceover-application-revealed-\(large ? "largest" : "standard")"
+            screenshot.lifetime = .keepAlways; add(screenshot)
+        }
+    }
+
+    private func normalized(_ value: String) -> String {
+        String(value.lowercased().filter { $0.isLetter || $0.isNumber })
+    }
+
+    private func checkCatalog(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "工坊", large: large)
+        try withVoiceOver(app: app, name: "catalog-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek("搜索应用", service: voiceOver, speech: speech)
+            for label in ["我的应用", "个人工坊", "打开个人工坊"] {
+                try next(label, service: voiceOver, speech: speech)
+            }
+            app.buttons["打开个人工坊"].doubleTap()
+            XCTAssertTrue(app.navigationBars["打开个人工坊"].waitForExistence(timeout: 5))
+            try seek("工坊编号或链接", service: voiceOver, speech: speech)
+            try next("打开工坊", service: voiceOver, speech: speech)
+            XCTAssertFalse(app.buttons["workshop.lookup.open"].isEnabled)
+            try seek("工坊", service: voiceOver, speech: speech, forward: false, labelBoundary: true)
+            app.navigationBars["打开个人工坊"].buttons.element(boundBy: 0).doubleTap()
+            XCTAssertTrue(app.navigationBars["工坊"].waitForExistence(timeout: 5))
+            expectFocus("打开个人工坊", service: voiceOver, speech: speech)
+        }
+    }
+
+    @available(iOS 27, *)
+    private func withVoiceOver(app: XCUIApplication, name: String,
+                               body: (XCUIVoiceOverService, SpeechLog) throws -> Void) throws {
+        let service = XCUIDevice.shared.voiceOverService
+        originalVoiceOverState = service.isEnabled
+        inspectedApp = app; transcriptName = name
+        transcript.lines = ["initiallyEnabled: \(service.isEnabled)"]
+        if !service.isEnabled { try service.enable() }
+        XCTAssertTrue(service.isEnabled)
+        transcript.lines.append("initial: \(try service.currentSpeech().utterance)")
+        try body(service, transcript)
+    }
+
+    @available(iOS 27, *)
+    private func expectFocus(_ label: String, service: XCUIVoiceOverService, speech: SpeechLog) {
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            guard let output = try? service.currentSpeech() else { return false }
+            let line = "return: \(output.utterance)"
+            if speech.lines.last != line { speech.lines.append(line) }
+            return output.utterance.contains(label)
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed,
+                       "Returning must restore VoiceOver focus to \(label)")
+        XCTAssertTrue(service.isEnabled)
+    }
+
+    @available(iOS 27, *)
+    private func seek(_ label: String, service: XCUIVoiceOverService, speech: SpeechLog,
+                      forward: Bool = true, labelBoundary: Bool = false) throws {
+        var previous: String?
+        var repeated = 0
+        for _ in 0..<25 {
+            let utterance = try service.currentSpeech().utterance
+            speech.lines.append("focus: \(utterance)")
+            if utterance.contains(label) && (!labelBoundary || utterance == label || utterance.hasPrefix(label + " ") || utterance.hasPrefix(label + "，") || utterance.hasPrefix(label + ",")) { return }
+            repeated = previous == utterance ? repeated + 1 : 0
+            if repeated == 3 { break }
+            previous = utterance
+            let moved = try forward ? service.moveForward() : service.moveBackward()
+            speech.lines.append("\(forward ? "next" : "previous"): \(moved.utterance)")
+        }
+        XCTFail("VoiceOver could not reach \(label)")
+    }
+
+    @available(iOS 27, *)
+    private func next(_ label: String, service: XCUIVoiceOverService, speech: SpeechLog) throws {
+        let utterance = try service.moveForward().utterance
+        speech.lines.append("next: \(utterance)")
+        XCTAssertTrue(utterance.contains(label), "Expected the next VoiceOver stop to be \(label); heard \(utterance)")
+    }
+}

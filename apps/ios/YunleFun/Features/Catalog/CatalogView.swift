@@ -6,39 +6,20 @@ struct CatalogView: View {
     @State private var query = ""
     @State private var category = "全部"
     @State private var showScanner = false
+    @State private var returningShortcut: Shortcut?
+    @AccessibilityFocusState(for: .voiceOver) private var focusedShortcut: Shortcut?
+    private enum Shortcut: Hashable { case applications, workshops, lookup }
 
     private var filtered: [CloudApplication] {
         catalog.applications.filter { (category == "全部" || $0.browseCategory == category) && $0.matches(query) }
     }
 
     var body: some View {
-        List {
-            Section {
-                NavigationLink { MyApplicationsView() } label: { shortcutLabel("我的应用", systemImage: "square.and.pencil") }
-                NavigationLink { MyWorkshopsView() } label: { shortcutLabel("个人工坊", systemImage: "person.2") }
-                NavigationLink { WorkshopLookupView() } label: { shortcutLabel("打开个人工坊", systemImage: "number") }
-            }
-            CatalogStatusView()
-            if catalog.isLoading && catalog.applications.isEmpty {
-                ProgressView("正在载入工坊").frame(maxWidth: .infinity).padding()
-            } else if let error = catalog.error, catalog.applications.isEmpty {
-                ContentStateView(title: "暂时无法连接工坊", systemImage: "wifi.exclamationmark", message: error,
-                                 actionTitle: "重试", action: { Task { await catalog.load() } })
-            } else if filtered.isEmpty {
-                ContentStateView(title: query.isEmpty ? "还没有应用" : "没有找到相关应用", systemImage: "magnifyingglass",
-                                 message: query.isEmpty ? "稍后再来看看。" : "试试其他关键词或分类。")
-            } else {
-                Section {
-                    ForEach(filtered) { app in
-                        NavigationLink(value: app) { ApplicationRow(application: app) }
-                    }
-                } header: {
-                    Text(category == "全部" ? "全部应用 · \(filtered.count)" : "\(category) · \(filtered.count)")
-                        .foregroundStyle(Color.primary)
-                }
-            }
-        }
+        content
         .navigationTitle("工坊")
+        .onAppear {
+            if let returningShortcut { focusedShortcut = returningShortcut; self.returningShortcut = nil }
+        }
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .workshop) }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
@@ -58,11 +39,53 @@ struct CatalogView: View {
         }
     }
 
+    private var content: some View {
+        List {
+            Section {
+                shortcut("我的应用", systemImage: "square.and.pencil", entry: .applications) { MyApplicationsView() }
+                shortcut("个人工坊", systemImage: "person.2", entry: .workshops) { MyWorkshopsView() }
+                shortcut("打开个人工坊", systemImage: "number", entry: .lookup) { WorkshopLookupView() }
+            }
+            CatalogStatusView()
+            if catalog.isLoading && catalog.applications.isEmpty {
+                ProgressView("正在载入工坊").frame(maxWidth: .infinity).padding()
+            } else if let error = catalog.error, catalog.applications.isEmpty {
+                ContentStateView(title: "暂时无法连接工坊", systemImage: "wifi.exclamationmark", message: error,
+                                 actionTitle: "重试", action: { Task { await catalog.load() } })
+            } else if filtered.isEmpty {
+                ContentStateView(title: query.isEmpty ? "还没有应用" : "没有找到相关应用", systemImage: "magnifyingglass",
+                                 message: query.isEmpty ? "稍后再来看看。" : "试试其他关键词或分类。")
+            } else {
+                Section {
+                    ForEach(filtered) { app in
+                        NavigationLink(value: app) { ApplicationRow(application: app) }
+                            .accessibilityIdentifier("catalog.application.\(app.id)")
+                    }
+                } header: {
+                    Text(category == "全部" ? "全部应用 · \(filtered.count)" : "\(category) · \(filtered.count)")
+                        .foregroundStyle(Color.primary)
+                }
+            }
+        }
+    }
+
+    private func shortcut<Destination: View>(_ title: String, systemImage: String, entry: Shortcut,
+                                             @ViewBuilder destination: @escaping () -> Destination) -> some View {
+        NavigationLink { destination().onAppear { returningShortcut = entry; focusedShortcut = nil } } label: {
+            shortcutLabel(title, systemImage: systemImage)
+        }
+        .accessibilityFocused($focusedShortcut, equals: entry)
+    }
+
     @ViewBuilder private func shortcutLabel(_ title: String, systemImage: String) -> some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Text(title).fixedSize(horizontal: false, vertical: true)
+            Text(title).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
         } else {
-            Label(title, systemImage: systemImage)
+            Label {
+                Text(title).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: systemImage).font(.body).accessibilityHidden(true)
+            }
         }
     }
 }

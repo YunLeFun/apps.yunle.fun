@@ -119,3 +119,7 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 该修正的导入专项本机 **19 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-16T20-08-41-527Z_pid44279_f2a65b35.xcresult`。组合手机号 / 密码用例在托管执行耗时 114 秒，现拆为独立登录旅程，每项仍保持原 120 秒时限及实际输入 / 键盘可操作 / 收起断言。新建隔离模拟器 **7 UI 通过，0 失败 / 跳过**：`test_sim_2026-10-16T20-13-59-437Z_pid44279_eba5992b.xcresult`；完整日常现为 262 单元 / 集成 + 7 UI，共 269 项，最新远端仍以自身终态为准。
 
 夹具的完成事件还核对实际固定 URL 后，持久化记录专项另 **1 项通过**：`test_sim_2026-10-16T20-23-39-544Z_pid44279_70d1b010.xcresult`。导航到其他页面不能触发样例写入的就绪信号。
+
+`167aed5` 的[第六轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38962372915)完整成功：**262 单元 / 集成 + 7 UI，共 269 项通过，0 失败 / 跳过**；Release 模拟器编译及隔离模拟器删除成功。同提交的 Web / 移动端、Chromium、macOS / Windows / Linux 桌面与 GitGuardian 一并通过，共七项检查成功。前五轮失败记录继续保留。
+
+后续字号与 VoiceOver 改进的本机专项分别见[系统审计](./ios-accessibility-audits.md)和[VoiceOver 验证](./ios-voiceover-validation.md)。显式 Benchmark 审计与 VoiceOver 不在日常 269 项之内；系统审计失败不能被日常绿色检查覆盖。当前提交的远端终态继续记录在[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)，不使用上一提交的结果代替。

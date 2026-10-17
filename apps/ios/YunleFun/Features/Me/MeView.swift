@@ -5,12 +5,17 @@ struct MeView: View {
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showLogin = false
+    @State private var returningEntry: Entry?
+    @AccessibilityFocusState(for: .voiceOver) private var focusedEntry: Entry?
+
+    private enum Entry: Hashable { case profile, login, wallet, membership, applications, workshops, accounts, settings, about, reports }
 
     var body: some View {
         List {
             Section {
                 if let user = accounts.user {
-                    NavigationLink { AccountProfileView() } label: { AccountIdentityLabel(user: user) }
+                    NavigationLink { AccountProfileView().onAppear { returningEntry = .profile; focusedEntry = nil } } label: { AccountIdentityLabel(user: user) }
+                        .accessibilityFocused($focusedEntry, equals: .profile)
                 } else {
                     Button { showLogin = true } label: {
                         Group {
@@ -26,6 +31,7 @@ struct MeView: View {
                         .padding(.vertical, 8)
                     }
                     .accessibilityIdentifier("me.login")
+                    .accessibilityFocused($focusedEntry, equals: .login)
                 }
                 LabeledContent("云居中的应用", value: "\(library.snapshot.applications.count)")
             }
@@ -37,35 +43,61 @@ struct MeView: View {
                 }
             }
             Section {
-                NavigationLink { WalletView() } label: { Label("钱包", systemImage: "wallet.pass") }
-                NavigationLink { MembershipView() } label: { Label("云乐坊会员", systemImage: "crown") }
-                NavigationLink { MyApplicationsView() } label: { Label("我的应用", systemImage: "square.and.pencil") }
-                NavigationLink { MyWorkshopsView() } label: { Label("个人工坊", systemImage: "person.2.crop.square.stack") }
-                NavigationLink { AccountManagementView() } label: { Label("账号管理", systemImage: "person.2") }
-                NavigationLink { SettingsView() } label: { Label("设置", systemImage: "gearshape") }
-                NavigationLink { AboutView() } label: { Label("关于云乐坊", systemImage: "info.circle") }
+                navigationRow("钱包", systemImage: "wallet.pass", entry: .wallet) { WalletView() }
+                navigationRow("云乐坊会员", systemImage: "crown", entry: .membership) { MembershipView() }
+                navigationRow("我的应用", systemImage: "square.and.pencil", entry: .applications) { MyApplicationsView() }
+                navigationRow("个人工坊", systemImage: "person.2.crop.square.stack", entry: .workshops) { MyWorkshopsView() }
+                navigationRow("账号管理", systemImage: "person.2", entry: .accounts) { AccountManagementView() }
+                navigationRow("设置", systemImage: "gearshape", entry: .settings) { SettingsView() }
+                navigationRow("关于云乐坊", systemImage: "info.circle", entry: .about) { AboutView() }
             }
             Section {
-                NavigationLink { MyReportsView() } label: { Label("我的举报", systemImage: "flag") }
-                Link(destination: URL(string: "https://www.yunle.fun/docs")!) { Label("使用帮助", systemImage: "questionmark.circle") }
+                Text("支持").font(.headline).foregroundStyle(Color.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                navigationRow("我的举报", systemImage: "flag", entry: .reports) { MyReportsView() }
+                Link(destination: URL(string: "https://www.yunle.fun/docs")!) { navigationLabel("使用帮助", systemImage: "questionmark.circle") }
                 Link(destination: URL(string: "https://github.com/YunLeFun/apps.yunle.fun/issues")!) {
-                    Label("反馈与建议", systemImage: "bubble.left.and.bubble.right")
+                    navigationLabel("反馈与建议", systemImage: "bubble.left.and.bubble.right")
                 }
-            } header: {
-                Text("支持").foregroundStyle(Color.primary)
             }
         }
         .navigationTitle("我")
-        .sheet(isPresented: $showLogin) { LoginView() }
+        .onAppear {
+            if let returningEntry { focusedEntry = returningEntry; self.returningEntry = nil }
+        }
+        .sheet(isPresented: $showLogin, onDismiss: { focusedEntry = accounts.user == nil ? .login : .profile }) {
+            LoginView().onAppear { focusedEntry = nil }
+        }
+    }
+
+    private func navigationRow<Destination: View>(_ title: String, systemImage: String, entry: Entry,
+                                                  @ViewBuilder destination: @escaping () -> Destination) -> some View {
+        NavigationLink { destination().onAppear { returningEntry = entry; focusedEntry = nil } } label: {
+            navigationLabel(title, systemImage: systemImage)
+        }
+        .accessibilityFocused($focusedEntry, equals: entry)
+    }
+
+    @ViewBuilder private func navigationLabel(_ title: String, systemImage: String) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Text(title).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
+        } else {
+            Label {
+                Text(title).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: systemImage).font(.body).accessibilityHidden(true)
+            }
+        }
     }
 
     private var loginIcon: some View {
-        Image(systemName: "person.crop.circle").font(.largeTitle)
+        Image(systemName: "person.crop.circle").font(.largeTitle).accessibilityHidden(true)
     }
 
     private var loginText: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("登录云乐坊").font(.headline)
+            Text("登录云乐坊").font(.headline).foregroundStyle(Color.primary)
             Text("继续你的应用生活").font(.subheadline).foregroundStyle(Color.primary)
         }
         .fixedSize(horizontal: false, vertical: true)

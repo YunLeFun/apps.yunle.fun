@@ -12,11 +12,13 @@ struct DiscoveryView: View {
                 Section {
                     NavigationLink(value: featured) {
                         VStack(alignment: .leading, spacing: 20) {
-                            officialLabel.font(.subheadline).foregroundStyle(Color.primary)
+                            officialLabel.foregroundStyle(Color.primary)
                             ApplicationIcon(application: featured, size: 76)
                             VStack(alignment: .leading, spacing: 8) {
-                                Text(featured.name).font(.title2.bold())
-                                Text(featured.summary).font(.body).foregroundStyle(.secondary)
+                                Text(featured.name).font(.title2.bold()).foregroundStyle(Color.primary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(featured.summary).font(.body).foregroundStyle(Color.primary)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(.vertical, 16)
@@ -50,9 +52,13 @@ struct DiscoveryView: View {
 
     @ViewBuilder private var officialLabel: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Text("云乐坊出品").fixedSize(horizontal: false, vertical: true)
+            Text("云乐坊出品").font(.subheadline).fixedSize(horizontal: false, vertical: true)
         } else {
-            Label("云乐坊出品", systemImage: "sparkle")
+            Label {
+                Text("云乐坊出品").font(.subheadline).fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "sparkle").font(.subheadline).accessibilityHidden(true)
+            }
         }
     }
 }

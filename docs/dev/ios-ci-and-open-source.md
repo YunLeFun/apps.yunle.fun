@@ -156,7 +156,7 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 
 本轮原生帮助 / 反馈源码不在该提交内；按自身模拟器结果和新提交 CI 分别记录。冷 Cookie 清理、完整新提交 CI 与系统审计继续待验，不通过延长等待、重发应用打开或跳过失败关闭问题。
 
-只读复核未支持“没有先创建 WKWebView”这一根因：公开 WebKit 的 [Cookie 读取实现](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Source/WebKit/UIProcess/API/APIHTTPCookieStore.cpp#L81)会主动启动网络进程，[官方无预热测试](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WKHTTPCookieStore.mm#L462)也先于 WebView 创建读写 Cookie；默认 Store 有全局持有。CI 最初网络进程启动早于失败约 40 秒，但尚无中途重建或清理阶段记录，公开主线也不等于运行库的精确版本。下一步在原五秒预算内记录读取发起 / 返回数量、删除开始 / 完成数量、主队列通知和 Runtime 代次检查，再比较独立进程中默认参数、显式保活及同 Store 空 WebView 三种条件，不能先把预热当作修复。
+只读复核未支持“没有先创建 WKWebView”这一根因：公开 WebKit 的 [Cookie 读取实现](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Source/WebKit/UIProcess/API/APIHTTPCookieStore.cpp#L81)会主动启动网络进程，[官方无预热测试](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WKHTTPCookieStore.mm#L462)也先于 WebView 创建读写 Cookie；默认 Store 有全局持有。CI 最初网络进程启动早于失败约 40 秒，但当时尚无中途重建或清理阶段记录，公开主线也不等于运行库的精确版本。随后在原五秒预算内采集读取、删除、主队列通知和 Runtime 代次阶段，结果见下文；不能先把预热或持有方式当作修复。
 
 ## 原生帮助反馈的本机回归 · 2026-10-17
 
@@ -165,3 +165,49 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 唯一失败是标准字号手机号键盘用例超过原 120 秒。键盘收起后的交互状态检查及截图已完成，XCTest 日志记录未收到动画完成通知，随后取消操作卡于 idle 等待；尚未定因。两次完整运行均超过工具 300 秒观察窗口，继续跟踪各自原 PID 并从原始结果包核对终态，runner 自动重启后的局部绿色摘要不代表整轮通过。没有延长时限或重复执行后替换失败。
 
 锁包 Release 模拟器编译、根 lint 与文档构建通过；原生帮助 / 反馈四项实际 VoiceOver 另行通过。当前提交的托管状态以[草稿 PR #48 的头提交检查](https://github.com/YunLeFun/apps.yunle.fun/pull/48/checks)为准；此前绿色提交、本机部分通过和未完成的独立系统审计分别保留。
+
+## 帮助反馈提交的远端终态 · 2026-10-17
+
+`a35cc44` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39019145600)终态失败：**333 个不同用例，332 通过 / 1 失败 / 0 跳过**。323 个单元 / 集成中 322 通过、1 失败；10 个 UI 全部通过。唯一失败仍为 `HomeLayoutVisualTests.testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable` 的初次身份 Cookie 清理五秒超时；同一用例随后记录 `InvalidTransition { phase: idle, targetPhase: failed(deinit) }`，两个失败事件不能多算为两个失败用例。
+
+Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39019145536)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39019145590)及 GitGuardian 均成功，合计其余六项检查通过；原生项独立保留失败。
+
+远端计数、步骤终态与逐例结果归档于 `/tmp/yunlefun-ios-support-20261017/ci-a35cc44`，包括 `verification-summary.json`、`native-case-counts.json`、`pr-final-checks.json` 和原始 `native.log`。本节没有把尚未核对的远端完整 xcresult 附件用作内部阶段证据；以下阶段记录来自同源码的本机隔离复现。
+
+## 默认 Cookie 读取的隔离诊断 · 2026-10-17
+
+以 `a35cc44` 为基线，在专用 iPhone 18 Pro / iOS 27 模拟器串行运行，保留原五秒身份准备等待、120 秒默认用例预算和 180 秒最大用例预算。安装 / 启动准备耗时单列；工具观察窗口结束后继续跟踪原执行进程至终态，没有将观察超时作为测试重试。
+
+| 集合                         | 进程与执行计数                             | 已确认结果                                           | 原始结果包                                                     |
+| ---------------------------- | ------------------------------------------ | ---------------------------------------------------- | -------------------------------------------------------------- |
+| 无插桩的原始 Home 完整 class | 11 个不同用例，两个独立进程，共 22 次执行  | 每轮 10 通过 / 1 失败 / 0 跳过；均为同一初次清理超时 | `test_sim_2026-10-17T09-21-05-257Z_pid44279_4349ab5b.xcresult` |
+| 带 trace 的单独目标用例      | 1 个用例、一次执行                         | 1 通过 / 0 失败 / 0 跳过；不能代替完整 class         | `test_sim_2026-10-17T09-31-36-790Z_pid44279_6ec59f19.xcresult` |
+| 带 trace 的 Home 完整 class  | 相同 11 个用例，两个独立进程，共 22 次执行 | 每轮仍为 10 通过 / 1 失败 / 0 跳过                   | `test_sim_2026-10-17T09-35-56-655Z_pid44279_edfa5e10.xcresult` |
+
+临时 trace 只在 Debug 且测试进程设置 `YUNLEFUN_IDENTITY_CLEANUP_TRACE=1` 时启用，用锁保护最多 512 条事件；只记录固定阶段名、进程内 runtime / reset / operation 序号、计数、主线程布尔值及单调时间，不记录 Cookie 值、名称、域名、账号、URL 或错误文本。没有添加 Cookie 读取、写入或预热，没有额外持有 runtime / store，也没有修改清理允许名单、代次 guard、删除完成等待或超时。五秒准备失败时向 stdout 输出一次相同的有界快照，超时和夹具关闭时另附测试附件，避免只能依赖远端大附件下载来定位阶段。
+
+单例通过时，两个清理操作都实际读到零条 Cookie，并通过 owner / generation 检查。目标操作读取回调用时 204ms，空 group 的主队列通知另等待 3050ms；其中 OCR 占用主线程 2138ms，其后仍有 682ms 间隔。这只能说明该次通过执行存在额外通知调度等待，不能解释之后完整 class 的失败。
+
+两轮完整 class 的失败快照均无事件丢弃，卡点出现在真实 `getAllCookies` 回调之前：
+
+| trace 轮次 | 回调阶段                                                                                                                         | 五秒准备等待与活性证据                                                            | 快照中的未回调 Native 清理数 |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------- |
+| 第一次进程 | op1–3 读到零条并完成；op4–11 已发起读取且方法返回，却没有进入读取回调。最早未回调的 op4 已等待 17,773ms，目标 op11 已等待 6229ms | 等待 5001ms，97 次轮询，最大轮询间隔 53ms；所有 main probe 已执行，等待区间无 OCR | 8                            |
+| 第二次进程 | op1–11 均无读取回调入口；最早读取已等待 17,894ms，目标 op11 已等待 6114ms                                                        | 等待 5015ms，96 次轮询，最大轮询间隔 59ms；所有 main probe 已执行，等待区间无 OCR | 11                           |
+
+这里的“无回调”限于超时快照覆盖的窗口，不代表证明回调永远不会到达。主队列与 MainActor 轮询仍能前进，不能据此证明 WebKit 内部 IPC、转换或回调投递正常。失败操作没有到达删除、group notify 或 Runtime 代次检查阶段，因而**不支持用空 Cookie 集合直接 completion 的候选修复这两次失败**；本轮没有实施该候选，也没有延长五秒等待。仍按未修复记录。
+
+同一时段的 NetworkProcess 日志包含挂起 / 恢复转换：17:37:05.676 准备挂起、06.391 恢复、06.992 再挂起、07.334 恢复；这些状态记录没有给出 Cookie 请求到回调的完整链路，不能推断必须预热或默认 Store 未保活。[Apple 的公开读取契约](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/getallcookies%28_%3A%29)规定异步 MainActor completion；[WebKit 主线的转换与投递实现](https://github.com/WebKit/WebKit/blob/e1c510bc7fae8b20c296f2bcc3aeac3c5c8df578/Source/WebKit/UIProcess/API/Cocoa/WKHTTPCookieStore.mm#L76-L89)提供进一步分段的参考，但尚未建立与本机运行库精确版本的对应关系。
+
+本轮临时诊断插桩已从主工作目录的四个文件清理，未作为产品修复保留。`ios-identity-cleanup` 隔离 worktree 继续保留，原始失败结果、临时补丁、带 trace 的单例附件、两进程逐阶段汇总及 WebKit 日志归档于 `/tmp/yunlefun-ios-cookie-diagnosis-20261017`；`traced-home11-two-process-summary.md` 保留逐 operation 和 OCR 区间。诊断证据与原始失败均继续保留，后续仍需在真实完整 class 和新提交 CI 中验证修复。
+
+### 缩减为三用例后仍可复现
+
+随后在同一隔离 worktree 中仅选择原 class 的 `testCompactHomeWithLargestAccessibilityText`、`testCompactHomeWithStandardText` 和目标 `testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable`。沿用已准备测试产物中的两轮独立进程配置，日志实际包含 **3 个不同用例、6 次执行，每轮 2 通过 / 1 失败**；不是新增六个不同用例。两轮目标均在原五秒初次身份清理等待处失败，随后各记录同一用例的 `InvalidTransition` 事件。
+
+| 三用例轮次 | 读取回调阶段                                  | 目标五秒等待                                      | 快照中的未回调 Native 清理数 |
+| ---------- | --------------------------------------------- | ------------------------------------------------- | ---------------------------- |
+| 第一次进程 | op1–3 已完成，目标 op4 发起读取后没有回调入口 | 6062→11093ms，共 5031ms；97 次轮询，最大间隔 62ms | 1                            |
+| 第二次进程 | op1–4 均没有读取回调入口                      | 4276→9292ms，共 5016ms；97 次轮询，最大间隔 53ms  | 4                            |
+
+两轮 main probe 都已执行，五秒等待区间没有 OCR；失败阶段仍在读取回调之前。结果包为 `test_sim_2026-10-17T09-42-32-310Z_pid44279_5148a697.xcresult`，原始日志为 `test_sim_2026-10-17T09-42-32-310Z_pid44279_7380d1ad.log`，两份有界快照另存 `/tmp/yunlefun-ios-cookie-diagnosis-20261017/minimized-three-trace.txt`。这将可复现集合从 11 例缩为“两个 CompactHome 前序 + 目标”三例，**尚未证明不能继续缩小，也不是修复或最小复现完成**；原清理边界和五秒预算保持。

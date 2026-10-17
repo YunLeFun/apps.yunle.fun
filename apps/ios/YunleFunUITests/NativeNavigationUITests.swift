@@ -72,11 +72,16 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertLessThan(dismiss.frame.maxY, keyboard.frame.minY)
         dismiss.tap()
         let hidden = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            // UIKit can retain a Keyboard accessibility node after its UI has
-            // left the screen. Neither the keyboard nor a typing key may
-            // remain interactive; releasing focus must also remove the action.
-            guard keyboard.exists else { return !dismiss.exists }
-            return !keyboard.isHittable && (!typingKey.exists || !typingKey.isHittable) && !dismiss.exists
+            // Query current matches instead of re-resolving the old keyboard
+            // node: XCTest retries a removed node, consuming this whole wait
+            // even when the keyboard and focus action have already disappeared.
+            // Retained keyboard nodes and typing keys must still be inert.
+            guard app.buttons.matching(identifier: "login.dismiss-keyboard").count == 0 else { return false }
+            return app.keyboards.allElementsBoundByIndex.allSatisfy { currentKeyboard in
+                !currentKeyboard.isHittable && currentKeyboard.descendants(matching: .any)
+                    .matching(NSPredicate(format: "label IN %@", ["1", "a", "A"]))
+                    .allElementsBoundByIndex.allSatisfy { !$0.isHittable }
+            }
         }, object: nil)
         let dismissal = XCTWaiter.wait(for: [hidden], timeout: 5)
         let after = XCTAttachment(screenshot: XCUIScreen.main.screenshot())

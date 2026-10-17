@@ -59,6 +59,7 @@ test('catalog uses Chromium proxy routing while omitting cookies and refusing re
     await application.context().route('https://yunlefun-cos-1253292018.cos.ap-shanghai.myqcloud.com/**', route => route.abort())
     await application.context().tracing.start({ screenshots: true, snapshots: true, sources: true })
     const shell = await application.firstWindow()
+    await shell.waitForLoadState('domcontentloaded', { timeout: 15000 })
     await expect(shell.getByRole('heading', { name: '探索', exact: true })).toBeVisible()
     await expect.poll(() => shell.evaluate(async () => (await window.desktop!.getState()).catalog.loading)).toBe(false)
     expect(await shell.evaluate(async () => (await window.desktop!.getState()).catalog.source)).toBe('snapshot')

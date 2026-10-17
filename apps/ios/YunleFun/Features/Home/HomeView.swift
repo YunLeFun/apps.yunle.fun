@@ -49,10 +49,16 @@ struct HomeView: View {
                     }
                 }
                 .environment(\.editMode, .constant(.active))
-            } else if library.snapshot.applications.isEmpty && library.snapshot.dockApplications.isEmpty && runtime.applications.isEmpty {
+            } else if library.snapshot.applications.isEmpty && library.snapshot.dockApplications.isEmpty {
                 ScrollView {
-                    ContentStateView(title: "把喜欢的应用带回云居", systemImage: "square.grid.2x2",
-                                     message: "从工坊添加应用，下次打开更顺手。", actionTitle: "去工坊看看", action: browse)
+                    VStack(alignment: .leading, spacing: 24) {
+                        syncStatus
+                        runningApplicationsLink
+                        ContentStateView(title: "把喜欢的应用带回云居", systemImage: "square.grid.2x2",
+                                         message: "从工坊添加应用，下次打开更顺手。", actionTitle: "去工坊看看", action: browse)
+                            .accessibilityIdentifier("home.empty")
+                    }
+                    .padding()
                 }
             } else {
                 if dynamicTypeSize.isAccessibilitySize {
@@ -113,17 +119,57 @@ struct HomeView: View {
         app.refreshingPublicMetadata(with: catalog.application(id: app.id))
     }
 
-    @ViewBuilder private var homeSections: some View {
-        if accounts.user != nil {
+    @ViewBuilder private var syncStatus: some View {
+        if accounts.user != nil && library.snapshot.syncEnabled {
             switch sync.phase {
-            case .failed, .conflict:
-                NavigationLink { HomeSyncSettingsView() } label: {
+            case .syncing:
+                ProgressView("正在同步云居")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("home.sync.progress")
+            case .failed:
+                VStack(alignment: .leading, spacing: 12) {
                     Label(sync.message, systemImage: "exclamationmark.icloud")
-                        .font(.subheadline).frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.subheadline)
+                    Button("重试同步") { Task { await sync.recheck() } }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("home.sync.retry")
+                    NavigationLink("云居同步") { HomeSyncSettingsView() }
+                }
+            case .conflict:
+                NavigationLink { HomeSyncSettingsView() } label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label(sync.message, systemImage: "exclamationmark.icloud")
+                        Text("查看并选择要保留的版本").font(.subheadline)
+                    }
+                }
+                .accessibilityIdentifier("home.sync.conflict")
+            case .idle where library.snapshot.base == nil:
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("尚未同步", systemImage: "icloud")
+                    Text("此设备尚未读取云端云居。").font(.subheadline).foregroundStyle(.secondary)
+                    Button("立即同步") { Task { await sync.synchronize() } }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("home.sync.start")
                 }
             default: EmptyView()
             }
         }
+    }
+
+    @ViewBuilder private var runningApplicationsLink: some View {
+        if !runtime.applications.isEmpty {
+            NavigationLink { RunningApplicationsView() } label: {
+                Label("正在运行（\(runtime.applications.count)）", systemImage: "square.stack")
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityIdentifier("home.running")
+        }
+    }
+
+    @ViewBuilder private var homeSections: some View {
+        syncStatus
+        runningApplicationsLink
         if showRecent && library.snapshot.applications.count > 4 {
             let recent = Array(library.snapshot.recentApplications.prefix(4)).map(current)
             if !recent.isEmpty { section("最近使用", applications: recent) }
@@ -225,15 +271,22 @@ private struct RunningApplicationsView: View {
 
     var body: some View {
         List {
+            if runtime.applications.isEmpty {
+                ContentStateView(title: "还没有运行中的应用", systemImage: "square.stack",
+                                 message: "打开云居或工坊里的应用后，可在这里恢复或结束会话。")
+                    .accessibilityIdentifier("home.running.empty")
+            }
             ForEach(runtime.applications) { app in
                 Button { runtime.open(app, catalog: catalog, library: library) } label: {
                     ApplicationRow(application: app).foregroundStyle(.primary)
                 }
+                .accessibilityIdentifier("home.running.application.\(app.id)")
                 .swipeActions {
                     Button("结束", role: .destructive) { runtime.end(app) }
                 }
             }
         }
+        .accessibilityIdentifier("home.running.list")
         .navigationTitle("正在运行")
     }
 }

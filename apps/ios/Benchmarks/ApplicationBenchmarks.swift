@@ -149,6 +149,107 @@ final class ApplicationBenchmarks: XCTestCase {
         attach(app, name: "cloud-air-ended")
     }
 
+    func testNativeGuestCanRestoreCloudAirAfterRemovingLastHomeApplication() throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard !isLegacy, environment["YLF_LAST_APP_RUNTIME_UI"] == "1" else {
+            throw XCTSkip("Requires an explicitly opted-in, fresh owned guest Benchmark simulator")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This fixture-removal journey may only run in an owned iOS simulator")
+        #else
+        continueAfterFailure = false
+        guard let ownedSimulator = environment["YLF_OWNED_BENCHMARK_SIMULATOR_UDID"],
+              !ownedSimulator.isEmpty, ownedSimulator == environment["SIMULATOR_UDID"] else {
+            XCTFail("Set YLF_OWNED_BENCHMARK_SIMULATOR_UDID to this newly created Benchmark simulator's UDID")
+            return
+        }
+        let app = XCUIApplication(bundleIdentifier: "fun.yunle.apps.benchmark-dev")
+        app.launch()
+        app.tabBars.buttons["我"].tap()
+        let guestLogin = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch
+        guard guestLogin.waitForExistence(timeout: 5) else {
+            XCTFail("Never remove a home application from a signed-in account")
+            return
+        }
+        app.tabBars.buttons["云居"].tap()
+        let guidance = app.buttons["去工坊看看"]
+        let homeEntries = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开"))
+        guard guidance.waitForExistence(timeout: 5), homeEntries.count == 0,
+              !app.buttons["home.running"].exists else {
+            XCTFail("Requires a fresh empty guest home; never removes unrelated application data")
+            return
+        }
+        attach(app, name: "last-app-fresh-guest-fixture")
+
+        // Acquire the actual public application through the existing native catalog journey.
+        prepareNativeHome(app)
+        let open = app.buttons["打开云空调"]
+        guard open.waitForExistence(timeout: 10), homeEntries.count == 1,
+              homeEntries.firstMatch.label == "打开云空调" else {
+            XCTFail("Only the cloud-air application acquired by this fresh fixture may be removed")
+            return
+        }
+        open.tap()
+        let document = app.webViews.staticTexts["便携小空调"].firstMatch
+        XCTAssertTrue(document.waitForExistence(timeout: 20))
+        try expectPaintedCloudAir(app, name: "last-app-cloud-air-open")
+        app.buttons["收起应用"].tap()
+        XCTAssertTrue(open.waitForExistence(timeout: 5))
+        XCTAssertFalse(document.isHittable)
+
+        // Use the real home context menu, scoped to the only installation in this fixture.
+        guard homeEntries.count == 1, homeEntries.firstMatch.label == "打开云空调" else {
+            XCTFail("The known single-application fixture changed before removal")
+            return
+        }
+        open.press(forDuration: 1.2)
+        let remove = app.buttons["从云居移除"]
+        XCTAssertTrue(remove.waitForExistence(timeout: 5))
+        remove.tap()
+        XCTAssertTrue(guidance.waitForExistence(timeout: 5))
+        XCTAssertTrue(guidance.isHittable, "An empty home must still explain how to add applications")
+        XCTAssertEqual(homeEntries.count, 0, "Removal must remove the installation while retaining its running session")
+        let running = app.buttons["home.running"]
+        XCTAssertTrue(running.waitForExistence(timeout: 5))
+        XCTAssertTrue(running.isHittable, "The retained session needs a visible home entry")
+        XCTAssertTrue(running.label.contains("正在运行（1）"))
+        XCTAssertGreaterThanOrEqual(running.frame.height, 44, "The compact entry must retain a usable native touch region")
+        XCTAssertLessThanOrEqual(running.frame.height, 120, "Running applications should use a compact native home row")
+        attach(app, name: "last-app-removed-session-retained")
+
+        running.tap()
+        let runningNavigation = app.navigationBars["正在运行"]
+        XCTAssertTrue(runningNavigation.waitForExistence(timeout: 5))
+        let sessions = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home.running.application."))
+        XCTAssertEqual(sessions.count, 1)
+        let cloudAir = sessions.firstMatch
+        XCTAssertTrue(cloudAir.label.hasPrefix("云空调"))
+        XCTAssertTrue(cloudAir.isHittable)
+        cloudAir.tap()
+        XCTAssertTrue(document.waitForExistence(timeout: 5))
+        try expectPaintedCloudAir(app, name: "last-app-cloud-air-restored")
+        app.buttons["更多操作"].tap()
+        let end = app.buttons["结束"]
+        XCTAssertTrue(end.waitForExistence(timeout: 5))
+        end.tap()
+        XCTAssertTrue(runningNavigation.waitForExistence(timeout: 5))
+        XCTAssertEqual(sessions.count, 0)
+        XCTAssertTrue(app.staticTexts["还没有运行中的应用"].exists)
+        XCTAssertFalse(app.webViews.firstMatch.exists)
+        attach(app, name: "last-app-running-session-ended")
+        let back = runningNavigation.buttons["云居"]
+        XCTAssertTrue(back.exists)
+        back.tap()
+        XCTAssertTrue(app.navigationBars["云居"].waitForExistence(timeout: 5))
+        XCTAssertTrue(guidance.waitForExistence(timeout: 5))
+        XCTAssertTrue(guidance.isHittable)
+        XCTAssertFalse(running.exists, "Ending the final session must remove the home running entry")
+        XCTAssertEqual(homeEntries.count, 0)
+        XCTAssertFalse(app.webViews.firstMatch.exists)
+        attach(app, name: "last-app-empty-home-after-end")
+        #endif
+    }
+
     func testNativeGuestAuthorizationLoginCanBeCancelled() throws {
         guard !isLegacy else { throw XCTSkip("Verifies the native host broker") }
         continueAfterFailure = false

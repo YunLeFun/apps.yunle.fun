@@ -55,6 +55,8 @@ final class NativeWebRuntime: ObservableObject {
         if let memoryObserver { NotificationCenter.default.removeObserver(memoryObserver) }
     }
 
+    var isIdentityCleanupPending: Bool { isClearingIdentity }
+
     func contains(_ app: CloudApplication) -> Bool { sessions[app.id] != nil }
 
     func configureAuthorization(accounts: AccountStore) {

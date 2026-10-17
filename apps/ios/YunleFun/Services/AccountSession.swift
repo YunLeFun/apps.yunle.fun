@@ -149,10 +149,12 @@ actor AccountSession {
     }
 
     func updateProfile(name: String, description: String) async throws {
+        let generation = selectionGeneration
         let identity = try await authorization()
+        try requireCurrent(identity, generation: generation)
         try await api.updateProfile(userID: identity.userID, name: name, description: description,
                                     accessToken: identity.accessToken, deviceID: requestDeviceID())
-        guard try load().activeID == identity.userID else { throw AccountError.sessionChanged }
+        try requireCurrent(identity, generation: generation)
         try await refreshProfile()
     }
 

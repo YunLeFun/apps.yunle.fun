@@ -125,8 +125,13 @@ private struct ProfileEditView: View {
 
     var body: some View {
         Form {
-            Section("昵称") { TextField("昵称", text: $name).textContentType(.nickname) }
-            Section("个人简介") { TextField("介绍一下自己", text: $description, axis: .vertical).lineLimit(3...8) }
+            Section("昵称") {
+                TextField("昵称", text: $name).textContentType(.nickname).accessibilityIdentifier("profile.name")
+            }
+            Section("个人简介") {
+                TextField("介绍一下自己", text: $description, axis: .vertical).lineLimit(3...8)
+                    .accessibilityIdentifier("profile.description")
+            }
             if let error { Section { Text(error).foregroundStyle(.red) } }
             if busy { ProgressView().accessibilityLabel("正在保存资料") }
         }
@@ -148,6 +153,7 @@ private struct ProfileEditView: View {
                 }
                 .disabled(busy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                           (name == (user.name ?? "") && description == (user.description ?? "")))
+                .accessibilityIdentifier("profile.save")
             }
         }
     }

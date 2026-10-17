@@ -124,6 +124,53 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertTrue(revoked.users.isEmpty)
     }
 
+    func testLateProfileWriteAfterAccountRoundtripCannotRefreshOrSucceed() async throws {
+        let gate = AccountTestGate()
+        let api = AccountTestAPI(profileWriteGate: gate)
+        let session = AccountSession(api: api, vault: try vaultWithAccounts(["a", "b"]), now: { self.fixedNow })
+        let pending = Task { try await session.updateProfile(name: "旧编辑", description: "来自上一身份代次") }
+        await gate.waitUntilEntered()
+        try await session.select("b")
+        try await session.select("a")
+        let before = try await session.overview()
+        await gate.open()
+        do { try await pending.value; XCTFail("An old edit must not succeed after A to B to A") }
+        catch { XCTAssertEqual(error as? AccountError, .sessionChanged) }
+        let after = try await session.overview()
+        let reads = await api.userCount
+        XCTAssertEqual(after, before, "The stale completion must not refresh the current account projection")
+        XCTAssertEqual(reads, 0)
+    }
+
+    func testLateProfileWriteCannotRefreshANewerLoginOfTheSameAccount() async throws {
+        let gate = AccountTestGate()
+        let api = AccountTestAPI(profileWriteGate: gate)
+        let session = AccountSession(api: api, vault: try vaultWithAccounts(["a"]), now: { self.fixedNow })
+        let pending = Task { try await session.updateProfile(name: "旧编辑", description: "来自上一登录") }
+        await gate.waitUntilEntered()
+        try await session.passwordSignIn(identifier: "a", password: "test-password", captcha: nil)
+        let before = try await session.overview()
+        await gate.open()
+        do { try await pending.value; XCTFail("A late edit must not complete in the replacement login") }
+        catch { XCTAssertEqual(error as? AccountError, .sessionChanged) }
+        let after = try await session.overview()
+        let reads = await api.userCount
+        XCTAssertEqual(after, before)
+        XCTAssertEqual(reads, 1, "Only the new login may fetch its user; the old write must not fetch again")
+    }
+
+    func testCurrentProfileWriteRefreshesAndPersistsTheServerProfile() async throws {
+        let api = AccountTestAPI()
+        let vault = try vaultWithAccounts(["a"])
+        let session = AccountSession(api: api, vault: vault, now: { self.fixedNow })
+        try await session.updateProfile(name: "新昵称", description: "多行\n简介 🧩")
+        let overview = try await session.overview()
+        XCTAssertEqual(overview.activeUser?.name, "新昵称")
+        XCTAssertEqual(overview.activeUser?.description, "多行\n简介 🧩")
+        let restored = try await AccountSession(api: api, vault: vault, now: { self.fixedNow }).overview()
+        XCTAssertEqual(restored.activeUser, overview.activeUser)
+    }
+
     func testRotatedCredentialSurvivesATemporaryKeychainWriteFailureInMemory() async throws {
         let vault = try vaultWithAccounts(["a"], expired: true)
         let api = AccountTestAPI()
@@ -249,16 +296,21 @@ private actor AccountTestGate {
 private actor AccountTestAPI: AccountAuthenticating {
     enum RefreshFailure { case network, revoked }
     private(set) var refreshCount = 0
+    private(set) var userCount = 0
     private let refreshGate: AccountTestGate?
     private var userGate: AccountTestGate?
     private let signOutGate: AccountTestGate?
+    private let profileWriteGate: AccountTestGate?
+    private var profiles: [String: (name: String, description: String)] = [:]
     private let rejectedUserToken: String?
     private var refreshFailure: RefreshFailure?
     init(refreshGate: AccountTestGate? = nil, userGate: AccountTestGate? = nil,
-         rejectedUserToken: String? = nil, refreshFailure: RefreshFailure? = nil, signOutGate: AccountTestGate? = nil) {
+         rejectedUserToken: String? = nil, refreshFailure: RefreshFailure? = nil, signOutGate: AccountTestGate? = nil,
+         profileWriteGate: AccountTestGate? = nil) {
         self.refreshGate = refreshGate; self.userGate = userGate
         self.rejectedUserToken = rejectedUserToken; self.refreshFailure = refreshFailure
         self.signOutGate = signOutGate
+        self.profileWriteGate = profileWriteGate
     }
     func disableUserGate() { userGate = nil }
     func setRefreshFailure(_ value: RefreshFailure) { refreshFailure = value }
@@ -274,14 +326,19 @@ private actor AccountTestAPI: AccountAuthenticating {
         return AuthTokenResponse(accessToken: "rotated-\(id)", refreshToken: "rotated-refresh-\(id)", expiresIn: 3600, subject: id)
     }
     func user(accessToken: String, deviceID: String) async throws -> AccountUser {
+        userCount += 1
         await userGate?.wait()
         if accessToken == rejectedUserToken { throw AccountError.expiredSession }
-        return AccountUser(id: String(accessToken.split(separator: "-").last!))
+        let id = String(accessToken.split(separator: "-").last!)
+        return AccountUser(id: id, name: profiles[id]?.name, description: profiles[id]?.description)
     }
     func signOut(accessToken: String, deviceID: String) async throws { await signOutGate?.wait() }
     func sendVerification(address: VerificationAddress, deviceID: String, captcha: String?) async throws -> VerificationChallenge { throw AccountError.unavailable }
     func verify(_ challenge: VerificationChallenge, code: String, deviceID: String, captcha: String?) async throws -> AuthTokenResponse { throw AccountError.unavailable }
-    func updateProfile(userID: String, name: String, description: String, accessToken: String, deviceID: String) async throws { }
+    func updateProfile(userID: String, name: String, description: String, accessToken: String, deviceID: String) async throws {
+        await profileWriteGate?.wait()
+        profiles[userID] = (name, description)
+    }
     func captcha(deviceID: String) async throws -> CaptchaImage { throw AccountError.unavailable }
     func verifyCaptcha(token: String, text: String, deviceID: String) async throws -> String { throw AccountError.unavailable }
 }

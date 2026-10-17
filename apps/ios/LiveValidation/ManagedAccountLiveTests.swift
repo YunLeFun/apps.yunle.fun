@@ -205,7 +205,7 @@ final class FeedbackLoginLiveTests: XCTestCase {
             mark("guest-draft-entered")
             let username = try await focused(UITextField.self, identifier: "login.username", in: window)
             if mode == "canary" { input = canary }
-            else { input = try consumePassword(cache: cache); consumed = true }
+            else { input = try Self.consumePassword(cache: cache); consumed = true }
             username.insertText(mode == "canary" ? "feedback-canary" : "ylf_prod_zero")
             mark("username-entered")
             let password = try await focused(UITextField.self, identifier: "login.password", in: window)
@@ -387,20 +387,21 @@ final class FeedbackLoginLiveTests: XCTestCase {
         }
         let attachment = XCTAttachment(image: image); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
     }
-    private func consumePassword(cache: URL) throws -> String {
+    fileprivate static func consumePassword(cache: URL, fileName: String = "feedback-native-input.json") throws -> String {
+        guard ["feedback-native-input.json", "profile-native-input.json"].contains(fileName) else { throw InputFailure.credential }
         let directory = cache.appendingPathComponent("iOSNativeValidation")
         let folder = open(directory.path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         guard folder >= 0 else { throw InputFailure.credential }; defer { close(folder) }
         var folderInfo = stat()
         guard fstat(folder, &folderInfo) == 0, folderInfo.st_uid == geteuid(),
               folderInfo.st_mode & mode_t(0o7777) == mode_t(0o700) else { throw InputFailure.credential }
-        let file = openat(folder, "feedback-native-input.json", O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        let file = openat(folder, fileName, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
         guard file >= 0 else { throw InputFailure.credential }; defer { close(file) }
         var info = stat()
         guard fstat(file, &info) == 0, info.st_uid == geteuid(), info.st_nlink == 1,
               info.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG),
               info.st_mode & mode_t(0o7777) == mode_t(0o600), info.st_size > 0, info.st_size <= 65_536,
-              unlinkat(folder, "feedback-native-input.json", 0) == 0 else { throw InputFailure.credential }
+              unlinkat(folder, fileName, 0) == 0 else { throw InputFailure.credential }
         var data = Data(), buffer = [UInt8](repeating: 0, count: 4096)
         while true {
             let count = buffer.withUnsafeMutableBytes { Darwin.read(file, $0.baseAddress, $0.count) }
@@ -417,6 +418,204 @@ final class FeedbackLoginLiveTests: XCTestCase {
     private struct InputPool: Decodable { let accounts: [InputCredential] }
     private struct InputCredential: Decodable { let id: String; let environment: String; let username: String; let password: String }
     private enum InputFailure: Error { case state, timeout, privacy, credential }
+}
+
+/// Real profile writes use the existing production form and service. Login is
+/// fixture setup, not a claim about login UI. Every save and logout is clicked
+/// externally; focused public UIKit input supplies only synthetic profile text.
+@MainActor
+final class ManagedProfileLiveTests: XCTestCase {
+    private var stages: [String] = []
+    private struct Baseline: Codable {
+        let run: String
+        let owner: String
+        let name: String
+        let description: String
+    }
+    private enum ProfileFailure: Error { case state, timeout }
+
+    func testNativeProfileSaveReadBackRestoreAndSignOut() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let mode = env["YUNLEFUN_LIVE_PROFILE"], ["validate", "recover"].contains(mode) else {
+            throw XCTSkip("Requires explicit synthetic profile validation and an external UI driver")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Only an explicitly owned simulator may run this journey")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty, owned == env["SIMULATOR_UDID"],
+              let run = env["YUNLEFUN_LIVE_PROFILE_RUN"], UUID(uuidString: run)?.uuidString == run else {
+            return XCTFail("Requires the exact owned simulator and a canonical run UUID")
+        }
+        executionTimeAllowance = 900
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let baselineURL = cache.appendingPathComponent("iOSNativeValidation/profile-native-baseline.json")
+        let service = "fun.yunle.apps.profile-live." + UUID().uuidString
+        let vault = KeychainAccountVault(service: service)
+        let auth = FeedbackObservedAuth(canary: false)
+        let accounts = AccountStore(session: AccountSession(api: auth, vault: vault))
+        var baseline: Baseline?
+        var window: UIWindow?
+        var previous: UIViewController?
+        var failure: String?
+        var uiRestored = false, remoteRestored = false, uiRemoved = false, fallbackRestored = false
+        var sameIdentityGeneration = false, persistedChangedProfile = false, submittedTrimmedName = false
+        let changedName = "iOS校验" + run.prefix(8)
+        let changedDescription = "Native profile validation 🧩\n" + run
+        defer {
+            if let window { window.rootViewController = previous; window.makeKeyAndVisible() }
+            SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service] as CFDictionary)
+        }
+        do {
+            mark("authenticating-private-fixture")
+            let password = try FeedbackLoginLiveTests.consumePassword(cache: cache, fileName: "profile-native-input.json")
+            try await accounts.passwordSignIn(identifier: "ylf_prod_zero", password: password, captcha: nil)
+            let original = try await serverProfile(accounts: accounts, vault: vault)
+            guard original.username == "ylf_prod_zero", original.isUsable else { throw ProfileFailure.state }
+            if mode == "recover" {
+                let attributes = try FileManager.default.attributesOfItem(atPath: baselineURL.path)
+                guard attributes[.type] as? FileAttributeType == .typeRegular,
+                      (attributes[.posixPermissions] as? NSNumber)?.intValue == 0o600,
+                      ((attributes[.size] as? NSNumber)?.intValue ?? Int.max) <= 16_384 else { throw ProfileFailure.state }
+                baseline = try JSONDecoder().decode(Baseline.self, from: Data(contentsOf: baselineURL))
+                guard baseline?.run == run, baseline?.owner == original.id else { throw ProfileFailure.state }
+                mark("recovering-owned-profile")
+            } else {
+                guard let name = original.name, (2...48).contains(name.utf16.count),
+                      !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                      !FileManager.default.fileExists(atPath: baselineURL.path) else { throw ProfileFailure.state }
+                let saved = Baseline(run: run, owner: original.id, name: name, description: original.description ?? "")
+                let data = try JSONEncoder().encode(saved)
+                try data.write(to: baselineURL, options: [.withoutOverwriting, .completeFileProtectionUnlessOpen])
+                try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: baselineURL.path)
+                baseline = saved
+                let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+                let host = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
+                window = host; previous = host.rootViewController
+                host.rootViewController = UIHostingController(rootView: NavigationStack { AccountProfileView() }.environmentObject(accounts))
+                host.makeKeyAndVisible()
+                let generation = accounts.identityGeneration
+                mark("profile-ready")
+                try await replaceFocused("profile.name", with: "  " + changedName + "  ", in: host)
+                try await replaceFocused("profile.description", with: changedDescription, in: host)
+                mark("synthetic-profile-entered-awaiting-save")
+                try await wait { accounts.user?.name == changedName && accounts.user?.description == changedDescription }
+                let submitted = await auth.counts().profileInputs
+                submittedTrimmedName = submitted.count == 1 && submitted[0].name == changedName
+                    && submitted[0].description == changedDescription
+                guard submittedTrimmedName else { throw ProfileFailure.state }
+                let changed = try await serverProfile(accounts: accounts, vault: vault)
+                guard changed.id == original.id, changed.name == changedName, changed.description == changedDescription,
+                      changed.username == original.username, changed.email == original.email,
+                      changed.phoneNumber == original.phoneNumber else { throw ProfileFailure.state }
+                sameIdentityGeneration = accounts.identityGeneration == generation
+                let persisted = try await AccountSession(api: auth, vault: vault).overview().activeUser
+                persistedChangedProfile = persisted?.name == changedName && persisted?.description == changedDescription
+                guard sameIdentityGeneration, persistedChangedProfile else { throw ProfileFailure.state }
+                attach(host, name: "profile-updated-and-read-back")
+                mark("profile-saved-and-read-back")
+                try await replaceFocused("profile.name", with: saved.name, in: host)
+                try await replaceFocused("profile.description", with: saved.description, in: host)
+                mark("original-profile-entered-awaiting-save")
+                try await wait { self.matches(accounts.user, saved) }
+                guard matches(try await serverProfile(accounts: accounts, vault: vault), saved) else { throw ProfileFailure.state }
+                uiRestored = true; remoteRestored = true
+                attach(host, name: "profile-restored-and-read-back")
+                mark("profile-restored-via-ui")
+                try await wait { accounts.overview.users.isEmpty }
+                uiRemoved = true
+                try await waitAsync { await auth.counts().signOutSucceeded == 1 }
+                mark("native-signout-acknowledged")
+            }
+        } catch { failure = "Profile journey failed after " + (stages.last ?? "fixture preparation") }
+
+        // A failed UI journey may already have written. Read before restoring;
+        // never overwrite an unrelated concurrent profile change or retry blindly.
+        if !remoteRestored, let baseline, let user = accounts.user, user.id == baseline.owner {
+            do {
+                var current = try await serverProfile(accounts: accounts, vault: vault)
+                if !matches(current, baseline) {
+                    guard current.name == changedName, current.description == changedDescription else { throw ProfileFailure.state }
+                    try await accounts.updateProfile(name: baseline.name, description: baseline.description)
+                    current = try await serverProfile(accounts: accounts, vault: vault)
+                    fallbackRestored = true
+                }
+                guard matches(current, baseline) else { throw ProfileFailure.state }
+                remoteRestored = true
+            } catch { failure = (failure ?? "Recovery") + "; original profile still requires recovery" }
+        }
+        for user in accounts.overview.users {
+            do { try await accounts.remove(user.id) }
+            catch { failure = (failure ?? "Journey") + "; signout failed" }
+        }
+        if remoteRestored {
+            do { try FileManager.default.removeItem(at: baselineURL) }
+            catch { failure = (failure ?? "Journey") + "; baseline cleanup failed" }
+        }
+        let empty = try await AccountSession(api: auth, vault: vault).overview()
+        let counts = await auth.counts()
+        let report: [String: Any] = ["run": run, "mode": mode, "stages": stages,
+            "profileWritesAttempted": counts.profileAttempts, "profileWritesSucceeded": counts.profileSucceeded,
+            "profileReadBackAndPersisted": persistedChangedProfile, "sameIdentityGeneration": sameIdentityGeneration,
+            "submittedTrimmedName": submittedTrimmedName,
+            "originalProfileRestoredViaUI": uiRestored, "originalProfileRestoredRemotely": remoteRestored,
+            "fallbackRestored": fallbackRestored, "nativeUIAccountRemoval": uiRemoved,
+            "remoteSignOutSucceeded": counts.signOutSucceeded, "vaultEmpty": empty.users.isEmpty && empty.activeID == nil,
+            "baselineRemoved": !FileManager.default.fileExists(atPath: baselineURL.path), "failure": failure ?? "none",
+            "scope": "Real production profile form/save/readback/restore; authenticated fixture setup, not login UI; no entitlement changes"]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]),
+                                       uniformTypeIdentifier: "public.json")
+        attachment.name = "native-profile-live-report"; attachment.lifetime = .keepAlways; add(attachment)
+        if let failure { XCTFail(failure) }
+        XCTAssertTrue(remoteRestored); XCTAssertTrue(empty.users.isEmpty); XCTAssertEqual(counts.signOutSucceeded, 1)
+        if mode == "validate" {
+            XCTAssertTrue(uiRestored); XCTAssertTrue(uiRemoved); XCTAssertFalse(fallbackRestored)
+            XCTAssertEqual(counts.profileAttempts, 2); XCTAssertEqual(counts.profileSucceeded, 2)
+        }
+    }
+    private func matches(_ user: AccountUser?, _ baseline: Baseline) -> Bool {
+        user?.id == baseline.owner && user?.name == baseline.name && (user?.description ?? "") == baseline.description
+    }
+    private func serverProfile(accounts: AccountStore, vault: KeychainAccountVault) async throws -> AccountUser {
+        let identity = try await accounts.authorization()
+        let state = try JSONDecoder().decode(AccountVaultState.self, from: XCTUnwrap(vault.read()))
+        let user = try await CloudbaseAuthService().user(accessToken: identity.accessToken, deviceID: state.deviceID)
+        guard user.id == identity.userID, user.username == "ylf_prod_zero", user.isUsable else { throw ProfileFailure.state }
+        return user
+    }
+    private func replaceFocused(_ identifier: String, with text: String, in window: UIWindow) async throws {
+        var target: UIView?
+        try await wait {
+            target = self.views(window).first { $0.isFirstResponder && $0.accessibilityIdentifier == identifier }
+            return target != nil
+        }
+        if let field = target as? UITextField {
+            field.selectedTextRange = field.textRange(from: field.beginningOfDocument, to: field.endOfDocument)
+            field.deleteBackward(); if !text.isEmpty { field.insertText(text) }
+        } else if let field = target as? UITextView {
+            field.selectedTextRange = field.textRange(from: field.beginningOfDocument, to: field.endOfDocument)
+            field.deleteBackward(); if !text.isEmpty { field.insertText(text) }
+        } else { throw ProfileFailure.state }
+    }
+    private func views(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(views) }
+    private func wait(_ predicate: () -> Bool) async throws {
+        let deadline = Date().addingTimeInterval(180)
+        while !predicate() {
+            guard Date() < deadline else { throw ProfileFailure.timeout }
+            try await Task.sleep(nanoseconds: 200_000_000)
+        }
+    }
+    private func waitAsync(_ predicate: () async -> Bool) async throws {
+        let deadline = Date().addingTimeInterval(45)
+        while !(await predicate()) {
+            guard Date() < deadline else { throw ProfileFailure.timeout }
+            try await Task.sleep(nanoseconds: 200_000_000)
+        }
+    }
+    private func mark(_ stage: String) { stages.append(stage); print("YLF_PROFILE_STAGE " + stage) }
+    private func attach(_ window: UIWindow, name: String) {
+        let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in window.drawHierarchy(in: window.bounds, afterScreenUpdates: true) }
+        let attachment = XCTAttachment(image: image); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
+    }
 }
 
 /// Preserve any existing receipt in the owned simulator. Only the synthetic
@@ -466,7 +665,12 @@ private final class FeedbackReceiptSnapshot {
 /// Forwards the same production auth API and counts only successful return values.
 /// The canary refuses all authentication requests, even if submit is tapped.
 private actor FeedbackObservedAuth: AccountAuthenticating {
-    struct Counts { var passwordAttempts = 0; var passwordSucceeded = 0; var signOutSucceeded = 0 }
+    struct Counts {
+        var passwordAttempts = 0; var passwordSucceeded = 0; var signOutSucceeded = 0
+        var profileAttempts = 0; var profileSucceeded = 0
+        var profileInputs: [ProfileInput] = []
+    }
+    struct ProfileInput { let name: String; let description: String }
     private let api = CloudbaseAuthService()
     private let canary: Bool
     private var observed = Counts()
@@ -494,7 +698,10 @@ private actor FeedbackObservedAuth: AccountAuthenticating {
         try allow(); try await api.signOut(accessToken: accessToken, deviceID: deviceID); observed.signOutSucceeded += 1
     }
     func updateProfile(userID: String, name: String, description: String, accessToken: String, deviceID: String) async throws {
-        try allow(); try await api.updateProfile(userID: userID, name: name, description: description, accessToken: accessToken, deviceID: deviceID)
+        try allow(); observed.profileAttempts += 1
+        observed.profileInputs.append(ProfileInput(name: name, description: description))
+        try await api.updateProfile(userID: userID, name: name, description: description, accessToken: accessToken, deviceID: deviceID)
+        observed.profileSucceeded += 1
     }
     func captcha(deviceID: String) async throws -> CaptchaImage { try allow(); return try await api.captcha(deviceID: deviceID) }
     func verifyCaptcha(token: String, text: String, deviceID: String) async throws -> String {

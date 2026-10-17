@@ -7,21 +7,23 @@ import process from 'node:process'
 import { previewHeaders, readPreviewTarget } from './live-target.mjs'
 
 const args = process.argv.slice(2)
+const schemaVersion = args.includes('--schema=3') ? 3 : 1
 const targetFile = args.find(value => value.startsWith('--target='))?.slice('--target='.length)
 const localTarget = args.includes('--origin=http://127.0.0.1:18746')
 if (
-  args.length !== 3
+  args.length !== (schemaVersion === 3 ? 4 : 3)
   || !args.includes('--write')
   || !args.includes('--confirm-account=production-zero-balance')
   || !!targetFile === localTarget
 ) {
   console.log(
-    'Usage: node scripts/ios/home-sync-smoke.mjs (--origin=http://127.0.0.1:18746 | --target=/private/preview-receipt.json) --write --confirm-account=production-zero-balance',
+    'Usage: node scripts/ios/home-sync-smoke.mjs (--origin=http://127.0.0.1:18746 | --target=/private/preview-receipt.json) --write --confirm-account=production-zero-balance [--schema=3]',
   )
   process.exit(0)
 }
 const previewTarget = targetFile ? await readPreviewTarget(targetFile) : undefined
 const origin = previewTarget?.origin ?? 'http://127.0.0.1:18746'
+const homeEndpoint = `${origin}/api/home-screen${schemaVersion === 3 ? '?schema=3' : ''}`
 const root = join(homedir(), '.config/yunlefun')
 const path = join(root, 'test-accounts.json')
 assert.equal((await stat(path)).mode & 0o077, 0)
@@ -66,26 +68,32 @@ let baseline
 let original
 let last
 let cleanupNeeded = false
-const report = { origin, account: account.id, checks: [] }
+const report = { origin, account: account.id, schemaVersion, checks: [] }
 function configuration(x) {
   const { installedApps, dockApps, recentApps } = x.configuration
-  return structuredClone({ installedApps, dockApps, recentApps })
+  const content = structuredClone({ installedApps, dockApps, recentApps, ...(schemaVersion === 3 ? { folders: x.configuration.folders, applicationSources: x.configuration.applicationSources } : {}) })
+  if (schemaVersion === 3) {
+    assert.ok(Array.isArray(content.folders))
+    assert.ok(Array.isArray(content.applicationSources))
+    content.applicationSources.sort((a, b) => a.appId < b.appId ? -1 : a.appId > b.appId ? 1 : 0)
+  }
+  return content
 }
 async function put(base, content, mutationId = randomUUID()) {
   return request(`${origin}/api/home-screen`, {
     method: 'PUT',
     token,
-    fields: { baseRevision: base.revision, mutationId, configuration: content },
+    fields: { schemaVersion, baseRevision: base.revision, mutationId, configuration: content },
   })
 }
 try {
   const profile = await request(`${authOrigin}/auth/v1/user/me`, { token })
   assert.equal(profile.status, 200)
   assert.equal(profile.body.username, account.username)
-  const read = await request(`${origin}/api/home-screen`, { token })
+  const read = await request(homeEndpoint, { token })
   assert.equal(read.status, 200)
   assert.equal(read.cache, 'private, no-store')
-  assert.equal(read.body.schemaVersion, 1)
+  assert.equal(read.body.schemaVersion, schemaVersion)
   baseline = structuredClone(read.body)
   original = JSON.stringify(baseline)
   const backupDir = join(root, 'ios-native-validation')
@@ -113,9 +121,55 @@ try {
   assert.equal(replay.status, 200)
   assert.deepEqual(replay.body, last)
   report.checks.push('lost-ack idempotent replay')
+  if (schemaVersion === 3) {
+    const profile = await request('https://apps.yunle.fun/api/markets/personal/YunYouJun')
+    assert.equal(profile.status, 200)
+    assert.equal(profile.body.ownerLogin, 'YunYouJun')
+    assert.ok(profile.body.items.some(item => item._id === app._id && item.audience === 'public' && item.isPublic === true))
+    const author = configuration(last)
+    author.applicationSources = author.applicationSources.filter(source => source.appId !== app._id)
+    author.applicationSources.push({ appId: app._id, ownerLogin: 'YunYouJun' })
+    author.applicationSources.sort((a, b) => a.appId < b.appId ? -1 : a.appId > b.appId ? 1 : 0)
+    const authorWrite = await put(last, author)
+    assert.equal(authorWrite.status, 200)
+    last = authorWrite.body
+    assert.deepEqual(configuration(last), author)
+    assert.deepEqual(configuration((await request(homeEndpoint, { token })).body), author)
+    report.checks.push('schema 3 author source survives committed reread')
+
+    // An older client must preserve the source it cannot represent.
+    const legacy = await request(`${origin}/api/home-screen?schema=2`, { token })
+    assert.equal(legacy.status, 200)
+    assert.equal(legacy.body.schemaVersion, 2)
+    const { updatedAt: _updatedAt, ...oldContent } = legacy.body.configuration
+    assert.equal(Object.hasOwn(oldContent, 'applicationSources'), false)
+    const oldWrite = await request(`${origin}/api/home-screen`, { token, method: 'PUT', fields: { schemaVersion: 2, baseRevision: legacy.body.revision, mutationId: randomUUID(), configuration: oldContent } })
+    assert.equal(oldWrite.status, 200)
+    last = { ...last, revision: oldWrite.body.revision }
+    const preserved = await request(homeEndpoint, { token })
+    assert.equal(preserved.status, 200)
+    last = preserved.body
+    assert.deepEqual(configuration(last), author)
+    report.checks.push('schema 2 write preserves author sources and folders')
+
+    const market = configuration(last)
+    market.applicationSources = market.applicationSources.filter(source => source.appId !== app._id)
+    const sourceBase = last
+    const marketWrite = await put(sourceBase, market)
+    assert.equal(marketWrite.status, 200)
+    last = marketWrite.body
+    assert.notEqual(last.revision, sourceBase.revision)
+    assert.deepEqual(configuration(last), market)
+    assert.deepEqual(configuration((await request(homeEndpoint, { token })).body), market)
+    const staleSource = await put(sourceBase, author)
+    assert.equal(staleSource.status, 409)
+    assert.equal(staleSource.body.data?.code, 'HOME_CONFLICT')
+    report.checks.push('explicit market source clears selection and stale author revision conflicts')
+  }
+  const concurrentBase = configuration(last)
   const contenders = [
-    { ...content, dockApps: [{ appId: app._id }] },
-    { ...content, dockApps: [] },
+    { ...concurrentBase, dockApps: [{ appId: app._id }] },
+    { ...concurrentBase, dockApps: [] },
   ]
   if (JSON.stringify(contenders[0]) === JSON.stringify(contenders[1]))
     throw new Error('Invalid concurrent fixture')
@@ -124,7 +178,7 @@ try {
   last = outcomes.find(r => r.status === 200).body
   assert.equal(outcomes.find(r => r.status === 409).body.data?.code, 'HOME_CONFLICT')
   report.checks.push('concurrent one-winner conflict')
-  const reread = await request(`${origin}/api/home-screen`, { token })
+  const reread = await request(homeEndpoint, { token })
   assert.equal(reread.status, 200)
   assert.deepEqual(reread.body, last)
   report.checks.push('read after committed write')
@@ -136,12 +190,12 @@ try {
 finally {
   try {
     if (cleanupNeeded && baseline) {
-      const current = await request(`${origin}/api/home-screen`, { token })
+      const current = await request(homeEndpoint, { token })
       if (last && current.status === 200 && current.body.revision === last.revision) {
         const restored = await put(last, configuration(baseline))
         assert.equal(restored.status, 200)
         assert.deepEqual(configuration(restored.body), configuration(baseline))
-        const verified = await request(`${origin}/api/home-screen`, { token })
+        const verified = await request(homeEndpoint, { token })
         assert.equal(verified.status, 200)
         assert.deepEqual(configuration(verified.body), configuration(baseline))
         report.restoredCloudContent = true
@@ -162,7 +216,8 @@ finally {
   finally {
     const signout = await request(`${authOrigin}/auth/v1/user/signout`, { token, method: 'POST', fields: {} })
     report.signOut = signout.status === 200
-    await writeFile('/tmp/yunlefun-home-sync-live-report.json', JSON.stringify(report, null, 2), {
+    const reportPath = schemaVersion === 3 ? '/tmp/yunlefun-home-sync-live-schema3-report.json' : '/tmp/yunlefun-home-sync-live-report.json'
+    await writeFile(reportPath, JSON.stringify(report, null, 2), {
       mode: 0o600,
     })
     console.log(JSON.stringify(report))

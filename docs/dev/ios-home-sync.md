@@ -1,6 +1,6 @@
 # 原生云居同步契约
 
-> 2026-10-16。已在本地完整服务连接现有 CloudBase、使用受管合成账号完成真实 HTTP 与原生协调器读写。生产接口尚未部署；M2 云同步验收保持未完成。
+> 更新于 2026-10-18。schema 3 已通过本地服务连接真实 CloudBase 的 HTTP、原生离线 / 冲突与双模拟器来源往返验证。生产接口尚未部署，旧客户端并发与完整 UI 验收仍未完成；M2 保持未完成。
 
 ## 数据与身份
 
@@ -55,7 +55,7 @@ PUT 提供 `baseRevision`（新建时必须显式为 null）、UUID `mutationId`
 
 本地快照新增可选 `folders`，旧文件可直接读取。固定 / 移除应用时自动离开所属文件夹，文件夹变空即消失。
 
-## Schema 3：作者来源选择（2026-10-18，客户端与服务实现待联调）
+## Schema 3：作者来源选择（2026-10-18）
 
 后续 Goal 新增 `configuration.applicationSources: { appId, ownerLogin }[]`。仅记录用户选择的作者来源；没有条目表示市场来源。应用 ID 仍使用现有引用，来源不携带网址、token、访问范围或可信主机，不是运行权限。接收端实际打开前仍必须重新读取作者公开发布并检查免费公开条件，不能套用市场旧版本的报价或授权。
 
@@ -65,7 +65,7 @@ PUT 提供 `baseRevision`（新建时必须显式为 null）、UUID `mutationId`
 - 同步按 appId 规范排序，来源变化纳入所有 schema 的同一修订号与 schema 3 幂等摘要。仅来源变化也阻止旧修订覆盖；没有来源的历史修订和原 schema 1 / 2 幂等摘要保持一致。
 - 存储适配器复用现有验证身份、事务重读、固定账号文档和错误处理。结构损坏仍返回 `HOME_DATA_INVALID`，不以空数组覆盖。
 
-原生客户端现已接入 schema 3，**尚未部署生产，也未完成真实双模拟器联调**。来源选择参与本机待同步状态、冲突比较、云端采用和备份恢复；显式获取 / 成功打开选择来源，被动目录刷新不能代替用户切换。新设备只有作者标识时不拼接网址，而是由既有作者启动服务重新读取当前公开发布；云端明确切回市场时不能复用旧作者网址。
+原生客户端现已接入 schema 3，**尚未部署生产**。下述双模拟器增量验证覆盖来源往返；来源选择参与本机待同步状态、冲突比较、云端采用和备份恢复，显式获取 / 成功打开选择来源，被动目录刷新不能代替用户切换。新设备只有作者标识时不拼接网址，而是由既有作者启动服务重新读取当前公开发布；云端明确切回市场时不能复用旧作者网址。
 
 服务仍返回 schema 1 / 2 时可以读取并保留本地来源，但不能确认来源已上传；待上传修改保留，并提示服务尚不支持当前云居版本。schema 3 缺失或使用 null 来源数组拒绝解析，不把它解释为用户清空选择。
 
@@ -76,6 +76,32 @@ PUT 提供 `baseRevision`（新建时必须显式为 null）、UUID `mutationId`
 本轮定向验证：`home-screen-sources`、`home-screen-folders`、`home-screen-api`、`home-screen-routes`、`home-screen-storage` 共 **33 项通过**；受影响 TypeScript 文件的 ESLint 与服务领域文件严格类型检查通过。该集合使用隔离测试夹具和本机 HTTP 路由，不代替真实 CloudBase 或双模拟器联调。原始日志在 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/home-schema3-tests.log`。
 
 2026-10-18 再次无凭据读取正式 `GET /api/home-screen?schema=3`，仍得到 **HTTP 200 / text/html**。这不是已部署的 JSON 同步响应，不据此触发登录刷新或宣称正式服务可用；已保存响应元数据，未发送账号信息或写入云端数据。
+
+### Schema 3 真实 HTTP 联调
+
+从提交 `e7ea1cd` 导出的隔离源码完成 Nuxt 生产构建，并在本机 `127.0.0.1:18746` 连接既有 CloudBase。`home-sync-smoke.mjs` 新增可选 `--schema=3`，沿用受管 `production-zero-balance` 合成账号与原有私有凭据文件；登录后先校验身份并保存完整恢复快照，再执行真实 GET / PUT。
+
+本次 **9 项检查全部通过**：鉴权读取与 no-store、事务写入、丢失确认后的幂等重放、云空调作者来源保存与回读、schema 2 写入保留来源、显式切回市场来源及过期来源修订冲突、并发写入仅一个成功、提交后回读、过期修订拒绝。作者引用先由真实匿名公开作者接口核实；没有请求应用授权或新增权益。
+
+结束时按最后一次确认的修订号恢复原配置，并再次读取核对安装、Dock、最近使用、文件夹和来源，`restoredCloudContent: true`；验证会话注销为 `signOut: true`。私有原快照保留在仓库外，日志与构建来源记录保存于持久证据目录的 `home-schema3-live-report.json`、`home-schema3-server-provenance.json`。这是本地服务连接真实数据库的 HTTP 验证，尚未证明两个模拟器、原生页面操作或生产部署通过。
+
+### Schema 3 原生与双模拟器联调
+
+`HomeSyncLiveTests.testOfflineRestartSyncConflictAndAccountIsolation` 扩展到真实作者来源与非空文件夹，**1 通过 / 0 失败 / 0 跳过**（`home-schema3-native-live.xcresult`）。实际不可达请求保留离线内容，Keychain / 磁盘实例重建后上传；独立本地客户端收到来源后通过匿名作者服务重新解析公开版本。另一客户端切回市场来源产生真实冲突，采用云端后清除旧作者元数据并保留文件夹；原作者选择与未上传内容留在恢复副本。真实 A → B → A 账号切换、原云居恢复、注销和临时目录清理全部通过。该项仍是一个模拟器中的两个本地客户端。
+
+随后在两个独立 iPhone 18 Pro / iOS 27 模拟器上串行执行 `testCrossSimulatorSourceRoundtripStage`，三次均 **1 通过 / 0 失败 / 0 跳过**：
+
+1. A（`70CF3A21-F228-475E-A01A-895359099A2F`）保存云端原快照，上传作者来源、非空文件夹和仅供验证的未知应用引用。
+2. B（`557129BA-1C94-465B-AA77-86433E74C0CC`）以独立数据容器和 Keychain 登录同一受管账号，核对实际云端修订并通过原生协调器下载；重新读取作者公开版本，再显式选择市场来源并上传，文件夹保持一致。
+3. A 在新测试进程中重读本机快照，经协调器采用 B 的云端版本，核对作者来源与缓存标记清除，最后按当前修订恢复原快照并回读确认。
+
+三阶段的每次登录会话均已注销，最终 `restoredCloudContent: true`、`fixturesRemoved: true`。结果包为 `home-cross-simulator-publish`、`home-cross-simulator-receive`、`home-cross-simulator-returnAndRestore`，回执为 `home-cross-simulator-report.json`，均保存在持久证据目录；相关构建仍包含工作区的并行缓存改动，不视为纯净 CI 产物。
+
+该用例仅属于独立 LiveValidation Scheme，需显式 `YUNLEFUN_LIVE_HOME_CROSS_SIMULATOR=1`。私有一次性输入 `iOSNativeValidation/home-cross-simulator.json` 包含 UUID `runID`、精确 `simulatorID`、受管账号、阶段和上一阶段的 `expected` 完整响应，读取后立即删除。按 `publish(A) → receive(B) → returnAndRestore(A)` 执行；输入必须分别绑定实际模拟器，后两步必须匹配当前云端完整修订。若中断，保留 A 的 `HomeCrossSimulator-<runID>/baseline.json` 和各阶段 planned / receipt 文件，核对云端仍为已知测试写入后才可执行 `recover`；修订不匹配时停止，不能覆盖其他修改。
+
+恢复入口随后独立于公开目录读取，只依赖受管账号、本机原快照与匹配的云端修订；增量构建和显式 `recover` **1 项通过**，内容恢复、注销、一次性输入与临时目录删除均核实。结果为 `home-cross-simulator-recover.xcresult` 和 `home-cross-simulator-recovery-report.json`。这是单独的恢复验证，不增加三阶段往返的用例数量，也未注入目录故障。
+
+这证明两台模拟器的真实协议、持久化与来源解析往返，不是云应用实际启动、完整原生同步按钮操作、旧 Web 并发或生产部署验收。早期单模拟器记录不追认为双设备结果。
 
 ## 事务、重试与旧版本限制
 

@@ -8,6 +8,150 @@ import XCTest
 /// Only explicitly provisioned, managed synthetic identities are accepted.
 @MainActor
 final class HomeSyncLiveTests: XCTestCase {
+    /// Run serially as publish(A), receive(B), returnAndRestore(A). Each input
+    /// is private, consumed once, and bound to a different owned simulator.
+    /// Keep the baseline and planned writes if any stage fails; recovery must
+    /// provide the exact current revision rather than overwrite a third party.
+    func testCrossSimulatorSourceRoundtripStage() async throws {
+        guard ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_HOME_CROSS_SIMULATOR"] == "1",
+              let simulatorID = ProcessInfo.processInfo.environment["SIMULATOR_UDID"] else {
+            throw XCTSkip("Requires an explicitly provisioned owned simulator and a managed synthetic account")
+        }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let inputURL = cache.appendingPathComponent("iOSNativeValidation/home-cross-simulator.json")
+        let data = try Data(contentsOf: inputURL)
+        try FileManager.default.removeItem(at: inputURL)
+        let input = try JSONDecoder().decode(CrossSimulatorInput.self, from: data)
+        guard UUID(uuidString: input.runID) != nil, input.simulatorID == simulatorID,
+              input.account.id == "production-zero-balance", input.account.environment == "production",
+              input.account.username == "ylf_prod_zero", !input.account.password.isEmpty
+        else { return XCTFail("Only the explicitly provisioned simulator and approved synthetic identity may run") }
+        let directory = cache.appendingPathComponent("HomeCrossSimulator-" + input.runID)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let baselineURL = directory.appendingPathComponent("baseline.json")
+        let library = HomeLibrary(directory: directory.appendingPathComponent("home"))
+        let keychainService = "fun.yunle.apps.home-cross-simulator." + UUID().uuidString
+        let vault = KeychainAccountVault(service: keychainService)
+        defer { SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: keychainService] as CFDictionary) }
+        let accounts = AccountStore(session: AccountSession(vault: vault)) { id in
+            library.activateAccount(id); library.setAutoSyncEnabled(false)
+        }
+        let service = HomeSyncService(origin: URL(string: "http://127.0.0.1:18746")!)
+        let sync = HomeSyncCoordinator(accounts: accounts, library: library, service: service, monitorNetwork: false)
+        var receipt = CrossSimulatorReceipt(phase: input.phase, simulatorID: simulatorID)
+        var failure: Error?
+        do {
+            try await accounts.passwordSignIn(identifier: input.account.username, password: input.account.password, captcha: nil)
+            let identity = try await accounts.authorization(forceRefresh: false)
+            let current = try await service.load(identity: identity)
+            receipt.remote = current
+            guard current.schemaVersion == 3 else { throw LiveFailure.target }
+            if input.phase != .publish {
+                guard let expected = input.expected, expected == current else { throw LiveFailure.conflict }
+            }
+            if input.phase == .recover {
+                receipt.remote = try await restoreCrossSimulatorBaseline(baselineURL, current: current, service: service, identity: identity)
+                receipt.restoredCloudContent = true
+            } else {
+                let catalog = try await CatalogService().applications()
+                let market = try XCTUnwrap(catalog.first { $0.marketShortName == "air-conditioner" })
+                switch input.phase {
+                case .publish:
+                    guard input.expected == nil, !FileManager.default.fileExists(atPath: baselineURL.path),
+                          current.configuration.installedApps.count < 990, current.configuration.folders.count < 199
+                    else { throw LiveFailure.fixtureCapacity }
+                    try JSONEncoder().encode(current).write(to: baselineURL, options: [.atomic, .completeFileProtectionUnlessOpen])
+                    try library.adopt(current)
+                    let profile = try await DeveloperProfileService().profile(login: "YunYouJun")
+                    let author = try XCTUnwrap(profile.items.first { $0.id == market.id && $0.canOpenAsGuest })
+                    library.add(author)
+                    let marker = CloudApplication(id: "cross-simulator-" + input.runID, name: "跨模拟器验证", isUnavailable: true)
+                    library.add(marker)
+                    _ = try XCTUnwrap(library.createFolder(named: "跨模拟器验证", with: [author.id, marker.id], at: author.id))
+                    guard library.snapshot.configuration.applicationSources.contains(.init(appId: author.id, ownerLogin: "YunYouJun"))
+                    else { throw LiveFailure.upload }
+                case .receive:
+                    guard library.snapshot.configuration.installedApps.isEmpty, !library.snapshot.hasPendingChanges else { throw LiveFailure.secondClient }
+                    await sync.synchronize()
+                    guard sync.phase == .idle, library.snapshot.configuration == current.configuration else { throw LiveFailure.secondClient }
+                    let received = try XCTUnwrap(library.snapshot.applications.first { $0.id == market.id })
+                    let resolved = try await PersonalMarketLaunchAuthorization().resolve(received)
+                    guard resolved.personalMarketOwnerLogin == "YunYouJun", resolved.canOpenAsGuest,
+                          resolved.homeReference == received.homeReference,
+                          !library.snapshot.configuration.folders.isEmpty else { throw LiveFailure.secondClient }
+                    library.add(market)
+                    guard !library.snapshot.configuration.applicationSources.contains(where: { $0.appId == market.id }),
+                          library.snapshot.configuration.folders == current.configuration.folders else { throw LiveFailure.secondClient }
+                case .returnAndRestore:
+                    guard library.snapshot.configuration.applicationSources.contains(.init(appId: market.id, ownerLogin: "YunYouJun")),
+                          !library.snapshot.hasPendingChanges else { throw LiveFailure.restart }
+                    await sync.synchronize()
+                    guard sync.phase == .idle, library.snapshot.configuration == current.configuration,
+                          !library.snapshot.configuration.applicationSources.contains(where: { $0.appId == market.id }),
+                          library.snapshot.applications.first(where: { $0.id == market.id })?.personalMarketOwnerLogin == nil
+                    else { throw LiveFailure.secondClient }
+                    try await snapshot(accounts, library, sync, name: "cross-simulator-returned-market")
+                    receipt.remote = try await restoreCrossSimulatorBaseline(baselineURL, current: current, service: service, identity: identity)
+                    receipt.restoredCloudContent = true
+                case .recover:
+                    throw LiveFailure.target
+                }
+                if input.phase == .publish || input.phase == .receive {
+                    let planned = library.snapshot.configuration
+                    try JSONEncoder().encode(planned).write(to: directory.appendingPathComponent("planned-\(input.phase.rawValue).json"),
+                        options: [.atomic, .completeFileProtectionUnlessOpen])
+                    await sync.synchronize()
+                    let committed = try await service.load(identity: identity)
+                    receipt.remote = committed
+                    guard sync.phase == .idle, !library.snapshot.hasPendingChanges,
+                          committed.configuration.hasSameContent(as: planned), committed.revision != current.revision else { throw LiveFailure.upload }
+                }
+            }
+            receipt.passed = true
+        } catch { failure = error }
+        do {
+            for user in accounts.overview.users {
+                try await accounts.remove(user.id)
+                guard accounts.notice == nil else { throw LiveFailure.signout }
+            }
+            receipt.signedOut = accounts.overview.users.isEmpty
+        } catch { if failure == nil { failure = error } }
+        let report = try JSONEncoder().encode(receipt)
+        try report.write(to: directory.appendingPathComponent("receipt-\(input.phase.rawValue).json"), options: [.atomic, .completeFileProtectionUnlessOpen])
+        let attachment = XCTAttachment(data: report, uniformTypeIdentifier: "public.json")
+        attachment.name = "native-home-cross-simulator-" + input.phase.rawValue; attachment.lifetime = .keepAlways; add(attachment)
+        XCTAssertTrue(receipt.signedOut)
+        if let failure = failure as? LiveFailure { XCTFail("Cross-simulator validation failed at \(failure)") }
+        else if let failure { XCTFail("Cross-simulator request failed: \(safeMessage(failure))") }
+    }
+
+    private func restoreCrossSimulatorBaseline(_ url: URL, current: RemoteHomeScreen,
+                                               service: HomeSyncService, identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
+        let baseline = try JSONDecoder().decode(RemoteHomeScreen.self, from: Data(contentsOf: url))
+        _ = try await service.save(HomeScreenWrite(baseRevision: current.revision, mutationId: UUID().uuidString,
+            configuration: baseline.configuration), identity: identity)
+        let restored = try await service.load(identity: identity)
+        guard restored.configuration.hasSameContent(as: baseline.configuration) else { throw LiveFailure.backup }
+        return restored
+    }
+
+    private enum CrossSimulatorPhase: String, Codable { case publish, receive, returnAndRestore, recover }
+    private struct CrossSimulatorInput: Decodable {
+        let runID: String
+        let simulatorID: String
+        let phase: CrossSimulatorPhase
+        let account: Credential
+        let expected: RemoteHomeScreen?
+    }
+    private struct CrossSimulatorReceipt: Codable {
+        let phase: CrossSimulatorPhase
+        let simulatorID: String
+        var passed = false
+        var signedOut = false
+        var restoredCloudContent = false
+        var remote: RemoteHomeScreen?
+    }
+
     func testAccountBackupRestoreSyncConflictAndUndo() async throws {
         guard ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_HOME_BACKUP"] == "1" else {
             throw XCTSkip("Requires managed synthetic accounts and an explicitly enabled real backup/sync validation")
@@ -249,6 +393,7 @@ final class HomeSyncLiveTests: XCTestCase {
         var owner: String?
         var submitted: [HomeConfiguration] = []
         var restored = false
+        var signedOut = false
         var failure: Error?
         var stages: [String] = []
         do {
@@ -268,6 +413,13 @@ final class HomeSyncLiveTests: XCTestCase {
             let unresolved = CloudApplication(id: "native-validation-" + UUID().uuidString, name: "待解析应用", isUnavailable: true)
             library.add(unresolved); library.recordUse(app)
             if library.snapshot.configuration.dockApps.count < 4 { library.setPinned(app, true) }
+            let author = try await DeveloperProfileService().profile(login: "YunYouJun")
+            let authorApp = try XCTUnwrap(author.items.first { $0.id == app.id && $0.canOpenAsGuest })
+            library.add(authorApp)
+            let folderID = try XCTUnwrap(library.createFolder(named: "同步验证", with: [app.id, unresolved.id], at: app.id))
+            guard library.snapshot.configuration.applicationSources.contains(.init(appId: app.id, ownerLogin: "YunYouJun")),
+                  library.snapshot.configuration.folders.contains(where: { $0.id == folderID && $0.appIds == [app.id, unresolved.id] })
+            else { throw LiveFailure.upload }
             let offlineContent = library.snapshot.configuration
             let mutation = library.snapshot.mutationId
             let offline = HomeSyncCoordinator(accounts: accounts, library: library, service: unavailable, monitorNetwork: false)
@@ -304,16 +456,28 @@ final class HomeSyncLiveTests: XCTestCase {
             let otherSync = HomeSyncCoordinator(accounts: resumedAccounts, library: other, service: service, monitorNetwork: false)
             await otherSync.synchronize()
             guard other.snapshot.configuration == committed.configuration else { throw LiveFailure.secondClient }
+            let receivedAuthor = try XCTUnwrap(other.snapshot.applications.first { $0.id == app.id })
+            guard receivedAuthor.personalMarketOwnerLogin == "YunYouJun" else { throw LiveFailure.secondClient }
+            let resolvedAuthor = try await PersonalMarketLaunchAuthorization().resolve(receivedAuthor)
+            guard resolvedAuthor.id == app.id, resolvedAuthor.personalMarketOwnerLogin == "YunYouJun",
+                  resolvedAuthor.canOpenAsGuest, resolvedAuthor.homeReference == receivedAuthor.homeReference
+            else { throw LiveFailure.secondClient }
+            stages.append("schema 3 author source and nonempty folder persist offline and roundtrip; receiver resolves current public author release")
             let localOnly = CloudApplication(id: "native-local-" + UUID().uuidString, name: "此设备待同步", isUnavailable: true)
             let cloudOnly = CloudApplication(id: "native-cloud-" + UUID().uuidString, name: "另一客户端更新", isUnavailable: true)
             reopened.add(localOnly)
             let localContent = reopened.snapshot.configuration
+            other.add(app)
+            guard !other.snapshot.configuration.applicationSources.contains(where: { $0.appId == app.id }) else { throw LiveFailure.secondClient }
             other.add(cloudOnly); submitted.append(other.snapshot.configuration)
             await otherSync.synchronize()
             guard otherSync.phase == .idle, !other.snapshot.hasPendingChanges else { throw LiveFailure.secondClient }
             await resumed.synchronize()
             guard case .conflict(let conflict) = resumed.phase,
-                  reopened.snapshot.configuration == localContent else { throw LiveFailure.conflict }
+                  reopened.snapshot.configuration == localContent,
+                  localContent.applicationSources.contains(.init(appId: app.id, ownerLogin: "YunYouJun")),
+                  !conflict.remote.configuration.applicationSources.contains(where: { $0.appId == app.id })
+            else { throw LiveFailure.conflict }
             try await snapshot(resumedAccounts, reopened, resumed, name: "live-home-conflict", dark: true, accessibility: true)
             if ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_SYNC_UI_TAP"] == "1" {
                 submitted.append(localContent)
@@ -323,12 +487,16 @@ final class HomeSyncLiveTests: XCTestCase {
             let backups = try FileManager.default.contentsOfDirectory(at: directory.appendingPathComponent("first"),
                 includingPropertiesForKeys: nil).filter { $0.lastPathComponent.contains(".conflict-") }
             guard resumed.phase == .idle, !reopened.snapshot.hasPendingChanges, backups.count == 1,
-                  reopened.snapshot.containsReference(cloudOnly.id), !reopened.snapshot.containsReference(localOnly.id)
+                  reopened.snapshot.containsReference(cloudOnly.id), !reopened.snapshot.containsReference(localOnly.id),
+                  !reopened.snapshot.configuration.applicationSources.contains(where: { $0.appId == app.id }),
+                  reopened.snapshot.applications.first(where: { $0.id == app.id })?.personalMarketOwnerLogin == nil,
+                  reopened.snapshot.configuration.folders.contains(where: { $0.id == folderID })
             else { throw LiveFailure.conflict }
             let recovery = try JSONDecoder().decode(HomeLibrarySnapshot.self, from: Data(contentsOf: backups[0]))
             guard recovery.configuration == localContent, recovery.hasPendingChanges else { throw LiveFailure.conflict }
             stages.append("independent local client reads and produces a real cloud conflict")
             stages.append("cloud choice preserves an offline recovery copy")
+            stages.append("market source choice conflicts with local author source; cloud adoption clears author metadata and preserves folder")
 
             try await resumedAccounts.passwordSignIn(identifier: standard.username, password: standard.password, captcha: nil)
             guard resumedAccounts.user?.id != owner, reopened.accountID == resumedAccounts.user?.id,
@@ -357,15 +525,23 @@ final class HomeSyncLiveTests: XCTestCase {
                 }
             }
         } catch { if failure == nil { failure = error } }
-        for user in activeAccounts.overview.users { try? await activeAccounts.remove(user.id) }
-        if restored { try? FileManager.default.removeItem(at: directory) }
+        do {
+            for user in activeAccounts.overview.users {
+                try await activeAccounts.remove(user.id)
+                guard activeAccounts.notice == nil else { throw LiveFailure.signout }
+            }
+            signedOut = activeAccounts.overview.users.isEmpty
+        } catch { if failure == nil { failure = error } }
+        if restored && signedOut { try? FileManager.default.removeItem(at: directory) }
         let report: [String: Any] = ["origin": serviceOrigin.absoluteString,
-            "account": "production-zero-balance", "stages": stages, "restoredCloudContent": restored,
+            "account": "production-zero-balance", "stages": stages, "restoredCloudContent": restored, "signedOut": signedOut,
+            "fixtureRemoved": !FileManager.default.fileExists(atPath: directory.path),
             "realPayments": false, "deviceScope": "one simulator, two independent local clients"]
         let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]),
             uniformTypeIdentifier: "public.json")
         attachment.name = "native-home-sync-live"; attachment.lifetime = .keepAlways; add(attachment)
         XCTAssertTrue(restored, "If cleanup is interrupted, retain the baseline and do not overwrite unrelated cloud changes")
+        XCTAssertTrue(signedOut, "The managed validation sessions must be revoked")
         if let failure = failure as? LiveFailure { XCTFail("Native sync validation failed at \(failure)") }
         else if let failure { XCTFail("Native sync request failed: \(safeMessage(failure))") }
     }

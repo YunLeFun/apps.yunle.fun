@@ -1,10 +1,46 @@
 # 原生反馈登录续接验证
 
-更新于 2026-10-17。实现入口为 `apps/ios/Benchmarks/FeedbackLoginBenchmarks.swift`，复用现有 `apps/ios/project.yml` 中的 YunleFunBenchmarks Scheme 和真实 Benchmark App，不增加测试宿主、生产调试入口或假成功按钮。
+更新于 2026-10-18。旧 XCTest / 粘贴路径位于 `apps/ios/Benchmarks/FeedbackLoginBenchmarks.swift`；新 UIKit 输入路径位于 `apps/ios/LiveValidation/ManagedAccountLiveTests.swift` 的 `FeedbackLoginLiveTests`，复用既有 YunleFunLiveValidation app-hosted 测试目标。没有新增生产调试入口或假成功按钮。
 
-当前 Goal 已按用户决定收敛为[模拟器体验交付](./ios-simulator-preview.md)，完整反馈登录续接不再是本轮前置。以下失败与真实输入门禁保留；未提交的扩展诊断草稿已归档到仓库外，不继续要求用户查找剪贴板开关来阻塞访客体验交付。
+此前 Goal 曾收敛为[模拟器体验交付](./ios-simulator-preview.md)，用户随后恢复完整原生迁移范围。本轮通过新的非剪贴板通道完成真实登录续接；以下旧失败和旧通道限制继续保留，不把新结果算作旧粘贴通道通过。
 
-## 当前结果与未完成项
+## UIKit 输入通道与真实登录 · 2026-10-18
+
+`uikit-input-v1` 在独占 iPhone 18 Pro / iOS 27 模拟器 `70CF3A21-F228-475E-A01A-895359099A2F` 验证。夹具承载实际 `AppRootView` 及原反馈、登录、账号管理页面；仅隔离 Keychain 和本地目录。外部 UI 驱动点击导航、输入框、提交、取消和退出，文本通过已聚焦 `UITextView` / `UITextField` 的公开 `insertText` 写入。密码不作为 XCTest action 参数、不经过工具文本参数或剪贴板。没有直接调用登录 Store、续接 coordinator 或模型 dismissal 来冒充 UI 成功。
+
+### Canary 与审计
+
+公开标记为 `YLF_UIKit_Input_Canary_20261018_Bb8!`。canary 模式的认证代理拒绝全部认证调用，成功报告仍要求密码认证尝试次数为零。三轮结果均保留：前两轮分别在输入后和取消后因过宽的检查失败；第三轮 **1 通过 / 0 失败 / 0 跳过，78.023 秒**，无结果包运行时警告。
+
+原检查遍历所有 UIKit 子视图，把内部 `UIFieldEditor` 的属性命中当成了外部 AX 泄露。新报告保留这一命中：它属于 secure field 内部、`isAccessibilityElement=false`；密码框自身的 AX value、对外可访问元素属性和诊断日志均不含标记，Device Hub 完整外部树及运行时快照只返回圆点。不能据内部私有存储属性推断外部读取，也不能忽略它而声称所有内存不含密码。
+
+模拟器全旅程 changeCount 为 5→7→11→13，不能称全程剪贴板隔离。密码写入前后计数保持一致；Mac 监测 105.929 秒保持 1259→1259，仅读计数。该通道源码没有剪贴板写入，因此不依赖旧 host bridge 隔离开关，也没有改变任何全局设置。旧 `local-paste-v1` 仍禁止真实输入。
+
+第三轮完整 xcresult、附件、activity、日志与外部 AX 共 46 个文件扫描未命中完整标记或特征前缀。保留录像包含 1,159 个解码帧，逐帧使用 Vision 英文 OCR 扫描，0 识别错误、0 标记 / 特征片段命中；这不等于 OCR 绝无漏识别。另人工复核输入画面和外部 AX 遮蔽。取消后的实际反馈范围仍为 24 小时，精确多行草稿由原生控件读回断言。
+
+### 固定账号真实旅程
+
+同一编译夹具经上述审计后，固定零余额合成账号旅程 **1 通过 / 0 失败 / 0 跳过，138.337 秒**，无结果包运行时警告：
+
+- 实际访客反馈输入多行 emoji 原稿，选择 24 小时，打开登录续接并在原密码表单提交。
+- 真实 CloudBase 密码认证成功一次；实际 sheet 关闭，新反馈逐字恢复原稿，默认范围回到 1 小时，未自动出现上传确认或成功提示。
+- 返回“我”核对身份，再打开新反馈为零字符，证明续接仅消费一次。
+- 实际账号管理中点击“退出当前账号”及“退出并移除”。转发真实 `CloudbaseAuthService` 的代理观察到本次 signout 成功返回一次；重新创建 AccountSession 读取同一 Keychain，账号与当前身份均为空。失败时的直接清理另行标识，不计作 UI 退出。
+- 一次性输入已删除，私有测试目录无残留。49 个本次结果、附件、activity、日志与登录后 AX 文件扫描未命中真实密码或其 12 字符前缀。Mac 154.567 秒计数保持 1259→1259，密码写入前后模拟器计数不变；全程模拟器计数仍有上述变化。
+
+此旅程未提交诊断日志，未点击邮件、客服、付款或保存密码，也不证明覆盖所有 HTTP 请求、真实键盘硬件或 AutoFill。默认 1 小时和未自动确认由保留的实际外部 AX 佐证；精确草稿、一次性恢复、认证与退出由夹具断言。产品页面未为测试改写。构建包含工作区并行缓存文件，其哈希与状态留档，不能称纯净提交 CI。
+
+### 新通道运行约束
+
+只运行 `YunleFunLiveTests/FeedbackLoginLiveTests/testFocusedNativeInputAndFeedbackContinuation`，使用 `YunleFunLiveValidation` / Debug，单个独占模拟器、串行 Xcode。`TEST_RUNNER_YUNLEFUN_LIVE_FEEDBACK_INPUT=canary` 先行；真实模式为 `managed`，另要求 `TEST_RUNNER_YUNLEFUN_FEEDBACK_INPUT_AUDITED=uikit-input-v1`。两者均要求 `TEST_RUNNER_YUNLEFUN_OWNED_SIMULATOR_UDID` 与 runner 的实际 `SIMULATOR_UDID` 相等；默认跳过，真机拒绝执行。开关不是外部审计的替代品，输入实现改变后重新审计。
+
+真实输入由私有进程从既有池筛选固定账号，仅投递到**测试宿主 App** 的 `Library/Caches/iOSNativeValidation/feedback-native-input.json`（与旧 UI runner 路径不同）。目录 0700、文件 0600；reader 验证所有者、类型、单链接和 64 KiB 上限，以 no-follow 打开，先 unlink 再读取。仅在实际用户名框已聚焦后消费，不使用主池 fallback。用户名固定校验，密码非空、最多 1024 UTF-8 字节且不含控制字符。密码、token 不得放进启动参数、环境变量、异常或附件。
+
+全部原结果、两次失败、录像、逐帧 OCR、外部 AX、元数据监测与脱敏报告位于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/` 的 `feedback-input-*` 文件；`feedback-input-uikit-v1-audit.json` 绑定已审计源码摘要。未据此关闭上传服务、最低系统、其他字号 / 设备与辅助功能验收。
+
+## 旧 XCTest 与粘贴路径的结果和限制
+
+以下至文末是旧 `local-paste-v1` 的历史记录与专用限制，不适用于上文已审计的新通道。旧通道真实输入仍未开放，不应执行其真实账号步骤。
 
 - 首次非敏感 canary 使用 `secureTextField.typeText`，完整 XCTest activity 暴露了密码参数的明文截断前缀。即使界面隐藏密码，该通道仍判为 **不安全**；没有读取或输入真实凭据。
 - 该次取消登录后，24 次滚动未能抵达 TextEditor，最终画面有原生“保存密码？”卡片遮挡反馈页；更早的取消后画面尚无卡片，不能认定全部滑动均被它拦截。不能据此声称原稿已丢失，也不能把旅程算作通过。原始失败结果为 `test_sim_2026-10-17T10-35-40-197Z_pid44279_9ebdde12.xcresult`。

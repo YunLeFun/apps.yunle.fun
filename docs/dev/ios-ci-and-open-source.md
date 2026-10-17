@@ -283,4 +283,8 @@ Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功
 
 集成后在本任务隔离 iPhone / iOS 27 运行完整 `HomeLayoutVisualTests`、`HostIdentitySessionsTests` 和 `SupportViewTests`，**17 通过 / 0 失败 / 0 跳过**，无结果包运行时警告（`ci-repairs-tests.xcresult`）。反馈两条目标均在底部定位后的首张截图读到完整文字；已逐图复核支持编号错误与上传预览入口。原文件保留、未提交日志及真实 Cookie 删除 / 保留断言全部通过。Cookie 原三条提交以 cherry-pick 保留在当前分支，没有合并或关闭 PR #49；后续完整 CI 仍需独立确认。
 
+随后来源提交 `5c2e85ff5246d00f8fc37874cd0e9ddca9042cf0` 的 [Native CI 39069021230](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39069021230) 自然结束并成功。实际 checkout 为 PR 合并提交 `db453e6ef9482769f9d47d409a69b61da2ea8d71`；完整原始日志按完成用例名独立去重，**433 通过 / 0 失败 / 0 跳过**（423 单元 / 集成 + 10 UI）。Release 模拟器编译和隔离模拟器删除成功，失败附件步骤按条件跳过，因此本次计数来源是日志而非未生成的上传附件。该头的七项常规检查全部成功；可选作者 Benchmark 跳过，不能计为通过。
+
+此结果验证两项修复在本次完整 CI 中有效，原失败记录继续保留。原日志、运行元数据与独立计数位于持久目录的 `native-ci-5c2e85f.log`、`native-ci-5c2e85f-summary.json`、`native-ci-5c2e85f-counts.json`。后续新增的 opt-in 真实反馈登录夹具按自己的构建与执行证据记录，不追溯计入这 433 项。
+
 原日志、完整结果包与三份反馈附件保存于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/native-ci-e7ea1cd-artifact`、`native-ci-e7ea1cd-support-failure`。初次只导出与失败事件直接关联的附件得到空列表，随后按失败方法 ID 导出其 keepAlways 附件；空导出不代表没有截图证据。

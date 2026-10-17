@@ -137,3 +137,9 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 修正后的 `2a8ab45` [Windows job](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991942710/job/117276027659)已成功，Web / 移动端、Chromium、macOS / Linux 桌面与 GitGuardian 同提交成功。`a51bd93` 原生运行由后续提交的 concurrency 自动取消，未完成 Release，专用模拟器删除成功，不能计为完整通过。后续 VoiceOver 夹具收紧与 iPad 专项单列于[验证记录](./ios-voiceover-validation.md)，日常原生 CI 的最新终态继续记录在 PR #48。
 
 `2a8ab45` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991942668)随后完整成功：**262 单元 / 集成 + 7 UI，共 269 项通过，0 失败 / 跳过**；Release 模拟器编译与专用模拟器删除成功，共七项检查通过。Cookie 夹具完整性修正与 Windows 启动同步在该提交均有完整远端通过证据；这不覆盖仍失败的独立系统审计或真机验收，后续提交按自身终态核对。
+
+## 详情布局后的完整 CI · 2026-10-17
+
+`c548960` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289451)完整成功：**266 单元 / 集成 + 7 UI，共 273 项通过，0 失败 / 跳过**。日志已核对两类测试计数、`TEST SUCCEEDED` 和 `BUILD SUCCEEDED`；Release 模拟器编译与隔离模拟器删除均成功。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289495)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289463)及 GitGuardian 一并通过，共七项检查成功。
+
+新增四项详情布局样例属于日常 273 项。独立 Benchmark 的 VoiceOver、系统审计与尺寸专项不在该集合中，仍按[详情布局](./ios-detail-accessibility.md)与[朗读记录](./ios-voiceover-validation.md)保留各自通过和失败。本机完整集合中的三条键盘失败没有被远端通过改写；后续仅模拟器测试的范围见[当前 Goal](./ios-native-migration.md)。

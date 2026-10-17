@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 @MainActor
 final class NativeVoiceOverTests: XCTestCase {
@@ -207,12 +208,17 @@ final class NativeVoiceOverTests: XCTestCase {
             try seek(primary.label, service: voiceOver, speech: speech, labelBoundary: true)
             XCTAssertTrue(try voiceOver.currentSpeech().utterance.contains("按钮"), "Read the actual primary action")
             XCTAssertTrue(primary.isHittable)
+            let bottomTabBar = app.tabBars.firstMatch
+            XCTAssertTrue(bottomTabBar.exists || UIDevice.current.userInterfaceIdiom == .pad,
+                          "The iPhone detail must retain its native bottom TabBar")
             let revealed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-                primary.frame.minY >= app.navigationBars[title].frame.maxY - 1
-                    && primary.frame.maxY <= app.tabBars.firstMatch.frame.minY + 1
+                // iPad's native floating tabs are above the content, with no bottom TabBar.
+                let bottom = bottomTabBar.exists ? bottomTabBar.frame.minY : app.windows.firstMatch.frame.maxY
+                return primary.frame.minY >= app.navigationBars[title].frame.maxY - 1
+                    && primary.frame.maxY <= bottom + 1
             }, object: nil)
             XCTAssertEqual(XCTWaiter.wait(for: [revealed], timeout: 5), .completed,
-                           "VoiceOver must reveal the focused action between the system bars")
+                           "VoiceOver must reveal the focused action below navigation and above any bottom TabBar")
             if primary.label == "获取" {
                 try next("试用", service: voiceOver, speech: speech)
                 XCTAssertTrue(app.buttons["试用"].isHittable)

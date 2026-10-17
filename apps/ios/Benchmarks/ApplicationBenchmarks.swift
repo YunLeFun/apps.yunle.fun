@@ -1,5 +1,6 @@
 import XCTest
 import Vision
+import UIKit
 
 /// Opt-in benchmarks in a separate test environment. The compatibility app must be installed
 /// separately. Never install either variant over the user's production app.
@@ -43,7 +44,17 @@ final class ApplicationBenchmarks: XCTestCase {
             app.launchArguments += ["-appearance", appearance]
         }
         app.launch()
-        app.tabBars.buttons["寻乐"].tap()
+        let phoneTab = app.tabBars.buttons["寻乐"]
+        if phoneTab.waitForExistence(timeout: 5) {
+            phoneTab.tap()
+        } else {
+            XCTAssertEqual(UIDevice.current.userInterfaceIdiom, .pad)
+            let floatingTab = app.buttons.matching(NSPredicate(
+                format: "identifier == %@ AND label == %@", "safari", "寻乐")).firstMatch
+            XCTAssertTrue(floatingTab.waitForExistence(timeout: 5))
+            XCTAssertTrue(floatingTab.isHittable)
+            floatingTab.tap()
+        }
         let featured = app.buttons["discovery.featured"]
         XCTAssertTrue(featured.waitForExistence(timeout: 15))
         featured.tap()
@@ -55,8 +66,12 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed)
         let primary = app.buttons["获取"].exists ? app.buttons["获取"] : app.buttons["打开"]
         XCTAssertTrue(primary.isHittable)
+        let bottomTabBar = app.tabBars.firstMatch
+        XCTAssertTrue(bottomTabBar.exists || UIDevice.current.userInterfaceIdiom == .pad,
+                      "The iPhone detail must retain its native bottom TabBar")
+        let bottom = bottomTabBar.exists ? bottomTabBar.frame.minY : app.windows.firstMatch.frame.maxY
         XCTAssertGreaterThanOrEqual(primary.frame.minY, navigation.frame.maxY - 1)
-        XCTAssertLessThanOrEqual(primary.frame.maxY, app.tabBars.firstMatch.frame.minY + 1)
+        XCTAssertLessThanOrEqual(primary.frame.maxY, bottom + 1)
         attach(app, name: "discovery-detail-largest")
         navigation.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))

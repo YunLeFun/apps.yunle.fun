@@ -7,6 +7,7 @@ struct ApplicationDetailView: View {
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var accounts: AccountStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var workshopIdentity: UUID?
     private var app: CloudApplication { application.refreshingPublicMetadata(with: catalog.application(id: application.id)) }
 
@@ -23,7 +24,10 @@ struct ApplicationDetailView: View {
     private var content: some View {
         List {
             Section {
-                HStack(alignment: .top, spacing: 16) {
+                let layout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+                    : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
+                layout {
                     ApplicationIcon(application: app, size: 84)
                     VStack(alignment: .leading, spacing: 8) {
                         Text(app.name).font(.title2.bold())
@@ -92,21 +96,26 @@ struct ApplicationDetailView: View {
         } else if app.launchURL == nil {
             Text("暂时无法打开").font(.subheadline).foregroundStyle(.secondary)
         } else {
-            HStack {
-                if runtime.verifyingScopedApplicationID == app.id { ProgressView("正在确认访问权限") }
-                else if library.contains(app) {
-                    Button("打开") { runtime.open(app, catalog: catalog, library: library) }
-                        .buttonStyle(.borderedProminent)
-                } else {
-                    Button("获取") {
-                        if app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil { library.add(app) }
-                        else { runtime.acquire(app, intent: .install, catalog: catalog, library: library) }
-                    }.buttonStyle(.borderedProminent)
-                }
-                if !library.contains(app) && runtime.verifyingScopedApplicationID != app.id && (app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil) {
-                    Button("试用") { runtime.open(app, catalog: catalog, library: library) }.buttonStyle(.bordered)
-                }
+            ViewThatFits(in: .horizontal) {
+                HStack { acquisitionActions }
+                VStack(alignment: .leading) { acquisitionActions }
             }
+        }
+    }
+
+    @ViewBuilder private var acquisitionActions: some View {
+        if runtime.verifyingScopedApplicationID == app.id { ProgressView("正在确认访问权限") }
+        else if library.contains(app) {
+            Button("打开") { runtime.open(app, catalog: catalog, library: library) }
+                .buttonStyle(.borderedProminent)
+        } else {
+            Button("获取") {
+                if app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil { library.add(app) }
+                else { runtime.acquire(app, intent: .install, catalog: catalog, library: library) }
+            }.buttonStyle(.borderedProminent)
+        }
+        if !library.contains(app) && runtime.verifyingScopedApplicationID != app.id && (app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil) {
+            Button("试用") { runtime.open(app, catalog: catalog, library: library) }.buttonStyle(.bordered)
         }
     }
 }

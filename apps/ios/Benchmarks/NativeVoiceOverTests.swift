@@ -38,6 +38,8 @@ final class NativeVoiceOverTests: XCTestCase {
     func testDiscoveryFeaturedAtLargestText() throws { try checkDiscoveryApplication(large: true, featured: true) }
     func testDiscoveryApplicationAtStandardText() throws { try checkDiscoveryApplication(large: false, featured: false) }
     func testDiscoveryApplicationAtLargestText() throws { try checkDiscoveryApplication(large: true, featured: false) }
+    func testApplicationDetailAtStandardText() throws { try checkApplicationDetail(large: false) }
+    func testApplicationDetailAtLargestText() throws { try checkApplicationDetail(large: true) }
 
     private func guestApp(tab: String, large: Bool) throws -> XCUIApplication {
         guard ProcessInfo.processInfo.environment["YLF_VOICEOVER_VALIDATION"] == "1" else {
@@ -187,6 +189,42 @@ final class NativeVoiceOverTests: XCTestCase {
 
     private func normalized(_ value: String) -> String {
         String(value.lowercased().filter { $0.isLetter || $0.isNumber })
+    }
+
+    private func checkApplicationDetail(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "寻乐", large: large)
+        let title = "今天来做菜"
+        try withVoiceOver(app: app, name: "application-detail-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek(title, service: voiceOver, speech: speech)
+            app.buttons["discovery.featured"].doubleTap()
+            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
+            let available = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                app.buttons["获取"].exists || app.buttons["打开"].exists
+            }, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [available], timeout: 5), .completed)
+            let primary = app.buttons["获取"].exists ? app.buttons["获取"] : app.buttons["打开"]
+            try seek(primary.label, service: voiceOver, speech: speech, labelBoundary: true)
+            XCTAssertTrue(try voiceOver.currentSpeech().utterance.contains("按钮"), "Read the actual primary action")
+            XCTAssertTrue(primary.isHittable)
+            let revealed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                primary.frame.minY >= app.navigationBars[title].frame.maxY - 1
+                    && primary.frame.maxY <= app.tabBars.firstMatch.frame.minY + 1
+            }, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [revealed], timeout: 5), .completed,
+                           "VoiceOver must reveal the focused action between the system bars")
+            if primary.label == "获取" {
+                try next("试用", service: voiceOver, speech: speech)
+                XCTAssertTrue(app.buttons["试用"].isHittable)
+            }
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "voiceover-detail-action-\(large ? "largest" : "standard")"
+            screenshot.lifetime = .keepAlways; add(screenshot)
+            try seek("寻乐", service: voiceOver, speech: speech, forward: false, labelBoundary: true)
+            app.navigationBars[title].buttons.element(boundBy: 0).doubleTap()
+            XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
+            expectFocus(title, service: voiceOver, speech: speech)
+        }
     }
 
     private func checkCatalog(large: Bool) throws {

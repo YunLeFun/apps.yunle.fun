@@ -3,6 +3,8 @@ import SwiftUI
 struct DiscoveryView: View {
     @EnvironmentObject private var catalog: CatalogStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var returningApplicationID: String?
+    @AccessibilityFocusState(for: .voiceOver) private var focusedApplicationID: String?
     private var official: [CloudApplication] { catalog.applications.filter { $0.isOfficial == true } }
 
     var body: some View {
@@ -10,7 +12,7 @@ struct DiscoveryView: View {
             CatalogStatusView()
             if let featured = official.first {
                 Section {
-                    NavigationLink(value: featured) {
+                    applicationLink(featured) {
                         VStack(alignment: .leading, spacing: 20) {
                             officialLabel.foregroundStyle(Color.primary)
                             ApplicationIcon(application: featured, size: 76)
@@ -29,7 +31,7 @@ struct DiscoveryView: View {
             if !official.isEmpty {
                 Section {
                     ForEach(official.dropFirst().prefix(5)) { app in
-                        NavigationLink(value: app) { ApplicationRow(application: app) }
+                        applicationLink(app) { ApplicationRow(application: app) }
                             .accessibilityIdentifier("discovery.application.\(app.id)")
                     }
                 } header: { Text("官方出品").foregroundStyle(Color.primary) }
@@ -37,7 +39,7 @@ struct DiscoveryView: View {
             if !catalog.applications.isEmpty {
                 Section {
                     ForEach(catalog.applications.filter { $0.isOfficial != true }.prefix(8)) { app in
-                        NavigationLink(value: app) { ApplicationRow(application: app) }
+                        applicationLink(app) { ApplicationRow(application: app) }
                             .accessibilityIdentifier("discovery.application.\(app.id)")
                     }
                 } header: { Text("随手发现").foregroundStyle(Color.primary) }
@@ -50,7 +52,22 @@ struct DiscoveryView: View {
             }
         }
         .navigationTitle("寻乐")
+        .onAppear {
+            if let returningApplicationID {
+                focusedApplicationID = returningApplicationID
+                self.returningApplicationID = nil
+            }
+        }
         .refreshable { await catalog.load() }
+    }
+
+    private func applicationLink<Content: View>(_ application: CloudApplication,
+                                                @ViewBuilder label: @escaping () -> Content) -> some View {
+        NavigationLink {
+            ApplicationDetailView(application: application)
+                .onAppear { returningApplicationID = application.id; focusedApplicationID = nil }
+        } label: { label() }
+        .accessibilityFocused($focusedApplicationID, equals: application.id)
     }
 
     @ViewBuilder private var officialLabel: some View {

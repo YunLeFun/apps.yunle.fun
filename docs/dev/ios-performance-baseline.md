@@ -102,7 +102,7 @@ python3 scripts/ios/sample-memory.py \
 
 ## 干净候选的启动与分进程观测 · 2026-10-18
 
-来源为 `a8b16f7` 干净归档的 Benchmark / arm64，`fun.yunle.apps.benchmark-dev` 0.1.0 (1)。与[新候选包](./ios-simulator-preview.md#含隐私声明的新候选-2026-10-18)为同一二进制，文件摘要在 `ios-baseline/2026-10-18/provenance.json`。同一个自有 iPhone 18 Pro / iOS 27.0 (24A434) 在测试时仍名为 Candidate c8d43bc，交付前才改名为 Candidate a8b16f7；不能由设备名称推断所装源码。
+来源为 `a8b16f7` 干净归档的 Benchmark / arm64，`fun.yunle.apps.benchmark-dev` 0.1.0 (1)。与[新候选包](./ios-simulator-preview.md#含隐私声明的新候选-·-2026-10-18)为同一二进制，文件摘要在 `ios-baseline/2026-10-18/provenance.json`。同一个自有 iPhone 18 Pro / iOS 27.0 (24A434) 在测试时仍名为 Candidate c8d43bc，交付前才改名为 Candidate a8b16f7；不能由设备名称推断所装源码。
 
 先通过真实工坊准备唯一云空调入口，再检查四 Tab；两条均通过。两项测量分别运行，各 **5 次记录值**，XCTest 另有预热；没有夹杂业务测试、清空缓存或调试器附加。测量后独立回读访客安装列表仍只有云空调，常用为空。
 

@@ -77,3 +77,13 @@ xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFunStoreKitValidati
 - 正式签名和 Sandbox 所需设备 / 账号准备；上一轮真机签名在安装前失败，本轮不据模拟器或未签名编译宣布真机通过。
 
 M3 与整个迁移 Goal 保持未完成，没有上传 TestFlight 或提审。
+
+## IAP 服务端候选修复 · 2026-10-18
+
+在外部 `www.yunle.fun` 的独立工作区 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/iap-service`，从 `3f7ff5d0be186ff1e54f3fc6666fa31b959152e2` 准备账号归属与发放修复，保存为本地提交 `ffaabaa1c99105dfda811ae7518660c5140a6b40`。生产尚未部署，前述外部服务缺口不能按本地源码视为已解决。
+
+服务端候选开始核对 Apple 签名交易的 `appAccountToken` 与 CloudBase 已认证 UID；原生 Swift 与 Node 的三个固定输入（含中文 UID）分别执行，UUID 完全一致。新 IAP 订单使用稳定文档 ID，并将订单、会员 / 云币、充值流水和发放凭据同事务提交；已有随机 ID 订单在事务内重读校验，不因客户端首次请求竞争而创建第二份权益。旧会员已付款却无发放凭据时，仅能证明当前最后一次发放的记录可补凭据，其余返回人工核对，不能虚报已处理或再次延期。微信查询 / 对账入口也已加入 IAP 隔离保护。
+
+本地使用外部仓库原始 Vitest 配置执行完整支付目录 **19 文件 / 293 项通过**，包括退款、并发、响应丢失、回滚及旧记录。首次 Node 子集通过 98 项；扩大时因缺少 Nuxt 生成配置有一套件未加载，生成本地配置后完整重跑成功，原失败日志保留。证据为持久目录的 `iap-wxpay-regression-final.log`、`native-iap-token-vectors.log`；没有将夹具当作真实云数据库或 Apple Sandbox 证据。
+
+候选继续保留既有 Server API 的 Sandbox 回退，尚未完成测试环境权益数据隔离。因此不能向生产账号执行 Sandbox 发放。真实 CloudBase 事务、历史异常订单盘点、协调排空旧发放实例、隔离 Sandbox 账号 / 环境和跨设备恢复仍是验收条件；部署说明保存在外部补丁的 `docs/ios-iap-settlement.md`。本轮未改商品类型或价格，未部署、上传或提审。

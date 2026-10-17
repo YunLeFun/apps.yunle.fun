@@ -71,8 +71,21 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(dismiss.isHittable)
         XCTAssertLessThan(dismiss.frame.maxY, keyboard.frame.minY)
         dismiss.tap()
-        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: keyboard)
-        waitForExpectations(timeout: 5)
+        let hidden = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            // UIKit can retain a Keyboard accessibility node after its UI has
+            // left the screen. Neither the keyboard nor a typing key may
+            // remain interactive; releasing focus must also remove the action.
+            guard keyboard.exists else { return !dismiss.exists }
+            return !keyboard.isHittable && (!typingKey.exists || !typingKey.isHittable) && !dismiss.exists
+        }, object: nil)
+        let dismissal = XCTWaiter.wait(for: [hidden], timeout: 5)
+        let after = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        after.name = "native-login-after-dismiss-\(name)"; after.lifetime = .keepAlways; add(after)
+        if dismissal != .completed {
+            let tree = XCTAttachment(string: app.debugDescription)
+            tree.name = "native-login-after-dismiss-tree-\(name)"; tree.lifetime = .keepAlways; add(tree)
+        }
+        XCTAssertEqual(dismissal, .completed, "Focus, the keyboard and typing keys must no longer be interactive")
         XCTAssertFalse(dismiss.exists)
     }
 

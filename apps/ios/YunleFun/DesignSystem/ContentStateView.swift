@@ -8,6 +8,25 @@ struct ContentStateView: View {
     var action: (() -> Void)?
 
     var body: some View {
+        if #available(iOS 17, *) {
+            // The system view keeps spacing, type and symbol rendering in step
+            // with each OS release.
+            ContentUnavailableView {
+                Label(title, systemImage: systemImage)
+            } description: {
+                Text(message)
+            } actions: {
+                if let actionTitle, let action {
+                    Button(actionTitle, action: action).buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 220)
+        } else {
+            legacy
+        }
+    }
+
+    private var legacy: some View {
         VStack(spacing: 16) {
             Image(systemName: systemImage).font(.largeTitle).foregroundStyle(.secondary).accessibilityHidden(true)
             Text(title).font(.title3.bold())

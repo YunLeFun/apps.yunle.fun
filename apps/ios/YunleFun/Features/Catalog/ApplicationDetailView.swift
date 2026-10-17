@@ -8,7 +8,10 @@ struct ApplicationDetailView: View {
     @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var workshopIdentity: UUID?
+    /// Set when this visit added the app, so the header confirms where it went.
+    @State private var addedHere = false
     private var app: CloudApplication { application.refreshingPublicMetadata(with: catalog.application(id: application.id)) }
 
     var body: some View {
@@ -33,10 +36,23 @@ struct ApplicationDetailView: View {
                         Text(app.name).font(.title2.bold())
                         Text(app.author).font(.subheadline).foregroundStyle(.secondary)
                         action
+                        if addedHere && library.contains(app) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).accessibilityHidden(true)
+                                Text("已加入云居").foregroundStyle(.secondary)
+                            }
+                            .font(.footnote)
+                            .accessibilityElement(children: .combine)
+                            .transition(.opacity)
+                            .accessibilityIdentifier("detail.added")
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .animation(Motion.standard(reduceMotion: reduceMotion), value: library.contains(app))
+                    .animation(Motion.fade, value: runtime.verifyingScopedApplicationID)
                 }
                 .padding(.vertical, 12)
+                .haptic(.success, trigger: library.contains(app)) { old, new in !old && new }
             }
             Section("关于这个应用") { Text(app.summary).textSelection(.enabled) }
             if app.accessWorkshopID == nil && app.accessOwnerID == nil && app.personalMarketOwnerLogin == nil {
@@ -63,18 +79,8 @@ struct ApplicationDetailView: View {
             }
             if let screenshots = app.screenshots, !screenshots.isEmpty {
                 Section("应用预览") {
-                    ScrollView(.horizontal) {
-                        HStack {
-                            ForEach(screenshots, id: \.self) { value in
-                                if let url = URL(string: value), url.scheme == "https" {
-                                    AsyncImage(url: url) { image in image.resizable().scaledToFit() }
-                                    placeholder: { ProgressView() }
-                                    .frame(height: 280)
-                                    .accessibilityLabel("\(app.name)的应用预览")
-                                }
-                            }
-                        }
-                    }
+                    ScreenshotStrip(name: app.name, screenshots: screenshots)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0))
                 }
             }
             if let issue = library.storageError {
@@ -99,7 +105,7 @@ struct ApplicationDetailView: View {
 
     @ViewBuilder private var action: some View {
         if let menu = runtimeMenu, menu.represents(app) {
-            Button("返回应用", action: menu.dismiss).buttonStyle(.borderedProminent)
+            Button("返回应用", action: menu.dismiss).buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
         } else if app.personalMarketOwnerLogin != nil && !app.canOpenAsGuest {
             VStack(alignment: .leading, spacing: 6) {
                 Label(app.accessLabel ?? "暂时无法打开", systemImage: "lock").font(.subheadline)
@@ -124,15 +130,59 @@ struct ApplicationDetailView: View {
         if runtime.verifyingScopedApplicationID == app.id { ProgressView("正在确认访问权限") }
         else if library.contains(app) {
             Button("打开") { runtime.open(app, catalog: catalog, library: library) }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
         } else {
             Button("获取") {
-                if app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil { library.add(app) }
-                else { runtime.acquire(app, intent: .install, catalog: catalog, library: library) }
-            }.buttonStyle(.borderedProminent)
+                if app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil { addedHere = true; library.add(app) }
+                else { addedHere = true; runtime.acquire(app, intent: .install, catalog: catalog, library: library) }
+            }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
         }
         if !library.contains(app) && runtime.verifyingScopedApplicationID != app.id && (app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil) {
-            Button("试用") { runtime.open(app, catalog: catalog, library: library) }.buttonStyle(.bordered)
+            Button("试用") { runtime.open(app, catalog: catalog, library: library) }.buttonStyle(.bordered).buttonBorderShape(.capsule)
         }
+    }
+}
+
+/// Horizontally paged previews with rounded corners, a hairline edge so light
+/// screenshots don't bleed into the background, and a fade-in once loaded.
+private struct ScreenshotStrip: View {
+    let name: String
+    let screenshots: [String]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(screenshots, id: \.self) { value in
+                    if let url = URL(string: value), url.scheme == "https" {
+                        AsyncImage(url: url, transaction: Transaction(animation: Motion.fade)) { phase in
+                            switch phase {
+                            case .success(let image): image.resizable().scaledToFit().transition(.opacity)
+                            case .failure: Image(systemName: "photo").foregroundStyle(.secondary).frame(width: 160)
+                            default: Color(uiColor: .tertiarySystemFill).frame(width: 160).overlay(ProgressView())
+                            }
+                        }
+                        .frame(height: 280)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.quaternary, lineWidth: 0.5))
+                        .accessibilityLabel("\(name)的应用预览")
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .modifier(ScrollTargetLayout())
+        }
+        .modifier(ViewAlignedPaging())
+    }
+}
+
+private struct ScrollTargetLayout: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17, *) { content.scrollTargetLayout() } else { content }
+    }
+}
+
+private struct ViewAlignedPaging: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17, *) { content.scrollTargetBehavior(.viewAligned) } else { content }
     }
 }

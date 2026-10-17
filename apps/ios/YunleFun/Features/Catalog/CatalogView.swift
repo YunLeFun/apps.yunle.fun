@@ -3,6 +3,7 @@ import SwiftUI
 struct CatalogView: View {
     @EnvironmentObject private var catalog: CatalogStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var query = ""
     @State private var category = "全部"
     @State private var showScanner = false
@@ -24,6 +25,8 @@ struct CatalogView: View {
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
         .refreshable { await catalog.load() }
+        .animation(Motion.standard(reduceMotion: reduceMotion), value: category)
+        .haptic(.selection, trigger: category)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showScanner = true } label: { Label("扫描工坊二维码", systemImage: "qrcode.viewfinder") }
@@ -34,7 +37,11 @@ struct CatalogView: View {
                     Picker("分类", selection: $category) {
                         ForEach(catalog.categories, id: \.self) { Text($0).tag($0) }
                     }
-                } label: { Label("分类", systemImage: "line.3.horizontal.decrease") }
+                } label: {
+                    // A filled glyph tells people a filter is hiding part of the catalog.
+                    Label("分类", systemImage: category == "全部" ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                }
+                .accessibilityValue(category)
             }
         }
     }
@@ -54,7 +61,9 @@ struct CatalogView: View {
                                  actionTitle: "重试", action: { Task { await catalog.load() } })
             } else if filtered.isEmpty {
                 ContentStateView(title: query.isEmpty ? "还没有应用" : "没有找到相关应用", systemImage: "magnifyingglass",
-                                 message: query.isEmpty ? "稍后再来看看。" : "试试其他关键词或分类。")
+                                 message: query.isEmpty ? "稍后再来看看。" : "试试其他关键词或分类。",
+                                 actionTitle: category == "全部" ? nil : "显示全部分类",
+                                 action: category == "全部" ? nil : { category = "全部" })
             } else {
                 Section {
                     ForEach(filtered) { app in
@@ -62,8 +71,18 @@ struct CatalogView: View {
                             .accessibilityIdentifier("catalog.application.\(app.id)")
                     }
                 } header: {
-                    Text(category == "全部" ? "全部应用 · \(filtered.count)" : "\(category) · \(filtered.count)")
-                        .foregroundStyle(Color.primary)
+                    HStack {
+                        Text(category == "全部" ? "全部应用 · \(filtered.count)" : "\(category) · \(filtered.count)")
+                            .foregroundStyle(Color.primary)
+                            .numericTransition(Double(filtered.count))
+                        Spacer()
+                        if category != "全部" {
+                            Button("显示全部") { category = "全部" }
+                                .font(.subheadline)
+                                .textCase(nil)
+                                .accessibilityIdentifier("catalog.filter.clear")
+                        }
+                    }
                 }
             }
         }

@@ -89,10 +89,15 @@ private struct ApplicationIconImage<Fallback: View>: View {
         .task(id: key) {
             let request = key
             loaded = nil; loadedKey = nil
+            let started = Date()
             do {
                 let value = try await pipeline.load(request.candidates, pixelSize: request.pixels)
                 try Task.checkCancellation()
-                loaded = value; loadedKey = request
+                // Memory-cache hits swap instantly so revisited screens don't
+                // flicker; only real network / decode waits fade in.
+                withAnimation(Date().timeIntervalSince(started) > 0.08 ? Motion.fade : nil) {
+                    loaded = value; loadedKey = request
+                }
             } catch is CancellationError { return }
             catch { loaded = nil; loadedKey = request }
         }
@@ -141,14 +146,26 @@ struct ApplicationRow: View {
     private var description: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(application.name).font(.headline).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
+            // Two lines keep long catalogs scannable; the detail page and
+            // VoiceOver still get the full summary. Accessibility sizes stay unclamped.
             Text(application.summary).font(.subheadline).foregroundStyle(Color.primary)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func accessLabel(_ label: String) -> some View {
-        Text(label).font(.caption).foregroundStyle(Color.primary)
-            .fixedSize(horizontal: false, vertical: true)
+    @ViewBuilder private func accessLabel(_ label: String) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            Text(label).font(.caption).foregroundStyle(Color.primary)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            // A compact capsule that never wraps character by character beside the summary.
+            Text(label).font(.caption.weight(.medium)).foregroundStyle(Color.primary)
+                .lineLimit(1)
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(Color(uiColor: .tertiarySystemFill), in: Capsule())
+                .fixedSize()
+        }
     }
 }

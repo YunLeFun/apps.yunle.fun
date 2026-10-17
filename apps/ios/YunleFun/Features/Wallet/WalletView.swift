@@ -117,7 +117,11 @@ private struct WalletBalanceSection: View {
     var body: some View {
         Section {
             if let snapshot = wallet.snapshot {
-                LabeledContent("云币余额") { Text(snapshot.coin.formatted()).font(.title2.bold()).monospacedDigit() }
+                LabeledContent("云币余额") {
+                    Text(snapshot.coin.formatted()).font(.title2.bold()).monospacedDigit()
+                        .numericTransition(Double(snapshot.coin))
+                        .animation(Motion.spring, value: snapshot.coin)
+                }
             } else if wallet.isLoading { ProgressView("正在读取余额") }
             else { Text("尚未获取余额").foregroundStyle(.secondary) }
             LabeledContent("当前账号", value: accounts.user?.displayName ?? "")

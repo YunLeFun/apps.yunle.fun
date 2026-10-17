@@ -103,6 +103,7 @@
 		A55E9397E81CAEF30D909F4F /* CloudApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272B234D269D80D84B38F3E6 /* CloudApplication.swift */; };
 		A81DE8781D8BB7EB3FD84D9F /* CatalogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1A8E60138E9E1071D72C30 /* CatalogService.swift */; };
 		A9EE669F7D2DF67C32F1AA1F /* CameraQRReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAD6CD73DEE8D0B2E8E2AAB /* CameraQRReader.swift */; };
+		AD8BA6831805FFDCF0436F16 /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6D25A6EDE058B21133D56F /* Motion.swift */; };
 		AEEE059EB83EF9755334E51D /* HomeSyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A3AB4A80B4BD642F4ECF189 /* HomeSyncSettingsView.swift */; };
 		B05AC8EA5BC36FEC197D1425 /* HomeSyncHTTPTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08F60F4C711CE6C895B14AF /* HomeSyncHTTPTests.swift */; };
 		B08B5872746195A4C833BF10 /* QRScannerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EA8F55A6D1A7868965216D /* QRScannerModel.swift */; };
@@ -250,6 +251,7 @@
 		41BED686047B5CD8FB88FBC4 /* ApplicationIconTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationIconTests.swift; sourceTree = "<group>"; };
 		45B193A58BBB520C168766D2 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		4D3C47432884C98C9B9E84D4 /* SwiftDraw-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "SwiftDraw-LICENSE.txt"; sourceTree = "<group>"; };
+		4F6D25A6EDE058B21133D56F /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
 		53837FE4B0ED3ADCD5F55420 /* HomeSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncCoordinator.swift; sourceTree = "<group>"; };
 		554381AF9377893D21B04DDA /* ApplicationDraftVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDraftVault.swift; sourceTree = "<group>"; };
 		556A6C05BD6F159893221D84 /* NativeNavigationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeNavigationUITests.swift; sourceTree = "<group>"; };
@@ -675,6 +677,7 @@
 			children = (
 				FB0BEBE6F399E0E22ADEBDFB /* ApplicationIcon.swift */,
 				EC1B63E1B44278210C81D0B6 /* ContentStateView.swift */,
+				4F6D25A6EDE058B21133D56F /* Motion.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -1058,6 +1061,7 @@
 				0E07AC436622BC7C8F3A1D0E /* LegacyMigrationView.swift in Sources */,
 				5B96680135BF27ED34DDA8A2 /* LoginView.swift in Sources */,
 				B7F304B652EA60375B86DDA5 /* MeView.swift in Sources */,
+				AD8BA6831805FFDCF0436F16 /* Motion.swift in Sources */,
 				507D9C420ECFEF306328CEA9 /* MyApplicationsView.swift in Sources */,
 				1DF4A45D5DD8C5CEE596929C /* MyReportsView.swift in Sources */,
 				EFC4E935FFCB128B4AE7B427 /* MyWorkshopsView.swift in Sources */,

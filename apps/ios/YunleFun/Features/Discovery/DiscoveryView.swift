@@ -3,6 +3,8 @@ import SwiftUI
 struct DiscoveryView: View {
     @EnvironmentObject private var catalog: CatalogStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Namespace private var featuredZoom
     @State private var returningApplicationID: String?
     @AccessibilityFocusState(for: .voiceOver) private var focusedApplicationID: String?
     private var official: [CloudApplication] { catalog.applications.filter { $0.isOfficial == true } }
@@ -12,7 +14,7 @@ struct DiscoveryView: View {
             CatalogStatusView()
             if let featured = official.first {
                 Section {
-                    applicationLink(featured) {
+                    applicationLink(featured, zoom: true) {
                         VStack(alignment: .leading, spacing: 20) {
                             officialLabel.foregroundStyle(Color.primary)
                             ApplicationIcon(application: featured, size: 76)
@@ -24,6 +26,8 @@ struct DiscoveryView: View {
                             }
                         }
                         .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
                     }
                     .accessibilityIdentifier("discovery.featured")
                 } header: { Text("发现一点小乐趣").foregroundStyle(Color.primary) }
@@ -61,12 +65,19 @@ struct DiscoveryView: View {
         .refreshable { await catalog.load() }
     }
 
-    private func applicationLink<Content: View>(_ application: CloudApplication,
+    /// The featured card zooms into its detail like an App Store story; list
+    /// rows keep the standard push that matches every other list in the app.
+    private func applicationLink<Content: View>(_ application: CloudApplication, zoom: Bool = false,
                                                 @ViewBuilder label: @escaping () -> Content) -> some View {
         NavigationLink {
             ApplicationDetailView(application: application)
                 .onAppear { returningApplicationID = application.id; focusedApplicationID = nil }
-        } label: { label() }
+                .modifier(OptionalZoom(enabled: zoom, id: application.id, namespace: featuredZoom, isDestination: true,
+                                       reduceMotion: reduceMotion))
+        } label: {
+            label().modifier(OptionalZoom(enabled: zoom, id: application.id, namespace: featuredZoom, isDestination: false,
+                                          reduceMotion: reduceMotion))
+        }
         .accessibilityFocused($focusedApplicationID, equals: application.id)
     }
 
@@ -80,5 +91,19 @@ struct DiscoveryView: View {
                 Image(systemName: "sparkle").font(.subheadline).accessibilityHidden(true)
             }
         }
+    }
+}
+
+private struct OptionalZoom: ViewModifier {
+    let enabled: Bool
+    let id: String
+    let namespace: Namespace.ID
+    let isDestination: Bool
+    let reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        if !enabled { content }
+        else if isDestination { content.zoomDestination(id: id, in: namespace, reduceMotion: reduceMotion) }
+        else { content.zoomSource(id: id, in: namespace) }
     }
 }

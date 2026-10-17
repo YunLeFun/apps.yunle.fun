@@ -1,3 +1,4 @@
+import CryptoKit
 import Darwin
 import Foundation
 import Security
@@ -110,7 +111,7 @@ final class ManagedAccountLiveTests: XCTestCase {
 /// credentials never become XCTest action arguments or pasteboard contents.
 @MainActor
 final class FeedbackLoginLiveTests: XCTestCase {
-    private let draft = "Feedback continuation 🧩\nSteps: open feedback, then sign in.\nExpected: preserve every line.\nActual: return to a fresh feedback page."
+    private var draft = "Feedback continuation 🧩\nSteps: open feedback, then sign in.\nExpected: preserve every line.\nActual: return to a fresh feedback page."
     private let canary = "YLF_UIKit_Input_Canary_20261018_Bb8!"
     private var stages: [String] = []
     private var pasteboardCounts: [String: Int] = [:]
@@ -129,6 +130,16 @@ final class FeedbackLoginLiveTests: XCTestCase {
             return XCTFail("Requires the exact owned simulator and audited input channel")
         }
         executionTimeAllowance = 900
+        let uploadRun = env["YUNLEFUN_LIVE_FEEDBACK_UPLOAD"]
+        if let uploadRun {
+            guard mode == "managed", UUID(uuidString: uploadRun)?.uuidString == uploadRun else {
+                return XCTFail("An upload requires managed mode and a canonical, unique run UUID")
+            }
+            draft += "\nSynthetic validation: " + uploadRun
+        }
+        let receiptSnapshot = try uploadRun.map { _ in try FeedbackReceiptSnapshot() }
+        var receiptOwner: String?
+        var uploadEvidence: [String: Any] = [:]
         let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let directory = cache.appendingPathComponent("FeedbackInput-" + UUID().uuidString)
         let service = "fun.yunle.apps.feedback-input." + UUID().uuidString
@@ -141,6 +152,10 @@ final class FeedbackLoginLiveTests: XCTestCase {
         let accounts = AccountStore(session: AccountSession(api: auth, vault: vault), identityDidChange: { id in
             logs.activateAccount(id)
             logs.record(.info, message: "account.scope.activated")
+            if let uploadRun, let id {
+                receiptOwner = id
+                logs.record(.info, message: "feedback.validation.upload." + uploadRun)
+            }
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
             library.setAutoSyncEnabled(false)
@@ -168,6 +183,10 @@ final class FeedbackLoginLiveTests: XCTestCase {
             try? FileManager.default.removeItem(at: directory)
             SecItemDelete([kSecClass as String: kSecClassGenericPassword,
                            kSecAttrService as String: service] as CFDictionary)
+            if let receiptOwner, let receiptSnapshot {
+                do { try receiptSnapshot.restore(owner: receiptOwner) }
+                catch { XCTFail("Could not restore this synthetic account's previous local receipt") }
+            }
         }
         let initialPasteboardCount = UIPasteboard.general.changeCount
         var failure: String?
@@ -230,11 +249,20 @@ final class FeedbackLoginLiveTests: XCTestCase {
                 guard window.rootViewController?.presentedViewController == nil else { throw InputFailure.state }
                 attach(window, name: "managed-feedback-resumed")
                 mark("managed-feedback-resumed")
+                if let uploadRun, let receiptSnapshot {
+                    uploadEvidence = try await exerciseUpload(run: uploadRun, window: window,
+                        accounts: accounts, logs: logs, snapshot: receiptSnapshot)
+                }
                 // The UI driver returns to Me, then opens a new feedback entry.
                 try await wait { self.editor(in: window) == nil }
                 mark("returned-to-me")
                 try await wait { self.editor(in: window) != nil }
                 guard self.editor(in: window)?.text == "" else { throw InputFailure.state }
+                if uploadRun != nil {
+                    let restoredReceipt = DiagnosticUploadStore(accounts: accounts, logs: logs).receipt
+                    guard restoredReceipt?.supportCode == uploadEvidence["supportCode"] as? String else { throw InputFailure.state }
+                    uploadEvidence["receiptRestoredOnNewEntry"] = true
+                }
                 attach(window, name: "managed-feedback-new-entry-empty")
                 mark("continuation-consumed-once")
                 // Only the actual account-management UI removes this account.
@@ -263,6 +291,7 @@ final class FeedbackLoginLiveTests: XCTestCase {
             "inputChecks": inputChecks, "internalMatchingViews": internalMatches, "pasteboardCounts": pasteboardCounts,
             "passwordSignInAttempts": counts.passwordAttempts, "passwordSignInSucceeded": counts.passwordSucceeded,
             "remoteSignOutSucceeded": counts.signOutSucceeded, "nativeUIAccountRemoval": uiRemoval,
+            "upload": uploadEvidence,
             "simulatorPasteboardUnchanged": UIPasteboard.general.changeCount == initialPasteboardCount,
             "failure": failure ?? "none",
             "scope": "App-hosted actual product views; external UI navigation and submission; public focused UIKeyInput text entry"]
@@ -274,6 +303,52 @@ final class FeedbackLoginLiveTests: XCTestCase {
         XCTAssertEqual(counts.passwordSucceeded, mode == "canary" ? 0 : 1)
         XCTAssertEqual(counts.signOutSucceeded, mode == "canary" ? 0 : 1)
         if mode == "managed" { XCTAssertTrue(uiRemoval) }
+    }
+
+    private func exerciseUpload(run: String, window: UIWindow, accounts: AccountStore,
+                                logs: DiagnosticLogStore, snapshot: FeedbackReceiptSnapshot) async throws -> [String: Any] {
+        let owner = try XCTUnwrap(accounts.user?.id)
+        let expectedMessages = ["account.scope.activated", "feedback.validation.upload." + run]
+        guard logs.accountID == owner, logs.entries.map(\.message) == expectedMessages,
+              logs.entries.allSatisfy({ $0.level == .info }), DiagnosticText.redact(draft) == draft else {
+            throw InputFailure.state
+        }
+        let before = try snapshot.current(owner: owner)
+        mark("upload-waiting-for-first-preview")
+        try await wait { window.rootViewController?.presentedViewController != nil }
+        attach(window, name: "diagnostic-first-review")
+        mark("upload-first-preview-presented")
+        // The external UI driver cancels this preview, checks the exact run's
+        // database absence, then reopens the review and explicitly consents.
+        try await wait { window.rootViewController?.presentedViewController == nil }
+        guard try snapshot.current(owner: owner) == before else { throw InputFailure.state }
+        mark("upload-preview-cancelled-receipt-unchanged")
+        try await wait { window.rootViewController?.presentedViewController != nil }
+        guard logs.entries.map(\.message) == expectedMessages else { throw InputFailure.state }
+        mark("upload-second-preview-presented")
+        var receipt: DiagnosticUploadReceipt?
+        try await wait {
+            receipt = try? snapshot.receipt(owner: owner)
+            return receipt != nil && (try? snapshot.current(owner: owner)) != before
+        }
+        let saved = try XCTUnwrap(receipt)
+        guard saved.logCount == 2, !saved.uploadId.isEmpty else { throw InputFailure.state }
+        try DiagnosticUploadRules.validate(saved, count: 2, now: Date().timeIntervalSince1970 * 1000)
+        let evidence: [String: Any] = ["run": run, "ownerUid": owner,
+            "uploadId": saved.uploadId, "supportCode": saved.supportCode,
+            "logCount": saved.logCount, "expiresAt": saved.expiresAt,
+            "issueDescription": draft, "expectedMessages": expectedMessages,
+            "cancelledPreviewLeftReceiptUnchanged": true,
+            "transport": "Unmodified production DiagnosticService over HTTPS; no mocked response"]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.prettyPrinted, .sortedKeys]),
+                                       uniformTypeIdentifier: "public.json")
+        attachment.name = "diagnostic-upload-live-receipt"; attachment.lifetime = .keepAlways; add(attachment)
+        attach(window, name: "diagnostic-upload-success-alert")
+        mark("upload-receipt-persisted")
+        // Dismiss the real success alert with Done, leaving the receipt visible.
+        try await wait { window.rootViewController?.presentedViewController == nil }
+        mark("upload-success-alert-dismissed")
+        return evidence
     }
 
     private func mark(_ stage: String) {
@@ -342,6 +417,50 @@ final class FeedbackLoginLiveTests: XCTestCase {
     private struct InputPool: Decodable { let accounts: [InputCredential] }
     private struct InputCredential: Decodable { let id: String; let environment: String; let username: String; let password: String }
     private enum InputFailure: Error { case state, timeout, privacy, credential }
+}
+
+/// Preserve any existing receipt in the owned simulator. Only the synthetic
+/// identity used by this run is restored; all other files remain untouched.
+@MainActor
+private final class FeedbackReceiptSnapshot {
+    private let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("DiagnosticReceipts")
+    private var originals: [String: Data] = [:]
+    init() throws {
+        guard FileManager.default.fileExists(atPath: directory.path) else { return }
+        let attributes = try FileManager.default.attributesOfItem(atPath: directory.path)
+        guard attributes[.type] as? FileAttributeType == .typeDirectory else { throw DiagnosticError.storage }
+        let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+        guard files.count <= 100 else { throw DiagnosticError.storage }
+        for file in files { originals[file.lastPathComponent] = try read(file) }
+    }
+    private func file(_ owner: String) -> URL {
+        let name = SHA256.hash(data: Data(owner.utf8)).map { String(format: "%02x", $0) }.joined() + ".json"
+        return directory.appendingPathComponent(name)
+    }
+    private func read(_ file: URL) throws -> Data {
+        let attributes = try FileManager.default.attributesOfItem(atPath: file.path)
+        guard attributes[.type] as? FileAttributeType == .typeRegular,
+              let size = attributes[.size] as? NSNumber, size.int64Value <= 8192 else { throw DiagnosticError.storage }
+        return try Data(contentsOf: file)
+    }
+    func current(owner: String) throws -> Data? {
+        let file = file(owner)
+        return FileManager.default.fileExists(atPath: file.path) ? try read(file) : nil
+    }
+    func receipt(owner: String) throws -> DiagnosticUploadReceipt? {
+        guard let data = try current(owner: owner) else { return nil }
+        struct Record: Decodable { let receipt: DiagnosticUploadReceipt }
+        return try JSONDecoder().decode(Record.self, from: data).receipt
+    }
+    func restore(owner: String) throws {
+        let file = file(owner)
+        let previous = originals[file.lastPathComponent]
+        if try current(owner: owner) == previous { return }
+        if let previous { try previous.write(to: file, options: [.atomic, .completeFileProtectionUnlessOpen]) }
+        else { try FileManager.default.removeItem(at: file) }
+        guard try current(owner: owner) == previous else { throw DiagnosticError.storage }
+    }
 }
 
 /// Forwards the same production auth API and counts only successful return values.

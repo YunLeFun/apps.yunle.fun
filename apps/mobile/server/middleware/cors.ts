@@ -20,7 +20,7 @@ export default defineEventHandler((event) => {
   if (event.method === 'OPTIONS') {
     setResponseHeaders(event, {
       'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-      'Access-Control-Allow-Headers': 'Authorization,Content-Type',
+      'Access-Control-Allow-Headers': 'Authorization,Content-Type,If-Match',
       'Access-Control-Max-Age': '86400',
     })
     return sendNoContent(event)

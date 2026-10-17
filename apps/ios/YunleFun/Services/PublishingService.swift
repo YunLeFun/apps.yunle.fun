@@ -4,9 +4,9 @@ enum ApplicationIconRole: String { case appIcon = "app-icon", mark }
 protocol PublishingServing: Sendable {
     func access(identity: AuthorizedAccount) async throws -> PublishingAccess
     func applications(identity: AuthorizedAccount) async throws -> [ManagedApplication]
-    func save(id: String?, draft: ApplicationDraft, identity: AuthorizedAccount) async throws -> ManagedApplication
-    func submit(id: String, makePublic: Bool, shortName: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt
-    func delist(id: String, identity: AuthorizedAccount) async throws
+    func save(id: String?, draft: ApplicationDraft, writeVersion: String?, identity: AuthorizedAccount) async throws -> ManagedApplication
+    func submit(id: String, makePublic: Bool, shortName: String, writeVersion: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt
+    func delist(id: String, writeVersion: String, identity: AuthorizedAccount) async throws
     func upload(png: Data, role: ApplicationIconRole, identity: AuthorizedAccount) async throws -> String
 }
 struct PublishingService: PublishingServing {
@@ -36,7 +36,8 @@ struct PublishingService: PublishingServing {
             return record
         }
     }
-    func save(id: String?, draft: ApplicationDraft, identity: AuthorizedAccount) async throws -> ManagedApplication {
+    func save(id: String?, draft: ApplicationDraft, writeVersion: String? = nil, identity: AuthorizedAccount) async throws -> ManagedApplication {
+        if id != nil { guard let writeVersion, PublishingValue.writeVersion(writeVersion) else { throw PublishingError.unsupportedServer } }
         guard draft.isValid else { throw PublishingError.invalidInput }
         let url = try id.map { try appURL($0).appendingPathComponent("submissions") } ?? origin.appendingPathComponent("api/apps/submissions")
         var body = try JSONSerialization.jsonObject(with: JSONEncoder().encode(draft)) as! [String: Any]
@@ -54,13 +55,13 @@ struct PublishingService: PublishingServing {
             if let mark = variants(icons.mark) { compact["mark"] = mark }
             body["iconAssets"] = compact.isEmpty ? nil : compact
         }
-        let receipt: ApplicationSaveReceipt = try await request(url, method: "POST", fields: body, identity: identity)
+        let receipt: ApplicationSaveReceipt = try await request(url, method: "POST", fields: body, writeVersion: writeVersion, identity: identity)
         try receipt.app.validate(owner: identity.userID, id: id)
         guard receipt.submission.appId == receipt.app.id, receipt.submission.submitterUid == identity.userID,
               PublishingValue.identifier(receipt.submission.id), receipt.submission.id == receipt.app.currentRevisionId,
               receipt.submission.id == receipt.app.latestSubmission?.id,
               receipt.submission.reviewStatus == .draft, receipt.app.latestSubmission?.reviewStatus == .draft,
-              receipt.submission.revision > 0, receipt.app.latestSubmission?.revision == receipt.submission.revision,
+              receipt.app.writeVersion != nil, receipt.submission.revision > 0, receipt.app.latestSubmission?.revision == receipt.submission.revision,
               receipt.app.publishedSubmissionId == receipt.submission.id, receipt.app.publicationStatus == .published,
               receipt.app.draft.name.trimmed == draft.name.trimmed, receipt.app.draft.slug == draft.slug.trimmed,
               receipt.app.draft.audience == draft.audience else { throw PublishingError.invalidResponse }
@@ -68,15 +69,15 @@ struct PublishingService: PublishingServing {
         app.application.accessOwnerID = identity.userID; app.application.accessWorkshopID = nil
         return app
     }
-    func submit(id: String, makePublic: Bool, shortName: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt {
+    func submit(id: String, makePublic: Bool, shortName: String, writeVersion: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt {
         guard shortName.isEmpty || PublishingValue.slug(shortName) else { throw PublishingError.invalidInput }
         let receipt: MarketSubmissionReceipt = try await request(appURL(id).appendingPathComponent("public-market"), method: "POST",
-            fields: ["makePublic": makePublic, "shortName": shortName], identity: identity)
+            fields: ["makePublic": makePublic, "shortName": shortName], writeVersion: writeVersion, identity: identity)
         guard receipt.appId == id, PublishingValue.identifier(receipt.submissionId), receipt.reviewStatus == .pending else { throw PublishingError.invalidResponse }
         return receipt
     }
-    func delist(id: String, identity: AuthorizedAccount) async throws {
-        let receipt: DelistReceipt = try await request(appURL(id), method: "DELETE", identity: identity)
+    func delist(id: String, writeVersion: String, identity: AuthorizedAccount) async throws {
+        let receipt: DelistReceipt = try await request(appURL(id), method: "DELETE", writeVersion: writeVersion, identity: identity)
         guard receipt.success else { throw PublishingError.invalidResponse }
     }
     func upload(png: Data, role: ApplicationIconRole, identity: AuthorizedAccount) async throws -> String {
@@ -98,8 +99,12 @@ struct PublishingService: PublishingServing {
         return origin.appendingPathComponent("api/apps").appendingPathComponent(id)
     }
     private func request<Value: Decodable>(_ url: URL, method: String = "GET", fields: [String: Any]? = nil,
-        rawBody: Data? = nil, contentType: String? = nil, identity: AuthorizedAccount) async throws -> Value {
+        rawBody: Data? = nil, contentType: String? = nil, writeVersion: String? = nil, identity: AuthorizedAccount) async throws -> Value {
         var request = URLRequest(url: url)
+        if let writeVersion {
+            guard PublishingValue.writeVersion(writeVersion) else { throw PublishingError.unsupportedServer }
+            request.setValue("\"\(writeVersion)\"", forHTTPHeaderField: "If-Match")
+        }
         request.httpMethod = method; request.cachePolicy = .reloadIgnoringLocalCacheData
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("Bearer \(identity.accessToken)", forHTTPHeaderField: "Authorization")
@@ -116,7 +121,8 @@ struct PublishingService: PublishingServing {
         case 401: throw PublishingError.unauthorized
         case 403: throw PublishingError.forbidden
         case 404: throw PublishingError.notFound
-        case 409: throw PublishingError.conflict
+        case 409, 412: throw PublishingError.conflict
+        case 428: throw PublishingError.unsupportedServer
         case 429: throw PublishingError.throttled
         case 200..<300: break
         default: throw PublishingError.unavailable

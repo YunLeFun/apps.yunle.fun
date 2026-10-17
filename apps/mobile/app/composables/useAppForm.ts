@@ -52,6 +52,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
   const workshopModule = usePersonalWorkshop()
 
   const form = reactive(createEmptyForm())
+  let editBase: AppRecord | null = null
   const saving = ref(false)
   const iconUploadBusy = ref(false)
   const slugError = ref('')
@@ -68,6 +69,7 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
 
   /** 用已有数据填充表单 */
   function populateForm(app: AppRecord) {
+    editBase = app
     form.name = app.name
     form.slug = app.slug
     form.description = app.description || ''
@@ -389,19 +391,21 @@ export function useAppForm(mode: 'create' | 'edit' = 'create', existingApp?: Ref
       }
       else {
         // 编辑模式
-        if (!existingApp?.value)
+        const current = editBase
+        const input = buildFormData()
+        if (!current)
           return
 
         // slug 变更时需要检查唯一性
-        if (form.slug !== existingApp.value.slug) {
+        if (form.slug !== current.slug) {
           const taken = await isSlugTaken(form.slug)
           if (taken) {
             slugError.value = '此标识符已被占用，请换一个'
             return
           }
         }
-        const workshopOpened = await ensureWorkshopForAudience(form.audience, workshopModule)
-        await updateApp(existingApp.value._id, buildFormData())
+        const workshopOpened = await ensureWorkshopForAudience(input.audience ?? (input.isPublic ? 'public' : 'owner'), workshopModule)
+        await updateApp(current, input)
         submitted.value = true
         workshopDirty.value = true
         toast.showSuccess(workshopOpened ? '已开启个人工坊并保存' : '保存成功')

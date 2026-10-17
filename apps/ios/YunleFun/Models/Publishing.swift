@@ -1,7 +1,7 @@
 import Foundation
 
 enum PublishingError: Error, Equatable, AccountRequestFailure {
-    case invalidInput, invalidResponse, unauthorized, forbidden, notFound, conflict, throttled, unavailable, identityChanged, storage
+    case invalidInput, invalidResponse, unauthorized, forbidden, notFound, conflict, throttled, unavailable, identityChanged, storage, unsupportedServer
     var isUnauthorized: Bool { self == .unauthorized }
     var message: String {
         switch self {
@@ -14,6 +14,7 @@ enum PublishingError: Error, Equatable, AccountRequestFailure {
         case .throttled: return "操作较频繁，请稍后重试。作品保存还有每日次数限制。"
         case .unavailable: return "暂时无法连接作品服务，请检查网络后重试。"
         case .identityChanged: return "账号已变化，请重新打开作品。"
+        case .unsupportedServer: return "服务暂未支持安全保存。请稍后刷新重试，本机草稿可以继续保留。"
         case .storage: return "无法保存本机草稿，原有文件已保留。"
         }
     }
@@ -119,6 +120,7 @@ struct ApplicationDraft: Codable, Equatable {
     }
 }
 struct PublishingAccess: Decodable {
+    let writePreconditionVersion: Int?
     let canSubmitFirstParty: Bool
     let thirdPartyEnabled: Bool
     let thirdPartyMessage: String
@@ -147,6 +149,7 @@ struct ManagedApplication: Decodable, Identifiable {
     let legacyOwner: String?
     var publicationStatus: ApplicationPublicationStatus?
     let ownerMetadataRevisionId: String?
+    let writeVersion: String?
     let currentRevisionId: String?
     let publishedSubmissionId: String?
     let activeSubmissionId: String?
@@ -155,13 +158,14 @@ struct ManagedApplication: Decodable, Identifiable {
     let updatedAt: Double
     enum CodingKeys: String, CodingKey {
         case id = "_id", legacyOwner = "_openid", listing = "yunlefunListing"
-        case ownerUid, publicationStatus, ownerMetadataRevisionId, currentRevisionId, publishedSubmissionId, activeSubmissionId, latestSubmission, updatedAt
+        case ownerUid, publicationStatus, ownerMetadataRevisionId, writeVersion, currentRevisionId, publishedSubmissionId, activeSubmissionId, latestSubmission, updatedAt
     }
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id); application = try CloudApplication(from: decoder); draft = try ApplicationDraft(from: decoder)
         ownerUid = try c.decodeIfPresent(String.self, forKey: .ownerUid); legacyOwner = try c.decodeIfPresent(String.self, forKey: .legacyOwner)
         publicationStatus = try c.decodeIfPresent(ApplicationPublicationStatus.self, forKey: .publicationStatus)
+        writeVersion = try c.decodeIfPresent(String.self, forKey: .writeVersion)
         ownerMetadataRevisionId = try c.decodeIfPresent(String.self, forKey: .ownerMetadataRevisionId)
         currentRevisionId = try c.decodeIfPresent(String.self, forKey: .currentRevisionId)
         publishedSubmissionId = try c.decodeIfPresent(String.self, forKey: .publishedSubmissionId)
@@ -171,6 +175,7 @@ struct ManagedApplication: Decodable, Identifiable {
         updatedAt = try c.decode(Double.self, forKey: .updatedAt)
     }
     func validate(owner: String, id: String? = nil) throws {
+        if let writeVersion, !PublishingValue.writeVersion(writeVersion) { throw PublishingError.invalidResponse }
         guard PublishingValue.identifier(self.id), id == nil || self.id == id,
               ownerUid?.nilIfEmpty == owner || (ownerUid?.nilIfEmpty == nil && legacyOwner == owner),
               !application.name.isEmpty, CommunityValue.timestamp(updatedAt) else { throw PublishingError.invalidResponse }
@@ -217,6 +222,7 @@ struct PublicationPresentation { let label: String; let detail: String; let acti
 struct ApplicationSaveReceipt: Decodable { let app: ManagedApplication; let submission: ApplicationSubmission }
 struct MarketSubmissionReceipt: Decodable { let appId: String; let submissionId: String; let reviewStatus: ApplicationReviewStatus }
 enum PublishingValue {
+    static func writeVersion(_ value: String) -> Bool { value.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil }
     static func identifier(_ value: String) -> Bool { CommunityValue.identifier(value) && value != "." && value != ".." }
     static func slug(_ value: String) -> Bool { value.range(of: "^[a-z][a-z0-9-]{1,49}$", options: .regularExpression) != nil }
     static func https(_ value: String) -> Bool {

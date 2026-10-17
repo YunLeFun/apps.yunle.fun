@@ -5,6 +5,7 @@ struct SavedApplicationDraft: Codable, Equatable {
     var draft: ApplicationDraft
     var baseRevision: String?
     var baseUpdatedAt: Double?
+    var baseWriteVersion: String?
 }
 struct ApplicationDraftVault {
     let directory: URL

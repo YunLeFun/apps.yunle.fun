@@ -4,8 +4,9 @@ import Foundation
 struct ApplicationEditBase: Equatable {
     let id: String
     let revision: String?
+    let writeVersion: String?
     let updatedAt: Double
-    init(_ app: ManagedApplication) { id = app.id; revision = app.revisionID; updatedAt = app.updatedAt }
+    init(_ app: ManagedApplication) { id = app.id; revision = app.revisionID; updatedAt = app.updatedAt; writeVersion = app.writeVersion }
 }
 struct PendingPublicationReload { let name: String; let madePublic: Bool }
 @MainActor
@@ -59,7 +60,7 @@ final class PublishingStore: ObservableObject {
                 try self.checkGeneration(generation)
                 guard workshop != nil else { throw PublishingError.invalidInput }
             }
-            return try await self.service.save(id: base?.id, draft: draft, identity: identity)
+            return try await self.service.save(id: base?.id, draft: draft, writeVersion: base?.writeVersion, identity: identity)
         }
         records.removeAll { $0.id == result.id }; records.insert(result, at: 0); loadedBoundary = access.boundary
         notice = "当前版本已保存。投稿云乐坊需要另外确认。"
@@ -70,7 +71,7 @@ final class PublishingStore: ObservableObject {
         _ = try await write(generation: generation) { identity in
             try await self.checkRemote(base, identity: identity)
             try self.checkGeneration(generation)
-            return try await self.service.submit(id: base.id, makePublic: makePublic, shortName: shortName, identity: identity)
+            return try await self.service.submit(id: base.id, makePublic: makePublic, shortName: shortName, writeVersion: base.writeVersion!, identity: identity)
         }
         records.removeAll { $0.id == base.id }
         pendingRecords[base.id] = PendingPublicationReload(name: current.application.name, madePublic: makePublic)
@@ -81,7 +82,7 @@ final class PublishingStore: ObservableObject {
         try await write(generation: generation) { identity in
             try await self.checkRemote(base, identity: identity)
             try self.checkGeneration(generation)
-            try await self.service.delist(id: base.id, identity: identity)
+            try await self.service.delist(id: base.id, writeVersion: base.writeVersion!, identity: identity)
         }
         records.removeAll { $0.id == base.id }
         notice = "作品已下架，提交与审核记录仍保留。"
@@ -94,12 +95,14 @@ final class PublishingStore: ObservableObject {
     }
     private func checkRemote(_ base: ApplicationEditBase?, identity: AuthorizedAccount) async throws {
         guard let base else { return }
+        guard let version = base.writeVersion, PublishingValue.writeVersion(version) else { throw PublishingError.unsupportedServer }
         guard let current = try await service.applications(identity: identity).first(where: { $0.id == base.id }),
               current.hasCurrentMetadata, ApplicationEditBase(current) == base else { throw PublishingError.conflict }
     }
     private func write<Result>(generation: UUID, operation: (AuthorizedAccount) async throws -> Result) async throws -> Result {
         guard access.boundary.generation == generation else { throw PublishingError.identityChanged }
         guard canSubmit else { throw PublishingError.forbidden }
+        guard publishingAccess?.writePreconditionVersion == 1 else { throw PublishingError.unsupportedServer }
         guard !isWriting else { throw PublishingError.throttled }
         let boundary = access.boundary, requestID = UUID()
         loadID = UUID(); isLoading = false; writeID = requestID; isWriting = true; error = nil; notice = nil

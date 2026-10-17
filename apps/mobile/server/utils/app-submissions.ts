@@ -28,6 +28,7 @@ import {
   normalizeSubmissionInput,
   publicProjectionFromSubmission,
 } from './app-submission-validation'
+import { applicationRevisionIds, applicationWriteVersion, readOwnedApplicationState, requireApplicationWriteVersion } from './app-write-version'
 import { useCloudbaseAdmin } from './cloudbase-admin'
 
 export const APPS_COLLECTION = 'apps'
@@ -49,6 +50,7 @@ export async function getAppSubmissionAccess(user: ServerAuthUser): Promise<AppS
     && user.accountStatus === 'active'
   return {
     canSubmitFirstParty,
+    writePreconditionVersion: 1,
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
     thirdPartyMessage: '第三方应用入驻敬请期待',
   }
@@ -146,16 +148,19 @@ export async function createAppSubmission(
     await rethrowDuplicateIdentity(db, error, normalized.snapshot.name, normalized.snapshot.slug, appId)
   }
 
-  return { app: { ...app, latestSubmission: submission }, submission }
+  return { app: await savedApplication(db, appId, user.uid, submissionId), submission }
 }
 
 export async function updateAppSubmission(
   user: ServerAuthUser,
   appId: string,
   input: unknown,
+  ifMatch: string | undefined,
 ): Promise<AppSubmissionResult> {
   const { db } = useCloudbaseAdmin()
-  const app = await ownedApp(db, appId, user.uid)
+  const base = await readOwnedApplicationState(db, appId, user.uid)
+  requireApplicationWriteVersion(ifMatch, base.writeVersion)
+  const { app } = base
   const normalized = normalizeSubmissionInput(input, {
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
   })
@@ -227,50 +232,40 @@ export async function updateAppSubmission(
 
   try {
     await db.runTransaction(async (transaction: CloudbaseTransaction) => {
+      const current = await readOwnedApplicationState(transaction, appId, user.uid)
+      requireApplicationWriteVersion(ifMatch, current.writeVersion)
       await claimAppIdentifier(transaction, 'namespace', normalized.snapshot.slug, appId, user.uid)
       await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).set(documentPayload(submission))
       await transaction.collection(APPS_COLLECTION).doc(appId).update(appPatch)
       await transaction.collection(APP_REVIEW_EVENTS_COLLECTION).doc(eventId).set(documentPayload(event))
+      if (normalized.snapshot.audience !== 'public')
+        await invalidatePublicMarketListing(transaction, current, now, 'audience_changed')
     })
   }
   catch (error) {
     await rethrowDuplicateIdentity(db, error, normalized.snapshot.name, normalized.snapshot.slug, appId)
   }
-  if (normalized.snapshot.audience !== 'public')
-    await invalidatePublicMarketListing(db, appId, now)
-
-  const nextApp = {
-    ...app,
-    ...appPatch,
-    latestSubmission: submission,
-  } as AppRecord
-  return { app: nextApp, submission }
+  return { app: await savedApplication(db, appId, user.uid, submissionId), submission }
 }
 
 export async function submitOwnedAppToPublicMarket(
   user: ServerAuthUser,
   appId: string,
-  options: { makePublic?: boolean, shortName?: string } = {},
+  options: { makePublic?: boolean, shortName?: string, ifMatch?: string } = {},
 ): Promise<{ appId: string, submissionId: string, reviewStatus: 'pending' }> {
   const { db } = useCloudbaseAdmin()
+  const base = await readOwnedApplicationState(db, appId, user.uid)
+  requireApplicationWriteVersion(options.ifMatch, base.writeVersion)
   const workflow = createPublicMarketSubmissionModule({
-    async getOwnedApp(id, ownerUid) {
-      return ownedApp(db, id, ownerUid)
+    async getOwnedApp() {
+      return base.app
     },
-    async getSubmission(submissionId) {
-      const { data } = await db.collection(APP_SUBMISSIONS_COLLECTION).doc(submissionId).get()
-      return firstDocument<AppSubmission>(data)
+    async getSubmission(id) {
+      return base.submissions.get(id) ?? null
     },
-    async getListing(id) {
-      const { data } = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(id).get()
-      const listing = firstDocument<PublicMarketListingRecord>(data)
-      return listing
-        ? {
-            ...listing,
-            appId: listing.appId || id,
-            approvedRevisionId: listing.approvedRevisionId || '',
-            activeSubmissionId: listing.activeSubmissionId || '',
-          }
+    async getListing() {
+      return base.listing
+        ? { ...base.listing, appId, approvedRevisionId: base.listing.approvedRevisionId || '', activeSubmissionId: base.listing.activeSubmissionId || '' }
         : null
     },
     async getLatestRevisionNumber(id) {
@@ -282,7 +277,7 @@ export async function submitOwnedAppToPublicMarket(
       return Number((data?.[0] as AppSubmission | undefined)?.revision || 0)
     },
     async commit(change) {
-      await commitPublicMarketSubmission(db, change)
+      await commitPublicMarketSubmission(db, change, user.uid, options.ifMatch)
     },
   })
   try {
@@ -337,7 +332,7 @@ export async function isAppSlugTaken(slug: string, ownerUid: string): Promise<bo
   return Boolean(data?.length)
 }
 
-export async function delistOwnedApp(user: ServerAuthUser, appId: string): Promise<void> {
+export async function delistOwnedApp(user: ServerAuthUser, appId: string, ifMatch: string | undefined): Promise<void> {
   const { db } = useCloudbaseAdmin()
   const app = await ownedApp(db, appId, user.uid)
   const now = Date.now()
@@ -353,12 +348,9 @@ export async function delistOwnedApp(user: ServerAuthUser, appId: string): Promi
   )
 
   await db.runTransaction(async (transaction: CloudbaseTransaction) => {
-    if (app.activeSubmissionId) {
-      await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(app.activeSubmissionId).update({
-        reviewStatus: 'withdrawn',
-        updatedAt: now,
-      })
-    }
+    const current = await readOwnedApplicationState(transaction, appId, user.uid)
+    requireApplicationWriteVersion(ifMatch, current.writeVersion)
+    await invalidatePublicMarketListing(transaction, current, now, 'owner_delisted')
     await transaction.collection(APPS_COLLECTION).doc(appId).update({
       isPublic: false,
       publicationStatus: 'delisted',
@@ -369,6 +361,20 @@ export async function delistOwnedApp(user: ServerAuthUser, appId: string): Promi
   })
 }
 
+async function savedApplication(db: ReturnType<typeof useCloudbaseAdmin>['db'], appId: string, uid: string, revisionId: string): Promise<AppRecord> {
+  const state = await readOwnedApplicationState(db, appId, uid)
+  const latestSubmission = state.submissions.get(revisionId)
+  if (!latestSubmission)
+    throw createError({ statusCode: 409, message: '作品已再次变化，请刷新后核对保存结果' })
+  return {
+    ...state.app,
+    writeVersion: state.writeVersion,
+    ownerMetadataRevisionId: state.app.currentRevisionId || state.app.publishedSubmissionId,
+    latestSubmission,
+    ...(state.listing ? { yunlefunListing: { ...state.listing, appId } } : {}),
+  }
+}
+
 async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppRecord[]> {
   if (!apps.length)
     return apps
@@ -377,22 +383,15 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
     .limit(apps.length)
     .get()
   const listings = new Map<string, PublicMarketListingRecord>(
-    ((listingResult.data || []) as PublicMarketListingRecord[])
-      .map(item => [item.appId || '', item]),
+    ((listingResult.data || []) as (PublicMarketListingRecord & { _id?: string })[])
+      .map(item => [item.appId || item._id || '', item]),
   )
-  const submissionIds = apps
-    .map((app) => {
-      const listing = listings.get(app._id)
-      return listing?.activeSubmissionId
-        || app.activeSubmissionId
-        || app.currentRevisionId
-        || app.publishedSubmissionId
-    })
-    .filter(Boolean) as string[]
+  const submissionIds = [...new Set(apps.flatMap(app => applicationRevisionIds(app, listings.get(app._id))))]
   if (!submissionIds.length) {
     return apps.map(app => ({
       ...app,
-      ...(listings.get(app._id) ? { yunlefunListing: listings.get(app._id) } : {}),
+      writeVersion: applicationWriteVersion(app, listings.get(app._id) ?? null, new Map()),
+      ...(listings.get(app._id) ? { yunlefunListing: { ...listings.get(app._id)!, appId: app._id } } : {}),
     }))
   }
   const { data } = await db.collection(APP_SUBMISSIONS_COLLECTION)
@@ -412,7 +411,8 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
     if (!latest) {
       return {
         ...app,
-        ...(listing ? { yunlefunListing: listing } : {}),
+        writeVersion: applicationWriteVersion(app, listing ?? null, submissions),
+        ...(listing ? { yunlefunListing: { ...listing, appId: app._id } } : {}),
       }
     }
     const currentId = app.currentRevisionId || app.publishedSubmissionId
@@ -421,6 +421,7 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
     return {
       ...app,
       ...visibleSnapshot,
+      writeVersion: applicationWriteVersion(app, listing ?? null, submissions),
       ownerMetadataRevisionId: currentId || latest._id,
       isPublic: app.publicationStatus === 'published' && (app.audience || visibleSnapshot?.audience || 'public') === 'public',
       status: reviewsCurrent ? reviewStatusToLegacy(latest.reviewStatus, app.status) : app.status,
@@ -428,7 +429,7 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
         ? latest.reviewNote || ''
         : app.rejectedReason,
       latestSubmission: latest,
-      ...(listing ? { yunlefunListing: listing } : {}),
+      ...(listing ? { yunlefunListing: { ...listing, appId: app._id } } : {}),
     }
   })
 }
@@ -436,10 +437,13 @@ async function attachLatestSubmissions(db: any, apps: AppRecord[]): Promise<AppR
 async function commitPublicMarketSubmission(
   db: ReturnType<typeof useCloudbaseAdmin>['db'],
   change: PublicMarketSubmissionChange,
+  ownerUid: string,
+  ifMatch: string | undefined,
 ): Promise<void> {
   await db.runTransaction(async (transaction: CloudbaseTransaction) => {
-    const currentListing = await transaction.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(change.appId).get()
-    const current = firstDocument<PublicMarketListingRecord>(currentListing.data)
+    const state = await readOwnedApplicationState(transaction, change.appId, ownerUid)
+    requireApplicationWriteVersion(ifMatch, state.writeVersion)
+    const current = state.listing
     if (current?.shortName && current.shortName !== change.listing.shortName)
       throw createError({ statusCode: 409, message: '市场短名已确定，请刷新后重试' })
     await claimAppIdentifier(transaction, 'market', change.listing.shortName!, change.appId)
@@ -469,25 +473,24 @@ async function commitPublicMarketSubmission(
 }
 
 async function invalidatePublicMarketListing(
-  db: ReturnType<typeof useCloudbaseAdmin>['db'],
-  appId: string,
+  transaction: CloudbaseTransaction,
+  state: Awaited<ReturnType<typeof readOwnedApplicationState>>,
   updatedAt: number,
+  reason: 'audience_changed' | 'owner_delisted',
 ): Promise<void> {
-  try {
-    const { data } = await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(appId).get()
-    const existing = Array.isArray(data) ? data[0] : data
-    if (!existing)
-      return
-    await db.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(appId).update({
+  for (const id of new Set([state.app.activeSubmissionId, state.listing?.activeSubmissionId].filter((id): id is string => Boolean(id)))) {
+    const submission = state.submissions.get(id)
+    if (submission?.appId === state.app._id && ['pending', 'in_review'].includes(submission.reviewStatus)) {
+      await transaction.collection(APP_SUBMISSIONS_COLLECTION).doc(id).update({ reviewStatus: 'withdrawn', updatedAt })
+    }
+  }
+  if (state.listing) {
+    await transaction.collection(PUBLIC_MARKET_LISTINGS_COLLECTION).doc(state.app._id).update({
       status: 'delisted',
       activeSubmissionId: '',
-      delistedReason: 'audience_changed',
+      delistedReason: reason,
       updatedAt,
     })
-  }
-  catch (error: unknown) {
-    // 兼容云乐坊 listing 集合尚未完成初始化的滚动部署阶段。
-    console.warn('[PublicMarket] listing invalidation skipped during migration', error)
   }
 }
 
@@ -581,10 +584,4 @@ function entityId(prefix: string): string {
 function documentPayload<T extends { _id: string }>(document: T): Omit<T, '_id'> {
   const { _id: _documentId, ...payload } = document
   return payload
-}
-
-function firstDocument<T>(value: unknown): T | null {
-  if (Array.isArray(value))
-    return value[0] as T | undefined || null
-  return value && typeof value === 'object' ? value as T : null
 }

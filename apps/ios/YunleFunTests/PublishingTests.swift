@@ -39,22 +39,22 @@ final class PublishingServiceTests: XCTestCase {
     func testMismatchedSaveReceiptCannotBecomeASuccessfulEdit() async throws {
         let record = publishingRecord(owner: "other", revision: "revision-two")
         let (service, _) = service([(200, try publishingJSON(["app": record, "submission": record["latestSubmission"]!]))])
-        do { _ = try await service.save(id: "app-one", draft: publishingDraft(), identity: identity); XCTFail() }
+        do { _ = try await service.save(id: "app-one", draft: publishingDraft(), writeVersion: publishingVersion, identity: identity); XCTFail() }
         catch { XCTAssertEqual(error as? PublishingError, .invalidResponse) }
     }
     func testMarketSubmissionAndDelistingNeedMatchingPositiveReceipts() async throws {
         let (service, fixture) = service([(200, #"{"appId":"app-one","submissionId":"revision-two","reviewStatus":"pending"}"#),
             (200, #"{"appId":"different","submissionId":"revision-two","reviewStatus":"pending"}"#), (200, #"{"success":false}"#), (200, #"{"success":true}"#)])
-        let receipt = try await service.submit(id: "app-one", makePublic: true, shortName: "my-app", identity: identity)
+        let receipt = try await service.submit(id: "app-one", makePublic: true, shortName: "my-app", writeVersion: publishingVersion, identity: identity)
         XCTAssertEqual(receipt.reviewStatus, .pending)
         let body = try publishingBody(XCTUnwrap(fixture.requests.first))
         XCTAssertEqual(body["makePublic"] as? Bool, true); XCTAssertEqual(body["shortName"] as? String, "my-app")
         XCTAssertEqual(body.count, 2)
-        do { _ = try await service.submit(id: "app-one", makePublic: false, shortName: "my-app", identity: identity); XCTFail() }
+        do { _ = try await service.submit(id: "app-one", makePublic: false, shortName: "my-app", writeVersion: publishingVersion, identity: identity); XCTFail() }
         catch { XCTAssertEqual(error as? PublishingError, .invalidResponse) }
-        do { try await service.delist(id: "app-one", identity: identity); XCTFail() }
+        do { try await service.delist(id: "app-one", writeVersion: publishingVersion, identity: identity); XCTFail() }
         catch { XCTAssertEqual(error as? PublishingError, .invalidResponse) }
-        try await service.delist(id: "app-one", identity: identity)
+        try await service.delist(id: "app-one", writeVersion: publishingVersion, identity: identity)
     }
     func testIconUploadUsesMultipartPNGAndRequiresAnOwnedResourceReceiptShape() async throws {
         let png = try await ApplicationIconNormalizer().normalize(publishingImage(width: 120, height: 120), role: .appIcon)
@@ -75,10 +75,10 @@ final class PublishingServiceTests: XCTestCase {
         var draft = publishingDraft(); draft.name = String(repeating: "😀", count: 26)
         XCTAssertFalse(draft.isValid)
         do { _ = try await service.save(id: nil, draft: draft, identity: identity); XCTFail() } catch { XCTAssertEqual(error as? PublishingError, .invalidInput) }
-        do { try await service.delist(id: "../other", identity: identity); XCTFail() } catch { XCTAssertEqual(error as? PublishingError, .invalidInput) }
+        do { try await service.delist(id: "../other", writeVersion: publishingVersion, identity: identity); XCTFail() } catch { XCTAssertEqual(error as? PublishingError, .invalidInput) }
         XCTAssertTrue(fixture.requests.isEmpty)
         for expected in [PublishingError.unauthorized, .forbidden, .conflict, .throttled, .unavailable] {
-            do { try await service.delist(id: "app-one", identity: identity); XCTFail() } catch { XCTAssertEqual(error as? PublishingError, expected) }
+            do { try await service.delist(id: "app-one", writeVersion: publishingVersion, identity: identity); XCTFail() } catch { XCTAssertEqual(error as? PublishingError, expected) }
         }
     }
     func testVisibilityAndMarketRevisionPresentationRemainIndependent() throws {
@@ -106,6 +106,27 @@ final class PublishingServiceTests: XCTestCase {
         XCTAssertFalse(app.hasCurrentMetadata, "Older servers must not let a stale review snapshot become the edit form")
         record["ownerMetadataRevisionId"] = "current-new"
         XCTAssertTrue(try publishingManaged(record: record).hasCurrentMetadata)
+    }
+    func testEditsCarryTheCapturedStrongVersionAndMapPreconditionFailures() async throws {
+        let record = publishingRecord(revision: "revision-two")
+        let (service, fixture) = service([(200, try publishingJSON(["app": record, "submission": record["latestSubmission"]!])), (412, "{}"), (428, "{}")])
+        _ = try await service.save(id: "app-one", draft: publishingDraft(), writeVersion: publishingVersion, identity: identity)
+        let request = try XCTUnwrap(fixture.requests.first)
+        XCTAssertEqual(request.value(forHTTPHeaderField: "If-Match"), "\"\(publishingVersion)\"")
+        XCTAssertNil(try publishingBody(request)["writeVersion"])
+        do { try await service.delist(id: "app-one", writeVersion: publishingVersion, identity: identity); XCTFail() }
+        catch { XCTAssertEqual(error as? PublishingError, .conflict) }
+        do { try await service.delist(id: "app-one", writeVersion: publishingVersion, identity: identity); XCTFail() }
+        catch { XCTAssertEqual(error as? PublishingError, .unsupportedServer) }
+        XCTAssertTrue(fixture.requests.allSatisfy { $0.value(forHTTPHeaderField: "If-Match") == "\"\(publishingVersion)\"" })
+    }
+    func testMissingOrMalformedWriteVersionsNeverSendAnEdit() async throws {
+        let (service, fixture) = service([])
+        for version in [nil, "*", "W/abc", String(repeating: "a", count: 63)] as [String?] {
+            do { _ = try await service.save(id: "app-one", draft: publishingDraft(), writeVersion: version, identity: identity); XCTFail() }
+            catch { XCTAssertEqual(error as? PublishingError, .unsupportedServer) }
+        }
+        XCTAssertTrue(fixture.requests.isEmpty)
     }
     private func service(_ replies: [(Int, String)]) -> (PublishingService, AuthHTTPFixture) {
         let host = UUID().uuidString.lowercased() + ".invalid"; hosts.append(host)
@@ -178,6 +199,42 @@ final class PublishingStoreTests: XCTestCase {
         XCTAssertNil(store.application(id: base.id)); XCTAssertTrue(try XCTUnwrap(store.pending(id: base.id)).madePublic)
         XCTAssertNotNil(store.error); XCTAssertTrue(try XCTUnwrap(store.notice).contains("设为公开"))
     }
+    func testOlderServerAllowsReadingButCannotAcceptWrites() async throws {
+        let accounts = PublishingAccounts("owner"), service = PublishingFixture(capability: nil)
+        let store = PublishingStore(accounts: accounts, service: service)
+        await store.refresh()
+        XCTAssertEqual(store.applications.count, 1)
+        do { _ = try await store.save(publishingDraft(), base: nil, generation: accounts.identityGeneration); XCTFail() }
+        catch { XCTAssertEqual(error as? PublishingError, .unsupportedServer) }
+        let writes = await service.writes; XCTAssertEqual(writes, 0)
+    }
+    func testSameRevisionAndTimestampWithNewWriteVersionCannotRebaseAnOpenForm() async throws {
+        let accounts = PublishingAccounts("owner"), service = PublishingFixture()
+        let store = PublishingStore(accounts: accounts, service: service)
+        await store.refresh()
+        let base = ApplicationEditBase(try XCTUnwrap(store.applications.first))
+        try await service.changeWriteVersion()
+        do { _ = try await store.save(publishingDraft(), base: base, generation: accounts.identityGeneration); XCTFail() }
+        catch { XCTAssertEqual(error as? PublishingError, .conflict) }
+        let writes = await service.writes; XCTAssertEqual(writes, 0)
+    }
+    func testServerConflictAfterPreflightKeepsTheLocalDraftAndOriginalBase() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let vault = ApplicationDraftVault(directory: directory), accounts = PublishingAccounts("owner")
+        let service = PublishingFixture(writeConflict: true), store = PublishingStore(accounts: accounts, service: service)
+        await store.refresh()
+        let current = try XCTUnwrap(store.applications.first)
+        let editor = ApplicationEditorModel(application: current, accounts: accounts, store: store, vault: vault)
+        editor.draft.description = "Unsaved work"; try editor.saveLocalDraft()
+        let before = try Data(contentsOf: vault.file(owner: "owner", appID: current.id))
+        let result = await editor.saveVersion()
+        XCTAssertNil(result); XCTAssertEqual(editor.error, PublishingError.conflict.message)
+        XCTAssertEqual(editor.draft.description, "Unsaved work")
+        XCTAssertEqual(editor.base?.writeVersion, publishingVersion)
+        XCTAssertEqual(try Data(contentsOf: vault.file(owner: "owner", appID: current.id)), before)
+        let sent = await service.receivedVersion; XCTAssertEqual(sent, publishingVersion)
+    }
     func testOwnerPreviewRevalidatesTheCurrentIdentityAndPreservesItsOwnURL() async throws {
         let accounts = PublishingAccounts("owner"), service = PublishingFixture()
         var cached = try publishingManaged().application; cached.accessOwnerID = "owner"; cached.websiteUrl = "https://old.invalid"
@@ -216,6 +273,19 @@ final class ApplicationDraftAndIconTests: XCTestCase {
         second.restoreDraft(); XCTAssertTrue(second.hasOlderDraft)
         second.useDraftOnCurrentVersion(); try second.saveLocalDraft()
         XCTAssertEqual(try vault.load(owner: "owner", appID: current.id)?.baseRevision, "new")
+    }
+    func testLegacyDraftWithMatchingTimestampStillNeedsExplicitVersionConfirmation() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let vault = ApplicationDraftVault(directory: directory), accounts = PublishingAccounts("owner")
+        let store = PublishingStore(accounts: accounts, service: PublishingFixture()), current = try publishingManaged()
+        try vault.save(SavedApplicationDraft(draft: publishingDraft(), baseRevision: current.revisionID, baseUpdatedAt: current.updatedAt), owner: "owner", appID: current.id)
+        let editor = ApplicationEditorModel(application: current, accounts: accounts, store: store, vault: vault)
+        editor.restoreDraft(); XCTAssertTrue(editor.hasOlderDraft)
+        try editor.saveLocalDraft()
+        XCTAssertNil(try vault.load(owner: "owner", appID: current.id)?.baseWriteVersion)
+        editor.useDraftOnCurrentVersion(); try editor.saveLocalDraft()
+        XCTAssertEqual(try vault.load(owner: "owner", appID: current.id)?.baseWriteVersion, publishingVersion)
     }
     func testNormalizerEnforcesSquareIconsAndProducesReal1024PNG() async throws {
         let normalizer = ApplicationIconNormalizer()
@@ -260,31 +330,38 @@ private actor PublishingGate {
 }
 private actor PublishingFixture: PublishingServing {
     var reads = 0, writes = 0
+    var receivedVersion: String?
+    let capability: Int?, writeConflict: Bool
     var record: ManagedApplication
     let preflightGate: PublishingGate?, writeGate: PublishingGate?
     let failWrites: Bool, failReload: Bool
-    init(preflightGate: PublishingGate? = nil, writeGate: PublishingGate? = nil, failWrites: Bool = false, audience: String = "public", failReload: Bool = false) {
+    init(preflightGate: PublishingGate? = nil, writeGate: PublishingGate? = nil, failWrites: Bool = false, audience: String = "public", failReload: Bool = false, capability: Int? = 1, writeConflict: Bool = false) {
+        self.capability = capability; self.writeConflict = writeConflict
         self.preflightGate = preflightGate; self.writeGate = writeGate; self.failWrites = failWrites; self.failReload = failReload
         record = try! publishingManaged(record: publishingRecord(audience: audience))
     }
+    func changeWriteVersion() throws { var data = publishingRecord(); data["writeVersion"] = String(repeating: "b", count: 64); record = try publishingManaged(record: data) }
     func changeRevision() throws { record = try publishingManaged(record: publishingRecord(revision: "revision-changed", timestamp: 1_800_000_000_001)) }
-    func access(identity: AuthorizedAccount) async throws -> PublishingAccess { PublishingAccess(canSubmitFirstParty: true, thirdPartyEnabled: false, thirdPartyMessage: "第三方应用入驻敬请期待") }
+    func access(identity: AuthorizedAccount) async throws -> PublishingAccess { PublishingAccess(writePreconditionVersion: capability, canSubmitFirstParty: true, thirdPartyEnabled: false, thirdPartyMessage: "第三方应用入驻敬请期待") }
     func applications(identity: AuthorizedAccount) async throws -> [ManagedApplication] {
         reads += 1; if reads == 2 { await preflightGate?.wait() }
         if failReload && writes > 0 { throw PublishingError.unavailable }
         return [record]
     }
-    func save(id: String?, draft: ApplicationDraft, identity: AuthorizedAccount) async throws -> ManagedApplication {
+    func save(id: String?, draft: ApplicationDraft, writeVersion: String?, identity: AuthorizedAccount) async throws -> ManagedApplication {
+        receivedVersion = writeVersion
+        if writeConflict { throw PublishingError.conflict }
         writes += 1; await writeGate?.wait(); if failWrites { throw PublishingError.unavailable }
         record = try publishingManaged(record: publishingRecord(revision: "revision-two")); return record
     }
-    func submit(id: String, makePublic: Bool, shortName: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt {
+    func submit(id: String, makePublic: Bool, shortName: String, writeVersion: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt {
         writes += 1; if failWrites { throw PublishingError.unavailable }
         return MarketSubmissionReceipt(appId: id, submissionId: "revision-two", reviewStatus: .pending)
     }
-    func delist(id: String, identity: AuthorizedAccount) async throws { writes += 1; if failWrites { throw PublishingError.unavailable } }
+    func delist(id: String, writeVersion: String, identity: AuthorizedAccount) async throws { writes += 1; if failWrites { throw PublishingError.unavailable } }
     func upload(png: Data, role: ApplicationIconRole, identity: AuthorizedAccount) async throws -> String { writes += 1; return publishingFileID }
 }
+private let publishingVersion = String(repeating: "a", count: 64)
 private let publishingFileID = "cloud://env.bucket/app-icons/aaaaaaaaaaaaaaaa/11111111-1111-1111-1111-111111111111.png"
 private func publishingDraft() -> ApplicationDraft {
     var draft = ApplicationDraft(); draft.name = "我的作品"; draft.slug = "my-app"; draft.websiteUrl = "https://sample.yunle.fun/"
@@ -294,7 +371,7 @@ private func publishingDraft() -> ApplicationDraft {
 private func publishingRecord(owner: String? = "owner", legacy: String? = nil, audience: String = "public", revision: String = "revision-one", review: String = "draft", publication: String = "published", listing: [String: String]? = nil, timestamp: Double = 1_800_000_000_000) -> [String: Any] {
     var snapshot = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(publishingDraft())) as! [String: Any]
     snapshot["audience"] = audience; snapshot["isPublic"] = audience == "public"
-    var app = snapshot; app["_id"] = "app-one"; app["updatedAt"] = timestamp; app["publicationStatus"] = publication
+    var app = snapshot; app["writeVersion"] = publishingVersion; app["_id"] = "app-one"; app["updatedAt"] = timestamp; app["publicationStatus"] = publication
     app["currentRevisionId"] = revision; app["publishedSubmissionId"] = revision
     app["latestSubmission"] = ["_id": revision, "appId": "app-one", "submitterUid": "owner", "revision": 1, "reviewStatus": review, "snapshot": snapshot]
     if let owner { app["ownerUid"] = owner }; if let legacy { app["_openid"] = legacy }; if let listing { app["yunlefunListing"] = listing }

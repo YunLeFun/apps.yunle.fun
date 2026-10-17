@@ -30,6 +30,7 @@ final class ApplicationEditorModel: ObservableObject {
     private let initialBase: ApplicationEditBase?
     private var draftBaseRevision: String?
     private var draftBaseUpdatedAt: Double?
+    private var draftBaseWriteVersion: String?
     private var initial: ApplicationDraft
     private var uploadID = UUID()
     private let appID: String?
@@ -38,7 +39,7 @@ final class ApplicationEditorModel: ObservableObject {
         generation = accounts.identityGeneration; owner = accounts.user?.id ?? ""; appID = application?.id
         initial = application?.draft ?? ApplicationDraft(); draft = initial
         base = application.map(ApplicationEditBase.init); initialBase = base
-        draftBaseRevision = base?.revision; draftBaseUpdatedAt = base?.updatedAt
+        draftBaseRevision = base?.revision; draftBaseUpdatedAt = base?.updatedAt; draftBaseWriteVersion = base?.writeVersion
         do { recovered = try vault.load(owner: owner, appID: appID) }
         catch { self.error = PublishingError.storage.message }
     }
@@ -47,18 +48,18 @@ final class ApplicationEditorModel: ObservableObject {
     func restoreDraft() {
         guard let recovered else { return }
         draft = recovered.draft
-        draftBaseRevision = recovered.baseRevision; draftBaseUpdatedAt = recovered.baseUpdatedAt
-        hasOlderDraft = appID != nil && (recovered.baseRevision != initialBase?.revision || recovered.baseUpdatedAt != initialBase?.updatedAt)
+        draftBaseRevision = recovered.baseRevision; draftBaseUpdatedAt = recovered.baseUpdatedAt; draftBaseWriteVersion = recovered.baseWriteVersion
+        hasOlderDraft = appID != nil && (recovered.baseRevision != initialBase?.revision || recovered.baseUpdatedAt != initialBase?.updatedAt || recovered.baseWriteVersion != initialBase?.writeVersion)
         self.recovered = nil
         notice = hasOlderDraft ? "草稿基于旧版。请核对字段，再确认是否以它覆盖当前版本。" : "已恢复此账号的本机草稿。"
     }
     func useDraftOnCurrentVersion() {
-        hasOlderDraft = false; base = initialBase; draftBaseRevision = base?.revision; draftBaseUpdatedAt = base?.updatedAt
+        hasOlderDraft = false; base = initialBase; draftBaseRevision = base?.revision; draftBaseUpdatedAt = base?.updatedAt; draftBaseWriteVersion = base?.writeVersion
     }
     func ignoreRecoveredDraft() { recovered = nil }
     func saveLocalDraft() throws {
         guard !owner.isEmpty else { throw PublishingError.identityChanged }
-        try vault.save(SavedApplicationDraft(draft: draft, baseRevision: draftBaseRevision, baseUpdatedAt: draftBaseUpdatedAt), owner: owner, appID: appID)
+        try vault.save(SavedApplicationDraft(draft: draft, baseRevision: draftBaseRevision, baseUpdatedAt: draftBaseUpdatedAt, baseWriteVersion: draftBaseWriteVersion), owner: owner, appID: appID)
         notice = "本机草稿已保存"
     }
     func saveVersion() async -> ManagedApplication? {

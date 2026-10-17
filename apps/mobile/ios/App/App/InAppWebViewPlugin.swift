@@ -724,7 +724,15 @@ enum HostIdentitySessions {
         func trace(_ phase: String) {
             if traceEnabled { print("[DEBUG-cookie] \(operation) \(phase) time=\(ProcessInfo.processInfo.systemUptime) main=\(Thread.isMainThread)") }
         }
-        trace("read.request")
+        let mode = ProcessInfo.processInfo.environment["YUNLEFUN_COOKIE_LIFETIME"] ?? "none"
+        let storeLease: WKWebsiteDataStore? = mode == "store" || mode == "webview" ? .default() : nil
+        let viewLease: WKWebView?
+        if mode == "webview", let storeLease, cookieStore === storeLease.httpCookieStore {
+            let configuration = WKWebViewConfiguration()
+            configuration.websiteDataStore = storeLease
+            viewLease = WKWebView(frame: .zero, configuration: configuration)
+        } else { viewLease = nil }
+        trace("read.request mode=\(mode)")
         cookieStore.getAllCookies { cookies in
             trace("read.callback count=\(cookies.count)")
             let identityCookies = cookies.filter { cookie in
@@ -737,7 +745,9 @@ enum HostIdentitySessions {
                 cookieStore.delete(cookie) { group.leave() }
             }
             trace("delete.count=\(identityCookies.count)")
-            group.notify(queue: .main) { trace("completion"); completion() }
+            group.notify(queue: .main) {
+                withExtendedLifetime((storeLease, viewLease)) { trace("completion"); completion() }
+            }
         }
         trace("read.return")
     }

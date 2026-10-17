@@ -89,15 +89,12 @@ jobs:
             CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build-for-testing \
             2>&1 | tee "$YLF_CI_OUTPUT/build.log"
           YLF_FAILED=0
-          for YLF_SCENARIO in full three empty target; do
-            YLF_TESTS=(-only-testing:YunleFunTests/HomeLayoutVisualTests/testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable)
-            case "$YLF_SCENARIO" in
-              full) YLF_TESTS=(-only-testing:YunleFunTests/HomeLayoutVisualTests) ;;
-              three) YLF_TESTS+=(-only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithLargestAccessibilityText -only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithStandardText -only-testing:YunleFunTests/HomeLayoutVisualTests/testEmptyHomeCanScrollAtLargestAccessibilityText) ;;
-              empty) YLF_TESTS+=(-only-testing:YunleFunTests/HomeLayoutVisualTests/testEmptyHomeCanScrollAtLargestAccessibilityText) ;;
-            esac
+          for YLF_SCENARIO in none1 store webview none2; do
+            YLF_TESTS=(-only-testing:YunleFunTests/HomeLayoutVisualTests)
+            YLF_MODE="$YLF_SCENARIO"
+            if [[ "$YLF_SCENARIO" == none* ]]; then YLF_MODE=none; fi
             set +e
-            xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
+            TEST_RUNNER_YUNLEFUN_COOKIE_LIFETIME="$YLF_MODE" xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
               -configuration Debug -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
               -derivedDataPath "$YLF_CI_OUTPUT/debug" \
               -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \

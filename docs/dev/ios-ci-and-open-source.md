@@ -145,3 +145,23 @@ Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结
 新增四项详情布局样例属于日常 273 项。独立 Benchmark 的 VoiceOver、系统审计与尺寸专项不在该集合中，仍按[详情布局](./ios-detail-accessibility.md)与[朗读记录](./ios-voiceover-validation.md)保留各自通过和失败。本机完整集合中的三条键盘失败没有被远端通过改写；后续仅模拟器测试的范围见[当前 Goal](./ios-native-migration.md)。
 
 `ceee732` 的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013218418)也已完整成功：**266 单元 / 集成 + 7 UI，共 273 项通过，0 失败 / 跳过**；Release 模拟器编译与隔离设备清理成功，日志中的两组计数、`TEST SUCCEEDED`、`BUILD SUCCEEDED` 已核对。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013219007)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013218419)及 GitGuardian 均成功，共七项检查通过。该提交只补充 Benchmark 的原生 iPad 导航适配和验证记录，不包括后续云居状态修复。
+
+## 云居修复后的冷 CI · 2026-10-17
+
+`be3b92f` 的[原生执行](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39015276862)终态失败：**281 个不同用例，279 通过 / 2 失败 / 0 跳过**。274 个单元 / 集成中 273 通过、1 失败；7 个 UI 中 6 通过、1 失败。日志另记录同一 Home 用例的 XCTest `InvalidTransition` 事件，不能多算为一个失败用例。Release 未执行，隔离模拟器清理成功。
+
+- Home 会话入口用例在调用 `open` 前等待初次身份 Cookie 清理五秒超时。附件证明 anchor、window 和 key window 正常，未呈现浏览器、没有运行会话或业务错误；尚不能归因于空态 UI 或断言会话打开失败。
+- 标准字号密码键盘用例在点击收起后等待旧 Keyboard 对象不存在超时。原始视频第 69、73 秒可见键盘和收起按钮已经消失、表单恢复全高；系统导出的 AX 快照没有足够子节点，不能据此断定缓存的具体属性。后续测试补充收起后截图 / 完整树，并核对键盘与按键不可交互、焦点操作消失；五秒限制保持。
+- [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39015276853)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39015276850)及 GitGuardian 同提交成功。原生日常失败独立保留，不能引用这些结果或此前绿色提交作为当前原生验收。
+
+本轮原生帮助 / 反馈源码不在该提交内；按自身模拟器结果和新提交 CI 分别记录。冷 Cookie 清理、完整新提交 CI 与系统审计继续待验，不通过延长等待、重发应用打开或跳过失败关闭问题。
+
+只读复核未支持“没有先创建 WKWebView”这一根因：公开 WebKit 的 [Cookie 读取实现](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Source/WebKit/UIProcess/API/APIHTTPCookieStore.cpp#L81)会主动启动网络进程，[官方无预热测试](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WKHTTPCookieStore.mm#L462)也先于 WebView 创建读写 Cookie；默认 Store 有全局持有。CI 最初网络进程启动早于失败约 40 秒，但尚无中途重建或清理阶段记录，公开主线也不等于运行库的精确版本。下一步在原五秒预算内记录读取发起 / 返回数量、删除开始 / 完成数量、主队列通知和 Runtime 代次检查，再比较独立进程中默认参数、显式保活及同 Store 空 WebView 三种条件，不能先把预热当作修复。
+
+## 原生帮助反馈的本机回归 · 2026-10-17
+
+源码 `abe06fa` 的日常集合扩为 **323 单元 / 集成 + 10 UI，共 333 项**。首次完整执行 331 通过 / 2 失败，两项新增截图夹具失败已分别核对原始截图与懒加载几何，修正后页面专项 5 项通过。最终完整执行 **332 通过 / 1 失败 / 0 跳过**：`test_sim_2026-10-17T08-44-32-100Z_pid44279_83ad0a14.xcresult`，323 项单元 / 集成及全部 3 条新支持 UI 通过。
+
+唯一失败是标准字号手机号键盘用例超过原 120 秒。键盘收起后的交互状态检查及截图已完成，XCTest 日志记录未收到动画完成通知，随后取消操作卡于 idle 等待；尚未定因。两次完整运行均超过工具 300 秒观察窗口，继续跟踪各自原 PID 并从原始结果包核对终态，runner 自动重启后的局部绿色摘要不代表整轮通过。没有延长时限或重复执行后替换失败。
+
+锁包 Release 模拟器编译、根 lint 与文档构建通过；原生帮助 / 反馈四项实际 VoiceOver 另行通过。当前提交的托管状态以[草稿 PR #48 的头提交检查](https://github.com/YunLeFun/apps.yunle.fun/pull/48/checks)为准；此前绿色提交、本机部分通过和未完成的独立系统审计分别保留。

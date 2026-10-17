@@ -1,12 +1,12 @@
 # 原生帮助、反馈与诊断日志契约
 
-> 2026-10-17 仓库只读盘点。本文是后续实施契约；原生帮助、反馈、诊断缓冲、上传与邮件界面均尚未实现、未验收。本次未调用外部服务、提交反馈或核验线上部署。
+> 2026-10-17 已接入原生帮助、反馈、诊断缓冲、上传确认和系统邮件界面。下文分别记录接口契约、实现与实际验证范围；不据源码或模拟器夹具声称实际上传、线上留存、系统邮件投递或旧日志迁移已验收。后续仅使用 iOS 模拟器。
 
 ## 当前入口与能力缺口
 
-- [MeView](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Features/Me/MeView.swift) 的“我的举报”已原生化；“使用帮助”仍打开文档，“反馈与建议”仍打开 GitHub Issues，不能视为旧版功能迁移完成。
+- 此前 [MeView](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Features/Me/MeView.swift) 的帮助和反馈为外链。现已改用 `HelpView` / `FeedbackView` 原生导航；“我的举报”保持现有原生实现，文档、隐私与条款使用系统网页。
 - 旧版 [help.vue](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/pages/help.vue) 提供新手引导和 FAQ；[feedback.vue](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/pages/feedback.vue) 提供日志范围、确认上传、清除、邮件、微信客服与评分入口。
-- 原生 [CatalogStore](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Services/CatalogStore.swift) 只有两处 OSLog 缓存错误记录，没有统一可导出的诊断缓冲或上传服务；不能声称 OSLog 已覆盖旧日志能力。
+- 此前 [CatalogStore](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Services/CatalogStore.swift) 的 OSLog 不等同于可上传缓冲。现由 `DiagnosticLogStore` 单独记录白名单宿主事件，不读取 OSLog 或拦截云应用的 console。
 - [LegacyLocalData](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Models/LegacyLocalData.swift) 的白名单不含 `ylf:diagnostic-logs:v1`，升级前的诊断日志目前不会导入。原生启动后的记录与旧日志迁移必须分别说明。
 
 ## 可复用模块
@@ -67,7 +67,7 @@ JS 字符串限制按 UTF-16 计数，Swift 应使用 `.utf16.count`。大小上
 
 脱敏顺序为 Authorization/Bearer、敏感键值、JWT、HTTP(S) URL、邮箱、16–20 位长数字、国内手机号，再截断。敏感键包含 access/refresh token、password/passwd、secret、cookie、session、q-signature/signature、token；URL 整体变为 `[redacted-url:<hostname>]`，不保留路径、参数或签名。服务端使用同一函数再次处理日志、描述和 client。
 
-原生尚需实现：
+原生实现约束（已接入，验证范围见文末）：
 
 - 从启动初始化受限文件环形缓冲，落盘前脱敏、原子写入和文件保护；沿用 500 条/7 天/1500 UTF-16 上限，并显示当前可用范围。
 - 只记录宿主安全事件名、状态码、错误域/码等白名单信息；不记录请求/响应正文、凭证、账号资料、聊天内容或完整 URL。正则无法识别所有自由文本隐私和任意 UID，不能替代字段白名单。
@@ -101,10 +101,39 @@ JS 字符串限制按 UTF-16 计数，Swift 应使用 `.utf16.count`。大小上
 
 联系方式以 [links.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/constants/links.ts) 为准：问题反馈 `kf@yunle.fun`、业务合作 `i@yunle.fun`、微信客服 `https://work.weixin.qq.com/kfid/kfc9d4dcc4b6bd1c69e`、公众号“云乐坊工作室”；评分 App ID 见 [config](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/config/index.ts)。
 
-## 仅模拟器验证清单（尚未执行）
+## 仅模拟器验收矩阵
 
 - [ ] 在 iOS 16 与当前可用最新 iOS 模拟器验证原生导航、横竖屏、深浅色、最大动态字体和 VoiceOver/返回焦点；不操作真机。
-- [ ] 移植 [脱敏/环形缓冲](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/test/unit/diagnostic-logs.test.ts) 和 [上传校验](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/test/unit/diagnostic-log-upload.test.ts) 的边界；包括 UTF-16、URL、凭证、过期、损坏文件及落盘失败。
-- [ ] 用隔离 URLProtocol 检查 endpoint、headers、毫秒时间、完整快照、响应校验和 401/403/413/429/5xx；切号 A→B→A、取消及断网不串号、不自动重传。
+- [x] 移植 [脱敏/环形缓冲](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/test/unit/diagnostic-logs.test.ts) 和 [上传校验](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/test/unit/diagnostic-log-upload.test.ts) 的边界；包括 UTF-16、URL、凭证、过期、损坏文件及落盘失败。
+- [x] 用隔离 URLProtocol 检查 endpoint、headers、毫秒时间、完整快照、响应校验和 401/403/413/429/5xx；切号 A→B→A、取消及断网不串号、不自动重传。
 - [ ] UI 检查空日志/访客仍可联系、取消确认零请求、确认前后快照一致、清除不影响服务端回执、成功编号可复制/分享、邮件不可用和客服打开失败的兜底。
 - [ ] 分开记录模拟器自动化、系统邮件/分享交互及实际后端上传的验收范围；本文不证明原生上传、线上留存或旧日志迁移已完成。
+
+## 原生实现 · 2026-10-17
+
+源码：[FeedbackView](https://github.com/YunLeFun/apps.yunle.fun/blob/abe06faece81487bd5a5e0d6b9817c70e56aaffe/apps/ios/YunleFun/Features/Support/FeedbackView.swift)、[HelpView](https://github.com/YunLeFun/apps.yunle.fun/blob/abe06faece81487bd5a5e0d6b9817c70e56aaffe/apps/ios/YunleFun/Features/Support/HelpView.swift)、[日志缓冲](https://github.com/YunLeFun/apps.yunle.fun/blob/abe06faece81487bd5a5e0d6b9817c70e56aaffe/apps/ios/YunleFun/Services/DiagnosticLogStore.swift)、[上传与回执](https://github.com/YunLeFun/apps.yunle.fun/blob/abe06faece81487bd5a5e0d6b9817c70e56aaffe/apps/ios/YunleFun/Services/DiagnosticUploadStore.swift)。前文旧版与复用模块链接保留盘点时的提交。
+
+- `YunleFunApp` 创建共享 `DiagnosticLogStore`，从启动记录固定宿主事件名；账号身份通知先切换日志分区，再重置云应用运行时和云居。日志不包含账号资料、原始错误、URL、请求正文或云应用内容。
+- 文件环形缓冲按账号 SHA-256 分区，访客单独保存；落盘前脱敏，7 天 / 500 条 / 1500 UTF-16 上限。拒绝父目录和文件符号链接；损坏或过大文件保留，新事件暂存内存，清除操作需用户确认且绑定当前日志代次。
+- `DiagnosticUploadStore` 冻结账号代次、日志分区代次和完整脱敏 payload；只接受该确认一次。编辑、取消、清除或切号使确认失效；成功回执只显示在其账号下。上传进入服务后取消会提示“结果尚未确认”，不声称服务端回滚，也不自动重传。
+- `FeedbackView` 使用系统 Form / TextEditor / Picker / DatePicker / DisclosureGroup，上传前原生 Sheet 明确展示账号、时间、条数、大小、描述和全部日志。成功后用系统提示告知支持编号，并保留编号复制、分享和到期时间。错误与复制确认补充 VoiceOver 焦点。
+- `HelpView` 使用系统 List 和可展开引导 / FAQ，可前往对应 Tab、设置和反馈。邮件使用 MessageUI，由用户决定是否发送；系统邮件不可用时仍可复制邮箱、复制或分享内容。微信客服、业务合作、评分和社交入口保留。
+- 回执文件只保存支持编号、条数、期限及存储元数据，不保存反馈描述或日志。原生日志与回执均指定原子写入和文件保护选项；模拟器不提供真实硬件文件保护验收。
+
+## 模拟器验证 · 2026-10-17
+
+- 专用 iPhone 18 Pro / iOS 27 上，首轮完整日常为 **331 通过 / 2 失败 / 0 跳过，共 333 项**：`test_sim_2026-10-17T08-25-30-020Z_pid44279_4038cd13.xcresult`。323 项单元 / 集成中 321 通过；10 条 UI 全部通过，包含帮助展开与切换 Tab、反馈输入 / 收起键盘 / 取消登录保留草稿、最大字号复制与清除确认。工具在 300 秒观察超时后继续跟踪同一测试进程，终态来自原始结果包，没有重跑后替换该结果。
+- 两项新截图检查失败分别是 Vision 省略语气连接字、SwiftUI List 尚未实化的估算高度使扫描漏过目标。保留原始图片和 OCR；前者改为完整的失败语义子句，后者用公开原生末项定位并校准真实底部，再在原 10 秒预算内扫描。未缩小最大字号 / 320pt 视口，未修改生产文案或隐藏内容。
+- 修正后全部页面渲染专项 **5 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-17T08-43-09-615Z_pid44279_3cd4f50c.xcresult`。最终截图完整显示“所选时间内没有本地日志。你仍可以通过邮件或微信客服反馈。”；损坏日志 / 回执文件逐字节保持，已登录入口渲染不触发上传或自动打开确认页。
+- 新增 14 项日志存储、10 项真实 Service + URLProtocol、16 项上传 Store 和 4 项联系方式测试在上述完整执行中全部通过。覆盖 UTF-16 / 脱敏幂等、范围与字节预算、Cookie / 重定向策略、错误状态与仅一次 401 刷新、冻结快照、A→B→A、取消与迟到响应、符号链接、损坏文件、回执隔离及存储失败；不等于真实后端或已登录 UI 上传验收。
+- 新帮助与反馈的标准 / 最大辅助字号实际 VoiceOver **4 项通过**，见[朗读与焦点记录](./ios-voiceover-validation.md#原生帮助与反馈-2026-10-17)。系统邮件不可用时的复制入口通过；没有发送邮件、客服消息或真实诊断。
+- 同一产品源码锁包 Release 模拟器编译通过且无构建告警：`build_sim_2026-10-17T08-34-54-674Z_pid44279_ce4207da.log`。核对正式 Bundle ID `fun.yunle.apps`、最低 iOS 16、版本 `0.1.0` / 构建 `1`；此产物未安装、归档或上传。根 lint 与文档构建通过，最终完整回归及新提交 CI 另记终态。
+- 最终源码完整执行为 **332 通过 / 1 失败 / 0 跳过，共 333 项**：`test_sim_2026-10-17T08-44-32-100Z_pid44279_83ad0a14.xcresult`。323 项单元 / 集成和新增 3 条支持 UI 全部通过；唯一失败是既有标准字号手机号键盘用例超过 120 秒。日志显示键盘收起检查完成后，XCTest 的动画完成通知等待及随后取消操作阻塞；根因仍待查，未提高时限、移除取消断言或重跑替换失败。该执行也超过工具 300 秒观察窗口，继续跟踪原 PID 后读取完整原始结果，不能将 runner 重启后的局部绿色摘要当作整轮全绿。
+
+## 仍需验收
+
+- 实际后端上传、线上权限 / 到期清理部署、系统邮件投递与客服网络连通尚未验证；本轮没有发送邮件、提交支持消息或上传真实诊断。
+- 实际 UI runner 仍需验证已登录用户打开完整确认、取消零请求、成功编号提示 / 复制 / 分享，以及上传错误的 VoiceOver 焦点。HTTP / Store 测试和入口截图分别证明各自范围，不能替代这些交互。
+- 取消登录会保留反馈草稿；成功登录仍会触发既有“我”导航的身份重建，草稿和原页面续接未实现。后续应使用显式、一次性的登录续接意图，并在新账号下重新准备确认，不取消身份重置或复用旧快照。
+- 访客日志保留在访客分区，登录后不会自动合并到账号；旧 Web 日志也未导入。不能据登录后的新日志替代访客问题发生时的记录。
+- 新页面的完整深浅色系统审计、横屏 / iPad、iOS 16 运行及更多错误状态继续待验；四 Tab 既有审计失败保持原状态。

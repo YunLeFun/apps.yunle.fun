@@ -247,11 +247,13 @@ final class LegacyImportTests: XCTestCase {
     }
 
     private func verifyRealWebKitReader(dataStore: WKWebsiteDataStore) async throws {
+        func stage(_ name: String) { XCTContext.runActivity(named: "Legacy WebKit: " + name) { _ in } }
         let configuration = WKWebViewConfiguration(); configuration.websiteDataStore = dataStore
         configuration.setURLSchemeHandler(LegacyImportSchemeHandler(), forURLScheme: "capacitor")
         let old = WKWebView(frame: .zero, configuration: configuration)
         defer { old.navigationDelegate = nil; old.stopLoading() }
         let navigation = LegacyTestNavigation(); old.navigationDelegate = navigation
+        stage("navigate isolated fixture")
         old.load(URLRequest(url: LegacyLocalDataReader.url))
         let ready = await XCTWaiter.fulfillment(of: [navigation.completed], timeout: 20)
         guard ready == .completed else {
@@ -261,16 +263,22 @@ final class LegacyImportTests: XCTestCase {
         if let failure = navigation.failure { throw failure }
         XCTAssertTrue(navigation.loaded)
         var values = legacyValues(); values["ylf_access_token"] = "fixture-secret-must-stay-in-old-storage"
+        stage("seed synthetic local storage")
         _ = try await old.callAsyncJavaScript("for (const [key,value] of Object.entries(values)) localStorage.setItem(key,value); return true;", arguments: ["values": values], in: nil, contentWorld: .page)
+        stage("reject expired read")
         do {
             _ = try await LegacyLocalDataReader(dataStore: dataStore, timeoutNanoseconds: 1).read()
             XCTFail("The expired read must not report empty or partial data")
         } catch LegacyImportError.timedOut { }
+        stage("first complete read")
         let first = try await LegacyLocalDataReader(dataStore: dataStore).read()
+        stage("second complete read")
         let second = try await LegacyLocalDataReader(dataStore: dataStore).read()
         XCTAssertEqual(first, try LegacyLocalData(values: legacyValues()).values); XCTAssertEqual(second, first)
         XCTAssertFalse(first.keys.contains("ylf_access_token"))
+        stage("verify original synthetic credential remains")
         let token = try await old.evaluateJavaScript("localStorage.getItem('ylf_access_token')") as? String
+        stage("verify original applications remain")
         let apps = try await old.evaluateJavaScript("localStorage.getItem('ylf:homescreen-apps')") as? String
         XCTAssertEqual(token, values["ylf_access_token"]); XCTAssertEqual(apps, values["ylf:homescreen-apps"])
     }

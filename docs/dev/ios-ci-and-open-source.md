@@ -288,3 +288,17 @@ Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功
 此结果验证两项修复在本次完整 CI 中有效，原失败记录继续保留。原日志、运行元数据与独立计数位于持久目录的 `native-ci-5c2e85f.log`、`native-ci-5c2e85f-summary.json`、`native-ci-5c2e85f-counts.json`。后续新增的 opt-in 真实反馈登录夹具按自己的构建与执行证据记录，不追溯计入这 433 项。
 
 原日志、完整结果包与三份反馈附件保存于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/native-ci-e7ea1cd-artifact`、`native-ci-e7ea1cd-support-failure`。初次只导出与失败事件直接关联的附件得到空列表，随后按失败方法 ID 导出其 keepAlways 附件；空导出不代表没有截图证据。
+
+## 反馈登录提交的 CI 与等待诊断 · 2026-10-18
+
+来源提交 `c726d6416c5236199adf5b72a39fb327ec793dc5` 的 [Native CI 39071245366 第一轮](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39071245366/attempts/1) 自然结束为 **431 通过 / 2 失败 / 0 跳过**，结果包无运行时警告。实际 checkout 为 `10433e0d7ec0e616dcad1831b9d974ffcf6ab39c`，Release 跳过，失败附件上传与隔离模拟器清理成功。六项其他常规检查成功，可选作者 Benchmark 跳过。
+
+失败方法为 `LegacyImportTests/testRealWebKitReaderUsesSameOriginAndNeverReadsCredentialKeys` 和 `NativeNavigationUITests/testGuestCanDismissPhoneKeyboardAtStandardTextSize`。前者抛出 `InvalidTransition { phase: idle; targetPhase: failed(deinit) }`；原包没有具体阶段，当前尚未定位到调用。新增七个不含数据值的 XCTest activity 阶段，标记夹具导航、种子写入、强制超时、两次读取及原数据检查；不改变产品读取路径，不吞错或自动重试。
+
+键盘方法在点击收起后查询消失按钮的 `count`，日志显示查询内部重试消耗了原 5 秒等待；失败后的原截图与 AX 均已没有键盘和收起按钮。现先使用 XCTest 原生 `waitForNonExistence(timeout: 10)`，再单独等待保留键盘节点及输入键均不可点击。屏幕内且可操作的初始键盘、实际点击、焦点动作消失和所有键盘节点不可操作的断言均保留，没有修改登录页面。
+
+第一次本机专项 `ci-keyboard-legacy-diagnostics.xcresult` 为 **3 通过 / 3 失败 / 0 跳过**：三个真实 WebKit 读取用例通过，三条 UI 在初始软件键盘可见性断言失败，键盘矩形位于屏幕外，尚未执行收起判断。随后在本任务独占模拟器的已聚焦访客表单，使用 Device → Keyboard → Toggle Software Keyboard 显示数字键盘并保留截图 / AX；没有修改硬件键盘或全局偏好，也未输入账号或提交认证。后续复验按单独结果记录，原失败保留。
+
+同一测试构建随后只复验三条键盘 UI，`ci-keyboard-software-shown.xcresult` 为 **3 通过 / 0 失败 / 0 跳过**，结果包无运行时警告；标准字号手机号与密码、最大辅助字号手机号均从实际可用键盘执行收起并取消回“我”。该结果支持等待检查在本机可用，不能解释所有远端负载情形，也不将尚未定位的 WebKit 异常改记为已修复。完整原始日志、附件和初次键盘前置失败均留在持久证据目录的 `ci-keyboard-*`。
+
+原 CI 日志、job 元数据、xcresult 和全部附件位于持久证据目录的 `native-ci-c726d64-attempt1-*`。同一远端 run 的第二轮已在首轮结束后开始；API 记录的 triggering actor 为 `YunYouJun`，本轮没有取消或重新发起该 run。等待自然结束后再推送新提交，避免工作流的 concurrency 配置自动取消它。

@@ -71,26 +71,30 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(dismiss.isHittable)
         XCTAssertLessThan(dismiss.frame.maxY, keyboard.frame.minY)
         dismiss.tap()
+        // A count query can spend the whole predicate deadline retrying a
+        // removed toolbar button. Use XCTest's absence wait before checking
+        // any keyboard nodes that the accessibility service may retain.
+        let focusDismissed = dismiss.waitForNonExistence(timeout: 10)
         let hidden = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             // Query current matches instead of re-resolving the old keyboard
             // node: XCTest retries a removed node, consuming this whole wait
             // even when the keyboard and focus action have already disappeared.
             // Retained keyboard nodes and typing keys must still be inert.
-            guard app.buttons.matching(identifier: "login.dismiss-keyboard").count == 0 else { return false }
             return app.keyboards.allElementsBoundByIndex.allSatisfy { currentKeyboard in
                 !currentKeyboard.isHittable && currentKeyboard.descendants(matching: .any)
                     .matching(NSPredicate(format: "label IN %@", ["1", "a", "A"]))
                     .allElementsBoundByIndex.allSatisfy { !$0.isHittable }
             }
         }, object: nil)
-        let dismissal = XCTWaiter.wait(for: [hidden], timeout: 5)
+        let dismissal = XCTWaiter.wait(for: [hidden], timeout: 10)
         let after = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         after.name = "native-login-after-dismiss-\(name)"; after.lifetime = .keepAlways; add(after)
-        if dismissal != .completed {
+        if !focusDismissed || dismissal != .completed {
             let tree = XCTAttachment(string: app.debugDescription)
             tree.name = "native-login-after-dismiss-tree-\(name)"; tree.lifetime = .keepAlways; add(tree)
         }
-        XCTAssertEqual(dismissal, .completed, "Focus, the keyboard and typing keys must no longer be interactive")
+        XCTAssertTrue(focusDismissed, "The focus dismissal action must disappear")
+        XCTAssertEqual(dismissal, .completed, "The keyboard and typing keys must no longer be interactive")
         XCTAssertFalse(dismiss.exists)
     }
 

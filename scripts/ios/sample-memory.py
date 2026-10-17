@@ -38,6 +38,8 @@ for pid, parent, command in rows:
         candidates[pid] = "unattributed-web-content"
     elif "NetworkingExtension.appex/" in command:
         candidates[pid] = "unattributed-networking"
+    elif "GPUExtension.appex/" in command:
+        candidates[pid] = "unattributed-gpu"
 
 samples = []
 start = time.monotonic()

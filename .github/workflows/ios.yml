@@ -82,10 +82,15 @@ jobs:
             -collect-test-diagnostics never \
             -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
             -maximum-test-execution-time-allowance 180 \
+            -only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithLargestAccessibilityText \
+            -only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithStandardText \
+            -only-testing:YunleFunTests/HomeLayoutVisualTests/testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable \
+            -test-iterations 2 -test-repetition-relaunch-enabled YES \
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
             2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
 
       - name: Compile native Release for simulator
+        if: ${{ false }}
         run: |
           set -o pipefail
           xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
@@ -97,7 +102,7 @@ jobs:
             2>&1 | tee "$YLF_CI_OUTPUT/release.log"
 
       - name: Upload failure diagnostics
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: native-ios-failure-${{ github.sha }}

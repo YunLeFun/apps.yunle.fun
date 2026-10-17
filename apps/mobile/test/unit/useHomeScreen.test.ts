@@ -435,6 +435,18 @@ describe('useHomeScreen', () => {
       )
     })
 
+    it('只更新应用字段，保留原生客户端写入的文件夹（schema 2）', async () => {
+      mockHomeScreenStore.cloudDocId = 'existing-doc'
+      mockDbSetup.mockCollection.update.mockResolvedValue({ updated: 1 })
+
+      const { syncToCloud } = useHomeScreen()
+      await syncToCloud()
+
+      const payload = mockDbSetup.mockCollection.update.mock.calls[0]![0] as Record<string, unknown>
+      expect(Object.keys(payload).sort()).toEqual(['dockApps', 'installedApps', 'recentApps', 'updatedAt'])
+      expect(mockDbSetup.mockCollection.doc).not.toHaveBeenCalled()
+    })
+
     it('同步时以 CloudBase 当前会话身份为准，不使用可能过期的本地账号 ID', async () => {
       mockUserStore = createMockUserStore({
         isLoggedIn: true,

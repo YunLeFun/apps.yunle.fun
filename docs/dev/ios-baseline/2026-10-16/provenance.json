@@ -1,0 +1,35 @@
+{
+  "sourceCommit": "924e131e2d6fd4a8535441a75a5cef5f9b8a0837",
+  "worktreeHasChanges": true,
+  "xcode": "Xcode 27.0\nBuild version 27A266a",
+  "runtime": "iOS 18.6 (22G86)",
+  "device": "iPhone 16 Pro",
+  "simulatorUUID": "D8933802-9D62-4733-8BD6-77A3A680D173",
+  "dataset": "Guest with one cloud-air entry; persisted caches; live network; no real account",
+  "iterationsPerTimingMetric": 5,
+  "builds": {
+    "legacy": {
+      "bundleID": "fun.yunle.apps",
+      "version": "0.1.0",
+      "build": "194",
+      "executableSHA256": "45976aee5e03936d81463d398388d629d8df9b7a4dfea2997629eb9440643687",
+      "bundleLogicalBytes": 18059860,
+      "configuration": "Release"
+    },
+    "native": {
+      "bundleID": "fun.yunle.apps.benchmark-dev",
+      "version": "0.1.0",
+      "build": "1",
+      "executableSHA256": "446b67ba07d60da43ab8d8ffe8196ac18ef70e18aaee0e59ae2f888f78354447",
+      "bundleLogicalBytes": 3338766,
+      "configuration": "Benchmark (release)"
+    }
+  },
+  "legacyPublicIndexSHA256": "f4aec2f5ada6947e7baad94db0fc1eba25cdfcc832e308341be15f79b06fca59",
+  "limitations": [
+    "Current dirty compatibility source build, not an App Store binary",
+    "Timing binaries predate three accessibility-label-only changes to shared WebViewController",
+    "Bundle size is logical simulator app bundle bytes without full feature parity; not an IPA size comparison",
+    "Live network and persistent caches; no controlled network latency or cold-install series"
+  ]
+}

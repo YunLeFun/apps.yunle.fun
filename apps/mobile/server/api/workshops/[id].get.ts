@@ -1,10 +1,10 @@
-import { createError, getRouterParam, setResponseHeader } from 'h3'
+import { createError, getRequestHeader, getRouterParam, setResponseHeader } from 'h3'
 import { CatalogNotFoundError } from '../../domain/catalog'
 import {
   catalogAppViewToRecord,
   createCloudbaseCatalogResolver,
 } from '../../domain/catalog/cloudbase'
-import { tryGetCloudbaseUser } from '../../utils/cloudbase-auth'
+import { requireRegisteredCloudbaseUser } from '../../utils/cloudbase-auth'
 
 const WORKSHOP_ID_PATTERN = /^[2-9A-HJKMNP-Z]{6}$/
 
@@ -13,13 +13,15 @@ export default defineEventHandler(async (event) => {
   if (!WORKSHOP_ID_PATTERN.test(workshopId))
     throw createError({ statusCode: 404, message: '个人工坊不存在' })
 
-  const user = await tryGetCloudbaseUser(event)
+  const user = getRequestHeader(event, 'authorization') !== undefined
+    ? await requireRegisteredCloudbaseUser(event)
+    : null
   const resolver = createCloudbaseCatalogResolver()
   try {
     const view = await resolver.resolveCatalog({
       surface: 'workshop',
       workshopId,
-    }, user && !user.anonymous ? { uid: user.uid } : null)
+    }, user ? { uid: user.uid } : null)
     setResponseHeader(event, 'Cache-Control', 'private, no-store')
     return {
       ...view,

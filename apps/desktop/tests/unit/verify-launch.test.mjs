@@ -73,7 +73,7 @@ describe('native packaged startup verification', () => {
     })
     expect(await runLaunch()).toBe('Packaged app exited (SIGSEGV): sandbox failed')
     expect(child.kill).not.toHaveBeenCalled()
-    expect(mocks.rm).toHaveBeenCalledWith('/test-profile', { recursive: true, force: true })
+    expect(mocks.rm).toHaveBeenCalledWith('/test-profile', expect.objectContaining({ recursive: true, force: true }))
   })
 
   it('handles an exit immediately after readiness without killing the already terminated app', async () => {

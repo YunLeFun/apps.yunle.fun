@@ -51,5 +51,5 @@ finally {
     await exited
     clearTimeout(timer)
   }
-  await fs.rm(userData, { recursive: true, force: true })
+  await fs.rm(userData, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 })
 }

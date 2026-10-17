@@ -1,0 +1,139 @@
+import XCTest
+@testable import YunleFun
+
+final class HomeSyncHTTPTests: XCTestCase {
+    private var hosts: [String] = []
+    private let empty = #"{"schemaVersion":1,"revision":null,"configuration":{"installedApps":[],"dockApps":[],"recentApps":[],"updatedAt":0}}"#
+    override func tearDown() { hosts.forEach(AuthHTTPProtocol.unregister); hosts = []; super.tearDown() }
+
+    func testWriteSendsExplicitNullBaseWithoutClientUIDOrCookies() async throws {
+        let saved = RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: HomeConfiguration(updatedAt: 100))
+        let (service, fixture) = service([(200, String(decoding: try JSONEncoder().encode(saved), as: UTF8.self))])
+        let write = HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString, configuration: HomeConfiguration())
+        _ = try await service.save(write, identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token"))
+        let request = try XCTUnwrap(fixture.requests.first)
+        XCTAssertEqual(request.url?.path, "/api/home-screen")
+        XCTAssertNil(request.url?.query)
+        XCTAssertEqual(request.httpMethod, "PUT")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")
+        XCTAssertNil(request.value(forHTTPHeaderField: "Cookie"))
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body(request)) as? [String: Any])
+        XCTAssertEqual(json["schemaVersion"] as? Int, 3)
+        XCTAssertTrue(json["baseRevision"] is NSNull)
+        XCTAssertNil(json["uid"])
+        XCTAssertNil(json["_openid"])
+        XCTAssertEqual(json["mutationId"] as? String, write.mutationId)
+    }
+
+    func testReadsOptInToFoldersAndAcceptBothSchemas() async throws {
+        let v2 = #"{"schemaVersion":2,"revision":"\#(String(repeating: "b", count: 64))","configuration":{"installedApps":[{"appId":"a"},{"appId":"b"}],"dockApps":[],"recentApps":[],"updatedAt":5,"folders":[{"id":"f","name":"组","appIds":["a","b"]}]}}"#
+        let v1 = #"{"schemaVersion":1,"revision":"\#(String(repeating: "c", count: 64))","configuration":{"installedApps":[{"appId":"a"}],"dockApps":[],"recentApps":[],"updatedAt":5}}"#
+        let badV1 = #"{"schemaVersion":1,"revision":"\#(String(repeating: "c", count: 64))","configuration":{"installedApps":[{"appId":"a"}],"dockApps":[],"recentApps":[],"updatedAt":5,"folders":[{"id":"f","name":"组","appIds":["a"]}]}}"#
+        let (service, fixture) = service([(200, v2), (200, v1), (200, badV1)])
+        let identity = AuthorizedAccount(userID: "test-owner", accessToken: "test-token")
+        let folders = try await service.load(identity: identity)
+        XCTAssertEqual(fixture.requests.first?.url?.query, "schema=3")
+        XCTAssertEqual(folders.configuration.folders.first?.appIds, ["a", "b"])
+        let legacy = try await service.load(identity: identity)
+        XCTAssertFalse(legacy.carriesFolders)
+        do { _ = try await service.load(identity: identity); XCTFail("schema 1 cannot claim folders") }
+        catch { XCTAssertTrue(error is HomeSyncError) }
+    }
+
+    func testAConflictCarriesTheRemoteVersionInsteadOfBecomingAnEmptySuccess() async throws {
+        let remote = RemoteHomeScreen(revision: String(repeating: "a", count: 64),
+                                      configuration: HomeConfiguration(installedApps: [HomeAppReference(appId: "remote")], updatedAt: 100))
+        let object = try JSONSerialization.jsonObject(with: JSONEncoder().encode(remote))
+        let payload = try JSONSerialization.data(withJSONObject: ["data": ["code": "HOME_CONFLICT", "current": object]])
+        let (service, _) = service([(409, String(decoding: payload, as: UTF8.self))])
+        do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+        catch HomeSyncError.conflict(let received) { XCTAssertEqual(received, remote) }
+    }
+
+    func testFailuresAndMalformedResponsesCannotEraseLocalData() async {
+        let (service, _) = service([
+            (503, "{}"), (401, "{}"), (200, "{}"),
+            (200, #"{"schemaVersion":1,"configuration":{"installedApps":[],"dockApps":[],"recentApps":[],"updatedAt":0}}"#),
+        ])
+        for _ in 0..<4 {
+            do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+            catch { XCTAssertTrue(error is HomeSyncError) }
+        }
+    }
+
+    func testSaveRejectsAnAcknowledgementForDifferentContent() async throws {
+        let saved = RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: HomeConfiguration(updatedAt: 100))
+        let (service, _) = service([(200, String(decoding: try JSONEncoder().encode(saved), as: UTF8.self))])
+        let write = HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString,
+                                    configuration: HomeConfiguration(installedApps: [HomeAppReference(appId: "local")]))
+        do { _ = try await service.save(write, identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+        catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Unexpected error") } }
+    }
+
+    func testGatewayHTMLCannotInvalidateAnAuthenticatedSession() async {
+        let (service, _) = service([(200, "<html>Preview</html>"), (401, "<html>Access gate</html>"),
+                                    (403, "<html>Access gate</html>")], contentType: "text/html; charset=utf-8")
+        for _ in 0..<3 {
+            do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+            catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Gateway HTML must not expire app login") } }
+        }
+    }
+
+    func testSourceWriteRequiresAnExactSchemaThreeAcknowledgement() async throws {
+        let content = HomeConfiguration(installedApps: [.init(appId: "cook")], applicationSources: [.init(appId: "cook", ownerLogin: "Author")])
+        let old = RemoteHomeScreen(schemaVersion: 2, revision: String(repeating: "a", count: 64), configuration: HomeConfiguration(installedApps: content.installedApps))
+        let wrong = RemoteHomeScreen(revision: String(repeating: "b", count: 64), configuration: old.configuration)
+        let saved = RemoteHomeScreen(revision: String(repeating: "c", count: 64), configuration: content)
+        let (service, fixture) = service(try [old, wrong, saved].map { (200, String(decoding: try JSONEncoder().encode($0), as: UTF8.self)) })
+        let write = HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString, configuration: content)
+        let identity = AuthorizedAccount(userID: "test-owner", accessToken: "test-token")
+        do { _ = try await service.save(write, identity: identity); XCTFail("Old servers cannot acknowledge sources") }
+        catch { guard case HomeSyncError.unsupportedSchema = error else { return XCTFail("Unexpected error") } }
+        do { _ = try await service.save(write, identity: identity); XCTFail("A different source is not the uploaded content") }
+        catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Unexpected error") } }
+        let response = try await service.save(write, identity: identity)
+        XCTAssertEqual(response, saved)
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: body(XCTUnwrap(fixture.requests.last))) as? [String: Any])
+        let configuration = try XCTUnwrap(payload["configuration"] as? [String: Any])
+        XCTAssertEqual(configuration["applicationSources"] as? [[String: String]], [["appId": "cook", "ownerLogin": "Author"]])
+    }
+
+    func testSchemaThreeMustExplicitlyCarrySourcesRatherThanOmittingOrNullingThem() async {
+        let prefix = #"{"schemaVersion":3,"revision":null,"configuration":{"installedApps":[],"dockApps":[],"recentApps":[],"folders":[],"updatedAt":0"#
+        let (service, _) = service([(200, prefix + "}}"), (200, prefix + #", "applicationSources":null}}"#)])
+        for _ in 0..<2 {
+            do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+            catch { XCTAssertTrue(error is HomeSyncError) }
+        }
+    }
+
+    func testOversizedJSONIsRejectedBeforeAuthenticationClassification() async {
+        let (service, _) = service([(401, String(repeating: " ", count: 2 * 1024 * 1024 + 1))])
+        do { _ = try await service.load(identity: AuthorizedAccount(userID: "test-owner", accessToken: "test-token")); XCTFail() }
+        catch { guard case HomeSyncError.invalidResponse = error else { return XCTFail("Oversized response must fail protocol validation") } }
+    }
+
+    private func service(_ replies: [(Int, String)], contentType: String = "application/json") -> (HomeSyncService, AuthHTTPFixture) {
+        let host = UUID().uuidString.lowercased() + ".invalid"
+        hosts.append(host)
+        let fixture = AuthHTTPFixture(replies: replies, contentType: contentType)
+        AuthHTTPProtocol.register(host, fixture: fixture)
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [AuthHTTPProtocol.self]
+        return (HomeSyncService(session: URLSession(configuration: config), origin: URL(string: "https://\(host)")!), fixture)
+    }
+    private func body(_ request: URLRequest) throws -> Data {
+        if let data = request.httpBody { return data }
+        let stream = try XCTUnwrap(request.httpBodyStream)
+        stream.open()
+        defer { stream.close() }
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        var data = Data()
+        while stream.hasBytesAvailable {
+            let count = stream.read(&buffer, maxLength: buffer.count)
+            guard count > 0 else { break }
+            data.append(buffer, count: count)
+        }
+        return data
+    }
+}

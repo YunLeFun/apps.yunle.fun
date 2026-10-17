@@ -135,16 +135,39 @@ async function verifyCloudbaseUser(event: H3Event): Promise<ServerAuthUser | nul
     })
   }
   catch {
-    return null
+    throw authServiceUnavailable()
   }
 
-  if (!response.ok)
-    return null
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403)
+      return null
+    if (response.status === 400) {
+      let failure: unknown
+      try {
+        failure = await response.json()
+      }
+      catch {
+        throw authServiceUnavailable()
+      }
+      if (isRecord(failure)
+        && ((failure.error === 'failed_precondition' && failure.error_code === 9)
+          || ['invalid_token', 'invalid_grant', 'unauthenticated', 'access_token_expired', 'user_not_found'].includes(String(failure.error)))) {
+        return null
+      }
+    }
+    throw authServiceUnavailable()
+  }
 
-  const rawProfile = await response.json() as unknown
+  let rawProfile: unknown
+  try {
+    rawProfile = await response.json()
+  }
+  catch {
+    throw authServiceUnavailable()
+  }
   const profile = normalizeCloudbaseProfile(rawProfile)
   if (!profile?.sub)
-    return null
+    throw authServiceUnavailable()
   const rawRecord = isRecord(rawProfile) ? rawProfile : {}
   const claims = readJwtPayload(token)
 
@@ -164,6 +187,14 @@ async function verifyCloudbaseUser(event: H3Event): Promise<ServerAuthUser | nul
   setAuthCache(cacheKey, user, Date.now() + ttl)
 
   return user
+}
+
+function authServiceUnavailable() {
+  return createError({
+    statusCode: 503,
+    statusMessage: 'Authentication service unavailable',
+    message: '暂时无法验证登录状态，请稍后重试',
+  })
 }
 
 function setAuthCache(cacheKey: string, user: ServerAuthUser, expiresAt: number) {
@@ -275,7 +306,7 @@ function accountIsSuspended(profile: Record<string, unknown>, claims: Record<str
       || ''
     ).toLowerCase()
     return firstBoolean([record], 'disabled', 'banned', 'suspended') === true
-      || ['disabled', 'banned', 'suspended', 'deleted'].includes(status)
+      || ['blocked', 'disabled', 'banned', 'suspended', 'deleted'].includes(status)
   })
 }
 

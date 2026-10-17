@@ -1,0 +1,290 @@
+# 原生 iOS CI 与开源选择
+
+调研日期：2026-10-16。初次调研时 `YunLeFun/apps.yunle.fun` 为私有仓库，根目录已有 MIT License，组织计划为 GitHub Free。后续按用户确认范围清理 Git 历史并公开仓库，账单预算与 runner 注册未改，实际执行见文末。
+
+## 判断
+
+可以考虑开源，尤其是希望长期吸引贡献、展示原生设计与形成云应用生态时。开源能解决标准托管 runner 的计算费用问题，但不应只凭一次预算阻断就直接公开全部历史。
+
+用户已明确普通历史、后端与运维资料可以公开，因此按整仓开源执行，无需仅因这些内容存在而拆分客户端。已从可写分支历史精确过滤一份真实云居导出路径，保留其余历史；用户随后决定暂缓 PR 缓存处理，详见[公开内容复核](./open-source-review.md)。私有仓库也支持付费托管 runner 或隔离的自托管 Mac，本项目最终选择公开仓库。
+
+## GitHub 当前规则
+
+| 选择                           | CI 计算费用                                                | 本项目影响                                                                              |
+| ------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 整个仓库公开                   | 标准 GitHub 托管 runner 免费，包括标准 macOS               | 同一公开仓库的 Web、桌面与原生 iOS 工作流可受益；代码和既有 Actions 历史 / 日志一起公开 |
+| 保持私有，使用托管 runner      | 使用组织计划额度，超额按 runner 类型收费；预算可阻止启动   | 无需整理公开发布，但要给组织的 Actions 用量安排额度与上限                               |
+| 保持私有，使用自托管 Mac       | 当前官方文档列自托管 runner 使用免费；硬件、电费和维护自理 | 适合已有专用隔离 Mac 的情况；需要独立管理运行环境和升级，不直接接入带日常凭据的开发环境 |
+| 只公开客户端，生产运维保持私有 | 只有公开仓库中的标准 runner 免费                           | 需要维护源码边界和构建依赖；原有私有仓库的 CI 仍受自身额度限制                          |
+
+GitHub Free 组织计划当前含每月 2,000 分钟和 500 MB artifact 存储额度，组织内仓库共享计划额度。标准 macOS 超额计算费当前为每分钟 0.062 美元；例如 300 分钟全部属于收费部分时，计算费约 18.60 美元，未包含超额存储或其他用量。这只是单价示例，不能代替组织账单测量。当前 API 未提供本组织已用额度或预算金额，本次未读取付款信息。
+
+公开免费仅适用于标准托管 runner，larger runner 仍计费；artifact / cache 有各自的额度和规则，不把公开仓库理解为所有服务无限免费。自托管收费的旧公告后来延期，以当前文档和公告顶部更新为准。
+
+来源：[Actions 计费](https://docs.github.com/en/billing/concepts/product-billing/github-actions)、[runner 单价](https://docs.github.com/en/billing/reference/actions-runner-pricing)、[标准 runner 列表](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)、[自托管计费公告更新](https://github.blog/changelog/2025-12-16-coming-soon-simpler-pricing-and-a-better-experience-for-github-actions/)。
+
+## 项目公开范围
+
+当前是包括原生 iOS、Web / 桌面、Nitro 后端、CloudBase 配置与运维资料的单仓库。客户端工程还直接引用 `apps/mobile/ios/App/App` 的 Swift 运行时和图片资源。只复制 `apps/ios` 到公开仓库会失去这些构建依赖，拆分需要同时保留运行时、资源、锁定依赖及服务契约，不能靠公开一个空 CI 仓库解决。
+
+MIT 文件表明现有代码已选择宽松许可证，但它不能证明所有第三方素材、贡献和历史内容都已完成公开授权核对。生产账号数据、凭据与签名材料继续保存在仓库外；服务端源码是否公开可作为单独的商业决定。客户端开源也不改变会员、支付和私有内容必须由服务端鉴权的边界。
+
+GitHub 明确说明，私有转公开会使代码和 Actions 历史 / 日志可见，其他人能 fork。之后改回私有不会让已经公开的 fork 一起变私有。因此最终公开前还需复核历史日志、附件、Issue / PR 中的测试记录、品牌素材及第三方资源，而不只检查当前目录。[可见性变更说明](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility)。
+
+本轮只做了初步只读盘点：
+
+- 当前被 Git 跟踪的敏感文件名检查未发现 `.p8` / `.p12` / 私钥或真实 `.env`；有 `.env.example`。本机真实账号文件留在仓库外。
+- Gitleaks 8.30.1 对本机完整、非浅克隆的全部本地可达 refs / 235 个提交运行默认规则，报告 4 个 `generic-api-key` 匹配。报告已脱敏，保存在仓库外。
+- 其中 2 个匹配横跨历史 `.env.example` 的空 secret 字段与下一变量；另外 2 个已核实为第三方 Coze 文档中顺序数字组成的短示例，均未确认为真实凭据。本次未对任何历史字符串进行认证，也未轮换凭据或添加扫描忽略规则。
+- 后续复核覆盖 236 个本地可达提交、48 条 Issue / PR 正文、28 条评论和 458 份可取得的 Actions 日志，未新增凭据命中；但在常规密钥扫描之外发现一份真实云居导出。当前源码已移除，历史对应路径待处理。完整范围、不可取得的日志及附件 / 素材边界见[公开内容复核](./open-source-review.md)。
+
+## 原生 iOS CI
+
+新增 `.github/workflows/ios.yml`，只在原生工程、共享 iOS 运行时 / 资源或工作流变更时自动运行，并保留手动入口。配置适用于公开或私有仓库：
+
+1. GitHub 官方 `xcode-27` 标准镜像，固定 Xcode 27.0，与本机验证版本一致。该 runner 标签仍是 public preview，可能有可用性与队列限制；不悄悄退回旧 SDK。
+2. 使用已提交的 Xcode 工程与 `Package.resolved`，只解析锁定的 SwiftDraw 版本并核对锁文件不变。
+3. 新建独立 iPhone 18 Pro / iOS 27 模拟器，用 `simctl bootstatus -b` 等待启动迁移结束，再串行运行日常 `YunleFun` Scheme 的单元、集成和访客 UI 测试；每项测试有执行时限。
+4. 模拟器 ad-hoc 签名保留 Keychain 测试能力，随后只编译 Release 模拟器产物；不安装正式 Bundle ID，不归档上传。
+5. 失败时保留日志 / xcresult 三天，完成后删除本次新建模拟器。只授予 `contents: read`，checkout 不保留凭据；两个 Action 固定官方仓库的完整提交 SHA。
+
+线上账号联调、真实扣费、Sandbox、签名、TestFlight 与商店提交不包含在日常工作流。整个 job 不注入仓库 secret，使用普通 `pull_request` 事件；公开后外部贡献也不应取得生产或签名凭据。自托管 runner 的信任边界需单独设计，不能直接让外部 PR 在日常开发 Mac 上执行。[工作流安全说明](https://docs.github.com/en/actions/reference/security/secure-use)。
+
+官方 `macos-latest` 当前仍可能提供较旧的默认 Xcode，不能把它等同于最新 iOS SDK。`xcode-27` 镜像及 Xcode 27.0 / iOS 27.0 的来源已核对：[官方镜像清单](https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md)。actionlint 1.7.12 尚未内置这个标准预览标签，`.github/actionlint.yaml` 仅扩展标签白名单，不注册自托管机器。
+
+配置和本机验证不能代替远端执行通过；公开后以实际工作流结果验证标准 runner。完整原生迁移、真机、最低系统、升级和发布验收继续按[原生改造 Goal](./ios-native-migration.md)推进。
+
+## 冷启动验证记录
+
+初次本机新建模拟器试跑在第一条 WebKit Cookie 写入等待回调，124 项通过后为定位而中断；原始结果保留失败 / 取消状态。Cookie 夹具改为 XCTest 异步 expectation 并逐个回调设置 10 秒时限，单项通过，但另一全新模拟器完整试跑仍为 257 通过 / 3 失败，涉及 Cookie、实际旧版 WebKit 读取和旧版导入 UI；不把之后的单项通过合并成全套通过。
+
+第二次工具观察在 300 秒超时后，原 `xcodebuild` 仍在运行；已核对进程，随后中断并读取实际终态 xcresult，未因观察超时重启测试。其结果为 `test_sim_2026-10-16T09-42-22-417Z_pid91503_2bf7d3cf.xcresult`。相关 WebKit / RunningBoard 日志和主线程采样保存在仓库外 `ios-native/ci-research`，不据此把原因归到业务逻辑或宣布已修复系统问题。
+
+工作流现显式等待新模拟器启动完成；第三台设备实际观察到 LaunchServices、Keychain 与 WebBookmarks 的初始迁移，37 秒后结束。但 Cookie 首次写入仍超时，为继续定位而中断该轮；这证明启动等待本身不足以解决问题。第三轮结果为 `test_sim_2026-10-16T09-51-44-751Z_pid91503_258dfe31.xcresult`，不是完整回归通过。
+
+Cookie 夹具还显式保留非持久化 `WKWebsiteDataStore` 至异步调用结束；WebKit 的 Cookie store 实现对拥有它的数据存储使用弱引用，不能只持有 Cookie store 推定所有者仍在。[WebKit 源码](https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/API/APIHTTPCookieStore.h)。这项防御性修正尚不能被当作冷启动根因结论：第四台本机新模拟器在测试之前即因 `launchd_sim` 无法绑定会话而启动失败，系统返回码 60。
+
+四台本轮创建的模拟器均已删除；原有设备与数据保留。本机冷环境的 WebKit / CoreSimulator 问题、远端执行和完整原生迁移验收继续列待验。后续应在独立可正常启动的环境重现原始完整旅程，不能通过跳过这些测试判定完成。
+
+原有模拟器上的首次当前源码复测也出现 Cookie 读取超时（259 通过 / 1 失败）；只保持数据存储存活还不足以通过该轮。在夹具中按实际宿主创建 `WKWebViewConfiguration` / `WKWebView`，从其配置取得 Cookie store，并让两个所有者跨过异步回调后，原有设备完整日常回归为 260 项通过（257 单元 / 集成 + 3 UI），无跳过或构建诊断。结果为 `test_sim_2026-10-16T10-00-43-026Z_pid91503_7e6a9cad.xcresult`。此处没有修改产品的 Cookie 清理实现，也没有减少原有删除 / 保留断言；这是原有可运行环境的回归证据，不替代新建模拟器与远端验证。
+
+锁定依赖的独立 Release 模拟器编译通过，无构建诊断；产物核对为 `fun.yunle.apps`、最低 iOS 16，且包含原生隐私用途资源。未安装此 Release 产物。actionlint、根 lint 与文档构建通过，文档仅有既有高亮 / 包大小提示。
+
+## 公开后的实际执行
+
+按用户后续确认，将已清理可写 Git 历史的仓库公开；PR 缓存暂缓处理，没有提交 Support 工单。已核对匿名 GitHub API 返回 200、`private: false`。
+
+在同一清理后提交 `6f2d1eb` 重跑三条工作流的第二次尝试：[原生 iOS](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38895225888/attempts/2)、[Web / 移动端](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38895225919/attempts/2)、[桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38895225899/attempts/2)。六个 job 均已实际启动，不再因组织 Actions 预算而停在运行前；原生已核对 Xcode / 锁包并进入独立模拟器创建。这只证明预算阻断解除，最终结果仍以工作流终态为准。
+
+该轮 Web / 移动端与 Chromium 两项通过，Windows 桌面通过。macOS 桌面请求 840pt 内容高度，runner 实际限制为 677pt，尺寸断言失败；Linux 未安装目录中的 Chromium 沙箱辅助程序缺少 root / 4755 权限，启动检查中止。
+
+桌面工作流为临时 runner 配置打包目录下的沙箱辅助程序，保留沙箱运行；`0d9d05c` 的 Linux 检查随后通过。第一次屏幕适配错误地同时限制宽度，macOS / Windows 分别得到 1024 / 1008pt，而原宽屏测试需要 1280pt；这轮失败保留。后续修正只适配 macOS 内容高度，保留两种请求宽度、精确视口尺寸、最小 600pt 高度、溢出与操作入口可见性断言，截图标明实际尺寸。本机重新构建后的专项通过；首次本机试跑在 Electron 启动处超时，记录保留。
+
+窗口高度调整依据 [Electron BaseWindow](https://www.electronjs.org/docs/latest/api/base-window) 的原生尺寸与 macOS 屏幕限制，使用窗口外框 / 内容差和 [screen 的工作区](https://www.electronjs.org/docs/latest/api/screen/)计算。沙箱权限依据 [Chromium SUID sandbox](https://chromium.googlesource.com/chromium/src/+/26b424af1258efd1d49bd9e2c68bdd8db4ae4d1e/docs/linux/suid_sandbox_development.md)，没有给应用增加 `--no-sandbox`。
+
+原生首轮日志中 4 个访客 UI 旅程通过；会话测试出现 4 处断言失败，集中于两个嵌套呈现用例。该轮被后续提交的 concurrency 规则取消，不能计为完整回归通过。夹具原先只等待 50 / 100ms，现改为等待 UIKit 呈现完成、控制器稳定进入窗口，以及旧控制器和视图实际离开；账号模型必须立即清空的断言保留。修改后本机会话专项 **10 项通过**：`test_sim_2026-10-16T15-09-19-495Z_pid91503_d07c27ab.xcresult`。没有修改产品的账号清理逻辑或跳过嵌套弹层断言，远端冷环境仍以修正后工作流终态为准。
+
+后续提交的运行与最终结论同步记录在[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)；未验证的真机、完整辅助功能、Sandbox 与升级范围继续保留。
+
+原生 CI 还显式关闭 Xcode 的自动机器级测试诊断采集，与本机工具的执行条件一致；测试失败仍返回失败状态，日志、xcresult 和测试附件继续上传。没有关闭测试、重试后改记通过或取消原有断言。
+
+`2bcee4b` 的 [Web / 移动端](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475588) 通过，[桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475488) 的 macOS 与 Linux 通过。Windows 打包启动已输出成功标记，但退出后的临时 profile 删除遇到 `Network/Trust Tokens-journal` 文件占用，整项仍判失败。清理改用 Node 的有上限重试（最多五次、初始间隔 200ms），持续占用仍返回失败，未跳过启动或吞掉清理错误。重试行为依据 [Node fs.rm](https://nodejs.org/docs/latest-v24.x/api/fs.html#fspromisesrmpath-options)；脚本三项单元测试与专项 lint 通过，实际 Windows 验证仍以新提交的工作流为准。
+
+同一提交的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38923475502) 最终 **成功**：官方 Xcode 27 runner 新建独立模拟器后，260 项单元 / 集成与 4 项访客 UI 测试全部通过，随后 Release 模拟器编译通过，专用模拟器删除完成。日志分别记录 `TEST SUCCEEDED` 与 `BUILD SUCCEEDED`，没有测试失败或跳过。这是本轮首份完整远端冷环境通过证据；不代表线上账号、正式安装升级、真机、完整辅助功能或发布验收完成。原先失败和取消的记录继续保留，后续提交以其自身 CI 为准。
+
+## 登录改进后的冷环境执行 · 2026-10-17
+
+`6051799` 的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38936977208) 为 **264 通过 / 2 失败**：260 项单元 / 集成通过，6 项 UI 中标准字号键盘可操作性查询和旧版导入空状态失败，Release 编译未执行。失败日志、xcresult 和附件已取得，专用模拟器删除完成。同提交 Web / 移动端、Chromium、macOS / Linux / Windows 桌面与 GitGuardian 六项检查通过；没有据此将原生项改记成功。
+
+键盘改为按名称跨角色查询，保留实际可见 / 可点击与收起断言；导入将超时单独提示，只允许显式点击一次原生重试后核对真正的空状态，未将错误或无响应视为空记录。首次冷启动成功率仍未验收。拒绝了可能漏读真实 localStorage 的网站数据记录捷径，未提交该候选；已有记录与凭据不改写的检查保留。中间失败、环境清理与新建模拟器的恢复旅程分别记录，见[键盘](./ios-keyboard-layout-diagnostics.md#托管执行中的按键查询)与[导入](./ios-upgrade-migration.md#冷启动超时与原生重试-2026-10-17)。
+
+修正后的本机完整日常回归 **268 通过 / 0 失败 / 0 跳过**（262 单元 / 集成 + 6 UI）：`test_sim_2026-10-16T18-02-29-211Z_pid44279_5d51481a.xcresult`，没有临时日志插桩。测试存储释放的等待上限调整后单项复核另 **1 项通过**：`test_sim_2026-10-16T18-07-30-695Z_pid44279_e2e452d4.xcresult`，不减少内容或清理断言。新提交 CI 以其终态记录在 PR #48，不能用本机通过或先前提交的绿色检查替代。
+
+`842cef1` 的[第二轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38945616136) 为 **267 通过 / 1 失败 / 0 跳过**：262 项单元 / 集成与其余五条 UI 通过，标准字号登录用例在进入表单前按组合文字查找入口时卡住，超过原有 120 秒限制；Release 未执行。导入旅程已通过，两次失败原因分别保留，不能归为同一键盘失败。
+
+访客登录入口补充 `me.login` 标识，旅程先确认“我”页导航就绪，再按标识进入，并继续核对“登录云乐坊”的可访问文字。新建隔离模拟器的全部 **6 UI 通过，0 失败 / 跳过**：`test_sim_2026-10-16T18-34-51-200Z_pid44279_82a73a01.xcresult`。没有扩大用例时限；最新提交的完整远端执行仍以终态为准。
+
+`8793087` 的[第三轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38949308097) 为 **267 通过 / 1 失败 / 0 跳过**，六条 UI 全部通过。失败来自既有 `NativeApplicationMenuTests.testMenuActionEndsExactlyOneSessionAfterDismissal` 的两条回调计数断言，Release 未执行。夹具原先固定等待呈现 150ms、菜单 450ms、退出 650ms；现等待 UIKit 呈现完成、控制器稳定进入 / 离开窗口及实际关闭回调。重复动作只执行一次、身份失效丢弃动作、保留回调不能干扰后续状态等断言保留，局部启用的动画设置在结束时恢复。
+
+该菜单专项本机 **5 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-16T18-58-10-745Z_pid44279_f733d6b0.xcresult`。初次测试修正的两处 await / 断言编译错误已修正，构建失败记录保留。下一提交仍需完整远端终态，不以 UI 六例通过覆盖菜单失败。
+
+`7e62fbf` 的[第四轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38952150899) 为 **267 通过 / 1 失败 / 0 跳过**：全部 262 单元 / 集成与其余五条 UI 通过，导入的初次和一次原生重试均在附件中记录明确的 8 秒超时，Release 未执行。只读 WebKit 加载预算调整为 20 秒，UI 等待实际结果 / 超时为 25 秒；用例总时限、固定来源、取消、一次重试和数据校验保持。冷启动耗时仍需性能验收，新提交按自身完整执行核对。
+
+上述预算调整后的新建隔离模拟器专项 **25 通过 / 0 失败 / 0 跳过**（19 导入检查 + 6 UI）：`test_sim_2026-10-16T19-35-11-698Z_pid44279_b76e41f8.xcresult`。四轮失败原始包均已保留在仓库外；更长等待不代表冷启动性能改善，最新托管结果继续单独记录。
+
+同一产品源码的独立锁包 Release 模拟器编译另通过，无构建诊断：`build_sim_2026-10-16T19-40-08-815Z_pid44279_dcfe8b2e.log`。正式 Bundle ID `fun.yunle.apps`、最低 iOS 16 与原生隐私用途资源已核对，锁文件无变化。此本机结果不能代替下一轮完整远端 CI，也不代表正式安装、签名归档或发布。
+
+`096f076` 的[第五轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38957237812) 为 **267 通过 / 1 失败 / 0 跳过**，六条 UI 全部通过，包括 20 秒预算下的导入。持久化导入夹具在准备样例页面时仅等候 5 秒，导航未就绪便继续写入脚本，造成导航断言和后续脚本错误；Release 未执行。夹具改为等待实际导航完成 / 失败事件，上限 20 秒，准备失败立即停止后续脚本并清理视图，内容、凭据与清理断言保留。
+
+该修正的导入专项本机 **19 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-16T20-08-41-527Z_pid44279_f2a65b35.xcresult`。组合手机号 / 密码用例在托管执行耗时 114 秒，现拆为独立登录旅程，每项仍保持原 120 秒时限及实际输入 / 键盘可操作 / 收起断言。新建隔离模拟器 **7 UI 通过，0 失败 / 跳过**：`test_sim_2026-10-16T20-13-59-437Z_pid44279_eba5992b.xcresult`；完整日常现为 262 单元 / 集成 + 7 UI，共 269 项，最新远端仍以自身终态为准。
+
+夹具的完成事件还核对实际固定 URL 后，持久化记录专项另 **1 项通过**：`test_sim_2026-10-16T20-23-39-544Z_pid44279_70d1b010.xcresult`。导航到其他页面不能触发样例写入的就绪信号。
+
+`167aed5` 的[第六轮原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38962372915)完整成功：**262 单元 / 集成 + 7 UI，共 269 项通过，0 失败 / 跳过**；Release 模拟器编译及隔离模拟器删除成功。同提交的 Web / 移动端、Chromium、macOS / Windows / Linux 桌面与 GitGuardian 一并通过，共七项检查成功。前五轮失败记录继续保留。
+
+后续字号与 VoiceOver 改进的本机专项分别见[系统审计](./ios-accessibility-audits.md)和[VoiceOver 验证](./ios-voiceover-validation.md)。显式 Benchmark 审计与 VoiceOver 不在日常 269 项之内；系统审计失败不能被日常绿色检查覆盖。当前提交的远端终态继续记录在[草稿 PR #48](https://github.com/YunLeFun/apps.yunle.fun/pull/48)，不使用上一提交的结果代替。
+
+## Cookie 夹具完整性复核 · 2026-10-17
+
+字号与 VoiceOver 提交 `0a4249d` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38989327105)为 **268 通过 / 1 失败 / 0 跳过**：七项 UI 均通过，Cookie 清理用例在清理前仅读到五条样例，预期为六条；清理后的三条无关 Cookie 保留断言通过。Release 未执行，隔离模拟器已删除，其余六项检查成功。这个日志没有记录缺少的具体名称，不能据此认定产品删除规则有误，也未证明冷启动的唯一根因。
+
+夹具现先完成非持久化 store 的一次读取，再通过 HTTPS 响应头解析不带 Domain、具有 Secure 和根路径的 Cookie；每条只写入一次，随后读回并核对累计的完整域名 / 名称集合及数量。准备不完整立即失败，停止清理断言并报告具体差异。最终六条准备和三条保留断言继续执行，10 秒回调时限保持；产品清理代码、允许清理的主机与名称未改，没有睡眠、写入重试或忽略失败。
+
+全新隔离 iPhone 18 Pro / iOS 27 上，该用例的三次进程重启执行均通过：`test_sim_2026-10-17T01-29-37-509Z_pid44279_99ba521b.xcresult`，为 **1 个不同用例、3 次通过执行，0 失败 / 跳过**。此项不能代替修正后提交的完整远端回归；其终态仍在 PR #48 记录。
+
+同一后续提交 `a51bd93` 的[Windows 桌面执行](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991315161/job/117274108734)在目录网络专项的首次窗口中等待“探索”标题五秒超时，Electron 集成为 2 通过 / 1 失败；不是 Cookie 清理失败。trace 的 `app://shell/` 快照当时只有文档头，没有正文，尚不能据此判定具体资源或系统耗时根因。夹具增加等待实际 `domcontentloaded` 事件，上限 15 秒，再执行原有五秒标题断言；整体 30 秒时限、代理路由、请求 / 响应 Cookie 隔离、拒绝跳转与清理断言保留。本机该网络专项 1 项通过，修正后的 Windows 与完整 CI 仍以最新提交终态为准，不将本机 macOS 结果算作 Windows 通过。
+
+修正后的 `2a8ab45` [Windows job](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991942710/job/117276027659)已成功，Web / 移动端、Chromium、macOS / Linux 桌面与 GitGuardian 同提交成功。`a51bd93` 原生运行由后续提交的 concurrency 自动取消，未完成 Release，专用模拟器删除成功，不能计为完整通过。后续 VoiceOver 夹具收紧与 iPad 专项单列于[验证记录](./ios-voiceover-validation.md)，日常原生 CI 的最新终态继续记录在 PR #48。
+
+`2a8ab45` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/38991942668)随后完整成功：**262 单元 / 集成 + 7 UI，共 269 项通过，0 失败 / 跳过**；Release 模拟器编译与专用模拟器删除成功，共七项检查通过。Cookie 夹具完整性修正与 Windows 启动同步在该提交均有完整远端通过证据；这不覆盖仍失败的独立系统审计或真机验收，后续提交按自身终态核对。
+
+## 详情布局后的完整 CI · 2026-10-17
+
+`c548960` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289451)完整成功：**266 单元 / 集成 + 7 UI，共 273 项通过，0 失败 / 跳过**。日志已核对两类测试计数、`TEST SUCCEEDED` 和 `BUILD SUCCEEDED`；Release 模拟器编译与隔离模拟器删除均成功。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289495)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39011289463)及 GitGuardian 一并通过，共七项检查成功。
+
+新增四项详情布局样例属于日常 273 项。独立 Benchmark 的 VoiceOver、系统审计与尺寸专项不在该集合中，仍按[详情布局](./ios-detail-accessibility.md)与[朗读记录](./ios-voiceover-validation.md)保留各自通过和失败。本机完整集合中的三条键盘失败没有被远端通过改写；后续仅模拟器测试的范围见[当前 Goal](./ios-native-migration.md)。
+
+`ceee732` 的 [Native iOS CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013218418)也已完整成功：**266 单元 / 集成 + 7 UI，共 273 项通过，0 失败 / 跳过**；Release 模拟器编译与隔离设备清理成功，日志中的两组计数、`TEST SUCCEEDED`、`BUILD SUCCEEDED` 已核对。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013219007)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39013218419)及 GitGuardian 均成功，共七项检查通过。该提交只补充 Benchmark 的原生 iPad 导航适配和验证记录，不包括后续云居状态修复。
+
+## 云居修复后的冷 CI · 2026-10-17
+
+`be3b92f` 的[原生执行](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39015276862)终态失败：**281 个不同用例，279 通过 / 2 失败 / 0 跳过**。274 个单元 / 集成中 273 通过、1 失败；7 个 UI 中 6 通过、1 失败。日志另记录同一 Home 用例的 XCTest `InvalidTransition` 事件，不能多算为一个失败用例。Release 未执行，隔离模拟器清理成功。
+
+- Home 会话入口用例在调用 `open` 前等待初次身份 Cookie 清理五秒超时。附件证明 anchor、window 和 key window 正常，未呈现浏览器、没有运行会话或业务错误；尚不能归因于空态 UI 或断言会话打开失败。
+- 标准字号密码键盘用例在点击收起后等待旧 Keyboard 对象不存在超时。原始视频第 69、73 秒可见键盘和收起按钮已经消失、表单恢复全高；系统导出的 AX 快照没有足够子节点，不能据此断定缓存的具体属性。后续测试补充收起后截图 / 完整树，并核对键盘与按键不可交互、焦点操作消失；五秒限制保持。
+- [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39015276853)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39015276850)及 GitGuardian 同提交成功。原生日常失败独立保留，不能引用这些结果或此前绿色提交作为当前原生验收。
+
+本轮原生帮助 / 反馈源码不在该提交内；按自身模拟器结果和新提交 CI 分别记录。冷 Cookie 清理、完整新提交 CI 与系统审计继续待验，不通过延长等待、重发应用打开或跳过失败关闭问题。
+
+只读复核未支持“没有先创建 WKWebView”这一根因：公开 WebKit 的 [Cookie 读取实现](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Source/WebKit/UIProcess/API/APIHTTPCookieStore.cpp#L81)会主动启动网络进程，[官方无预热测试](https://github.com/WebKit/WebKit/blob/ddf2b17a528bde63603600ed71ab9ba358af3c12/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WKHTTPCookieStore.mm#L462)也先于 WebView 创建读写 Cookie；默认 Store 有全局持有。CI 最初网络进程启动早于失败约 40 秒，但当时尚无中途重建或清理阶段记录，公开主线也不等于运行库的精确版本。随后在原五秒预算内采集读取、删除、主队列通知和 Runtime 代次阶段，结果见下文；不能先把预热或持有方式当作修复。
+
+## 原生帮助反馈的本机回归 · 2026-10-17
+
+源码 `abe06fa` 的日常集合扩为 **323 单元 / 集成 + 10 UI，共 333 项**。首次完整执行 331 通过 / 2 失败，两项新增截图夹具失败已分别核对原始截图与懒加载几何，修正后页面专项 5 项通过。最终完整执行 **332 通过 / 1 失败 / 0 跳过**：`test_sim_2026-10-17T08-44-32-100Z_pid44279_83ad0a14.xcresult`，323 项单元 / 集成及全部 3 条新支持 UI 通过。
+
+唯一失败是标准字号手机号键盘用例超过原 120 秒。键盘收起后的交互状态检查及截图已完成，XCTest 日志记录未收到动画完成通知，随后取消操作卡于 idle 等待；尚未定因。两次完整运行均超过工具 300 秒观察窗口，继续跟踪各自原 PID 并从原始结果包核对终态，runner 自动重启后的局部绿色摘要不代表整轮通过。没有延长时限或重复执行后替换失败。
+
+锁包 Release 模拟器编译、根 lint 与文档构建通过；原生帮助 / 反馈四项实际 VoiceOver 另行通过。当前提交的托管状态以[草稿 PR #48 的头提交检查](https://github.com/YunLeFun/apps.yunle.fun/pull/48/checks)为准；此前绿色提交、本机部分通过和未完成的独立系统审计分别保留。
+
+## 帮助反馈提交的远端终态 · 2026-10-17
+
+`a35cc44` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39019145600)终态失败：**333 个不同用例，332 通过 / 1 失败 / 0 跳过**。323 个单元 / 集成中 322 通过、1 失败；10 个 UI 全部通过。唯一失败仍为 `HomeLayoutVisualTests.testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable` 的初次身份 Cookie 清理五秒超时；同一用例随后记录 `InvalidTransition { phase: idle, targetPhase: failed(deinit) }`，两个失败事件不能多算为两个失败用例。
+
+Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功。同提交的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39019145536)、[三平台桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39019145590)及 GitGuardian 均成功，合计其余六项检查通过；原生项独立保留失败。
+
+远端计数、步骤终态与逐例结果归档于 `/tmp/yunlefun-ios-support-20261017/ci-a35cc44`，包括 `verification-summary.json`、`native-case-counts.json`、`pr-final-checks.json` 和原始 `native.log`。本节没有把尚未核对的远端完整 xcresult 附件用作内部阶段证据；以下阶段记录来自同源码的本机隔离复现。
+
+## 默认 Cookie 读取的隔离诊断 · 2026-10-17
+
+以 `a35cc44` 为基线，在专用 iPhone 18 Pro / iOS 27 模拟器串行运行，保留原五秒身份准备等待、120 秒默认用例预算和 180 秒最大用例预算。安装 / 启动准备耗时单列；工具观察窗口结束后继续跟踪原执行进程至终态，没有将观察超时作为测试重试。
+
+| 集合                         | 进程与执行计数                             | 已确认结果                                           | 原始结果包                                                     |
+| ---------------------------- | ------------------------------------------ | ---------------------------------------------------- | -------------------------------------------------------------- |
+| 无插桩的原始 Home 完整 class | 11 个不同用例，两个独立进程，共 22 次执行  | 每轮 10 通过 / 1 失败 / 0 跳过；均为同一初次清理超时 | `test_sim_2026-10-17T09-21-05-257Z_pid44279_4349ab5b.xcresult` |
+| 带 trace 的单独目标用例      | 1 个用例、一次执行                         | 1 通过 / 0 失败 / 0 跳过；不能代替完整 class         | `test_sim_2026-10-17T09-31-36-790Z_pid44279_6ec59f19.xcresult` |
+| 带 trace 的 Home 完整 class  | 相同 11 个用例，两个独立进程，共 22 次执行 | 每轮仍为 10 通过 / 1 失败 / 0 跳过                   | `test_sim_2026-10-17T09-35-56-655Z_pid44279_edfa5e10.xcresult` |
+
+临时 trace 只在 Debug 且测试进程设置 `YUNLEFUN_IDENTITY_CLEANUP_TRACE=1` 时启用，用锁保护最多 512 条事件；只记录固定阶段名、进程内 runtime / reset / operation 序号、计数、主线程布尔值及单调时间，不记录 Cookie 值、名称、域名、账号、URL 或错误文本。没有添加 Cookie 读取、写入或预热，没有额外持有 runtime / store，也没有修改清理允许名单、代次 guard、删除完成等待或超时。五秒准备失败时向 stdout 输出一次相同的有界快照，超时和夹具关闭时另附测试附件，避免只能依赖远端大附件下载来定位阶段。
+
+单例通过时，两个清理操作都实际读到零条 Cookie，并通过 owner / generation 检查。目标操作读取回调用时 204ms，空 group 的主队列通知另等待 3050ms；其中 OCR 占用主线程 2138ms，其后仍有 682ms 间隔。这只能说明该次通过执行存在额外通知调度等待，不能解释之后完整 class 的失败。
+
+两轮完整 class 的失败快照均无事件丢弃，卡点出现在真实 `getAllCookies` 回调之前：
+
+| trace 轮次 | 回调阶段                                                                                                                         | 五秒准备等待与活性证据                                                            | 快照中的未回调 Native 清理数 |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------- |
+| 第一次进程 | op1–3 读到零条并完成；op4–11 已发起读取且方法返回，却没有进入读取回调。最早未回调的 op4 已等待 17,773ms，目标 op11 已等待 6229ms | 等待 5001ms，97 次轮询，最大轮询间隔 53ms；所有 main probe 已执行，等待区间无 OCR | 8                            |
+| 第二次进程 | op1–11 均无读取回调入口；最早读取已等待 17,894ms，目标 op11 已等待 6114ms                                                        | 等待 5015ms，96 次轮询，最大轮询间隔 59ms；所有 main probe 已执行，等待区间无 OCR | 11                           |
+
+这里的“无回调”限于超时快照覆盖的窗口，不代表证明回调永远不会到达。主队列与 MainActor 轮询仍能前进，不能据此证明 WebKit 内部 IPC、转换或回调投递正常。失败操作没有到达删除、group notify 或 Runtime 代次检查阶段，因而**不支持用空 Cookie 集合直接 completion 的候选修复这两次失败**；本轮没有实施该候选，也没有延长五秒等待。仍按未修复记录。
+
+同一时段的 NetworkProcess 日志包含挂起 / 恢复转换：17:37:05.676 准备挂起、06.391 恢复、06.992 再挂起、07.334 恢复；这些状态记录没有给出 Cookie 请求到回调的完整链路，不能推断必须预热或默认 Store 未保活。[Apple 的公开读取契约](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/getallcookies%28_%3A%29)规定异步 MainActor completion；[WebKit 主线的转换与投递实现](https://github.com/WebKit/WebKit/blob/e1c510bc7fae8b20c296f2bcc3aeac3c5c8df578/Source/WebKit/UIProcess/API/Cocoa/WKHTTPCookieStore.mm#L76-L89)提供进一步分段的参考，但尚未建立与本机运行库精确版本的对应关系。
+
+本轮临时诊断插桩已从主工作目录的四个文件清理，未作为产品修复保留。`ios-identity-cleanup` 隔离 worktree 继续保留，原始失败结果、临时补丁、带 trace 的单例附件、两进程逐阶段汇总及 WebKit 日志归档于 `/tmp/yunlefun-ios-cookie-diagnosis-20261017`；`traced-home11-two-process-summary.md` 保留逐 operation 和 OCR 区间。诊断证据与原始失败均继续保留，后续仍需在真实完整 class 和新提交 CI 中验证修复。
+
+### 缩减为三用例后仍可复现
+
+随后在同一隔离 worktree 中仅选择原 class 的 `testCompactHomeWithLargestAccessibilityText`、`testCompactHomeWithStandardText` 和目标 `testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable`。沿用已准备测试产物中的两轮独立进程配置，日志实际包含 **3 个不同用例、6 次执行，每轮 2 通过 / 1 失败**；不是新增六个不同用例。两轮目标均在原五秒初次身份清理等待处失败，随后各记录同一用例的 `InvalidTransition` 事件。
+
+| 三用例轮次 | 读取回调阶段                                  | 目标五秒等待                                      | 快照中的未回调 Native 清理数 |
+| ---------- | --------------------------------------------- | ------------------------------------------------- | ---------------------------- |
+| 第一次进程 | op1–3 已完成，目标 op4 发起读取后没有回调入口 | 6062→11093ms，共 5031ms；97 次轮询，最大间隔 62ms | 1                            |
+| 第二次进程 | op1–4 均没有读取回调入口                      | 4276→9292ms，共 5016ms；97 次轮询，最大间隔 53ms  | 4                            |
+
+两轮 main probe 都已执行，五秒等待区间没有 OCR；失败阶段仍在读取回调之前。结果包为 `test_sim_2026-10-17T09-42-32-310Z_pid44279_5148a697.xcresult`，原始日志为 `test_sim_2026-10-17T09-42-32-310Z_pid44279_7380d1ad.log`，两份有界快照另存 `/tmp/yunlefun-ios-cookie-diagnosis-20261017/minimized-three-trace.txt`。这将可复现集合从 11 例缩为“两个 CompactHome 前序 + 目标”三例，**尚未证明不能继续缩小，也不是修复或最小复现完成**；原清理边界和五秒预算保持。
+
+## 反馈续接提交的完整 CI · 2026-10-17
+
+`18c8e86` 的[完整原生执行](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39023604431)在第 1 次运行终态成功：**376 个不同用例，376 通过 / 0 失败 / 0 跳过**，其中 366 个单元 / 集成和 10 个 UI。已从完整原始日志独立去重计数并核对套件摘要，不以预计集合大小代替实际结果。Release 模拟器编译与同一独占模拟器清理成功，失败附件上传按条件跳过。
+
+同一头提交的 Web / 移动端、Chromium、三平台桌面与 GitGuardian 合计其余六项检查也全部成功；PR #48 仍为草稿。逐例行号、完整日志和终态 JSON 保存在仓库外 `/tmp/yunlefun-ios-cookie-diagnosis-20261017/ci-18c8e86`。这次 Cookie 目标和键盘用例通过只证明本次执行，不关闭前述间歇问题；真实登录成功后的完整反馈 UI 与其他未验收范围分别推进。
+
+### 当前头提交的缩减对照
+
+后续把隔离 worktree 的基线移到 `18c8e86`，确认四个探针接缝文件没有生产差异，并保存原补丁。在新的独占模拟器中，显式 `-test-iterations 2` 的三用例执行是**同一宿主内每例重复两次**：3 个不同用例、6 次执行，4 通过 / 2 失败，不能写成两个独立 class 进程。该次与之前 `a35cc44` 的两进程结果分开计数。
+
+去掉重复参数后，两个 CompactHome 前序加目标用例仍为 2 通过 / 1 失败；原五秒等待为 3854→8860ms，97 次轮询、最大间隔 54ms。op1–3 读取空集合并完成，目标 op4 在 2510ms 请求读取、2511ms 方法返回，至 8860ms 仍未进入回调。删除任一 CompactHome 前序的两例对照分别各 2 通过 / 0 失败。这只缩小了触发条件，间歇行为尚未统计验证到最小复现，不据此实施修复或放宽预算。
+
+原日志、逐次执行和探针补丁保存于仓库外 `/tmp/yunlefun-ios-native-continuation-20261017`。这些结果来自明确的 `18c8e86` 诊断基线，不能冒充后续作者页改动的完整验收。
+
+## 作者主页提交的完整 CI · 2026-10-17
+
+头提交 `9181f2160905aa721949b7142a15c7684ba98e71` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39028849489)终态成功。该 `pull_request` 运行的实际 checkout 是合并提交 `095632a2c3a8b105f8ca2b43b2f2fc3783dd8545`，日志明确记录将该头提交合入 `c741d0200fe4a86638f50145395ae291ba305a9a`；没有用其他头提交的绿色结果替代本次证据。
+
+完整日志独立解析为 **405 个不同测试方法，395 单元 / 集成 + 10 UI，405 通过 / 0 失败 / 0 跳过**。810 条开始 / 通过事件中没有重复开始、重复终态或缺失终态，两组 XCTest 套件摘要与逐例计数一致，并记录 `TEST SUCCEEDED`。Xcode 27.0（27A266a）/ iOS 27.0 上的 Release 模拟器编译记录 `BUILD SUCCEEDED`；本次独占模拟器 `B6F3D733-1746-4938-953F-23C7C89913B0` 的删除命令与清理步骤成功。shutdown 命令保留 `|| true`，日志未额外查询删除后的设备列表，因此不把它写成单独断言 shutdown 成功。失败附件上传按条件跳过，不是 XCTest 跳过。
+
+同一完整 SHA 的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39028849501)、[macOS / Ubuntu / Windows 桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39028849434)及 GitGuardian 全部成功，合计 **7 项 check-runs 均为 completed / success**。传统 commit statuses 接口没有 context；其空集合默认 `pending` 不代表另有待运行检查。
+
+这轮仍有 **32 条 appearance transition 不平衡消息**：按串行日志中最近的测试开始事件归属，`NativeRuntimeSessionTests` 11 条、`NativeWebNavigationTests` 10 条，其余布局、菜单、导入和二维码样例合计 11 条。该归属只提供发生上下文，不证明生产故障来源；生命周期问题继续保留，不能由绿色检查关闭。另外有 9 条编译 / 工具 warning：5 条测试目标最低 iOS 16 与 XCTest iOS 17 库的链接版本提示，4 条无 AppIntents 依赖时的元数据提取提示。日志另有 WebKit / RBS、系统 AX 重复类、模型预检和 debugger `noURL` 等诊断，完整行号与计数独立归档，不计作 XCTest 失败，也未宣称已解决。
+
+完整原生 / Web / 桌面日志、原生原始日志 zip、405 个方法的开始 / 终态行号、全部检查 JSON、warning 归属和 SHA-256 保存在仓库外 `/tmp/yunlefun-ios-native-continuation-20261017/ci-9181f21`。当前本机未提交的 `DeveloperProfileBenchmarks` 及其他显式 Benchmark UI / 系统无障碍项目不在该 SHA 的这次日常集合中，不能用 405 项作为其通过证据；实际界面与辅助功能验收仍以各自记录为准。此前 Cookie、键盘和其他失败记录继续保留，原生改造 Goal 尚未据本次 CI 宣告完成。
+
+## 作者页显式 UI 验收 CI
+
+作者验收位于独立的 `.github/workflows/ios-author-benchmark.yml`，由 `ci:ios-author-benchmark` 标签门禁控制。带标签的同步提交执行浅色 / 深色两格；单独添加该标签只触发可选工作流。日常 `.github/workflows/ios.yml` 不再监听标签事件，避免创建同名 skipped 原生检查并遮蔽已有日常失败。两个工作流使用各自的并发组，可选作者验收不会取消日常检查；无关标签事件使用独立组，不取消仍在运行 / 排队的有效作者验收。
+
+每格在 Xcode 27 / iOS 27 新建独占 iPhone 模拟器，使用现有 `YunleFunBenchmarks` / Benchmark 配置，串行执行作者页标准 / 最大辅助字号的普通触摸和实际 VoiceOver 四个方法。合计是 **4 个不同方法 × 2 外观 = 8 次执行**，启用时新增两项实际检查；不是新增八个不同方法，也不能与日常计数混淆。每例原 120 秒时限和 180 秒上限保留，无重试；逐格要求四个方法各开始、通过一次，任何跳过、缺项、重复或失败都不能验收。
+
+仅使用匿名公开作者页面与新建空访客云居，不选择物理设备或已有模拟器，不运行真实登录、反馈 canary、获取、购买或云应用。开关只含固定 opt-in、外观与该格新建模拟器 UUID，不传凭据；继续只读仓库权限、固定 Actions、锁包和不持久化 checkout 凭据。产品仍支持 iOS 16，iOS 27 只用于本次实际 VoiceOver API。
+
+成功与失败均保留完整 xcresult、原始测试日志及方法计数 JSON 三天，不上传构建产品或依赖缓存；完整朗读、AX 和截图须下载后复核，不能以方法计数代替实际无障碍验收。每格最后尝试关闭并删除自己的模拟器，分别核对步骤终态。带标签的验收结束后可移除标签，使后续提交恢复原日常范围。
+
+显式作者验收使用 PR 标签入口，不依赖默认分支的手动 dispatch 注册，也不为注册入口合并草稿。以上是可复现执行入口，实际结果按相应提交与运行 ID 记录；静态 actionlint 通过不等于八次旅程已通过。
+
+## 体验版源码的实际 CI · 2026-10-17
+
+`c358899a34013abf8d181faa2d59088ee7f6e6c6` 的[日常原生执行](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39032659106)自然终态失败，实际 checkout 为合并提交 `78824ae9b28e5831f88df61f66061b55d300d0ac`，将该 source 合入 `c741d0200fe4a86638f50145395ae291ba305a9a`。
+
+完整日志独立解析为 **405 个不同方法，404 通过 / 1 失败 / 0 跳过**：单元 / 集成 394 通过、1 失败，全部 10 条 UI 通过。唯一失败仍是 `HomeLayoutVisualTests.testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable` 在首次打开前等待身份 Cookie 清理五秒；同一方法后续追加 `InvalidTransition` 失败事件，不能计作另一失败用例。日志有 405 条方法终态、404 条开始记录，其中一个实际通过方法缺开始行，原始 zip 与 artifact 内日志复核一致，不补造 810 条完整事件。Release 步骤跳过，完整失败 artifact 上传及独占模拟器删除成功。其他六项常规检查成功，日常原生失败继续保留。
+
+日常执行终态后才添加可选标签，旧版单工作流的[作者专项](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39033883456)也自然终态失败。两格 checkout 同一合并提交，各四个方法开始 / 终态完整，合计 **8 次执行，1 通过 / 7 失败 / 0 跳过**：
+
+| 方法                   | 浅色                    | 深色                       |
+| ---------------------- | ----------------------- | -------------------------- |
+| 标准字号触摸           | 通过                    | 返回画面 / OCR 检查失败    |
+| 最大辅助字号触摸       | 返回画面 / OCR 检查失败 | 返回画面 / OCR 检查失败    |
+| 标准字号 VoiceOver     | 未能找到作者标题朗读    | 等待真实作者资料失败       |
+| 最大辅助字号 VoiceOver | 未能找到作者标题朗读    | 系统 `No speech available` |
+
+三条触摸失败已经到达返回作者页部分，在原五秒内未通过实际画面绘制检查；不能仅凭 AX 存在宣称已正常绘制，也不能在未审完整截图前认定是产品、OCR 或托管环境根因。两格完整 xcresult 已上传，模拟器清理成功；测试失败后计数步骤 skipped 不代表测试方法被跳过。此前同 source 一共留下 11 条历史 check-run 记录：6 success、3 failure、2 skipped，不能写成九项全绿或用后来的同名 skipped 日常记录覆盖原失败。工作流拆分修正的是后续状态呈现，历史失败不删除。
+
+完整日常日志 / xcresult 和作者日志 / artifact 元数据分别保存在本机 `ci-c358899-daily`、`ci-c358899-author-benchmarks`。用户随后将本轮 Goal 收敛为可体验模拟器版，作者全矩阵和完整迁移验收后移，不再追加探针或重跑来扩张交付前置。作者标签已移除，后续不自动继续该矩阵。
+
+同一运行时代码的有限核心体验另在本机实际模拟器 **2 通过 / 0 失败 / 0 跳过**，包括真实发现详情、免费获取、云应用网页绘制、收起 / 恢复、结束与返回；七张原始截图已核对。该结果与上述日常 / 作者失败分别记录，详见[模拟器体验交付](./ios-simulator-preview.md)。
+
+## 来源同步提交的完整 CI · 2026-10-18
+
+来源提交 `e7ea1cd6e0d00bbad58273c2510322b3ba28e38d` 的 [Native CI 39067045605](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39067045605) 已自然结束。实际 checkout 为 PR 合并提交 `d9b80434143e88385336cd3139b63bdb3e38621a`，原 xcresult 独立解析为 **433 个不同用例，431 通过 / 2 失败 / 0 跳过**，无结果包运行时警告。423 项单元 / 集成中 421 通过，全部 10 条 UI（含三条键盘旅程）通过。
+
+失败为首页 `testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable` 的初次 Cookie 清理五秒期限，以及反馈页 `testCorruptSavedReceiptRendersReadFailureWithoutReplacingEvidence` 的文字扫描。首页方法随后产生 `InvalidTransition` 事件，日志的三次断言 / 异常失败属于两个用例，不能写成三个失败用例。Release 跳过，失败附件上传和独占模拟器删除成功；Web、三种桌面构建、Chromium smoke 和 GitGuardian 成功，不代替原生全绿。
+
+反馈原始 viewport scan 记录六次截图：最后采样 offset.y=1568、contentSize.height=2648.83、viewport.height=800，下一步请求底部 offset.y=1848.83 后已到原十秒期限，没有再采样。截图显示日志范围和数量，尚未显示末尾支持编号错误。这支持扫描未到目标的夹具问题；不是用 OCR 文案匹配放宽来消除失败。
+
+两个待检查目标都位于反馈表单末尾，现复用已有 `fromBottom` 原生列表定位，再读取真实截图文字。保留十秒期限、完整错误子句、未发送 HTTP 和损坏原文件逐字节不变断言；产品 `FeedbackView` 未修改。Cookie 路径接入独立 [PR #49](https://github.com/YunLeFun/apps.yunle.fun/pull/49) 已验证的上下文生命周期修复，见[Cookie 对照与边界](./ios-identity-cookie-cleanup.md)。集成后的专项与新 CI 按自身执行结果验收，原失败保留。
+
+集成后在本任务隔离 iPhone / iOS 27 运行完整 `HomeLayoutVisualTests`、`HostIdentitySessionsTests` 和 `SupportViewTests`，**17 通过 / 0 失败 / 0 跳过**，无结果包运行时警告（`ci-repairs-tests.xcresult`）。反馈两条目标均在底部定位后的首张截图读到完整文字；已逐图复核支持编号错误与上传预览入口。原文件保留、未提交日志及真实 Cookie 删除 / 保留断言全部通过。Cookie 原三条提交以 cherry-pick 保留在当前分支，没有合并或关闭 PR #49；后续完整 CI 仍需独立确认。
+
+随后来源提交 `5c2e85ff5246d00f8fc37874cd0e9ddca9042cf0` 的 [Native CI 39069021230](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39069021230) 自然结束并成功。实际 checkout 为 PR 合并提交 `db453e6ef9482769f9d47d409a69b61da2ea8d71`；完整原始日志按完成用例名独立去重，**433 通过 / 0 失败 / 0 跳过**（423 单元 / 集成 + 10 UI）。Release 模拟器编译和隔离模拟器删除成功，失败附件步骤按条件跳过，因此本次计数来源是日志而非未生成的上传附件。该头的七项常规检查全部成功；可选作者 Benchmark 跳过，不能计为通过。
+
+此结果验证两项修复在本次完整 CI 中有效，原失败记录继续保留。原日志、运行元数据与独立计数位于持久目录的 `native-ci-5c2e85f.log`、`native-ci-5c2e85f-summary.json`、`native-ci-5c2e85f-counts.json`。后续新增的 opt-in 真实反馈登录夹具按自己的构建与执行证据记录，不追溯计入这 433 项。
+
+原日志、完整结果包与三份反馈附件保存于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/native-ci-e7ea1cd-artifact`、`native-ci-e7ea1cd-support-failure`。初次只导出与失败事件直接关联的附件得到空列表，随后按失败方法 ID 导出其 keepAlways 附件；空导出不代表没有截图证据。

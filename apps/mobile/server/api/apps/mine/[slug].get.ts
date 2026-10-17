@@ -1,9 +1,9 @@
 import { createError, getRouterParam } from 'h3'
 import { getOwnedAppBySlug } from '../../../utils/app-submissions'
-import { requireCloudbaseUser } from '../../../utils/cloudbase-auth'
+import { requireRegisteredCloudbaseUser } from '../../../utils/cloudbase-auth'
 
 export default defineEventHandler(async (event) => {
-  const user = await requireCloudbaseUser(event)
+  const user = await requireRegisteredCloudbaseUser(event)
   const slug = getRouterParam(event, 'slug')?.trim()
   if (!slug)
     throw createError({ statusCode: 400, statusMessage: 'slug 必填' })

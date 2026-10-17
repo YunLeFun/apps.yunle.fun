@@ -81,7 +81,7 @@ final class AccountSessionTests: XCTestCase {
         await gate.waitUntilEntered()
         await session.cancelSignIn()
         await gate.open()
-        do { try await login.value; XCTFail("Cancelled login must not commit") }
+        do { _ = try await login.value; XCTFail("Cancelled login must not commit") }
         catch { XCTAssertEqual(error as? AccountError, .sessionChanged) }
         let overview = try await session.overview()
         XCTAssertEqual(overview.activeID, "a")
@@ -181,11 +181,11 @@ final class AccountSessionTests: XCTestCase {
         weak var visibleStore: AccountStore?
         var previousIDs: [String?] = []
         let logoutPublished = expectation(description: "Local account projection cleared")
-        let store = AccountStore(session: AccountSession(api: api, vault: vault, now: { self.fixedNow })) { id in
+        let store = AccountStore(session: AccountSession(api: api, vault: vault, now: { self.fixedNow }), identityDidChange: { id in
             previousIDs.append(visibleStore?.user?.id)
             library.activateAccount(id)
             if id == nil { logoutPublished.fulfill() }
-        }
+        })
         visibleStore = store
         await store.restore()
         XCTAssertEqual(store.user?.id, "a")

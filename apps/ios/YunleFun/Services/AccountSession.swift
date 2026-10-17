@@ -29,32 +29,47 @@ actor AccountSession {
         return AccountOverview(revision: revision, users: current.accounts.map(\.user), activeID: current.activeID)
     }
 
+    func overview(matching commit: AccountSignInCommit) throws -> AccountOverview {
+        let current = try load()
+        guard current.activeID == commit.userID, selectionGeneration == commit.selectionGeneration else {
+            throw AccountError.sessionChanged
+        }
+        return AccountOverview(revision: revision, users: current.accounts.map(\.user), activeID: current.activeID)
+    }
+
     func restore() async throws {
         guard try load().activeID != nil else { return }
         try await refreshProfile()
     }
 
-    func passwordSignIn(identifier: String, password: String, captcha: String?) async throws {
-        let attempt = UUID()
-        signInAttempt = attempt
+    @discardableResult
+    func passwordSignIn(identifier: String, password: String, captcha: String?,
+                        attemptID: UUID = UUID()) async throws -> AccountSignInCommit {
+        try Task.checkCancellation()
+        signInAttempt = attemptID
         let deviceID = try requestDeviceID()
         let response = try await api.passwordSignIn(identifier: identifier, password: password, deviceID: deviceID, captcha: captcha)
-        try await accept(response, attempt: attempt, deviceID: deviceID)
+        return try await accept(response, attempt: attemptID, deviceID: deviceID)
     }
 
     func sendVerification(address: VerificationAddress, captcha: String?) async throws -> VerificationChallenge {
         try await api.sendVerification(address: address, deviceID: requestDeviceID(), captcha: captcha)
     }
 
-    func verify(_ challenge: VerificationChallenge, code: String, captcha: String?) async throws {
-        let attempt = UUID()
-        signInAttempt = attempt
+    @discardableResult
+    func verify(_ challenge: VerificationChallenge, code: String, captcha: String?,
+                attemptID: UUID = UUID()) async throws -> AccountSignInCommit {
+        try Task.checkCancellation()
+        signInAttempt = attemptID
         let deviceID = try requestDeviceID()
         let response = try await api.verify(challenge, code: code, deviceID: deviceID, captcha: captcha)
-        try await accept(response, attempt: attempt, deviceID: deviceID)
+        return try await accept(response, attempt: attemptID, deviceID: deviceID)
     }
 
-    func cancelSignIn() { signInAttempt = nil }
+    func cancelSignIn(attemptID: UUID? = nil) {
+        if let attemptID, signInAttempt != attemptID { return }
+        signInAttempt = nil
+    }
 
     func authorization(forceRefresh: Bool = false) async throws -> AuthorizedAccount {
         let current = try load()
@@ -146,7 +161,7 @@ actor AccountSession {
         try await api.verifyCaptcha(token: token, text: text, deviceID: requestDeviceID())
     }
 
-    private func accept(_ response: AuthTokenResponse, attempt: UUID, deviceID: String) async throws {
+    private func accept(_ response: AuthTokenResponse, attempt: UUID, deviceID: String) async throws -> AccountSignInCommit {
         guard signInAttempt == attempt else { throw AccountError.sessionChanged }
         let credential = try response.credential(at: now())
         let user = try await api.user(accessToken: credential.accessToken, deviceID: deviceID)
@@ -161,6 +176,7 @@ actor AccountSession {
         try commit(proposed)
         signInAttempt = nil
         selectionGeneration += 1
+        return AccountSignInCommit(attemptID: attempt, userID: user.id, selectionGeneration: selectionGeneration)
     }
 
     private func refresh(_ account: SavedAccount) async throws -> AccountCredential {

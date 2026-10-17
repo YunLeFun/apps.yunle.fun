@@ -23,13 +23,13 @@ struct YunleFunApp: App {
         _diagnostics = StateObject(wrappedValue: diagnostics)
         _library = StateObject(wrappedValue: library)
         _runtime = StateObject(wrappedValue: runtime)
-        let accounts = AccountStore { id in
+        let accounts = AccountStore(identityDidChange: { id in
             diagnostics.activateAccount(id)
             diagnostics.record(.info, message: "account.scope.activated")
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
             library.updateCatalog(catalog.applications)
-        }
+        })
         _catalog = StateObject(wrappedValue: catalog)
         _accounts = StateObject(wrappedValue: accounts)
         runtime.configureAuthorization(accounts: accounts)

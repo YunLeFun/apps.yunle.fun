@@ -4,6 +4,9 @@ struct LoginView: View {
     var authorizationApplication: String? = nil
     var onSignedIn: (() -> Void)? = nil
     var continuationMessage: String? = nil
+    var continuation: AccountSignInContinuation? = nil
+    var onCommitted: ((AccountSignInSuccess) -> Void)? = nil
+    var onCancelled: (() -> Void)? = nil
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -15,6 +18,9 @@ struct LoginView: View {
     @State private var resendAt = Date.distantPast
     @State private var error: String?
     @State private var isBusy = false
+    @State private var authenticationCommitted = false
+    @State private var continuationCancelled = false
+    @State private var signInAttemptID: UUID?
     @State private var operation: Task<Void, Never>?
     @State private var captchaAction: Action?
     @FocusState private var focus: Field?
@@ -107,7 +113,9 @@ struct LoginView: View {
             .navigationTitle(authorizationApplication == nil && continuationMessage == nil ? "账号" : "登录并继续")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("取消") { cancel(); dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") { continuationCancelled = true; onCancelled?(); cancel(); dismiss() }
+                }
                 if focus != nil {
                     ToolbarItem(placement: keyboardDismissPlacement) {
                         Button { focus = nil } label: {
@@ -170,9 +178,14 @@ struct LoginView: View {
     private func resetChallenge() { challenge = nil; code = "" }
 
     private func cancel() {
+        // A successful identity publication can rebuild the presenting view
+        // before its await resumes. Keep that already committed task alive.
+        guard !authenticationCommitted else { operation = nil; return }
+        let attempt = signInAttemptID
+        signInAttemptID = nil
         operation?.cancel()
         operation = nil
-        Task { await accounts.cancelSignIn() }
+        if let attempt { Task { await accounts.cancelSignIn(attemptID: attempt) } }
     }
 
     private func perform(_ action: Action, captcha: String? = nil) {
@@ -191,13 +204,27 @@ struct LoginView: View {
                     resendAt = Date().addingTimeInterval(60)
                     focus = .code
                 case .signIn:
+                    let attempt = UUID()
+                    signInAttemptID = attempt
+                    let committed: (AccountSignInSuccess) -> Void = { success in
+                        authenticationCommitted = true
+                        onCommitted?(success)
+                    }
+                    let authenticated = { authenticationCommitted = true }
                     if method == .password {
-                        try await accounts.passwordSignIn(identifier: identifier, password: password, captcha: captcha)
+                        try await accounts.passwordSignIn(identifier: identifier, password: password, captcha: captcha,
+                                                          continuation: continuation, onCommitted: committed,
+                                                          attemptID: attempt, onAuthenticated: authenticated)
                     } else {
                         guard let challenge else { throw AccountError.invalidVerification }
-                        try await accounts.verify(challenge, code: code, captcha: captcha)
+                        try await accounts.verify(challenge, code: code, captcha: captcha,
+                                                  continuation: continuation, onCommitted: committed,
+                                                  attemptID: attempt, onAuthenticated: authenticated)
                     }
                     password = ""
+                    try Task.checkCancellation()
+                    authenticationCommitted = true
+                    guard !continuationCancelled else { return }
                     onSignedIn?()
                     dismiss()
                 }

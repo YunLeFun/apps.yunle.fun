@@ -40,7 +40,8 @@ final class NativeSupportUITests: XCTestCase {
         XCTAssertFalse(app.buttons["feedback.confirmation.upload"].exists)
         let login = app.buttons["feedback.login"]
         reveal(login, in: app); login.tap()
-        XCTAssertTrue(app.navigationBars["账号"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["登录并继续"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "上传前仍需重新预览并确认")).firstMatch.exists)
         app.buttons["取消"].tap()
         XCTAssertTrue(app.navigationBars["反馈与建议"].waitForExistence(timeout: 5))
         reveal(field, in: app, upward: false)

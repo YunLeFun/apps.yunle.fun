@@ -3,13 +3,18 @@ import SwiftUI
 struct AppRootView: View {
     @State private var selectedTab = AppTab.home
     @State private var workshopPath = NavigationPath()
+    @StateObject private var feedbackLogin = FeedbackLoginCoordinator()
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var accounts: AccountStore
+    @EnvironmentObject private var diagnostics: DiagnosticLogStore
 
     var body: some View {
         tabs
+            .environment(\.requestFeedbackLogin, { text in
+                feedbackLogin.begin(text: text, origin: accountBoundary, isRestoring: accounts.isRestoring)
+            })
             .background(RuntimePresentationAnchor(runtime: runtime, catalog: catalog, library: library).frame(width: 0, height: 0))
             .onOpenURL(perform: handleLink)
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
@@ -18,6 +23,26 @@ struct AppRootView: View {
             .alert(item: $runtime.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             }
+            .sheet(item: Binding(get: { feedbackLogin.login }, set: { if $0 == nil { feedbackLogin.presentationEnded() } }),
+                   onDismiss: {
+                if feedbackLogin.didDismiss(current: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                            proofIsCurrent: continuationIsCurrent) {
+                    selectedTab = .me
+                }
+            }) { intent in
+                LoginView(continuationMessage: "登录后返回反馈与建议，并保留问题描述。上传前仍需重新预览并确认。",
+                          continuation: intent.continuation,
+                          onCommitted: { success in
+                    feedbackLogin.committed(success, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                            proofIsCurrent: accounts.isCurrent(success))
+                }, onCancelled: { feedbackLogin.cancel() })
+                .environmentObject(accounts)
+                .onAppear { feedbackLogin.didPresent(intent.id) }
+            }
+            .onChange(of: accounts.identityGeneration) { _ in
+                updateFeedbackIdentity()
+            }
+            .onChange(of: accounts.selectionOperationGeneration) { _ in updateFeedbackIdentity() }
     }
 
     @ViewBuilder private var tabs: some View {
@@ -62,10 +87,35 @@ struct AppRootView: View {
         // Authentication callbacks belong to ASWebAuthenticationSession, never
         // to the navigation parser. No raw callback URL is stored or logged.
         guard let destination = NativeLink.destination(url) else { return }
+        feedbackLogin.cancel()
         selectedTab = .workshop
         workshopPath.append(destination)
     }
     private var me: some View {
-        NavigationStack { MeView(navigateTab: { selectedTab = $0 }) }.id(accounts.identityGeneration)
+        let stackBoundary = accountBoundary
+        return NavigationStack(path: Binding(
+            get: {
+                guard stackBoundary == accountBoundary else { return [] }
+                return feedbackLogin.path(current: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                          proofIsCurrent: continuationIsCurrent)
+            },
+            set: { feedbackLogin.updatePath($0, stack: stackBoundary, current: accountBoundary,
+                                            isUsable: accounts.user?.isUsable == true, proofIsCurrent: continuationIsCurrent) })) {
+            MeView(navigateTab: { selectedTab = $0 })
+                .navigationDestination(for: FeedbackResumeRoute.self) { route in
+                    if let text = feedbackLogin.text(for: route, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                                     proofIsCurrent: continuationIsCurrent) {
+                        FeedbackView(logs: diagnostics, accounts: accounts, initialIssueDescription: text).id(route.id)
+                    }
+                }
+        }.id(accounts.identityGeneration)
+    }
+    private var accountBoundary: AccountRequestBoundary {
+        .init(uid: accounts.user?.id, generation: accounts.identityGeneration)
+    }
+    private var continuationIsCurrent: Bool { feedbackLogin.success.map { accounts.isCurrent($0) } ?? false }
+    private func updateFeedbackIdentity() {
+        feedbackLogin.identityChanged(to: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                      proofIsCurrent: continuationIsCurrent)
     }
 }

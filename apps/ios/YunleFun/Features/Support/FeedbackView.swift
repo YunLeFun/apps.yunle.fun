@@ -14,12 +14,15 @@ struct FeedbackView: View {
     @State private var preparationError: String?
     @State private var completedUpload: DiagnosticUploadReceipt?
     @State private var showUploadSuccess = false
+    @Environment(\.requestFeedbackLogin) private var requestLogin
     @FocusState private var descriptionFocused: Bool
     @AccessibilityFocusState(for: .voiceOver) private var errorFocused: Bool
 
     init(logs: DiagnosticLogStore, accounts: AccountStore,
-         service: DiagnosticServing = DiagnosticService(), receiptDirectory: URL? = nil) {
+         service: DiagnosticServing = DiagnosticService(), receiptDirectory: URL? = nil,
+         initialIssueDescription: String = "") {
         self.logs = logs; self.accounts = accounts
+        _issueDescription = State(initialValue: initialIssueDescription)
         _upload = StateObject(wrappedValue: DiagnosticUploadStore(accounts: accounts, logs: logs,
             service: service, receiptDirectory: receiptDirectory))
     }
@@ -156,8 +159,14 @@ struct FeedbackView: View {
         Section {
             if accounts.user == nil {
                 Text("上传诊断日志需要登录；联系反馈无需登录。")
-                Button("登录后上传日志") { descriptionFocused = false; sheet = .login }
-                    .accessibilityIdentifier("feedback.login")
+                Button("登录后上传日志") {
+                    descriptionFocused = false
+                    upload.invalidateConfirmation()
+                    if let requestLogin { requestLogin(issueDescription) }
+                    else { sheet = .login }
+                }
+                .disabled(accounts.isRestoring)
+                .accessibilityIdentifier("feedback.login")
             } else {
                 Button("预览并上传日志") { prepareUpload() }
                     .disabled(accounts.isRestoring || upload.isUploading || selectedLogs.isEmpty || rangeError != nil

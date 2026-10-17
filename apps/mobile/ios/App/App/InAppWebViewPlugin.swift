@@ -719,7 +719,14 @@ enum HostIdentitySessions {
 
     static func clear(in cookieStore: WKHTTPCookieStore = WKWebsiteDataStore.default().httpCookieStore,
                       completion: @escaping () -> Void) {
+        let traceEnabled = ProcessInfo.processInfo.environment["YUNLEFUN_COOKIE_TRACE"] == "1"
+        let operation = UUID().uuidString
+        func trace(_ phase: String) {
+            if traceEnabled { print("[DEBUG-cookie] \(operation) \(phase) time=\(ProcessInfo.processInfo.systemUptime) main=\(Thread.isMainThread)") }
+        }
+        trace("read.request")
         cookieStore.getAllCookies { cookies in
+            trace("read.callback count=\(cookies.count)")
             let identityCookies = cookies.filter { cookie in
                 let host = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
                 return identitySessionCookies.contains { $0.host == host && $0.name == cookie.name }
@@ -729,8 +736,10 @@ enum HostIdentitySessions {
                 group.enter()
                 cookieStore.delete(cookie) { group.leave() }
             }
-            group.notify(queue: .main, execute: completion)
+            trace("delete.count=\(identityCookies.count)")
+            group.notify(queue: .main) { trace("completion"); completion() }
         }
+        trace("read.return")
     }
 }
 

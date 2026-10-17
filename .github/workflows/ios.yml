@@ -71,6 +71,7 @@ jobs:
       - name: Native unit, integration and guest UI tests
         env:
           YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+          TEST_RUNNER_YUNLEFUN_COOKIE_TRACE: '1'
         run: |
           set -o pipefail
           xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
@@ -82,10 +83,8 @@ jobs:
             -collect-test-diagnostics never \
             -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
             -maximum-test-execution-time-allowance 180 \
-            -only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithLargestAccessibilityText \
-            -only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithStandardText \
-            -only-testing:YunleFunTests/HomeLayoutVisualTests/testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable \
-            -test-iterations 2 -test-repetition-relaunch-enabled YES \
+            -only-testing:YunleFunTests/HomeLayoutVisualTests \
+            -test-iterations 4 -test-repetition-relaunch-enabled YES \
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
             2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
 

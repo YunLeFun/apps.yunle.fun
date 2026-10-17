@@ -284,11 +284,22 @@ private final class HomeStateFixture {
     }
 
     func open(_ app: CloudApplication, test: XCTestCase) async throws -> WebViewController {
+        print("[DEBUG-cookie] wait.begin time=\(ProcessInfo.processInfo.systemUptime) applicationState=\(UIApplication.shared.applicationState.rawValue)")
         let preparationDeadline = Date().addingTimeInterval(5)
         while runtime.isIdentityCleanupPending {
             guard Date() < preparationDeadline else {
                 recordOpenState(app, stage: "initial-identity-cleanup-timeout", test: test)
                 XCTFail("The fixture's initial identity cleanup did not finish before opening")
+                print("[DEBUG-cookie] wait.failed time=\(ProcessInfo.processInfo.systemUptime)")
+                if #available(iOS 17.0, *) {
+                    let policy = XCTestExpectation(description: "post-failure cookie policy probe")
+                    WKWebsiteDataStore.default().httpCookieStore.getCookiePolicy { _ in
+                        print("[DEBUG-cookie] policy.callback time=\(ProcessInfo.processInfo.systemUptime)")
+                        policy.fulfill()
+                    }
+                    let result = await XCTWaiter.fulfillment(of: [policy], timeout: 2)
+                    print("[DEBUG-cookie] policy.verdict=\(result.rawValue) pending=\(runtime.isIdentityCleanupPending)")
+                }
                 throw NSError(domain: "HomeLayoutVisualTests", code: 5)
             }
             try await Task.sleep(nanoseconds: 50_000_000)

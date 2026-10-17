@@ -2,6 +2,8 @@
 
 SwiftUI 主壳，系统组件优先，云应用复用现有 UIKit / WKWebView 运行时。使用最新 SDK 编译，最低部署版本暂为 iOS 16.0；同时支持 iPhone 和 iPad。完整目标见 [原生改造 Goal](../../docs/dev/ios-native-migration.md) 和 [原生 UI 规范](../../docs/ui/ios-native.md)。
 
+当前测试范围按用户 2026-10-17 的后续指令调整为仅 iOS 模拟器，不再安排真机安装或验证；已有设备记录作为历史证据保留。功能、真实服务、数据与兼容目标继续推进，硬件专属覆盖明确记录为当前范围不执行。
+
 ## 开发
 
 提交的 `YunleFun.xcodeproj` 可直接用 Xcode 打开。修改 `project.yml` 后用 XcodeGen 重新生成；首次实施使用 XcodeGen 2.46.0 与 Xcode 27.0。
@@ -40,7 +42,7 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 原生自动检查使用 `.github/workflows/ios.yml`：官方 `xcode-27` 预览 runner 上固定 Xcode 27.0，解析锁定包、新建 iOS 27 模拟器、运行日常测试并编译 Release 模拟器产物。它不注入线上账号或签名凭据，也不发布构建。公开仓库决定与实际运行记录见 [CI 与开源调研](../../docs/dev/ios-ci-and-open-source.md)。
 
-真机使用独立 Benchmark 标识与开发签名，不沿用模拟器的 ad-hoc 签名参数。签名、安装、明确选取的公开旅程及真机 / 模拟器证据边界见[真机验证](../../docs/dev/ios-device-validation.md)。2026-10-17 已完成 iPhone 15 Pro / iOS 26.6.1 的签名、安装与原生启动，以及本地 Release 归档；XCTest 控制通道尚未建立，真机 UI / 无障碍用例仍未运行。
+真机使用独立 Benchmark 标识与开发签名，不沿用模拟器的 ad-hoc 签名参数。2026-10-17 已完成 iPhone 15 Pro / iOS 26.6.1 的签名、安装、原生启动和本地 Release 归档；USB 上的四 Tab、云空调截图就绪 / 会话、AI 春联访客取消均已分次通过。四 Tab 系统审计仍有对比度失败，完整设备 / 账号验收继续待办；复现方式与证据边界见[真机验证](../../docs/dev/ios-device-validation.md)。
 
 ## 当前能力与缺口
 
@@ -63,6 +65,8 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 原生评价 / 举报页面与协议已实现，真实公开读取和访客取消已验证；真实写入 / 审核 / 个人记录仍待联调，详见[评价与举报](../../docs/dev/ios-community.md)。个人工坊的原生创建 / 设置 / 坊客管理 / 加入 / 离开 / 二维码分享已接入协议，访客入口已验证；真实写入和私有工坊内容仍待联调，详见[个人工坊](../../docs/dev/ios-workshops.md)。原生相机 / 相册扫码与应用 / 工坊链接接收已实现，iOS 27 / 18.6 的相册识别和 URL 接收已验证，硬件相机及正式 Universal Link 分发待验，详见[扫码与链接](../../docs/dev/ios-scanner.md)。应用管理与发布已有原生列表 / 编辑、版本保存、市场投稿、下架、图标上传协议和分账号本机草稿；真实写入与私有预览仍待联调，详见[应用管理与发布](../../docs/dev/ios-publishing.md)。原生图标已支持当前公开云图标解析、深色变体、独立 SVG 与有界缓存，真实 SVG 在 iOS 27 / 18.6 验证通过；全目录检查仍有 2 个远端 404，详见[图标资产](../../docs/dev/ios-icon-assets.md)。钱包 / 会员、账户 HTTP 与原生 StoreKit 2 购买 / 归属 / 恢复流程已接入；iOS 27 / 18.6 的实际本地 StoreKit 测试与访客旅程通过，iOS 27 三个受管账号的真实钱包与流水读取通过，Sandbox 尚未验收，见[钱包与会员](../../docs/dev/ios-wallet.md)。原生应用获取新增统一条件页、云币确认及服务端核价 / 已购查询，接口已进入受限分支预览，正式域名与真实账号购买和使用待联调，见[应用获取](../../docs/dev/ios-acquisition.md)。云同步与发布的真实账号闭环、付费应用获取验收、Sandbox、完整图标资产验收、其余深链及旧版数据导入尚未完成。寻乐当前从真实目录展示官方和公开作品，没有把目录顺序冒充编辑推荐或热门榜单。
 
 最新系统的 Tab、导航、搜索、表单和菜单采用系统视觉。独立原生 WebRuntime 已使用 UINavigationController / 系统标题菜单和导航项，更多操作由 SwiftUI 列表与弹层提供；多层弹窗清理、连续切换和会话复用已有回归。完整 VoiceOver、iPad、最低系统、真机与性能仍待验，见[运行时导航](../../docs/dev/ios-runtime-navigation.md)。正式签名、隐私声明、构建号与发布材料在候选版本阶段统一核验；当前不上传或提审。
+
+应用详情在辅助字号下让图标与名称上下排列，获取 / 试用按钮按实际宽度使用系统横排或纵排。保留完整内容、动态字体、状态和原操作，窄窗口的浅深色样例与真机大字号截图见[详情动态字号](../../docs/dev/ios-detail-accessibility.md)。
 
 旧版导入原型已接入“我 → 设置 → 旧版数据导入”。它读取明确的本地数据键、准备受限副本，并在用户确认目标后备份和替换当前云居；不导入旧凭据，不根据本机缓存授予会员或购买权益。导入有目标绑定、身份代次与摘要保护，未知应用引用继续保留。对应单元、实际 WebKit 同源读取和合成访客 UI 确认 / 重启旅程已建立；正式旧版覆盖升级、其余设置与历史格式仍未完成，见[升级导入](../../docs/dev/ios-upgrade-migration.md)。
 

@@ -1,8 +1,10 @@
 # 原生系统辅助功能审计
 
+> 后续按用户 2026-10-17 的新指令仅使用 iOS 模拟器。下方真机结果属于历史记录，不再作为继续推进的设备前置条件；模拟器中的对比度、裁切和完整状态矩阵继续处理。
+
 `NativeAccessibilityAudits` 使用 Apple 的 [XCUIAccessibilityAuditType](https://developer.apple.com/documentation/xcuiautomation/xcuiaccessibilityaudittype) 与 `performAccessibilityAudit`，检查对比度、识别、点击区域、描述、动态字体、文字裁切和 trait。使用 `.all`，问题处理器只附加诊断并返回 `false`，保留 XCTest 失败；没有为通过审计而忽略某类问题。
 
-真机补充：用户完成开发账号配置后，2026-10-17 的 iPhone 15 Pro / iOS 26.6.1 已成功签名、安装和启动独立 Benchmark。两次 XCTest 在控制连接建立前退出，尚未执行系统审计，不能用启动成功替代真机无障碍验收；后续 USB 对照及原始记录见[真机验证](./ios-device-validation.md)。下方模拟器结果保持原有范围。
+真机补充：2026-10-17 的 iPhone 15 Pro / iOS 26.6.1 已成功签名、安装和启动独立 Benchmark。两次无线 XCTest 在控制连接建立前退出；USB 对照随后开始执行，四 Tab 与访客旅程通过。真机完整浅色审计为 **1 通过 / 7 失败 / 0 跳过**（13 条对比度），深色为 **2 通过 / 6 失败 / 0 跳过**（14 条对比度）；两者均无裁切 / 动态字号报告，完整集合仍失败。逐页表格、访客云居差异和原始记录见[真机验证](./ios-device-validation.md#无障碍与后续范围)。下方 iOS 27 模拟器结果保持原有范围。
 
 ## 模拟器增量验证 · 2026-10-17
 

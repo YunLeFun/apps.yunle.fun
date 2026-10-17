@@ -304,3 +304,11 @@ Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功
 同一远端 run 的[第二轮](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39071245366/attempts/2)自然结束并成功。仍为来源 `c726d64`、checkout `10433e0`，按原日志完成用例名独立去重为 **423 单元 / 集成 + 10 UI，共 433 通过 / 0 失败 / 0 跳过**；Release 模拟器编译与独占模拟器清理成功。原失败没有因此消失，不能称已定位 WebKit 根因或验证尚未推送的后续改动。
 
 第一轮日志、job 元数据、xcresult 和全部附件位于持久目录的 `native-ci-c726d64-attempt1-*`，第二轮日志、元数据和独立计数为 `native-ci-c726d64-attempt2-*`。API 记录第二轮 triggering actor 为 `YunYouJun`，本轮没有取消或重新发起该 run；新提交在它自然结束后推送，避免 concurrency 自动取消原证据。
+
+## 账号保护与候选提交的完整 CI · 2026-10-18
+
+来源提交 `6c968f61ac1d50aad373fec6b4d069f13162f292` 的 [Native CI 39075735071](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39075735071) 首轮自然结束并成功，实际 checkout 为 `6bd49f156e1d6c5acb4fd9d611010c1650c6be14`。原始日志独立核对为 **426 单元 / 集成 + 10 UI，共 436 通过 / 0 失败 / 0 跳过**；Release 模拟器编译、隔离模拟器删除与同提交七项常规检查全部成功，可选作者 Benchmark 按条件跳过。
+
+原日志有 436 条开始记录和 435 条完整方法终态。另一条作者版本权限方法的终态被 WebKit 进程日志从方法名中间插入，原始 zip 同样如此；核对相邻的原前缀与 `tions]' passed (0.018 seconds).` 后精确恢复该条，数量与 XCTest 套件汇总一致。未改写原日志，原始 zip、文本、元数据及含这两行原文的独立计数保存为 `native-ci-6c968f6-*`。此次成功没有上传失败用 xcresult，不能描述为结果包逐项解析。
+
+此执行覆盖新增资料会话保护、键盘分阶段等待和 WebKit activity 诊断；opt-in 真实账号 Benchmark 仍以各自结果为准。先前 WebKit 异常、作者全矩阵及系统无障碍失败继续保留，单次全绿不等于全部稳定性问题已经定位或关闭。

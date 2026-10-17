@@ -225,3 +225,27 @@ Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功
 去掉重复参数后，两个 CompactHome 前序加目标用例仍为 2 通过 / 1 失败；原五秒等待为 3854→8860ms，97 次轮询、最大间隔 54ms。op1–3 读取空集合并完成，目标 op4 在 2510ms 请求读取、2511ms 方法返回，至 8860ms 仍未进入回调。删除任一 CompactHome 前序的两例对照分别各 2 通过 / 0 失败。这只缩小了触发条件，间歇行为尚未统计验证到最小复现，不据此实施修复或放宽预算。
 
 原日志、逐次执行和探针补丁保存于仓库外 `/tmp/yunlefun-ios-native-continuation-20261017`。这些结果来自明确的 `18c8e86` 诊断基线，不能冒充后续作者页改动的完整验收。
+
+## 作者主页提交的完整 CI · 2026-10-17
+
+头提交 `9181f2160905aa721949b7142a15c7684ba98e71` 的[原生 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39028849489)终态成功。该 `pull_request` 运行的实际 checkout 是合并提交 `095632a2c3a8b105f8ca2b43b2f2fc3783dd8545`，日志明确记录将该头提交合入 `c741d0200fe4a86638f50145395ae291ba305a9a`；没有用其他头提交的绿色结果替代本次证据。
+
+完整日志独立解析为 **405 个不同测试方法，395 单元 / 集成 + 10 UI，405 通过 / 0 失败 / 0 跳过**。810 条开始 / 通过事件中没有重复开始、重复终态或缺失终态，两组 XCTest 套件摘要与逐例计数一致，并记录 `TEST SUCCEEDED`。Xcode 27.0（27A266a）/ iOS 27.0 上的 Release 模拟器编译记录 `BUILD SUCCEEDED`；本次独占模拟器 `B6F3D733-1746-4938-953F-23C7C89913B0` 的删除命令与清理步骤成功。shutdown 命令保留 `|| true`，日志未额外查询删除后的设备列表，因此不把它写成单独断言 shutdown 成功。失败附件上传按条件跳过，不是 XCTest 跳过。
+
+同一完整 SHA 的 [Web / 移动端与 Chromium](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39028849501)、[macOS / Ubuntu / Windows 桌面](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39028849434)及 GitGuardian 全部成功，合计 **7 项 check-runs 均为 completed / success**。传统 commit statuses 接口没有 context；其空集合默认 `pending` 不代表另有待运行检查。
+
+这轮仍有 **32 条 appearance transition 不平衡消息**：按串行日志中最近的测试开始事件归属，`NativeRuntimeSessionTests` 11 条、`NativeWebNavigationTests` 10 条，其余布局、菜单、导入和二维码样例合计 11 条。该归属只提供发生上下文，不证明生产故障来源；生命周期问题继续保留，不能由绿色检查关闭。另外有 9 条编译 / 工具 warning：5 条测试目标最低 iOS 16 与 XCTest iOS 17 库的链接版本提示，4 条无 AppIntents 依赖时的元数据提取提示。日志另有 WebKit / RBS、系统 AX 重复类、模型预检和 debugger `noURL` 等诊断，完整行号与计数独立归档，不计作 XCTest 失败，也未宣称已解决。
+
+完整原生 / Web / 桌面日志、原生原始日志 zip、405 个方法的开始 / 终态行号、全部检查 JSON、warning 归属和 SHA-256 保存在仓库外 `/tmp/yunlefun-ios-native-continuation-20261017/ci-9181f21`。当前本机未提交的 `DeveloperProfileBenchmarks` 及其他显式 Benchmark UI / 系统无障碍项目不在该 SHA 的这次日常集合中，不能用 405 项作为其通过证据；实际界面与辅助功能验收仍以各自记录为准。此前 Cookie、键盘和其他失败记录继续保留，原生改造 Goal 尚未据本次 CI 宣告完成。
+
+## 作者页显式 UI 验收 CI
+
+`Native iOS CI` 新增 `ci:ios-author-benchmark` 标签门禁。对当前 PR 添加该标签后，同步提交会同时运行原日常检查和独立的浅色 / 深色两格作者验收；单独添加这个标签只运行作者验收。无关标签事件的两个 job 都跳过，并使用独立并发组，不取消或替换仍在运行 / 排队的有效检查。指定标签及正常同步仍沿用原 PR 并发组，会取消同组旧执行；有需要保留的运行时不要反复添加标签。
+
+每格在 Xcode 27 / iOS 27 新建独占 iPhone 模拟器，使用现有 `YunleFunBenchmarks` / Benchmark 配置，串行执行作者页标准 / 最大辅助字号的普通触摸和实际 VoiceOver 四个方法。合计是 **4 个不同方法 × 2 外观 = 8 次执行**，正常带标签同步新增两项检查，共九项；不是新增八个不同方法，也不能与日常计数混淆。每例原 120 秒时限和 180 秒上限保留，无重试；逐格要求四个方法各开始、通过一次，任何跳过、缺项、重复或失败都不能验收。
+
+仅使用匿名公开作者页面与新建空访客云居，不选择物理设备或已有模拟器，不运行真实登录、反馈 canary、获取、购买或云应用。开关只含固定 opt-in、外观与该格新建模拟器 UUID，不传凭据；继续只读仓库权限、固定 Actions、锁包和不持久化 checkout 凭据。产品仍支持 iOS 16，iOS 27 只用于本次实际 VoiceOver API。
+
+成功与失败均保留完整 xcresult、原始测试日志及方法计数 JSON 三天，不上传构建产品或依赖缓存；完整朗读、AX 和截图须下载后复核，不能以方法计数代替实际无障碍验收。每格最后尝试关闭并删除自己的模拟器，分别核对步骤终态。带标签的验收结束后可移除标签，使后续提交恢复原日常范围。
+
+当前默认分支没有 `ios.yml`；工作流虽已被 API 登记为 active，不能仅凭登记状态保证手动 dispatch 可用，因此使用已经正常工作的 PR 触发，不为注册入口合并草稿。[GitHub 手动运行要求](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)要求工作流存在于默认分支。以上是可复现执行入口，实际结果按相应提交与运行 ID 记录；静态 actionlint 通过不等于八次旅程已通过。

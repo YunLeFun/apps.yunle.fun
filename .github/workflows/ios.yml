@@ -9,6 +9,7 @@ on:
       - apps/mobile/ios/App/App/**
       - .github/workflows/ios.yml
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     branches: [main]
     paths:
       - apps/ios/**
@@ -19,11 +20,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: native-ios-${{ github.ref }}
+  # Unrelated label events must not replace a pending or active verification.
+  group: native-ios-${{ github.event.action == 'labeled' && github.event.label.name != 'ci:ios-author-benchmark' && github.run_id || github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
+    if: github.event_name != 'pull_request' || github.event.action != 'labeled'
     name: Native iOS · Xcode 27
     # GitHub's standard Xcode 27 image is currently a public preview.
     runs-on: xcode-27
@@ -107,6 +110,128 @@ jobs:
           retention-days: 3
 
       - name: Remove isolated simulator
+        if: always() && steps.simulator.outputs.id != ''
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+        run: |
+          xcrun simctl shutdown "$YLF_CI_SIMULATOR" || true
+          xcrun simctl delete "$YLF_CI_SIMULATOR"
+  author-benchmarks:
+    name: Author Benchmark · ${{ matrix.appearance }}
+    if: >-
+      github.event_name == 'pull_request' &&
+      contains(github.event.pull_request.labels.*.name, 'ci:ios-author-benchmark') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'ci:ios-author-benchmark')
+    runs-on: xcode-27
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        appearance: [light, dark]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Verify Xcode and locked Benchmark packages
+        env:
+          YLF_CI_OUTPUT: ${{ runner.temp }}/yunlefun-author-benchmark
+        run: |
+          xcodebuild -version
+          mkdir -p "$YLF_CI_OUTPUT"
+          echo "YLF_CI_OUTPUT=$YLF_CI_OUTPUT" >> "$GITHUB_ENV"
+          xcodebuild -resolvePackageDependencies \
+            -project apps/ios/YunleFun.xcodeproj -scheme YunleFunBenchmarks \
+            -onlyUsePackageVersionsFromResolvedFile \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages"
+          git diff --exit-code -- apps/ios/YunleFun.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+      - name: Create isolated author Benchmark simulator
+        id: simulator
+        run: |
+          python3 - <<'PYCODE'
+          import os
+          import subprocess
+          simulator = subprocess.check_output([
+              "xcrun", "simctl", "create", "YunleFun Author Benchmark",
+              "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+              "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+          ], text=True).strip()
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("id=" + simulator + "\n")
+          print("Created isolated author Benchmark simulator: " + simulator)
+          subprocess.run(["xcrun", "simctl", "bootstatus", simulator, "-b"], check=True)
+          PYCODE
+
+      - name: Public author touch and VoiceOver journeys
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+          TEST_RUNNER_YLF_BENCHMARK_TARGET: native
+          TEST_RUNNER_YLF_DEVELOPER_PROFILE_UI: '1'
+          TEST_RUNNER_YLF_VOICEOVER_VALIDATION: '1'
+          TEST_RUNNER_YLF_DEVELOPER_PROFILE_VOICEOVER: '1'
+          TEST_RUNNER_YLF_DEVELOPER_PROFILE_FRESH_GUEST_FIXTURE: '1'
+          TEST_RUNNER_YLF_OWNED_BENCHMARK_SIMULATOR_UDID: ${{ steps.simulator.outputs.id }}
+          TEST_RUNNER_YLF_ACCESSIBILITY_APPEARANCE: ${{ matrix.appearance }}
+        run: |
+          set -o pipefail
+          xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFunBenchmarks \
+            -configuration Benchmark -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
+            -derivedDataPath "$YLF_CI_OUTPUT/build" \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
+            -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
+            -resultBundlePath "$YLF_CI_OUTPUT/author-tests.xcresult" \
+            -only-testing:YunleFunBenchmarksTests/DeveloperProfileBenchmarks/testAnonymousAuthorProfileAtStandardText \
+            -only-testing:YunleFunBenchmarksTests/DeveloperProfileBenchmarks/testAnonymousAuthorProfileAtLargestText \
+            -only-testing:YunleFunBenchmarksTests/NativeVoiceOverTests/testDeveloperProfileAtStandardText \
+            -only-testing:YunleFunBenchmarksTests/NativeVoiceOverTests/testDeveloperProfileAtLargestText \
+            -collect-test-diagnostics never \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
+            -maximum-test-execution-time-allowance 180 \
+            -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
+            2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
+
+      - name: Require all four selected methods with no skips
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          import os
+          import re
+          from pathlib import Path
+          expected = {
+              ("DeveloperProfileBenchmarks", "testAnonymousAuthorProfileAtStandardText"),
+              ("DeveloperProfileBenchmarks", "testAnonymousAuthorProfileAtLargestText"),
+              ("NativeVoiceOverTests", "testDeveloperProfileAtStandardText"),
+              ("NativeVoiceOverTests", "testDeveloperProfileAtLargestText"),
+          }
+          root = Path(os.environ["YLF_CI_OUTPUT"])
+          pattern = r"Test Case '-\[YunleFunBenchmarksTests\.(\w+) (\w+)\]' (started|passed|failed|skipped)"
+          events = re.findall(pattern, (root / "tests.log").read_text())
+          started = [(suite, method) for suite, method, status in events if status == "started"]
+          passed = [(suite, method) for suite, method, status in events if status == "passed"]
+          unsuccessful = [event for event in events if event[2] in {"failed", "skipped"}]
+          summary = {"started": started, "passed": passed, "failedOrSkipped": unsuccessful}
+          (root / "selected-methods.json").write_text(json.dumps(summary, indent=2) + "\n")
+          if len(started) != 4 or set(started) != expected or len(passed) != 4 or set(passed) != expected or unsuccessful:
+              raise SystemExit("Expected exactly four distinct selected methods, each started and passed once, with no skips")
+          print("Verified four distinct author methods: four passed, zero failed, zero skipped")
+          PYCODE
+
+      - name: Preserve complete public author evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: native-ios-author-${{ matrix.appearance }}-${{ github.event.pull_request.head.sha }}
+          path: |
+            ${{ runner.temp }}/yunlefun-author-benchmark/*.log
+            ${{ runner.temp }}/yunlefun-author-benchmark/*.json
+            ${{ runner.temp }}/yunlefun-author-benchmark/author-tests.xcresult
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Remove isolated author Benchmark simulator
         if: always() && steps.simulator.outputs.id != ''
         env:
           YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}

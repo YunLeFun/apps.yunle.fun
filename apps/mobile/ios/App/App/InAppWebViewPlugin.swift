@@ -710,6 +710,7 @@ enum WebViewSessionPolicy {
 
 /// Shared by the Capacitor compatibility shell and the native SwiftUI shell.
 /// Web input cannot choose the identity cookies this method deletes.
+@MainActor
 enum HostIdentitySessions {
     private static let identitySessionCookies: [(host: String, name: String)] = [
         ("play.yunle.fun", "__Host-ylf_play_session"),
@@ -717,8 +718,16 @@ enum HostIdentitySessions {
         ("cms.yunle.fun", "h3"),
     ]
 
-    static func clear(in cookieStore: WKHTTPCookieStore = WKWebsiteDataStore.default().httpCookieStore,
+    static func clear(in dataStore: WKWebsiteDataStore = .default(),
                       completion: @escaping () -> Void) {
+        // Identity resets also run before any browser exists. Keep a WebKit
+        // context for this store alive through both enumeration and deletion;
+        // a detached cookie store can stall across iOS process suspension.
+        // The context never loads a page or joins the visible session pool.
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = dataStore
+        let context = WKWebView(frame: .zero, configuration: configuration)
+        let cookieStore = dataStore.httpCookieStore
         cookieStore.getAllCookies { cookies in
             let identityCookies = cookies.filter { cookie in
                 let host = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
@@ -729,7 +738,9 @@ enum HostIdentitySessions {
                 group.enter()
                 cookieStore.delete(cookie) { group.leave() }
             }
-            group.notify(queue: .main, execute: completion)
+            group.notify(queue: .main) {
+                withExtendedLifetime(context) { completion() }
+            }
         }
     }
 }
@@ -1310,10 +1321,12 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Apps 退出或切换账号后清除第一方 HttpOnly BFF cookie，并通知保活页面刷新身份。
     @objc func clearIdentitySessions(_ call: CAPPluginCall) {
-        HostIdentitySessions.clear { [weak self] in
-            self?.sessions
-                .forEach { $0.notifyHostIdentityChanged() }
-            call.resolve()
+        DispatchQueue.main.async { [weak self] in
+            HostIdentitySessions.clear { [weak self] in
+                self?.sessions
+                    .forEach { $0.notifyHostIdentityChanged() }
+                call.resolve()
+            }
         }
     }
 

@@ -47,7 +47,7 @@ final class HostIdentitySessionsTests: XCTestCase {
         let before = try await cookies(in: store)
         XCTAssertEqual(before.count, 6)
         XCTAssertEqual(Set(before.map(identity)), expected)
-        try await callback("clear allowed identity cookies") { done in HostIdentitySessions.clear(in: store, completion: done) }
+        try await callback("clear allowed identity cookies") { done in HostIdentitySessions.clear(in: dataStore, completion: done) }
         let after = try await cookies(in: store)
         let remaining = Set(after.map(identity))
         XCTAssertEqual(remaining, [

@@ -28,7 +28,7 @@ final class SupportViewTests: XCTestCase {
         XCTAssertEqual(fixture.logs.entries.count, 1)
         let original = fixture.logs.entries
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
-        let screen = try await fixture.readScreen(named: "support-signed-in-preview-entry", containing: "预览并上传日志", scrollToFind: true, test: self)
+        let screen = try await fixture.readScreen(named: "support-signed-in-preview-entry", containing: "预览并上传日志", scrollToFind: true, fromBottom: true, test: self)
         XCTAssertTrue(screen.contains("预览并上传日志"))
         XCTAssertFalse(fixture.hasPresentedSheet, "Rendering FeedbackView must not automatically open consent or a contact composer")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty, "Rendering the upload entry must not submit logs")
@@ -43,9 +43,11 @@ final class SupportViewTests: XCTestCase {
         let corrupt = try Data(contentsOf: file)
         // The retained screenshot shows the full sentence; Vision can omit the
         // preceding grammatical particle. Keep the complete read-failure clause.
+        // This is the final section. Materialize the native list bottom before
+        // OCR so scanning unrelated contact rows cannot consume its deadline.
         let expected = "支持编号暂时无法读取"
         let text = try await fixture.readScreen(named: "support-corrupt-receipt-read-failure",
-            containing: expected, scrollToFind: true, test: self)
+            containing: expected, scrollToFind: true, fromBottom: true, test: self)
         XCTAssertTrue(text.contains(expected), "A missing usable receipt must not hide its disk-read failure")
         XCTAssertEqual(try Data(contentsOf: file), corrupt, "Displaying a receipt error must retain the damaged evidence")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)

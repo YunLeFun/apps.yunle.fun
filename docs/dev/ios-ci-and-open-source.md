@@ -270,3 +270,17 @@ Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功
 完整日常日志 / xcresult 和作者日志 / artifact 元数据分别保存在本机 `ci-c358899-daily`、`ci-c358899-author-benchmarks`。用户随后将本轮 Goal 收敛为可体验模拟器版，作者全矩阵和完整迁移验收后移，不再追加探针或重跑来扩张交付前置。作者标签已移除，后续不自动继续该矩阵。
 
 同一运行时代码的有限核心体验另在本机实际模拟器 **2 通过 / 0 失败 / 0 跳过**，包括真实发现详情、免费获取、云应用网页绘制、收起 / 恢复、结束与返回；七张原始截图已核对。该结果与上述日常 / 作者失败分别记录，详见[模拟器体验交付](./ios-simulator-preview.md)。
+
+## 来源同步提交的完整 CI · 2026-10-18
+
+来源提交 `e7ea1cd6e0d00bbad58273c2510322b3ba28e38d` 的 [Native CI 39067045605](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39067045605) 已自然结束。实际 checkout 为 PR 合并提交 `d9b80434143e88385336cd3139b63bdb3e38621a`，原 xcresult 独立解析为 **433 个不同用例，431 通过 / 2 失败 / 0 跳过**，无结果包运行时警告。423 项单元 / 集成中 421 通过，全部 10 条 UI（含三条键盘旅程）通过。
+
+失败为首页 `testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable` 的初次 Cookie 清理五秒期限，以及反馈页 `testCorruptSavedReceiptRendersReadFailureWithoutReplacingEvidence` 的文字扫描。首页方法随后产生 `InvalidTransition` 事件，日志的三次断言 / 异常失败属于两个用例，不能写成三个失败用例。Release 跳过，失败附件上传和独占模拟器删除成功；Web、三种桌面构建、Chromium smoke 和 GitGuardian 成功，不代替原生全绿。
+
+反馈原始 viewport scan 记录六次截图：最后采样 offset.y=1568、contentSize.height=2648.83、viewport.height=800，下一步请求底部 offset.y=1848.83 后已到原十秒期限，没有再采样。截图显示日志范围和数量，尚未显示末尾支持编号错误。这支持扫描未到目标的夹具问题；不是用 OCR 文案匹配放宽来消除失败。
+
+两个待检查目标都位于反馈表单末尾，现复用已有 `fromBottom` 原生列表定位，再读取真实截图文字。保留十秒期限、完整错误子句、未发送 HTTP 和损坏原文件逐字节不变断言；产品 `FeedbackView` 未修改。Cookie 路径接入独立 [PR #49](https://github.com/YunLeFun/apps.yunle.fun/pull/49) 已验证的上下文生命周期修复，见[Cookie 对照与边界](./ios-identity-cookie-cleanup.md)。集成后的专项与新 CI 按自身执行结果验收，原失败保留。
+
+集成后在本任务隔离 iPhone / iOS 27 运行完整 `HomeLayoutVisualTests`、`HostIdentitySessionsTests` 和 `SupportViewTests`，**17 通过 / 0 失败 / 0 跳过**，无结果包运行时警告（`ci-repairs-tests.xcresult`）。反馈两条目标均在底部定位后的首张截图读到完整文字；已逐图复核支持编号错误与上传预览入口。原文件保留、未提交日志及真实 Cookie 删除 / 保留断言全部通过。Cookie 原三条提交以 cherry-pick 保留在当前分支，没有合并或关闭 PR #49；后续完整 CI 仍需独立确认。
+
+原日志、完整结果包与三份反馈附件保存于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/native-ci-e7ea1cd-artifact`、`native-ci-e7ea1cd-support-failure`。初次只导出与失败事件直接关联的附件得到空列表，随后按失败方法 ID 导出其 keepAlways 附件；空导出不代表没有截图证据。

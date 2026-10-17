@@ -73,7 +73,7 @@ PR48 头 `c11b1e4` 的 [39061035624](https://github.com/YunLeFun/apps.yunle.fun/
 
 原收起后截图中键盘与导航栏收起按钮均已消失，AX 树也不存在 `Keyboard` 或 `login.dismiss-keyboard`；密码字段仅保留测试字符的安全掩码。活动记录显示收起后仍重查原先 `x=0, y=590, width=402, height=226` 的键盘元素并发生内部 retry，随后查询已经移除的按钮；五秒 predicate 预算在这些查询中耗尽。该证据指向已移除元素的测试查询开销，不足以证明产品未收起键盘。
 
-改为查询当前按钮数量与 `keyboards.allElementsBoundByIndex`：仍要求收起操作不存在，所有残留键盘与全部目标输入按键都不可交互。保持原五秒时限、显示时的屏幕范围 / 按键可点击 / 收起按钮位置断言，不添加点击重试、不改 LoginView、不过滤告警。此修正在专用 iOS 27 模拟器的三条键盘 UI 中全部通过：标准字号密码、标准字号手机号和最大辅助字号手机号均执行实际输入与收起，原五秒时限保持。结果为 `source-and-keyboard-tests.xcresult`（同包另有 60 项云居回归，总计 63 通过 / 0 失败 / 0 跳过），位于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/`。这次是本机专项通过；远端 CI 尚未针对该未提交改动重跑，原失败记录保留。
+改为查询当前按钮数量与 `keyboards.allElementsBoundByIndex`：仍要求收起操作不存在，所有残留键盘与全部目标输入按键都不可交互。保持原五秒时限、显示时的屏幕范围 / 按键可点击 / 收起按钮位置断言，不添加点击重试、不改 LoginView、不过滤告警。此修正在专用 iOS 27 模拟器的三条键盘 UI 中全部通过：标准字号密码、标准字号手机号和最大辅助字号手机号均执行实际输入与收起，原五秒时限保持。结果为 `source-and-keyboard-tests.xcresult`（同包另有 60 项云居回归，总计 63 通过 / 0 失败 / 0 跳过），位于 `/Users/yunyou/.codex/artifacts/ios-native-goal-20261018/`。随后提交 `e7ea1cd` 的 [Native CI 39067045605](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39067045605) 中三条键盘用例及全部 10 条 UI 均通过；完整执行仍为 431 通过 / 2 失败 / 0 跳过，失败是首页初次 Cookie 清理和反馈页扫描，Release 跳过。键盘本次通过不改写先前失败，也不把整轮 CI 记为成功。
 
 Apple 对 [allElementsBoundByIndex](https://developer.apple.com/documentation/xcuiautomation/xcuielementquery/allelementsboundbyindex) 的定义为立即执行当前查询并返回按索引绑定的结果；这里用空匹配集表达元素已经消失，避免重复解析旧节点。
 

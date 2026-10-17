@@ -718,7 +718,11 @@ enum HostIdentitySessions {
         ("cms.yunle.fun", "h3"),
     ]
 
-    static func clear(in dataStore: WKWebsiteDataStore = .default(),
+    static func clear(completion: @escaping () -> Void) {
+        clear(in: .default(), completion: completion)
+    }
+
+    static func clear(in dataStore: WKWebsiteDataStore,
                       completion: @escaping () -> Void) {
         // Identity resets also run before any browser exists. Keep a WebKit
         // context for this store alive through both enumeration and deletion;

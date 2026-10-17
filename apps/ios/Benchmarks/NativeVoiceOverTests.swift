@@ -41,6 +41,10 @@ final class NativeVoiceOverTests: XCTestCase {
     func testDiscoveryApplicationAtLargestText() throws { try checkDiscoveryApplication(large: true, featured: false) }
     func testApplicationDetailAtStandardText() throws { try checkApplicationDetail(large: false) }
     func testApplicationDetailAtLargestText() throws { try checkApplicationDetail(large: true) }
+    func testHelpAtStandardText() throws { try checkHelp(large: false) }
+    func testHelpAtLargestText() throws { try checkHelp(large: true) }
+    func testFeedbackAtStandardText() throws { try checkFeedback(large: false) }
+    func testFeedbackAtLargestText() throws { try checkFeedback(large: true) }
 
     private func guestApp(tab: String, large: Bool) throws -> XCUIApplication {
         guard ProcessInfo.processInfo.environment["YLF_VOICEOVER_VALIDATION"] == "1" else {
@@ -87,6 +91,85 @@ final class NativeVoiceOverTests: XCTestCase {
     }
 
     private enum NavigationError: Error { case missingTab }
+
+    private func checkHelp(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "我", large: large)
+        try withVoiceOver(app: app, name: "help-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek("使用帮助", service: voiceOver, speech: speech, labelBoundary: true)
+            let help = app.buttons["me.help"]
+            XCTAssertTrue(help.exists)
+            XCTAssertTrue(help.isHittable, "VoiceOver must reveal the actual native help entry")
+            help.doubleTap()
+            XCTAssertTrue(app.navigationBars["帮助"].waitForExistence(timeout: 5))
+            XCTAssertFalse(app.webViews.firstMatch.exists, "First-party help must remain native")
+
+            let question = "云乐坊是什么？"
+            try seek("云乐坊是什么", service: voiceOver, speech: speech)
+            let faq = app.buttons["help.faq.what"]
+            XCTAssertTrue(faq.exists)
+            XCTAssertTrue(faq.isHittable, "VoiceOver must reveal the real FAQ disclosure control")
+            XCTAssertTrue(normalized(try voiceOver.currentSpeech().utterance).contains(normalized(question)))
+            faq.doubleTap()
+            let answer = "云乐坊汇集各类云应用和实用工具。你可以在工坊发现应用，在云居保存入口，打开后直接使用。"
+            XCTAssertTrue(app.staticTexts[answer].waitForExistence(timeout: 5))
+            try seek("云乐坊汇集各类云应用和实用工具", service: voiceOver, speech: speech)
+            XCTAssertTrue(normalized(try voiceOver.currentSpeech().utterance).contains(normalized(answer)),
+                          "VoiceOver must read the complete expanded native FAQ answer")
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "voiceover-help-expanded-faq-\(large ? "largest" : "standard")"
+            screenshot.lifetime = .keepAlways; add(screenshot)
+
+            try seek("我", service: voiceOver, speech: speech, forward: false, labelBoundary: true)
+            app.navigationBars["帮助"].buttons.element(boundBy: 0).doubleTap()
+            XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+            expectFocus("使用帮助", service: voiceOver, speech: speech)
+        }
+    }
+
+    private func checkFeedback(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let app = try guestApp(tab: "我", large: large)
+        try withVoiceOver(app: app, name: "feedback-\(large ? "largest" : "standard")") { voiceOver, speech in
+            try seek("反馈与建议", service: voiceOver, speech: speech, labelBoundary: true)
+            let feedback = app.buttons["me.feedback"]
+            XCTAssertTrue(feedback.exists)
+            XCTAssertTrue(feedback.isHittable, "VoiceOver must reveal the actual native feedback entry")
+            feedback.doubleTap()
+            XCTAssertTrue(app.navigationBars["反馈与建议"].waitForExistence(timeout: 5))
+            XCTAssertFalse(app.webViews.firstMatch.exists, "First-party feedback must remain native")
+
+            try seek("问题描述", service: voiceOver, speech: speech, labelBoundary: true)
+            let description = app.textViews["feedback.description"]
+            XCTAssertTrue(description.exists)
+            XCTAssertTrue(description.isHittable, "VoiceOver must expose the native multiline description editor")
+            XCTAssertTrue(try voiceOver.currentSpeech().utterance.contains("文本"),
+                          "Read the actual editable text field rather than its section heading")
+            let editorScreenshot = XCTAttachment(screenshot: app.screenshot())
+            editorScreenshot.name = "voiceover-feedback-description-\(large ? "largest" : "standard")"
+            editorScreenshot.lifetime = .keepAlways; add(editorScreenshot)
+
+            try seek("复制邮箱", service: voiceOver, speech: speech, labelBoundary: true)
+            let copyEmail = app.buttons["support.feedback.copy-email"]
+            XCTAssertTrue(copyEmail.exists)
+            XCTAssertTrue(copyEmail.isHittable, "Contacting support must remain available to a guest without sending mail")
+            XCTAssertTrue(try voiceOver.currentSpeech().utterance.contains("kf@yunle.fun"),
+                          "Read which support address the fallback action copies")
+            copyEmail.doubleTap()
+            let notice = app.staticTexts["support.feedback.notice"]
+            XCTAssertTrue(notice.waitForExistence(timeout: 5))
+            XCTAssertTrue(notice.label.contains("邮箱已复制"))
+            expectFocus("邮箱已复制", service: voiceOver, speech: speech)
+            let copiedScreenshot = XCTAttachment(screenshot: app.screenshot())
+            copiedScreenshot.name = "voiceover-feedback-copy-email-\(large ? "largest" : "standard")"
+            copiedScreenshot.lifetime = .keepAlways; add(copiedScreenshot)
+
+            try seek("我", service: voiceOver, speech: speech, forward: false, labelBoundary: true)
+            app.navigationBars["反馈与建议"].buttons.element(boundBy: 0).doubleTap()
+            XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+            expectFocus("反馈与建议", service: voiceOver, speech: speech)
+        }
+    }
 
     private func checkMe(large: Bool) throws {
         guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }

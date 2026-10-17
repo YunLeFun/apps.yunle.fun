@@ -3,12 +3,14 @@ import SwiftUI
 struct MeView: View {
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var accounts: AccountStore
+    @EnvironmentObject private var diagnostics: DiagnosticLogStore
+    let navigateTab: (AppTab) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showLogin = false
     @State private var returningEntry: Entry?
     @AccessibilityFocusState(for: .voiceOver) private var focusedEntry: Entry?
 
-    private enum Entry: Hashable { case profile, login, wallet, membership, applications, workshops, accounts, settings, about, reports }
+    private enum Entry: Hashable { case profile, login, wallet, membership, applications, workshops, accounts, settings, about, reports, help, feedback }
 
     var body: some View {
         List {
@@ -56,10 +58,14 @@ struct MeView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                 navigationRow("我的举报", systemImage: "flag", entry: .reports) { MyReportsView() }
-                Link(destination: URL(string: "https://www.yunle.fun/docs")!) { navigationLabel("使用帮助", systemImage: "questionmark.circle") }
-                Link(destination: URL(string: "https://github.com/YunLeFun/apps.yunle.fun/issues")!) {
-                    navigationLabel("反馈与建议", systemImage: "bubble.left.and.bubble.right")
+                navigationRow("使用帮助", systemImage: "questionmark.circle", entry: .help) {
+                    HelpView(logs: diagnostics, accounts: accounts, navigateTab: navigateTab)
                 }
+                .accessibilityIdentifier("me.help")
+                navigationRow("反馈与建议", systemImage: "bubble.left.and.bubble.right", entry: .feedback) {
+                    FeedbackView(logs: diagnostics, accounts: accounts)
+                }
+                .accessibilityIdentifier("me.feedback")
             }
         }
         .navigationTitle("我")

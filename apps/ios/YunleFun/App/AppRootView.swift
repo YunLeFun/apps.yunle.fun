@@ -65,5 +65,7 @@ struct AppRootView: View {
         selectedTab = .workshop
         workshopPath.append(destination)
     }
-    private var me: some View { NavigationStack { MeView() }.id(accounts.identityGeneration) }
+    private var me: some View {
+        NavigationStack { MeView(navigateTab: { selectedTab = $0 }) }.id(accounts.identityGeneration)
+    }
 }

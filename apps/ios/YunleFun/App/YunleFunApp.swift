@@ -10,6 +10,7 @@ struct YunleFunApp: App {
     @StateObject private var wallet: WalletStore
     @StateObject private var purchases: PurchaseCoordinator
     @StateObject private var assistant: AssistantStore
+    @StateObject private var diagnostics: DiagnosticLogStore
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance = AppAppearance.system
 
@@ -17,9 +18,14 @@ struct YunleFunApp: App {
         let catalog = CatalogStore()
         let library = HomeLibrary()
         let runtime = NativeWebRuntime()
+        let diagnostics = DiagnosticLogStore()
+        diagnostics.record(.info, message: "app.launched")
+        _diagnostics = StateObject(wrappedValue: diagnostics)
         _library = StateObject(wrappedValue: library)
         _runtime = StateObject(wrappedValue: runtime)
         let accounts = AccountStore { id in
+            diagnostics.activateAccount(id)
+            diagnostics.record(.info, message: "account.scope.activated")
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
             library.updateCatalog(catalog.applications)
@@ -47,6 +53,7 @@ struct YunleFunApp: App {
                 .environmentObject(wallet)
                 .environmentObject(purchases)
                 .environmentObject(assistant)
+                .environmentObject(diagnostics)
                 .preferredColorScheme(appearance.colorScheme)
                 .task { await catalog.load() }
                 .task { await accounts.restore() }
@@ -58,8 +65,30 @@ struct YunleFunApp: App {
                     assistant.identityChanged()
                     Task { await purchases.processUnfinished() }
                 }
-                .onChange(of: catalog.applications) { library.updateCatalog($0) }
-                .onChange(of: scenePhase) { if $0 == .active { homeSync.schedule() } }
+                .onChange(of: catalog.applications) {
+                    library.updateCatalog($0)
+                    diagnostics.record(.info, message: "catalog.updated")
+                }
+                .onChange(of: catalog.error) { if $0 != nil { diagnostics.record(.error, message: "catalog.load.failed") } }
+                .onChange(of: runtime.issue?.id) { if $0 != nil { diagnostics.record(.error, message: "runtime.operation.failed") } }
+                .onChange(of: homeSync.phase) { phase in
+                    // Only fixed host event names enter diagnostics. Never log the
+                    // associated error, cloud data, URLs, or authentication state.
+                    let event: String
+                    switch phase {
+                    case .idle: event = "home.sync.idle"
+                    case .syncing: event = "home.sync.syncing"
+                    case .failed: event = "home.sync.failed"
+                    case .conflict: event = "home.sync.conflict"
+                    }
+                    diagnostics.record(.info, message: event)
+                }
+                .onChange(of: scenePhase) {
+                    if $0 == .active {
+                        diagnostics.record(.info, message: "app.foregrounded")
+                        homeSync.schedule()
+                    }
+                }
         }
     }
 }

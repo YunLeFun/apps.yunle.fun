@@ -291,6 +291,8 @@ private final class HomeStateFixture {
                 recordOpenState(app, stage: "initial-identity-cleanup-timeout", test: test)
                 XCTFail("The fixture's initial identity cleanup did not finish before opening")
                 print("[DEBUG-cookie] wait.failed time=\(ProcessInfo.processInfo.systemUptime)")
+                // Preserve the original failure first; allow external diagnostic samples afterwards.
+                try await Task.sleep(nanoseconds: 5_000_000_000)
                 if #available(iOS 17.0, *) {
                     let policy = XCTestExpectation(description: "post-failure cookie policy probe")
                     WKWebsiteDataStore.default().httpCookieStore.getCookiePolicy { _ in

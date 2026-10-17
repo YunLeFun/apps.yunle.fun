@@ -74,19 +74,47 @@ jobs:
           TEST_RUNNER_YUNLEFUN_COOKIE_TRACE: '1'
         run: |
           set -o pipefail
+          xcrun simctl spawn "$YLF_CI_SIMULATOR" log stream --style compact --level debug \
+            --predicate 'subsystem == "com.apple.WebKit" AND (category == "ProcessSuspension" OR category == "Process")' \
+            > "$YLF_CI_OUTPUT/network-lifecycle.log" 2>&1 &
+          YLF_LOG_PID=$!
+          python3 .github/scripts/sample-cookie-stall.py &
+          YLF_SAMPLE_PID=$!
+          trap 'kill "$YLF_LOG_PID" "$YLF_SAMPLE_PID" 2>/dev/null || true' EXIT
           xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
             -configuration Debug -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
             -derivedDataPath "$YLF_CI_OUTPUT/debug" \
             -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
             -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
-            -resultBundlePath "$YLF_CI_OUTPUT/native-tests.xcresult" \
-            -collect-test-diagnostics never \
-            -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
-            -maximum-test-execution-time-allowance 180 \
-            -only-testing:YunleFunTests/HomeLayoutVisualTests \
-            -test-iterations 4 -test-repetition-relaunch-enabled YES \
-            -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
-            2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
+            CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build-for-testing \
+            2>&1 | tee "$YLF_CI_OUTPUT/build.log"
+          YLF_FAILED=0
+          for YLF_SCENARIO in full three empty target; do
+            YLF_TESTS=(-only-testing:YunleFunTests/HomeLayoutVisualTests/testRemovingLastInstalledApplicationKeepsRunningSessionDiscoverable)
+            case "$YLF_SCENARIO" in
+              full) YLF_TESTS=(-only-testing:YunleFunTests/HomeLayoutVisualTests) ;;
+              three) YLF_TESTS+=(-only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithLargestAccessibilityText -only-testing:YunleFunTests/HomeLayoutVisualTests/testCompactHomeWithStandardText -only-testing:YunleFunTests/HomeLayoutVisualTests/testEmptyHomeCanScrollAtLargestAccessibilityText) ;;
+              empty) YLF_TESTS+=(-only-testing:YunleFunTests/HomeLayoutVisualTests/testEmptyHomeCanScrollAtLargestAccessibilityText) ;;
+            esac
+            set +e
+            xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
+              -configuration Debug -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
+              -derivedDataPath "$YLF_CI_OUTPUT/debug" \
+              -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
+              -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
+              -resultBundlePath "$YLF_CI_OUTPUT/$YLF_SCENARIO.xcresult" \
+              -collect-test-diagnostics never -test-timeouts-enabled YES \
+              -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 \
+              -test-iterations 2 -test-repetition-relaunch-enabled YES \
+              -parallel-testing-enabled NO "${YLF_TESTS[@]}" \
+              CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test-without-building \
+              2>&1 | tee "$YLF_CI_OUTPUT/tests-$YLF_SCENARIO.log"
+            YLF_STATUS=${PIPESTATUS[0]}
+            set -e
+            echo "COOKIE_SCENARIO $YLF_SCENARIO exit=$YLF_STATUS"
+            if [ "$YLF_STATUS" -ne 0 ]; then YLF_FAILED=1; fi
+          done
+          exit "$YLF_FAILED"
 
       - name: Compile native Release for simulator
         if: ${{ false }}
@@ -107,7 +135,7 @@ jobs:
           name: native-ios-failure-${{ github.sha }}
           path: |
             ${{ runner.temp }}/yunlefun-ios-ci/*.log
-            ${{ runner.temp }}/yunlefun-ios-ci/native-tests.xcresult
+            ${{ runner.temp }}/yunlefun-ios-ci/*.xcresult
           if-no-files-found: ignore
           retention-days: 3
 

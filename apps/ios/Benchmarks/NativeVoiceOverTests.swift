@@ -8,6 +8,7 @@ final class NativeVoiceOverTests: XCTestCase {
     private var transcriptName = ""
     private var inspectedApp: XCUIApplication?
     private var originalVoiceOverState: Bool?
+    private var isDeveloperProfileJourney = false
 
     override func tearDownWithError() throws {
         if #available(iOS 27, *), let originalVoiceOverState {
@@ -23,6 +24,10 @@ final class NativeVoiceOverTests: XCTestCase {
         if inspectedApp != nil {
             let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             screenshot.name = "voiceover-return-screen-\(transcriptName)"; screenshot.lifetime = .keepAlways; add(screenshot)
+        }
+        if isDeveloperProfileJourney, let inspectedApp {
+            let tree = XCTAttachment(string: inspectedApp.debugDescription)
+            tree.name = "voiceover-complete-ax-\(transcriptName)"; tree.lifetime = .keepAlways; add(tree)
         }
         try super.tearDownWithError()
     }
@@ -45,6 +50,164 @@ final class NativeVoiceOverTests: XCTestCase {
     func testHelpAtLargestText() throws { try checkHelp(large: true) }
     func testFeedbackAtStandardText() throws { try checkFeedback(large: false) }
     func testFeedbackAtLargestText() throws { try checkFeedback(large: true) }
+    func testDeveloperProfileAtStandardText() throws { try checkDeveloperProfile(large: false) }
+    func testDeveloperProfileAtLargestText() throws { try checkDeveloperProfile(large: true) }
+
+    private func checkDeveloperProfile(large: Bool) throws {
+        guard #available(iOS 27, *) else { throw XCTSkip("VoiceOver service requires iOS 27") }
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["YLF_VOICEOVER_VALIDATION"] == "1", environment["YLF_DEVELOPER_PROFILE_VOICEOVER"] == "1" else {
+            throw XCTSkip("Enable the real public author-profile VoiceOver journey explicitly")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("The author-profile VoiceOver journey only uses an owned simulator")
+        #else
+        continueAfterFailure = false
+        executionTimeAllowance = 120
+        guard let owned = environment["YLF_OWNED_BENCHMARK_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == environment["SIMULATOR_UDID"], environment["YLF_DEVELOPER_PROFILE_FRESH_GUEST_FIXTURE"] == "1",
+              environment["YLF_BENCHMARK_TARGET"] != "legacy", UIDevice.current.userInterfaceIdiom == .phone,
+              let appearance = environment["YLF_ACCESSIBILITY_APPEARANCE"], ["light", "dark"].contains(appearance) else {
+            throw DeveloperProfileFailure(description: "Declare this owned iPhone simulator's fresh guest and explicit light/dark author fixture")
+        }
+        let app = try guestApp(tab: "我", large: large)
+        let restoredGuest = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            app.buttons["me.login"].exists && !app.progressIndicators["正在检查登录状态"].exists
+        }, object: nil)
+        guard XCTWaiter.wait(for: [restoredGuest], timeout: 15) == .completed else {
+            throw DeveloperProfileFailure(description: "Account restoration must finish while the author fixture remains a guest")
+        }
+        try selectTab("云居", in: app)
+        guard app.buttons["去工坊看看"].waitForExistence(timeout: 10), !app.buttons["home.running"].exists,
+              !app.webViews.firstMatch.exists,
+              app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开")).count == 0 else {
+            throw DeveloperProfileFailure(description: "The author VoiceOver journey requires a real empty guest home with no running application")
+        }
+        isDeveloperProfileJourney = true
+        inspectedApp = app
+        transcriptName = "developer-profile-\(large ? "largest" : "standard")-\(appearance)"
+        let requestedLogin = "YunYouJun"
+        app.open(try XCTUnwrap(URL(string: "yunlefun://developer/\(requestedLogin)")))
+        let names = app.staticTexts.matching(identifier: "developer.name")
+        let counts = app.staticTexts.matching(NSPredicate(format: "label MATCHES %@", "^[0-9]+ 个公开作品$"))
+        let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "developer.application."))
+        let loaded = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            guard counts.firstMatch.exists else { return false }
+            let count = Int(counts.firstMatch.label.components(separatedBy: " ").first ?? "") ?? 0
+            return app.state == .runningForeground && self.developerNavigationBar(in: app, login: requestedLogin).exists
+                && names.count == 1 && count > 0 && rows.firstMatch.exists
+                && !app.descendants(matching: .any).matching(identifier: "developer.loading").firstMatch.exists
+                && !app.descendants(matching: .any).matching(identifier: "developer.error").firstMatch.exists
+        }, object: nil)
+        guard XCTWaiter.wait(for: [loaded], timeout: 25) == .completed else {
+            throw DeveloperProfileFailure(description: "The real anonymous author page must load a name, count and public work")
+        }
+        let navigation = developerNavigationBar(in: app, login: requestedLogin)
+        let ownerLogin = navigation.identifier.isEmpty ? navigation.label : navigation.identifier
+        let authorName = names.firstMatch, countElement = counts.firstMatch, row = rows.firstMatch
+        let displayName = authorName.label, countLabel = countElement.label
+        let count = try XCTUnwrap(Int(countLabel.components(separatedBy: " ").first ?? ""))
+        let identifier = row.identifier, rowLabel = row.label
+        let content = row.staticTexts.matching(NSPredicate(format: "label != %@ AND label != ''", rowLabel))
+        guard ownerLogin.caseInsensitiveCompare(requestedLogin) == .orderedSame, !displayName.isEmpty, count > 0,
+              !identifier.isEmpty, content.count >= 2 else {
+            throw DeveloperProfileFailure(description: "Read the author identity and the real child title/summary from the actual public row")
+        }
+        let title = content.element(boundBy: 0).label, summary = content.element(boundBy: 1).label
+        guard !title.isEmpty, !summary.isEmpty, normalized(rowLabel).contains(normalized(title)),
+              normalized(rowLabel).contains(normalized(summary)) else {
+            throw DeveloperProfileFailure(description: "The actual row must expose its complete title and summary without parsing a fabricated label")
+        }
+        captureDeveloperProfile(app, phase: "loaded")
+        try withVoiceOver(app: app, name: transcriptName) { voiceOver, speech in
+            speech.lines.append("observed UI (not speech): owner=\(ownerLogin); name=\(displayName); count=\(countLabel); row=\(identifier)")
+            speech.lines.append("expected complete row from UI (not speech): \(rowLabel)")
+            speech.lines.append("scope: real anonymous public profile; no login/acquire/open/share; no system accessibility audit")
+            try seek(displayName, service: voiceOver, speech: speech, labelBoundary: true, requiredSpeech: "标题")
+            XCTAssertTrue(normalized(try voiceOver.currentSpeech().utterance).contains(normalized(displayName)),
+                          "Read the complete observed author name as a heading")
+            try expectDeveloperContent([authorName], in: app, navigation: navigation)
+            let handle = app.staticTexts["@\(ownerLogin)"]
+            if displayName != ownerLogin {
+                XCTAssertTrue(handle.exists, "The public identifier must exist when it differs from the displayed author name")
+                try seek(ownerLogin, service: voiceOver, speech: speech)
+                XCTAssertTrue(normalized(try voiceOver.currentSpeech().utterance).contains(normalized(ownerLogin)),
+                              "Read the actual public author identifier")
+                try expectDeveloperContent([handle], in: app, navigation: navigation)
+            }
+            try seek("个公开作品", service: voiceOver, speech: speech)
+            let countSpeech = try voiceOver.currentSpeech().utterance
+            speech.lines.append("observed count speech: \(countSpeech)")
+            XCTAssertNotNil(normalized(countSpeech).range(of: "(?<![0-9])\(count)个公开作品", options: .regularExpression),
+                            "VoiceOver must read the actual dynamic count, not merely expose it in the AX tree")
+            try expectDeveloperContent([countElement], in: app, navigation: navigation)
+            captureDeveloperProfile(app, phase: "spoken-author")
+
+            try seek(title, service: voiceOver, speech: speech)
+            let workSpeech = try voiceOver.currentSpeech().utterance
+            speech.lines.append("observed complete work speech: \(workSpeech)")
+            XCTAssertTrue(normalized(workSpeech).contains(normalized(rowLabel)), "Read the complete observed work title, summary and any access condition")
+            XCTAssertTrue(workSpeech.contains("按钮"), "The spoken public work must be the actionable native NavigationLink")
+            let selected = app.buttons[identifier]
+            XCTAssertTrue(selected.exists && selected.isHittable)
+            try expectDeveloperContent([selected.staticTexts[title], selected.staticTexts[summary]], in: app, navigation: navigation)
+            captureDeveloperProfile(app, phase: "spoken-work")
+            selected.doubleTap()
+            let detail = app.navigationBars[title]
+            XCTAssertTrue(detail.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.webViews.firstMatch.exists, "VoiceOver double-tap must enter native detail without running the application")
+            XCTAssertTrue(detail.buttons["分享作者主页"].exists)
+            try seek("作者公开发布的版本", service: voiceOver, speech: speech, labelBoundary: true)
+            XCTAssertTrue(normalized(try voiceOver.currentSpeech().utterance).contains(normalized("作者公开发布的版本")))
+            try expectDeveloperContent([app.staticTexts["作者公开发布的版本"]], in: app, navigation: detail)
+            captureDeveloperProfile(app, phase: "detail")
+
+            let back = detail.buttons.element(boundBy: 0)
+            let backLabel = back.label
+            XCTAssertTrue(back.exists && (backLabel.caseInsensitiveCompare(ownerLogin) == .orderedSame
+                || backLabel.contains("返回") || backLabel.lowercased() == "back"))
+            try seek(backLabel, service: voiceOver, speech: speech, forward: false, labelBoundary: true, requiredSpeech: "返回")
+            XCTAssertTrue(back.isHittable)
+            back.doubleTap()
+            XCTAssertTrue(developerNavigationBar(in: app, login: ownerLogin).waitForExistence(timeout: 5))
+            expectFocus(title, service: voiceOver, speech: speech, completeText: [rowLabel])
+            let returnedSpeech = try voiceOver.currentSpeech().utterance
+            speech.lines.append("observed restored complete work speech: \(returnedSpeech)")
+            XCTAssertTrue(returnedSpeech.contains("按钮"))
+            XCTAssertTrue(app.buttons[identifier].exists && app.buttons[identifier].isHittable)
+            try expectDeveloperContent([app.buttons[identifier].staticTexts[title], app.buttons[identifier].staticTexts[summary]],
+                                       in: app, navigation: developerNavigationBar(in: app, login: ownerLogin))
+            XCTAssertTrue(app.state == .runningForeground && !app.webViews.firstMatch.exists)
+            captureDeveloperProfile(app, phase: "restored-work-focus")
+        }
+        #endif
+    }
+
+    private func developerNavigationBar(in app: XCUIApplication, login: String) -> XCUIElement {
+        app.navigationBars.matching(NSPredicate(format: "identifier ==[c] %@ OR label ==[c] %@", login, login)).firstMatch
+    }
+
+    private func expectDeveloperContent(_ elements: [XCUIElement], in app: XCUIApplication, navigation: XCUIElement) throws {
+        let visible = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            guard app.state == .runningForeground, navigation.exists, app.tabBars.firstMatch.exists else { return false }
+            let top = navigation.frame.maxY, bottom = app.tabBars.firstMatch.frame.minY
+            let window = app.windows.firstMatch.frame
+            return elements.allSatisfy { $0.exists && $0.isHittable && $0.frame.minY >= top - 1 && $0.frame.maxY <= bottom + 1
+                && $0.frame.minX >= window.minX - 1 && $0.frame.maxX <= window.maxX + 1 }
+        }, object: nil)
+        guard XCTWaiter.wait(for: [visible], timeout: 5) == .completed else {
+            throw DeveloperProfileFailure(description: "VoiceOver must reveal the actual complete focused author/work text between the native bars")
+        }
+    }
+
+    private func captureDeveloperProfile(_ app: XCUIApplication, phase: String) {
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "voiceover-\(transcriptName)-\(phase)-screen"; screenshot.lifetime = .keepAlways; add(screenshot)
+        let tree = XCTAttachment(string: app.debugDescription)
+        tree.name = "voiceover-\(transcriptName)-\(phase)-complete-ax"; tree.lifetime = .keepAlways; add(tree)
+    }
+
+    private struct DeveloperProfileFailure: Error, CustomStringConvertible { let description: String }
 
     private func guestApp(tab: String, large: Bool) throws -> XCUIApplication {
         guard ProcessInfo.processInfo.environment["YLF_VOICEOVER_VALIDATION"] == "1" else {
@@ -350,12 +513,12 @@ final class NativeVoiceOverTests: XCTestCase {
     }
 
     @available(iOS 27, *)
-    private func expectFocus(_ label: String, service: XCUIVoiceOverService, speech: SpeechLog) {
+    private func expectFocus(_ label: String, service: XCUIVoiceOverService, speech: SpeechLog, completeText: [String] = []) {
         let ready = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             guard let output = try? service.currentSpeech() else { return false }
             let line = "return: \(output.utterance)"
             if speech.lines.last != line { speech.lines.append(line) }
-            return output.utterance.contains(label)
+            return output.utterance.contains(label) && completeText.allSatisfy { self.normalized(output.utterance).contains(self.normalized($0)) }
         }, object: nil)
         XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed,
                        "Returning must restore VoiceOver focus to \(label)")
@@ -364,13 +527,14 @@ final class NativeVoiceOverTests: XCTestCase {
 
     @available(iOS 27, *)
     private func seek(_ label: String, service: XCUIVoiceOverService, speech: SpeechLog,
-                      forward: Bool = true, labelBoundary: Bool = false) throws {
+                      forward: Bool = true, labelBoundary: Bool = false, requiredSpeech: String? = nil) throws {
         var previous: String?
         var repeated = 0
         for _ in 0..<25 {
             let utterance = try service.currentSpeech().utterance
             speech.lines.append("focus: \(utterance)")
-            if utterance.contains(label) && (!labelBoundary || utterance == label || utterance.hasPrefix(label + " ") || utterance.hasPrefix(label + "，") || utterance.hasPrefix(label + ",")) { return }
+            if utterance.contains(label) && (!labelBoundary || utterance == label || utterance.hasPrefix(label + " ") || utterance.hasPrefix(label + "，") || utterance.hasPrefix(label + ","))
+                && (requiredSpeech.map { utterance.contains($0) } ?? true) { return }
             repeated = previous == utterance ? repeated + 1 : 0
             if repeated == 3 { break }
             previous = utterance

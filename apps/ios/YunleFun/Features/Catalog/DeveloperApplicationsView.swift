@@ -13,7 +13,9 @@ struct DeveloperApplicationsView: View {
 
     var body: some View {
         List {
-            if model.isLoading { ProgressView("正在载入作者主页").accessibilityIdentifier("developer.loading") }
+            if model.isLoading && model.profile == nil {
+                ProgressView("正在载入作者主页").accessibilityIdentifier("developer.loading")
+            }
             if let error = model.error {
                 Section {
                     Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(.secondary)
@@ -25,7 +27,7 @@ struct DeveloperApplicationsView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Image(systemName: "person.crop.circle").font(.largeTitle).foregroundStyle(.secondary).accessibilityHidden(true)
-                        Text(profile.displayName).font(.title2.bold()).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
+                        Text(profile.displayName).font(.title2.bold()).fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader).accessibilityIdentifier("developer.name")
                         if profile.displayName != profile.ownerLogin {
                             Text("@\(profile.ownerLogin)").foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         }
@@ -55,6 +57,14 @@ struct DeveloperApplicationsView: View {
         .runtimeMenuToolbar()
         .toolbar {
             if let profile = model.profile {
+                if model.isLoading {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        // Keep the existing list geometry stable during a
+                        // refresh, including when restoring VoiceOver focus.
+                        ProgressView().accessibilityLabel("正在刷新作者主页")
+                            .accessibilityIdentifier("developer.loading")
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ShareLink(item: profile.shareURL) { Label("分享作者主页", systemImage: "square.and.arrow.up") }
                 }

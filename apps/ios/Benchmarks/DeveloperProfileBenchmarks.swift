@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import Vision
 import XCTest
 
 /// Explicit, anonymous UI journeys against the real public author endpoint.
@@ -117,7 +118,8 @@ final class DeveloperProfileBenchmarks: XCTestCase {
         observations["observedReturnedPublicWorkCount"] = String(returned.count)
         try require(returned.count > 0 && !app.webViews.firstMatch.exists,
                     "Returning must retain a native public profile without running a cloud application")
-        capture(app, name: "\(evidenceName)-returned-author")
+        try capturePaintedReturnedAuthor(app, ownerLogin: returned.ownerLogin, publicWorkCount: returned.count,
+                                        selectedIdentifier: selectedIdentifier)
 
         home.tap()
         try require(app.buttons["去工坊看看"].waitForExistence(timeout: 5)
@@ -218,9 +220,68 @@ final class DeveloperProfileBenchmarks: XCTestCase {
         try require(XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed, message)
     }
 
-    private func capture(_ app: XCUIApplication, name: String) {
-        let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = "\(name)-screen"; screenshot.lifetime = .keepAlways; add(screenshot)
+    private func capturePaintedReturnedAuthor(_ app: XCUIApplication, ownerLogin: String, publicWorkCount: Int,
+                                              selectedIdentifier: String) throws {
+        let started = ProcessInfo.processInfo.systemUptime
+        let budget: TimeInterval = 5
+        let expectedOwner = normalized(ownerLogin)
+        let expectedCountPattern = "(?<![0-9])\(publicWorkCount)个公开作品"
+        var lastScreenshot: XCUIScreenshot?
+        var lastRecognized = ""
+        var attempts = 0
+        var accepted: (screenshot: XCUIScreenshot, recognized: String, elapsed: TimeInterval)?
+        let painted = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            guard ProcessInfo.processInfo.systemUptime - started < budget else { return false }
+            let wasForeground = app.state == .runningForeground
+            let screenshot = app.screenshot()
+            lastScreenshot = screenshot
+            attempts += 1
+            lastRecognized = ""
+            guard let image = screenshot.image.cgImage else { return false }
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["zh-Hans", "en-US"]
+            request.usesLanguageCorrection = false
+            do {
+                try VNImageRequestHandler(cgImage: image).perform([request])
+                lastRecognized = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: " ")
+            } catch { return false }
+            let text = self.normalized(lastRecognized)
+            let count = self.publicWorkCountElement(in: app)
+            let current = wasForeground && app.state == .runningForeground
+                && self.authorNavigationBar(in: app, login: ownerLogin).exists
+                && count.exists && self.publicWorkCount(from: count.label) == publicWorkCount
+                && count.isHittable && self.isBetweenBars(count, in: app)
+                && app.buttons[selectedIdentifier].exists && !app.webViews.firstMatch.exists
+            let elapsed = ProcessInfo.processInfo.systemUptime - started
+            guard current, elapsed <= budget, text.contains(expectedOwner),
+                  text.range(of: expectedCountPattern, options: .regularExpression) != nil else { return false }
+            accepted = (screenshot, lastRecognized, elapsed)
+            return true
+        }, object: nil)
+        let result = XCTWaiter.wait(for: [painted], timeout: budget)
+        let verified = result == .completed && accepted != nil
+        observations["returnedFrameBasis"] = "Vision reads the observed owner and dynamic public-work count from the same retained screenshot; ordinary touch, not VoiceOver or a system accessibility audit"
+        observations["returnedFrameExpectedOwnerLogin"] = ownerLogin
+        observations["returnedFrameExpectedPublicWorkCount"] = String(publicWorkCount)
+        observations["returnedFrameVerified"] = String(verified)
+        observations["returnedFrameAttempts"] = String(attempts)
+        observations["returnedFrameBudgetMilliseconds"] = "5000"
+        observations["returnedFrameElapsedMilliseconds"] = String(format: "%.0f", (accepted?.elapsed ?? (ProcessInfo.processInfo.systemUptime - started)) * 1000)
+        observations["returnedFrameRecognizedText"] = String((accepted?.recognized ?? lastRecognized).prefix(2000))
+        // Retain precisely the accepted frame, or the last actual frame on
+        // failure. Never take a later Me screenshot as evidence of this return.
+        capture(app, name: "\(evidenceName)-returned-author", screenshot: accepted?.screenshot ?? lastScreenshot)
+        try require(verified, "Within five seconds the actual foreground frame must show the observed author and public-work count; AX presence alone is insufficient")
+    }
+
+    private func normalized(_ value: String) -> String {
+        String(value.lowercased().filter { $0.isLetter || $0.isNumber })
+    }
+
+    private func capture(_ app: XCUIApplication, name: String, screenshot: XCUIScreenshot? = nil) {
+        let frame = XCTAttachment(screenshot: screenshot ?? app.screenshot())
+        frame.name = "\(name)-screen"; frame.lifetime = .keepAlways; add(frame)
         let tree = XCTAttachment(string: app.debugDescription)
         tree.name = "\(name)-complete-ax"; tree.lifetime = .keepAlways; add(tree)
     }

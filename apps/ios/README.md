@@ -40,9 +40,11 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 原生自动检查使用 `.github/workflows/ios.yml`：官方 `xcode-27` 预览 runner 上固定 Xcode 27.0，解析锁定包、新建 iOS 27 模拟器、运行日常测试并编译 Release 模拟器产物。它不注入线上账号或签名凭据，也不发布构建。公开仓库决定与实际运行记录见 [CI 与开源调研](../../docs/dev/ios-ci-and-open-source.md)。
 
+真机使用独立 Benchmark 标识与开发签名，不沿用模拟器的 ad-hoc 签名参数。签名、安装、明确选取的公开旅程及真机 / 模拟器证据边界见[真机验证](../../docs/dev/ios-device-validation.md)。2026-10-17 已完成 iPhone 15 Pro / iOS 26.6.1 的签名、安装与原生启动，以及本地 Release 归档；XCTest 控制通道尚未建立，真机 UI / 无障碍用例仍未运行。
+
 ## 当前能力与缺口
 
-另有按需运行的 `YunleFunBenchmarks` Scheme，使用 release 优化和独立的 `fun.yunle.apps.benchmark-dev` 标识，包含四 Tab、真实云空调旅程与显式启用的启动测量。测量条件、环境变量、结果导出和首轮原始数据见 [性能基线](../../docs/dev/ios-performance-baseline.md)。它要求独立访客测试模拟器，不包含在日常单元测试 Scheme 中。
+另有按需运行的 `YunleFunBenchmarks` Scheme，使用 release 优化和独立的 `fun.yunle.apps.benchmark-dev` 标识，包含四 Tab、真实云空调旅程与显式启用的启动测量。测量条件、环境变量、结果导出和首轮原始数据见 [性能基线](../../docs/dev/ios-performance-baseline.md)。它要求独立访客测试环境，不包含在日常单元测试 Scheme 中；模拟器和真机分别记录结果。
 
 同一 Benchmark Scheme 提供显式启用的系统辅助功能审计，检查四个 Tab 在标准和最大辅助字号下的当前可见区域。使用 iOS 17 起的 Apple Audit API，不过滤报告的问题；执行方式、失败记录与覆盖边界见[辅助功能审计](../../docs/dev/ios-accessibility-audits.md)。
 

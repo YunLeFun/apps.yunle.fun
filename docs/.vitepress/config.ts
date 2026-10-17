@@ -78,6 +78,7 @@ export default defineConfig({
           { text: '原生评价与举报', link: '/dev/ios-community' },
           { text: 'iOS 首轮性能基线', link: '/dev/ios-performance-baseline' },
           { text: 'iOS 辅助功能审计', link: '/dev/ios-accessibility-audits' },
+          { text: 'iOS 真机验证', link: '/dev/ios-device-validation' },
           { text: '认证', link: '/dev/auth' },
           { text: '扫码功能', link: '/dev/barcode-scanner' },
           { text: '沉浸式内嵌浏览器', link: '/dev/in-app-browser' },

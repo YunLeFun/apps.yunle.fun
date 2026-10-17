@@ -2,6 +2,8 @@
 
 `NativeAccessibilityAudits` 使用 Apple 的 [XCUIAccessibilityAuditType](https://developer.apple.com/documentation/xcuiautomation/xcuiaccessibilityaudittype) 与 `performAccessibilityAudit`，检查对比度、识别、点击区域、描述、动态字体、文字裁切和 trait。使用 `.all`，问题处理器只附加诊断并返回 `false`，保留 XCTest 失败；没有为通过审计而忽略某类问题。
 
+真机补充：用户完成开发账号配置后，2026-10-17 的 iPhone 15 Pro / iOS 26.6.1 已成功签名、安装和启动独立 Benchmark。两次 XCTest 在控制连接建立前退出，尚未执行系统审计，不能用启动成功替代真机无障碍验收；后续 USB 对照及原始记录见[真机验证](./ios-device-validation.md)。下方模拟器结果保持原有范围。
+
 ## 模拟器增量验证 · 2026-10-17
 
 用户明确本轮先完成模拟器验证，真机签名与设备验收留待后续。继续使用 Xcode 27、iPhone 18 Pro / iOS 27.0（24A434）、独立访客 Benchmark；未安装正式 Bundle 或修改系统全局字号、外观。

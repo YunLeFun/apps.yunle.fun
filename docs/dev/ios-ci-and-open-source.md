@@ -301,4 +301,6 @@ Release 模拟器编译跳过，失败诊断上传与隔离模拟器删除成功
 
 同一测试构建随后只复验三条键盘 UI，`ci-keyboard-software-shown.xcresult` 为 **3 通过 / 0 失败 / 0 跳过**，结果包无运行时警告；标准字号手机号与密码、最大辅助字号手机号均从实际可用键盘执行收起并取消回“我”。该结果支持等待检查在本机可用，不能解释所有远端负载情形，也不将尚未定位的 WebKit 异常改记为已修复。完整原始日志、附件和初次键盘前置失败均留在持久证据目录的 `ci-keyboard-*`。
 
-原 CI 日志、job 元数据、xcresult 和全部附件位于持久证据目录的 `native-ci-c726d64-attempt1-*`。同一远端 run 的第二轮已在首轮结束后开始；API 记录的 triggering actor 为 `YunYouJun`，本轮没有取消或重新发起该 run。等待自然结束后再推送新提交，避免工作流的 concurrency 配置自动取消它。
+同一远端 run 的[第二轮](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39071245366/attempts/2)自然结束并成功。仍为来源 `c726d64`、checkout `10433e0`，按原日志完成用例名独立去重为 **423 单元 / 集成 + 10 UI，共 433 通过 / 0 失败 / 0 跳过**；Release 模拟器编译与独占模拟器清理成功。原失败没有因此消失，不能称已定位 WebKit 根因或验证尚未推送的后续改动。
+
+第一轮日志、job 元数据、xcresult 和全部附件位于持久目录的 `native-ci-c726d64-attempt1-*`，第二轮日志、元数据和独立计数为 `native-ci-c726d64-attempt2-*`。API 记录第二轮 triggering actor 为 `YunYouJun`，本轮没有取消或重新发起该 run；新提交在它自然结束后推送，避免 concurrency 自动取消原证据。

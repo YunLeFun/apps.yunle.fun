@@ -518,14 +518,41 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
 
     private func recoveryPage(_ app: CloudApplication, runtime: NativeWebRuntime, catalog: CatalogStore,
                               library: HomeLibrary, window: UIWindow) async throws -> WKWebView {
-        try await wait(seconds: 10) { !runtime.isIdentityCleanupPending }
-        runtime.open(app, catalog: catalog, library: library)
-        try await wait(seconds: 25) {
-            guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
-                  let state = try? await self.pageState(web) else { return false }
-            return !web.isLoading && state["ready"] as? Bool == true
+        var phase = "identity-cleanup", sample: [String: Any] = [:]
+        let started = Date()
+        do {
+            try await wait(seconds: 10) { !runtime.isIdentityCleanupPending }
+            phase = "native-presentation"
+            runtime.open(app, catalog: catalog, library: library)
+            try await wait(seconds: 25) {
+                sample["runtimeIssuePresent"] = runtime.issue != nil
+                sample["identityCleanupPending"] = runtime.isIdentityCleanupPending
+                sample["browserPresent"] = self.browser(in: window) != nil
+                guard let browser = self.browser(in: window) else { return false }
+                phase = "web-view"
+                sample["browserBeingPresented"] = browser.isBeingPresented
+                sample["webViewPresent"] = self.webView(in: browser.view) != nil
+                guard let web = self.webView(in: browser.view) else { return false }
+                phase = "consumer-document"
+                sample["loading"] = web.isLoading
+                sample["estimatedProgress"] = web.estimatedProgress
+                sample["expectedHost"] = web.url?.host == "ai-sfc.yunle.fun"
+                guard let state = try? await self.pageState(web) else { return false }
+                sample["consumerReady"] = state["ready"] as? Bool == true
+                return !web.isLoading && state["ready"] as? Bool == true
+            }
+            return try XCTUnwrap(webView(in: XCTUnwrap(browser(in: window)).view))
+        } catch {
+            // Keep private URLs, identity, page text and credentials out of
+            // failure evidence. The existing opening budgets are unchanged.
+            sample["phase"] = phase
+            sample["elapsedSeconds"] = Date().timeIntervalSince(started)
+            sample["identityCleanupPending"] = runtime.isIdentityCleanupPending
+            let detail = XCTAttachment(data: try JSONSerialization.data(withJSONObject: sample, options: [.prettyPrinted, .sortedKeys]),
+                                       uniformTypeIdentifier: "public.json")
+            detail.name = "managed-consumer-open-failure"; detail.lifetime = .keepAlways; add(detail)
+            throw error
         }
-        return try XCTUnwrap(webView(in: XCTUnwrap(browser(in: window)).view))
     }
 
     private func authorizeRecoveryPage(_ web: WKWebView, owner: AccountUser, window: UIWindow) async throws {

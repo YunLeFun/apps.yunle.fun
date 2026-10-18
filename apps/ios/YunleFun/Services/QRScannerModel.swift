@@ -62,8 +62,9 @@ final class QRScannerModel: ObservableObject {
         activate()
     }
     func toggleTorch() { guard cameraState == .running, torchAvailable else { return }; camera.torch(!torchOn) }
-    func readPhoto(load: @escaping () async throws -> Data) {
-        guard visible else { return }
+    @discardableResult
+    func readPhoto(load: @escaping () async throws -> Data) -> Task<Void, Never>? {
+        guard visible else { return nil }
         pickingPhoto = false; pauseCamera(); permissionID = nil
         photoTask?.cancel()
         let id = UUID(); photoID = id; isReadingPhoto = true; candidates = []; issue = nil
@@ -82,6 +83,7 @@ final class QRScannerModel: ObservableObject {
                 self.issue = (error as? ScanImageError)?.message ?? "图片暂时无法读取，请重新选择。"
             }
         }
+        return photoTask
     }
     private func activate() {
         guard visible, sceneActive, !pickingPhoto, !isReadingPhoto, candidates.isEmpty, permissionID == nil else { return }

@@ -7,6 +7,85 @@ import UIKit
 import XCTest
 @testable import YunleFun
 
+@MainActor
+final class HomeScrollMotionLiveTests: XCTestCase {
+    func testStandardMotionAnimatesAutomaticScroll() async throws { try await sample(reduceMotion: false) }
+    func testReducedMotionRevealsWithoutIntermediateScrollPositions() async throws { try await sample(reduceMotion: true) }
+
+    private func sample(reduceMotion: Bool) async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_HOME_MOTION"] == "1" else {
+            throw XCTSkip("Requires a controlled Reduce Motion setting on an owned simulator")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This validation is restricted to an owned simulator")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else { return XCTFail("Requires the exact owned simulator") }
+        XCTAssertEqual(UIAccessibility.isReduceMotionEnabled, reduceMotion, "Verify the real system setting before sampling")
+        let signal = HomeScrollSignal()
+        let controller = UIHostingController(rootView: HomeScrollMotionFixture(signal: signal))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKeyAndVisible() }
+        XCTAssertTrue(UIView.areAnimationsEnabled, "The ordinary-motion control must retain UIKit animations")
+        let deadline = Date().addingTimeInterval(5)
+        var scroll: UIScrollView?
+        repeat {
+            controller.view.layoutIfNeeded()
+            scroll = findScroll(in: controller.view)
+            if (scroll?.contentSize.height ?? 0) > 2000 { break }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        } while Date() < deadline
+        XCTAssertEqual(signal.observedReduceMotion, reduceMotion, "SwiftUI must observe the same system preference")
+        let view = try XCTUnwrap(scroll)
+        XCTAssertGreaterThan(view.contentSize.height, 2000)
+        let start = view.contentOffset.y
+        let end = view.contentSize.height - view.bounds.height + view.adjustedContentInset.bottom
+        XCTAssertGreaterThan(end - start, 1000, "Use a meaningful automatic scroll distance")
+        var positions: [CGFloat] = [start]
+        signal.reveal = true
+        let samplingEnd = Date().addingTimeInterval(0.8)
+        repeat {
+            try await Task.sleep(nanoseconds: 8_000_000)
+            positions.append(view.contentOffset.y)
+        } while Date() < samplingEnd
+        let intermediate = positions.filter { abs($0 - start) > 1 && abs($0 - end) > 1 }
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: [
+            "reduceMotion": reduceMotion, "start": start, "destination": end,
+            "positions": positions, "intermediateSamples": intermediate.count,
+        ], options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "home-scroll-\(reduceMotion ? "reduced" : "standard")"; attachment.lifetime = .keepAlways; add(attachment)
+        XCTAssertEqual(view.contentOffset.y, end, accuracy: 1, "Both settings must reveal the requested last row")
+        if reduceMotion { XCTAssertTrue(intermediate.isEmpty, "Reduce Motion must not travel through intermediate scroll positions") }
+        else { XCTAssertGreaterThan(intermediate.count, 2, "The normal setting must retain its visible scroll animation") }
+    }
+    private func findScroll(in view: UIView) -> UIScrollView? {
+        if let scroll = view as? UIScrollView { return scroll }
+        return view.subviews.lazy.compactMap { self.findScroll(in: $0) }.first
+    }
+}
+
+@MainActor
+private final class HomeScrollSignal: ObservableObject { @Published var reveal = false; var observedReduceMotion: Bool? }
+private struct HomeScrollMotionFixture: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject var signal: HomeScrollSignal
+    var body: some View {
+        HomeScrollView { scroller in
+            VStack(spacing: 0) {
+                ForEach(0..<60) { index in Text("Application \(index)").frame(height: 40).id("row-\(index)") }
+            }
+            .onAppear { signal.observedReduceMotion = reduceMotion }
+            .onChange(of: signal.reveal) { reveal in if reveal { scroller.reveal("row-59", at: .bottom) } }
+        }
+    }
+}
+
+
 /// Real authentication and publishing reads, with a fail-closed write observer.
 /// This proves the native eligibility gate; it does not validate cloud writes.
 @MainActor

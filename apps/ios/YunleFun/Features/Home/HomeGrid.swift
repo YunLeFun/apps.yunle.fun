@@ -109,12 +109,13 @@ struct HomeDockPlatter<Content: View>: View {
 /// space, so a drag can tell how close the finger is to the visible top or
 /// bottom edge, and the scroller lets a drag bring the next row into view.
 struct HomeScrollView<Content: View>: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     static var viewport: String { "home.viewport" }
     @ViewBuilder var content: (_ scroller: HomeScroller) -> Content
 
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView { content(HomeScroller(proxy: proxy)) }
+            ScrollView { content(HomeScroller(proxy: proxy, reduceMotion: reduceMotion)) }
                 .coordinateSpace(name: Self.viewport)
         }
     }
@@ -124,9 +125,10 @@ struct HomeScrollView<Content: View>: View {
 struct HomeScroller {
     static let topID = "home.edit.top"
     let proxy: ScrollViewProxy
+    let reduceMotion: Bool
 
     func reveal(_ id: String, at anchor: UnitPoint) {
-        withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(id, anchor: anchor) }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { proxy.scrollTo(id, anchor: anchor) }
     }
 }
 

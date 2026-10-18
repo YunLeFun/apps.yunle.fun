@@ -558,7 +558,8 @@ struct HomeEditCanvas: View {
 
 /// One icon or folder in edit mode. It is deliberately not a Button: tapping
 /// an app while editing only checks it, just like the Home Screen ignores it.
-private struct HomeEditTile<Icon: View>: View {
+struct HomeEditTile<Icon: View>: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let key: String
     let name: String
     let showsName: Bool
@@ -572,19 +573,20 @@ private struct HomeEditTile<Icon: View>: View {
 
     var body: some View {
         HomeAppGlyph(name: name, showsName: showsName, labelWidth: labelWidth) {
-            TimelineView(.animation(minimumInterval: nil, paused: !wobbling)) { context in
+            TimelineView(.animation(minimumInterval: nil, paused: !wobbling || reduceMotion)) { context in
                 icon()
-                    .rotationEffect(.degrees(wobbling ? angle(at: context.date) : 0))
+                    .rotationEffect(.degrees(wobbling && !reduceMotion ? angle(at: context.date) : 0))
             }
-            // The folder that will form, growing behind the target.
+            // The folder that will form. Reduce Motion reveals its outline
+            // through opacity while the target icon keeps its original size.
             .background {
                 RoundedRectangle(cornerRadius: HomeGridMetrics.iconSize * 0.26, style: .continuous)
                     .fill(.regularMaterial)
-                    .scaleEffect(merging ? 1.25 : 0.8)
+                    .scaleEffect(reduceMotion ? 1.25 : (merging ? 1.25 : 0.8))
                     .opacity(merging ? 1 : 0)
             }
-            .scaleEffect(merging ? 0.85 : 1)
-            .animation(Motion.spring, value: merging)
+            .scaleEffect(merging && !reduceMotion ? 0.85 : 1)
+            .animation(reduceMotion ? Motion.fade : Motion.spring, value: merging)
             .overlay(alignment: .topLeading) {
                 Button(action: remove) {
                     Image(systemName: "minus.circle.fill")
@@ -601,7 +603,7 @@ private struct HomeEditTile<Icon: View>: View {
                 .buttonStyle(.plain)
                 .offset(x: -14, y: -14)
                 .opacity(merging ? 0 : 1)
-                .transition(.scale.combined(with: .opacity))
+                .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
                 .accessibilityIdentifier("home.edit.remove.\(key)")
             }
             .overlay(alignment: .bottomTrailing) {
@@ -612,12 +614,12 @@ private struct HomeEditTile<Icon: View>: View {
                         .font(.system(size: 22, weight: .semibold))
                         .background(Circle().fill(Color(uiColor: .systemBackground)).padding(2))
                         .offset(x: 6, y: 6)
-                        .transition(.scale.combined(with: .opacity))
+                        .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
                         .accessibilityHidden(true)
                 }
             }
-            .scaleEffect(selected ? 0.92 : 1)
-            .animation(Motion.press, value: selected)
+            .scaleEffect(selected && !reduceMotion ? 0.92 : 1)
+            .animation(reduceMotion ? Motion.fade : Motion.press, value: selected)
         }
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)

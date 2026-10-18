@@ -7,6 +7,203 @@ import UIKit
 import XCTest
 @testable import YunleFun
 
+/// Samples the rendered positions of real dock cells through both shared
+/// animation call sites: an explicit transaction and an implicit value change.
+@MainActor
+final class SharedLayoutMotionLiveTests: XCTestCase {
+    func testStandardMotionAnimatesImplicitReorder() async throws { try await sample(reduced: false, explicit: false) }
+    func testReducedMotionDoesNotAnimateImplicitReorder() async throws { try await sample(reduced: true, explicit: false) }
+    func testStandardMotionAnimatesExplicitReorder() async throws { try await sample(reduced: false, explicit: true) }
+    func testReducedMotionDoesNotAnimateExplicitReorder() async throws { try await sample(reduced: true, explicit: true) }
+
+    private func sample(reduced: Bool, explicit: Bool) async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_LAYOUT_MOTION"] == "1" else {
+            throw XCTSkip("Requires a controlled Reduce Motion setting on an owned simulator")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This validation is restricted to an owned simulator")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else { return XCTFail("Requires the exact owned simulator") }
+        XCTAssertEqual(UIAccessibility.isReduceMotionEnabled, reduced)
+        XCTAssertTrue(UIView.areAnimationsEnabled)
+        let signal = DockMotionSignal()
+        let controller = UIHostingController(rootView: DockMotionFixture(signal: signal, explicit: explicit))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKeyAndVisible() }
+        let deadline = Date().addingTimeInterval(5)
+        repeat {
+            controller.view.layoutIfNeeded()
+            if signal.views.count == 3, signal.views.values.allSatisfy({ $0.window === window && $0.bounds.width == 64 }) { break }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        } while Date() < deadline
+        XCTAssertEqual(signal.observedReduceMotion, reduced)
+        let first = try XCTUnwrap(signal.views[0])
+        let last = try XCTUnwrap(signal.views[2])
+        let start = first.convert(CGPoint(x: 32, y: 32), to: window).x
+        let destination = last.convert(CGPoint(x: 32, y: 32), to: window).x
+        XCTAssertGreaterThan(destination - start, 150)
+        var positions = [start]
+        var presentationSamples = 0
+        signal.reorder = true
+        let end = Date().addingTimeInterval(0.8)
+        repeat {
+            try await Task.sleep(nanoseconds: 8_000_000)
+            if let layer = first.layer.presentation(), let root = window.layer.presentation() {
+                positions.append(layer.convert(CGPoint(x: 32, y: 32), to: root).x)
+                presentationSamples += 1
+            } else {
+                positions.append(first.convert(CGPoint(x: 32, y: 32), to: window).x)
+            }
+        } while Date() < end
+        let intermediate = positions.filter { abs($0 - start) > 1 && abs($0 - destination) > 1 }
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: [
+            "reduceMotion": reduced, "explicitTransaction": explicit, "start": start,
+            "destination": destination, "positions": positions, "presentationSamples": presentationSamples,
+            "intermediateSamples": intermediate.count, "sameCellIdentity": signal.views[0] === first,
+        ], options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "dock-reorder-\(explicit ? "explicit" : "implicit")-\(reduced ? "reduced" : "standard")"
+        attachment.lifetime = .keepAlways; add(attachment)
+        XCTAssertTrue(signal.views[0] === first, "Reordering must preserve the existing cell")
+        XCTAssertEqual(first.convert(CGPoint(x: 32, y: 32), to: window).x, destination, accuracy: 1)
+        XCTAssertGreaterThan(presentationSamples, 2, "Read actual presentation layers while the window is visible")
+        if reduced { XCTAssertTrue(intermediate.isEmpty, "Reduce Motion must not move cells through intermediate positions") }
+        else { XCTAssertGreaterThan(intermediate.count, 2, "The ordinary-motion control must retain visible movement") }
+    }
+}
+
+@MainActor
+private final class DockMotionSignal: ObservableObject {
+    @Published var reorder = false
+    var views: [Int: UIView] = [:]
+    var observedReduceMotion: Bool?
+}
+
+@MainActor
+final class HomeEditTileMotionLiveTests: XCTestCase {
+    func testStandardMotionScalesSelectedAndMergingTiles() async throws { try await sample(reduced: false) }
+    func testReducedMotionKeepsSelectedAndMergingTilesStill() async throws { try await sample(reduced: true) }
+
+    private func sample(reduced: Bool) async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_LAYOUT_MOTION"] == "1" else {
+            throw XCTSkip("Requires a controlled Reduce Motion setting on an owned simulator")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This validation is restricted to an owned simulator")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else { return XCTFail("Requires the exact owned simulator") }
+        XCTAssertEqual(UIAccessibility.isReduceMotionEnabled, reduced)
+        XCTAssertTrue(UIView.areAnimationsEnabled)
+        let signal = TileMotionSignal()
+        let controller = UIHostingController(rootView: TileMotionFixture(signal: signal))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKeyAndVisible() }
+        let deadline = Date().addingTimeInterval(5)
+        repeat {
+            controller.view.layoutIfNeeded()
+            if signal.cells.views[0]?.window === window { break }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        } while Date() < deadline
+        XCTAssertEqual(signal.observedReduceMotion, reduced)
+        let cell = try XCTUnwrap(signal.cells.views[0])
+        let initial = cell.convert(cell.bounds, to: window).width
+        XCTAssertEqual(initial, 64, accuracy: 0.1)
+        var evidence: [[String: Any]] = []
+        for phase in ["selected", "merging"] {
+            signal.selected = phase == "selected"; signal.merging = phase == "merging"
+            var widths: [CGFloat] = []
+            let end = Date().addingTimeInterval(0.8)
+            repeat {
+                try await Task.sleep(nanoseconds: 8_000_000)
+                if let layer = cell.layer.presentation(), let root = window.layer.presentation() {
+                    widths.append(layer.convert(cell.bounds, to: root).width)
+                }
+            } while Date() < end
+            let expected: CGFloat = reduced ? 64 : (phase == "selected" ? 64 * 0.92 : 64 * 0.85)
+            let final = cell.convert(cell.bounds, to: window).width
+            evidence.append(["phase": phase, "widths": widths, "expected": expected, "final": final])
+            XCTAssertGreaterThan(widths.count, 2)
+            XCTAssertEqual(final, expected, accuracy: 0.1, "The real icon must use the intended final size")
+            if reduced { XCTAssertTrue(widths.allSatisfy { abs($0 - 64) < 0.1 }, "Reduce Motion must keep the icon still") }
+            else { XCTAssertGreaterThan(widths.filter { abs($0 - 64) > 0.1 && abs($0 - expected) > 0.1 }.count, 2) }
+            let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in window.drawHierarchy(in: window.bounds, afterScreenUpdates: true) }
+            let screenshot = XCTAttachment(image: image)
+            screenshot.name = "edit-tile-\(phase)-\(reduced ? "reduced" : "standard")"
+            screenshot.lifetime = .keepAlways; add(screenshot)
+            signal.selected = false; signal.merging = false
+            try await Task.sleep(nanoseconds: 600_000_000)
+        }
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: [
+            "reduceMotion": reduced, "initial": initial, "phases": evidence,
+        ], options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "edit-tile-\(reduced ? "reduced" : "standard")"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+}
+@MainActor
+private final class TileMotionSignal: ObservableObject {
+    @Published var selected = false
+    @Published var merging = false
+    let cells = DockMotionSignal()
+    var observedReduceMotion: Bool?
+}
+private struct TileMotionFixture: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject var signal: TileMotionSignal
+    var body: some View {
+        HomeEditTile(key: "motion-fixture", name: "示例应用", showsName: true, labelWidth: 88,
+                     wobbling: false, selected: signal.selected, merging: signal.merging, remove: {}) {
+            DockMotionCell(id: 0, signal: signal.cells).frame(width: 64, height: 64)
+        }
+        .onAppear { signal.observedReduceMotion = reduceMotion }
+    }
+}
+private struct DockMotionItem: Identifiable { let id: Int }
+private struct DockMotionFixture: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject var signal: DockMotionSignal
+    let explicit: Bool
+    @State private var order = [0, 1, 2]
+    var body: some View {
+        Group {
+            if explicit { row }
+            else { row.animation(Motion.standard(reduceMotion: reduceMotion), value: order) }
+        }
+        .onAppear { signal.observedReduceMotion = reduceMotion }
+        .onChange(of: signal.reorder) { changed in
+            guard changed else { return }
+            if explicit { withAnimation(Motion.standard(reduceMotion: reduceMotion)) { order.reverse() } }
+            else { order.reverse() }
+        }
+    }
+    private var row: some View {
+        HomeDockRow(items: order.map { DockMotionItem(id: $0) }, metrics: HomeGridMetrics(width: 360, sizeClass: .compact)) { item in
+            DockMotionCell(id: item.id, signal: signal).frame(width: 64, height: 64)
+        }
+    }
+}
+private struct DockMotionCell: UIViewRepresentable {
+    let id: Int
+    let signal: DockMotionSignal
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = [UIColor.systemRed, .systemGreen, .systemBlue][id]
+        signal.views[id] = view
+        return view
+    }
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
 @MainActor
 final class HomeScrollMotionLiveTests: XCTestCase {
     func testStandardMotionAnimatesAutomaticScroll() async throws { try await sample(reduceMotion: false) }

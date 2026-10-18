@@ -2,15 +2,15 @@ import SwiftUI
 import UIKit
 
 /// Shared motion vocabulary. Curves stay short and critically damped so state
-/// changes read as confirmation rather than decoration. With Reduce Motion on,
-/// every curve becomes a plain cross-fade: the change stays visible, nothing
-/// slides, scales or zooms.
+/// changes read as confirmation rather than decoration. Reduce Motion disables
+/// shared layout animation. A different curve would still interpolate positions;
+/// opacity-only effects can opt into `fade` separately.
 enum Motion {
     static let spring = Animation.spring(response: 0.34, dampingFraction: 0.86)
     static let press = Animation.spring(response: 0.22, dampingFraction: 0.72)
     static let fade = Animation.easeInOut(duration: 0.2)
 
-    static func standard(reduceMotion: Bool) -> Animation { reduceMotion ? fade : spring }
+    static func standard(reduceMotion: Bool) -> Animation? { reduceMotion ? nil : spring }
 
     /// Grid items grow in from their own position; Reduce Motion keeps opacity only.
     static func appear(reduceMotion: Bool) -> AnyTransition {

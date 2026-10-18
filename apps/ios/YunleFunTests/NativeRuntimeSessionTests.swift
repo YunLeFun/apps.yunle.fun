@@ -89,6 +89,57 @@ final class NativeRuntimeSessionTests: XCTestCase {
         """, arguments: ["key": key], in: nil, contentWorld: .page)
     }
 
+    func testRecoveryRejectsGuestAndIdentityChangesIncludingReturnToSameAccount() async throws {
+        guard #available(iOS 17, *) else { throw XCTSkip("Named profile recovery requires iOS 17") }
+        let guest = try await Fixture()
+        XCTAssertThrowsError(try guest.runtime.profileRecovery(for: guest.application))
+        guest.close()
+        let accounts = try await recoveryAccounts()
+        let fixture = try await Fixture(accounts: accounts); defer { fixture.close() }
+        let repo = WebProfileRepository(fileURL: fixture.directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture")
+        let guestStore = try repo.select(.guest, application: fixture.application)
+        _ = try repo.bindGuestContinuation(guestStore, to: "a")
+        let snapshot = try fixture.runtime.profileRecovery(for: fixture.application)
+        let selected = try XCTUnwrap(snapshot.profiles.retained.first)
+        let before = try Data(contentsOf: fixture.directory.appendingPathComponent("profiles.json"))
+        try await accounts.select("b"); fixture.runtime.resetIdentity(to: "b")
+        XCTAssertThrowsError(try fixture.runtime.restoreWebProfile(selected, from: snapshot))
+        try await accounts.select("a"); fixture.runtime.resetIdentity(to: "a")
+        XCTAssertThrowsError(try fixture.runtime.restoreWebProfile(selected, from: snapshot))
+        XCTAssertEqual(try Data(contentsOf: fixture.directory.appendingPathComponent("profiles.json")), before)
+    }
+
+    func testConfirmedRecoveryClosesCurrentPageAndReopensTheSelectedStore() async throws {
+        guard #available(iOS 17, *) else { throw XCTSkip("Named profile recovery requires iOS 17") }
+        let accounts = try await recoveryAccounts()
+        let fixture = try await Fixture(accounts: accounts); defer { fixture.close() }
+        let repo = WebProfileRepository(fileURL: fixture.directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture")
+        let guest = try repo.select(.guest, application: fixture.application)
+        _ = try repo.bindGuestContinuation(guest, to: "a")
+        let snapshot = try fixture.runtime.profileRecovery(for: fixture.application)
+        let selected = try XCTUnwrap(snapshot.profiles.retained.first)
+        let old = fixture.browser
+        try fixture.runtime.restoreWebProfile(selected, from: snapshot)
+        XCTAssertFalse(fixture.runtime.contains(fixture.application))
+        try await fixture.waitForDismissal()
+        fixture.runtime.open(fixture.application, catalog: fixture.catalog, library: fixture.library)
+        let reopened = try await fixture.waitForApplication(fixture.application)
+        XCTAssertFalse(reopened === old)
+        let web = try XCTUnwrap(reopened.view.subviews.compactMap { $0 as? WKWebView }.first)
+        XCTAssertEqual(web.configuration.websiteDataStore.identifier, selected.identifier)
+        XCTAssertEqual(try repo.retained(for: .account("a"), application: fixture.application), [try XCTUnwrap(snapshot.profiles.active)])
+    }
+
+    private func recoveryAccounts() async throws -> AccountStore {
+        var state = AccountVaultState(); state.activeID = "a"
+        state.accounts = ["a", "b"].map {
+            SavedAccount(user: AccountUser(id: $0), credential: AccountCredential(accessToken: $0, refreshToken: $0,
+                expiresAt: Date().addingTimeInterval(3600)))
+        }
+        let store = AccountStore(session: AccountSession(api: RuntimeRecoveryAuth(), vault: BillingMemoryVault(data: try JSONEncoder().encode(state))))
+        await store.restore(); return store
+    }
+
     func testCorruptOwnershipMetadataCannotFallBackToTheLegacySharedStore() async throws {
         guard #available(iOS 17, *) else { throw XCTSkip("Named WebKit store integration requires iOS 17") }
         let fixture = try await Fixture(); defer { fixture.close() }
@@ -364,7 +415,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let root = UIViewController()
         let runtime: NativeWebRuntime
-        let accounts = AccountStore(session: AccountSession(vault: BillingMemoryVault()))
+        let accounts: AccountStore
         let application = CloudApplication(id: "session-fixture", name: "会话边界验证", websiteUrl: "https://runtime.invalid/", emoji: "🧪")
         let window: UIWindow
         let previous: UIWindow?
@@ -373,7 +424,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let animationsWereEnabled: Bool
         private(set) var browser: WebViewController!
 
-        init(personalMarketService: DeveloperProfileServing = DeveloperProfileService()) async throws {
+        init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), accounts: AccountStore? = nil) async throws {
+            self.accounts = accounts ?? AccountStore(session: AccountSession(vault: BillingMemoryVault()))
             runtime = NativeWebRuntime(personalMarketService: personalMarketService,
                 webProfiles: WebProfileRepository(fileURL: directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture"))
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
@@ -384,7 +436,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
             library = HomeLibrary(directory: directory.appendingPathComponent("home"))
             catalog = CatalogStore(cacheURL: directory.appendingPathComponent("catalog.json"))
             library.add(application)
-            runtime.configureAuthorization(accounts: accounts)
+            runtime.configureAuthorization(accounts: self.accounts)
             window.rootViewController = root; window.makeKeyAndVisible()
             runtime.anchor = root
             for _ in 0..<100 where root.presentedViewController == nil {
@@ -479,4 +531,16 @@ private actor RuntimePersonalReadGate {
     func wait() async { entered.fulfill(); await withCheckedContinuation { continuation = $0 } }
     func open() { continuation?.resume(); continuation = nil }
     func didReturn() { returned.fulfill() }
+}
+
+private struct RuntimeRecoveryAuth: AccountAuthenticating {
+    func user(accessToken: String, deviceID: String) async throws -> AccountUser { AccountUser(id: accessToken) }
+    func passwordSignIn(identifier: String, password: String, deviceID: String, captcha: String?) async throws -> AuthTokenResponse { throw AccountError.invalidResponse }
+    func sendVerification(address: VerificationAddress, deviceID: String, captcha: String?) async throws -> VerificationChallenge { throw AccountError.invalidResponse }
+    func verify(_ challenge: VerificationChallenge, code: String, deviceID: String, captcha: String?) async throws -> AuthTokenResponse { throw AccountError.invalidResponse }
+    func refresh(_ refreshToken: String, deviceID: String) async throws -> AuthTokenResponse { throw AccountError.invalidResponse }
+    func signOut(accessToken: String, deviceID: String) async throws { throw AccountError.invalidResponse }
+    func updateProfile(userID: String, name: String, description: String, accessToken: String, deviceID: String) async throws { throw AccountError.invalidResponse }
+    func captcha(deviceID: String) async throws -> CaptchaImage { throw AccountError.invalidResponse }
+    func verifyCaptcha(token: String, text: String, deviceID: String) async throws -> String { throw AccountError.invalidResponse }
 }

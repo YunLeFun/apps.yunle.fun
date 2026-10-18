@@ -197,6 +197,55 @@ final class WebProfileRepositoryTests: XCTestCase {
         XCTAssertTrue(try repository().retained(for: .account("account-a"), application: app).isEmpty)
     }
 
+    func testReadingRecoveryChoicesDoesNotCreateAnAssignmentOrFile() throws {
+        let state = try repository().snapshot(for: .account("a"), application: app)
+        XCTAssertNil(state.active); XCTAssertTrue(state.retained.isEmpty)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+    }
+
+    func testExplicitRecoverySwapsStoresAndPreservesTheDisplacedData() throws {
+        let repo = repository()
+        let original = try repo.select(.account("a"), application: app)
+        try repo.retire("a")
+        let current = try repo.select(.account("a"), application: app)
+        try repo.activateRetained(original, accountID: "a", application: app, replacing: current)
+        XCTAssertEqual(try repository().snapshot(for: .account("a"), application: app),
+                       .init(active: original, retained: [current]))
+        try repo.activateRetained(current, accountID: "a", application: app, replacing: original)
+        XCTAssertEqual(try repository().snapshot(for: .account("a"), application: app),
+                       .init(active: current, retained: [original]))
+    }
+
+    func testRecoveryRejectsForeignAccountApplicationProviderAndStaleConfirmation() throws {
+        let repo = repository()
+        let original = try repo.select(.account("a"), application: app)
+        try repo.retire("a")
+        let current = try repo.select(.account("a"), application: app)
+        let before = try Data(contentsOf: file)
+        XCTAssertThrowsError(try repo.activateRetained(original, accountID: "b", application: app, replacing: nil))
+        let other = CloudApplication(id: "other", name: "Other", websiteUrl: app.websiteUrl)
+        XCTAssertThrowsError(try repo.activateRetained(original, accountID: "a", application: other, replacing: nil))
+        XCTAssertThrowsError(try repository(namespace: "another-provider").activateRetained(original, accountID: "a", application: app, replacing: current))
+        XCTAssertThrowsError(try repo.activateRetained(original, accountID: "a", application: app, replacing: nil))
+        XCTAssertEqual(try Data(contentsOf: file), before)
+        try repo.activateRetained(original, accountID: "a", application: app, replacing: current)
+        let changed = try Data(contentsOf: file)
+        XCTAssertThrowsError(try repo.activateRetained(original, accountID: "a", application: app, replacing: current))
+        XCTAssertEqual(try Data(contentsOf: file), changed)
+    }
+
+    func testRecoveryWriteFailurePreservesBothAssignmentsAndAllowsRetry() throws {
+        let repo = repository()
+        let original = try repo.select(.account("a"), application: app)
+        try repo.retire("a")
+        let before = try Data(contentsOf: file)
+        let failing = WebProfileRepository(fileURL: file, namespace: "provider-a") { _, _ in throw FixtureFailure.write }
+        XCTAssertThrowsError(try failing.activateRetained(original, accountID: "a", application: app, replacing: nil))
+        XCTAssertEqual(try Data(contentsOf: file), before)
+        try repo.activateRetained(original, accountID: "a", application: app, replacing: nil)
+        XCTAssertEqual(try repo.snapshot(for: .account("a"), application: app), .init(active: original, retained: []))
+    }
+
     func testActualWebKitStoresKeepAccountDataAfterRecreatingRepositoryAndBrowser() async throws {
         guard #available(iOS 17, *) else { throw XCTSkip("Named persistent WebKit stores require iOS 17") }
         let a = try await page(repository().select(.account("account-a"), application: app))
@@ -236,6 +285,14 @@ final class WebProfileRepositoryTests: XCTestCase {
         let reopenedContinuation = try await page(retained)
         let draft = try await contents(reopenedContinuation)
         XCTAssertEqual(draft, ["local": "continuation-draft", "draft": "continuation-draft", "cookie": "continuation-draft"])
+        try repository().activateRetained(retained, accountID: "account-a", application: app, replacing: existing)
+        let restoredPage = try await page(repository().select(.account("account-a"), application: app))
+        let restoredDraft = try await contents(restoredPage)
+        XCTAssertEqual(restoredDraft, draft)
+        let displaced = try XCTUnwrap(repository().retained(for: .account("account-a"), application: app).first)
+        let displacedPage = try await page(displaced)
+        let displacedDraft = try await contents(displacedPage)
+        XCTAssertEqual(displacedDraft, previous)
     }
 
     @available(iOS 17, *)

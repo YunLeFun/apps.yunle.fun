@@ -355,6 +355,31 @@ final class NativeWebRuntime: ObservableObject {
         if #available(iOS 17, *) { try webProfiles.retire(id) }
     }
 
+    struct ProfileRecoverySnapshot {
+        let application: CloudApplication
+        let boundary: AccountRequestBoundary
+        let profiles: WebProfileRepository.Snapshot
+    }
+
+    func profileRecovery(for application: CloudApplication) throws -> ProfileRecoverySnapshot {
+        guard #available(iOS 17, *), let accounts, let user = accounts.user, user.isUsable,
+              profileAccountID == user.id, !isClearingIdentity else { throw AccountError.sessionChanged }
+        return ProfileRecoverySnapshot(application: application,
+            boundary: AccountRequestBoundary(uid: user.id, generation: accounts.identityGeneration),
+            profiles: try webProfiles.snapshot(for: .account(user.id), application: application))
+    }
+
+    func restoreWebProfile(_ selected: WebProfileRepository.Selection, from snapshot: ProfileRecoverySnapshot) throws {
+        guard #available(iOS 17, *), let accounts, let user = accounts.user, user.isUsable,
+              snapshot.boundary == AccountRequestBoundary(uid: user.id, generation: accounts.identityGeneration),
+              profileAccountID == user.id, !isClearingIdentity else { throw AccountError.sessionChanged }
+        try webProfiles.activateRetained(selected, accountID: user.id, application: snapshot.application,
+                                        replacing: snapshot.profiles.active)
+        // The previous store remains retained. Close its page only after the
+        // durable swap succeeds; reopening still goes through normal access checks.
+        end(snapshot.application)
+    }
+
     func resetIdentity(to id: String? = nil) {
         profileAccountID = id
         scopedOpenID = UUID(); scopedOpenTask?.cancel(); scopedOpenTask = nil; verifyingScopedApplicationID = nil

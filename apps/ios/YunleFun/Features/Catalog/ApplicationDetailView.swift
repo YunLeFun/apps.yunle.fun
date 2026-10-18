@@ -55,6 +55,14 @@ struct ApplicationDetailView: View {
                 .haptic(.success, trigger: library.contains(app)) { old, new in !old && new }
             }
             Section("关于这个应用") { Text(app.summary).textSelection(.enabled) }
+            if #available(iOS 17, *) {
+                Section {
+                    NavigationLink {
+                        WebProfileRecoveryView(application: app)
+                    } label: { Label("应用数据", systemImage: "archivebox") }
+                    .accessibilityIdentifier("detail.web-profiles")
+                }
+            }
             if app.accessWorkshopID == nil && app.accessOwnerID == nil && app.personalMarketOwnerLogin == nil {
                 Section { NavigationLink("评分与评价") { ApplicationReviewsView(application: app) } }
             }

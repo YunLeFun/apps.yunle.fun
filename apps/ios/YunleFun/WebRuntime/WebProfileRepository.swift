@@ -18,6 +18,11 @@ final class WebProfileRepository {
         fileprivate var key: String { owner + "/" + application }
     }
 
+    struct Snapshot: Equatable {
+        let active: Selection?
+        let retained: [Selection]
+    }
+
     enum ContinuationDisposition: Equatable {
         /// The account had no store for this application; it owns the former guest store.
         case adopted(Selection)
@@ -102,10 +107,35 @@ final class WebProfileRepository {
     }
 
     func retained(for principal: Principal, application: CloudApplication) throws -> [Selection] {
+        try snapshot(for: principal, application: application).retained
+    }
+
+    /// Reading recovery choices must not create or claim a store.
+    func snapshot(for principal: Principal, application: CloudApplication) throws -> Snapshot {
         let owner = try ownerKey(principal), app = try applicationKey(application)
         let state = try read()
-        return (state.retained[owner + "/" + app] ?? []).map {
+        let key = owner + "/" + app
+        return Snapshot(active: state.active[key].map { Selection(identifier: $0, owner: owner, application: app) },
+                        retained: (state.retained[key] ?? []).map {
             Selection(identifier: $0, owner: owner, application: app)
+        })
+    }
+
+    /// Explicit owner-only recovery swaps assignments without erasing contents.
+    /// Recheck the presented active store so an old confirmation cannot replace
+    /// a more recent selection. Unknown/default stores are never accepted.
+    func activateRetained(_ selected: Selection, accountID: String, application: CloudApplication,
+                          replacing expected: Selection?) throws {
+        let owner = try ownerKey(.account(accountID)), app = try applicationKey(application)
+        guard selected.owner == owner, selected.application == app,
+              expected == nil || (expected?.owner == owner && expected?.application == app) else { throw Failure.staleSelection }
+        try update { state in
+            let key = selected.key
+            guard state.active[key] == expected?.identifier,
+                  let index = state.retained[key]?.firstIndex(of: selected.identifier) else { throw Failure.staleSelection }
+            state.retained[key]?.remove(at: index)
+            if let previous = state.active[key] { state.retained[key, default: []].append(previous) }
+            state.active[key] = selected.identifier
         }
     }
 

@@ -364,7 +364,7 @@ export async function delistOwnedApp(user: ServerAuthUser, appId: string, ifMatc
 async function savedApplication(db: ReturnType<typeof useCloudbaseAdmin>['db'], appId: string, uid: string, revisionId: string): Promise<AppRecord> {
   const state = await readOwnedApplicationState(db, appId, uid)
   const latestSubmission = state.submissions.get(revisionId)
-  if (!latestSubmission)
+  if ((state.app.currentRevisionId || state.app.publishedSubmissionId) !== revisionId || !latestSubmission)
     throw createError({ statusCode: 409, message: '作品已再次变化，请刷新后核对保存结果' })
   return {
     ...state.app,

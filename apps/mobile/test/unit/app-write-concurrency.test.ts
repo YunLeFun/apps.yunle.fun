@@ -22,6 +22,7 @@ function database() {
   let records = new Map<string, Document>([['apps/app-one', { ...app }], ['app_submissions/revision-one', { ...submission }]])
   let epoch = 0
   let beforeTransaction: (() => void) | undefined
+  let afterTransaction: (() => void) | undefined
   let failCollection: string | undefined
   let commits = 0
   let attempts = 0
@@ -88,6 +89,9 @@ function database() {
         records = snapshot
         epoch++
         commits++
+        const afterCommit = afterTransaction
+        afterTransaction = undefined
+        afterCommit?.()
         return
       }
       throw new Error('DATABASE_TRANSACTION_CONFLICT')
@@ -102,6 +106,7 @@ function database() {
     read: (key: string) => records.get(key),
     dump: () => structuredClone([...records]),
     before(action: () => void) { beforeTransaction = action },
+    after(action: () => void) { afterTransaction = action },
     failOn(name: string) { failCollection = name },
     get commits() { return commits },
     get attempts() { return attempts },
@@ -162,6 +167,27 @@ describe('atomic owner publishing preconditions', () => {
     expect(created.app.writeVersion).toBe(current.writeVersion)
     expect(memory.read(`apps/${created.app._id}`)).not.toHaveProperty('writeVersion')
     expect(memory.commits).toBe(1)
+  })
+  it.each(['create', 'update'] as const)('does not acknowledge a superseded %s with another editor\'s current version', async (operation) => {
+    let savedRevision: string | undefined
+    let changedApp: string | undefined
+    memory.after(() => {
+      const saved = memory.dump().find(([key, value]) => key.startsWith('apps/') && value.currentRevisionId !== 'revision-one')![1]
+      changedApp = saved._id as string
+      savedRevision = saved.currentRevisionId as string
+      // A second writer replaces the owner version while an older review still
+      // references this request's saved revision, before its receipt is read.
+      memory.patch('app_submissions/next-revision', { ...submission, _id: 'next-revision', appId: changedApp, snapshot: { ...form, name: 'Editor B' } })
+      memory.patch(`apps/${changedApp}`, { currentRevisionId: 'next-revision', publishedSubmissionId: 'next-revision', name: 'Editor B' })
+      memory.patch(`public_market_listings/${changedApp}`, { _id: changedApp, appId: changedApp, activeSubmissionId: savedRevision })
+    })
+    const action = operation === 'create'
+      ? createAppSubmission(user, { ...form, slug: 'new-app' })
+      : updateAppSubmission(user, app._id, { ...form, name: 'Editor A' }, await token())
+    await expect(action).rejects.toMatchObject({ statusCode: 409 })
+    expect(memory.commits).toBe(1)
+    expect(memory.read(`apps/${changedApp}`)?.name).toBe('Editor B')
+    expect(memory.read(`app_submissions/${savedRevision}`)).toBeDefined()
   })
   it('returns an owner token for the same persisted state regardless of projected review status', async () => {
     const [owned] = await listOwnedApps(user)

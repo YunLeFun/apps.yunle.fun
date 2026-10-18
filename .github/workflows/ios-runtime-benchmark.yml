@@ -8,6 +8,8 @@ on:
       - apps/ios/**
       - apps/mobile/ios/App/App/**
       - .github/workflows/ios*.yml
+      - scripts/ios/cleanup-ci-simulator.py
+      - scripts/ios/test_cleanup_ci_simulator.py
 
 permissions:
   contents: read
@@ -40,6 +42,9 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+
+      - name: Verify simulator cleanup guards and timeout handling
+        run: python3 -B -m unittest discover -s scripts/ios -p test_cleanup_ci_simulator.py
 
       - name: Verify Xcode and locked Benchmark packages
         env:
@@ -165,18 +170,13 @@ jobs:
         if: always() && steps.simulator.outputs.id != ''
         env:
           YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          import subprocess
-          simulator = os.environ["YLF_CI_SIMULATOR"]
-          try:
-              subprocess.run(["xcrun", "simctl", "shutdown", simulator], timeout=30)
-          except subprocess.TimeoutExpired:
-              print("Shutdown command timed out; still attempting removal of this job's simulator")
-          subprocess.run(["xcrun", "simctl", "delete", simulator], check=True, timeout=60)
-          devices = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "--json"], timeout=15))
-          assert not any(device["udid"] == simulator for group in devices["devices"].values() for device in group)
-          print("Removed isolated simulator " + simulator)
-          PY
+        run: python3 scripts/ios/cleanup-ci-simulator.py
+
+      - name: Preserve simulator cleanup outcome
+        if: always() && steps.simulator.outputs.id != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: native-ios-runtime-cleanup-${{ matrix.journey }}-${{ github.event.pull_request.head.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/yunlefun-runtime-benchmark/cleanup-receipt.json
+          if-no-files-found: error
+          retention-days: 3

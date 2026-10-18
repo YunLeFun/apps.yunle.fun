@@ -68,6 +68,7 @@ export default defineConfig({
           { text: 'iOS 原生接口盘点', link: '/dev/ios-native-api-audit' },
           { text: '原生云居同步契约', link: '/dev/ios-home-sync' },
           { text: '原生宿主授权接入', link: '/dev/ios-host-authorization' },
+          { text: '跨 App 授权（设计草案）', link: '/dev/ios-cross-app-authorization' },
           { text: '原生扫码与链接接收', link: '/dev/ios-scanner' },
           { text: '原生个人工坊', link: '/dev/ios-workshops' },
           { text: '原生应用管理与发布', link: '/dev/ios-publishing' },

@@ -9,6 +9,7 @@
 - [iOS 原生接口盘点](./ios-native-api-audit) — HTTP 接口、账号边界与待补能力
 - [原生云居同步契约](./ios-home-sync) — 鉴权、修订冲突、离线保存与旧数据兼容边界
 - [原生宿主授权接入](./ios-host-authorization) — 注册策略、原生登录回跳、取消与账号隔离
+- [跨 App 授权（设计草案）](./ios-cross-app-authorization) — 其他 iOS App 跳转云乐坊确认、未安装时的网页降级与安全边界
 - [原生扫码与链接接收](./ios-scanner) — 系统相册、相机状态、结果路由与真机签名待办
 - [原生个人工坊](./ios-workshops) — 创建 / 管理 / 加入、坊客权限、分享和真实联调边界
 - [原生应用管理与发布](./ios-publishing) — 本人作品、原生编辑、本机草稿、市场状态与待验范围

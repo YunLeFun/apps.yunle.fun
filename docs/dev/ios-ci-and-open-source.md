@@ -427,3 +427,11 @@ Release 模拟器编译、隔离模拟器清理和七项常规检查全部成功
 工作流新增 `xcresulttool get test-results summary` 与 `tests` 导出；有结果包就生成 JSON，并保存 PR 来源、实际 checkout、run / attempt 以及两份文件的 SHA-256。成功和失败均上传该报告，完整故障附件继续沿用原策略。没有生成结果包时不伪造测试数量，保留构建日志。
 
 actionlint 通过；从实际工作流提取相同脚本，分别对本轮候选通过结果 **2 / 0 / 0**、真实恢复首轮失败结果 **0 / 1 / 0** 及缺少结果包三种情况执行，退出状态、计数、输出标记与文件摘要均符合预期。原始失败结果未改动。证据保存在 `structured-test-report-validation-083a841/`；GitHub 上传步骤仍须由新来源 CI 验证。测试预算、断言、失败附件和清理条件未调整。
+
+## PR50 的结构化 CI 证据 · 2026-10-18 {#ci-d51f6a6}
+
+PR48 由外部操作合并后，恢复验证和结构化报告改动移到独立草稿 PR50。来源 `d51f6a66d124fbe7dc043efb777a5aba80d5b231` 的 [Native CI 39100483603](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39100483603) 首轮自然成功，实际 checkout 为 `1c6b66f51963c62d428a564437b02ee06a8ade5b`。Release、报告导出 / 上传与隔离模拟器清理均成功；原生、Web / mobile、Chromium 和 GitGuardian 四项检查成功，可选作者 Benchmark 跳过，本次路径未触发桌面工作流。
+
+下载的报告 ZIP 与 GitHub artifact SHA-256 相同；来源回执中的两个文件摘要逐一匹配。直接解析上传的 xcresult 摘要和 **468 个唯一 Test Case 节点**，结果为 **458 单元 / 集成 + 10 UI，共 468 通过 / 0 失败 / 0 跳过**。本次计数不依赖控制台行拼接，原始 ZIP 日志、元数据、摘要、完整测试树和独立计数仍一并归档为 `native-ci-d51f6a6-*`。
+
+该结果验证了真实 GitHub 环境中的结构化报告导出、上传与来源绑定。显式线上夹具不计入日常测试；本轮后续新增的消费端跨进程夹具仍以自己的结果为准。历史 Cookie、WebKit、AX 查询和退出延迟的间歇根因没有因这次成功而关闭，预算与断言未放宽。

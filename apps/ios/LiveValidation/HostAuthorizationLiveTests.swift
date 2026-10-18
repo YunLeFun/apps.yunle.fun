@@ -544,6 +544,213 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         }
     }
 
+    private struct ConsumerProcessCheckpoint: Codable {
+        let processID: Int32
+        let profileID: UUID
+        let ownerDigest: String
+    }
+
+    /// Seed and verify must be separate test-host launches with the same UUID.
+    /// The consumer's own SDK performs a fresh authenticated read; a cached
+    /// display name alone is not accepted as proof of a valid remote session.
+    func testManagedConsumerSessionAcrossSeparateAppProcesses() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let phase = env["YUNLEFUN_LIVE_CONSUMER_PROCESS"], ["seed", "verify", "cleanup"].contains(phase) else {
+            throw XCTSkip("Requires explicit real consumer process validation")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Only an owned isolated simulator may run this validation")
+        #endif
+        guard #available(iOS 17, *), let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"],
+              !owned.isEmpty, owned == env["SIMULATOR_UDID"],
+              let run = env["YUNLEFUN_CONSUMER_PROCESS_RUN"], UUID(uuidString: run) != nil else {
+            return XCTFail("Requires named profiles, a run UUID and the exact owned simulator")
+        }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let directory = cache.appendingPathComponent("ManagedConsumerProcess-" + run)
+        let registry = directory.appendingPathComponent("profiles.json")
+        let checkpointURL = directory.appendingPathComponent("checkpoint.json")
+        let draftKey = "managed-process-draft-" + run
+        let service = "fun.yunle.apps.consumer-process." + run
+        let vault = KeychainAccountVault(service: service)
+        let profiles = WebProfileRepository(fileURL: registry, namespace: run)
+        let runtime = NativeWebRuntime(webProfiles: profiles)
+        let library = HomeLibrary(directory: directory.appendingPathComponent("home"))
+        let catalog = CatalogStore()
+        let auth = RecoveryObservedAuth()
+        let accounts = AccountStore(session: AccountSession(api: auth, vault: vault),
+            accountWillRemove: { try runtime.retireAccount($0) }, identityDidChange: { id in
+                runtime.resetIdentity(to: id); library.activateAccount(id); library.setAutoSyncEnabled(false)
+            })
+        runtime.configureAuthorization(accounts: accounts)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
+        let previous = window.rootViewController
+        let root = UIViewController(); root.view.backgroundColor = .systemBackground
+        window.rootViewController = root; window.makeKeyAndVisible(); runtime.anchor = root
+        defer { runtime.resetIdentity(); window.rootViewController = previous; window.makeKeyAndVisible() }
+        var stage = "setup", failure: String?, seedComplete = false, cleanupComplete = false
+        var evidence: [String: Any] = ["phase": phase, "run": run,
+            "currentProcessID": ProcessInfo.processInfo.processIdentifier]
+        func mark(_ value: String) { stage = value; print("YLF_CONSUMER_PROCESS_STAGE " + value) }
+        do {
+            if phase == "seed" {
+                guard !FileManager.default.fileExists(atPath: directory.path), try vault.read() == nil else {
+                    throw ProbeFailure.observation
+                }
+                let input = cache.appendingPathComponent("iOSNativeValidation/sso-identity-accounts.json")
+                let attributes = try FileManager.default.attributesOfItem(atPath: input.path)
+                guard let permissions = attributes[.posixPermissions] as? NSNumber, permissions.intValue & 0o077 == 0 else {
+                    throw ProbeFailure.observation
+                }
+                let data = try Data(contentsOf: input); try FileManager.default.removeItem(at: input)
+                let pool = try JSONDecoder().decode(Pool.self, from: data)
+                guard let credential = pool.accounts.first(where: { $0.id == "production-zero-balance" }),
+                      credential.environment == "production", !credential.username.isEmpty, !credential.password.isEmpty else {
+                    throw ProbeFailure.observation
+                }
+                mark("initial-host-login")
+                try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil)
+                guard accounts.user?.username == credential.username else { throw ProbeFailure.observation }
+            } else {
+                mark("restore-host-from-private-keychain")
+                await accounts.restore()
+                if phase == "verify" { guard accounts.notice == nil else { throw ProbeFailure.observation } }
+            }
+            if phase != "cleanup" {
+                let owner = try XCTUnwrap(accounts.user)
+                let digest = SHA256.hash(data: Data(owner.id.utf8)).map { String(format: "%02x", $0) }.joined()
+                await catalog.load()
+                let app = try XCTUnwrap(catalog.applications.first { $0.marketShortName == "ai-sfc" })
+                if phase == "verify" {
+                    let checkpoint = try JSONDecoder().decode(ConsumerProcessCheckpoint.self, from: Data(contentsOf: checkpointURL))
+                    guard checkpoint.processID != ProcessInfo.processInfo.processIdentifier, checkpoint.ownerDigest == digest,
+                          try profiles.snapshot(for: .account(owner.id), application: app).active?.identifier == checkpoint.profileID else {
+                        throw ProbeFailure.observation
+                    }
+                    evidence["seedProcessID"] = checkpoint.processID
+                    evidence["hostIdentityRestoredFromKeychain"] = true
+                }
+                mark("open-real-consumer")
+                let web = try await recoveryPage(app, runtime: runtime, catalog: catalog, library: library, window: window)
+                let selected = try XCTUnwrap(profiles.snapshot(for: .account(owner.id), application: app).active)
+                guard web.configuration.websiteDataStore.identifier == selected.identifier else { throw ProbeFailure.observation }
+                if phase == "seed" {
+                    let checkpoint = ConsumerProcessCheckpoint(processID: ProcessInfo.processInfo.processIdentifier,
+                        profileID: selected.identifier, ownerDigest: digest)
+                    try JSONEncoder().encode(checkpoint).write(to: checkpointURL, options: .atomic)
+                    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: checkpointURL.path)
+                    mark("actual-native-consumer-consent")
+                    try await authorizeRecoveryPage(web, owner: owner, window: window)
+                    _ = try await web.callAsyncJavaScript("localStorage.setItem(key, 'seed-draft')", arguments: ["key": draftKey], in: nil, contentWorld: .page)
+                }
+                mark("verify-draft-and-remote-consumer-identity")
+                guard try await web.callAsyncJavaScript("return localStorage.getItem(key)", arguments: ["key": draftKey], in: nil, contentWorld: .page) as? String == "seed-draft",
+                      try await pageState(web)["name"] as? String == owner.displayName else { throw ProbeFailure.observation }
+                let remote = try await readConsumerRemoteIdentity(web, expectedOwner: owner.id)
+                evidence["remoteConsumerIdentity"] = remote
+                guard remote["identityMatches"] as? Bool == true, remote["authenticatedGETObserved"] as? Bool == true,
+                      remote["cacheBypassRequested"] as? Bool == true else {
+                    throw ProbeFailure.observation
+                }
+                evidence["draftPersisted"] = true
+                evidence["consumerAuthorizationRequestedThisPhase"] = phase == "seed"
+                if phase == "seed" { seedComplete = true }
+                mark("phase-verified")
+            }
+        } catch { failure = stage }
+        // Successful seed intentionally retains its private checkpoint and vault.
+        // Every failure and the verify/cleanup phase attempts exact-run cleanup.
+        if !seedComplete {
+            mark("exact-run-cleanup")
+            runtime.resetIdentity()
+            do {
+                if FileManager.default.fileExists(atPath: registry.path) {
+                    struct Registry: Decodable { let active: [String: UUID]; let retained: [String: [UUID]] }
+                    let saved = try JSONDecoder().decode(Registry.self, from: Data(contentsOf: registry))
+                    let ids = Set(Array(saved.active.values) + saved.retained.values.flatMap { $0 })
+                    guard ids.count <= 1 else { throw ProbeFailure.observation }
+                    for id in ids {
+                        let configuration = WKWebViewConfiguration(); configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
+                        let web = WKWebView(frame: .zero, configuration: configuration)
+                        web.load(URLRequest(url: URL(string: "https://ai-sfc.yunle.fun/")!))
+                        try await wait(seconds: 20) { (try? await self.pageState(web))?["ready"] as? Bool == true }
+                        _ = try await web.callAsyncJavaScript("localStorage.removeItem(key)", arguments: ["key": draftKey], in: nil, contentWorld: .page)
+                        guard await signOutWebUI(web),
+                              try await web.callAsyncJavaScript("return localStorage.getItem(key) === null", arguments: ["key": draftKey], in: nil, contentWorld: .page) as? Bool == true else {
+                            throw ProbeFailure.observation
+                        }
+                        web.stopLoading()
+                    }
+                    evidence["cleanedProfiles"] = ids.count
+                }
+                await accounts.restore()
+                for user in accounts.overview.users { try await accounts.remove(user.id); guard accounts.notice == nil else { throw ProbeFailure.observation } }
+                guard try await AccountSession(vault: vault).overview().users.isEmpty else { throw ProbeFailure.observation }
+                if FileManager.default.fileExists(atPath: directory.path) { try FileManager.default.removeItem(at: directory) }
+                let status = SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service] as CFDictionary)
+                guard status == errSecSuccess || status == errSecItemNotFound else { throw ProbeFailure.observation }
+                cleanupComplete = true
+            } catch { cleanupComplete = false }
+        }
+        evidence["failureStage"] = failure ?? "none"
+        evidence["seedCheckpointRetained"] = seedComplete
+        evidence["cleanupComplete"] = cleanupComplete
+        evidence["fixtureDirectoryRemoved"] = !FileManager.default.fileExists(atPath: directory.path)
+        evidence["hostRemoteSignOutCount"] = await auth.signOutCount()
+        evidence["scope"] = "Real managed host and consumer; separate XCTest app processes; fresh consumer SDK GET; no business writes or logout-revocation claim"
+        let report = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        report.name = "managed-consumer-process-" + phase; report.lifetime = .keepAlways; add(report)
+        XCTAssertNil(failure, "Consumer process validation failed at \(failure ?? stage); private values omitted")
+        XCTAssertTrue(seedComplete || cleanupComplete, "Retry cleanup using the same run UUID; private recovery data retained")
+    }
+
+    private func readConsumerRemoteIdentity(_ web: WKWebView, expectedOwner: String) async throws -> [String: Any] {
+        // This module/export is from the currently inspected public deployment.
+        // Fail closed if it changes. Never export the consumer token or profile.
+        try await web.callAsyncJavaScript("""
+        const module = await import('/_nuxt/X4HmLciw.js');
+        const auth = module.a().auth({ persistence: 'local' });
+        const originalFetch = window.fetch, originalOpen = XMLHttpRequest.prototype.open;
+        const statuses = [], transports = [], cachePolicies = [];
+        let cacheBypassRequested = false;
+        const isUserRead = value => {
+          try { return /\\/v[12]\\/user\\/me$/.test(new URL(value, location.href).pathname); }
+          catch { return false; }
+        };
+        window.fetch = async function(input, options) {
+          const observed = isUserRead(typeof input === 'string' ? input : input.url);
+          if (observed) cacheBypassRequested = true;
+          const response = await originalFetch.call(this, input, observed ? { ...options, cache: 'no-store' } : options);
+          if (observed) {
+            statuses.push(response.status); transports.push('fetch');
+            cachePolicies.push(response.headers.get('Cache-Control') || 'unspecified');
+          }
+          return response;
+        };
+        XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+          const result = originalOpen.call(this, method, url, ...rest);
+          if (method.toUpperCase() === 'GET' && isUserRead(url)) {
+            this.setRequestHeader('Cache-Control', 'no-cache'); cacheBypassRequested = true;
+            this.addEventListener('loadend', () => {
+              statuses.push(this.status); transports.push('xhr');
+              cachePolicies.push(this.getResponseHeader('Cache-Control') || 'unspecified');
+            }, { once: true });
+          }
+          return result;
+        };
+        try {
+          const user = await auth.oauthInstance.authApi.getUserInfo();
+          await new Promise(resolve => setTimeout(resolve, 0));
+          return { identityMatches: user.uid === expectedOwner && !user.is_anonymous,
+            authenticatedGETObserved: statuses.includes(200), requestStatuses: statuses,
+            cacheBypassRequested, transports, responseCachePolicies: cachePolicies };
+        } finally {
+          window.fetch = originalFetch; XMLHttpRequest.prototype.open = originalOpen;
+        }
+        """, arguments: ["expectedOwner": expectedOwner], in: nil, contentWorld: .page) as? [String: Any] ?? [:]
+    }
+
     private func cleanupGuestNeeded(_ accounts: AccountStore) -> Bool { accounts.overview.users.isEmpty }
 
     private func pageState(_ web: WKWebView) async throws -> [String: Any] {

@@ -1,6 +1,6 @@
 # 原生 iOS 宿主授权接入
 
-> 2026-10-18 更新：已将 iOS 17+ 持久分仓接入原生运行时，真实 A → B → A 与访客密码登录续接均通过。真实账号移除、原生密码重登录及保留数据恢复闭环已通过并清理；两个独立进程的存储验证仍为合成身份。新的[体验 ZIP](./ios-simulator-preview.md#profile-recovery-candidate)包含持久分仓和恢复入口。iOS 16、旧默认仓库、真实账号重启及完整多应用验收仍未完成。完整目标见 [原生改造 Goal](./ios-native-migration.md)。
+> 2026-10-18 更新：iOS 17+ 持久分仓、真实 A → B → A、访客密码登录续接、账号移除后重登录及保留数据恢复均已验证。AI 春联的[真实消费端独立进程验证](#managed-consumer-process)也已通过：两阶段均完成不使用缓存的身份 GET，第二进程未重新请求授权，测试数据和会话已清理。按本轮用户决定，仅使用最新 iOS 验收；iOS 16 不再是本轮安装或实跑前置条件，部署下限配置保留，未声明其兼容验收通过。[体验 ZIP](./ios-simulator-preview.md#profile-recovery-candidate)包含持久分仓和恢复入口，但不包含之后的钱包修复与 Sandbox 路由。旧默认仓库、第二个真实消费端、系统其他账号及完整多应用验收仍待完成，完整目标见 [原生改造 Goal](./ios-native-migration.md)。
 
 ## 协议与服务
 

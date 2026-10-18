@@ -2,9 +2,21 @@
 
 本页先记录 2026-10-18 的干净源码候选，再保留 2026-10-17 的历史交付。当前完整原生迁移 Goal 继续推进支付、最低系统兼容、真实服务和其他验收，见[完整迁移目标](./ios-native-migration.md)。可体验候选不等于完整迁移或全部无障碍矩阵已验收。
 
+## 减少动态效果候选 · 2026-10-18 {#motion-candidate}
+
+当前交付为 `YunleFun-Native-Simulator-b18e92f`，来源 `b18e92f278adacaa81b924d3362546bea6d547b2` 的干净归档，加入云居自动滚动、共享重排与选中 / 合并图标对系统减少动态效果的适配。没有纳入并行缓存 / Web 修改。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
+
+双击 `LaunchPreview.command`，在 Device Hub 选择 **YunleFun Candidate b18e92f**。脚本已实际校验、安装并启动，截图确认为空访客云居；仅复用标识与名称匹配的专用实例，否则新建自己的模拟器。额外辅助功能树抓取遇到远程自动化连接超时，原失败保留；不将其算作界面测试通过。包内没有账号、用户数据容器或测试 runner。
+
+同次两条实际旅程为 **2 通过 / 0 失败 / 0 跳过**：最大辅助字号详情 **30.667 秒**；真实免费云空调获取、首次绘制、移除唯一安装项后恢复会话、结束并回空云居 **78.388 秒**。七张原始截图逐张检查，结果包无运行时警告。App 与测试产物逐文件相同，ad hoc 签名及包含 11 类数据的隐私资源通过核对；不扩大为完整隐私验收。
+
+ZIP 为 **5,685,855 字节**，SHA-256 为 `f8b65bcf57cff15d1fc813958d41521025ff4c0bf2f2d8ce15baaf1baea8ac68`。CRC、脚本执行权限和内容校验通过，包内附来源回执、测试摘要、七张核心截图与启动截图；本机交付路径由消息提供，完整证据在 `candidate-b18e92f-verification/`。旧候选保持不变。
+
+来源 `db4503e` 的前一轮完整原生 CI 已通过 445 项、Release 和清理，新提交仍需自身 CI。iOS 16 实跑、完整业务和辅助功能、购买 Sandbox、正式升级及性能隐私验收继续待完成；生产条件写入协议没有部署，可体验包不代表完整发布闭环。
+
 ## 发布保护与登录改进候选 · 2026-10-18
 
-当前交付为 `YunleFun-Native-Simulator-4085f12`，来源 `4085f12105a52c2533818ff98b62520aabbda641` 的干净归档。包含发布条件写入与草稿保护、验证码冷却期之外停止刷新；没有并行缓存或 Web 页面改动。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
+该轮交付为 `YunleFun-Native-Simulator-4085f12`，来源 `4085f12105a52c2533818ff98b62520aabbda641` 的干净归档。包含发布条件写入与草稿保护、验证码冷却期之外停止刷新；没有并行缓存或 Web 页面改动。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
 
 双击 `LaunchPreview.command`，在 Device Hub 选择 **YunleFun Candidate 4085f12**。脚本已实际安装启动，完成后截图确认空访客云居。只复用标识和名称同时匹配的专用实例，否则创建自己的模拟器。包内没有账号、用户数据容器或测试 runner；App 签名、九个文件与两次实际测试二进制的一致性、11 类隐私声明与源码逐字节匹配均通过。
 

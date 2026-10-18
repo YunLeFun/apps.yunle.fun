@@ -57,6 +57,19 @@ describe('yunLeFun submission state', () => {
     })
   })
 
+  it('does not mistake an older pending review for the current saved revision', () => {
+    expect(getYunLeFunSubmissionState(appRecord({
+      audience: 'public',
+      isPublic: true,
+      latestSubmission: submission({ _id: 'revision-old', reviewStatus: 'pending' }),
+    }))).toMatchObject({
+      status: 'draft',
+      statusLabel: '新版未投稿',
+      detail: '另一个版本仍在审核；当前版本尚未投稿。',
+      action: 'submit',
+    })
+  })
+
   it('uses a disabled Chinese reviewing state while YunLeFun is checking the revision', () => {
     expect(getYunLeFunSubmissionState(appRecord({
       isPublic: true,

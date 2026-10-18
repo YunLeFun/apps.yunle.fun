@@ -19,7 +19,7 @@ export function searchAppsInMemory(records, input) {
   const limit = normalizeLimit(input.limit)
   const candidates = records
     .map((record, order) => ({ record, order }))
-    .filter(({ record }) => record?.isPublic === true && record?.status === 'approved')
+    .filter(({ record }) => record?.isPublic === true && record?.status === 'approved' && record?.publicationStatus === 'published')
     .filter(({ record }) => !category || record.category === category)
 
   if (terms.length === 0) {
@@ -167,10 +167,11 @@ function defaultReason(record) {
 function recordToAgentCard(record, reason) {
   return {
     id: stringValue(record._id),
-    slug: stringValue(record.slug) || '',
+    slug: stringValue(record.marketShortName) || stringValue(record._id) || '',
     name: stringValue(record.name) || '',
     description: stringValue(record.description),
     logo: stringValue(record.logo),
+    ...(record.iconAssets ? { iconAssets: record.iconAssets } : {}),
     emoji: stringValue(record.emoji) || '📱',
     themeColor: stringValue(record.themeColor) || '#007AFF',
     category: stringValue(record.category),

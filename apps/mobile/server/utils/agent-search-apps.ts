@@ -1,7 +1,7 @@
 import type { CloudbaseAdminDb } from './cloudbase-admin'
 import type { AppIconAssets, AppRecord } from '~/types/app'
 import { normalizeAppSearchText, tokenizeAppSearchQuery } from '~/utils/app-search'
-import { useCloudbaseAdmin } from './cloudbase-admin'
+import { catalogAppViewToRecord, createCloudbaseCatalogResolver } from '../domain/catalog/cloudbase'
 
 export interface SearchAppsInput {
   query: string
@@ -47,25 +47,10 @@ export async function searchApps(
   input: SearchAppsInput,
   options: SearchAppsOptions = {},
 ): Promise<AgentSearchAppCard[]> {
-  const db = options.db || useCloudbaseAdmin().db
   const limit = normalizeLimit(input.limit)
-  const where: Record<string, unknown> = {
-    isPublic: true,
-    status: 'approved',
-    publicationStatus: 'published',
-  }
-
-  if (input.category?.trim())
-    where.category = input.category.trim()
-
-  const { data } = await db
-    .collection('apps')
-    .where(where)
-    .orderBy('updatedAt', 'desc')
-    .limit(options.candidateLimit ?? DEFAULT_CANDIDATE_LIMIT)
-    .get()
-
-  return searchAppsInMemory((data as AppRecord[]) || [], input, limit)
+  const view = await createCloudbaseCatalogResolver(options.db).resolveCatalog({ surface: 'public_market' }, null)
+  const candidateLimit = Math.max(1, Math.min(1000, Math.floor(options.candidateLimit || DEFAULT_CANDIDATE_LIMIT)))
+  return searchAppsInMemory(view.apps.slice(0, candidateLimit).map(catalogAppViewToRecord), input, limit)
 }
 
 export function searchAppsInMemory(
@@ -144,7 +129,7 @@ function scoreTerm(record: AppRecord, term: string) {
 function recordToAgentCard(record: AppRecord, reason: string): AgentSearchAppCard {
   return {
     id: record._id,
-    slug: record.slug,
+    slug: record.marketShortName || record._id,
     name: record.name,
     description: record.description,
     logo: record.logo,

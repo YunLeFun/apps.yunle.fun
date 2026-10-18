@@ -1,6 +1,8 @@
 import type { MyReportItem, ReportReason, ReportStatus } from '~/types/review'
+import { setResponseHeader } from 'h3'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
+import { getPublicAppsByKeys } from '../../utils/public-apps'
 
 const REPORT_REASONS: ReportReason[] = ['illegal', 'porn', 'abuse', 'spam', 'privacy', 'other']
 const REPORT_STATUSES: ReportStatus[] = ['open', 'resolved', 'dismissed']
@@ -12,6 +14,7 @@ const REPORT_STATUSES: ReportStatus[] = ['open', 'resolved', 'dismissed']
  * 仅投影对举报人安全的字段，机审 / 处理人 / 处理备注等内部信息不下发。
  */
 export default defineEventHandler(async (event) => {
+  setResponseHeader(event, 'Cache-Control', 'private, no-store')
   const user = await requireCloudbaseUser(event)
   const { db } = useCloudbaseAdmin()
 
@@ -25,23 +28,13 @@ export default defineEventHandler(async (event) => {
     .map(normalizeMyReport)
     .filter((report): report is MyReportItem => Boolean(report))
 
-  // 按 appKey(slug) 批量回填应用名称，缺省回退展示 slug
-  const slugs = [...new Set(reports.map(r => r.appKey).filter((s): s is string => Boolean(s)))]
-  if (slugs.length) {
-    const { data: apps } = await db.collection('apps')
-      .where({ slug: db.command.in(slugs) })
-      .limit(slugs.length)
-      .get()
-    const nameMap = new Map<string, string>()
-    for (const app of apps || []) {
-      const slug = stringProp(app, 'slug')
-      const name = stringProp(app, 'name')
-      if (slug && name)
-        nameMap.set(slug, name)
-    }
+  // appKey uses the public market name or record ID, never a workshop-local slug.
+  const keys = reports.map(report => report.appKey).filter((key): key is string => Boolean(key))
+  if (keys.length) {
+    const apps = await getPublicAppsByKeys(keys, db)
     for (const report of reports) {
       if (report.appKey)
-        report.appName = nameMap.get(report.appKey)
+        report.appName = apps.get(report.appKey)?.name
     }
   }
 

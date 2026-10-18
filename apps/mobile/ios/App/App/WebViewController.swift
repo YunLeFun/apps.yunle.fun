@@ -42,6 +42,13 @@ enum WebViewDisplayMode: String {
     case titlebar
 }
 
+enum WebAppMenuAction { case share, copyLink, openBrowser, reload, end }
+
+struct WebAppMenuPage {
+    let controller: UIViewController
+    let isCurrent: () -> Bool
+}
+
 /// 自定义网页容器，按 displayMode 分两种形态：
 /// 沉浸式 = 无导航栏，网页全屏平铺，右上角悬浮小程序风格胶囊（更多 | 关闭），
 /// 可后退时左上角出现悬浮返回键（官方应用声明专属）；
@@ -49,7 +56,13 @@ enum WebViewDisplayMode: String {
 /// 网页底部仍铺满。关闭收口在「更多」展开面板。
 class WebViewController: UIViewController {
     var url: URL?
-    var customTitle: String = ""
+    /// Native hosts may provide an identity-bound store before the view loads.
+    var websiteDataStore: WKWebsiteDataStore?
+    var customTitle: String = "" {
+        didSet { if isViewLoaded { updateHeaderTitle() } }
+    }
+    /// The standalone native host embeds this controller in UINavigationController.
+    var usesSystemNavigationBar = false
     var toolbarColorHex: String?
     var appInfo: WebAppInfo?
     /// 展示形态（present 之前设置，viewDidLoad 后不可变更；默认标题栏，沉浸为官方应用声明专属）
@@ -69,6 +82,12 @@ class WebViewController: UIViewController {
     var onDetail: ((String) -> Void)?
     /// 可信页面请求宿主代为签发一次性 SSO code；宿主不会向页面暴露自身 token。
     var onAuthorizationRequest: ((String, String, [String: Any]) -> Void)?
+    /// Native hosts provide first-party screens without loading a web shell.
+    var localPageFactory: ((String, String, String?) -> UIViewController)?
+    var localMenuPageFactory: ((URL?, @escaping (WebAppMenuAction) -> Void) -> WebAppMenuPage?)?
+    private weak var nativeMenuController: UIViewController?
+    private var nativeMenuID: UUID?
+    private var nativeMenuActionPending = false
 
     /// 会话去重 / 定位键：优先 appId，无则用 URL（与插件层 sessionKey 一致）
     var sessionKey: String {
@@ -122,6 +141,10 @@ class WebViewController: UIViewController {
     private var titleLabel: UILabel?
     /// 标题栏是否可见（仅标题栏模式有意义；页面经 JSAPI 切换，会话内持久，不随导航重置）
     private var titleBarVisible = true
+    private var usesSystemTitleBar: Bool { usesSystemNavigationBar && displayMode == .titlebar }
+    private var nativeBackItem: UIBarButtonItem?
+    private var nativeMinimizeItem: UIBarButtonItem?
+    private var nativeFloatingControls: WebChromeControlContainer?
     /// 页面通过 JSAPI 主动隐藏了胶囊（每次主文档导航重置；仅沉浸模式可触发）
     private var capsuleHiddenByPage = false
     /// 标题栏配色：套用应用主题色时为 true（前景转白/黑、状态栏与发丝线适配）
@@ -155,7 +178,8 @@ class WebViewController: UIViewController {
         modalPresentationCapturesStatusBarAppearance = true
         configureBarColors() // 解析主题色，定下标题栏前/背景色与状态栏样式
         if displayMode == .titlebar {
-            setupTitleBar() // 先建栏，webView 顶部锚点依赖它
+            if usesSystemTitleBar { setupSystemNavigationItems() }
+            else { setupTitleBar() }
         }
         setupWebView()
         setupOverlay()
@@ -169,6 +193,13 @@ class WebViewController: UIViewController {
     /// 有合法 themeColor 时套用为顶栏底色并按亮度选黑/白前景；否则回退系统背景。
     /// 状态栏适配仅标题栏模式生效（沉浸模式无顶栏，状态栏交给页面）。
     private func configureBarColors() {
+        if usesSystemTitleBar {
+            barIsThemed = false
+            barBackgroundColor = .systemBackground
+            barForegroundColor = .label
+            statusBarStyle = .default
+            return
+        }
         guard let themed = UIColor(hex: appInfo?.themeColor ?? "") else {
             barIsThemed = false
             barBackgroundColor = .systemBackground
@@ -188,6 +219,7 @@ class WebViewController: UIViewController {
 
     private func setupWebView() {
         let config = WKWebViewConfiguration()
+        if let websiteDataStore { config.websiteDataStore = websiteDataStore }
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         setupJSBridge(config.userContentController)
@@ -210,8 +242,10 @@ class WebViewController: UIViewController {
         view.addSubview(webView)
 
         // 沉浸：顶部到屏幕最顶；标题栏：顶部从导航栏底下开始。底部都铺到屏幕最底
-        webViewTopConstraint = titleBar.map { webView.topAnchor.constraint(equalTo: $0.bottomAnchor) }
-            ?? webView.topAnchor.constraint(equalTo: view.topAnchor)
+        webViewTopConstraint = usesSystemTitleBar
+            ? webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+            : titleBar.map { webView.topAnchor.constraint(equalTo: $0.bottomAnchor) }
+                ?? webView.topAnchor.constraint(equalTo: view.topAnchor)
         NSLayoutConstraint.activate([
             webViewTopConstraint,
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -229,7 +263,7 @@ class WebViewController: UIViewController {
 
         canGoBackObservation = webView.observe(\.canGoBack, options: .new) { [weak self] webView, _ in
             DispatchQueue.main.async {
-                self?.backButton.isHidden = !webView.canGoBack
+                self?.updateHistoryControls()
             }
         }
 
@@ -242,13 +276,52 @@ class WebViewController: UIViewController {
             }
         }
 
-        if displayMode == .titlebar, customTitle.isEmpty {
+        if displayMode == .titlebar {
             // 未传应用名时回退页面 <title>，随导航更新
             titleObservation = webView.observe(\.title, options: .new) { [weak self] webView, _ in
                 DispatchQueue.main.async {
-                    self?.titleLabel?.text = webView.title
+                    self?.updateHeaderTitle()
                 }
             }
+        }
+    }
+
+    private func updateHeaderTitle() {
+        let resolved = customTitle.isEmpty ? (webView?.title ?? url?.host ?? "") : customTitle
+        if usesSystemTitleBar { navigationItem.title = resolved }
+        else { titleLabel?.text = resolved }
+    }
+
+    private func setupSystemNavigationItems() {
+        navigationItem.largeTitleDisplayMode = .never
+        nativeMinimizeItem = UIBarButtonItem(image: UIImage(systemName: "chevron.down"), style: .plain,
+                                            target: self, action: #selector(minimizeTapped))
+        nativeMinimizeItem?.accessibilityLabel = "收起应用"
+        nativeMinimizeItem?.accessibilityIdentifier = "runtime.minimize"
+        nativeBackItem = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain,
+                                        target: self, action: #selector(goBackTapped))
+        nativeBackItem?.accessibilityLabel = "返回网页"
+        let more = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain,
+                                  target: self, action: #selector(moreTapped))
+        more.accessibilityLabel = "更多操作"
+        more.accessibilityIdentifier = "runtime.more"
+        navigationItem.rightBarButtonItem = more
+        if !isDetailSheet, appInfo != nil {
+            navigationItem.titleMenuProvider = { [weak self] _ in
+                UIMenu(children: [UIAction(title: "应用详情", image: UIImage(systemName: "info.circle")) { [weak self] _ in
+                    self?.titleTapped()
+                }])
+            }
+        }
+        updateHeaderTitle()
+        updateHistoryControls()
+    }
+
+    private func updateHistoryControls() {
+        let canGoBack = webView?.canGoBack == true
+        backButton?.isHidden = !canGoBack || (usesSystemTitleBar && titleBarVisible)
+        if usesSystemTitleBar {
+            navigationItem.leftBarButtonItems = (canGoBack ? [nativeBackItem, nativeMinimizeItem] : [nativeMinimizeItem]).compactMap { $0 }
         }
     }
 
@@ -401,6 +474,22 @@ class WebViewController: UIViewController {
         progressView.isHidden = true
         view.addSubview(progressView)
 
+        let controls: UIView
+        if usesSystemTitleBar {
+            let container = WebChromeControlContainer()
+            container.accessibilityIdentifier = "runtime.floating-controls"
+            nativeFloatingControls = container
+            container.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(container)
+            NSLayoutConstraint.activate([
+                container.topAnchor.constraint(equalTo: view.topAnchor),
+                container.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                container.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                container.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+            ])
+            controls = container.controls
+        } else { controls = view }
+
         // 右上角控件：沉浸 = 胶囊（更多 | 关闭）；标题栏 = 单个「更多」菜单按钮（「结束」移入展开面板）
         if displayMode == .immersive {
             let c = makeCapsule()
@@ -412,12 +501,13 @@ class WebViewController: UIViewController {
             menuButton = m
             rightControl = m
         }
-        view.addSubview(rightControl)
+        controls.addSubview(rightControl)
 
         backButton = makeFloatingButton(icon: "chevron.left", pointSize: 14)
+        backButton.accessibilityLabel = "返回网页"
         backButton.isHidden = true
         backButton.addTarget(self, action: #selector(goBackTapped), for: .touchUpInside)
-        view.addSubview(backButton)
+        controls.addSubview(backButton)
 
         // 两种形态都保留收起入口，沉浸模式使用悬浮按钮。
         do {
@@ -425,7 +515,7 @@ class WebViewController: UIViewController {
             mb.accessibilityLabel = "收起应用"
             mb.addTarget(self, action: #selector(minimizeTapped), for: .touchUpInside)
             minimizeButton = mb
-            view.addSubview(mb)
+            controls.addSubview(mb)
         }
         applyBarButtonStyles()
 
@@ -447,8 +537,8 @@ class WebViewController: UIViewController {
             rightControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
 
             backButton.centerYAnchor.constraint(equalTo: rightControl.centerYAnchor),
-            backButton.widthAnchor.constraint(equalToConstant: 32),
-            backButton.heightAnchor.constraint(equalToConstant: 32),
+            backButton.widthAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
+            backButton.heightAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
         ])
 
         // 左侧布局：标题栏 = [最小化][返回]（返回随历史出现，紧跟最小化键右侧）；沉浸 = [返回] 贴最左
@@ -456,8 +546,8 @@ class WebViewController: UIViewController {
             NSLayoutConstraint.activate([
                 minimizeButton.centerYAnchor.constraint(equalTo: rightControl.centerYAnchor),
                 minimizeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
-                minimizeButton.widthAnchor.constraint(equalToConstant: 32),
-                minimizeButton.heightAnchor.constraint(equalToConstant: 32),
+                minimizeButton.widthAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
+                minimizeButton.heightAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
                 backButton.leadingAnchor.constraint(equalTo: minimizeButton.trailingAnchor, constant: 6),
             ])
         }
@@ -468,8 +558,8 @@ class WebViewController: UIViewController {
         // 单菜单按钮无固有尺寸，显式给 32×32（胶囊自带 88×32）
         if let menuButton = menuButton {
             NSLayoutConstraint.activate([
-                menuButton.widthAnchor.constraint(equalToConstant: 32),
-                menuButton.heightAnchor.constraint(equalToConstant: 32),
+                menuButton.widthAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
+                menuButton.heightAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
             ])
         }
 
@@ -483,6 +573,15 @@ class WebViewController: UIViewController {
     /// 顶栏浮层按钮材质（返回 / 最小化 / 更多）：嵌在实体标题栏内时素色（前景色着色、无背景），
     /// 悬浮态（沉浸模式，或标题栏 hideTitleBar 收起后）转暗色半透明圆钮，保证任意网页配色上可读
     private func applyBarButtonStyles() {
+        if usesSystemTitleBar {
+            nativeFloatingControls?.isHidden = titleBarVisible
+            nativeFloatingControls?.accessibilityElementsHidden = titleBarVisible
+            nativeFloatingControls?.isUserInteractionEnabled = !titleBarVisible
+            minimizeButton?.isHidden = titleBarVisible
+            menuButton?.isHidden = titleBarVisible
+            updateHistoryControls()
+            return
+        }
         [backButton, minimizeButton, menuButton].compactMap { $0 }.forEach(styleBarButton)
     }
 
@@ -507,6 +606,18 @@ class WebViewController: UIViewController {
     /// 会话内持久）。先同步定版面再动画，确保 getEnv() 立即读到最终的
     /// capsuleRect / safeAreaInsets。
     private func setTitleBarVisible(_ visible: Bool) {
+        if usesSystemTitleBar {
+            guard visible != titleBarVisible else { return }
+            titleBarVisible = visible
+            navigationController?.setNavigationBarHidden(!visible, animated: false)
+            webViewTopConstraint.isActive = false
+            webViewTopConstraint = webView.topAnchor.constraint(equalTo: visible ? view.safeAreaLayoutGuide.topAnchor : view.topAnchor)
+            webViewTopConstraint.isActive = true
+            applyBarButtonStyles()
+            navigationController?.view.layoutIfNeeded()
+            view.layoutIfNeeded()
+            return
+        }
         guard displayMode == .titlebar, let bar = titleBar, visible != titleBarVisible else { return }
         titleBarVisible = visible
 
@@ -547,6 +658,21 @@ class WebViewController: UIViewController {
 
     /// 悬浮圆形按钮（与胶囊同材质：暗色半透明，不随浅色/深色模式变化）
     private func makeFloatingButton(icon: String, pointSize: CGFloat) -> UIButton {
+        if usesSystemTitleBar {
+            var configuration: UIButton.Configuration
+            if #available(iOS 26, *) { configuration = .glass() }
+            else {
+                configuration = .filled()
+                configuration.baseBackgroundColor = .secondarySystemBackground
+                configuration.baseForegroundColor = .label
+            }
+            configuration.image = UIImage(systemName: icon)
+            configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)
+            configuration.cornerStyle = .capsule
+            let button = UIButton(configuration: configuration)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            return button
+        }
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: icon, withConfiguration:
             UIImage.SymbolConfiguration(pointSize: pointSize, weight: .medium)), for: .normal)
@@ -561,7 +687,14 @@ class WebViewController: UIViewController {
 
     /// 标题栏右上角单个「更多」菜单按钮（点开展开面板；材质由 styleBarButton 决定）
     private func makeMenuButton() -> UIButton {
+        if usesSystemTitleBar {
+            let button = makeFloatingButton(icon: "ellipsis", pointSize: 17)
+            button.accessibilityLabel = "更多操作"
+            button.addTarget(self, action: #selector(moreTapped), for: .touchUpInside)
+            return button
+        }
         let button = UIButton(type: .system)
+        button.accessibilityLabel = "更多操作"
         button.setImage(UIImage(systemName: "ellipsis", withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)), for: .normal)
         button.layer.cornerRadius = 16
@@ -580,6 +713,7 @@ class WebViewController: UIViewController {
         capsule.translatesAutoresizingMaskIntoConstraints = false
 
         let moreButton = UIButton(type: .system)
+        moreButton.accessibilityLabel = "更多操作"
         moreButton.setImage(UIImage(systemName: "ellipsis", withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 15, weight: .medium)), for: .normal)
         moreButton.tintColor = .white
@@ -591,6 +725,7 @@ class WebViewController: UIViewController {
         divider.translatesAutoresizingMaskIntoConstraints = false
 
         let closeButton = UIButton(type: .system)
+        closeButton.accessibilityLabel = "结束应用"
         closeButton.setImage(UIImage(systemName: "xmark", withConfiguration:
             UIImage.SymbolConfiguration(pointSize: 13, weight: .medium)), for: .normal)
         closeButton.tintColor = .white
@@ -635,6 +770,7 @@ class WebViewController: UIViewController {
     /// 结束（彻底释放）：收起容器并通知插件层释放本会话，下次打开全新开始
     @objc private func closeTapped() {
         minimizePending = false
+        if usesSystemNavigationBar, let onClose { onClose(); return }
         dismiss(animated: true)
         onClose?()
     }
@@ -652,7 +788,9 @@ class WebViewController: UIViewController {
             if let data = image?.jpegData(compressionQuality: 0.7) {
                 self.previewImage = "data:image/jpeg;base64," + data.base64EncodedString()
             }
-            self.dismiss(animated: true)
+            if self.usesSystemNavigationBar, let owner = self.navigationController?.presentingViewController {
+                owner.dismiss(animated: true)
+            } else { self.dismiss(animated: true) }
             self.onMinimize?()
         }
         guard webView.bounds.width > 0, webView.bounds.height > 0 else {
@@ -683,15 +821,28 @@ class WebViewController: UIViewController {
         let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
         guard let encodedKey = key.addingPercentEncoding(withAllowedCharacters: pathAllowed) else { return }
 
-        let detailVC = AppViewController()
-        detailVC.configureLocalDetail(
-            routePath: "/app/\(encodedKey)",
-            target: scrollToReviews ? "reviews" : nil)
+        let detailVC: UIViewController
+        if let factory = localPageFactory {
+            detailVC = factory("/app/\(encodedKey)", "app-detail-sheet", scrollToReviews ? "reviews" : nil)
+        } else {
+#if canImport(Capacitor)
+            let detailVC = AppViewController()
+            detailVC.configureLocalDetail(
+                routePath: "/app/\(encodedKey)",
+                target: scrollToReviews ? "reviews" : nil)
+            presentLocalPage(detailVC)
+#endif
+            return
+        }
+        presentLocalPage(detailVC)
+    }
+
+    private func presentLocalPage(_ detailVC: UIViewController) {
         detailVC.modalPresentationStyle = .pageSheet
         if let presentation = detailVC.sheetPresentationController {
             presentation.detents = [.large()]
             presentation.prefersGrabberVisible = true
-            presentation.preferredCornerRadius = 20
+            if !usesSystemNavigationBar { presentation.preferredCornerRadius = 20 }
         }
         present(detailVC, animated: true)
     }
@@ -703,10 +854,17 @@ class WebViewController: UIViewController {
         let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
         guard let encodedLogin = login.addingPercentEncoding(withAllowedCharacters: pathAllowed) else { return }
 
-        let profileVC = AppViewController()
-        profileVC.configureLocalPage(
-            routePath: "/developer/\(encodedLogin)",
-            kind: "developer-sheet")
+        let profileVC: UIViewController
+        if let factory = localPageFactory {
+            profileVC = factory("/developer/\(encodedLogin)", "developer-sheet", nil)
+        } else {
+#if canImport(Capacitor)
+            let profileVC = AppViewController()
+            profileVC.configureLocalPage(routePath: "/developer/\(encodedLogin)", kind: "developer-sheet")
+            presentLocalPage(profileVC)
+#endif
+            return
+        }
         profileVC.modalPresentationStyle = .pageSheet
         if let presentation = profileVC.sheetPresentationController {
             presentation.detents = [.large()]
@@ -717,6 +875,26 @@ class WebViewController: UIViewController {
     }
 
     @objc private func moreTapped() {
+        guard presentedViewController == nil else { return }
+        if let factory = localMenuPageFactory {
+            let menuID = UUID()
+            guard let page = factory(webView.url ?? url, { [weak self] action in
+                self?.performNativeMenuAction(action, menuID: menuID)
+            }) else { return }
+            nativeMenuID = menuID
+            nativeMenuActionPending = false
+            nativeMenuController = page.controller
+            nativeMenuIsCurrent = page.isCurrent
+            page.controller.modalPresentationStyle = .pageSheet
+            if let presentation = page.controller.sheetPresentationController {
+                presentation.detents = [.medium(), .large()]
+                presentation.selectedDetentIdentifier = .large
+                presentation.prefersGrabberVisible = true
+                presentation.prefersScrollingExpandsWhenScrolledToEdge = true
+            }
+            present(page.controller, animated: true)
+            return
+        }
         let sheet = AppInfoSheetController()
         sheet.appInfo = appInfo
         sheet.currentURL = webView.url ?? url
@@ -747,6 +925,34 @@ class WebViewController: UIViewController {
             presentation.preferredCornerRadius = 20
         }
         present(sheet, animated: true)
+    }
+
+    private var nativeMenuIsCurrent: (() -> Bool)?
+
+    private func performNativeMenuAction(_ action: WebAppMenuAction, menuID: UUID) {
+        guard nativeMenuID == menuID, !nativeMenuActionPending,
+              nativeMenuIsCurrent?() == true,
+              let menu = nativeMenuController, presentedViewController === menu,
+              !isBeingDismissed, !(navigationController ?? self).isBeingDismissed,
+              !menu.isBeingDismissed else { return }
+        nativeMenuActionPending = true
+        // Sharing requires the sheet's dismissal to finish before presenting another controller.
+        menu.dismiss(animated: true) { [weak self] in
+            guard let self, self.nativeMenuID == menuID else { return }
+            defer { self.nativeMenuID = nil; self.nativeMenuIsCurrent = nil }
+            guard self.nativeMenuIsCurrent?() == true, !self.isBeingDismissed,
+                  !(self.navigationController ?? self).isBeingDismissed,
+                  self.presentingViewController != nil, self.viewIfLoaded?.window != nil,
+                  self.presentedViewController == nil else { return }
+            switch action {
+            case .share: self.shareCurrent()
+            case .copyLink: UIPasteboard.general.string = (self.webView.url ?? self.url)?.absoluteString
+            case .openBrowser:
+                if let url = self.webView.url ?? self.url { UIApplication.shared.open(url) }
+            case .reload: self.webView.reload()
+            case .end: self.closeTapped()
+            }
+        }
     }
 
     private func shareCurrent() {
@@ -1160,7 +1366,7 @@ private struct NativeSsoSystemAuthorization {
     let request: NativeSsoRequest
 }
 
-private struct NativeSsoRequest {
+struct NativeSsoRequest {
     let clientId: String
     let codeChallenge: String
     let nonce: String
@@ -1169,12 +1375,12 @@ private struct NativeSsoRequest {
     let acquisitionJSON: String?
 }
 
-private enum NativeSsoResult {
+enum NativeSsoResult {
     case success(code: String, issuer: String)
     case denied
 }
 
-private enum NativeSsoProtocol {
+enum NativeSsoProtocol {
     private static let issuer = "https://www.yunle.fun"
 
     static func readRequest(_ input: [String: Any]) -> NativeSsoRequest? {
@@ -1590,6 +1796,11 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     /// 滚动隐藏只是平移动画，需剔除 transform 取回布局值。
     /// 标题栏模式下胶囊位于视口上方（y 为负），页面按矩形避让自然判定无重叠
     private func capsuleRectInPage() -> [String: CGFloat] {
+        if usesSystemTitleBar {
+            let control = titleBarVisible ? navigationController?.navigationBar : rightControl
+            let rect = control.map { $0.convert($0.bounds, to: webView) } ?? .zero
+            return ["x": rect.minX, "y": rect.minY, "width": rect.width, "height": rect.height]
+        }
         var rect = rightControl.frame
         rect.origin.x -= rightControl.transform.tx
         rect.origin.y -= rightControl.transform.ty
@@ -1600,6 +1811,40 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     private static let authorizationTimeoutSeconds: TimeInterval = 30
     private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
     private static let externalAuthorizationTimeoutSeconds: TimeInterval = 5 * 60
+}
+
+/// Groups native floating buttons without intercepting touches on the page between them.
+private final class WebChromeControlContainer: UIView {
+    private var effectView: UIVisualEffectView?
+    var controls: UIView { effectView?.contentView ?? self }
+
+    init() {
+        super.init(frame: .zero)
+        if #available(iOS 26, *) {
+            let effect = UIGlassContainerEffect()
+            effect.spacing = 8
+            let effectView = UIVisualEffectView(effect: effect)
+            effectView.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(effectView)
+            NSLayoutConstraint.activate([
+                effectView.topAnchor.constraint(equalTo: topAnchor), effectView.bottomAnchor.constraint(equalTo: bottomAnchor),
+                effectView.leadingAnchor.constraint(equalTo: leadingAnchor), effectView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            ])
+            self.effectView = effectView
+        }
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let hit = super.hitTest(point, with: event) else { return nil }
+        var ancestor: UIView? = hit
+        while let view = ancestor, view !== self {
+            if view is UIControl { return hit }
+            ancestor = view.superview
+        }
+        return nil
+    }
 }
 
 /// WKUserContentController 会强持有 handler，经弱引用代理转发以打破循环引用
@@ -2174,12 +2419,14 @@ class AppInfoSheetController: UIViewController {
     }
 }
 
-/// 携带闭包的点击热区（评分行用）
-class ActionRowControl: UIControl {
+/// 原生按钮保留操作行闭包，同时向 VoiceOver 和系统自动化暴露按钮语义。
+class ActionRowControl: UIButton {
     var rowAction: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        isAccessibilityElement = true
+        accessibilityTraits.insert(.button)
         addTarget(self, action: #selector(fire), for: .touchUpInside)
     }
 

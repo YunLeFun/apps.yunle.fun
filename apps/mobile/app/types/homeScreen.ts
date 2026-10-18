@@ -17,6 +17,19 @@ export interface RecentApp {
   usedAt: number
 }
 
+/**
+ * 云居文件夹（同步协议 schema 2，由原生客户端写入）
+ *
+ * 成员仍保留在 installedApps 中；文件夹显示在第一个成员的位置。
+ * Web 端暂不展示文件夹（成员按平铺显示），但同步时必须原样保留该字段。
+ */
+export interface HomeFolder {
+  id: string
+  name: string
+  /** 成员应用 ID，均为 installedApps 中的引用 */
+  appIds: string[]
+}
+
 /** Home Screen 配置（前端 Store 使用） */
 export interface HomeScreenConfig {
   /** 主屏已安装应用（有序） */
@@ -36,6 +49,8 @@ export interface UserHomeScreenRecord {
   installedApps: InstalledApp[]
   dockApps: InstalledApp[]
   recentApps: RecentApp[]
+  /** schema 2 文件夹；Web 端只读不写，见 HomeFolder */
+  folders?: HomeFolder[]
   createdAt: number
   updatedAt: number
 }

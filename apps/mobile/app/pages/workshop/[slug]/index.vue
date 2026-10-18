@@ -106,12 +106,13 @@ function goEdit() {
 const workshopDirty = useState('workshop:dirty', () => false)
 
 async function confirmDelete() {
-  if (!app.value)
+  const target = app.value
+  if (!target)
     return
 
   const alert = await alertController.create({
     header: '下架应用',
-    message: `确定要下架「${app.value.name}」吗？应用会从目录移除，提交与审核记录仍会保留。`,
+    message: `确定要下架「${target.name}」吗？应用会从目录移除，提交与审核记录仍会保留。`,
     buttons: [
       { text: '取消', role: 'cancel' },
       {
@@ -119,7 +120,7 @@ async function confirmDelete() {
         role: 'destructive',
         handler: async () => {
           try {
-            await deleteApp(app.value!._id)
+            await deleteApp(target)
             workshopDirty.value = true
             toast.showSuccess('已下架')
             router.replace('/workshop')
@@ -134,30 +135,28 @@ async function confirmDelete() {
   await alert.present()
 }
 
-async function performYunLeFunSubmission(makePublic: boolean, shortName?: string) {
-  if (!app.value)
+async function performYunLeFunSubmission(makePublic: boolean, shortName?: string, target = app.value) {
+  if (!target)
     return
-  if (!shortName && !app.value.yunlefunListing?.shortName) {
+  if (!shortName && !target.yunlefunListing?.shortName) {
     const alert = await alertController.create({
       header: '选择市场唯一短名',
       message: '上架后使用 /apps/短名。显示名称可以重复；短名取得后保留，下架不释放。',
-      inputs: [{ name: 'shortName', type: 'text', value: app.value.slug, placeholder: '例如 my-app' }],
+      inputs: [{ name: 'shortName', type: 'text', value: target.slug, placeholder: '例如 my-app' }],
       buttons: [
         { text: '取消', role: 'cancel' },
-        { text: '投稿', handler: (values: { shortName: string }) => { void performYunLeFunSubmission(makePublic, values.shortName.trim()) } },
+        { text: '投稿', handler: (values: { shortName: string }) => { void performYunLeFunSubmission(makePublic, values.shortName.trim(), target) } },
       ],
     })
     await alert.present()
     return
   }
-  if (!app.value)
-    return
   try {
     submittingPublicMarket.value = true
-    await submitPublicMarket(app.value._id, { makePublic, shortName })
+    await submitPublicMarket(target, { makePublic, shortName })
     workshopDirty.value = true
     toast.showSuccess('已投稿云乐坊，等待审核')
-    await loadApp(app.value.slug)
+    await loadApp(target.slug)
   }
   catch (err: unknown) {
     toast.showError(err instanceof Error ? err.message : '投稿失败')

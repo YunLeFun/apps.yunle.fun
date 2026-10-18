@@ -81,12 +81,11 @@ export function useApps() {
     return response.app._id
   }
 
-  async function updateApp(id: string, updates: Partial<CreateAppForm>): Promise<void> {
-    const current = await getMyAppById(id)
-    if (!current)
-      throw new Error('应用不存在或无权更新')
+  async function updateApp(current: AppRecord, updates: Partial<CreateAppForm>): Promise<void> {
+    const id = current._id
     await $api<AppSubmissionResult>(`/api/apps/${encodeURIComponent(id)}/submissions`, {
       method: 'POST',
+      headers: writeHeaders(current),
       body: {
         kind: 'first_party',
         ...toForm(current),
@@ -95,16 +94,17 @@ export function useApps() {
     })
   }
 
-  async function deleteApp(id: string): Promise<void> {
-    await $api(`/api/apps/${encodeURIComponent(id)}`, { method: 'DELETE' })
+  async function deleteApp(current: AppRecord): Promise<void> {
+    await $api(`/api/apps/${encodeURIComponent(current._id)}`, { method: 'DELETE', headers: writeHeaders(current) })
   }
 
   async function submitPublicMarket(
-    id: string,
+    current: AppRecord,
     options: { makePublic?: boolean, shortName?: string } = {},
   ): Promise<void> {
-    await $api(`/api/apps/${encodeURIComponent(id)}/public-market`, {
+    await $api(`/api/apps/${encodeURIComponent(current._id)}/public-market`, {
       method: 'POST',
+      headers: writeHeaders(current),
       body: { makePublic: options.makePublic === true, shortName: options.shortName },
     })
   }
@@ -181,4 +181,11 @@ function statusCode(error: unknown): number | undefined {
     const status = (response as Record<string, unknown>).status
     return typeof status === 'number' ? status : undefined
   }
+}
+
+/** Use the version shown to the user, never fetch and silently rebase an old form at save time. */
+function writeHeaders(app: AppRecord): Record<string, string> {
+  if (!app.writeVersion || app.writeVersion.length !== 64 || !/^[a-f0-9]{64}$/.test(app.writeVersion))
+    throw new Error('请刷新作品后重试，服务暂未提供安全保存所需的版本信息')
+  return { 'If-Match': `"${app.writeVersion}"` }
 }

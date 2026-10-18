@@ -1,13 +1,14 @@
 import type { SearchAppsInput } from '../../utils/agent-search-apps'
-import { createError, readBody } from 'h3'
+import { createError, readBody, setResponseHeader } from 'h3'
 import { searchApps } from '../../utils/agent-search-apps'
-import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
+import { requireRegisteredCloudbaseUser } from '../../utils/cloudbase-auth'
 
 const MAX_QUERY_LENGTH = 120
 const MAX_CATEGORY_LENGTH = 40
 
 export default defineEventHandler(async (event) => {
-  await requireCloudbaseUser(event)
+  setResponseHeader(event, 'Cache-Control', 'private, no-store')
+  await requireRegisteredCloudbaseUser(event)
 
   const input = normalizeSearchAppsInput(await readBody(event))
   const apps = await searchApps(input)

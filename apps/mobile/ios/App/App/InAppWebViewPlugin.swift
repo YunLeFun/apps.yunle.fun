@@ -1,10 +1,12 @@
+#if canImport(Capacitor)
 import Capacitor
+#endif
 import Foundation
 import ImageIO
 import UIKit
 import WebKit
 
-private struct AuthorizationSheetContent {
+struct AuthorizationSheetContent {
     let applicationName: String
     let applicationOrigin: String
     let applicationIconURL: String?
@@ -14,7 +16,7 @@ private struct AuthorizationSheetContent {
     let authorizationNotice: String?
 }
 
-private enum AuthorizationSheetChoice: String {
+enum AuthorizationSheetChoice: String {
     case current
     case other
     case cancel
@@ -168,7 +170,7 @@ private let authorizationComfortableDetentIdentifier
     = UISheetPresentationController.Detent.Identifier("authorization-comfortable")
 
 @MainActor
-private func configureAuthorizationConsentPresentation(
+func configureAuthorizationConsentPresentation(
     _ presentation: UISheetPresentationController,
     contentSizeCategory: UIContentSizeCategory
 ) {
@@ -196,7 +198,7 @@ private func configureAuthorizationConsentPresentation(
 }
 
 /// 云乐坊第一方应用的可信原生授权 Sheet。所有展示字段均由宿主注册表或宿主会话提供。
-private final class AuthorizationConsentViewController: UIViewController,
+final class AuthorizationConsentViewController: UIViewController,
     UIAdaptivePresentationControllerDelegate {
     private static let accentColor = UIColor.systemBlue
     private static let noticeTintColor = UIColor.systemOrange
@@ -678,10 +680,9 @@ private final class AuthorizationConsentViewController: UIViewController,
     private func complete(_ choice: AuthorizationSheetChoice, dismiss: Bool = true) {
         guard !didComplete else { return }
         didComplete = true
-        onChoice(choice)
-        if dismiss {
-            self.dismiss(animated: true)
-        }
+        if dismiss, presentingViewController != nil {
+            self.dismiss(animated: true) { self.onChoice(choice) }
+        } else { onChoice(choice) }
     }
 
     func expire() {
@@ -690,7 +691,7 @@ private final class AuthorizationConsentViewController: UIViewController,
 }
 
 /// 根据设备物理内存选择保守的 WebView 自动上限；会员可手动提高到 7 个。
-private enum WebViewSessionPolicy {
+enum WebViewSessionPolicy {
     private static let gibibyte: UInt64 = 1_024 * 1_024 * 1_024
     private static let memberLimitRange = 2...7
 
@@ -707,6 +708,48 @@ private enum WebViewSessionPolicy {
     }
 }
 
+/// Shared by the Capacitor compatibility shell and the native SwiftUI shell.
+/// Web input cannot choose the identity cookies this method deletes.
+@MainActor
+enum HostIdentitySessions {
+    private static let identitySessionCookies: [(host: String, name: String)] = [
+        ("play.yunle.fun", "__Host-ylf_play_session"),
+        ("cms.yunle.fun", "__Host-ylf-cms-session"),
+        ("cms.yunle.fun", "h3"),
+    ]
+
+    static func clear(completion: @escaping () -> Void) {
+        clear(in: .default(), completion: completion)
+    }
+
+    static func clear(in dataStore: WKWebsiteDataStore,
+                      completion: @escaping () -> Void) {
+        // Identity resets also run before any browser exists. Keep a WebKit
+        // context for this store alive through both enumeration and deletion;
+        // a detached cookie store can stall across iOS process suspension.
+        // The context never loads a page or joins the visible session pool.
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = dataStore
+        let context = WKWebView(frame: .zero, configuration: configuration)
+        let cookieStore = dataStore.httpCookieStore
+        cookieStore.getAllCookies { cookies in
+            let identityCookies = cookies.filter { cookie in
+                let host = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
+                return identitySessionCookies.contains { $0.host == host && $0.name == cookie.name }
+            }
+            let group = DispatchGroup()
+            identityCookies.forEach { cookie in
+                group.enter()
+                cookieStore.delete(cookie) { group.leave() }
+            }
+            group.notify(queue: .main) {
+                withExtendedLifetime(context) { completion() }
+            }
+        }
+    }
+}
+
+#if canImport(Capacitor)
 @objc(HostRuntimePlugin)
 public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "HostRuntimePlugin"
@@ -1280,39 +1323,10 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// Native allowlist for sessions derived from Apps identity.
-    ///
-    /// Keep this independent from web input: JavaScript cannot choose arbitrary
-    /// cookie names or domains for native deletion.
-    private static let identitySessionCookies: [(host: String, name: String)] = [
-        ("play.yunle.fun", "__Host-ylf_play_session"),
-        ("cms.yunle.fun", "__Host-ylf-cms-session"),
-        // nuxt-auth-utils stores the CMS user projection separately. It is
-        // never authoritative without the opaque CMS session, but clearing it
-        // ensures SSR renders LoginGate immediately after an Apps account change.
-        ("cms.yunle.fun", "h3"),
-    ]
-
     /// Apps 退出或切换账号后清除第一方 HttpOnly BFF cookie，并通知保活页面刷新身份。
     @objc func clearIdentitySessions(_ call: CAPPluginCall) {
-        let cookieStore = WKWebsiteDataStore.default().httpCookieStore
-        cookieStore.getAllCookies { [weak self] cookies in
-            let identityCookies = cookies.filter { cookie in
-                let host = cookie.domain
-                    .trimmingCharacters(in: CharacterSet(charactersIn: "."))
-                    .lowercased()
-                return Self.identitySessionCookies.contains {
-                    $0.host == host && $0.name == cookie.name
-                }
-            }
-            let group = DispatchGroup()
-            identityCookies.forEach { cookie in
-                group.enter()
-                cookieStore.delete(cookie) {
-                    group.leave()
-                }
-            }
-            group.notify(queue: .main) {
+        DispatchQueue.main.async { [weak self] in
+            HostIdentitySessions.clear { [weak self] in
                 self?.sessions
                     .forEach { $0.notifyHostIdentityChanged() }
                 call.resolve()
@@ -1430,3 +1444,4 @@ public class HostRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
         else if let v = obj["ratingCount"] as? Double { info.ratingCount = Int(v) }
     }
 }
+#endif

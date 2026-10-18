@@ -1,0 +1,302 @@
+{
+  "sourceCommit": "a8b16f7f73d9ad9160996e68439ec694cfc75316",
+  "simulatorId": "07347157-E372-4089-8C58-22D87C0246CF",
+  "hostPID": 2738,
+  "debuggerAttached": false,
+  "independentAttribution": [
+    {
+      "pid": 2831,
+      "role": "WebContent (startup)",
+      "timestamp": "2026-10-18 07:19:31.776727+0800",
+      "message": "Acquiring assertion targeting [extension<com.apple.WebKit.WebContent[config:6E69CA09-34E3-3493-B8FC-B5021E1ACB71]((null):2738)>[uuid:61D8237B-D8FB-4D29-BF85-20D7627E3F87]:2831] from originator [app<fun.yunle.apps.benchmark-dev((null))>:2738] with description <RBSAssertionDescriptor| \"Browser Engine helper assertion targeting pid 2831\" ID:95477-2738-5516 target:2831 attributes:[\n\t<RBSDomainAttribute| domain:\"com.apple.browserenginekit\" name:\"Foreground\" sourceEnvironment:\"(null)\">\n\t]>"
+    },
+    {
+      "pid": 2832,
+      "role": "Networking",
+      "timestamp": "2026-10-18 07:19:31.792147+0800",
+      "message": "Acquiring assertion targeting [extension<com.apple.WebKit.Networking[config:6E69CA09-34E3-3493-B8FC-B5021E1ACB71]((null):2738)>[uuid:8B58F7EC-2155-43AF-9A66-29C5BE3FE39D]:2832] from originator [app<fun.yunle.apps.benchmark-dev((null))>:2738] with description <RBSAssertionDescriptor| \"Browser Engine helper assertion targeting pid 2832\" ID:95477-2738-5517 target:2832 attributes:[\n\t<RBSDomainAttribute| domain:\"com.apple.browserenginekit\" name:\"Foreground\" sourceEnvironment:\"(null)\">\n\t]>"
+    },
+    {
+      "pid": 6223,
+      "role": "WebContent (cloud-air)",
+      "timestamp": "2026-10-18 07:22:02.912087+0800",
+      "message": "Acquiring assertion targeting [extension<com.apple.WebKit.WebContent[config:6E69CA09-34E3-3493-B8FC-B5021E1ACB71]((null):2738)>[uuid:179E4756-72A8-439E-868F-560C2CA614BB]:6223] from originator [app<fun.yunle.apps.benchmark-dev((null))>:2738] with description <RBSAssertionDescriptor| \"Browser Engine helper assertion targeting pid 6223\" ID:95477-2738-5557 target:6223 attributes:[\n\t<RBSDomainAttribute| domain:\"com.apple.browserenginekit\" name:\"Foreground\" sourceEnvironment:\"(null)\">\n\t]>"
+    },
+    {
+      "pid": 6225,
+      "role": "GPU (cloud-air)",
+      "timestamp": "2026-10-18 07:22:02.930654+0800",
+      "message": "Acquiring assertion targeting [extension<com.apple.WebKit.GPU[config:6E69CA09-34E3-3493-B8FC-B5021E1ACB71]((null):2738)>[uuid:B281E8D7-4997-4CE9-B431-253567992F32]:6225] from originator [app<fun.yunle.apps.benchmark-dev((null))>:2738] with description <RBSAssertionDescriptor| \"Browser Engine helper assertion targeting pid 6225\" ID:95477-2738-5558 target:6225 attributes:[\n\t<RBSDomainAttribute| domain:\"com.apple.browserenginekit\" name:\"Foreground\" sourceEnvironment:\"(null)\">\n\t]>"
+    }
+  ],
+  "states": [
+    {
+      "state": "home",
+      "samples": 3,
+      "firstSampleUTC": "2026-10-17T23:20:45.983223+00:00",
+      "processes": [
+        {
+          "pid": 2738,
+          "role": "host",
+          "physicalFootprintBytes": [
+            70748896,
+            70765280,
+            70798048
+          ],
+          "meanMiB": 67.4922383626302
+        },
+        {
+          "pid": 2831,
+          "role": "WebContent (startup)",
+          "physicalFootprintBytes": [
+            15845872,
+            16730608,
+            15665648
+          ],
+          "meanMiB": 15.335759480794271
+        },
+        {
+          "pid": 2832,
+          "role": "Networking",
+          "physicalFootprintBytes": [
+            10062128,
+            10062128,
+            10062128
+          ],
+          "meanMiB": 9.595993041992188
+        }
+      ],
+      "rawSamplesSHA256": "86c1e44817ee637ee5b70e0cd28c7d20710c603870903aeea0ade480424ba049"
+    },
+    {
+      "state": "cloud-air",
+      "samples": 3,
+      "firstSampleUTC": "2026-10-17T23:22:20.428196+00:00",
+      "processes": [
+        {
+          "pid": 2738,
+          "role": "host",
+          "physicalFootprintBytes": [
+            76827360,
+            77007584,
+            77384416
+          ],
+          "meanMiB": 73.50265502929688
+        },
+        {
+          "pid": 2831,
+          "role": "WebContent (startup)",
+          "physicalFootprintBytes": [
+            15813128,
+            15813128,
+            15813128
+          ],
+          "meanMiB": 15.080574035644531
+        },
+        {
+          "pid": 2832,
+          "role": "Networking",
+          "physicalFootprintBytes": [
+            11684168,
+            11684168,
+            11880776
+          ],
+          "meanMiB": 11.205390930175781
+        },
+        {
+          "pid": 6223,
+          "role": "WebContent (cloud-air)",
+          "physicalFootprintBytes": [
+            70945600,
+            71093056,
+            72420160
+          ],
+          "meanMiB": 68.17462158203125
+        },
+        {
+          "pid": 6225,
+          "role": "GPU (cloud-air)",
+          "physicalFootprintBytes": [
+            24431016,
+            24480168,
+            25348520
+          ],
+          "meanMiB": 23.606524149576824
+        }
+      ],
+      "rawSamplesSHA256": "b73302e9496d480bad30b0b7b0da0a4ec46fc6a6a17ed66835edab9686c0a095"
+    },
+    {
+      "state": "minimized",
+      "samples": 3,
+      "firstSampleUTC": "2026-10-17T23:22:35.330693+00:00",
+      "processes": [
+        {
+          "pid": 2738,
+          "role": "host",
+          "physicalFootprintBytes": [
+            78498552,
+            78400248,
+            78416632
+          ],
+          "meanMiB": 74.8047612508138
+        },
+        {
+          "pid": 2831,
+          "role": "WebContent (startup)",
+          "physicalFootprintBytes": [
+            15845896,
+            15845896,
+            15845896
+          ],
+          "meanMiB": 15.111824035644531
+        },
+        {
+          "pid": 2832,
+          "role": "Networking",
+          "physicalFootprintBytes": [
+            12192072,
+            12110128,
+            12175688
+          ],
+          "meanMiB": 11.59600830078125
+        },
+        {
+          "pid": 6223,
+          "role": "WebContent (cloud-air)",
+          "physicalFootprintBytes": [
+            68750144,
+            68750144,
+            68750144
+          ],
+          "meanMiB": 65.56524658203125
+        },
+        {
+          "pid": 6225,
+          "role": "GPU (cloud-air)",
+          "physicalFootprintBytes": [
+            27036072,
+            26905000,
+            26905000
+          ],
+          "meanMiB": 25.700274149576824
+        }
+      ],
+      "rawSamplesSHA256": "f54e95f8e4431aa1c0799f393963dbaafed6cc4a4636c3cac559883803fb8c48"
+    },
+    {
+      "state": "restored",
+      "samples": 3,
+      "firstSampleUTC": "2026-10-17T23:22:48.282910+00:00",
+      "processes": [
+        {
+          "pid": 2738,
+          "role": "host",
+          "physicalFootprintBytes": [
+            78220024,
+            78220024,
+            78220024
+          ],
+          "meanMiB": 74.59642791748047
+        },
+        {
+          "pid": 2831,
+          "role": "WebContent (startup)",
+          "physicalFootprintBytes": [
+            15845896,
+            15845896,
+            15845896
+          ],
+          "meanMiB": 15.111824035644531
+        },
+        {
+          "pid": 2832,
+          "role": "Networking",
+          "physicalFootprintBytes": [
+            12093744,
+            12093744,
+            12093744
+          ],
+          "meanMiB": 11.533493041992188
+        },
+        {
+          "pid": 6223,
+          "role": "WebContent (cloud-air)",
+          "physicalFootprintBytes": [
+            67996480,
+            67996480,
+            67996480
+          ],
+          "meanMiB": 64.84649658203125
+        },
+        {
+          "pid": 6225,
+          "role": "GPU (cloud-air)",
+          "physicalFootprintBytes": [
+            27003304,
+            27003304,
+            27003304
+          ],
+          "meanMiB": 25.752357482910156
+        }
+      ],
+      "rawSamplesSHA256": "1d079825f179a82309b1d21b5fd11078e52efa4b6218146f40eee63789f3959d"
+    },
+    {
+      "state": "ended",
+      "samples": 3,
+      "firstSampleUTC": "2026-10-17T23:23:22.373408+00:00",
+      "processes": [
+        {
+          "pid": 2738,
+          "role": "host",
+          "physicalFootprintBytes": [
+            83921704,
+            83921704,
+            83921704
+          ],
+          "meanMiB": 80.03397369384766
+        },
+        {
+          "pid": 2831,
+          "role": "WebContent (startup)",
+          "physicalFootprintBytes": [
+            15878664,
+            15878664,
+            15878664
+          ],
+          "meanMiB": 15.143074035644531
+        },
+        {
+          "pid": 2832,
+          "role": "Networking",
+          "physicalFootprintBytes": [
+            12044616,
+            12044616,
+            12044616
+          ],
+          "meanMiB": 11.486640930175781
+        }
+      ],
+      "rawSamplesSHA256": "ee13177b1409bfaaa99467e7dc4e12e4fd25a9c4fed72d12a9f4987df5480409"
+    }
+  ],
+  "scope": "One manual open/minimize/restore/end cycle. Three sequential libproc reads per state. Not a leak or peak-memory test; footprint sums are not reported as total app memory.",
+  "initialGPU": {
+    "pid": 2833,
+    "exitObservedAt": "2026-10-18 07:20:12.400733+0800",
+    "note": "Exited before first home sample (07:20:45.983 local); the initial sampler omitted GPU candidate matching. Later sampler adds GPUExtension and captures pid 6225."
+  },
+  "endStateExitEvidence": [
+    {
+      "pid": 6223,
+      "timestamp": "2026-10-18 07:23:02.467537+0800",
+      "message": "Notifying connection [app<fun.yunle.apps.benchmark-dev((null))>:2738] that process [extension<com.apple.WebKit.WebContent[config:6E69CA09-34E3-3493-B8FC-B5021E1ACB71]((null):2738)>[uuid:179E4756-72A8-439E-868F-560C2CA614BB]:6223] exited with context <RBSProcessExitContext| voluntary>"
+    },
+    {
+      "pid": 6225,
+      "timestamp": "2026-10-18 07:23:02.483042+0800",
+      "message": "Notifying connection [app<fun.yunle.apps.benchmark-dev((null))>:2738] that process [extension<com.apple.WebKit.GPU[config:6E69CA09-34E3-3493-B8FC-B5021E1ACB71]((null):2738)>[uuid:B281E8D7-4997-4CE9-B431-253567992F32]:6225] exited with context <RBSProcessExitContext| specific, status:<RBSProcessExitStatus| domain:runningboard(15) code:0>>"
+    }
+  ]
+}

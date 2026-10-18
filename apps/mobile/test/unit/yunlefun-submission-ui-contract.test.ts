@@ -23,7 +23,10 @@ describe('yunLeFun owner submission UI contract', () => {
     expect(detailPage).toContain('云乐坊状态')
     expect(detailPage).toContain('设为公开并投稿')
     expect(detailPage).toContain('站点自身的登录、邀请或其他访问保护仍由开发者负责')
-    expect(detailPage).toContain('submitPublicMarket(app.value._id, { makePublic, shortName })')
+    // The whole record is sent so the write carries its version precondition;
+    // it still defaults to the app on screen.
+    expect(detailPage).toContain('performYunLeFunSubmission(makePublic: boolean, shortName?: string, target = app.value)')
+    expect(detailPage).toContain('submitPublicMarket(target, { makePublic, shortName })')
     expect(detailPage).not.toContain('公共市场审核')
   })
 

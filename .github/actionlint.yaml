@@ -1,0 +1,4 @@
+# actionlint 1.7.12 does not yet recognize GitHub's standard public-preview label.
+# This allowlist does not register or select a self-hosted machine.
+self-hosted-runner:
+  labels: [xcode-27]

@@ -7,8 +7,13 @@ dist
 **/.edgeone/
 **/.edgeone-nitro-config.mjs
 .env
+.env.*
+!.env.example
 *.jks
 *.keystore
+*.p8
+*.p12
+*.mobileprovision
 .idea/
 
 .playwright-mcp/
@@ -34,3 +39,6 @@ apps/desktop/public/images/*
 
 # Source and optimized catalog artwork is hosted in COS, outside the app bundle.
 apps/desktop/.media/
+
+# Production collection exports belong in private storage, outside Git.
+scripts/cloudbase-rules/*.backup-*.json

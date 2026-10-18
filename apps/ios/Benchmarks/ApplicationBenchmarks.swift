@@ -35,15 +35,77 @@ final class ApplicationBenchmarks: XCTestCase {
     }
 
     func testNativeDiscoveryDetailAtLargestText() throws {
+        try checkNativeDiscoveryDetail(large: true)
+    }
+
+    func testNativeIPadLandscapeDetailAtStandardText() throws {
+        try checkNativeDiscoveryDetail(large: false, landscape: true)
+    }
+
+    func testNativeIPadLandscapeDetailAtLargestText() throws {
+        try checkNativeDiscoveryDetail(large: true, landscape: true)
+    }
+
+    private func checkNativeDiscoveryDetail(large: Bool, landscape: Bool = false) throws {
         guard !isLegacy else { throw XCTSkip("Verifies the native discovery and detail route") }
         continueAfterFailure = false
+        let environment = ProcessInfo.processInfo.environment
+        if landscape {
+            guard environment["YLF_IPAD_LANDSCAPE_DETAIL"] == "1" else {
+                throw XCTSkip("Enable the owned iPad landscape detail journey explicitly")
+            }
+            #if !targetEnvironment(simulator)
+            throw XCTSkip("The landscape detail fixture only uses an owned simulator")
+            #else
+            XCTAssertEqual(UIDevice.current.userInterfaceIdiom, .pad)
+            let owned = try XCTUnwrap(environment["YLF_OWNED_BENCHMARK_SIMULATOR_UDID"])
+            XCTAssertFalse(owned.isEmpty)
+            XCTAssertEqual(owned, environment["SIMULATOR_UDID"])
+            XCTAssertTrue(["light", "dark"].contains(environment["YLF_ACCESSIBILITY_APPEARANCE"] ?? ""))
+            #endif
+        }
         let app = app
-        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
-        if let appearance = ProcessInfo.processInfo.environment["YLF_ACCESSIBILITY_APPEARANCE"] {
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName",
+                               large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
+        if let appearance = environment["YLF_ACCESSIBILITY_APPEARANCE"] {
             XCTAssertTrue(["system", "light", "dark"].contains(appearance))
             app.launchArguments += ["-appearance", appearance]
         }
+        // A newly created simulator can report an unknown physical orientation.
+        // Establish and verify a portrait fixture, then restore that UI state.
+        if landscape { XCUIDevice.shared.orientation = .portrait }
         app.launch()
+        if landscape {
+            addTeardownBlock {
+                await MainActor.run {
+                    XCUIDevice.shared.orientation = .portrait
+                    let portrait = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                        let frame = app.windows.firstMatch.frame
+                        return frame.height > frame.width && frame.width > 0
+                    }, object: nil)
+                    XCTAssertEqual(XCTWaiter.wait(for: [portrait], timeout: 10), .completed)
+                    let restored = XCTAttachment(string: "fixture=portrait; restoredWindow=\(app.windows.firstMatch.frame)")
+                    restored.name = "landscape-detail-orientation-restored"; restored.lifetime = .keepAlways; self.add(restored)
+                }
+            }
+        }
+        if landscape {
+            let portrait = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                let frame = app.windows.firstMatch.frame
+                return frame.height > frame.width && frame.width > 0
+            }, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [portrait], timeout: 10), .completed)
+            XCUIDevice.shared.orientation = .landscapeLeft
+            // Physical orientation alone does not prove the app's UI rotated.
+            let rotated = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+                let frame = app.windows.firstMatch.frame
+                return frame.width > frame.height && frame.height > 0
+            }, object: nil)
+            XCTAssertEqual(XCTWaiter.wait(for: [rotated], timeout: 10), .completed)
+            let me = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label == %@", "person.crop.circle", "我")).firstMatch
+            XCTAssertTrue(me.waitForExistence(timeout: 5)); me.tap()
+            XCTAssertTrue(app.buttons["me.login"].waitForExistence(timeout: 10), "Use a guest fixture without an account")
+        }
         let phoneTab = app.tabBars.buttons["寻乐"]
         if phoneTab.waitForExistence(timeout: 5) {
             phoneTab.tap()
@@ -65,6 +127,11 @@ final class ApplicationBenchmarks: XCTestCase {
         }, object: nil)
         XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 5), .completed)
         let primary = app.buttons["获取"].exists ? app.buttons["获取"] : app.buttons["打开"]
+        if landscape {
+            XCTAssertEqual(primary.label, "获取", "The fixture must not already have acquired the public application")
+            XCTAssertTrue(app.buttons["试用"].isHittable)
+            XCTAssertEqual(app.webViews.count, 0)
+        }
         XCTAssertTrue(primary.isHittable)
         let bottomTabBar = app.tabBars.firstMatch
         XCTAssertTrue(bottomTabBar.exists || UIDevice.current.userInterfaceIdiom == .pad,
@@ -72,10 +139,21 @@ final class ApplicationBenchmarks: XCTestCase {
         let bottom = bottomTabBar.exists ? bottomTabBar.frame.minY : app.windows.firstMatch.frame.maxY
         XCTAssertGreaterThanOrEqual(primary.frame.minY, navigation.frame.maxY - 1)
         XCTAssertLessThanOrEqual(primary.frame.maxY, bottom + 1)
-        attach(app, name: "discovery-detail-largest")
+        let name = "discovery-detail-\(large ? "largest" : "standard")\(landscape ? "-landscape" : "")"
+        attach(app, name: name)
+        if landscape {
+            // Keep both captures: some simulator runtimes encode a rotated
+            // application crop differently from the full display screenshot.
+            let display = XCUIScreen.main.screenshot()
+            let screenshot = XCTAttachment(screenshot: display)
+            screenshot.name = name + "-full-display"; screenshot.lifetime = .keepAlways; add(screenshot)
+            let geometry = XCTAttachment(string: "window=\(app.windows.firstMatch.frame)\nnavigation=\(navigation.frame)\nprimary=\(primary.frame)\ntrial=\(app.buttons["试用"].frame)\n" + app.debugDescription)
+            geometry.name = name + "-geometry-and-accessibility"; geometry.lifetime = .keepAlways; add(geometry)
+        }
         navigation.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
         XCTAssertTrue(featured.isHittable)
+        if landscape { attach(app, name: name + "-returned"); XCTAssertEqual(app.webViews.count, 0) }
     }
 
     func testLaunchResponsiveFrame() throws {

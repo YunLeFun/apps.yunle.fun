@@ -55,3 +55,26 @@ iPad 最大字号 VoiceOver 则 **0 通过 / 1 失败 / 0 跳过**：`test_sim_2
 该次未完成正常状态恢复，专用 iPad 的 VoiceOver 偏好仍为开启。已关闭并删除这台临时模拟器及其测试状态；原有 iPhone 模拟器偏好核对为关闭，用户环境保留。额外读取服务描述的诊断未取得输出，已撤回，不加入重试或跳过。iPad 详情朗读矩阵继续未完成。
 
 最终测试适配在原有 iPhone 18 Pro / iOS 27、深色最大辅助字号回归 **2 通过 / 0 失败 / 0 跳过**：`test_sim_2026-10-17T07-16-31-093Z_pid44279_775699bd.xcresult`。普通触摸与 VoiceOver 详情均通过，实际朗读、获取 / 试用相邻顺序和原入口焦点恢复已核对，状态恢复为关闭；随后系统偏好读回同样为关闭。测试工具配置恢复原 `ios-native`，专用小屏 / iPad 已清理，原有模拟器保留。
+
+## iPad 横屏验证 {#ipad-landscape-validation}
+
+2026-10-18 使用 `22fbbfc` 的干净源码及新增 Benchmark 夹具，在新建独占 iPad Pro 11-inch（M5）/ iOS 27 验证实际公开“今天来做菜”详情。只有测试源码变化，未包含并行缓存实现或修改产品页面。每例先建立 `834 × 1210pt` 竖屏起点，确认访客身份，再要求窗口实际变为 `1210 × 834pt`；不能只凭 [`XCUIDevice.orientation`](https://developer.apple.com/documentation/xcuiautomation/xcuidevice/orientation) 的物理方向判断界面方向。
+
+最终带整屏截图的四例 **4 通过 / 0 失败 / 0 跳过**，分别保存在 `light-display.xcresult` 和 `dark-display.xcresult`：
+
+| 外观 | 字号         | 用例时间 | 获取按钮范围（pt）          |
+| ---- | ------------ | -------- | --------------------------- |
+| 浅色 | 标准         | 33.628s  | x=140，y=262.5，58 × 34.5   |
+| 浅色 | 最大辅助字号 | 31.887s  | x=40，y=448.5，144.5 × 77.5 |
+| 深色 | 标准         | 33.436s  | x=140，y=262.5，58 × 34.5   |
+| 深色 | 最大辅助字号 | 32.081s  | x=40，y=448.5，144.5 × 77.5 |
+
+四例均确认获取 / 试用可交互、主要操作位于导航栏下方，页面没有 WebView；通过系统返回后，原精选入口仍可交互。没有点击获取、试用、分享或评价。XCTest 清理阶段逐例恢复竖屏，四份回读均为 `834 × 1210pt`。整屏截图已逐图核对实际浅深色、完整名称、作者、摘要及两项操作；这不替代触达区域、对比度、VoiceOver 或全部滚动内容的审计。
+
+同一最终测试产物在本任务独占 iPhone 18 Pro / iOS 27 复验原有最大字号详情路径，**1 / 0 / 0**，用例 18.697 秒，保存为 `iphone-regression.xcresult`。没有改变原手机端 TabBar 要求；本轮新建 iPad 已关闭删除，原独占 iPhone 已关闭保留。
+
+保留的前置失败包括一次测试目标名选择错误（未执行用例），以及两项物理方向初始值检查失败（尚未旋转或进入详情）。后者促使夹具明确建立竖屏起点，并把恢复放入 XCTest teardown，而不是依赖测试方法内 `defer`。此前仅带应用截图的浅深色四例也通过，但不与最终四例合并成一次矩阵。
+
+本运行时的 `app.screenshot()` 横屏应用裁图带旋转元数据，查看时出现黑边和截断；同一页面另取 `XCUIScreen.main.screenshot()` 后完整显示。测试保留两种原始截图、完整 AX 和几何记录，没有旋转、裁切或重绘图片来证明布局。证据统一保存于本聊天 `ipad-landscape-22fbbfc/`。原 iPad VoiceOver 的无语音 / 系统服务崩溃、系统全量审计及其他 G4 状态继续未完成。
+
+两条用例为 `ApplicationBenchmarks/testNativeIPadLandscapeDetailAtStandardText` 与 `testNativeIPadLandscapeDetailAtLargestText`，目标是 `YunleFunBenchmarksTests`，Scheme 为 `YunleFunBenchmarks`。执行时显式提供 `TEST_RUNNER_YLF_IPAD_LANDSCAPE_DETAIL=1`、`TEST_RUNNER_YLF_OWNED_BENCHMARK_SIMULATOR_UDID` 及 `TEST_RUNNER_YLF_ACCESSIBILITY_APPEARANCE=light|dark`；只有声明的独占 iPad 模拟器可以进入夹具。

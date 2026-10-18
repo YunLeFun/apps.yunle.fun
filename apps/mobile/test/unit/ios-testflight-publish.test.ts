@@ -17,6 +17,7 @@ function build(version: string, overrides: Record<string, unknown> = {}) {
       uploadedDate: new Date(Date.UTC(2026, 0, 1, 0, 0, Number(version))).toISOString(),
       expired: false,
       processingState: 'VALID',
+      buildAudienceType: 'INTERNAL_ONLY',
       ...overrides,
     },
   }
@@ -35,6 +36,8 @@ describe('ios-testflight-publish CLI', () => {
       '--',
       '--build',
       '122',
+      '--version',
+      '0.2.0',
       '--tester-email',
       'tester@example.com',
       '--invite-all-internal-users',
@@ -45,11 +48,13 @@ describe('ios-testflight-publish CLI', () => {
       help: false,
       inviteAllInternalUsers: true,
       testerEmails: ['tester@example.com'],
+      marketingVersion: '0.2.0',
     })
   })
 
   it('rejects unknown or incomplete options', () => {
     expect(() => parseArgs(['--build'])).toThrow('--build 需要一个值')
+    expect(() => parseArgs(['--version'])).toThrow('--version 需要一个值')
     expect(() => parseArgs(['--unknown'])).toThrow('未知参数')
   })
 })
@@ -70,6 +75,10 @@ describe('testflight build selection', () => {
     expect(() => selectBuild([
       build('122', { expired: true }),
     ], '122')).toThrow('构建尚不可发布')
+  })
+
+  it('rejects an ambiguous build number instead of selecting a different marketing version', () => {
+    expect(() => selectBuild([build('1'), build('1')], '1')).toThrow('--version')
   })
 })
 
@@ -182,6 +191,59 @@ describe('internal tester safety', () => {
 })
 
 describe('testFlight publication', () => {
+  it('pins the requested iOS marketing version when build numbers are reused', async () => {
+    const builds = ['old-ios', 'target-ios', 'same-version-macos'].map(id => ({
+      ...build('1'),
+      id,
+      relationships: { preReleaseVersion: { data: { id: `version-${id}` } } },
+    }))
+    const client = {
+      async request(path: string, options: Record<string, any> = {}) {
+        expect(options.method ?? 'GET').toBe('GET')
+        if (path.startsWith('/v1/apps?'))
+          return { data: [{ id: 'app-1', attributes: { name: '云乐坊', bundleId: 'fun.yunle.apps' } }] }
+        if (path.startsWith('/v1/builds?')) {
+          expect(new URL(path, 'https://api.appstoreconnect.apple.com').searchParams.get('include')).toBe('preReleaseVersion')
+          return {
+            data: builds,
+            included: builds.map(item => ({
+              id: `version-${item.id}`,
+              type: 'preReleaseVersions',
+              attributes: {
+                version: item.id === 'old-ios' ? '0.1.0' : '0.2.0',
+                platform: item.id === 'same-version-macos' ? 'MAC_OS' : 'IOS',
+              },
+            })),
+          }
+        }
+        if (path.includes('/betaGroups?') || path.includes('/betaAppLocalizations?') || path.includes('/betaBuildLocalizations?'))
+          return { data: [] }
+        throw new Error(`Unexpected request: ${path}`)
+      },
+    }
+    const result = await publishTestFlight({
+      client,
+      config: { bundleId: 'fun.yunle.apps', buildNumber: '1', marketingVersion: '0.2.0', dryRun: true },
+      log: () => {},
+    })
+    expect(result.build.id).toBe('target-ios')
+  })
+
+  it('rejects a public build before making any publication changes', async () => {
+    const client = {
+      async request(path: string) {
+        if (path.startsWith('/v1/apps?'))
+          return { data: [{ id: 'app-1', attributes: { name: '云乐坊' } }] }
+        if (path.startsWith('/v1/builds?'))
+          return { data: [build('1', { buildAudienceType: 'APP_STORE_ELIGIBLE' })] }
+        throw new Error(`Unexpected request: ${path}`)
+      },
+    }
+    await expect(publishTestFlight({ client, config: { bundleId: 'fun.yunle.apps', buildNumber: '1' } }))
+      .rejects
+      .toThrow('INTERNAL_ONLY')
+  })
+
   it('creates and assigns a missing beta tester for an eligible internal user', async () => {
     const group = {
       id: 'group-1',
@@ -236,7 +298,7 @@ describe('testFlight publication', () => {
         }
         if (path === '/v1/builds/build-122/buildBetaDetail') {
           return {
-            data: { attributes: { internalBuildState: 'IN_BETA_TESTING' } },
+            data: { attributes: { internalBuildState: 'IN_BETA_TESTING', externalBuildState: 'NOT_APPLICABLE' } },
           }
         }
         throw new Error(`Unexpected request: ${options.method ?? 'GET'} ${path}`)

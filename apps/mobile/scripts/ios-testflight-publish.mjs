@@ -35,6 +35,7 @@ export function parseArgs(argv) {
     help: false,
     inviteAllInternalUsers: false,
     testerEmails: [],
+    marketingVersion: undefined,
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -44,6 +45,9 @@ export function parseArgs(argv) {
     }
     else if (arg === '--build') {
       options.buildNumber = requireValue(argv, ++index, arg)
+    }
+    else if (arg === '--version') {
+      options.marketingVersion = requireValue(argv, ++index, arg)
     }
     else if (arg === '--tester-email') {
       options.testerEmails.push(requireValue(argv, ++index, arg))
@@ -109,6 +113,8 @@ export function selectBuild(builds, requestedBuildNumber) {
     const states = requested.map(build => `${build.attributes.version}:${build.attributes.processingState}`).join(', ')
     throw new Error(`构建尚不可发布（${states}）`)
   }
+  if (requestedBuildNumber && eligible.length > 1)
+    throw new Error('同一构建号对应多个版本，请同时指定 --version')
 
   return eligible[0]
 }
@@ -226,6 +232,7 @@ export function loadConfig(env, options) {
     keyPath,
     locale: env.ASC_BETA_LOCALE ?? DEFAULTS.locale,
     marketingUrl: env.ASC_MARKETING_URL ?? DEFAULTS.marketingUrl,
+    marketingVersion: options.marketingVersion ?? env.ASC_MARKETING_VERSION,
     privacyPolicyUrl: env.ASC_PRIVACY_POLICY_URL ?? DEFAULTS.privacyPolicyUrl,
     testerEmails: [...new Set(testerEmails.map(email => email.toLowerCase()))],
     whatsNew: env.ASC_WHATS_NEW ?? DEFAULTS.whatsNew,
@@ -268,7 +275,7 @@ async function getApp(client, bundleId) {
   return payload.data[0]
 }
 
-async function getBuild(client, appId, buildNumber) {
+async function getBuild(client, appId, buildNumber, marketingVersion) {
   const params = {
     'filter[app]': appId,
     'fields[builds]': 'version,uploadedDate,expirationDate,expired,processingState,usesNonExemptEncryption,buildAudienceType',
@@ -276,8 +283,20 @@ async function getBuild(client, appId, buildNumber) {
   }
   if (buildNumber)
     params['filter[version]'] = buildNumber
+  if (marketingVersion) {
+    params.include = 'preReleaseVersion'
+    params['fields[builds]'] += ',preReleaseVersion'
+    params['fields[preReleaseVersions]'] = 'version,platform'
+  }
   const payload = await client.request(`/v1/builds?${query(params)}`)
-  return selectBuild(payload.data, buildNumber)
+  const versions = new Set((payload.included ?? [])
+    .filter(item => item.type === 'preReleaseVersions'
+      && item.attributes.version === marketingVersion && item.attributes.platform === 'IOS')
+    .map(item => item.id))
+  const builds = marketingVersion
+    ? payload.data.filter(item => versions.has(item.relationships?.preReleaseVersion?.data?.id))
+    : payload.data
+  return selectBuild(builds, buildNumber)
 }
 
 async function ensureEncryptionDeclaration(client, build, dryRun, log) {
@@ -527,14 +546,17 @@ async function verifyPublication(client, group, build) {
   return {
     buildAttached: builds.some(item => item.id === build.id),
     internalBuildState: betaDetail.data.attributes.internalBuildState,
+    externalBuildState: betaDetail.data.attributes.externalBuildState,
     testerCount: testers.length,
   }
 }
 
 export async function publishTestFlight({ client, config, log = console.log }) {
   const app = await getApp(client, config.bundleId)
-  const build = await getBuild(client, app.id, config.buildNumber)
-  log(`目标：${app.attributes.name} ${config.bundleId}，构建 ${build.attributes.version}`)
+  const build = await getBuild(client, app.id, config.buildNumber, config.marketingVersion)
+  if (build.attributes.buildAudienceType !== 'INTERNAL_ONLY')
+    throw new Error('目标构建不是 INTERNAL_ONLY，请用仅内部测试配置重新导出和上传')
+  log(`目标：${app.attributes.name} ${config.bundleId}，版本 ${config.marketingVersion ?? '未指定'}，构建 ${build.attributes.version}，Build ID ${build.id}`)
 
   await ensureEncryptionDeclaration(client, build, config.dryRun, log)
   const group = await ensureInternalGroup(client, app.id, config, log)
@@ -580,8 +602,10 @@ export async function publishTestFlight({ client, config, log = console.log }) {
   const result = config.dryRun
     ? { buildAttached: Boolean(group), internalBuildState: 'DRY_RUN', testerCount: 0 }
     : await verifyPublication(client, group, build)
-  if (!config.dryRun && (!result.buildAttached || result.internalBuildState !== 'IN_BETA_TESTING'))
+  if (!config.dryRun && (!result.buildAttached || result.internalBuildState !== 'IN_BETA_TESTING'
+    || result.externalBuildState !== 'NOT_APPLICABLE' || result.testerCount === 0)) {
     throw new Error(`发布验收失败：${JSON.stringify(result)}`)
+  }
 
   log(config.dryRun
     ? 'Dry run 完成，未修改 App Store Connect'
@@ -595,6 +619,7 @@ function printHelp() {
 
 选项：
   --build <number>                 发布指定 build；默认选择最新 VALID build
+  --version <version>              同时限定 iOS 营销版本，例如 0.2.0
   --tester-email <email>           邀请指定的现有内部用户，可重复
   --invite-all-internal-users      邀请所有有当前 App 权限的 ASC 用户
   --dry-run                        只检查并显示计划，不修改 ASC
@@ -606,7 +631,7 @@ function printHelp() {
   ASC_KEY_P8
 
 可选环境变量：
-  ASC_BUILD_NUMBER, ASC_INTERNAL_GROUP, ASC_INTERNAL_TESTER_EMAILS,
+  ASC_BUILD_NUMBER, ASC_MARKETING_VERSION, ASC_INTERNAL_GROUP, ASC_INTERNAL_TESTER_EMAILS,
   ASC_WHATS_NEW, ASC_BETA_DESCRIPTION, ASC_FEEDBACK_EMAIL,
   ASC_MARKETING_URL, ASC_PRIVACY_POLICY_URL, ASC_BETA_LOCALE`)
 }

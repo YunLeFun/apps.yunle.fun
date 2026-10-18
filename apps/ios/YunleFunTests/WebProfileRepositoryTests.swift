@@ -299,6 +299,9 @@ final class WebProfileRepositoryTests: XCTestCase {
     private func page(_ selected: WebProfileRepository.Selection) async throws -> WKWebView {
         stores.insert(selected.identifier)
         let config = WKWebViewConfiguration()
+        // These storage probes deliberately stay outside a window. Keep their
+        // IndexedDB promises and cleanup timers running after navigation ends.
+        config.preferences.inactiveSchedulingPolicy = .none
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: selected.identifier)
         let web = WKWebView(frame: .zero, configuration: config)
         pages.append(web)

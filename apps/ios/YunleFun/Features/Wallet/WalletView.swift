@@ -118,9 +118,7 @@ private struct WalletBalanceSection: View {
         Section {
             if let snapshot = wallet.snapshot {
                 LabeledContent("云币余额") {
-                    Text(snapshot.coin.formatted()).font(.title2.bold()).monospacedDigit()
-                        .numericTransition(Double(snapshot.coin))
-                        .animation(Motion.spring, value: snapshot.coin)
+                    WalletCoinBalance(coin: snapshot.coin)
                 }
             } else if wallet.isLoading { ProgressView("正在读取余额") }
             else { Text("尚未获取余额").foregroundStyle(.secondary) }
@@ -135,6 +133,15 @@ private struct WalletBalanceSection: View {
                 Button("重试核对历史订单") { Task { await wallet.reconcileAndRefresh() } }
             }
         } header: { Text("账户") }
+    }
+}
+struct WalletCoinBalance: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let coin: Int64
+    var body: some View {
+        Text(coin.formatted()).font(.title2.bold()).monospacedDigit()
+            .numericTransition(Double(coin))
+            .animation(Motion.standard(reduceMotion: reduceMotion), value: coin)
     }
 }
 private struct CommerceProductsSection: View {

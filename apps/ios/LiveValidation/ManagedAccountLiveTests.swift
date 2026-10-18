@@ -7,6 +7,108 @@ import UIKit
 import XCTest
 @testable import YunleFun
 
+/// Samples pixels from the actual wallet amount component. Values are local
+/// fixtures; no authentication, wallet service, or StoreKit operation is used.
+@MainActor
+final class WalletNumericMotionLiveTests: XCTestCase {
+    func testStandardMotionAnimatesBalanceDigits() async throws { try await sample(reduced: false) }
+    func testReducedMotionChangesBalanceWithoutIntermediateFrames() async throws { try await sample(reduced: true) }
+
+    private func sample(reduced: Bool) async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_NUMERIC_MOTION"] == "1" else { throw XCTSkip("Requires controlled system motion on an owned simulator") }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This validation is restricted to an owned simulator")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else { return XCTFail("Requires the exact owned simulator") }
+        XCTAssertEqual(UIAccessibility.isReduceMotionEnabled, reduced)
+        XCTAssertTrue(UIView.areAnimationsEnabled)
+        let signal = WalletNumericMotionSignal()
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: 390, height: 180)
+        let controller = UIHostingController(rootView: WalletNumericMotionFixture(signal: signal))
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKeyAndVisible() }
+        try await Task.sleep(nanoseconds: 400_000_000)
+        controller.view.layoutIfNeeded()
+        XCTAssertEqual(signal.observedReduceMotion, reduced)
+        let format = UIGraphicsImageRendererFormat(); format.scale = 2; format.opaque = true
+        let renderer = UIGraphicsImageRenderer(bounds: controller.view.bounds, format: format)
+        func capture() -> UIImage { renderer.image { _ in controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: false) } }
+        func digest(_ image: UIImage) throws -> String {
+            let cg = try XCTUnwrap(image.cgImage)
+            var pixels = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
+            try pixels.withUnsafeMutableBytes { buffer in
+                let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: cg.width, height: cg.height,
+                    bitsPerComponent: 8, bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+                context.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+            }
+            return SHA256.hash(data: Data(pixels)).map { String(format: "%02x", $0) }.joined()
+        }
+        let initial = capture(), initialHash = try digest(initial)
+        var frames: [UIImage] = [], hashes: [String] = [], times: [Double] = []
+        signal.coin = 8888
+        let start = CACurrentMediaTime()
+        repeat {
+            try await Task.sleep(nanoseconds: 8_000_000)
+            let frame = capture(); frames.append(frame); hashes.append(try digest(frame))
+            times.append(CACurrentMediaTime() - start)
+        } while CACurrentMediaTime() - start < 0.8
+        var final = capture(), finalHash = try digest(final), stableSamples = 0
+        let settleDeadline = CACurrentMediaTime() + 3
+        repeat {
+            try await Task.sleep(nanoseconds: 50_000_000)
+            let next = capture(), nextHash = try digest(next)
+            stableSamples = nextHash == finalHash ? stableSamples + 1 : 0
+            final = next; finalHash = nextHash
+        } while stableSamples < 3 && CACurrentMediaTime() < settleDeadline
+        let settleSeconds = CACurrentMediaTime() - start
+        XCTAssertEqual(stableSamples, 3, "Capture the final reference after three identical normalized pixel samples")
+        try await Task.sleep(nanoseconds: 200_000_000)
+        XCTAssertEqual(try digest(capture()), finalHash, "The final image must be stable")
+        XCTAssertNotEqual(initialHash, finalHash, "Changing the balance must render a different value")
+        let intermediate = hashes.enumerated().filter { $0.element != initialHash && $0.element != finalHash }.map(\.offset)
+        for (name, frame) in [("initial", initial), ("final", final)] + intermediate.prefix(3).map({ ("intermediate-\($0)", frames[$0]) }) {
+            let attachment = XCTAttachment(image: frame)
+            attachment.name = "wallet-digits-\(reduced ? "reduced" : "standard")-\(name)"
+            attachment.lifetime = .keepAlways; add(attachment)
+        }
+        let evidence = XCTAttachment(data: try JSONSerialization.data(withJSONObject: [
+            "reduceMotion": reduced, "times": times, "hashes": hashes,
+            "initialHash": initialHash, "finalHash": finalHash,
+            "intermediateFrames": intermediate.count, "sampleCount": hashes.count,
+            "settleSeconds": settleSeconds,
+            "initialCoin": 1111, "finalCoin": 8888,
+            "scope": "Actual WalletCoinBalance pixels with fixture amounts; no network or financial writes",
+        ], options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        evidence.name = "wallet-digits-\(reduced ? "reduced" : "standard")"; evidence.lifetime = .keepAlways; add(evidence)
+        XCTAssertGreaterThan(hashes.count, 2)
+        if reduced { XCTAssertTrue(intermediate.isEmpty, "Reduce Motion must update the balance without intermediate digit frames") }
+        else { XCTAssertGreaterThan(intermediate.count, 2, "The ordinary-motion control must retain its numeric transition") }
+    }
+}
+@MainActor
+private final class WalletNumericMotionSignal: ObservableObject {
+    @Published var coin: Int64 = 1111
+    var observedReduceMotion: Bool?
+}
+private struct WalletNumericMotionFixture: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject var signal: WalletNumericMotionSignal
+    var body: some View {
+        WalletCoinBalance(coin: signal.coin)
+            .foregroundStyle(.black)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.white)
+            .environment(\.dynamicTypeSize, .large)
+            .onAppear { signal.observedReduceMotion = reduceMotion }
+    }
+}
+
 /// Real wallet reads only. Reconciliation can regrant historical orders, so it
 /// is deliberately excluded along with purchase readiness and verification.
 @MainActor

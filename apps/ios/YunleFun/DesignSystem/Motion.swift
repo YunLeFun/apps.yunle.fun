@@ -56,10 +56,9 @@ extension View {
         }
     }
 
-    /// Numeric labels roll between values on iOS 17+.
-    @ViewBuilder
+    /// Numeric labels roll on iOS 17+ only when system motion is enabled.
     func numericTransition(_ value: Double) -> some View {
-        if #available(iOS 17, *) { contentTransition(.numericText(value: value)) } else { self }
+        modifier(NumericTextTransition(value: value))
     }
 
     /// Hero zoom from a source view into a pushed destination (iOS 18+).
@@ -76,6 +75,17 @@ extension View {
     @ViewBuilder
     func bounceSymbol(value: some Equatable) -> some View {
         if #available(iOS 17, *) { symbolEffect(.bounce, value: value) } else { self }
+    }
+}
+
+private struct NumericTextTransition: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let value: Double
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 17, *) {
+            content.contentTransition(reduceMotion ? .identity : .numericText(value: value))
+        } else { content }
     }
 }
 

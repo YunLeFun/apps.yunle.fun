@@ -680,3 +680,5 @@ CI 补充：`c726d64` 第一轮为 **431 通过 / 2 失败**，涉及真实 WebK
 外部 IAP 候选补充 Sandbox 正式权益拒绝保护，避免测试发放或退款影响正式钱包 / 会员；12 条旧实现失败的边界用例修复后通过，完整支付回归 **312 / 0 / 0**。未部署，也尚无独立 Sandbox 权益环境，见[拒绝保护及边界](./ios-wallet.md#sandbox-entitlement-guard)。
 
 来源 `1d6f2e0` 的完整 Native CI 首轮自然成功，原日志核对 **445 / 0 / 0**，Release、清理和七项常规检查成功，详见[该轮证据](./ios-ci-and-open-source.md#ci-1d6f2e0)。历史间歇失败及完整 G1–G6 的其余验收条件继续保留。
+
+进一步修复钱包余额和共用数字过渡忽略减少动态效果的问题。真实系统开关下，实际余额组件的旧实现对照失败，修复后两种模式 **2 / 0 / 0**：开启时零中间帧，普通模式仍有数字过渡；原系统偏好恢复，见[渲染证据](./ios-accessibility-audits.md#wallet-numeric-reduced-motion)。当前可见 CloudBase 环境只有既有正式环境，独立 Sandbox 权益环境和 Apple 测试条件尚未确认；继续按完整 G1–G6 推进。

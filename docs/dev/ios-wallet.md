@@ -113,3 +113,9 @@ M3 与整个迁移 Goal 保持未完成，没有上传 TestFlight 或提审。
 12 条新增结算边界测试在旧实现上失败，修复后通过；完整支付目录 **21 文件 / 312 通过 / 0 失败 / 0 跳过**。其中 7 条入口测试覆盖实际 `iap-order` / `appstore-notify` 路由，但 Apple 服务与数据库为本地替身；正式发放、恢复去重及退款仍通过。库同步和定向 lint 通过，原始失败及修复证据保存为 `iap-environment-*`。
 
 此保护尚未部署，也没有实现独立 Sandbox 权益服务或 App Review 测试购买流程。不能用它代替真实 Sandbox 发放、退款与跨设备恢复验收；完整 G5 和 G1–G6 目标继续保持未完成。
+
+后续只读盘点中，CloudBase 连接器当前账号 / 区域视图仅返回现有上海正式环境，尚未确认独立 Sandbox 权益环境；这不代表已盘点所有区域或其他账号。App Store Connect 商品、Sandbox Apple Account 与开发签名仍需实际确认。Apple 将[本地 Xcode 测试和 Sandbox](https://developer.apple.com/documentation/storekit/testing-at-all-stages-of-development-with-xcode-and-the-sandbox)明确区分：前者交易由 Xcode 签名，不能替代 App Store 签名交易和服务端联调。本次仅列环境，没有创建资源、部署或尝试购买；记录为 `sandbox-readiness-b61908b.json`。
+
+## 余额减少动态效果 · 2026-10-18
+
+已修复余额数字变化忽略系统“减少动态效果”的问题：开启后直接更新，普通模式保留数字过渡。实际 `WalletCoinBalance` 样例取样中，旧实现开启时仍有 30 个中间帧，修复后为 0；普通模式保留 31 个中间帧，最终两种模式 **2 / 0 / 0**，真实系统开关恢复。完整方法、原始失败和证据边界见[余额渲染验证](./ios-accessibility-audits.md#wallet-numeric-reduced-motion)。这项视觉夹具没有读取或修改真实余额。

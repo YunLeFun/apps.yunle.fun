@@ -63,7 +63,7 @@ final class NativeAuthorizationPage: HostAuthorizationPage {
     }
 }
 
-private struct HostLoginContent: View {
+struct HostLoginContent: View {
     @ObservedObject var accounts: AccountStore
     let application: String
     let signedIn: () -> Void
@@ -74,7 +74,7 @@ private struct HostLoginContent: View {
 }
 
 @MainActor
-private final class HostLoginController: UIHostingController<HostLoginContent>, UIAdaptivePresentationControllerDelegate {
+final class HostLoginController: UIHostingController<HostLoginContent>, UIAdaptivePresentationControllerDelegate {
     private final class Decision { var signedIn = false }
     private let decision: Decision
     private let completion: (Bool) -> Void

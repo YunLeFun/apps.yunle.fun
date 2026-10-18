@@ -4,6 +4,7 @@ struct AppRootView: View {
     @State private var selectedTab = AppTab.home
     @State private var workshopPath = NavigationPath()
     @StateObject private var feedbackLogin = FeedbackLoginCoordinator()
+    @StateObject private var crossAppAuthorization = CrossAppAuthorizationCoordinator()
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var runtime: NativeWebRuntime
@@ -23,6 +24,9 @@ struct AppRootView: View {
             .alert(item: $runtime.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             }
+            .background(EmptyView().alert(item: $crossAppAuthorization.issue) { issue in
+                Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
+            })
             .sheet(item: Binding(get: { feedbackLogin.login }, set: { if $0 == nil { feedbackLogin.presentationEnded() } }),
                    onDismiss: {
                 if feedbackLogin.didDismiss(current: accountBoundary, isUsable: accounts.user?.isUsable == true,
@@ -84,6 +88,8 @@ struct AppRootView: View {
         }
     }
     private func handleLink(_ url: URL) {
+        // 跨 App 授权入口优先：只弹授权面板，不切换 Tab、不打断当前页面
+        if crossAppAuthorization.handle(url, runtime: runtime, accounts: accounts) { return }
         // Authentication callbacks belong to ASWebAuthenticationSession, never
         // to the navigation parser. No raw callback URL is stored or logged.
         guard let destination = NativeLink.destination(url) else { return }

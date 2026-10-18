@@ -77,6 +77,18 @@ final class NativeWebRuntime: ObservableObject {
         if profileAccountID != accounts.user?.id { resetIdentity(to: accounts.user?.id) }
     }
 
+    var isAuthorizationBusy: Bool { authorizationBroker?.isBusy == true }
+
+    /// 跨 App 授权与网页内授权共用同一个 broker，互斥并随账号切换一起撤销
+    func beginCrossAppAuthorization(_ page: CrossAppAuthorizationPage) {
+        guard let broker = authorizationBroker else {
+            page.resolve(page.requestID, result: nil, error: HostAuthorizationError.unavailable.code)
+            return
+        }
+        broker.begin(requestID: page.requestID, sourceOrigin: page.request.sourceOrigin,
+                     parameters: page.request.brokerParameters, page: page, requireConsent: true)
+    }
+
     func configureCommerce(wallet: WalletStore, purchases: PurchaseCoordinator) {
         self.wallet = wallet; self.purchases = purchases
     }

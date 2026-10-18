@@ -46,7 +46,12 @@ final class NativeAuthorizationBroker {
     }
     deinit { flow?.operation?.cancel(); flow?.timeout?.cancel() }
 
-    func begin(requestID: String, sourceOrigin: String, parameters: [String: Any], page: HostAuthorizationPage) {
+    /// 同一时间只处理一个授权决策；网页运行时与跨 App 请求共用这一个 broker
+    var isBusy: Bool { flow != nil }
+
+    /// `requireConsent` 为跨 App 请求使用：即使注册策略为 trusted 也必须显式确认
+    func begin(requestID: String, sourceOrigin: String, parameters: [String: Any], page: HostAuthorizationPage,
+               requireConsent: Bool = false) {
         guard flow == nil, page.isPending(requestID) else {
             page.resolve(requestID, result: nil, error: HostAuthorizationError.unavailable.code)
             return
@@ -55,7 +60,7 @@ final class NativeAuthorizationBroker {
             let request = try HostSsoRequest(sourceOrigin: sourceOrigin, parameters: parameters)
             let next = Flow(requestID: requestID, request: request, page: page, accountID: accounts?.user?.id)
             flow = next
-            run(next, requireConsent: false)
+            run(next, requireConsent: requireConsent)
         } catch {
             page.resolve(requestID, result: nil, error: HostAuthorizationError.invalidRequest.code)
         }

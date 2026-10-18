@@ -222,7 +222,7 @@ struct PublicationPresentation { let label: String; let detail: String; let acti
 struct ApplicationSaveReceipt: Decodable { let app: ManagedApplication; let submission: ApplicationSubmission }
 struct MarketSubmissionReceipt: Decodable { let appId: String; let submissionId: String; let reviewStatus: ApplicationReviewStatus }
 enum PublishingValue {
-    static func writeVersion(_ value: String) -> Bool { value.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil }
+    static func writeVersion(_ value: String) -> Bool { value.utf8.count == 64 && value.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil }
     static func identifier(_ value: String) -> Bool { CommunityValue.identifier(value) && value != "." && value != ".." }
     static func slug(_ value: String) -> Bool { value.range(of: "^[a-z][a-z0-9-]{1,49}$", options: .regularExpression) != nil }
     static func https(_ value: String) -> Bool {

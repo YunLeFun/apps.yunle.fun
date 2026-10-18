@@ -185,7 +185,7 @@ function statusCode(error: unknown): number | undefined {
 
 /** Use the version shown to the user, never fetch and silently rebase an old form at save time. */
 function writeHeaders(app: AppRecord): Record<string, string> {
-  if (!app.writeVersion || !/^[a-f0-9]{64}$/.test(app.writeVersion))
+  if (!app.writeVersion || app.writeVersion.length !== 64 || !/^[a-f0-9]{64}$/.test(app.writeVersion))
     throw new Error('请刷新作品后重试，服务暂未提供安全保存所需的版本信息')
   return { 'If-Match': `"${app.writeVersion}"` }
 }

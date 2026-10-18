@@ -122,7 +122,7 @@ final class PublishingServiceTests: XCTestCase {
     }
     func testMissingOrMalformedWriteVersionsNeverSendAnEdit() async throws {
         let (service, fixture) = service([])
-        for version in [nil, "*", "W/abc", String(repeating: "a", count: 63)] as [String?] {
+        for version in [nil, "*", "W/abc", String(repeating: "a", count: 63), publishingVersion + "\n", publishingVersion + "\r"] as [String?] {
             do { _ = try await service.save(id: "app-one", draft: publishingDraft(), writeVersion: version, identity: identity); XCTFail() }
             catch { XCTAssertEqual(error as? PublishingError, .unsupportedServer) }
         }

@@ -133,6 +133,12 @@ describe('useApps server-mediated submission flow', () => {
     expect(api).not.toHaveBeenCalled()
   })
 
+  it('rejects multiline version values before constructing request headers', async () => {
+    const app = appRecord({ writeVersion: `${'a'.repeat(64)}\n` })
+    await expect(useApps().deleteApp(app)).rejects.toThrow('版本信息')
+    expect(api).not.toHaveBeenCalled()
+  })
+
   it('soft-delists through the server and checks slug availability there', async () => {
     api
       .mockResolvedValueOnce(undefined)

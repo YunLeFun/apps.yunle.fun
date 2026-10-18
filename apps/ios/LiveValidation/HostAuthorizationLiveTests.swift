@@ -25,7 +25,8 @@ private actor RecoveryObservedAuth: AccountAuthenticating {
 }
 
 /// Drives real page controls and the native consent button in-process. Host
-/// credentials never enter JavaScript; no identity or token is injected into JS.
+/// credentials never enter JavaScript. Expected identity is only compared with
+/// the consumer's own response; it is never used to establish a page session.
 @MainActor
 final class HostIdentitySwitchLiveTests: XCTestCase {
     func testRealCloudApplicationDoesNotRestoreAnotherHostAccount() async throws {
@@ -575,6 +576,244 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         let processID: Int32
         let profileID: UUID
         let ownerDigest: String
+    }
+
+    /// Play automatically adopts the host identity on mount. This validates
+    /// account isolation, not persistence without reauthorization. Its normal
+    /// login may update the managed account's player profile on the server.
+    func testManagedPlayIdentitySwitchPreservesSeparateDrafts() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let mode = env["YUNLEFUN_LIVE_PLAY_IDENTITY"], ["journey", "cleanup"].contains(mode) else {
+            throw XCTSkip("Requires explicit managed Play identity validation")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Only an owned isolated simulator may run this validation")
+        #endif
+        guard #available(iOS 17, *), let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"],
+              !owned.isEmpty, owned == env["SIMULATOR_UDID"],
+              let run = env["YUNLEFUN_PLAY_IDENTITY_RUN"], UUID(uuidString: run) != nil else {
+            return XCTFail("Requires named profiles, a run UUID and the exact owned simulator")
+        }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let directory = cache.appendingPathComponent("ManagedPlayIdentity-" + run)
+        let registry = directory.appendingPathComponent("profiles.json")
+        let draftKey = "managed-play-draft-" + run
+        let service = "fun.yunle.apps.play-identity." + run
+        let vault = KeychainAccountVault(service: service)
+        let profiles = WebProfileRepository(fileURL: registry, namespace: run)
+        let runtime = NativeWebRuntime(webProfiles: profiles)
+        let library = HomeLibrary(directory: directory.appendingPathComponent("home"))
+        let catalog = CatalogStore()
+        let auth = RecoveryObservedAuth()
+        let accounts = AccountStore(session: AccountSession(api: auth, vault: vault),
+            accountWillRemove: { try runtime.retireAccount($0) }, identityDidChange: { id in
+                runtime.resetIdentity(to: id); library.activateAccount(id); library.setAutoSyncEnabled(false)
+            })
+        runtime.configureAuthorization(accounts: accounts)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
+        let previous = window.rootViewController
+        let root = UIViewController(); root.view.backgroundColor = .systemBackground
+        window.rootViewController = root; window.makeKeyAndVisible(); runtime.anchor = root
+        defer { runtime.resetIdentity(); window.rootViewController = previous; window.makeKeyAndVisible() }
+        var stage = "setup", failure: String?, cleanupComplete = false
+        var phases: [[String: Any]] = [], consentCount = 0
+        var expectedDrafts: [UUID: String] = [:]
+        var evidence: [String: Any] = ["mode": mode, "run": run]
+        func mark(_ value: String) { stage = value; print("YLF_PLAY_IDENTITY_STAGE " + value) }
+        do {
+            if mode == "journey" {
+                guard !FileManager.default.fileExists(atPath: directory.path), try vault.read() == nil else {
+                    throw ProbeFailure.observation
+                }
+                let input = cache.appendingPathComponent("iOSNativeValidation/sso-identity-accounts.json")
+                let attributes = try FileManager.default.attributesOfItem(atPath: input.path)
+                guard let permissions = attributes[.posixPermissions] as? NSNumber, permissions.intValue & 0o077 == 0 else {
+                    throw ProbeFailure.observation
+                }
+                let data = try Data(contentsOf: input); try FileManager.default.removeItem(at: input)
+                let pool = try JSONDecoder().decode(Pool.self, from: data)
+                let expected = ["production-zero-balance": "ylf_prod_zero", "production-standard": "ylf_prod_standard"]
+                guard pool.accounts.count == 2, Set(pool.accounts.map(\.id)) == Set(expected.keys),
+                      pool.accounts.allSatisfy({ $0.environment == "production" && $0.username == expected[$0.id] && !$0.password.isEmpty }),
+                      let first = pool.accounts.first(where: { $0.id == "production-zero-balance" }),
+                      let second = pool.accounts.first(where: { $0.id == "production-standard" }) else {
+                    throw ProbeFailure.observation
+                }
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true,
+                                                        attributes: [.posixPermissions: 0o700])
+                await catalog.load()
+                let app = try XCTUnwrap(catalog.applications.first { $0.marketShortName == "play" })
+                var firstOwner: String?, firstProfile: UUID?, firstName: String?
+                weak var priorBrowser: WebViewController?
+                for (index, credential) in [first, second, first].enumerated() {
+                    mark("host-selection-\(index)")
+                    if index == 2, let firstOwner { try await accounts.select(firstOwner) }
+                    else { try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil) }
+                    let owner = try XCTUnwrap(accounts.user)
+                    guard owner.username == credential.username, owner.isUsable,
+                          try await accounts.authorization(forceRefresh: true).userID == owner.id else { throw ProbeFailure.observation }
+                    if index == 0 { firstOwner = owner.id; firstName = owner.displayName }
+                    if index == 1, owner.id == firstOwner || owner.displayName == firstName { throw ProbeFailure.ambiguousDisplayName }
+                    try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && root.presentedViewController == nil }
+                    guard !runtime.contains(app) else { throw ProbeFailure.observation }
+                    mark("open-play-\(index)")
+                    runtime.open(app, catalog: catalog, library: library)
+                    try await wait(seconds: 25) {
+                        guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
+                              web.url?.host == "play.yunle.fun" else { return false }
+                        return (try? await self.playPageState(web))?["ready"] as? Bool == true
+                    }
+                    let browser = try XCTUnwrap(browser(in: window))
+                    let web = try XCTUnwrap(webView(in: browser.view))
+                    guard browser !== priorBrowser else { throw ProbeFailure.observation }
+                    priorBrowser = browser
+                    let selected = try XCTUnwrap(profiles.snapshot(for: .account(owner.id), application: app).active)
+                    guard web.configuration.websiteDataStore.identifier == selected.identifier else { throw ProbeFailure.observation }
+                    if index == 0 { firstProfile = selected.identifier }
+                    if index == 1, firstProfile == selected.identifier { throw ProbeFailure.observation }
+                    if index == 2, firstProfile != selected.identifier { throw ProbeFailure.observation }
+                    let draft = try await web.callAsyncJavaScript("return localStorage.getItem(key)",
+                        arguments: ["key": draftKey], in: nil, contentWorld: .page)
+                    guard index == 2 ? draft as? String == "account-a-draft" : draft is NSNull else { throw ProbeFailure.observation }
+                    if index < 2 {
+                        let value = index == 0 ? "account-a-draft" : "account-b-draft"
+                        _ = try await web.callAsyncJavaScript("localStorage.setItem(key, value)",
+                            arguments: ["key": draftKey, "value": value], in: nil, contentWorld: .page)
+                        expectedDrafts[selected.identifier] = value
+                    }
+                    mark("automatic-host-adoption-\(index)")
+                    var accepted = Set<ObjectIdentifier>()
+                    try await wait(seconds: 30) {
+                        if let consent = browser.presentedViewController as? AuthorizationConsentViewController,
+                           !consent.isBeingPresented, !consent.isBeingDismissed,
+                           !accepted.contains(ObjectIdentifier(consent)),
+                           let button = self.button(in: consent.view, identifier: "authorization-current-account"), button.isEnabled {
+                            guard button.accessibilityLabel?.contains(owner.displayName) == true else { throw ProbeFailure.observation }
+                            accepted.insert(ObjectIdentifier(consent)); consentCount += 1
+                            button.sendActions(for: .touchUpInside)
+                        }
+                        let state = try await self.playPageState(web)
+                        let name = state["name"] as? String ?? ""
+                        evidence["lastPageObservation"] = [
+                            "phase": index, "ready": state["ready"] as? Bool == true,
+                            "sessionSettled": state["sessionSettled"] as? Bool == true,
+                            "hasLogin": state["hasLogin"] as? Bool == true,
+                            "hostIdentityMatches": name == owner.displayName,
+                            "foreignIdentityRendered": !name.isEmpty && name != owner.displayName,
+                            "nativeSheetPresent": browser.presentedViewController != nil]
+                        guard name.isEmpty || name == owner.displayName else { throw ProbeFailure.foreignIdentity }
+                        return name == owner.displayName && browser.presentedViewController == nil
+                    }
+                    mark("fresh-play-session-read-\(index)")
+                    let remote = try await readPlayRemoteIdentity(web, expectedOwner: owner.id)
+                    evidence["lastRemoteRead"] = remote
+                    guard remote["identityMatches"] as? Bool == true, remote["status"] as? Int == 200,
+                          remote["cacheBypassRequested"] as? Bool == true else { throw ProbeFailure.observation }
+                    phases.append(["phase": index, "managedAccount": credential.id,
+                        "newBrowserCreated": true, "namedStoreMatches": true, "draftIsolationOrRetention": true,
+                        "remoteIdentity": remote, "automaticHostAdoptionAllowed": true])
+                }
+                guard phases.count == 3, expectedDrafts.count == 2 else { throw ProbeFailure.observation }
+            } else { await accounts.restore() }
+        } catch { failure = stage }
+        mark("exact-run-cleanup")
+        runtime.resetIdentity()
+        do {
+            var cleaned: [[String: Any]] = []
+            if FileManager.default.fileExists(atPath: registry.path) {
+                struct Registry: Decodable { let active: [String: UUID]; let retained: [String: [UUID]] }
+                let saved = try JSONDecoder().decode(Registry.self, from: Data(contentsOf: registry))
+                let ids = Set(Array(saved.active.values) + saved.retained.values.flatMap { $0 })
+                guard ids.count <= 2 else { throw ProbeFailure.observation }
+                for id in ids {
+                    let configuration = WKWebViewConfiguration(); configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
+                    // No native host bridge: cleanup never creates another host authorization.
+                    let web = WKWebView(frame: .zero, configuration: configuration)
+                    defer { web.stopLoading() }
+                    web.load(URLRequest(url: URL(string: "https://play.yunle.fun/")!))
+                    try await wait(seconds: 25) {
+                        guard let state = try? await self.playPageState(web) else { return false }
+                        return state["ready"] as? Bool == true && state["sessionSettled"] as? Bool == true
+                    }
+                    let draft = try await web.callAsyncJavaScript("return localStorage.getItem(key)",
+                        arguments: ["key": draftKey], in: nil, contentWorld: .page)
+                    let retained = expectedDrafts[id].map { draft as? String == $0 }
+                    if retained == false, failure == nil { failure = "cleanup-draft-retention" }
+                    _ = try await web.callAsyncJavaScript("localStorage.removeItem(key)", arguments: ["key": draftKey], in: nil, contentWorld: .page)
+                    guard await signOutPlayWebUI(web),
+                          try await web.callAsyncJavaScript("return localStorage.getItem(key) === null",
+                              arguments: ["key": draftKey], in: nil, contentWorld: .page) as? Bool == true else { throw ProbeFailure.observation }
+                    let remote = try await readPlayRemoteIdentity(web, expectedOwner: "")
+                    guard remote["status"] as? Int == 401 else { throw ProbeFailure.observation }
+                    var result: [String: Any] = ["draftRemoved": true, "logoutUIConfirmed": true, "postLogoutGETStatus": 401]
+                    if let retained { result["draftRetainedUntilCleanup"] = retained }
+                    cleaned.append(result)
+                    evidence["cleanedProfiles"] = cleaned
+                }
+            }
+            evidence["cleanedProfiles"] = cleaned
+            await accounts.restore()
+            for user in accounts.overview.users {
+                try await accounts.remove(user.id)
+                guard accounts.notice == nil else { throw ProbeFailure.observation }
+            }
+            guard try await AccountSession(vault: vault).overview().users.isEmpty else { throw ProbeFailure.observation }
+            if FileManager.default.fileExists(atPath: directory.path) { try FileManager.default.removeItem(at: directory) }
+            let status = SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service] as CFDictionary)
+            guard status == errSecSuccess || status == errSecItemNotFound else { throw ProbeFailure.observation }
+            cleanupComplete = true
+        } catch { cleanupComplete = false }
+        evidence["phases"] = phases; evidence["nativeConsentCount"] = consentCount
+        evidence["failureStage"] = failure ?? "none"; evidence["cleanupComplete"] = cleanupComplete
+        evidence["fixtureDirectoryRemoved"] = !FileManager.default.fileExists(atPath: directory.path)
+        evidence["hostRemoteSignOutCount"] = await auth.signOutCount()
+        evidence["oneUseInputAbsent"] = !FileManager.default.fileExists(atPath: cache.appendingPathComponent("iOSNativeValidation/sso-identity-accounts.json").path)
+        evidence["scope"] = "Real Play HTTPS and native account switch; in-process consent/DOM controls; automatic host adoption allowed; managed player profile may be updated by login; no game/purchase operations or independent token-revocation claim"
+        let report = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        report.name = "managed-play-identity-" + mode; report.lifetime = .keepAlways; add(report)
+        XCTAssertNil(failure, "Play identity journey failed at \(failure ?? stage); private values omitted")
+        XCTAssertTrue(cleanupComplete, "Retry explicit cleanup with the same run UUID; private recovery state retained")
+    }
+
+    private func playPageState(_ web: WKWebView) async throws -> [String: Any] {
+        guard web.url?.host == "play.yunle.fun" else { throw ProbeFailure.observation }
+        return try await web.evaluateJavaScript("""
+        (() => ({ ready: document.readyState === 'complete' && document.documentElement.dataset.appReady === 'true' && !!document.querySelector('.site-header'),
+          name: document.querySelector('.header-session__name')?.textContent?.trim() || '',
+          sessionSettled: !!document.querySelector('.header-session--account,.header-session--login:not(:disabled)'),
+          hasLogin: !!document.querySelector('.header-session--login:not(:disabled)') }))()
+        """) as? [String: Any] ?? [:]
+    }
+
+    private func readPlayRemoteIdentity(_ web: WKWebView, expectedOwner: String) async throws -> [String: Any] {
+        guard web.url?.host == "play.yunle.fun" else { throw ProbeFailure.observation }
+        return try await web.callAsyncJavaScript("""
+        const response = await fetch('https://api.play.yunle.fun/v1/session', {
+          credentials: 'include', cache: 'no-store', redirect: 'error', headers: { Accept: 'application/json' }
+        });
+        const value = await response.json();
+        return { status: response.status, identityMatches: response.status === 200 && value.ok === true &&
+          expectedOwner.length > 0 && value.user?.userId === expectedOwner,
+          cacheBypassRequested: true, responseCacheControl: response.headers.get('Cache-Control') || 'unspecified' };
+        """, arguments: ["expectedOwner": expectedOwner], in: nil, contentWorld: .page) as? [String: Any] ?? [:]
+    }
+
+    private func signOutPlayWebUI(_ web: WKWebView) async -> Bool {
+        do {
+            let state = try await playPageState(web)
+            if state["name"] as? String == "" { return state["hasLogin"] as? Bool == true }
+            _ = try await web.evaluateJavaScript("document.querySelector('.header-session--account').click()")
+            try await wait(seconds: 5) {
+                (try? await web.evaluateJavaScript("!!document.querySelector('.header-account-menu__logout:not(:disabled)')")) as? Bool == true
+            }
+            _ = try await web.evaluateJavaScript("document.querySelector('.header-account-menu__logout').click()")
+            try await wait(seconds: 15) {
+                guard let state = try? await self.playPageState(web) else { return false }
+                return state["name"] as? String == "" && state["hasLogin"] as? Bool == true
+            }
+            return true
+        } catch { return false }
     }
 
     /// Seed and verify must be separate test-host launches with the same UUID.

@@ -56,6 +56,11 @@ struct WebAppMenuPage {
 /// 网页底部仍铺满。关闭收口在「更多」展开面板。
 class WebViewController: UIViewController {
     var url: URL?
+    /// Optional native-host loader for explicitly downloaded public application resources.
+    var initialContentLoader: ((WKWebView, URL, @escaping () -> Void) -> Void)?
+    /// Presentation can finish before an asynchronous host has submitted its first navigation.
+    private(set) var isPreparingInitialContent = false
+    var initialContentFailure: ((WKWebView) -> Void)?
     /// Native hosts may provide an identity-bound store before the view loads.
     var websiteDataStore: WKWebsiteDataStore?
     var customTitle: String = "" {
@@ -185,7 +190,10 @@ class WebViewController: UIViewController {
         setupOverlay()
         setNeedsStatusBarAppearanceUpdate()
         if let url = url {
-            webView.load(URLRequest(url: url))
+            if let initialContentLoader {
+                isPreparingInitialContent = true
+                initialContentLoader(webView, url) { [weak self] in self?.isPreparingInitialContent = false }
+            } else { webView.load(URLRequest(url: url)) }
         }
     }
 
@@ -1883,11 +1891,24 @@ extension WebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
+        initialContentFailure = nil
         progressView.isHidden = true
     }
 
     func webView(_ webView: WKWebView, didFail _: WKNavigation!, withError error: Error) {
         progressView.isHidden = true
+        if (error as NSError).code != NSURLErrorCancelled { retryInitialContent(webView) }
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation _: WKNavigation!, withError error: Error) {
+        progressView.isHidden = true
+        if (error as NSError).code != NSURLErrorCancelled { retryInitialContent(webView) }
+    }
+
+    private func retryInitialContent(_ webView: WKWebView) {
+        let retry = initialContentFailure
+        initialContentFailure = nil
+        retry?(webView)
     }
 
     func webView(

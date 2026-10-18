@@ -75,6 +75,11 @@ struct ApplicationDetailView: View {
                     }
                 }
             }
+            Section {
+                NavigationLink {
+                    ApplicationCacheView(application: app, store: runtime.applicationCache)
+                } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
+            }
             Section("信息") {
                 LabeledContent("分类", value: app.browseCategory)
                 LabeledContent("开发者", value: app.author)

@@ -26,3 +26,5 @@
 - [短信登录](./sms-login) — CloudBase 短信验证码登录
 - [Home Screen 拖拽排序](./home-screen-drag) — SortableJS 拖拽架构与踩坑记录
 - [负一屏 AI Agent](./ai-agent-screen) — 会员对话检索应用方案(CloudBase Web SDK + Agent 工具卡片）
+
+- [原生应用下载缓存](./ios-application-cache) — 本地资源下载、更新、清理和离线范围

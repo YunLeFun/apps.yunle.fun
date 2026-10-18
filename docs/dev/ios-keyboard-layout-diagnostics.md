@@ -53,7 +53,7 @@ TEST_RUNNER_YUNLEFUN_UI_LAYOUT_DIAGNOSTICS=1 xcodebuild \
 
 新建独立 iPhone 18 Pro / iOS 27 模拟器，不连接 Device Hub 的桌面硬件键盘，等待首次系统迁移完成后运行完整日常 Scheme，最终 **266 通过 / 0 失败 / 0 跳过**（260 单元 / 集成 + 6 UI）：`test_sim_2026-10-16T16-51-41-396Z_pid44279_53e18db2.xcresult`。保留键盘全部可见性 / 可操作性断言；没有改变全局偏好或注入线上账号。专用模拟器在验证后删除，原有设备与设置保留。此通过与前述硬件键盘模式失败分开记录，后续远端 CI 以新提交自身结果为准。
 
-相同最终表单源码的实际 AI 春联 SSO UI 与原生密码焦点诊断随后同次运行，**2 通过 / 0 失败 / 0 跳过，无新增告警**：`test_sim_2026-10-16T16-57-33-952Z_pid44279_65b772f5.xcresult`。完成真实密码登录、原生授权、网页身份与退出，测试会话和一次性输入已清理，见[SSO 复验](./ios-runtime-navigation.md#新导航容器真实-sso-复验-2026-10-17)。这不改写原 pageSheet / keyboard toolbar 最小对照的失败。
+相同最终表单源码的实际 AI 春联 SSO UI 与原生密码焦点诊断随后同次运行，**2 通过 / 0 失败 / 0 跳过，无新增告警**：`test_sim_2026-10-16T16-57-33-952Z_pid44279_65b772f5.xcresult`。完成真实密码登录、原生授权、网页身份与退出，测试会话和一次性输入已清理，见[SSO 复验](./ios-runtime-navigation.md#新导航容器真实-sso-复验-·-2026-10-17)。这不改写原 pageSheet / keyboard toolbar 最小对照的失败。
 
 该调整不代表完整 VoiceOver、所有登录方式、最低系统或真机验收完成。标准字号“我”页的裁切 / 动态字号 / 对比度审计仍失败，见[辅助功能审计](./ios-accessibility-audits.md)。
 

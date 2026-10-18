@@ -6,6 +6,292 @@ import WebKit
 import XCTest
 @testable import YunleFun
 
+/// Drives real page controls and the native consent button in-process. Host
+/// credentials stay in AccountStore; no identity or token is injected into JS.
+@MainActor
+final class HostIdentitySwitchLiveTests: XCTestCase {
+    func testRealCloudApplicationDoesNotRestoreAnotherHostAccount() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_HOST_IDENTITY_SWITCH"] == "1" else {
+            throw XCTSkip("Requires explicit managed-account SSO identity validation")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Only an owned isolated simulator may run this validation")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else { return XCTFail("Requires the exact owned simulator") }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let input = cache.appendingPathComponent("iOSNativeValidation/sso-identity-accounts.json")
+        let attributes = try FileManager.default.attributesOfItem(atPath: input.path)
+        guard let permissions = attributes[.posixPermissions] as? NSNumber,
+              permissions.intValue & 0o077 == 0 else { return XCTFail("One-use input must be private") }
+        let data = try Data(contentsOf: input)
+        try FileManager.default.removeItem(at: input)
+        let pool = try JSONDecoder().decode(Pool.self, from: data)
+        let expected = ["production-zero-balance": "ylf_prod_zero", "production-standard": "ylf_prod_standard"]
+        guard pool.accounts.count == 2, Set(pool.accounts.map(\.id)) == Set(expected.keys),
+              pool.accounts.allSatisfy({ $0.environment == "production" && $0.username == expected[$0.id] && !$0.password.isEmpty }),
+              let first = pool.accounts.first(where: { $0.id == "production-zero-balance" }),
+              let second = pool.accounts.first(where: { $0.id == "production-standard" }) else {
+            return XCTFail("Only the two fixed managed synthetic identities are permitted")
+        }
+        let keychain = "fun.yunle.apps.sso-switch." + UUID().uuidString
+        let directory = cache.appendingPathComponent("HostIdentitySwitch-" + UUID().uuidString)
+        let library = HomeLibrary(directory: directory)
+        let catalog = CatalogStore()
+        let runtime = NativeWebRuntime()
+        let accounts = AccountStore(session: AccountSession(vault: KeychainAccountVault(service: keychain)), identityDidChange: { id in
+            runtime.resetIdentity(to: id)
+            library.activateAccount(id)
+            library.setAutoSyncEnabled(false)
+        })
+        runtime.configureAuthorization(accounts: accounts)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
+        let previous = window.rootViewController
+        let root = UIViewController()
+        root.view.backgroundColor = .systemBackground
+        window.rootViewController = root
+        window.makeKeyAndVisible()
+        runtime.anchor = root
+        defer {
+            runtime.resetIdentity()
+            window.rootViewController = previous
+            window.makeKeyAndVisible()
+            SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: keychain] as CFDictionary)
+            try? FileManager.default.removeItem(at: directory)
+        }
+        var phases: [[String: Any]] = []
+        var stage = "catalog"
+        var failure = false
+        var foreignIdentityObserved = false
+        var signedInNames: [String] = []
+        var initialID: String?
+        let draftKey = "native-sso-isolation-probe-" + UUID().uuidString
+        var application: CloudApplication?
+        weak var lastBrowser: WebViewController?
+        var consentCount = 0
+        do {
+            await catalog.load()
+            guard let app = catalog.applications.first(where: { $0.marketShortName == "ai-sfc" }) else {
+                throw ProbeFailure.observation
+            }
+            application = app
+            for (index, credential) in [first, second, first].enumerated() {
+                stage = "host-selection-\(index)"
+                if index == 2, let initialID { try await accounts.select(initialID) }
+                else { try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil) }
+                guard let host = accounts.user, host.username == credential.username, host.isUsable else {
+                    throw ProbeFailure.observation
+                }
+                let freshIdentity = try await accounts.authorization(forceRefresh: true)
+                guard freshIdentity.userID == host.id else { throw ProbeFailure.observation }
+                if index == 0 { initialID = host.id }
+                if index == 1, host.id == initialID { throw ProbeFailure.observation }
+                if index == 1, signedInNames.first == host.displayName { throw ProbeFailure.ambiguousDisplayName }
+                try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && root.presentedViewController == nil }
+                let oldSessionRemoved = !runtime.contains(app)
+                guard oldSessionRemoved else { throw ProbeFailure.observation }
+                stage = "reopen-\(index)"
+                runtime.open(app, catalog: catalog, library: library)
+                try await wait(seconds: 30) {
+                    guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
+                          let state = try? await self.pageState(web) else { return false }
+                    return !web.isLoading && state["ready"] as? Bool == true
+                }
+                guard let browser = browser(in: window), let web = webView(in: browser.view),
+                      web.url?.host == "ai-sfc.yunle.fun" else { throw ProbeFailure.observation }
+                let newBrowser = lastBrowser == nil || lastBrowser !== browser
+                lastBrowser = browser
+                guard newBrowser else { throw ProbeFailure.observation }
+                // Observe before any test cleanup or new SSO request. A cached
+                // foreign name is a failure even if the app later replaces it.
+                stage = "preauthorization-identity-\(index)"
+                var state = try await pageState(web)
+                let cachedName = state["name"] as? String ?? ""
+                if !cachedName.isEmpty && cachedName != host.displayName {
+                    foreignIdentityObserved = true
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                    let rendered = try await pageState(web)
+                    let renderedName = rendered["name"] as? String ?? ""
+                    phases.append(["phase": index, "hostAccount": credential.id,
+                                   "oldRuntimeSessionRemoved": oldSessionRemoved, "newBrowserCreated": newBrowser,
+                                   "freshHostAuthorizationMatches": true, "foreignIdentityBeforeAuthorization": true,
+                                   "foreignIdentityAfterRenderDelay": !renderedName.isEmpty && renderedName != host.displayName])
+                    attach(window, name: "sso-switch-foreign-identity-phase-\(index)")
+                    throw ProbeFailure.foreignIdentity
+                }
+                // A synthetic non-authentication draft detects both cross-account
+                // exposure and a destructive "clear all storage" workaround.
+                let draft = try await web.evaluateJavaScript("localStorage.getItem('\(draftKey)')")
+                if index == 1, !(draft is NSNull) { throw ProbeFailure.observation }
+                if index == 2, draft as? String != "account-a-draft" { throw ProbeFailure.observation }
+                if index == 0 {
+                    _ = try await web.evaluateJavaScript("localStorage.setItem('\(draftKey)', 'account-a-draft')")
+                }
+                var historyGate = false
+                var activatedLogin = false
+                if cachedName.isEmpty {
+                    guard state["hasLogin"] as? Bool == true else { throw ProbeFailure.observation }
+                    let clicked = try await web.evaluateJavaScript("""
+                    (() => { const a = document.querySelector('a[aria-label="我的春联"]');
+                      if (!a) return false; a.click(); return true; })()
+                    """) as? Bool
+                    guard clicked == true else { throw ProbeFailure.observation }
+                    try await wait(seconds: 10) {
+                        guard let state = try? await self.pageState(web) else { return false }
+                        return state["historyLoginGate"] as? Bool == true
+                    }
+                    historyGate = true
+                    let login = try await web.evaluateJavaScript("""
+                    (() => { const b = document.querySelector('button.account-login');
+                      if (!b || b.disabled) return false; b.click(); return true; })()
+                    """) as? Bool
+                    guard login == true else { throw ProbeFailure.observation }
+                    activatedLogin = true
+                    stage = "real-sso-adoption-\(index)"
+                    var accepted = Set<ObjectIdentifier>()
+                    try await wait(seconds: 35) {
+                        if let consent = browser.presentedViewController as? AuthorizationConsentViewController,
+                           !consent.isBeingPresented, !consent.isBeingDismissed,
+                           !accepted.contains(ObjectIdentifier(consent)),
+                           let button = self.button(in: consent.view, identifier: "authorization-current-account"), button.isEnabled {
+                            guard button.accessibilityLabel?.contains(host.displayName) == true else { throw ProbeFailure.observation }
+                            accepted.insert(ObjectIdentifier(consent))
+                            consentCount += 1
+                            self.attach(window, name: "sso-switch-native-consent-phase-\(index)")
+                            button.sendActions(for: .touchUpInside)
+                        }
+                        guard let state = try? await self.pageState(web) else { return false }
+                        return state["name"] as? String == host.displayName && browser.presentedViewController == nil
+                    }
+                }
+                state = try await pageState(web)
+                guard state["name"] as? String == host.displayName else { throw ProbeFailure.observation }
+                signedInNames.append(host.displayName)
+                attach(window, name: "sso-switch-matching-identity-phase-\(index)")
+                phases.append(["phase": index, "hostAccount": credential.id,
+                               "oldRuntimeSessionRemoved": oldSessionRemoved, "newBrowserCreated": newBrowser,
+                               "freshHostAuthorizationMatches": true,
+                               "foreignIdentityBeforeAuthorization": false, "historyLoginGateObserved": historyGate,
+                               "realPageLoginActivated": activatedLogin, "displayedIdentityMatchesHost": true,
+                               "draftIsolationAndRetentionChecked": index > 0])
+            }
+        } catch { failure = true }
+        // The actual application's logout control is used after observations,
+        // including a failing foreign-identity observation. No storage is wiped.
+        var webSignedOut = true
+        // Visit every signed-in host's partition after the observations so both
+        // real consumer sessions are signed out without deleting business data.
+        let cleanupIDs = accounts.overview.users.map(\.id)
+        for id in cleanupIDs {
+            do {
+                if accounts.user?.id != id { try await accounts.select(id) }
+                try await wait(seconds: 15) { !runtime.isIdentityCleanupPending }
+                if browser(in: window) == nil {
+                    guard let application else { throw ProbeFailure.observation }
+                    runtime.open(application, catalog: catalog, library: library)
+                }
+                try await wait(seconds: 30) {
+                    guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
+                          let state = try? await self.pageState(web) else { return false }
+                    return !web.isLoading && state["ready"] as? Bool == true
+                }
+                guard let browser = browser(in: window), let web = webView(in: browser.view) else { throw ProbeFailure.observation }
+                _ = try await web.evaluateJavaScript("localStorage.removeItem('\(draftKey)')")
+                let signedOut = await signOutWebUI(web)
+                webSignedOut = webSignedOut && signedOut
+            } catch { webSignedOut = false }
+        }
+        var hostSignedOut = true
+        for user in accounts.overview.users {
+            do { try await accounts.remove(user.id); hostSignedOut = hostSignedOut && accounts.notice == nil }
+            catch { hostSignedOut = false }
+        }
+        let restored = AccountStore(session: AccountSession(vault: KeychainAccountVault(service: keychain)))
+        await restored.restore()
+        let emptyKeychain = restored.user == nil && restored.overview.users.isEmpty
+        let report: [String: Any] = ["phases": phases, "failureStage": failure ? stage : "none",
+            "foreignIdentityObserved": foreignIdentityObserved, "nativeConsentCount": consentCount,
+            "applicationLogoutUIConfirmed": webSignedOut, "hostSessionsRemoteSignOut": hostSignedOut,
+            "emptyKeychain": emptyKeychain, "oneUseInputDeleted": !FileManager.default.fileExists(atPath: input.path),
+            "hostCredentialsInjectedIntoWebView": false, "applicationConsumerRemoteRevocationIndependentlyVerified": false,
+            "scope": "Real HTTPS and NativeWebRuntime; in-process DOM clicks and UIKit control events; no OS gesture or system other-account flow"]
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]),
+                                       uniformTypeIdentifier: "public.json")
+        attachment.name = "native-host-identity-switch-live"; attachment.lifetime = .keepAlways; add(attachment)
+        XCTAssertFalse(failure, "Real application identity journey failed at \(stage); response values omitted")
+        XCTAssertFalse(foreignIdentityObserved, "The reopened application displayed a different host account before authorization")
+        XCTAssertEqual(phases.count, 3)
+        XCTAssertTrue(webSignedOut); XCTAssertTrue(hostSignedOut); XCTAssertTrue(emptyKeychain)
+    }
+
+    private func pageState(_ web: WKWebView) async throws -> [String: Any] {
+        guard web.url?.host == "ai-sfc.yunle.fun" else { throw ProbeFailure.observation }
+        return try await web.evaluateJavaScript("""
+        (() => ({ ready: document.readyState === 'complete' && !!document.querySelector('.account-login,.account-trigger'),
+          name: document.querySelector('.account-name')?.textContent?.trim() || '',
+          hasLogin: !!document.querySelector('button.account-login'),
+          historyLoginGate: location.pathname === '/history' && !document.querySelector('.history-list') &&
+            document.body.innerText.includes('登录后即可保存与查看你生成过的春联。') }))()
+        """) as? [String: Any] ?? [:]
+    }
+
+    private func signOutWebUI(_ web: WKWebView) async -> Bool {
+        do {
+            let state = try await pageState(web)
+            if state["name"] as? String == "" { return state["hasLogin"] as? Bool == true }
+            _ = try await web.evaluateJavaScript("""
+            (() => { const b = document.querySelector('button.account-trigger');
+              if (!b) return false;
+              b.click();
+              return true; })()
+            """)
+            try await wait(seconds: 5) {
+                (try? await web.evaluateJavaScript("!!document.querySelector('.account-action.danger')")) as? Bool == true
+            }
+            _ = try await web.evaluateJavaScript("document.querySelector('.account-action.danger').click()")
+            try await wait(seconds: 15) {
+                guard let state = try? await self.pageState(web) else { return false }
+                return state["name"] as? String == "" && state["hasLogin"] as? Bool == true
+            }
+            return true
+        } catch { return false }
+    }
+
+    private func wait(seconds: TimeInterval, condition: () async throws -> Bool) async throws {
+        let deadline = Date().addingTimeInterval(seconds)
+        while Date() < deadline {
+            if try await condition() { return }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        throw ProbeFailure.timeout
+    }
+    private func browser(in window: UIWindow) -> WebViewController? {
+        if let navigation = window.rootViewController?.presentedViewController as? UINavigationController {
+            return navigation.viewControllers.compactMap { $0 as? WebViewController }.first
+        }
+        return window.rootViewController?.presentedViewController as? WebViewController
+    }
+    private func webView(in view: UIView) -> WKWebView? {
+        if let web = view as? WKWebView { return web }
+        return view.subviews.compactMap { webView(in: $0) }.first
+    }
+    private func button(in view: UIView, identifier: String) -> UIButton? {
+        if let button = view as? UIButton, button.accessibilityIdentifier == identifier { return button }
+        return view.subviews.compactMap { button(in: $0, identifier: identifier) }.first
+    }
+    private func attach(_ window: UIWindow, name: String) {
+        let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+        }
+        let attachment = XCTAttachment(image: image); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
+    }
+    private struct Pool: Decodable { let accounts: [Credential] }
+    private struct Credential: Decodable { let id: String; let environment: String; let username: String; let password: String }
+    private enum ProbeFailure: Error { case observation, ambiguousDisplayName, foreignIdentity, timeout }
+}
+
 /// Explicit live contract validation with an existing managed synthetic identity.
 /// The host token only reaches the fixed CloudBase gateway. The consumer receives
 /// the one-time code and its own PKCE verifier, never the host session.

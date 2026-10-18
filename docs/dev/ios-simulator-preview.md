@@ -4,6 +4,8 @@
 
 ## 余额数字动效候选 · 2026-10-18 {#wallet-motion-candidate}
 
+**新增已知缺陷：** 同一运行时源码的真实多账号验证已复现 A → B 后 AI 春联恢复 A 身份；当前 `0e315c5` 包不含分仓修复。该包保留原有访客体验用途，不作为已登录多账号隔离验收构建。原 ZIP 与哈希未改变，详见[故障与分仓原型对照](./ios-host-authorization.md#persistent-identity-defect)。
+
 当前交付为 `YunleFun-Native-Simulator-0e315c5`，来自 `0e315c512d4cb170da8b94efa85677528be3a1cc` 的干净归档，181 个原生及共享文件与提交逐一相同。包含此前云居动效适配和[余额数字减少动态效果修复](./ios-accessibility-audits.md#wallet-numeric-reduced-motion)，没有并行缓存 / Web 修改。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
 
 同一份构建的两条核心旅程分次通过：最大辅助字号详情 **54.723 秒**，真实免费云空调获取、首次绘制、收起、移除唯一安装项后恢复会话、结束并回空云居 **81.996 秒**。首次调用遗漏云空调显式开关，结果为 **1 通过 / 0 失败 / 1 跳过**；补齐开关与自有模拟器标识后只补跑该项，**1 通过 / 0 失败 / 0 跳过**。原始跳过与两份结果均保留，没有合并成同次全通过。七张原始核心截图逐张复核，两份结果包均无运行时警告；这两条访客旅程不覆盖登录后的钱包页面，也不替代此前余额组件的系统开关对照。

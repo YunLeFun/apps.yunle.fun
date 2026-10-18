@@ -395,3 +395,9 @@ Release 模拟器编译、隔离模拟器清理和七项常规检查全部成功
 来源 `b61908ba71687c0a2ed2538b629035f706106388` 的 [Native CI 39089850201](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39089850201) 首轮自然成功，实际合并 checkout 为 `dcec0f6b1cd9cdc3bda6df1c94611d5e55556d97`。原始 ZIP 日志的 445 个不同方法开始与完整终态逐项一致，套件汇总同为 **435 单元 / 集成 + 10 UI，合计 445 通过 / 0 失败 / 0 跳过**。没有成功运行 xcresult 上传；计数来自原日志，不包含独立 live 验证。
 
 普通字号手机号方法 31.369 秒、随后同步设置 23.773 秒通过。Release、隔离模拟器清理和七项常规检查成功，可选作者 Benchmark 跳过，job 总计 1088 秒。证据保存为 `native-ci-b61908b-*`。该结果属于余额数字修复前的来源；历史间歇问题未据此关闭，未调整任何预算或断言。
+
+## 937bc29 完整 CI · 2026-10-18 {#ci-937bc29}
+
+来源 `937bc296b1a87f193ea9c9dcedea3b5b0d985582` 的 [Native CI 39092630865](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39092630865) 首轮自然成功，实际合并 checkout 为 `076c6026c9539ef5fdbaff7659accb8e818d3335`。原始日志 445 条唯一开始与完整终态对应，套件总数一致：**435 单元 / 集成 + 10 UI，共 445 / 0 / 0**。Release、隔离模拟器清理和七项常规检查成功，可选作者 Benchmark 跳过，job 1320 秒；日志与元数据保存为 `native-ci-937bc29-*`，成功运行没有上传故障 xcresult。
+
+这轮 CI 不包含随后新增的显式多账号线上夹具，也没有覆盖现已复现的[网页持久身份缺陷](./ios-host-authorization.md#persistent-identity-defect)。原型和故障对照按各自来源单独记账。历史 Cookie 清理及普通字号手机号超时的间歇根因仍未关闭，没有放宽预算或断言。

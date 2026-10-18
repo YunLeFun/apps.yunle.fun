@@ -57,7 +57,9 @@ struct WebAppMenuPage {
 class WebViewController: UIViewController {
     var url: URL?
     /// Optional native-host loader for explicitly downloaded public application resources.
-    var initialContentLoader: ((WKWebView, URL) -> Void)?
+    var initialContentLoader: ((WKWebView, URL, @escaping () -> Void) -> Void)?
+    /// Presentation can finish before an asynchronous host has submitted its first navigation.
+    private(set) var isPreparingInitialContent = false
     var initialContentFailure: ((WKWebView) -> Void)?
     /// Native hosts may provide an identity-bound store before the view loads.
     var websiteDataStore: WKWebsiteDataStore?
@@ -188,8 +190,10 @@ class WebViewController: UIViewController {
         setupOverlay()
         setNeedsStatusBarAppearanceUpdate()
         if let url = url {
-            if let initialContentLoader { initialContentLoader(webView, url) }
-            else { webView.load(URLRequest(url: url)) }
+            if let initialContentLoader {
+                isPreparingInitialContent = true
+                initialContentLoader(webView, url) { [weak self] in self?.isPreparingInitialContent = false }
+            } else { webView.load(URLRequest(url: url)) }
         }
     }
 

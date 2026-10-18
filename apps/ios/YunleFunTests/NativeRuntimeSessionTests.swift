@@ -62,14 +62,21 @@ final class NativeRuntimeSessionTests: XCTestCase {
                                              in: nil, contentWorld: .page) as? [String: String] ?? [:]
         }
         do {
+            print("RUNTIME_STORAGE_PROBE stage=open-a")
             let first = try await open(accountA)
+            print("RUNTIME_STORAGE_PROBE stage=write-a")
             let seeded = try await storage(first, "account-a")
             XCTAssertEqual(seeded, ["local": "account-a", "draft": "account-a", "cookie": "account-a"])
+            print("RUNTIME_STORAGE_PROBE stage=open-b")
             let second = try await open(accountB)
+            print("RUNTIME_STORAGE_PROBE stage=read-b")
             let other = try await storage(second)
             XCTAssertEqual(other, ["local": "", "draft": "", "cookie": ""], "B must not read A's persisted identity or drafts")
+            print("RUNTIME_STORAGE_PROBE stage=write-b")
             _ = try await storage(second, "account-b")
+            print("RUNTIME_STORAGE_PROBE stage=reopen-a")
             let returned = try await open(accountA)
+            print("RUNTIME_STORAGE_PROBE stage=read-restored-a")
             let restored = try await storage(returned)
             XCTAssertEqual(restored, ["local": "account-a", "draft": "account-a", "cookie": "account-a"],
                            "Returning to A must restore A's own data without deleting it")
@@ -77,7 +84,10 @@ final class NativeRuntimeSessionTests: XCTestCase {
             for web in pages { try? await cleanupStorageProbe(web, key: key) }
             throw error
         }
-        for web in pages { try await cleanupStorageProbe(web, key: key) }
+        for (index, web) in pages.enumerated() {
+            print("RUNTIME_STORAGE_PROBE stage=cleanup index=\(index)")
+            try await cleanupStorageProbe(web, key: key)
+        }
     }
 
     private func cleanupStorageProbe(_ web: WKWebView, key: String) async throws {
@@ -486,6 +496,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
                 if let navigation = root.presentedViewController as? UINavigationController,
                    let browser = navigation.topViewController as? WebViewController,
                    browser.appInfo?.id == application.id, browser.url == application.launchURL,
+                   !browser.isPreparingInitialContent,
                    !navigation.isBeingPresented, !navigation.isBeingDismissed, browser.viewIfLoaded?.window != nil {
                     browser.view.subviews.compactMap { $0 as? WKWebView }.first?.stopLoading()
                     return browser

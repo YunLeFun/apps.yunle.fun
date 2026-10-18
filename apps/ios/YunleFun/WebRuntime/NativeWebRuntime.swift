@@ -275,8 +275,9 @@ final class NativeWebRuntime: ObservableObject {
             // persistent isolation and migration policy is implemented.
             controller.url = url
             let identity = identityReset
-            controller.initialContentLoader = { [weak self, weak controller] web, url in
+            controller.initialContentLoader = { [weak self, weak controller] web, url, prepared in
                 Task { @MainActor [weak self, weak controller] in
+                    defer { prepared() }
                     guard let self, let controller else { return }
                     let snapshot = try? await self.applicationCache.repository.snapshot(for: app)
                     guard self.identityReset == identity, self.sessions[app.id]?.browser === controller else { return }

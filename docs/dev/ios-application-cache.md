@@ -318,3 +318,9 @@ python3 apps/ios/scripts/capture-simulator-startup.py \
 完整验收保持 `launchd_sim 52383`（18:02:06 启动）、SpringBoard `52392`、RunningBoard `52396`；XCTest 服务首次按需启动为 `57768`，随后各组保持一致。三个组间重启开关均为 false。最终缓存 0、自动更新关闭、仅 Wi-Fi 开启，工作进程和监听已结束，专用设备确认 Shutdown 后已让出串行窗口。其他在用模拟器未操作。
 
 本机证据在 `~/.codex/artifacts/ios-cache-ui-20261018-01a14b01/server-wait-chain/`：`continuous-acceptance/` 保存 11 组实际结果及采样，`episode-analysis.json` 保存四次现场与逐 PID 计数变化；`native-probe-libproc/`、`native-capture-smoke/` 保存普通启动和控制验证，`prior-evidence-correction.json` 明确更正上一轮第七次采样已进主循环的解读，原始证据保留。
+
+### 合并前的完整 CI 集成检查
+
+缓存改动单独提取到最新 `main` 后，[首次完整 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39119738505) 的结构化报告为 503 通过、1 失败、7 个显式专项跳过。新增 27 项日常缓存回归全部通过；失败为 `NativeRuntimeSessionTests/testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts()`，记录了 `InvalidTransition` 与 `failed(deinit)`，Release 编译跳过。报告的来源提交及摘要已核对，失败证据保留，不能把这一轮记为完整通过。
+
+检查发现，原运行时测试只等待控制器呈现完成，就停止首次导航并注入隔离 HTML；缓存接入后，首次导航在异步读取缓存后才提交，控制器呈现完成已不能保证该请求提交完毕。补充 `isPreparingInitialContent` 状态及准备完成回调，测试在原来的等待预算内同时检查这一状态，然后停止初始请求、注入夹具。账号隔离、草稿保留及清理断言保持不变，并增加固定阶段标记以区分准备、读写和清理失败。这一修正仍需由后续完整 CI 验证，不能据此认定此前系统级 dyld / RunningBoard 阻塞已经解决。

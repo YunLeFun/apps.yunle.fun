@@ -469,3 +469,13 @@ PR48 由外部操作合并后，恢复验证和结构化报告改动移到独立
 报告 ZIP 的 SHA-256 为 `99b7ea6267781c33b56ec9d680f0bcfe6ff286f4b06b8688abad8ea0a3522054`，与 GitHub artifact `12130009660` 匹配；摘要、测试树、来源与 run / attempt 回执一致。完整 job 日志下载成功后再核对计数，其 SHA-256 为 `3e78341696428056792834ead303fccb9cd7157972e3d094f2f06d8afc56f5d1`。证据位于本聊天 `ci-7612daf/`。
 
 随后 `6911d60` 仅修改显式 LiveValidation 夹具和证据文档，产品源码及日常测试源码未变；其云乐坊间真实账号切换另有独立编译和实跑证据，不计入这 477 项。历史 WebKit、辅助功能查询与退出延迟的间歇根因仍未全部关闭，本轮没有放宽日常预算或删除断言。
+
+## 合入最新 main 后的完整 CI · 2026-10-18 {#ci-1530189}
+
+远端将网站首页、扫码任务等待接口及扫码 / 支持页 / WebKit 测试修正合入 PR50 后，来源 `1530189ee1766db9575d0e4ce8e9dae56e5073c8` 的 [Native CI 39114172380](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39114172380) 首轮成功，checkout 为 `9bda78c609bb95b099589eb7932fde9f28caa84b`。结构化结果为 **467 单元 / 集成 + 10 UI，共 477 通过 / 0 失败 / 0 跳过**；Release 编译、报告导出 / 上传和隔离模拟器清理均成功。
+
+477 个唯一结构化方法与原日志的 477 个唯一开始一致。原日志有 476 条完整终态，另一个 `PersonalMarketVersionTests.testCachedProvenanceCannotAuthorizeWithdrawnOrNewlyRestrictedPublications` 的通过行被一条 WebKit `ProcessSuspension` 日志插断。核对相邻两行的前后缀后，在派生解析输入中只连接这一处，得到对应的通过终态（0.019 秒）；477 个方法逐一匹配，无重复开始或已检查的崩溃重启标记。原始日志保持不变，解析规则及行号单独留存，没有把缺少完整单行误记为测试失败。
+
+报告 ZIP 的 SHA-256 `1a9cb056b0ef25ddec37a6466a6f6a601f50ea2d6677eb7ae74e978c05c98097` 与 artifact `12131704306` 一致，回执、摘要和测试树的文件摘要匹配。完整日志 SHA-256 为 `b518765b83063b89f1fcd413731af12bab52c4db2c7fbac4b6d07c00b7e9ead1`，证据保存在 `ci-1530189/`。
+
+本轮两个真实消费端共同保留会话、确认阶段切号的 live 夹具及文档提交接在该远端来源之后，产品与日常测试源码没有再次改变；集成构建与实际线上夹具有各自证据，不能将其算入这 477 项。推送后的新 head 仍须查看对应 CI 状态，历史间歇根因不因此全部关闭。

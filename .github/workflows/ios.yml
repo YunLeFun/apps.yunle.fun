@@ -2,6 +2,12 @@ name: Native iOS CI
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Simulator validation target
+        type: choice
+        default: current
+        options: [current, ios16]
   push:
     branches: [main]
     paths:
@@ -20,17 +26,21 @@ permissions:
   contents: read
 
 concurrency:
-  group: native-ios-${{ github.ref }}
+  group: native-ios-${{ github.ref }}-${{ inputs.target || 'current' }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    name: Native iOS · Xcode 27
+    name: ${{ inputs.target == 'ios16' && 'Native iOS · iOS 16 compatibility' || 'Native iOS · Xcode 27' }}
     # GitHub's standard Xcode 27 image is currently a public preview.
-    runs-on: xcode-27
-    timeout-minutes: 35
+    # iOS 16 needs a pre-27 Xcode and host; it is an explicit additional lane.
+    runs-on: ${{ inputs.target == 'ios16' && 'macos-26' || 'xcode-27' }}
+    timeout-minutes: ${{ inputs.target == 'ios16' && 45 || 35 }}
     env:
-      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+      DEVELOPER_DIR: ${{ inputs.target == 'ios16' && '/Applications/Xcode_26.6.app/Contents/Developer' || '/Applications/Xcode_27.0.app/Contents/Developer' }}
+      YLF_CI_RUNTIME: ${{ inputs.target == 'ios16' && 'com.apple.CoreSimulator.SimRuntime.iOS-16-0' || 'com.apple.CoreSimulator.SimRuntime.iOS-27-0' }}
+      YLF_CI_DEVICE: ${{ inputs.target == 'ios16' && 'com.apple.CoreSimulator.SimDeviceType.iPhone-14' || 'com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro' }}
+      YLF_CI_TARGET: ${{ inputs.target || 'current' }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -50,21 +60,34 @@ jobs:
             -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages"
           git diff --exit-code -- apps/ios/YunleFun.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
-      - name: Create isolated iOS 27 simulator
+      - name: Install requested iOS 16 runtime
+        if: inputs.target == 'ios16'
+        run: |
+          set -o pipefail
+          df -h
+          xcodebuild -downloadPlatform iOS -buildVersion 16.0 \
+            2>&1 | tee "$YLF_CI_OUTPUT/runtime-install.log"
+
+      - name: Create isolated requested simulator
         id: simulator
         run: |
           python3 - <<'PY'
           import os
+          import json
           import subprocess
 
+          runtime = os.environ["YLF_CI_RUNTIME"]
+          runtimes = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "runtimes", "--json"]))["runtimes"]
+          selected = [item for item in runtimes if item["identifier"] == runtime and item.get("isAvailable")]
+          if len(selected) != 1:
+              raise RuntimeError("The exact requested simulator runtime is unavailable; no version fallback is allowed")
           simulator = subprocess.check_output([
               "xcrun", "simctl", "create", "YunleFun CI",
-              "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
-              "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+              os.environ["YLF_CI_DEVICE"], runtime,
           ], text=True).strip()
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
               output.write("id=" + simulator + "\n")
-          print("Created isolated iOS 27 test simulator: " + simulator)
+          print("Created isolated " + runtime + " test simulator: " + simulator)
           subprocess.run(["xcrun", "simctl", "bootstatus", simulator, "-b"], check=True)
           PY
 
@@ -117,6 +140,10 @@ jobs:
               "checkout": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "runID": os.environ["GITHUB_RUN_ID"],
               "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "target": os.environ["YLF_CI_TARGET"],
+              "requestedRuntime": os.environ["YLF_CI_RUNTIME"],
+              "xcode": subprocess.check_output(["xcodebuild", "-version"], text=True).strip(),
+              "macOS": subprocess.check_output(["sw_vers", "-productVersion"], text=True).strip(),
               "sha256": {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in files},
           }
           (directory / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

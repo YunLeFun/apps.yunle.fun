@@ -435,3 +435,17 @@ PR48 由外部操作合并后，恢复验证和结构化报告改动移到独立
 下载的报告 ZIP 与 GitHub artifact SHA-256 相同；来源回执中的两个文件摘要逐一匹配。直接解析上传的 xcresult 摘要和 **468 个唯一 Test Case 节点**，结果为 **458 单元 / 集成 + 10 UI，共 468 通过 / 0 失败 / 0 跳过**。本次计数不依赖控制台行拼接，原始 ZIP 日志、元数据、摘要、完整测试树和独立计数仍一并归档为 `native-ci-d51f6a6-*`。
 
 该结果验证了真实 GitHub 环境中的结构化报告导出、上传与来源绑定。显式线上夹具不计入日常测试；本轮后续新增的消费端跨进程夹具仍以自己的结果为准。历史 Cookie、WebKit、AX 查询和退出延迟的间歇根因没有因这次成功而关闭，预算与断言未放宽。
+
+## 最低 iOS 16 的显式 CI 入口 · 2026-10-18 {#ci-ios16}
+
+`Native iOS CI` 增加手动参数 `target=ios16`，使用独立的 `macos-26` 托管环境与 `/Applications/Xcode_26.6.app`，通过 Apple 的 `xcodebuild -downloadPlatform iOS -buildVersion 16.0` 准备运行时，再创建本次作业专属的 iPhone 14 模拟器。创建前检查精确运行时标识和可用状态，不自动换成其他版本。日常 PR / main 检查及手动默认值仍为 Xcode 27 / iOS 27；两种目标使用不同并发组，手动最低系统验收不会取消日常检查。
+
+选用依据是 Apple 的 [Xcode 支持矩阵](https://developer.apple.com/xcode/system-requirements/)、[指定运行时版本的命令](https://developer.apple.com/documentation/xcode-release-notes/xcode-16_1-release-notes)与 GitHub 的 [macOS 26 镜像清单](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md)。2026-10-18 直接读取 Apple 运行时目录，iOS 16.0 的版本为 `20A360`，下载文件为 6,280,680,540 字节，条目限制 host / Xcode 最高为 `26.99.0`。本机当前只有 Xcode 27、约 18 GiB 可用空间；旧 `xcodes 1.6.2` 解析目录中的 `authentication=none` 时失败。因此先准备远端路径，本机最低系统仍未安装或实跑。
+
+```sh
+gh workflow run ios.yml --ref YOUR_BRANCH -f target=ios16
+```
+
+将 `YOUR_BRANCH` 替换为包含该工作流的待验分支。最低系统作业允许 45 分钟，包括额外运行时下载 / 安装；单项测试仍为默认 120 秒、最大 180 秒，测试选择、断言及串行执行保持。该入口执行现有 `YunleFun` Scheme 的单元 / 集成与访客 UI，继续上传来源绑定的结构化报告；回执额外记录目标、请求运行时、实际 Xcode 和 macOS。跳过项需逐项审阅，不把高版本专属功能跳过当作最低系统通过。
+
+**入口配置与实际运行结果分别记录。** 当前只有工作流静态检查通过，尚未确认托管环境能安装和启动 iOS 16，也未完成最低系统测试。成功编译、当前系统的 468 项结果和运行时目录存在均不替代实跑。iOS 16 共享 WebKit 仓库的身份隔离缺口、正式旧壳覆盖升级、真实账号与其余 G6 条件继续待处理；这条无账号凭据的 CI 不能代替它们。

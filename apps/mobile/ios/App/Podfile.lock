@@ -1,5 +1,5 @@
 PODS:
-  - Capacitor (8.4.2):
+  - Capacitor (8.5.3):
     - CapacitorCordova
   - CapacitorApp (8.1.1):
     - Capacitor
@@ -11,7 +11,7 @@ PODS:
   - CapacitorCamera (8.2.1):
     - Capacitor
     - IONCameraLib (~> 1.0.4)
-  - CapacitorCordova (8.4.2)
+  - CapacitorCordova (8.5.3)
   - CapacitorHaptics (8.0.1):
     - Capacitor
   - CapacitorKeyboard (8.0.5):
@@ -28,12 +28,12 @@ PODS:
     - Capacitor
 
 DEPENDENCIES:
-  - "Capacitor (from `../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios`)"
+  - "Capacitor (from `../../../../node_modules/.pnpm/@capacitor+ios@8.5.3_@capacitor+core@8.4.2/node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../../../node_modules/.pnpm/@capacitor+app@8.1.1_@capacitor+core@8.4.2/node_modules/@capacitor/app`)"
   - "CapacitorBarcodeScanner (from `../../../../node_modules/.pnpm/@capacitor+barcode-scanner@3.1.0_@capacitor+core@8.4.2/node_modules/@capacitor/barcode-scanner`)"
   - "CapacitorBrowser (from `../../../../node_modules/.pnpm/@capacitor+browser@8.0.4_@capacitor+core@8.4.2/node_modules/@capacitor/browser`)"
   - "CapacitorCamera (from `../../../../node_modules/.pnpm/@capacitor+camera@8.2.1_@capacitor+core@8.4.2/node_modules/@capacitor/camera`)"
-  - "CapacitorCordova (from `../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios`)"
+  - "CapacitorCordova (from `../../../../node_modules/.pnpm/@capacitor+ios@8.5.3_@capacitor+core@8.4.2/node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../../../node_modules/.pnpm/@capacitor+haptics@8.0.1_@capacitor+core@8.4.2/node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../../../node_modules/.pnpm/@capacitor+keyboard@8.0.5_@capacitor+core@8.4.2/node_modules/@capacitor/keyboard`)"
   - "CapacitorStatusBar (from `../../../../node_modules/.pnpm/@capacitor+status-bar@8.0.3_@capacitor+core@8.4.2/node_modules/@capacitor/status-bar`)"
@@ -48,7 +48,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Capacitor:
-    :path: "../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios"
+    :path: "../../../../node_modules/.pnpm/@capacitor+ios@8.5.3_@capacitor+core@8.4.2/node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../../../node_modules/.pnpm/@capacitor+app@8.1.1_@capacitor+core@8.4.2/node_modules/@capacitor/app"
   CapacitorBarcodeScanner:
@@ -58,7 +58,7 @@ EXTERNAL SOURCES:
   CapacitorCamera:
     :path: "../../../../node_modules/.pnpm/@capacitor+camera@8.2.1_@capacitor+core@8.4.2/node_modules/@capacitor/camera"
   CapacitorCordova:
-    :path: "../../../../node_modules/.pnpm/@capacitor+ios@8.4.2_@capacitor+core@8.4.2/node_modules/@capacitor/ios"
+    :path: "../../../../node_modules/.pnpm/@capacitor+ios@8.5.3_@capacitor+core@8.4.2/node_modules/@capacitor/ios"
   CapacitorHaptics:
     :path: "../../../../node_modules/.pnpm/@capacitor+haptics@8.0.1_@capacitor+core@8.4.2/node_modules/@capacitor/haptics"
   CapacitorKeyboard:
@@ -71,12 +71,12 @@ EXTERNAL SOURCES:
     :path: "../../../../packages/capacitor-storekit"
 
 SPEC CHECKSUMS:
-  Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3
+  Capacitor: 2f67eaeb8ed79909cd35b5e7439a5c2a9ca58e0f
   CapacitorApp: 305bd13c44f6f9d164e2ee66a4faa956ed8c0e06
   CapacitorBarcodeScanner: 94eb9e665cf2e60eddfd10e58917453799e1556d
   CapacitorBrowser: 752e0208aa07c7aa63d1f7cde895a3e9519b2656
   CapacitorCamera: 1b9dde3aaffbd1f051486f4cee2b4cdd962662ae
-  CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
+  CapacitorCordova: 0b7326439c7a09fc5d20eced5e0dab986327a493
   CapacitorHaptics: 4df2c625445cef39b67ea635a21802bc92df3b82
   CapacitorKeyboard: b6b0744890cdb1d9a96e2cafcc9253fdcc55de3b
   CapacitorStatusBar: eca7bc2b58d9f886f1ef9edb66e57a9b29c121af
@@ -86,6 +86,6 @@ SPEC CHECKSUMS:
   WechatOpenSDK-XCFramework: ff342ae616bb86df3d236aca38059dfd4bc4a949
   YunlefunCapacitorStorekit: 1431b6f6bffde6bc66117ebb4cc012cecdf36bb7
 
-PODFILE CHECKSUM: 4b23b203e890488b770ddbcaa28c0b4b8a02f4bf
+PODFILE CHECKSUM: 39a44790cad225e0dec24dcd7af4d08fbb4a7d99
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

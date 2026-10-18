@@ -1,0 +1,182 @@
+name: Native iOS Runtime Benchmark CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches: [main]
+    paths:
+      - apps/ios/**
+      - apps/mobile/ios/App/App/**
+      - .github/workflows/ios*.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-ios-runtime-${{ github.event.action == 'labeled' && github.event.label.name != 'ci:ios-runtime-benchmark' && github.run_id || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime-benchmarks:
+    name: Runtime Benchmark · ${{ matrix.journey }}
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'ci:ios-runtime-benchmark') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'ci:ios-runtime-benchmark')
+    runs-on: xcode-27
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - journey: lifecycle
+            method: testNativeCloudAirCanMinimizeRestoreAndEnd
+          - journey: last-installation
+            method: testNativeGuestCanRestoreCloudAirAfterRemovingLastHomeApplication
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+      YLF_CI_METHOD: ${{ matrix.method }}
+      YLF_CI_SOURCE_HEAD: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Verify Xcode and locked Benchmark packages
+        env:
+          YLF_CI_OUTPUT: ${{ runner.temp }}/yunlefun-runtime-benchmark
+        run: |
+          mkdir -p "$YLF_CI_OUTPUT"
+          echo "YLF_CI_OUTPUT=$YLF_CI_OUTPUT" >> "$GITHUB_ENV"
+          xcodebuild -version
+          xcodebuild -resolvePackageDependencies \
+            -project apps/ios/YunleFun.xcodeproj -scheme YunleFunBenchmarks \
+            -onlyUsePackageVersionsFromResolvedFile \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages"
+          git diff --exit-code -- apps/ios/YunleFun.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+      - name: Create a fresh simulator for this journey
+        id: simulator
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          simulator = subprocess.check_output([
+              "xcrun", "simctl", "create", "YunleFun Runtime Benchmark",
+              "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+              "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+          ], text=True).strip()
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("id=" + simulator + "\n")
+          root = Path(os.environ["YLF_CI_OUTPUT"])
+          (root / "simulator.json").write_text(json.dumps({
+              "id": simulator, "freshlyCreated": True,
+              "loadAverageBeforeBoot": os.getloadavg(),
+              "logicalCPUs": os.cpu_count(),
+          }, indent=2) + "\n")
+          subprocess.run(["xcrun", "simctl", "bootstatus", simulator, "-b"], check=True)
+          PY
+
+      - name: Run the selected public guest journey
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+          TEST_RUNNER_YLF_BENCHMARK_TARGET: native
+          TEST_RUNNER_YLF_LAST_APP_RUNTIME_UI: '1'
+          TEST_RUNNER_YLF_OWNED_BENCHMARK_SIMULATOR_UDID: ${{ steps.simulator.outputs.id }}
+        run: |
+          set -o pipefail
+          xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFunBenchmarks \
+            -configuration Benchmark -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
+            -derivedDataPath "$YLF_CI_OUTPUT/build" \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
+            -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
+            -resultBundlePath "$YLF_CI_OUTPUT/runtime-tests.xcresult" \
+            -only-testing:"YunleFunBenchmarksTests/ApplicationBenchmarks/$YLF_CI_METHOD" \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
+            -maximum-test-execution-time-allowance 180 \
+            -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
+            2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
+
+      - name: Export results and require the selected method to pass once
+        if: always()
+        run: |
+          xcrun xcresulttool get test-results summary --path "$YLF_CI_OUTPUT/runtime-tests.xcresult" > "$YLF_CI_OUTPUT/summary.json"
+          xcrun xcresulttool get test-results tests --path "$YLF_CI_OUTPUT/runtime-tests.xcresult" > "$YLF_CI_OUTPUT/tests.json"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          root = Path(os.environ["YLF_CI_OUTPUT"])
+          expected = "ApplicationBenchmarks/" + os.environ["YLF_CI_METHOD"]
+          cases = []
+          def visit(value):
+              if isinstance(value, dict):
+                  if value.get("nodeType") == "Test Case":
+                      cases.append(value)
+                  for child in value.values():
+                      visit(child)
+              elif isinstance(value, list):
+                  for child in value:
+                      visit(child)
+          visit(json.loads((root / "tests.json").read_text()))
+          summary = json.loads((root / "summary.json").read_text())
+          raw = (root / "tests.log").read_text()
+          events = re.findall(r"Test Case '-\[YunleFunBenchmarksTests\.(\w+) (\w+)\]' (started|passed|failed|skipped)", raw)
+          expected_events = [("ApplicationBenchmarks", os.environ["YLF_CI_METHOD"], status) for status in ["started", "passed"]]
+          restarts = [marker for marker in ["Restarting after unexpected exit", "Test runner crashed", "** TEST FAILED **"] if marker in raw]
+          counts = {key: summary.get(key) for key in ["totalTestCount", "passedTests", "failedTests", "skippedTests"]}
+          passed = (len(cases) == 1 and cases[0].get("nodeIdentifier", "").removesuffix("()") == expected
+                    and cases[0].get("result") == "Passed"
+                    and counts == {"totalTestCount": 1, "passedTests": 1, "failedTests": 0, "skippedTests": 0}
+                    and events == expected_events and not restarts)
+          receipt = {
+              "sourceHead": os.environ["YLF_CI_SOURCE_HEAD"],
+              "checkout": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "runID": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "expectedMethod": expected, "counts": counts, "rawEvents": events,
+              "restartIndicators": restarts, "selectedMethodPassedOnce": passed,
+              "loadAverageAfterTest": os.getloadavg(),
+              "sha256": {name: hashlib.sha256((root / name).read_bytes()).hexdigest()
+                         for name in ["summary.json", "tests.json", "tests.log", "simulator.json"]},
+          }
+          (root / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          if not passed:
+              raise SystemExit("Expected the selected method to start and pass exactly once, with matching structured results and no skips or restarts")
+          print("Verified " + expected + ": 1 passed, 0 failed, 0 skipped")
+          PY
+
+      - name: Preserve public runtime evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: native-ios-runtime-${{ matrix.journey }}-${{ github.event.pull_request.head.sha }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/yunlefun-runtime-benchmark/*.log
+            ${{ runner.temp }}/yunlefun-runtime-benchmark/*.json
+            ${{ runner.temp }}/yunlefun-runtime-benchmark/runtime-tests.xcresult
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Remove this journey's simulator
+        if: always() && steps.simulator.outputs.id != ''
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+          simulator = os.environ["YLF_CI_SIMULATOR"]
+          try:
+              subprocess.run(["xcrun", "simctl", "shutdown", simulator], timeout=30)
+          except subprocess.TimeoutExpired:
+              print("Shutdown command timed out; still attempting removal of this job's simulator")
+          subprocess.run(["xcrun", "simctl", "delete", simulator], check=True, timeout=60)
+          devices = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "--json"], timeout=15))
+          assert not any(device["udid"] == simulator for group in devices["devices"].values() for device in group)
+          print("Removed isolated simulator " + simulator)
+          PY

@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 import WebKit
 import XCTest
 @testable import YunleFun
@@ -8,6 +8,8 @@ final class WebProfileRepositoryTests: XCTestCase {
     private var directory: URL!
     private var pages: [WKWebView] = []
     private var stores: Set<UUID> = []
+    private var window: UIWindow?
+    private weak var previousWindow: UIWindow?
     private var file: URL { directory.appendingPathComponent("profiles.json") }
     private var app: CloudApplication {
         CloudApplication(id: "profile-fixture", name: "Profile fixture", websiteUrl: "https://profiles.invalid/app")
@@ -16,13 +18,20 @@ final class WebProfileRepositoryTests: XCTestCase {
         directory = FileManager.default.temporaryDirectory.appendingPathComponent("WebProfiles-" + UUID().uuidString)
     }
     override func tearDown() async throws {
+        defer {
+            pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }; pages.removeAll()
+            stores.removeAll()
+            window?.isHidden = true; window?.rootViewController = nil; window = nil
+            previousWindow?.makeKey()
+            try? FileManager.default.removeItem(at: directory)
+        }
         // Delete exactly the fixture's three values while its pages are alive.
         // Whole-store removal returned InvalidTransition on iOS 27; clearing
         // every WebKit data type subsequently took 88 seconds in one test.
         if #available(iOS 17, *) {
             for id in stores {
                 let web = try XCTUnwrap(pages.first { $0.configuration.websiteDataStore.identifier == id })
-                let cleared = try await web.callAsyncJavaScript("""
+                let cleared = try await WebStoragePageFixture.evaluate(in: web, script: """
                 const key = 'profile_test_draft';
                 localStorage.removeItem(key);
                 document.cookie = key + '=; Max-Age=0; path=/; Secure; SameSite=Lax';
@@ -35,13 +44,10 @@ final class WebProfileRepositoryTests: XCTestCase {
                 const databases = await indexedDB.databases();
                 return localStorage.getItem(key) === null && !document.cookie.split('; ').some(x => x.startsWith(key + '=')) &&
                   !databases.some(x => x.name === key);
-                """, arguments: [:], in: nil, contentWorld: .page) as? Bool
+                """) as? Bool
                 XCTAssertEqual(cleared, true, "All fixture identity and draft values must be deleted")
             }
         }
-        pages.forEach { $0.stopLoading() }; pages.removeAll()
-        stores.removeAll()
-        try? FileManager.default.removeItem(at: directory)
     }
     private func repository(namespace: String = "provider-a") -> WebProfileRepository {
         WebProfileRepository(fileURL: file, namespace: namespace)
@@ -297,25 +303,33 @@ final class WebProfileRepositoryTests: XCTestCase {
 
     @available(iOS 17, *)
     private func page(_ selected: WebProfileRepository.Selection) async throws -> WKWebView {
-        stores.insert(selected.identifier)
         let config = WKWebViewConfiguration()
-        // These storage probes deliberately stay outside a window. Keep their
-        // IndexedDB promises and cleanup timers running after navigation ends.
+        // Previously visited pages remain alive for exact fixture cleanup.
         config.preferences.inactiveSchedulingPolicy = .none
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: selected.identifier)
         let web = WKWebView(frame: .zero, configuration: config)
         pages.append(web)
-        web.loadHTMLString("<html><head><title>profile-probe</title></head><body>Profile fixture</body></html>",
-                           baseURL: URL(string: "https://profiles.invalid/"))
-        for _ in 0..<100 {
-            if !web.isLoading, (try? await web.evaluateJavaScript("document.title")) as? String == "profile-probe" { return web }
-            try await Task.sleep(nanoseconds: 50_000_000)
+        if window == nil {
+            let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+            previousWindow = scene.windows.first(where: \.isKeyWindow)
+            let host = UIWindow(windowScene: scene)
+            host.rootViewController = UIViewController()
+            host.makeKeyAndVisible()
+            window = host
         }
-        throw FixtureFailure.webKitTimeout
+        let host = try XCTUnwrap(window?.rootViewController?.view)
+        host.subviews.forEach { $0.removeFromSuperview() }
+        web.frame = host.bounds; web.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        host.addSubview(web)
+        try await WebStoragePageFixture.load(in: web, origin: URL(string: "https://profiles.invalid/")!, title: "profile-probe")
+        // A page that never committed cannot contain fixture values. Do not
+        // mask its navigation failure by running storage cleanup on about:blank.
+        stores.insert(selected.identifier)
+        return web
     }
 
     private func contents(_ web: WKWebView, writing value: String? = nil) async throws -> [String: String] {
-        try await web.callAsyncJavaScript("""
+        try await WebStoragePageFixture.evaluate(in: web, script: """
         const key = 'profile_test_draft';
         const db = await new Promise((resolve, reject) => {
           const r = indexedDB.open(key, 1);
@@ -338,8 +352,8 @@ final class WebProfileRepositoryTests: XCTestCase {
           return { local: localStorage.getItem(key) || '', draft,
             cookie: document.cookie.split('; ').find(x => x.startsWith(key + '='))?.split('=')[1] || '' };
         } finally { db.close(); }
-        """, arguments: ["value": value as Any? ?? NSNull()], in: nil, contentWorld: .page) as? [String: String] ?? [:]
+        """, arguments: ["value": value as Any? ?? NSNull()]) as? [String: String] ?? [:]
     }
 
-    private enum FixtureFailure: Error { case write, webKitTimeout }
+    private enum FixtureFailure: Error { case write }
 }

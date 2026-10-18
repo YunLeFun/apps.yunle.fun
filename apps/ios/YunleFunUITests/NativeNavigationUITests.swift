@@ -79,18 +79,21 @@ final class NativeNavigationUITests: XCTestCase {
             return
         }
         let fieldType = field.elementType
+        let fieldIdentifier = field.identifier
+        let insertion = typingKey.label
         typingKey.tap()
-        let entered = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            guard let value = field.value as? String else { return false }
-            // Secure fields expose an accessibility value, not the password.
-            // A localized character-count description can change while its
-            // string length stays constant. The selected software key above
-            // is an insertion key, so require an observable value change.
-            if fieldType == .secureTextField { return value != before }
-            return value.utf16.count > before.utf16.count
-        }, object: field)
-        let entry = XCTWaiter.wait(for: [entered], timeout: 5)
-        if entry != .completed {
+        // Match the current snapshot without repeatedly resolving the old
+        // element inside a predicate. CI observed the inserted value while
+        // that nested resolution was still retrying after its five-second wait.
+        // Secure fields expose a localized count/mask, so only their value
+        // change is observable; ordinary fields must contain the exact input.
+        let valuePredicate = fieldType == .secureTextField
+            ? NSPredicate(format: "value != %@", before)
+            : NSPredicate(format: "value == %@", before + insertion)
+        let fields = fieldType == .secureTextField ? app.secureTextFields : app.textFields
+        let entered = fields.matching(identifier: fieldIdentifier).matching(valuePredicate).firstMatch
+        let entry = entered.waitForExistence(timeout: 5)
+        if !entry {
             let value = field.value as? String
             let detail = XCTAttachment(string: """
                 elementType=\(fieldType.rawValue)
@@ -101,8 +104,7 @@ final class NativeNavigationUITests: XCTestCase {
                 """)
             detail.name = "native-login-key-entry-\(name)"; detail.lifetime = .keepAlways; add(detail)
         }
-        XCTAssertEqual(entry, .completed,
-                       "Tapping the software keyboard must actually enter a character")
+        XCTAssertTrue(entry, "Tapping the software keyboard must actually enter a character")
         XCTAssertTrue(dismiss.waitForExistence(timeout: 5))
         XCTAssertTrue(dismiss.isHittable)
         XCTAssertLessThan(dismiss.frame.maxY, keyboard.frame.minY)

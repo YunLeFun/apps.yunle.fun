@@ -24,15 +24,10 @@ final class NativeRuntimeSessionTests: XCTestCase {
             fixture.runtime.open(fixture.application, catalog: fixture.catalog, library: fixture.library)
             let browser = try await fixture.waitForApplication(fixture.application)
             let web = try XCTUnwrap(browser.view.subviews.compactMap { $0 as? WKWebView }.first)
+            try await WebStoragePageFixture.load(in: web, origin: URL(string: "https://identity-storage.invalid/")!,
+                                                  title: "identity-storage-probe")
             pages.append(web)
-            web.loadHTMLString("<html><head><title>identity-storage-probe</title></head><body>Storage fixture</body></html>",
-                               baseURL: URL(string: "https://identity-storage.invalid/"))
-            for _ in 0..<100 {
-                if !web.isLoading,
-                   (try? await web.evaluateJavaScript("document.title")) as? String == "identity-storage-probe" { return web }
-                try await Task.sleep(nanoseconds: 50_000_000)
-            }
-            throw NSError(domain: "NativeRuntimeSessionTests.Storage", code: 1)
+            return web
         }
         let storageScript = """
         const db = await new Promise((resolve, reject) => {
@@ -58,8 +53,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         } finally { db.close(); }
         """
         func storage(_ web: WKWebView, _ value: String? = nil) async throws -> [String: String] {
-            try await web.callAsyncJavaScript(storageScript, arguments: ["key": key, "value": value as Any? ?? NSNull()],
-                                             in: nil, contentWorld: .page) as? [String: String] ?? [:]
+            try await WebStoragePageFixture.evaluate(in: web, script: storageScript,
+                arguments: ["key": key, "value": value as Any? ?? NSNull()]) as? [String: String] ?? [:]
         }
         do {
             print("RUNTIME_STORAGE_PROBE stage=open-a")
@@ -81,22 +76,27 @@ final class NativeRuntimeSessionTests: XCTestCase {
             XCTAssertEqual(restored, ["local": "account-a", "draft": "account-a", "cookie": "account-a"],
                            "Returning to A must restore A's own data without deleting it")
         } catch {
-            for web in pages { try? await cleanupStorageProbe(web, key: key) }
+            for web in pages { try? await cleanupStorageProbe(web, key: key, window: fixture.window) }
             throw error
         }
         for (index, web) in pages.enumerated() {
             print("RUNTIME_STORAGE_PROBE stage=cleanup index=\(index)")
-            try await cleanupStorageProbe(web, key: key)
+            try await cleanupStorageProbe(web, key: key, window: fixture.window)
         }
     }
 
-    private func cleanupStorageProbe(_ web: WKWebView, key: String) async throws {
-        _ = try await web.callAsyncJavaScript("""
+    private func cleanupStorageProbe(_ web: WKWebView, key: String, window: UIWindow) async throws {
+        // Identity changes dismiss old browsers. Give their retained fixture
+        // pages a visible host while awaiting IndexedDB deletion.
+        let detached = web.window == nil
+        if detached { web.frame = window.bounds; window.addSubview(web) }
+        defer { if detached { web.removeFromSuperview() } }
+        _ = try await WebStoragePageFixture.evaluate(in: web, script: """
         localStorage.removeItem(key); document.cookie = key + '=; Max-Age=0; path=/; Secure; SameSite=Lax';
         await new Promise((resolve, reject) => {
           const r = indexedDB.deleteDatabase(key); r.onsuccess = resolve; r.onerror = () => reject(new Error('cleanup'));
         }); return true;
-        """, arguments: ["key": key], in: nil, contentWorld: .page)
+        """, arguments: ["key": key])
     }
 
     func testRecoveryRejectsGuestAndIdentityChangesIncludingReturnToSameAccount() async throws {

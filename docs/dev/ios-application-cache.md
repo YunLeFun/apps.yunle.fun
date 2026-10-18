@@ -324,3 +324,9 @@ python3 apps/ios/scripts/capture-simulator-startup.py \
 缓存改动单独提取到最新 `main` 后，[首次完整 CI](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39119738505) 的结构化报告为 503 通过、1 失败、7 个显式专项跳过。新增 27 项日常缓存回归全部通过；失败为 `NativeRuntimeSessionTests/testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts()`，记录了 `InvalidTransition` 与 `failed(deinit)`，Release 编译跳过。报告的来源提交及摘要已核对，失败证据保留，不能把这一轮记为完整通过。
 
 检查发现，原运行时测试只等待控制器呈现完成，就停止首次导航并注入隔离 HTML；缓存接入后，首次导航在异步读取缓存后才提交，控制器呈现完成已不能保证该请求提交完毕。补充 `isPreparingInitialContent` 状态及准备完成回调，测试在原来的等待预算内同时检查这一状态，然后停止初始请求、注入夹具。账号隔离、草稿保留及清理断言保持不变，并增加固定阶段标记以区分准备、读写和清理失败。这一修正仍需由后续完整 CI 验证，不能据此认定此前系统级 dyld / RunningBoard 阻塞已经解决。
+
+后续提交 `f8e76ce` 的 [CI 39121386171](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39121386171) 为 501 通过、3 失败、7 个显式专项跳过；27 项日常缓存测试仍全部通过，Release 仍跳过。三项失败分别是账号切换首次打开超时、访客草稿保留测试的页面就绪超时，以及最大字号键盘输入等待。准备状态修正没有使完整 CI 通过。
+
+原 xcresult 的键盘附件记录输入字符数从 1 变成 2，但等待旧字段的查询已超时。测试改用当前元素的标识和预期值直接匹配，保留 5 秒期限；普通字段要求精确追加点击的字符，密码字段仍要求可访问值变化。两个 WebKit 存储测试不再反复向尚未就绪的文档执行 `document.title`，而由夹具文档的 load 事件发送带随机标记的就绪消息，并核对主框架和来源。页面就绪与存储脚本回调各有 5 秒原生侧期限，避免 JavaScript 自身计时器因页面挂起而失效。草稿测试使用可见窗口承载当前页面；运行时切换后保留的旧页面在清理时临时恢复可见承载。未加载成功的页面不再触发无来源存储清理，所有夹具窗口和页面均在失败路径释放。
+
+该次账号超时还保存了完整系统 spindump。应用的两个 Swift 工作线程等待 ScreenTime 同步回复，服务端链经过 `ScreenTimeSettingsAgent → dasd → CoreDuetContext`；采样同时提示 cooperative thread limit。这说明现场存在系统服务等待，尚不能证明它是唯一原因，也没有通过关闭 ScreenTime 或重启服务绕开。键盘附件、逐阶段活动、系统采样和构建结果保存在本机 `merge-preflight/ci-fix-investigation/`，后续合并状态以对应提交的完整测试及 Release 终态为准。

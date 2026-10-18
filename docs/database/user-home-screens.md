@@ -2,19 +2,19 @@
 
 CloudBase NoSQL 集合，存储用户的 Home Screen 配置（已安装应用、排序、Dock）。
 
-每个用户对应**一条文档**，Home Screen 是用户个性化配置，读写粒度天然为整体。
+产品模型期望每个用户一份 Home Screen，读写粒度为整体。**2026-10-16 线上结构核实：`_openid_1` 为普通索引，历史上可能存在同一用户的多份文档；不能把一用户一文档当作数据库保证。** 原生入口的读取、冲突及历史保留方式见[同步契约](../dev/ios-home-sync.md)。
 
 ## 字段定义
 
-| 字段            | 类型             | 必填 | 说明                          |
-| --------------- | ---------------- | ---- | ----------------------------- |
-| `_id`           | `string`         | 自动 | 文档 ID，CloudBase 自动生成   |
-| `_openid`       | `string`         | 自动 | 用户 ID，服务端自动注入       |
-| `installedApps` | `InstalledApp[]` | 是   | 主屏已安装应用列表（有序）    |
-| `dockApps`      | `InstalledApp[]` | 是   | Dock 常用应用（最多 4 个）    |
-| `recentApps`    | `RecentApp[]`    | 是   | 最近使用的应用（最多 100 个） |
-| `createdAt`     | `number`         | 是   | 创建时间戳（ms）              |
-| `updatedAt`     | `number`         | 是   | 更新时间戳（ms）              |
+| 字段            | 类型             | 必填 | 说明                                       |
+| --------------- | ---------------- | ---- | ------------------------------------------ |
+| `_id`           | `string`         | 是   | 旧 SDK 自动生成；原生服务端使用固定派生 ID |
+| `_openid`       | `string`         | 是   | 旧 SDK 自动注入；原生服务端从验证身份填写  |
+| `installedApps` | `InstalledApp[]` | 是   | 主屏已安装应用列表（有序）                 |
+| `dockApps`      | `InstalledApp[]` | 是   | Dock 常用应用（最多 4 个）                 |
+| `recentApps`    | `RecentApp[]`    | 是   | 最近使用的应用（最多 100 个）              |
+| `createdAt`     | `number`         | 是   | 创建时间戳（ms）                           |
+| `updatedAt`     | `number`         | 是   | 更新时间戳（ms）                           |
 
 ### InstalledApp 子结构
 
@@ -33,10 +33,10 @@ CloudBase NoSQL 集合，存储用户的 Home Screen 配置（已安装应用、
 
 ## 索引
 
-| 索引名      | 字段      | 类型 | 说明       |
-| ----------- | --------- | ---- | ---------- |
-| `_id_`      | `_id`     | 默认 | 主键       |
-| `_openid_1` | `_openid` | 唯一 | 每用户一条 |
+| 索引名      | 字段      | 类型 | 说明                       |
+| ----------- | --------- | ---- | -------------------------- |
+| `_id_`      | `_id`     | 默认 | 主键                       |
+| `_openid_1` | `_openid` | 普通 | 支持按用户查询，不保证唯一 |
 
 ## 安全规则
 
@@ -57,10 +57,9 @@ CloudBase NoSQL 集合，存储用户的 Home Screen 配置（已安装应用、
 > - `auth.uid`：非微信登录方式（用户名、手机、邮箱等）的 user_id（Auth v2 JWT `sub`）
 > - 安全规则需同时匹配两者以兼容不同登录方式
 >
-> **`_openid` 注入规则**：CloudBase `add()` 时服务端自动注入。
-> 代码中也手动传入 `_openid: uid`，确保与 `auth.uid` 一致。
+> **`_openid` 注入规则**：旧 Web SDK `add()` 由 CloudBase 自动注入，当前客户端不手工覆盖。新 Nitro 管理员 SDK 不依赖客户端安全规则，必须由已验证的服务端身份填写 `_openid`，不能采用请求正文中的 UID。
 
-## 查询模式
+## 旧 Web SDK 查询模式
 
 ### 获取用户 Home Screen
 
@@ -91,7 +90,7 @@ db.collection('user_home_screens').doc(docId).update({
 })
 ```
 
-## 同步策略
+## 旧 Web SDK 同步策略
 
 1. **启动加载**：先从 localStorage 读取缓存快速渲染，后台异步拉取 CloudBase 最新数据
 2. **乐观更新**：拖拽/安装/卸载时先更新本地 store + localStorage，异步写入 CloudBase

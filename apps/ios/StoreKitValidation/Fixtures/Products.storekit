@@ -1,0 +1,94 @@
+{
+  "identifier" : "F3A1B2C4-0000-4000-8000-YUNLEFUN0001",
+  "nonRenewingSubscriptions" : [
+    {
+      "displayPrice" : "12.00",
+      "familyShareable" : false,
+      "internalID" : "F3A1B2C4-0000-4000-8000-MEMBERMONTH1",
+      "localizations" : [
+        {
+          "description" : "云乐坊会员 · 1 个自然月 / 1 calendar month",
+          "displayName" : "云乐坊会员（月度）",
+          "locale" : "zh_CN"
+        }
+      ],
+      "productID" : "fun.yunle.apps.member_month",
+      "referenceName" : "会员月度",
+      "type" : "NonRenewingSubscription"
+    },
+    {
+      "displayPrice" : "118.00",
+      "familyShareable" : false,
+      "internalID" : "F3A1B2C4-0000-4000-8000-MEMBERYEAR01",
+      "localizations" : [
+        {
+          "description" : "云乐坊会员 · 1 个自然年 / 1 calendar year",
+          "displayName" : "云乐坊会员（年度）",
+          "locale" : "zh_CN"
+        }
+      ],
+      "productID" : "fun.yunle.apps.member_year",
+      "referenceName" : "会员年度",
+      "type" : "NonRenewingSubscription"
+    }
+  ],
+  "products" : [
+    {
+      "displayPrice" : "12.00",
+      "familyShareable" : false,
+      "internalID" : "F3A1B2C4-0000-4000-8000-COIN00000100",
+      "localizations" : [
+        {
+          "description" : "100 云币",
+          "displayName" : "100 云币",
+          "locale" : "zh_CN"
+        }
+      ],
+      "productID" : "fun.yunle.apps.coin_100",
+      "referenceName" : "云币 100",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "58.00",
+      "familyShareable" : false,
+      "internalID" : "F3A1B2C4-0000-4000-8000-COIN00000500",
+      "localizations" : [
+        {
+          "description" : "500 云币",
+          "displayName" : "500 云币",
+          "locale" : "zh_CN"
+        }
+      ],
+      "productID" : "fun.yunle.apps.coin_500",
+      "referenceName" : "云币 500",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "108.00",
+      "familyShareable" : false,
+      "internalID" : "F3A1B2C4-0000-4000-8000-COIN00001000",
+      "localizations" : [
+        {
+          "description" : "1000 云币",
+          "displayName" : "1000 云币",
+          "locale" : "zh_CN"
+        }
+      ],
+      "productID" : "fun.yunle.apps.coin_1000",
+      "referenceName" : "云币 1000",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_locale" : "zh_CN",
+    "_storefront" : "CHN",
+    "_storeKitErrors" : [
+    ]
+  },
+  "subscriptionGroups" : [
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

@@ -17,6 +17,7 @@ function makeApp(slug, overrides = {}) {
     ratingCount: 0,
     isPublic: true,
     status: 'approved',
+    publicationStatus: 'published',
     ...overrides,
   }
 }

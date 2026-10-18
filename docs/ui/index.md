@@ -1,5 +1,9 @@
 # Ionic + Konsta UI 设计实践
 
+> 本页适用于现有 Web / Capacitor 界面。iOS 后续采用 SwiftUI 原生设计系统，界面范围、视觉方向和验收要求见 [iOS 原生改造 Goal](../dev/ios-native-migration.md)。
+
+原生客户端优先遵循最新 Apple HIG 并使用系统组件，见 [iOS 原生 UI 规范](./ios-native.md)。
+
 ## 核心原则
 
 1. **优先使用 Ionic / Konsta UI 组件**，避免用 HTML + CSS 重造轮子

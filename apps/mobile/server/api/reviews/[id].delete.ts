@@ -1,10 +1,11 @@
 import type { ReviewRecord } from '~/types/review'
-import { createError, getRouterParam } from 'h3'
+import { createError, getRouterParam, setResponseHeader } from 'h3'
 import { recomputeAppRating } from '../../utils/app-rating'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
 
 export default defineEventHandler(async (event) => {
+  setResponseHeader(event, 'Cache-Control', 'private, no-store')
   const user = await requireCloudbaseUser(event)
   const id = getRouterParam(event, 'id')?.trim()
   if (!id) {

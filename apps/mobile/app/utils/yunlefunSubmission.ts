@@ -65,6 +65,18 @@ export function getYunLeFunSubmissionState(app: AppRecord): YunLeFunSubmissionSt
     }
   }
 
+  if (currentRevisionId && app.latestSubmission && app.latestSubmission._id !== currentRevisionId) {
+    return {
+      status: 'draft',
+      statusLabel: '新版未投稿',
+      detail: reviewStatus === 'pending' || reviewStatus === 'in_review'
+        ? '另一个版本仍在审核；当前版本尚未投稿。'
+        : '这里的审核意见属于另一个版本，当前版本尚未投稿。',
+      action: 'submit',
+      actionLabel: '投稿当前版本到云乐坊',
+    }
+  }
+
   if (reviewStatus === 'approved' && currentRevisionId && activeSubmissionId === currentRevisionId) {
     return {
       status: 'awaiting_publication',

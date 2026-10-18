@@ -66,7 +66,8 @@ describe('native WebView authorization boundary', () => {
     expect(androidWebView).not.toContain('IDENTITY_AWARE_HOSTS')
     expect(nativePlugin).not.toContain('__Host-dayun-kicker-session')
     expect(androidPlugin).not.toContain('__Host-dayun-kicker-session')
-    expect(nativePlugin).toContain(`self?.sessions\n                    .forEach { $0.notifyHostIdentityChanged() }`)
+    expect(nativePlugin).toContain('HostIdentitySessions.clear')
+    expect(nativePlugin).toContain('.forEach { $0.notifyHostIdentityChanged() }')
     expect(androidWebView).toContain(`window.dispatchEvent(new CustomEvent('ylf:identityChanged'))`)
   })
 

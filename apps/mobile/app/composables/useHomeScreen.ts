@@ -155,6 +155,9 @@ export function useHomeScreen() {
 
     homeScreenStore.isSyncing = true
     const config = homeScreenStore.getHomeScreenConfig()
+    // 只更新以下字段：update() 不触碰文档上的其他字段，因此原生客户端写入的
+    // folders（schema 2）在 Web 同步后仍保留。不要改成整文档 set() 或在此
+    // 写入 folders，除非 Web 端完整支持文件夹的读取与校验。
     const payload = {
       installedApps: config.installedApps,
       dockApps: config.dockApps,

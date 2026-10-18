@@ -1,11 +1,12 @@
 import type { ReviewListResponse, ReviewPublic, ReviewRecord } from '~/types/review'
-import { createError, getQuery } from 'h3'
+import { createError, getQuery, getRequestHeader, setResponseHeader } from 'h3'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
-import { tryGetCloudbaseUser } from '../../utils/cloudbase-auth'
+import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
 import { getPublicAppByKey } from '../../utils/public-apps'
 import { summarizeRatingGroups } from '../../utils/reviews'
 
 export default defineEventHandler(async (event) => {
+  setResponseHeader(event, 'Cache-Control', 'private, no-store')
   const query = getQuery(event)
   let appKey = typeof query.appKey === 'string' ? query.appKey.trim() : ''
   if (!appKey) {
@@ -15,7 +16,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const user = await tryGetCloudbaseUser(event)
+  const user = getRequestHeader(event, 'authorization') ? await requireCloudbaseUser(event) : null
   const { db } = useCloudbaseAdmin()
   const app = await getPublicAppByKey(appKey, db)
   if (!app)

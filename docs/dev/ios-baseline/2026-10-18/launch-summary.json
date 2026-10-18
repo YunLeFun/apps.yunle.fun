@@ -1,0 +1,44 @@
+[
+  {
+    "label": "native-a8b16f7-frame",
+    "metric": "Duration (ApplicationFirstFramePresentationResponsive)",
+    "destination": "iPhone 18 Pro iOS Simulator 27.0",
+    "sourceCSV": "native-frame.csv",
+    "count": 5,
+    "seconds": [
+      5.492266625,
+      5.5685396250000005,
+      5.602269875,
+      5.6614225000000005,
+      5.978063000000001
+    ],
+    "meanSeconds": 5.660512325,
+    "medianSeconds": 5.602269875,
+    "minimumSeconds": 5.492266625,
+    "maximumSeconds": 5.978063000000001,
+    "sampleStandardDeviationSeconds": 0.18774785997932772,
+    "p95Seconds": null,
+    "note": "No P95 estimate for fewer than 20 measurements"
+  },
+  {
+    "label": "native-a8b16f7-home",
+    "metric": "Clock Monotonic Time",
+    "destination": "iPhone 18 Pro iOS Simulator 27.0",
+    "sourceCSV": "native-content.csv",
+    "count": 5,
+    "seconds": [
+      7.539119073,
+      7.473305463000001,
+      7.580419111,
+      7.675234932,
+      7.576948379
+    ],
+    "meanSeconds": 7.5690053916,
+    "medianSeconds": 7.576948379,
+    "minimumSeconds": 7.473305463000001,
+    "maximumSeconds": 7.675234932,
+    "sampleStandardDeviationSeconds": 0.07336509331160058,
+    "p95Seconds": null,
+    "note": "No P95 estimate for fewer than 20 measurements"
+  }
+]

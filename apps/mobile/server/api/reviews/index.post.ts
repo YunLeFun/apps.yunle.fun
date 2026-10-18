@@ -1,5 +1,5 @@
 import type { ReviewModerationInfo, ReviewRecord, SubmitReviewResponse } from '~/types/review'
-import { createError, readBody } from 'h3'
+import { createError, readBody, setResponseHeader } from 'h3'
 import { recomputeAppRating } from '../../utils/app-rating'
 import { useCloudbaseAdmin } from '../../utils/cloudbase-admin'
 import { requireCloudbaseUser } from '../../utils/cloudbase-auth'
@@ -8,6 +8,7 @@ import { getPublicAppByKey } from '../../utils/public-apps'
 import { checkCooldown, mapSuggestionToStatus, validateReviewInput } from '../../utils/reviews'
 
 export default defineEventHandler(async (event) => {
+  setResponseHeader(event, 'Cache-Control', 'private, no-store')
   const user = await requireCloudbaseUser(event)
   const input = validateReviewInput(await readBody(event))
   const { db } = useCloudbaseAdmin()

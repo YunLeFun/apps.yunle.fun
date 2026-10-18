@@ -1,4 +1,4 @@
-import { createError, getRouterParam, readBody } from 'h3'
+import { createError, getHeader, getRouterParam, readBody } from 'h3'
 import { submitOwnedAppToPublicMarket } from '../../../utils/app-submissions'
 import { requireVerifiedCloudbaseUser } from '../../../utils/cloudbase-auth'
 
@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: '应用 ID 必填' })
   const body = await readBody<{ makePublic?: unknown, shortName?: unknown } | undefined>(event)
   return submitOwnedAppToPublicMarket(user, appId, {
+    ifMatch: getHeader(event, 'if-match'),
     makePublic: body?.makePublic === true,
     shortName: typeof body?.shortName === 'string' ? body.shortName : undefined,
   })

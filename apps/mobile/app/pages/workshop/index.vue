@@ -108,7 +108,7 @@ async function confirmDeleteApp(app: AppRecord, slidingItem?: any) {
         role: 'destructive',
         handler: async () => {
           try {
-            await deleteApp(app._id)
+            await deleteApp(app)
             myApps.value = myApps.value.filter(a => a._id !== app._id)
             toast.showSuccess('已下架')
           }

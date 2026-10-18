@@ -1,0 +1,68 @@
+{
+  "sourceCommit": "a8b16f7f73d9ad9160996e68439ec694cfc75316",
+  "sourceMethod": "git archive; no worktree changes",
+  "configuration": "Benchmark",
+  "architectures": "arm64",
+  "bundleIdentifier": "fun.yunle.apps.benchmark-dev",
+  "version": "0.1.0",
+  "build": "1",
+  "minimumOSDeclared": "16.0",
+  "runtime": "iOS 27.0 (24A434)",
+  "device": "iPhone 18 Pro",
+  "simulatorId": "07347157-E372-4089-8C58-22D87C0246CF",
+  "nameDuringMeasurements": "YunleFun Candidate c8d43bc",
+  "deliveryName": "YunleFun Candidate a8b16f7",
+  "appSHA256": {
+    "SwiftDraw-LICENSE.txt": "0952fa14f101b00996c24fd6a678611feef5cb0902e8ce28949cea7cb0eb2aa7",
+    "AppIcon60x60@2x.png": "f033bd76d8f104c961579bcbc2b066dc853cba613e8908915ba6ed2b4f92fe8d",
+    "Assets.car": "75d127ee0247342f6566538319146c8621b7f8884c57adf6adb6e0e48a770a49",
+    "AppIcon76x76@2x~ipad.png": "98e4b754388204239821e14398f35886d1147e34dd87a1ceb77f199077608b81",
+    "PrivacyInfo.xcprivacy": "7544706aeab08ae8cfd57a7d9b4c3529d084065b06c1682690e3c89eb2decef6",
+    "Info.plist": "8ee0cabe4ffcfc49566e89055b9e498097836783e89000f0fe7faa780ba62e3b",
+    "YunleFun": "7d561a43280d419c2376ca45a954bb3c98289dfe6b27a8693ccc5e8679ab9f89",
+    "PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "_CodeSignature/CodeResources": "d47b048c30d9f13afd36fa172799a8e73436a17d80a2ea6f4dfc622d90556ebe"
+  },
+  "hostBefore": {
+    "recordedAt": "2026-10-17T23:16:58.205321+00:00",
+    "simulatorId": "07347157-E372-4089-8C58-22D87C0246CF",
+    "configuration": "Benchmark",
+    "sourceHead": "a8b16f7f73d9ad9160996e68439ec694cfc75316",
+    "conditions": "Shared development host. Other work may be running; no controlled idle-host or same-runtime legacy baseline. Existing guest cloud-air home.",
+    "uptime": "7:16  up 7 days,  6:10, 2 users, load averages: 153.75 120.53 106.58",
+    "macos": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "architecture": "arm64",
+    "cpuCount": "10",
+    "simulator": [
+      {
+        "dataPathSize": 3229855744,
+        "udid": "07347157-E372-4089-8C58-22D87C0246CF",
+        "lastUsedAt": "2026-10-17T23:13:14Z",
+        "isAvailable": true,
+        "logPathSize": 520192,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+        "state": "Booted",
+        "name": "YunleFun Candidate c8d43bc",
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+      }
+    ]
+  },
+  "hostAfter": {
+    "recordedAt": "2026-10-17T23:19:24.609321+00:00",
+    "uptime": "7:19  up 7 days,  6:13, 2 users, load averages: 85.53 106.42 103.13",
+    "guestInstalledApps": [
+      {
+        "appId": "3b49fbed6a2707b9000a533e02729196"
+      }
+    ],
+    "guestDockApps": []
+  },
+  "data": "Anonymous guest, one actual cloud-air entry, persisted caches, live network",
+  "samplesPerMetric": 5,
+  "comparison": "No same-runtime legacy baseline; high shared-host load. No speedup or regression attribution against the 2026-10-16 iOS 18.6 samples.",
+  "rawCSVHashes": {
+    "native-frame.csv": "7a98e690f5696ac0be61462f956771d4d401e7bff185d417c07501bc78811d64",
+    "native-content.csv": "552444f20f1639e03bb61eabcb8bc3e918d779fcf87861d07f90c54d90b2af7f"
+  }
+}

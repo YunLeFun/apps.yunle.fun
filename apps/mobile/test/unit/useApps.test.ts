@@ -11,6 +11,7 @@ const collection = vi.fn(() => ({ where }))
 function appRecord(overrides: Partial<AppRecord> = {}): AppRecord {
   return {
     _id: 'app_1',
+    writeVersion: 'a'.repeat(64),
     ownerLogin: 'YunYouJun',
     ownerUid: 'uid-1',
     name: '示例应用',
@@ -111,13 +112,13 @@ describe('useApps server-mediated submission flow', () => {
 
   it('creates a new immutable submission when editing', async () => {
     api
-      .mockResolvedValueOnce({ items: [appRecord({ description: '旧简介' })] })
       .mockResolvedValueOnce({ app: appRecord(), submission: { _id: 'submission_2' } })
 
-    await useApps().updateApp('app_1', { description: '新简介' })
+    await useApps().updateApp(appRecord({ description: '旧简介' }), { description: '新简介' })
 
-    expect(api).toHaveBeenNthCalledWith(2, '/api/apps/app_1/submissions', {
+    expect(api).toHaveBeenNthCalledWith(1, '/api/apps/app_1/submissions', {
       method: 'POST',
+      headers: { 'If-Match': `"${'a'.repeat(64)}"` },
       body: expect.objectContaining({
         kind: 'first_party',
         slug: 'example',
@@ -126,9 +127,16 @@ describe('useApps server-mediated submission flow', () => {
     })
   })
 
-  it('refuses to edit an app not returned by the owner endpoint', async () => {
+  it('refuses to rebase an edit without a captured owner version', async () => {
     api.mockResolvedValue({ items: [] })
-    await expect(useApps().updateApp('missing', { name: '无权' })).rejects.toThrow('应用不存在或无权更新')
+    await expect(useApps().updateApp(appRecord({ writeVersion: undefined }), { name: '无权' })).rejects.toThrow('版本信息')
+    expect(api).not.toHaveBeenCalled()
+  })
+
+  it('rejects multiline version values before constructing request headers', async () => {
+    const app = appRecord({ writeVersion: `${'a'.repeat(64)}\n` })
+    await expect(useApps().deleteApp(app)).rejects.toThrow('版本信息')
+    expect(api).not.toHaveBeenCalled()
   })
 
   it('soft-delists through the server and checks slug availability there', async () => {
@@ -137,9 +145,9 @@ describe('useApps server-mediated submission flow', () => {
       .mockResolvedValueOnce({ taken: true })
     const apps = useApps()
 
-    await apps.deleteApp('app_1')
+    await apps.deleteApp(appRecord())
     await expect(apps.isSlugTaken('example')).resolves.toBe(true)
-    expect(api).toHaveBeenNthCalledWith(1, '/api/apps/app_1', { method: 'DELETE' })
+    expect(api).toHaveBeenNthCalledWith(1, '/api/apps/app_1', { method: 'DELETE', headers: { 'If-Match': `"${'a'.repeat(64)}"` } })
     expect(api).toHaveBeenNthCalledWith(2, '/api/apps/slug', { query: { slug: 'example' } })
   })
 
@@ -150,11 +158,12 @@ describe('useApps server-mediated submission flow', () => {
       reviewStatus: 'pending',
     })
 
-    await useApps().submitPublicMarket('app_1', { makePublic: true })
+    await useApps().submitPublicMarket(appRecord(), { makePublic: true })
 
     expect(api).toHaveBeenCalledWith('/api/apps/app_1/public-market', {
       method: 'POST',
-      body: { makePublic: true },
+      headers: { 'If-Match': `"${'a'.repeat(64)}"` },
+      body: { makePublic: true, shortName: undefined },
     })
   })
 })

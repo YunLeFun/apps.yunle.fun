@@ -67,3 +67,9 @@
 2026-10-17 在新系统导航容器与会话层级清理实现上再次完成上述协议与实际 UI 两项，各 1 项通过；原生授权面板、网页同一身份 / 零余额和两端退出均核对成功。上轮自动化输入错位与字符改写的失败仍保留，本轮未更改认证或放宽检查。结果、清理与未完成边界见[导航容器复验](./ios-runtime-navigation.md#新导航容器真实-sso-复验-·-2026-10-17)。
 
 早期证据位于本聊天附件 ios-native/host-sso-live：protocol-27、ui-27、真实原生授权面板与网页账号截图。早期 UI 在键盘阶段出现 SwiftUI invalid frame dimension 告警，已在纯 SwiftUI 表单 / UIKit Sheet 组合复现并定位到 InputAccessoryBar 系统路径。2026-10-17 原生表单改用导航栏收起键盘后，实际 SSO UI 与原生密码焦点检查同次 2 项通过，无新增告警；原 keyboard toolbar 最小对照仍失败，详见[独立诊断](./ios-keyboard-layout-diagnostics.md)。最终报告位于聊天附件 ios-native/sso-ui-20261017/final-ui。本次仅覆盖同一模拟器、同一合成账号和 AI 春联，不能推广为所有应用身份隔离、BFF 会话实现、其他系统账号、真机或升级验收。
+
+## 持久身份隔离待验范围 · 2026-10-18 {#persistent-identity-validation}
+
+按提交 `0e315c5` 复核：`NativeWebRuntime.resetIdentity` 撤销授权并移除非续接页面，随后调用 `HostIdentitySessions.clear`。后者只删除 `play.yunle.fun` 的 `__Host-ylf_play_session`、`cms.yunle.fun` 的 `__Host-ylf-cms-session` 与 `h3`；该重置路径没有调用 `notifyHostIdentityChanged`。这是源码观察，不能据此认定实际串号，也不能据关闭页面证明所有应用的 localStorage / IndexedDB 身份已隔离。
+
+下一项真实验证需用受管合成账号完成 AI 春联原生授权，执行宿主 A → B → A 后重新打开，读回实际网页身份；再覆盖另一个确有登录入口的注册应用，以及授权途中切换时的迟到结果。系统“使用其他账号”的实际回跳单独验证。测试需保留应用非身份数据，结束时远端退出创建的会话并清理一次性输入与独立 Keychain；不能用清空整个 WebKit 存储替代隔离证明。本次仅完成源码复核，没有使用账号、签发授权或修改身份逻辑，G2 保持未验收。

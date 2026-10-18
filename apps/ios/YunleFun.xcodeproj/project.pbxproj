@@ -22,6 +22,7 @@
 		19318D620B58A06EBD67AD98 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DC80D539AC6A9E5CD63DA6 /* CameraPreview.swift */; };
 		1D98A8B6C6E34F1603075AF6 /* PublishingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CCBB719CCA8FCE720CC9F6 /* PublishingStore.swift */; };
 		1DF4A45D5DD8C5CEE596929C /* MyReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BF26DDAE982C29D0DBF4E1 /* MyReportsView.swift */; };
+		2009E98802053BCA31C84DEE /* WalletPresentationLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BE967444DF7CA0826745D3 /* WalletPresentationLiveTests.swift */; };
 		210C63C7D7A887626042B1E1 /* YunleFunApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139EACD28A83C9489BD6029B /* YunleFunApp.swift */; };
 		22E47851937ABBE2AB80A4AB /* SupportContactSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F4BE10630069215F3D5809 /* SupportContactSection.swift */; };
 		23E77173AD963E565B10E175 /* ApplicationReviewsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D242C1F6C89C2FD05A47 /* ApplicationReviewsView.swift */; };
@@ -328,6 +329,7 @@
 		8F7E20307BE7EBBCC7D47FED /* WalletTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletTests.swift; sourceTree = "<group>"; };
 		91EEF88CF96019AB5203CADA /* PublishingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingService.swift; sourceTree = "<group>"; };
 		93F4870F29D6C930BF6AA0E6 /* WalletStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletStore.swift; sourceTree = "<group>"; };
+		95BE967444DF7CA0826745D3 /* WalletPresentationLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletPresentationLiveTests.swift; sourceTree = "<group>"; };
 		95D8E999A74200EC236199FD /* FeedbackLoginCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackLoginCoordinator.swift; sourceTree = "<group>"; };
 		9651F704A0D7D36858EF4763 /* DeveloperProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperProfileService.swift; sourceTree = "<group>"; };
 		97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutDiagnostics.swift; sourceTree = "<group>"; };
@@ -586,6 +588,7 @@
 				97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */,
 				6B4852DB61BBB9719B249882 /* ManagedAccountLiveTests.swift */,
 				C0D1CF174CA2F91B416E92D7 /* PublicIconLiveTests.swift */,
+				95BE967444DF7CA0826745D3 /* WalletPresentationLiveTests.swift */,
 				DB891A24C2837E7FE180BD2E /* WebProfileProcessLiveTests.swift */,
 				61FA4DFE35928660E8971D33 /* WebProfileRecoveryLiveTests.swift */,
 			);
@@ -1186,6 +1189,7 @@
 				60FA64FB27A0A53A8CB97730 /* KeyboardLayoutDiagnostics.swift in Sources */,
 				C84CD9EC1F69F26D2EABE8E5 /* ManagedAccountLiveTests.swift in Sources */,
 				54DA859FABDDDF03DE7C2E4A /* PublicIconLiveTests.swift in Sources */,
+				2009E98802053BCA31C84DEE /* WalletPresentationLiveTests.swift in Sources */,
 				8724EB11FF79C82DB2B02493 /* WebProfileProcessLiveTests.swift in Sources */,
 				6662F9B3675951CFD089EEB4 /* WebProfileRecoveryLiveTests.swift in Sources */,
 			);

@@ -259,8 +259,8 @@ final class ApplicationBenchmarks: XCTestCase {
         }
         attach(app, name: "last-app-fresh-guest-fixture")
 
-        // Acquire the actual public application through the existing native catalog journey.
-        prepareNativeHome(app)
+        // Keep the verified guest fixture in the same process while acquiring the public app.
+        acquireNativeCloudAir(app)
         let open = app.buttons["打开云空调"]
         guard open.waitForExistence(timeout: 10), homeEntries.count == 1,
               homeEntries.firstMatch.label == "打开云空调" else {
@@ -886,6 +886,10 @@ final class ApplicationBenchmarks: XCTestCase {
         app.launch()
         app.tabBars.buttons["云居"].tap()
         if app.buttons["打开云空调"].exists { return }
+        acquireNativeCloudAir(app)
+    }
+
+    private func acquireNativeCloudAir(_ app: XCUIApplication) {
         app.tabBars.buttons["工坊"].tap()
         let search = app.searchFields.firstMatch
         XCTAssertTrue(search.waitForExistence(timeout: 10))

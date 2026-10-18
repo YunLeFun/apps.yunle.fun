@@ -7,6 +7,141 @@ import UIKit
 import XCTest
 @testable import YunleFun
 
+/// Real authentication and publishing reads, with a fail-closed write observer.
+/// This proves the native eligibility gate; it does not validate cloud writes.
+@MainActor
+final class PublishingAccessLiveTests: XCTestCase {
+    func testManagedPublishingEligibilityAndLocalDraftIsolation() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_PUBLISHING_ACCESS"] == "1" else {
+            throw XCTSkip("Requires explicitly provisioned managed accounts and the current loopback backend")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This validation is restricted to an owned simulator")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else {
+            return XCTFail("The exact owned simulator must be supplied")
+        }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let input = cache.appendingPathComponent("iOSNativeValidation/publishing-accounts.json")
+        let attributes = try FileManager.default.attributesOfItem(atPath: input.path)
+        guard let permissions = attributes[.posixPermissions] as? NSNumber,
+              permissions.intValue & 0o077 == 0 else {
+            return XCTFail("The one-use account file must be private")
+        }
+        let data = try Data(contentsOf: input)
+        try FileManager.default.removeItem(at: input)
+        let pool = try JSONDecoder().decode(Pool.self, from: data)
+        let expected = ["production-standard": "ylf_prod_standard",
+                        "production-member-active": "ylf_prod_member",
+                        "production-zero-balance": "ylf_prod_zero"]
+        guard pool.accounts.count == 3, Set(pool.accounts.map(\.id)) == Set(expected.keys),
+              pool.accounts.allSatisfy({ $0.environment == "production" && $0.username == expected[$0.id] && !$0.password.isEmpty }) else {
+            return XCTFail("Only the three approved synthetic accounts may run this validation")
+        }
+        let serviceName = "fun.yunle.apps.publishing-access." + UUID().uuidString
+        let keychain = KeychainAccountVault(service: serviceName)
+        let accounts = AccountStore(session: AccountSession(vault: keychain))
+        let directory = cache.appendingPathComponent("PublishingAccess-" + UUID().uuidString)
+        let drafts = ApplicationDraftVault(directory: directory)
+        let service = ReadOnlyPublishingProbe()
+        let store = PublishingStore(accounts: accounts, service: service)
+        var evidence: [[String: Any]] = []
+        var failure = false
+        defer {
+            try? FileManager.default.removeItem(at: directory)
+            SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: serviceName] as CFDictionary)
+        }
+        do {
+            for credential in pool.accounts.sorted(by: { $0.id < $1.id }) {
+                try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil)
+                guard let user = accounts.user, user.username == credential.username, user.isUsable else { throw ValidationFailure.identity }
+                _ = try await accounts.authorization(forceRefresh: true)
+                // Switching identity must hide the previous account's loaded state immediately.
+                guard !store.hasLoaded, store.applications.isEmpty else { throw ValidationFailure.isolation }
+                await store.refresh()
+                guard store.hasLoaded, store.error == nil, store.publishingAccess?.writePreconditionVersion == 1,
+                      !store.canSubmit else { throw ValidationFailure.eligibility }
+                let editor = ApplicationEditorModel(application: nil, accounts: accounts, store: store, vault: drafts)
+                guard editor.recovered == nil else { throw ValidationFailure.isolation }
+                editor.draft.name = "Private eligibility validation"
+                editor.draft.slug = "ios-access-" + UUID().uuidString.lowercased()
+                editor.draft.description = "Local-only draft: " + credential.id
+                editor.draft.audience = .owner
+                editor.draft.websiteUrl = "https://apps.yunle.fun"
+                editor.draft.privacyPolicyUrl = "https://apps.yunle.fun/privacy"
+                editor.draft.supportUrl = "https://apps.yunle.fun/help"
+                guard editor.draft.isValid else { throw ValidationFailure.draft }
+                try editor.saveLocalDraft()
+                let before = try Data(contentsOf: drafts.file(owner: user.id, appID: nil))
+                let result = await editor.saveVersion()
+                guard result == nil, editor.error == PublishingError.forbidden.message,
+                      try Data(contentsOf: drafts.file(owner: user.id, appID: nil)) == before else { throw ValidationFailure.draft }
+                let reopened = ApplicationEditorModel(application: nil, accounts: accounts, store: store, vault: drafts)
+                reopened.restoreDraft()
+                guard reopened.draft == editor.draft else { throw ValidationFailure.draft }
+                evidence.append(["account": credential.id, "realLoginAndRefresh": true,
+                                 "ownerListRead": true, "ownerListCount": store.applications.count,
+                                 "canSubmit": false, "writePreconditionVersion": 1,
+                                 "localDraftPreservedAndReopened": true])
+            }
+        } catch {
+            failure = true
+            if let stage = error as? ValidationFailure { XCTFail("Publishing live validation failed at \(stage)") }
+            else { XCTFail("Publishing live validation failed; private response contents omitted") }
+        }
+        // Always revoke every session created in this isolated Keychain namespace.
+        var allSignedOut = true
+        for user in accounts.overview.users {
+            do { try await accounts.remove(user.id) }
+            catch { allSignedOut = false }
+        }
+        let restored = AccountStore(session: AccountSession(vault: keychain))
+        await restored.restore()
+        let empty = restored.user == nil && restored.overview.users.isEmpty
+        let counts = await service.counts()
+        XCTAssertTrue(allSignedOut && empty, "Revoke test sessions and empty the isolated Keychain")
+        XCTAssertEqual(counts.writes, 0, "The native gate must reject before reaching any write method")
+        XCTAssertTrue(store.applications.isEmpty && !store.hasLoaded, "Signed-out state must hide owner data")
+        if !failure { XCTAssertEqual(counts.reads, 6) }
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: [
+            "accounts": evidence, "realReadCalls": counts.reads, "writeMethodCalls": counts.writes,
+            "remoteSignOut": allSignedOut, "emptyKeychain": empty, "businessNetworkWrites": 0,
+            "transport": "Real CloudBase auth and loopback publishing reads; write methods fail closed",
+        ], options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "publishing-access-live-validation"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+    private struct Pool: Decodable { let accounts: [Credential] }
+    private struct Credential: Decodable { let id: String; let environment: String; let username: String; let password: String }
+    private enum ValidationFailure: Error { case identity, isolation, eligibility, draft }
+}
+
+private actor ReadOnlyPublishingProbe: PublishingServing {
+    private let live = PublishingService(origin: URL(string: "http://127.0.0.1:18748")!)
+    private var reads = 0
+    private var writes = 0
+    func counts() -> (reads: Int, writes: Int) { (reads, writes) }
+    func access(identity: AuthorizedAccount) async throws -> PublishingAccess {
+        reads += 1; return try await live.access(identity: identity)
+    }
+    func applications(identity: AuthorizedAccount) async throws -> [ManagedApplication] {
+        reads += 1; return try await live.applications(identity: identity)
+    }
+    func save(id: String?, draft: ApplicationDraft, writeVersion: String?, identity: AuthorizedAccount) async throws -> ManagedApplication {
+        writes += 1; throw PublishingError.forbidden
+    }
+    func submit(id: String, makePublic: Bool, shortName: String, writeVersion: String, identity: AuthorizedAccount) async throws -> MarketSubmissionReceipt {
+        writes += 1; throw PublishingError.forbidden
+    }
+    func delist(id: String, writeVersion: String, identity: AuthorizedAccount) async throws {
+        writes += 1; throw PublishingError.forbidden
+    }
+    func upload(png: Data, role: ApplicationIconRole, identity: AuthorizedAccount) async throws -> String {
+        writes += 1; throw PublishingError.forbidden
+    }
+}
+
 /// Explicit, opt-in integration suite. Passwords are read once from an owner-only
 /// simulator cache file and never appear in launch arguments or test attachments.
 @MainActor

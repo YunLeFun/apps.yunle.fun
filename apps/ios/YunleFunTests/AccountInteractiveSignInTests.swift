@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import XCTest
 @testable import YunleFun
 
@@ -746,5 +747,25 @@ private actor InteractiveSignInAPI: AccountAuthenticating {
     func verifyCaptcha(token: String, text: String, deviceID: String) async throws -> String { throw AccountError.unavailable }
     private func tokens(for id: String) -> AuthTokenResponse {
         AuthTokenResponse(accessToken: "login-\(id)", refreshToken: "refresh-\(id)", expiresIn: 3600, subject: id)
+    }
+}
+
+final class VerificationResendTimelineTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+    func testIdleLoginDoesNotScheduleRecurringRefreshes() {
+        let schedule = VerificationResendTimeline(deadline: .distantPast)
+        XCTAssertEqual(Array(schedule.entries(from: now, mode: .normal).prefix(10)), [now])
+    }
+    func testActiveCooldownIncludesItsExactExpiryAndThenStops() {
+        let deadline = now.addingTimeInterval(2.5)
+        let schedule = VerificationResendTimeline(deadline: deadline)
+        let entries = Array(schedule.entries(from: now, mode: .normal).prefix(10))
+        XCTAssertEqual(entries, [now, now.addingTimeInterval(1), now.addingTimeInterval(2), deadline])
+        XCTAssertEqual(entries.map { max(0, Int(ceil(deadline.timeIntervalSince($0)))) }, [3, 2, 1, 0])
+    }
+    func testResumingAfterExpiryDoesNotRestartTheCountdown() {
+        let deadline = now.addingTimeInterval(60), resumed = now.addingTimeInterval(65)
+        let schedule = VerificationResendTimeline(deadline: deadline)
+        XCTAssertEqual(Array(schedule.entries(from: resumed, mode: .lowFrequency).prefix(10)), [resumed])
     }
 }

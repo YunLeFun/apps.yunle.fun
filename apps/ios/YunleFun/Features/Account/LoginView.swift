@@ -78,7 +78,7 @@ struct LoginView: View {
                             .keyboardType(.numberPad)
                             .focused($focus, equals: .code)
                             .onChange(of: code) { value in code = String(value.filter { $0.isASCII && $0.isNumber }.prefix(6)) }
-                        TimelineView(.periodic(from: .now, by: 1)) { context in
+                        TimelineView(VerificationResendTimeline(deadline: resendAt)) { context in
                             let seconds = max(0, Int(ceil(resendAt.timeIntervalSince(context.date))))
                             Button(seconds > 0 ? "\(seconds) 秒后重新获取" : "获取验证码") { perform(.sendCode) }
                                 .disabled(seconds > 0)
@@ -235,6 +235,26 @@ struct LoginView: View {
                 self.error = AccountError.message(for: error)
                 errorFocused = true
             }
+        }
+    }
+}
+
+/// Update the resend label through expiry, without refreshing an idle login form.
+struct VerificationResendTimeline: TimelineSchedule, Sendable {
+    let deadline: Date
+
+    func entries(from startDate: Date, mode: Mode) -> Entries {
+        Entries(nextDate: startDate, deadline: deadline)
+    }
+
+    struct Entries: Sequence, IteratorProtocol, Sendable {
+        var nextDate: Date?
+        let deadline: Date
+
+        mutating func next() -> Date? {
+            guard let date = nextDate else { return nil }
+            nextDate = date < deadline ? Swift.min(date.addingTimeInterval(1), deadline) : nil
+            return date
         }
     }
 }

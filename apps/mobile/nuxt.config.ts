@@ -22,6 +22,17 @@ export default defineNuxtConfig({
     '@yunlefun/capacitor-storekit': path.resolve(__dirname, '../../packages/capacitor-storekit/src/index.ts'),
   },
 
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        paths: {
+          // Keep schema augmentations on this app's Nuxt instance in the workspace.
+          'nuxt/schema': [configRequire.resolve('nuxt/schema')],
+        },
+      },
+    },
+  },
+
   devServer: {
     port: 8001,
   },

@@ -67,11 +67,11 @@
     "@yunlefun/ui": "0.0.6",
     "electron": "44.7.0",
     "eslint": "^10.7.0",
-    "nuxt": "4.4.8",
+    "nuxt": "4.5.1",
     "typescript": "5.9.3",
     "vite": "7.3.6",
     "vite-electron": "npm:vite@8.3.4",
-    "vitest": "^4.1.10",
+    "vitest": "^5.0.5",
     "vue": "3.5.40",
     "vue-router": "5.1.0",
     "vue-tsc": "^3.3.7"

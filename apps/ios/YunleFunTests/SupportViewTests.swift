@@ -15,7 +15,7 @@ final class SupportViewTests: XCTestCase {
         XCTAssertTrue(fixture.logs.entries.isEmpty)
         XCTAssertNotNil(fixture.logs.storageError)
         let corrupt = try Data(contentsOf: fixture.logFile)
-        let screen = try await fixture.readScreen(named: "support-corrupt-log-clear", containing: "清除本地日志", scrollToFind: true, test: self)
+        let screen = try await fixture.readScreen(named: "support-corrupt-log-clear", containing: "清除本地日志", scrollToFind: true, fromBottom: true, test: self)
         XCTAssertTrue(screen.contains("清除本地日志"))
         XCTAssertEqual(try Data(contentsOf: fixture.logFile), corrupt, "Rendering the recovery action must not delete the preserved file")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
@@ -216,8 +216,11 @@ private final class SupportViewFixture {
                 let top = -scroll.adjustedContentInset.top
                 let bottom = max(top,
                     scroll.contentSize.height - scroll.bounds.height + scroll.adjustedContentInset.bottom)
-                let divisor: CGFloat = fromBottom ? 4 : 2
-                let step = max(100, (scroll.bounds.height - scroll.adjustedContentInset.top - scroll.adjustedContentInset.bottom) / divisor)
+                // Keep half a viewport of overlap so the complete expected
+                // clause fits between samples, including at accessibility5.
+                // Quarter-page steps spend the scan deadline on the large
+                // upload footer before the preceding log text becomes visible.
+                let step = max(100, (scroll.bounds.height - scroll.adjustedContentInset.top - scroll.adjustedContentInset.bottom) / 2)
                 let next = fromBottom ? max(scroll.contentOffset.y - step, top) : min(scroll.contentOffset.y + step, bottom)
                 scan.append("Requested next offset.y=\(next)")
                 guard next != scroll.contentOffset.y else { break }

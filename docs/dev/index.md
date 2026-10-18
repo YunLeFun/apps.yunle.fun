@@ -6,6 +6,7 @@
 
 - [客户端工作区与部署](./monorepo) — `apps/mobile`／`apps/desktop`、构建入口和部署路径
 - [iOS 原生改造 Goal](./ios-native-migration) — iOS 优先、SwiftUI 界面、功能迁移清单与分阶段验收
+- [TestFlight 原生发布](./testflight) — 与云生共用技能、原生归档校验、内部测试和手机更新
 - [iOS 原生接口盘点](./ios-native-api-audit) — HTTP 接口、账号边界与待补能力
 - [原生云居同步契约](./ios-home-sync) — 鉴权、修订冲突、离线保存与旧数据兼容边界
 - [原生宿主授权接入](./ios-host-authorization) — 注册策略、原生登录回跳、取消与账号隔离

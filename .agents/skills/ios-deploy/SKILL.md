@@ -1,81 +1,27 @@
 ---
 name: ios-deploy
-description: 打包并部署云乐坊 iOS App 到真机或模拟器，归档并上传 App Store Connect，或将有效构建发布到 TestFlight 内部测试组。当用户要求“打包到 iOS”“装到手机”“部署真机”“上传或发布 TestFlight”“配置内部测试员”或运行 Capacitor iOS 流程时使用。
+description: 打包、部署或发布云乐坊原生 iOS 客户端到手机、模拟器与 TestFlight 内部测试。用于“云乐坊打包内测”“更新云乐坊 TestFlight”“装到手机”；旧 Capacitor 客户端仅在明确要求时使用。
 ---
 
-# iOS 打包部署（Nuxt + Capacitor）
+# 云乐坊 iOS 部署
 
-Nuxt 4（`ssr: false`）+ Capacitor 8，web 产物在 `.output/public`。
+当前默认对象是 `YunLeFun/apps.yunle.fun/apps/ios` 的原生 SwiftUI 客户端。先读 `apps/ios/README.md`；它不需要打包 Nuxt、Capacitor 同步或 CocoaPods。
 
-## 部署到真机（默认行为）
+## TestFlight 日常更新
 
-用户未指定目标时直接部署真机，不要询问：
+读取同级 [ios-testflight](../ios-testflight/SKILL.md) 共用技能，再读仓库 `docs/dev/testflight.md`，执行其中的项目参数和命令。共用技能也可安装在个人 skills 目录，供云生的 `life-testflight` 调用；两边的打包脚本与数据迁移仍归各自项目维护。
 
-```bash
-pnpm build
-pnpm sync
-LANG=en_US.UTF-8 npx cap run ios --list
-pnpm run:ios --target '<上一步列出的真机 Target ID>'
-```
+- Scheme：`YunleFun`；正式 Bundle ID：`fun.yunle.apps`；App ID：`6759859441`；内部组：云乐坊内测组。
+- 版本来源：`apps/ios/project.yml`；此仓库跟踪 `YunleFun.xcodeproj`，版本调整后按项目要求同步并审查生成差异。不要混入个人 `Info.plist` 或签名改动。
+- 原生分步脚本：`bash apps/ios/scripts/testflight.sh archive|export|validate|upload`。上传只在本次用户已授权时设置 `YUNLEFUN_CONFIRM_UPLOAD=1`，不因脚本变量再次询问已有授权。
+- 发布助手位于 `apps/mobile/scripts/ios-testflight-publish.mjs`，虽然在 mobile 目录，也用于同 App 的原生构建。按文档同时传 `--version` 与 `--build`，先 dry run 再发布；默认沿用现有测试员。
 
-输出 `Deploying App.app to <UDID>` 即成功，app 自动启动。
+## 手机或模拟器部署
 
-- 报 `Invalid target ID` 说明设备变了：重新列出设备并取非 simulator 行的 Target ID，不要把个人设备标识写入仓库。
-- 不要用 `xcrun devicectl list devices` 的 UDID —— 那是另一套体系，`cap run` 不认。
-- agent 场景必须显式传 `--target`，否则 `cap run` 会交互式选设备卡住。
+用户要求普通开发安装时，使用原生 Debug 标识 `fun.yunle.apps.native-dev`；指定 TestFlight 更新则走上一节。根据请求选择设备，遵守仓库模拟器归属和清理约定，不能以创建新设备代替核对现有设备。
 
-## 归档并上传
+Debug 的独立标识不迁移正式版数据。用户要求清理重复 App 时，逐个确认标识与数据，先备份，核验最终版本后才卸载重复开发版。正式版同标识更新通过 TestFlight，不先卸载。
 
-TestFlight / App Store 使用以下顺序：
+## 旧 Capacitor 客户端
 
-```bash
-pnpm build:ios
-
-export IOS_EXPORT_PROFILE_NAME='<App Store profile 名称>'
-export ASC_KEY_ID='<Key ID>'
-export ASC_ISSUER_ID='<Issuer ID>'
-export ASC_KEY_P8="$HOME/.appstoreconnect/private_keys/AuthKey_<Key ID>.p8"
-bash scripts/ios-testflight.sh
-```
-
-Ad-hoc 使用 `pnpm build:ios:adhoc`。这些命令都会自动同步版本号。
-
-## 发布 TestFlight 内测
-
-上传处理完成后，调用幂等发布脚本。先 dry run，再执行：
-
-```bash
-pnpm publish:ios:testflight -- --build <build-number> --dry-run
-pnpm publish:ios:testflight -- --build <build-number>
-```
-
-脚本会：
-
-1. 只选择 `VALID` 且未过期的构建；省略 `--build` 时选择最新构建。
-2. 复用或创建“云乐坊内测组”，并开启自动分发与 TestFlight 反馈。
-3. 关联构建，设置当前 App 的出口合规为“不使用非豁免加密”。
-4. 创建或更新简体中文的 App 说明、反馈邮箱、隐私政策和测试重点。
-5. 验收构建状态必须为 `IN_BETA_TESTING`。
-
-默认不新增测试员。首次配置或明确要求发邀请时，使用以下任一方式：
-
-```bash
-pnpm publish:ios:testflight -- --build <build-number> --tester-email '<现有 ASC 用户邮箱>'
-pnpm publish:ios:testflight -- --build <build-number> --invite-all-internal-users
-```
-
-也可用逗号分隔的 `ASC_INTERNAL_TESTER_EMAILS`，并用 `ASC_WHATS_NEW` 覆盖本次测试重点。脚本只接受已有 App Store Connect 内部用户，不创建外部测试员；外部 TestFlight 需要单独的测试组和 Beta App Review。
-
-## 凭据安全
-
-- 只记录凭据文件路径和环境变量名，不记录 `.p8` 内容、私钥、JWT 或完整测试员邮箱。
-- `.p8` 保持本机权限 `600`，不得提交到 Git。
-- App Store Connect API Key 至少需要 App Manager 权限。
-- 发布输出只报告测试员数量；错误中的邮箱必须脱敏。
-
-## 注意事项
-
-1. **优先用 pnpm 脚本**：cap 相关脚本已内置 `LANG=en_US.UTF-8`（CocoaPods 必需）；直接 `npx cap ...` 需手动加，否则报 `Encoding::CompatibilityError`。
-2. **`@capacitor/cli` 当前锁定为 8.4.2，且不得低于 7.5.0**：tar 被安全 override 钉到 v7，旧 CLI 用 v6 API 会报 `undefined (reading 'extract')`，详见 docs/dev/dependency-security.md。
-3. **server/ 代码不要顶层 require CJS 包**：nitro prerender 以虚拟入口执行，顶层 `createRequire` 会崩，须函数内惰性加载（参考 `server/utils/cloudbase-admin.ts`）。
-4. cordova-plugin-wechat 的 `NSAppTransportSecurity` warning 可忽略。
+只有用户明确要求维护 `apps/mobile/ios` 时，读取 `docs/dev/testflight-capacitor.md` 和对应 mobile 脚本。此时 `pnpm build`、`pnpm sync`、`pnpm build:ios` 才是该旧客户端的构建路径；不能把它作为原生版的前置步骤。Capacitor CLI 与 `devicectl` 的设备 ID 不通用。

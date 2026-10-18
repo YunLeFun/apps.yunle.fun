@@ -98,7 +98,9 @@ Nuxt 生产服务器不自动读取 `.env`；运行时覆盖需要匹配已声�
 
 `netlify.toml` 作为历史备选配置更新 Node.js 和资源目录；启用 Netlify 时仍需验证它的 Nuxt 服务端适配与 monorepo package directory。`cloudbaserc.json` 没有源码路径，继续保留现有环境与 CloudRun 名称。参考 [Netlify monorepo 设置](https://docs.netlify.com/build/configure-builds/monorepos/)。
 
-## 原生工程与发布
+## Capacitor 兼容工程与发布
+
+云乐坊原生 iOS 位于 `apps/ios`，日常 TestFlight 更新使用[原生发布流程](./testflight.md)。下列命令用于 `apps/mobile` 的旧 Capacitor 兼容客户端，不作为原生发布前置步骤。
 
 Capacitor 的 `webDir` 仍相对 `apps/mobile` 指向 `.output/public`。构建和同步命令保持原有行为：
 

@@ -57,6 +57,7 @@ require_asc() {
   # altool 按 Key ID 在 ~/.appstoreconnect/private_keys 等固定目录查找 .p8。
   [ "$(basename "$ASC_KEY_P8")" = "AuthKey_$ASC_KEY_ID.p8" ] \
     || fail "ASC_KEY_P8 文件名应为 AuthKey_$ASC_KEY_ID.p8，altool 才能找到它"
+  export API_PRIVATE_KEYS_DIR="$(dirname "$ASC_KEY_P8")"
 }
 
 plist_value() { /usr/libexec/PlistBuddy -c "Print :$2" "$1" 2>/dev/null || true; }
@@ -67,6 +68,29 @@ single_ipa() {
   shopt -u nullglob
   [ "${#ipas[@]}" -eq 1 ] || fail "导出目录应有一个 .ipa，实际 ${#ipas[@]} 个：${EXPORT_DIR}（先运行 export）"
   echo "${ipas[0]}"
+}
+
+# validate / upload 也检查包内标识，拒绝旧导出或误选另一个 App 的 IPA。
+verify_internal_ipa() {
+  python3 - "$1" "$BUNDLE_ID" <<'PY'
+import plistlib
+import sys
+import zipfile
+
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    paths = [name for name in archive.namelist()
+             if name.startswith('Payload/') and name.count('/') == 2
+             and name.endswith('.app/Info.plist')]
+    if len(paths) != 1:
+        sys.exit('IPA 必须包含一个 Payload/*.app/Info.plist')
+    info = plistlib.loads(archive.read(paths[0]))
+    if info.get('CFBundleIdentifier') != sys.argv[2]:
+        sys.exit('IPA Bundle ID 与目标应用不一致')
+    if info.get('TFInternalTestingOnly') is not True:
+        sys.exit('IPA 缺少 TFInternalTestingOnly=true，请重新 export，仅供内部测试')
+    print('仅内部测试 IPA：{} {} ({})'.format(
+        info['CFBundleIdentifier'], info.get('CFBundleShortVersionString'), info.get('CFBundleVersion')))
+PY
 }
 
 cmd_archive() {
@@ -140,6 +164,7 @@ cmd_export() {
 	<key>stripSwiftSymbols</key><false/>
 	<key>uploadSymbols</key><false/>
 	<key>manageAppVersionAndBuildNumber</key><false/>
+	<key>testFlightInternalTestingOnly</key><true/>
 </dict>
 </plist>
 EOF
@@ -154,6 +179,7 @@ EOF
 
   local ipa tmp app profile signature
   ipa="$(single_ipa)"
+  verify_internal_ipa "$ipa"
   tmp="$(mktemp -d)"
   trap 'rm -rf "$tmp"' RETURN
   unzip -q "$ipa" -d "$tmp"
@@ -179,6 +205,7 @@ cmd_validate() {
   require_asc validate
   local ipa
   ipa="$(single_ipa)"
+  verify_internal_ipa "$ipa"
   echo "==> App Store Connect 校验（不上传）：$ipa"
   xcrun altool --validate-app --type ios --file "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
   echo "✅ 校验通过"
@@ -190,6 +217,7 @@ cmd_upload() {
     || fail "上传会在 $BUNDLE_ID 下新增 TestFlight 构建；确认后用 YUNLEFUN_CONFIRM_UPLOAD=1 重新运行"
   local ipa
   ipa="$(single_ipa)"
+  verify_internal_ipa "$ipa"
   echo "==> 上传到 App Store Connect / TestFlight：$ipa"
   xcrun altool --upload-app --type ios --file "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
   echo "🎉 上传完成。处理约 10–30 分钟后出现在 https://appstoreconnect.apple.com/apps/6759859441 的 TestFlight。"

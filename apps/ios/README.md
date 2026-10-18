@@ -2,9 +2,11 @@
 
 SwiftUI 主壳，系统组件优先，云应用复用现有 UIKit / WKWebView 运行时。使用最新 SDK 编译，最低部署版本暂为 iOS 16.0；同时支持 iPhone 和 iPad。完整目标见 [原生改造 Goal](../../docs/dev/ios-native-migration.md) 和 [原生 UI 规范](../../docs/ui/ios-native.md)。
 
-当前测试范围按用户 2026-10-17 的后续指令调整为仅 iOS 模拟器，不再安排真机安装或验证；已有设备记录作为历史证据保留。功能、真实服务、数据与兼容目标继续推进，硬件专属覆盖明确记录为当前范围不执行。
+2026-10-17 的功能测试约定以 iOS 模拟器为范围；真机安装与 TestFlight 按后续明确的发布请求分别执行，已有记录保留其实际验收边界。一次安装成功不代表完整硬件、账号或升级矩阵通过。
 
 ## 开发
+
+日常 TestFlight 更新见[原生发布流程](../../docs/dev/testflight.md)，Codex 通过 [ios-deploy](../../.agents/skills/ios-deploy/SKILL.md) 调用与云生共用的 [ios-testflight](../../.agents/skills/ios-testflight/SKILL.md)。2026-10-19 已完成原生 0.2.0 (1) 的内部测试发布与手机 TestFlight 安装；后续按每次用户明确要求执行发布或安装。
 
 提交的 `YunleFun.xcodeproj` 可直接用 Xcode 打开。修改 `project.yml` 后用 XcodeGen 重新生成；首次实施使用 XcodeGen 2.46.0 与 Xcode 27.0。
 

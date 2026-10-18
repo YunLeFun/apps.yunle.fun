@@ -86,7 +86,7 @@ export default defineConfig({
           { text: '短信登录', link: '/dev/sms-login' },
           { text: 'Home Screen 拖拽排序', link: '/dev/home-screen-drag' },
           { text: 'App Store 上架手册', link: '/dev/app-store-onboarding' },
-          { text: 'TestFlight 内测上架', link: '/dev/testflight' },
+          { text: 'TestFlight 原生内测', link: '/dev/testflight' },
           { text: 'CloudBase 安全规则', link: '/dev/cloudbase-rules' },
           { text: '错误监控（Tencent RUM）', link: '/dev/rum' },
           { text: '隐私政策核对清单', link: '/dev/privacy-checklist' },

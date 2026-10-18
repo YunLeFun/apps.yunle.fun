@@ -248,13 +248,30 @@ final class LegacyImportTests: XCTestCase {
 
     private func verifyRealWebKitReader(dataStore: WKWebsiteDataStore) async throws {
         func stage(_ name: String) { XCTContext.runActivity(named: "Legacy WebKit: " + name) { _ in } }
+        let navigation = LegacyTestNavigation()
         let configuration = WKWebViewConfiguration(); configuration.websiteDataStore = dataStore
-        configuration.setURLSchemeHandler(LegacyImportSchemeHandler(), forURLScheme: "capacitor")
+        configuration.setURLSchemeHandler(LegacyFixtureSchemeHandler(navigation: navigation), forURLScheme: "capacitor")
         let old = WKWebView(frame: .zero, configuration: configuration)
-        defer { old.navigationDelegate = nil; old.stopLoading() }
-        let navigation = LegacyTestNavigation(); old.navigationDelegate = navigation
+        defer {
+            navigation.record("fixture released: loading=\(old.isLoading) progress=\(old.estimatedProgress)")
+            let trace = XCTAttachment(string: navigation.events.joined(separator: "\n"))
+            trace.name = "legacy-fixture-navigation"; trace.lifetime = .keepAlways; add(trace)
+            old.navigationDelegate = nil; old.stopLoading()
+        }
+        old.navigationDelegate = navigation
         stage("navigate isolated fixture")
+        navigation.record("load requested")
         old.load(URLRequest(url: LegacyLocalDataReader.url))
+        // CI recorded a 23-second WebContent launch before this local fixture
+        // could load. Separate engine startup from the existing 20-second
+        // navigation deadline; production reader deadlines remain unchanged.
+        let startup = await XCTWaiter.fulfillment(of: [navigation.startupResolved], timeout: 45)
+        if let failure = navigation.failure { throw failure }
+        guard startup == .completed, navigation.requestedFixture else {
+            XCTFail("The real WebKit engine must request the local fixture before storage is seeded")
+            throw NSError(domain: "LegacyImportTests", code: 3)
+        }
+        stage("local fixture requested; await navigation completion")
         let ready = await XCTWaiter.fulfillment(of: [navigation.completed], timeout: 20)
         guard ready == .completed else {
             XCTFail("The real WebKit fixture must finish navigation before storage is seeded")
@@ -352,11 +369,38 @@ private final class LegacyReaderFixture: LegacyLocalDataReading {
 }
 
 @MainActor
+private final class LegacyFixtureSchemeHandler: NSObject, WKURLSchemeHandler {
+    private let handler = LegacyImportSchemeHandler()
+    private let navigation: LegacyTestNavigation
+    init(navigation: LegacyTestNavigation) { self.navigation = navigation }
+    func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
+        if urlSchemeTask.request.url == LegacyLocalDataReader.url { navigation.fixtureRequested() }
+        handler.webView(webView, start: urlSchemeTask)
+    }
+    func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {
+        handler.webView(webView, stop: urlSchemeTask)
+    }
+}
+
+@MainActor
 private final class LegacyTestNavigation: NSObject, WKNavigationDelegate {
     var loaded = false
     var failure: Error?
+    private(set) var requestedFixture = false
+    private(set) var events: [String] = []
+    private let beganAt = ProcessInfo.processInfo.systemUptime
+    private var reportedStartup = false
+    let startupResolved = XCTestExpectation(description: "WebKit requested the local fixture or reported a navigation failure")
     let completed = XCTestExpectation(description: "The real WebKit storage fixture completed navigation")
+    func record(_ event: String) { events.append("\(ProcessInfo.processInfo.systemUptime - beganAt)s \(event)") }
+    func fixtureRequested() {
+        record("local scheme request started")
+        requestedFixture = true; resolveStartup()
+    }
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) { record("provisional navigation started") }
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) { record("navigation committed") }
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        record("navigation finished: expectedURL=\(webView.url == LegacyLocalDataReader.url)")
         guard webView.url == LegacyLocalDataReader.url else { return }
         complete()
     }
@@ -367,7 +411,16 @@ private final class LegacyTestNavigation: NSObject, WKNavigationDelegate {
     }
     private func complete(_ error: Error? = nil) {
         guard !loaded, failure == nil else { return }
+        if let error {
+            let issue = error as NSError
+            record("navigation failed: domain=\(issue.domain) code=\(issue.code)")
+            resolveStartup()
+        }
         failure = error; loaded = error == nil; completed.fulfill()
+    }
+    private func resolveStartup() {
+        guard !reportedStartup else { return }
+        reportedStartup = true; startupResolved.fulfill()
     }
 }
 

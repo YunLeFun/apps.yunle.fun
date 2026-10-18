@@ -10,6 +10,7 @@ struct RuntimeIssue: Identifiable {
 
 @MainActor
 final class NativeWebRuntime: ObservableObject {
+    let applicationCache: ApplicationCacheStore
     @Published private(set) var applications: [CloudApplication] = []
     @Published var issue: RuntimeIssue?
     @Published private(set) var verifyingScopedApplicationID: String?
@@ -47,7 +48,8 @@ final class NativeWebRuntime: ObservableObject {
     private let limit = WebViewSessionPolicy.automaticLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
     private let personalMarketService: DeveloperProfileServing
 
-    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), webProfiles: WebProfileRepository? = nil) {
+    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), applicationCache: ApplicationCacheStore? = nil, webProfiles: WebProfileRepository? = nil) {
+        self.applicationCache = applicationCache ?? ApplicationCacheStore()
         self.webProfiles = webProfiles ?? WebProfileRepository(
             fileURL: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("WebProfiles/ownership-v1.json"),
@@ -272,6 +274,24 @@ final class NativeWebRuntime: ObservableObject {
             // iOS 16 remains on the existing compatibility path until its
             // persistent isolation and migration policy is implemented.
             controller.url = url
+            let identity = identityReset
+            controller.initialContentLoader = { [weak self, weak controller] web, url in
+                Task { @MainActor [weak self, weak controller] in
+                    guard let self, let controller else { return }
+                    let snapshot = try? await self.applicationCache.repository.snapshot(for: app)
+                    guard self.identityReset == identity, self.sessions[app.id]?.browser === controller else { return }
+                    self.applicationCache.sessionStarted(app, revision: snapshot?.entry.downloadedAt)
+                    if let snapshot {
+                        controller.initialContentFailure = { [weak self, weak controller] web in
+                            guard let self, let controller, self.identityReset == identity,
+                                  self.sessions[app.id]?.browser === controller else { return }
+                            self.applicationCache.sessionStarted(app, revision: nil)
+                            web.load(URLRequest(url: url))
+                        }
+                        web.load(snapshot.archive, mimeType: "application/x-webarchive", characterEncodingName: "UTF-8", baseURL: url)
+                    } else { web.load(URLRequest(url: url)) }
+                }
+            }
             controller.displayMode = .titlebar
             controller.usesSystemNavigationBar = true
             controller.onClose = { [weak self, weak controller] in
@@ -410,6 +430,7 @@ final class NativeWebRuntime: ObservableObject {
         }
         sessions = sessions.filter { $0.value.browser === kept }
         authorizationPages = authorizationPages.filter { kept != nil && $0.value === continuation }
+        for app in applications where sessions[app.id] == nil { applicationCache.sessionEnded(app) }
         applications = applications.filter { sessions[$0.id] != nil }
         issue = profileError
         let complete: () -> Void = { [weak self] in
@@ -427,6 +448,7 @@ final class NativeWebRuntime: ObservableObject {
     }
 
     private func removeSession(_ app: CloudApplication) {
+        applicationCache.sessionEnded(applications.first(where: { $0.id == app.id }) ?? app)
         if let page = authorizationPages.removeValue(forKey: app.id) { authorizationBroker?.cancel(page: page) }
         sessions.removeValue(forKey: app.id)?.browser.cancelPendingAuthorizations()
         applications.removeAll { $0.id == app.id }

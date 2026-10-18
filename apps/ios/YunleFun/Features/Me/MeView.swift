@@ -112,6 +112,7 @@ struct MeView: View {
 }
 
 struct SettingsView: View {
+    @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var accounts: AccountStore
     @AppStorage("appearance") private var appearance = AppAppearance.system
@@ -134,6 +135,7 @@ struct SettingsView: View {
                     .disabled(library.snapshot.recentIDs.isEmpty)
             }
             Section {
+                NavigationLink("应用下载缓存") { ApplicationCacheSettingsView(store: runtime.applicationCache) }
                 NavigationLink("旧版数据导入") { LegacyMigrationView(library: library, accounts: accounts) }
             }
         }

@@ -63,6 +63,10 @@ struct YunleFunApp: App {
                 .task { await accounts.restore() }
                 .task { homeSync.identityChanged() }
                 .task { await purchases.start() }
+                .task {
+                    runtime.applicationCache.updateAutomaticApplications(catalog.applications)
+                    runtime.applicationCache.setApplicationActive(scenePhase == .active)
+                }
                 .onChange(of: accounts.overview.activeID) { _ in homeSync.identityChanged() }
                 .onChange(of: accounts.identityGeneration) { _ in
                     wallet.identityChanged(); purchases.identityChanged()
@@ -71,6 +75,7 @@ struct YunleFunApp: App {
                 }
                 .onChange(of: catalog.applications) {
                     library.updateCatalog($0)
+                    runtime.applicationCache.updateAutomaticApplications($0)
                     diagnostics.record(.info, message: "catalog.updated")
                 }
                 .onChange(of: catalog.error) { if $0 != nil { diagnostics.record(.error, message: "catalog.load.failed") } }
@@ -88,6 +93,7 @@ struct YunleFunApp: App {
                     diagnostics.record(.info, message: event)
                 }
                 .onChange(of: scenePhase) {
+                    runtime.applicationCache.setApplicationActive($0 == .active)
                     if $0 == .active {
                         diagnostics.record(.info, message: "app.foregrounded")
                         homeSync.schedule()

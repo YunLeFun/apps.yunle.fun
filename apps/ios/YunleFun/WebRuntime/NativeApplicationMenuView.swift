@@ -4,6 +4,7 @@ struct NativeApplicationMenuView: View {
     let application: CloudApplication
     let currentURL: URL?
     let perform: (WebAppMenuAction) -> Void
+    @EnvironmentObject private var runtime: NativeWebRuntime
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -44,6 +45,11 @@ struct NativeApplicationMenuView: View {
                     Button { perform(.copyLink) } label: { Label("复制链接", systemImage: "link") }
                     Button { perform(.openBrowser) } label: { Label("在浏览器中打开", systemImage: "safari") }
                     Button { perform(.reload) } label: { Label("重新载入", systemImage: "arrow.clockwise") }
+                    NavigationLink {
+                        ApplicationCacheView(application: application, store: runtime.applicationCache)
+                    } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
+                    .accessibilityIdentifier("runtime.menu.cache")
+                    ApplicationCacheUpdateNotice(application: application, store: runtime.applicationCache)
                 }
                 Section {
                     Button(role: .destructive) { perform(.end) } label: { Label("结束", systemImage: "xmark.circle") }
@@ -63,6 +69,18 @@ struct NativeApplicationMenuView: View {
         var origin = URLComponents()
         origin.scheme = scheme; origin.host = host; origin.port = url.port
         return origin.string
+    }
+}
+
+private struct ApplicationCacheUpdateNotice: View {
+    let application: CloudApplication
+    @ObservedObject var store: ApplicationCacheStore
+
+    var body: some View {
+        if store.updatesReady.contains(ApplicationCacheEntry.key(for: application)) {
+            Label("更新已就绪，下次重新打开生效", systemImage: "checkmark.circle")
+                .font(.footnote).foregroundStyle(.secondary)
+        }
     }
 }
 

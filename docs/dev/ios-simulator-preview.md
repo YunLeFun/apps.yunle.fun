@@ -2,11 +2,23 @@
 
 本页先记录 2026-10-18 的干净源码候选，再保留 2026-10-17 的历史交付。当前完整原生迁移 Goal 继续推进支付、最低系统兼容、真实服务和其他验收，见[完整迁移目标](./ios-native-migration.md)。可体验候选不等于完整迁移或全部无障碍矩阵已验收。
 
+## 持久分仓与数据恢复候选 · 2026-10-18 {#profile-recovery-candidate}
+
+当前交付为 `YunleFun-Native-Simulator-083a841`，来自 `083a841317be34bcd1fcdfaa502bcdfd8be4eea3` 干净归档，186 个原生及共享文件与提交逐一相同。包含 iOS 17+ 持久分仓和应用详情中的保留数据恢复入口，以及此前减少动态效果修复。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
+
+同次核心界面测试 **2 通过 / 0 失败 / 0 跳过**：最大辅助字号详情 **22.680 秒**；真实免费云空调获取、首次绘制、收起、移除唯一安装项后恢复会话、结束并回空云居 **79.928 秒**。七张原始截图逐张复核。构建 **67.962 秒成功、零构建诊断**；测试结果包无运行时警告。这两条访客旅程不替代完整辅助功能或登录后业务验收。
+
+双击 `LaunchPreview.command`，在 Device Hub 选择 **YunleFun Candidate 083a841**。脚本已实际校验、安装并启动至空访客云居；验证后专用模拟器已关闭，脚本可重新启动。启动中首次无障碍树读取超时原样留存，等待同一次启动完成后再次读取成功，没有重新安装来替换失败观察。App 与实际测试产物、安装副本逐文件相同，ad hoc 签名及 11 类隐私资源与源码字节一致性通过；包内没有账号、用户数据容器或测试 runner。
+
+ZIP 为 **5,745,434 字节**，SHA-256 为 `277b71943e7815524f92a6948b0ed3f90bbe01d552a64f3de6850296fe892e8e`。CRC、全部 22 个文件与目录一致性、App 和脚本执行权限均已核对；包内含来源回执、原始测试摘要及八张截图，完整证据在本机 `candidate-083a841-verification/`。
+
+相同产品来源另以独立 Debug live 产物完成[真实账号移除、重登录和恢复](./ios-host-authorization.md#managed-profile-recovery)，**78.142 秒通过并清理**；该结果不能写成此 Benchmark 二进制已经跑过账号闭环。来源的完整 [Native CI 为 468 / 0 / 0](./ios-ci-and-open-source.md#ci-083a841)。iOS 16 共享仓库缺陷、旧默认仓库归属、真实消费端重启、多应用、系统其他账号及其他 G1–G6 条件仍未完成。以下旧候选与原哈希保持不变。
+
 ## 余额数字动效候选 · 2026-10-18 {#wallet-motion-candidate}
 
 **新增已知缺陷：** 同一运行时源码的真实多账号验证已复现 A → B 后 AI 春联恢复 A 身份；当前 `0e315c5` 包不含分仓修复。该包保留原有访客体验用途，不作为已登录多账号隔离验收构建。原 ZIP 与哈希未改变，详见[故障与分仓原型对照](./ios-host-authorization.md#persistent-identity-defect)。
 
-当前交付为 `YunleFun-Native-Simulator-0e315c5`，来自 `0e315c512d4cb170da8b94efa85677528be3a1cc` 的干净归档，181 个原生及共享文件与提交逐一相同。包含此前云居动效适配和[余额数字减少动态效果修复](./ios-accessibility-audits.md#wallet-numeric-reduced-motion)，没有并行缓存 / Web 修改。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
+该轮交付为 `YunleFun-Native-Simulator-0e315c5`，来自 `0e315c512d4cb170da8b94efa85677528be3a1cc` 的干净归档，181 个原生及共享文件与提交逐一相同。包含此前云居动效适配和[余额数字减少动态效果修复](./ios-accessibility-audits.md#wallet-numeric-reduced-motion)，没有并行缓存 / Web 修改。Benchmark、`fun.yunle.apps.benchmark-dev`、0.1.0 (1)，仅 arm64；需要 Apple Silicon Mac、Xcode 27 / iOS 27 模拟器和 Python 3。
 
 同一份构建的两条核心旅程分次通过：最大辅助字号详情 **54.723 秒**，真实免费云空调获取、首次绘制、收起、移除唯一安装项后恢复会话、结束并回空云居 **81.996 秒**。首次调用遗漏云空调显式开关，结果为 **1 通过 / 0 失败 / 1 跳过**；补齐开关与自有模拟器标识后只补跑该项，**1 通过 / 0 失败 / 0 跳过**。原始跳过与两份结果均保留，没有合并成同次全通过。七张原始核心截图逐张复核，两份结果包均无运行时警告；这两条访客旅程不覆盖登录后的钱包页面，也不替代此前余额组件的系统开关对照。
 

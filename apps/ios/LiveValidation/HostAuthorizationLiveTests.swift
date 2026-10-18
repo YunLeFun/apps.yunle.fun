@@ -6,6 +6,24 @@ import WebKit
 import XCTest
 @testable import YunleFun
 
+/// Counts successful real remote revocations without recording credentials.
+private actor RecoveryObservedAuth: AccountAuthenticating {
+    private let api = CloudbaseAuthService()
+    private var revoked = 0
+    func signOutCount() -> Int { revoked }
+    func passwordSignIn(identifier: String, password: String, deviceID: String, captcha: String?) async throws -> AuthTokenResponse {
+        try await api.passwordSignIn(identifier: identifier, password: password, deviceID: deviceID, captcha: captcha)
+    }
+    func refresh(_ refreshToken: String, deviceID: String) async throws -> AuthTokenResponse { try await api.refresh(refreshToken, deviceID: deviceID) }
+    func user(accessToken: String, deviceID: String) async throws -> AccountUser { try await api.user(accessToken: accessToken, deviceID: deviceID) }
+    func signOut(accessToken: String, deviceID: String) async throws { try await api.signOut(accessToken: accessToken, deviceID: deviceID); revoked += 1 }
+    func sendVerification(address: VerificationAddress, deviceID: String, captcha: String?) async throws -> VerificationChallenge { throw AccountError.unavailable }
+    func verify(_ challenge: VerificationChallenge, code: String, deviceID: String, captcha: String?) async throws -> AuthTokenResponse { throw AccountError.unavailable }
+    func updateProfile(userID: String, name: String, description: String, accessToken: String, deviceID: String) async throws { throw AccountError.unavailable }
+    func captcha(deviceID: String) async throws -> CaptchaImage { try await api.captcha(deviceID: deviceID) }
+    func verifyCaptcha(token: String, text: String, deviceID: String) async throws -> String { try await api.verifyCaptcha(token: token, text: text, deviceID: deviceID) }
+}
+
 /// Drives real page controls and the native consent button in-process. Host
 /// credentials never enter JavaScript; no identity or token is injected into JS.
 @MainActor
@@ -303,6 +321,227 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         XCTAssertFalse(foreignIdentityObserved, "The reopened application displayed a different host account before authorization")
         XCTAssertEqual(phases.count, 3)
         XCTAssertTrue(webSignedOut); XCTAssertTrue(hostSignedOut); XCTAssertTrue(emptyKeychain)
+    }
+
+    /// Actual account-removal and recovery controls are driven externally. Only
+    /// private native text fields receive the managed credential, in-process.
+    func testManagedAccountRemovalReloginAndRetainedDataRecovery() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let mode = env["YUNLEFUN_LIVE_ACCOUNT_RECOVERY"], ["journey", "cleanup"].contains(mode) else {
+            throw XCTSkip("Requires explicit managed account recovery validation")
+        }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Only an owned isolated simulator may run this validation")
+        #endif
+        guard #available(iOS 17, *), let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"],
+              !owned.isEmpty, owned == env["SIMULATOR_UDID"],
+              let run = env["YUNLEFUN_ACCOUNT_RECOVERY_RUN"], UUID(uuidString: run) != nil else {
+            return XCTFail("Requires named profiles, a run UUID and the exact owned simulator")
+        }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let directory = cache.appendingPathComponent("ManagedWebRecovery-" + run)
+        let registry = directory.appendingPathComponent("profiles.json")
+        let service = "fun.yunle.apps.managed-recovery." + run
+        let draftKey = "managed-recovery-draft-" + run
+        let profiles = WebProfileRepository(fileURL: registry, namespace: run)
+        let runtime = NativeWebRuntime(webProfiles: profiles)
+        let vault = KeychainAccountVault(service: service)
+        let auth = RecoveryObservedAuth()
+        let library = HomeLibrary(directory: directory.appendingPathComponent("home"))
+        let catalog = CatalogStore()
+        let accounts = AccountStore(session: AccountSession(api: auth, vault: vault),
+            accountWillRemove: { try runtime.retireAccount($0) }, identityDidChange: { id in
+                runtime.resetIdentity(to: id); library.activateAccount(id); library.setAutoSyncEnabled(false)
+            })
+        runtime.configureAuthorization(accounts: accounts)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
+        let previous = window.rootViewController
+        var root: UIViewController = UIViewController()
+        root.view.backgroundColor = .systemBackground
+        window.rootViewController = root; window.makeKeyAndVisible(); runtime.anchor = root
+        defer { runtime.resetIdentity(); window.rootViewController = previous; window.makeKeyAndVisible() }
+        var stage = "setup", failure: String?
+        var evidence: [String: Any] = ["mode": mode, "run": run]
+        func mark(_ value: String) { stage = value; print("YLF_ACCOUNT_RECOVERY_STAGE " + value) }
+        func show<V: View>(_ view: V) {
+            root = UIHostingController(rootView: view.environmentObject(accounts).environmentObject(runtime)
+                .environmentObject(catalog).environmentObject(library))
+            window.rootViewController = root; window.makeKeyAndVisible(); runtime.anchor = root
+        }
+        do {
+            if mode == "journey" {
+                guard !FileManager.default.fileExists(atPath: registry.path), try vault.read() == nil else { throw ProbeFailure.observation }
+                let input = cache.appendingPathComponent("iOSNativeValidation/sso-identity-accounts.json")
+                let attributes = try FileManager.default.attributesOfItem(atPath: input.path)
+                guard let permissions = attributes[.posixPermissions] as? NSNumber, permissions.intValue & 0o077 == 0 else {
+                    throw ProbeFailure.observation
+                }
+                let data = try Data(contentsOf: input); try FileManager.default.removeItem(at: input)
+                let pool = try JSONDecoder().decode(Pool.self, from: data)
+                guard let credential = pool.accounts.first(where: { $0.id == "production-zero-balance" }),
+                      credential.environment == "production", !credential.username.isEmpty, !credential.password.isEmpty else {
+                    throw ProbeFailure.observation
+                }
+                mark("initial-managed-login")
+                try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil)
+                let owner = try XCTUnwrap(accounts.user)
+                guard owner.username == credential.username else { throw ProbeFailure.observation }
+                await catalog.load()
+                let app = try XCTUnwrap(catalog.applications.first { $0.marketShortName == "ai-sfc" })
+                let original = try await recoveryPage(app, runtime: runtime, catalog: catalog, library: library, window: window)
+                let originalSelection = try XCTUnwrap(profiles.snapshot(for: .account(owner.id), application: app).active)
+                mark("initial-real-consumer-login")
+                try await authorizeRecoveryPage(original, owner: owner, window: window)
+                _ = try await original.evaluateJavaScript("localStorage.setItem('\(draftKey)', 'original-draft')")
+                runtime.end(app)
+                try await wait(seconds: 10) { root.presentedViewController == nil }
+                show(NavigationStack { AccountManagementView() })
+                mark("awaiting-native-account-removal")
+                try await wait(seconds: 35) { accounts.user == nil && accounts.overview.users.isEmpty }
+                try await wait(seconds: 10) { await auth.signOutCount() == 1 }
+                let removed = try profiles.snapshot(for: .account(owner.id), application: app)
+                guard removed.active == nil, removed.retained == [originalSelection],
+                      try await AccountSession(vault: vault).overview().users.isEmpty else { throw ProbeFailure.observation }
+                evidence["nativeRemovalAndRemoteSignout"] = true
+                mark("guest-isolation")
+                let guest = try await recoveryPage(app, runtime: runtime, catalog: catalog, library: library, window: window)
+                guard try await guest.evaluateJavaScript("localStorage.getItem('\(draftKey)')") is NSNull,
+                      try await pageState(guest)["name"] as? String == "" else { throw ProbeFailure.foreignIdentity }
+                evidence["guestCannotSeeRetiredDraftOrIdentity"] = true
+                runtime.end(app); try await wait(seconds: 10) { root.presentedViewController == nil }
+                mark("awaiting-add-account")
+                try await wait(seconds: 35) { root.presentedViewController != nil }
+                let sheet = try XCTUnwrap(root.presentedViewController)
+                try await wait(seconds: 5) { self.segmentedControl(in: sheet.view) != nil && !sheet.isBeingPresented }
+                let picker = try XCTUnwrap(segmentedControl(in: sheet.view))
+                picker.selectedSegmentIndex = try XCTUnwrap((0..<picker.numberOfSegments).first { picker.titleForSegment(at: $0) == "密码" })
+                picker.sendActions(for: .valueChanged)
+                try await wait(seconds: 5) { self.textFields(in: sheet.view).contains { $0.isSecureTextEntry } }
+                let fields = textFields(in: sheet.view)
+                let username = try XCTUnwrap(fields.first { $0.placeholder == "用户名、邮箱或手机号" })
+                let password = try XCTUnwrap(fields.first { $0.isSecureTextEntry })
+                guard username.becomeFirstResponder() else { throw ProbeFailure.observation }
+                username.insertText(credential.username); username.sendActions(for: .editingChanged); await Task.yield()
+                guard password.becomeFirstResponder() else { throw ProbeFailure.observation }
+                password.insertText(credential.password); password.sendActions(for: .editingChanged)
+                try await Task.sleep(nanoseconds: 300_000_000)
+                guard username.text == credential.username, password.text == credential.password else { throw ProbeFailure.observation }
+                password.sendActions(for: .editingDidEndOnExit)
+                mark("native-relogin-submitted")
+                try await wait(seconds: 30) { accounts.user?.id == owner.id && root.presentedViewController == nil }
+                evidence["sameAccountNativePasswordRelogin"] = true
+                let fresh = try await recoveryPage(app, runtime: runtime, catalog: catalog, library: library, window: window)
+                let freshSelection = try XCTUnwrap(profiles.snapshot(for: .account(owner.id), application: app).active)
+                guard freshSelection != originalSelection,
+                      try await fresh.evaluateJavaScript("localStorage.getItem('\(draftKey)')") is NSNull,
+                      try await pageState(fresh)["name"] as? String == "" else { throw ProbeFailure.observation }
+                _ = try await fresh.evaluateJavaScript("localStorage.setItem('\(draftKey)', 'fresh-draft')")
+                evidence["reloginStartsSeparateEmptyProfile"] = true
+                runtime.end(app); try await wait(seconds: 10) { root.presentedViewController == nil }
+                show(NavigationStack { ApplicationDetailView(application: app) })
+                mark("awaiting-actual-recovery-controls")
+                try await wait(seconds: 35) { try profiles.snapshot(for: .account(owner.id), application: app).active == originalSelection }
+                guard try profiles.snapshot(for: .account(owner.id), application: app).retained == [freshSelection] else {
+                    throw ProbeFailure.observation
+                }
+                attach(window, name: "managed-recovery-confirmed")
+                evidence["actualRecoveryConfirmationSwappedOnlyOwnedProfiles"] = true
+                mark("awaiting-open-restored-application")
+                try await wait(seconds: 25) {
+                    guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
+                          let state = try? await self.pageState(web) else { return false }
+                    return !web.isLoading && state["ready"] as? Bool == true
+                }
+                let restored = try XCTUnwrap(webView(in: XCTUnwrap(browser(in: window)).view))
+                guard restored.configuration.websiteDataStore.identifier == originalSelection.identifier,
+                      try await restored.evaluateJavaScript("localStorage.getItem('\(draftKey)')") as? String == "original-draft" else {
+                    throw ProbeFailure.observation
+                }
+                let restoredName = try await pageState(restored)["name"] as? String ?? ""
+                guard restoredName.isEmpty || restoredName == owner.displayName else { throw ProbeFailure.foreignIdentity }
+                evidence["restoredConsumerIdentityAlreadyPresent"] = restoredName == owner.displayName
+                try await authorizeRecoveryPage(restored, owner: owner, window: window)
+                evidence["restoredDraftAndConsumerIdentityMatch"] = true
+                // Read the displaced profile without changing its assignments.
+                let displaced = WKWebView(frame: .zero, configuration: {
+                    let c = WKWebViewConfiguration(); c.websiteDataStore = WKWebsiteDataStore(forIdentifier: freshSelection.identifier); return c
+                }())
+                displaced.load(URLRequest(url: try XCTUnwrap(app.launchURL)))
+                try await wait(seconds: 20) { (try? await self.pageState(displaced))?["ready"] as? Bool == true }
+                guard try await displaced.evaluateJavaScript("localStorage.getItem('\(draftKey)')") as? String == "fresh-draft" else {
+                    throw ProbeFailure.observation
+                }
+                displaced.stopLoading(); evidence["displacedFreshDraftStillPresent"] = true
+                mark("journey-verified")
+            }
+        } catch { failure = stage }
+        // Cleanup is repeatable via mode=cleanup with the same run UUID. Keep
+        // the private vault and registry on failure so a later cleanup can revoke.
+        runtime.resetIdentity()
+        var cleanupOK = true, cleanedProfiles = 0
+        do {
+            if FileManager.default.fileExists(atPath: registry.path) {
+                struct Registry: Decodable { let active: [String: UUID]; let retained: [String: [UUID]] }
+                let saved = try JSONDecoder().decode(Registry.self, from: Data(contentsOf: registry))
+                let identifiers = Set(Array(saved.active.values) + saved.retained.values.flatMap { $0 })
+                guard identifiers.count <= 3 else { throw ProbeFailure.observation }
+                for id in identifiers {
+                    let c = WKWebViewConfiguration(); c.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
+                    let page = WKWebView(frame: .zero, configuration: c)
+                    page.load(URLRequest(url: URL(string: "https://ai-sfc.yunle.fun/")!))
+                    try await wait(seconds: 20) { (try? await self.pageState(page))?["ready"] as? Bool == true }
+                    _ = try await page.evaluateJavaScript("localStorage.removeItem('\(draftKey)')")
+                    guard await signOutWebUI(page), try await page.evaluateJavaScript("localStorage.getItem('\(draftKey)')") is NSNull else {
+                        throw ProbeFailure.observation
+                    }
+                    page.stopLoading(); cleanedProfiles += 1
+                }
+            }
+            await accounts.restore()
+            for user in accounts.overview.users { try await accounts.remove(user.id); guard accounts.notice == nil else { throw ProbeFailure.observation } }
+            guard try await AccountSession(vault: vault).overview().users.isEmpty else { throw ProbeFailure.observation }
+            try? FileManager.default.removeItem(at: directory)
+            guard !FileManager.default.fileExists(atPath: directory.path) else { throw ProbeFailure.observation }
+            SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service] as CFDictionary)
+        } catch { cleanupOK = false }
+        evidence["failureStage"] = failure ?? "none"; evidence["cleanupComplete"] = cleanupOK
+        evidence["cleanedProfiles"] = cleanedProfiles; evidence["hostRemoteSignOutCount"] = await auth.signOutCount()
+        evidence["fixtureDirectoryRemoved"] = !FileManager.default.fileExists(atPath: directory.path)
+        evidence["realConsumerRemoteRevocationIndependentlyVerified"] = false
+        evidence["scope"] = "Real managed auth and consumer HTTPS; external account-removal, recovery and reopen UI; native in-process credential entry and DOM/consent controls; fixture navigation between product screens"
+        let report = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        report.name = "managed-web-profile-recovery"; report.lifetime = .keepAlways; add(report)
+        XCTAssertNil(failure, "Managed recovery journey failed at \(failure ?? stage); private values omitted")
+        XCTAssertTrue(cleanupOK, "Retry explicit cleanup with the same run UUID; private vault and registry retained")
+    }
+
+    private func recoveryPage(_ app: CloudApplication, runtime: NativeWebRuntime, catalog: CatalogStore,
+                              library: HomeLibrary, window: UIWindow) async throws -> WKWebView {
+        try await wait(seconds: 10) { !runtime.isIdentityCleanupPending }
+        runtime.open(app, catalog: catalog, library: library)
+        try await wait(seconds: 25) {
+            guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
+                  let state = try? await self.pageState(web) else { return false }
+            return !web.isLoading && state["ready"] as? Bool == true
+        }
+        return try XCTUnwrap(webView(in: XCTUnwrap(browser(in: window)).view))
+    }
+
+    private func authorizeRecoveryPage(_ web: WKWebView, owner: AccountUser, window: UIWindow) async throws {
+        if try await pageState(web)["name"] as? String == owner.displayName { return }
+        _ = try await web.evaluateJavaScript("document.querySelector('button.account-login').click()")
+        let controller = try XCTUnwrap(browser(in: window))
+        var accepted = Set<ObjectIdentifier>()
+        try await wait(seconds: 25) {
+            if let consent = controller.presentedViewController as? AuthorizationConsentViewController,
+               !consent.isBeingPresented, !accepted.contains(ObjectIdentifier(consent)),
+               let button = self.button(in: consent.view, identifier: "authorization-current-account"), button.isEnabled {
+                guard button.accessibilityLabel?.contains(owner.displayName) == true else { throw ProbeFailure.observation }
+                accepted.insert(ObjectIdentifier(consent)); button.sendActions(for: .touchUpInside)
+            }
+            return (try? await self.pageState(web))?["name"] as? String == owner.displayName && controller.presentedViewController == nil
+        }
     }
 
     private func cleanupGuestNeeded(_ accounts: AccountStore) -> Bool { accounts.overview.users.isEmpty }

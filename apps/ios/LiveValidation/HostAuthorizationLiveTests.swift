@@ -593,10 +593,19 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         try await runManagedConsumerIdentitySwitch(includeCouplets: true)
     }
 
-    private func runManagedConsumerIdentitySwitch(includeCouplets: Bool) async throws {
+    func testManagedPendingConsentIsCancelledByAccountSwitch() async throws {
+        // Includes the complete two-consumer journey plus a real consent request
+        // held across A -> B and an attempted late action on the expired sheet.
+        executionTimeAllowance = 180
+        try await runManagedConsumerIdentitySwitch(includeCouplets: true, cancelPendingConsent: true)
+    }
+
+    private func runManagedConsumerIdentitySwitch(includeCouplets: Bool, cancelPendingConsent: Bool = false) async throws {
         let env = ProcessInfo.processInfo.environment
-        let modeKey = includeCouplets ? "YUNLEFUN_LIVE_CONSUMER_MATRIX" : "YUNLEFUN_LIVE_PLAY_IDENTITY"
-        let runKey = includeCouplets ? "YUNLEFUN_CONSUMER_MATRIX_RUN" : "YUNLEFUN_PLAY_IDENTITY_RUN"
+        let modeKey = cancelPendingConsent ? "YUNLEFUN_LIVE_PENDING_CONSENT"
+            : (includeCouplets ? "YUNLEFUN_LIVE_CONSUMER_MATRIX" : "YUNLEFUN_LIVE_PLAY_IDENTITY")
+        let runKey = cancelPendingConsent ? "YUNLEFUN_PENDING_CONSENT_RUN"
+            : (includeCouplets ? "YUNLEFUN_CONSUMER_MATRIX_RUN" : "YUNLEFUN_PLAY_IDENTITY_RUN")
         guard let mode = env[modeKey], ["journey", "cleanup"].contains(mode) else {
             throw XCTSkip("Requires explicit managed Play identity validation")
         }
@@ -609,11 +618,15 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
             return XCTFail("Requires named profiles, a run UUID and the exact owned simulator")
         }
         let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let directory = cache.appendingPathComponent((includeCouplets ? "ManagedConsumerMatrix-" : "ManagedPlayIdentity-") + run)
+        let directoryPrefix = cancelPendingConsent ? "ManagedPendingConsent-"
+            : (includeCouplets ? "ManagedConsumerMatrix-" : "ManagedPlayIdentity-")
+        let directory = cache.appendingPathComponent(directoryPrefix + run)
         let registry = directory.appendingPathComponent("profiles.json")
         let fixtureCatalog = directory.appendingPathComponent("applications.json")
-        let draftKey = (includeCouplets ? "managed-matrix-draft-" : "managed-play-draft-") + run
-        let service = (includeCouplets ? "fun.yunle.apps.consumer-matrix." : "fun.yunle.apps.play-identity.") + run
+        let draftKey = (cancelPendingConsent ? "managed-pending-draft-"
+            : (includeCouplets ? "managed-matrix-draft-" : "managed-play-draft-")) + run
+        let service = (cancelPendingConsent ? "fun.yunle.apps.pending-consent."
+            : (includeCouplets ? "fun.yunle.apps.consumer-matrix." : "fun.yunle.apps.play-identity.")) + run
         let vault = KeychainAccountVault(service: service)
         let profiles = WebProfileRepository(fileURL: registry, namespace: run)
         let runtime = NativeWebRuntime(webProfiles: profiles)
@@ -634,7 +647,8 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         var stage = "setup", failure: String?, cleanupComplete = false
         var phases: [[String: Any]] = [], consentCount = 0, companionConsentCount = 0
         var expectedDrafts: [UUID: String] = [:]
-        var evidence: [String: Any] = ["mode": mode, "run": run, "multipleConsumers": includeCouplets]
+        var evidence: [String: Any] = ["mode": mode, "run": run, "multipleConsumers": includeCouplets,
+                                     "cancelPendingConsent": cancelPendingConsent]
         func mark(_ value: String) {
             stage = value; print((includeCouplets ? "YLF_CONSUMER_MATRIX_STAGE " : "YLF_PLAY_IDENTITY_STAGE ") + value)
         }
@@ -676,6 +690,13 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                 var firstOwner: String?, firstProfile: UUID?, firstCompanionProfile: UUID?, firstName: String?
                 weak var priorBrowser: WebViewController?
                 for (index, credential) in [first, second, first].enumerated() {
+                    var pendingConsent: PendingConsentProbe?
+                    if cancelPendingConsent, index == 1 {
+                        mark("hold-real-consent-before-account-switch")
+                        pendingConsent = try await beginPendingConsent(try XCTUnwrap(companion),
+                            owner: try XCTUnwrap(accounts.user), runtime: runtime, catalog: catalog,
+                            library: library, window: window)
+                    }
                     mark("host-selection-\(index)")
                     let previousSessionCount = runtime.applications.count
                     if includeCouplets, index > 0, previousSessionCount != 2 { throw ProbeFailure.observation }
@@ -687,6 +708,11 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                     if index == 0 { firstOwner = owner.id; firstName = owner.displayName }
                     if index == 1, owner.id == firstOwner || owner.displayName == firstName { throw ProbeFailure.ambiguousDisplayName }
                     try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && root.presentedViewController == nil }
+                    if let pendingConsent {
+                        mark("verify-pending-consent-cancellation")
+                        evidence["pendingConsent"] = try await verifyCancelledConsent(pendingConsent)
+                        guard runtime.applications.isEmpty else { throw ProbeFailure.observation }
+                    }
                     guard !runtime.contains(app) else { throw ProbeFailure.observation }
                     if let companion, runtime.contains(companion) || !runtime.applications.isEmpty { throw ProbeFailure.observation }
                     let expectedDraft = index == 1 ? "account-b-draft" : "account-a-draft"
@@ -900,9 +926,98 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         evidence["scope"] = (includeCouplets ? "Two actual consumers retained together; account switch removes both runtime sessions; " : "")
             + "Real HTTPS and native account switch; in-process consent/DOM controls; automatic Play host adoption allowed; managed player profile may be updated by login; no four-tab UI, game/purchase operations or independent token-revocation claim"
         let report = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
-        report.name = (includeCouplets ? "managed-consumer-matrix-" : "managed-play-identity-") + mode; report.lifetime = .keepAlways; add(report)
+        report.name = (cancelPendingConsent ? "managed-pending-consent-"
+            : (includeCouplets ? "managed-consumer-matrix-" : "managed-play-identity-")) + mode
+        report.lifetime = .keepAlways; add(report)
         XCTAssertNil(failure, "Play identity journey failed at \(failure ?? stage); private values omitted")
         XCTAssertTrue(cleanupComplete, "Retry explicit cleanup with the same run UUID; private recovery state retained")
+    }
+
+    private struct PendingConsentProbe {
+        let browser: WebViewController
+        let web: WKWebView
+        let requestID: String
+        let consent: AuthorizationConsentViewController
+        let confirm: UIButton
+    }
+
+    private func beginPendingConsent(_ app: CloudApplication, owner: AccountUser, runtime: NativeWebRuntime,
+                                     catalog: CatalogStore, library: HomeLibrary, window: UIWindow) async throws -> PendingConsentProbe {
+        let web = try await recoveryPage(app, runtime: runtime, catalog: catalog, library: library, window: window)
+        let browser = try XCTUnwrap(browser(in: window))
+        guard runtime.applications.count == 2, await signOutWebUI(web),
+              try await pageState(web)["name"] as? String == "" else { throw ProbeFailure.observation }
+        // Observe the real bridge Promise without recording parameters, response
+        // values, account identifiers or authorization codes. Both entry points
+        // forward unchanged to their original implementation.
+        let installed = try await web.evaluateJavaScript("""
+        (() => {
+          const bridge = window.ylf;
+          if (!bridge || window.__ylfPendingConsentProbe) return false;
+          const state = { started: 0, resolved: 0, rejected: 0, denied: 0 };
+          window.__ylfPendingConsentProbe = state;
+          const observe = promise => {
+            state.started++;
+            return promise.then(value => { state.resolved++; return value; }, error => {
+              state.rejected++;
+              if (String(error).includes('HOST_AUTH_DENIED')) state.denied++;
+              throw error;
+            });
+          };
+          const authorize = bridge.authorize, invoke = bridge.invoke;
+          bridge.authorize = function (...args) { return observe(authorize.apply(this, args)); };
+          bridge.invoke = function (method, ...args) {
+            const promise = invoke.call(this, method, ...args);
+            return method === 'authorize' ? observe(promise) : promise;
+          };
+          return true;
+        })()
+        """)
+        guard installed as? Bool == true else { throw ProbeFailure.observation }
+        let original = try XCTUnwrap(browser.onAuthorizationRequest)
+        var requests: [String] = []
+        browser.onAuthorizationRequest = { id, origin, parameters in
+            requests.append(id); original(id, origin, parameters)
+        }
+        defer { browser.onAuthorizationRequest = original }
+        _ = try await web.evaluateJavaScript("document.querySelector('button.account-login').click()")
+        try await wait(seconds: 25) {
+            guard let consent = browser.presentedViewController as? AuthorizationConsentViewController,
+                  !consent.isBeingPresented, !consent.isBeingDismissed,
+                  let confirm = self.button(in: consent.view, identifier: "authorization-current-account") else { return false }
+            return confirm.isEnabled && confirm.accessibilityLabel?.contains(owner.displayName) == true
+        }
+        let consent = try XCTUnwrap(browser.presentedViewController as? AuthorizationConsentViewController)
+        let confirm = try XCTUnwrap(button(in: consent.view, identifier: "authorization-current-account"))
+        let state = try await pendingConsentState(web)
+        guard requests.count == 1, let request = requests.first, browser.authorizationEvent(requestId: request) != nil,
+              state["started"] == 1, state["resolved"] == 0, state["rejected"] == 0 else { throw ProbeFailure.observation }
+        return PendingConsentProbe(browser: browser, web: web, requestID: request, consent: consent, confirm: confirm)
+    }
+
+    private func pendingConsentState(_ web: WKWebView) async throws -> [String: Int] {
+        try await web.evaluateJavaScript("({ ...window.__ylfPendingConsentProbe })") as? [String: Int] ?? [:]
+    }
+
+    private func verifyCancelledConsent(_ probe: PendingConsentProbe) async throws -> [String: Any] {
+        // Hold the removed page only long enough to observe its real terminal
+        // reply; it is no longer owned or presented by the product runtime.
+        try await wait(seconds: 10) {
+            let state = try await self.pendingConsentState(probe.web)
+            return state["started"] == 1 && state["resolved"] == 0 && state["rejected"] == 1 && state["denied"] == 1
+        }
+        guard probe.browser.authorizationEvent(requestId: probe.requestID) == nil,
+              probe.consent.presentingViewController == nil,
+              probe.browser.viewIfLoaded?.window == nil else { throw ProbeFailure.observation }
+        probe.confirm.sendActions(for: .touchUpInside)
+        let afterLateAction = try await pendingConsentState(probe.web)
+        guard afterLateAction == ["started": 1, "resolved": 0, "rejected": 1, "denied": 1],
+              probe.browser.authorizationEvent(requestId: probe.requestID) == nil else { throw ProbeFailure.observation }
+        return ["realRequestPendingBeforeSwitch": true, "nativeSheetRemoved": true,
+                "oldPageRemovedFromWindow": true, "nativeRequestRemoved": true,
+                "bridgePromiseRejectedOnce": true, "denied": true,
+                "bridgePromiseResolvedCount": 0, "lateConfirmDidNotResolve": true,
+                "scope": "Actual consent-stage cancellation and immediate late-action observation; no claim about server issuance or an already in-flight ticket response"]
     }
 
     private func playPageState(_ web: WKWebView) async throws -> [String: Any] {

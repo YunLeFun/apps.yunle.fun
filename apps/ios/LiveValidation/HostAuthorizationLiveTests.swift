@@ -24,6 +24,48 @@ private actor RecoveryObservedAuth: AccountAuthenticating {
     func verifyCaptcha(token: String, text: String, deviceID: String) async throws -> String { try await api.verifyCaptcha(token: token, text: text, deviceID: deviceID) }
 }
 
+/// Makes one real HTTPS issue result arrive after cancellation. No code or token
+/// is written to an attachment, and all other requests use the normal service.
+private actor DeferredLiveIssueService: HostAuthorizationServing {
+    private let service = HostAuthorizationService()
+    private var expectedOwner: String?
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var releaseRequested = false
+    private var captured = false
+    private var returned = false
+    private var returnedAfterCancellation = false
+
+    func arm(owner: String) { expectedOwner = owner }
+    func state() -> [String: Bool] {
+        ["realHTTPSCodeCaptured": captured, "resultReturned": returned,
+         "returnedAfterTaskCancellation": returnedAfterCancellation]
+    }
+    func release() {
+        releaseRequested = true
+        continuation?.resume(); continuation = nil
+    }
+    func resolve(_ request: HostSsoRequest) async throws -> HostSsoPolicy {
+        try await service.resolve(request)
+    }
+    func issue(_ request: HostSsoRequest, identity: AuthorizedAccount) async throws -> HostSsoCode {
+        let owner = expectedOwner
+        expectedOwner = nil
+        let code = try await service.issue(request, identity: identity)
+        if let owner {
+            guard identity.userID == owner else { throw HostAuthorizationError.invalidResponse }
+            captured = true
+            if !releaseRequested {
+                // Deliberately do not turn task cancellation into a transport
+                // error: the broker must reject an already-issued late result.
+                await withCheckedContinuation { continuation = $0 }
+            }
+            returnedAfterCancellation = Task.isCancelled
+            returned = true
+        }
+        return code
+    }
+}
+
 /// Drives real page controls and the native consent button in-process. Host
 /// credentials never enter JavaScript. Expected identity is only compared with
 /// the consumer's own response; it is never used to establish a page session.
@@ -600,11 +642,17 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         try await runManagedConsumerIdentitySwitch(includeCouplets: true, cancelPendingConsent: true)
     }
 
-    private func runManagedConsumerIdentitySwitch(includeCouplets: Bool, cancelPendingConsent: Bool = false) async throws {
+    func testManagedIssuedCodeIsDiscardedAfterAccountSwitch() async throws {
+        executionTimeAllowance = 180
+        try await runManagedConsumerIdentitySwitch(includeCouplets: true, deferIssuedCode: true)
+    }
+
+    private func runManagedConsumerIdentitySwitch(includeCouplets: Bool, cancelPendingConsent: Bool = false,
+                                                  deferIssuedCode: Bool = false) async throws {
         let env = ProcessInfo.processInfo.environment
-        let modeKey = cancelPendingConsent ? "YUNLEFUN_LIVE_PENDING_CONSENT"
+        let modeKey = deferIssuedCode ? "YUNLEFUN_LIVE_LATE_ISSUE" : cancelPendingConsent ? "YUNLEFUN_LIVE_PENDING_CONSENT"
             : (includeCouplets ? "YUNLEFUN_LIVE_CONSUMER_MATRIX" : "YUNLEFUN_LIVE_PLAY_IDENTITY")
-        let runKey = cancelPendingConsent ? "YUNLEFUN_PENDING_CONSENT_RUN"
+        let runKey = deferIssuedCode ? "YUNLEFUN_LATE_ISSUE_RUN" : cancelPendingConsent ? "YUNLEFUN_PENDING_CONSENT_RUN"
             : (includeCouplets ? "YUNLEFUN_CONSUMER_MATRIX_RUN" : "YUNLEFUN_PLAY_IDENTITY_RUN")
         guard let mode = env[modeKey], ["journey", "cleanup"].contains(mode) else {
             throw XCTSkip("Requires explicit managed Play identity validation")
@@ -618,14 +666,14 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
             return XCTFail("Requires named profiles, a run UUID and the exact owned simulator")
         }
         let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let directoryPrefix = cancelPendingConsent ? "ManagedPendingConsent-"
+        let directoryPrefix = deferIssuedCode ? "ManagedLateIssue-" : cancelPendingConsent ? "ManagedPendingConsent-"
             : (includeCouplets ? "ManagedConsumerMatrix-" : "ManagedPlayIdentity-")
         let directory = cache.appendingPathComponent(directoryPrefix + run)
         let registry = directory.appendingPathComponent("profiles.json")
         let fixtureCatalog = directory.appendingPathComponent("applications.json")
-        let draftKey = (cancelPendingConsent ? "managed-pending-draft-"
+        let draftKey = (deferIssuedCode ? "managed-late-issue-draft-" : cancelPendingConsent ? "managed-pending-draft-"
             : (includeCouplets ? "managed-matrix-draft-" : "managed-play-draft-")) + run
-        let service = (cancelPendingConsent ? "fun.yunle.apps.pending-consent."
+        let service = (deferIssuedCode ? "fun.yunle.apps.late-issue." : cancelPendingConsent ? "fun.yunle.apps.pending-consent."
             : (includeCouplets ? "fun.yunle.apps.consumer-matrix." : "fun.yunle.apps.play-identity.")) + run
         let vault = KeychainAccountVault(service: service)
         let profiles = WebProfileRepository(fileURL: registry, namespace: run)
@@ -637,7 +685,9 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
             accountWillRemove: { try runtime.retireAccount($0) }, identityDidChange: { id in
                 runtime.resetIdentity(to: id); library.activateAccount(id); library.setAutoSyncEnabled(false)
             })
-        runtime.configureAuthorization(accounts: accounts)
+        let issueService = DeferredLiveIssueService()
+        if deferIssuedCode { runtime.configureAuthorization(accounts: accounts, service: issueService) }
+        else { runtime.configureAuthorization(accounts: accounts) }
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let window = try XCTUnwrap(scene.windows.first(where: \.isKeyWindow))
         let previous = window.rootViewController
@@ -645,10 +695,11 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         window.rootViewController = root; window.makeKeyAndVisible(); runtime.anchor = root
         defer { runtime.resetIdentity(); window.rootViewController = previous; window.makeKeyAndVisible() }
         var stage = "setup", failure: String?, cleanupComplete = false
-        var phases: [[String: Any]] = [], consentCount = 0, companionConsentCount = 0
+        var phases: [[String: Any]] = [], consentCount = 0, companionConsentCount = 0, deferredIssueConsentCount = 0
         var expectedDrafts: [UUID: String] = [:]
+        var lateIssueProbe: PendingConsentProbe?
         var evidence: [String: Any] = ["mode": mode, "run": run, "multipleConsumers": includeCouplets,
-                                     "cancelPendingConsent": cancelPendingConsent]
+                                     "cancelPendingConsent": cancelPendingConsent, "deferIssuedCode": deferIssuedCode]
         func mark(_ value: String) {
             stage = value; print((includeCouplets ? "YLF_CONSUMER_MATRIX_STAGE " : "YLF_PLAY_IDENTITY_STAGE ") + value)
         }
@@ -691,11 +742,22 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                 weak var priorBrowser: WebViewController?
                 for (index, credential) in [first, second, first].enumerated() {
                     var pendingConsent: PendingConsentProbe?
-                    if cancelPendingConsent, index == 1 {
+                    if cancelPendingConsent || deferIssuedCode, index == 1 {
                         mark("hold-real-consent-before-account-switch")
                         pendingConsent = try await beginPendingConsent(try XCTUnwrap(companion),
                             owner: try XCTUnwrap(accounts.user), runtime: runtime, catalog: catalog,
                             library: library, window: window)
+                        if deferIssuedCode {
+                            mark("hold-real-issued-code-before-account-switch")
+                            await issueService.arm(owner: try XCTUnwrap(accounts.user).id)
+                            try XCTUnwrap(pendingConsent).confirm.sendActions(for: .touchUpInside)
+                            deferredIssueConsentCount += 1
+                            try await wait(seconds: 25) {
+                                await issueService.state()["realHTTPSCodeCaptured"] == true
+                            }
+                            guard await issueService.state()["resultReturned"] == false else { throw ProbeFailure.observation }
+                            lateIssueProbe = pendingConsent
+                        }
                     }
                     mark("host-selection-\(index)")
                     let previousSessionCount = runtime.applications.count
@@ -710,8 +772,15 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                     try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && root.presentedViewController == nil }
                     if let pendingConsent {
                         mark("verify-pending-consent-cancellation")
-                        evidence["pendingConsent"] = try await verifyCancelledConsent(pendingConsent)
+                        var cancellation = try await verifyCancelledConsent(pendingConsent)
+                        if deferIssuedCode { cancellation["scope"] = "Actual bridge cancellation while a valid real HTTPS issue result is held at the service boundary" }
+                        evidence["pendingConsent"] = cancellation
                         guard runtime.applications.isEmpty else { throw ProbeFailure.observation }
+                        if deferIssuedCode {
+                            mark("deliver-issued-code-after-account-switch")
+                            await issueService.release()
+                            try await wait(seconds: 10) { await issueService.state()["resultReturned"] == true }
+                        }
                     }
                     guard !runtime.contains(app) else { throw ProbeFailure.observation }
                     if let companion, runtime.contains(companion) || !runtime.applications.isEmpty { throw ProbeFailure.observation }
@@ -845,10 +914,23 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                     phases.append(result)
                 }
                 guard phases.count == 3, expectedDrafts.count == (includeCouplets ? 4 : 2) else { throw ProbeFailure.observation }
+                if deferIssuedCode {
+                    let probe = try XCTUnwrap(lateIssueProbe)
+                    let state = await issueService.state()
+                    guard state == ["realHTTPSCodeCaptured": true, "resultReturned": true, "returnedAfterTaskCancellation": true],
+                          try await pendingConsentState(probe.web) == ["started": 1, "resolved": 0, "rejected": 1, "denied": 1],
+                          probe.browser.authorizationEvent(requestId: probe.requestID) == nil,
+                          probe.browser.viewIfLoaded?.window == nil else { throw ProbeFailure.observation }
+                    evidence["lateIssue"] = state.merging(["oldPageNeverResolvedAfterBAndARoundTrips": true]) { _, new in new }
+                    evidence["lateIssueScope"] = "Real HTTPS issue response delayed at the service boundary after decoding; cancelled task returns the valid code; actual bridge stays rejected through subsequent B and A identity GETs. No network packet delay or server revocation claim."
+                }
             } else { await accounts.restore() }
         } catch { failure = stage }
         mark("exact-run-cleanup")
         runtime.resetIdentity()
+        // On an early failure, cancel the product flow before unblocking a
+        // captured code, even if the account switch was never reached.
+        await issueService.release()
         do {
             var cleaned: [[String: Any]] = []
             if FileManager.default.fileExists(atPath: registry.path) {
@@ -916,7 +998,8 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
             guard status == errSecSuccess || status == errSecItemNotFound else { throw ProbeFailure.observation }
             cleanupComplete = true
         } catch { cleanupComplete = false }
-        evidence["phases"] = phases; evidence["nativeConsentCount"] = consentCount + companionConsentCount
+        evidence["phases"] = phases; evidence["nativeConsentCount"] = consentCount + companionConsentCount + deferredIssueConsentCount
+        evidence["deferredIssueConsentCount"] = deferredIssueConsentCount
         evidence["playNativeConsentCount"] = consentCount
         evidence["companionNativeConsentCount"] = companionConsentCount
         evidence["failureStage"] = failure ?? "none"; evidence["cleanupComplete"] = cleanupComplete
@@ -926,7 +1009,7 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         evidence["scope"] = (includeCouplets ? "Two actual consumers retained together; account switch removes both runtime sessions; " : "")
             + "Real HTTPS and native account switch; in-process consent/DOM controls; automatic Play host adoption allowed; managed player profile may be updated by login; no four-tab UI, game/purchase operations or independent token-revocation claim"
         let report = XCTAttachment(data: try JSONSerialization.data(withJSONObject: evidence, options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
-        report.name = (cancelPendingConsent ? "managed-pending-consent-"
+        report.name = (deferIssuedCode ? "managed-late-issue-" : cancelPendingConsent ? "managed-pending-consent-"
             : (includeCouplets ? "managed-consumer-matrix-" : "managed-play-identity-")) + mode
         report.lifetime = .keepAlways; add(report)
         XCTAssertNil(failure, "Play identity journey failed at \(failure ?? stage); private values omitted")

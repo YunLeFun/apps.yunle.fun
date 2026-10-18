@@ -69,9 +69,9 @@ final class NativeWebRuntime: ObservableObject {
 
     func contains(_ app: CloudApplication) -> Bool { sessions[app.id] != nil }
 
-    func configureAuthorization(accounts: AccountStore) {
+    func configureAuthorization(accounts: AccountStore, service: HostAuthorizationServing = HostAuthorizationService()) {
         self.accounts = accounts
-        authorizationBroker = NativeAuthorizationBroker(accounts: accounts)
+        authorizationBroker = NativeAuthorizationBroker(accounts: accounts, service: service)
         if profileAccountID != accounts.user?.id { resetIdentity(to: accounts.user?.id) }
     }
 

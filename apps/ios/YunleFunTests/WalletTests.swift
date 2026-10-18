@@ -181,6 +181,42 @@ final class PurchaseCoordinatorTests: XCTestCase {
         await rig.wallet.reconcileAndRefresh()
         XCTAssertEqual(rig.wallet.snapshot?.coin, 125); XCTAssertNotNil(rig.wallet.reconciliationError)
     }
+    func testWalletRemainsLoadingWhileHistoricalOrdersAreBeingReconciled() async {
+        for fails in [false, true] {
+            let gate = BillingGate(), rig = billingRig(reconciliationGate: gate)
+            if fails { await rig.service.setReconciliationFailure() }
+            let task = Task { await rig.wallet.reconcileAndRefresh() }
+            await fulfillment(of: [gate.entered], timeout: 2)
+            XCTAssertTrue(rig.wallet.isLoading, "Balance must not appear idle before its first read")
+            XCTAssertTrue(rig.wallet.isLoadingTransactions, "An unread ledger must not appear empty")
+            XCTAssertNil(rig.wallet.snapshot)
+            XCTAssertTrue(rig.wallet.entries.isEmpty)
+            await gate.open(); await task.value
+            XCTAssertFalse(rig.wallet.isLoading)
+            XCTAssertFalse(rig.wallet.isLoadingTransactions)
+            XCTAssertEqual(rig.wallet.snapshot?.coin, 125)
+            XCTAssertNil(rig.wallet.nextSkip, "An empty ledger is conclusive only after reading it")
+            XCTAssertEqual(rig.wallet.reconciliationError != nil, fails)
+        }
+    }
+    func testReconciliationLoadingAndCompletionCannotCrossAnAccountRoundtrip() async {
+        let gate = BillingGate(), rig = billingRig(reconciliationGate: gate)
+        let task = Task { await rig.wallet.reconcileAndRefresh() }
+        await fulfillment(of: [gate.entered], timeout: 2)
+        XCTAssertTrue(rig.wallet.isLoading)
+        XCTAssertTrue(rig.wallet.isLoadingTransactions)
+        rig.accounts.select("bob"); rig.accounts.select("alice")
+        XCTAssertFalse(rig.wallet.isLoading)
+        XCTAssertFalse(rig.wallet.isLoadingTransactions)
+        rig.wallet.identityChanged()
+        await gate.open(); await task.value
+        XCTAssertNil(rig.wallet.snapshot, "The old operation must not begin reads for the new identity")
+        XCTAssertNil(rig.wallet.checkedAt)
+        XCTAssertFalse(rig.wallet.isLoading)
+        XCTAssertFalse(rig.wallet.isLoadingTransactions)
+        await rig.wallet.refresh()
+        XCTAssertEqual(rig.wallet.snapshot?.coin, 125)
+    }
     func testOpaqueAccountTokenIsStableAndAccountSpecific() {
         XCTAssertEqual(PurchaseAccountToken.forUser("alice"), PurchaseAccountToken.forUser("alice"))
         XCTAssertNotEqual(PurchaseAccountToken.forUser("alice"), PurchaseAccountToken.forUser("bob"))

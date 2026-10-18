@@ -31,12 +31,13 @@ actor BillingServiceFixture: WalletServing {
     let verifyFailure: Bool
     let validReceipt: Bool
     let readinessFailure: Bool
-    let accountGate: BillingGate?, verifyGate: BillingGate?
+    let accountGate: BillingGate?, verifyGate: BillingGate?, reconciliationGate: BillingGate?
     private var reconciliationFailure = false
-    init(log: BillingLog, verifyFailure: Bool, accountGate: BillingGate?, verifyGate: BillingGate?, validReceipt: Bool = true, readinessFailure: Bool = false) {
+    init(log: BillingLog, verifyFailure: Bool, accountGate: BillingGate?, verifyGate: BillingGate?, validReceipt: Bool = true, readinessFailure: Bool = false, reconciliationGate: BillingGate? = nil) {
         self.log = log; self.verifyFailure = verifyFailure; self.accountGate = accountGate; self.verifyGate = verifyGate
         self.validReceipt = validReceipt
         self.readinessFailure = readinessFailure
+        self.reconciliationGate = reconciliationGate
     }
     func account(identity: AuthorizedAccount) async throws -> WalletSnapshot {
         if let accountGate { await accountGate.wait() }
@@ -50,6 +51,7 @@ actor BillingServiceFixture: WalletServing {
         return IapVerificationReceipt(granted: validReceipt, alreadyProcessed: nil, outTradeNo: "iap_" + transactionID)
     }
     func reconcile(identity: AuthorizedAccount) async throws -> WalletReconciliation {
+        if let reconciliationGate { await reconciliationGate.wait() }
         if reconciliationFailure { throw WalletError.unavailable }
         return WalletReconciliation(reconciled: 0, paid: 0, regranted: 0)
     }
@@ -90,10 +92,10 @@ final class BillingMemoryVault: AccountVault, @unchecked Sendable {
 @MainActor
 func billingRig(verifyFailure: Bool = false, accountGate: BillingGate? = nil, verifyGate: BillingGate? = nil,
                 purchaseGate: BillingGate? = nil, outcome: CommercePurchaseResult = .transaction(billingTransaction()),
-                unfinished: [CommerceTransaction] = [], vault: BillingMemoryVault = BillingMemoryVault(), validReceipt: Bool = true, restoreCancelled: Bool = false, readinessFailure: Bool = false)
+                unfinished: [CommerceTransaction] = [], vault: BillingMemoryVault = BillingMemoryVault(), validReceipt: Bool = true, restoreCancelled: Bool = false, readinessFailure: Bool = false, reconciliationGate: BillingGate? = nil)
 -> (coordinator: PurchaseCoordinator, wallet: WalletStore, accounts: BillingAccounts, service: BillingServiceFixture, log: BillingLog) {
     let log = BillingLog(), accounts = BillingAccounts()
-    let service = BillingServiceFixture(log: log, verifyFailure: verifyFailure, accountGate: accountGate, verifyGate: verifyGate, validReceipt: validReceipt, readinessFailure: readinessFailure)
+    let service = BillingServiceFixture(log: log, verifyFailure: verifyFailure, accountGate: accountGate, verifyGate: verifyGate, validReceipt: validReceipt, readinessFailure: readinessFailure, reconciliationGate: reconciliationGate)
     let commerce = BillingCommerceFixture(log: log, gate: purchaseGate, outcome: outcome, unfinished: unfinished, restoreCancelled: restoreCancelled)
     let wallet = WalletStore(accounts: accounts, service: service)
     let coordinator = PurchaseCoordinator(accounts: accounts, wallet: wallet, service: service, commerce: commerce,

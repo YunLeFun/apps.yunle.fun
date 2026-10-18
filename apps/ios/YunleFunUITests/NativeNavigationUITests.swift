@@ -51,18 +51,20 @@ final class NativeNavigationUITests: XCTestCase {
         let keyboard = app.keyboards.firstMatch, dismiss = app.buttons["login.dismiss-keyboard"]
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
         let screen = app.frame
-        let typingKey = keyboard.descendants(matching: .any)
-            .matching(NSPredicate(format: "label IN %@", ["1", "a", "A"])).firstMatch
+        // A Keyboard.firstMatch snapshot can have no descendants while the
+        // application's current snapshot already exposes the visible keys.
+        // Resolve keys from the app, then require them to be inside the keyboard.
+        let typingKeys = app.keys.matching(NSPredicate(format: "label IN %@", ["1", "a", "A"]))
         let shown = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             guard keyboard.exists else { return false }
             let frame = keyboard.frame
             return frame.height > 100 && frame.minY < screen.maxY - 100
-                && frame.maxY <= screen.maxY + 1 && typingKey.exists && typingKey.isHittable
+                && frame.maxY <= screen.maxY + 1 && typingKeys.allElementsBoundByIndex.contains { key in
+                    key.isHittable && frame.contains(key.frame)
+                }
         }, object: keyboard)
-        // CI simulators can take well over 10s before a freshly shown keyboard
-        // accepts taps (these journeys run 30-100s there); the reported frame
-        // was already in place when the 10s ceiling expired. The condition is
-        // unchanged; a longer ceiling only stops slow runners failing by chance.
+        // Keep the existing CI visibility allowance. The frame alone does not
+        // prove usability; the software key must also enter a character below.
         let visibility = XCTWaiter.wait(for: [shown], timeout: 30)
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = "native-login-keyboard-\(name)"; attachment.lifetime = .keepAlways; add(attachment)
@@ -71,6 +73,18 @@ final class NativeNavigationUITests: XCTestCase {
             tree.name = "native-login-keyboard-tree-\(name)"; tree.lifetime = .keepAlways; add(tree)
         }
         XCTAssertEqual(visibility, .completed, "Software keyboard must be onscreen and usable: \(keyboard.frame)")
+        guard let typingKey = typingKeys.allElementsBoundByIndex.first(where: { $0.isHittable && keyboard.frame.contains($0.frame) }),
+              let before = field.value as? String else {
+            XCTFail("A visible software key and the focused field value must be available")
+            return
+        }
+        typingKey.tap()
+        let entered = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            guard let value = field.value as? String else { return false }
+            return value.utf16.count > before.utf16.count
+        }, object: field)
+        XCTAssertEqual(XCTWaiter.wait(for: [entered], timeout: 5), .completed,
+                       "Tapping the software keyboard must actually enter a character")
         XCTAssertTrue(dismiss.waitForExistence(timeout: 5))
         XCTAssertTrue(dismiss.isHittable)
         XCTAssertLessThan(dismiss.frame.maxY, keyboard.frame.minY)
@@ -85,10 +99,8 @@ final class NativeNavigationUITests: XCTestCase {
             // even when the keyboard and focus action have already disappeared.
             // Retained keyboard nodes and typing keys must still be inert.
             return app.keyboards.allElementsBoundByIndex.allSatisfy { currentKeyboard in
-                !currentKeyboard.isHittable && currentKeyboard.descendants(matching: .any)
-                    .matching(NSPredicate(format: "label IN %@", ["1", "a", "A"]))
-                    .allElementsBoundByIndex.allSatisfy { !$0.isHittable }
-            }
+                !currentKeyboard.isHittable
+            } && typingKeys.allElementsBoundByIndex.allSatisfy { !$0.isHittable }
         }, object: nil)
         let dismissal = XCTWaiter.wait(for: [hidden], timeout: 10)
         let after = XCTAttachment(screenshot: XCUIScreen.main.screenshot())

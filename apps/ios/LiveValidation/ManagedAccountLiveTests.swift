@@ -7,6 +7,157 @@ import UIKit
 import XCTest
 @testable import YunleFun
 
+/// Real wallet reads only. Reconciliation can regrant historical orders, so it
+/// is deliberately excluded along with purchase readiness and verification.
+@MainActor
+final class ManagedWalletReadLiveTests: XCTestCase {
+    func testManagedWalletReadsPaginationAndAccountIsolation() async throws {
+        let env = ProcessInfo.processInfo.environment
+        guard env["YUNLEFUN_LIVE_WALLET_READ"] == "1" else { throw XCTSkip("Requires managed wallet accounts") }
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("This validation is restricted to an owned simulator")
+        #endif
+        guard let owned = env["YUNLEFUN_OWNED_SIMULATOR_UDID"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else { return XCTFail("Requires the exact owned simulator") }
+        let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let input = cache.appendingPathComponent("iOSNativeValidation/wallet-accounts.json")
+        let attributes = try FileManager.default.attributesOfItem(atPath: input.path)
+        guard let permissions = attributes[.posixPermissions] as? NSNumber, permissions.intValue & 0o077 == 0 else {
+            return XCTFail("The one-use account file must be private")
+        }
+        let data = try Data(contentsOf: input); try FileManager.default.removeItem(at: input)
+        let pool = try JSONDecoder().decode(Pool.self, from: data)
+        let expected = ["production-standard": "ylf_prod_standard", "production-member-active": "ylf_prod_member",
+                        "production-zero-balance": "ylf_prod_zero"]
+        guard pool.accounts.count == 3, Set(pool.accounts.map(\.id)) == Set(expected.keys),
+              pool.accounts.allSatisfy({ $0.environment == "production" && $0.username == expected[$0.id] && !$0.password.isEmpty }) else {
+            return XCTFail("Only the three approved synthetic accounts may run this validation")
+        }
+        let serviceName = "fun.yunle.apps.wallet-read." + UUID().uuidString
+        let vault = KeychainAccountVault(service: serviceName)
+        let accounts = AccountStore(session: AccountSession(vault: vault))
+        let service = ReadOnlyWalletProbe()
+        let wallet = WalletStore(accounts: accounts, service: service)
+        var ids: [String: String] = [:]
+        var snapshots: [String: WalletSnapshot] = [:]
+        var ledgers: [String: [CoinLedgerEntry]] = [:]
+        var evidence: [[String: Any]] = []
+        var heldRequest: Task<Void, Never>?
+        var abaVerified = false
+        var failure = false
+        defer { SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: serviceName] as CFDictionary) }
+        do {
+            for credential in pool.accounts.sorted(by: { $0.id < $1.id }) {
+                try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil)
+                guard let user = accounts.user, user.username == credential.username, user.isUsable else { throw Stage.identity }
+                let identity = try await accounts.authorization(forceRefresh: true)
+                guard wallet.snapshot == nil, wallet.entries.isEmpty, wallet.checkedAt == nil else { throw Stage.isolation }
+                await wallet.refresh()
+                guard let snapshot = wallet.snapshot, wallet.snapshotError == nil, wallet.transactionsError == nil,
+                      wallet.checkedAt != nil, !wallet.isLoading, !wallet.isLoadingTransactions else { throw Stage.read }
+                var entries: [CoinLedgerEntry] = []
+                var skip: Int? = 0
+                var pages = 0
+                while let current = skip, pages < 10 {
+                    let page = try await service.transactions(skip: current, limit: 2, identity: identity)
+                    entries += page.items; skip = page.nextSkip; pages += 1
+                }
+                guard skip == nil, Set(entries.map(\.id)).count == entries.count,
+                      entries.allSatisfy({ $0.userId == user.id }), wallet.entries == Array(entries.prefix(20)) else { throw Stage.pagination }
+                guard snapshot == (try await service.account(identity: identity)) else { throw Stage.changed }
+                ids[credential.id] = user.id; snapshots[credential.id] = snapshot; ledgers[credential.id] = entries
+                evidence.append(["account": credential.id, "realLoginAndRefresh": true, "coinIsZero": snapshot.coin == 0,
+                                 "membershipActive": snapshot.membership.isActive, "ledgerCount": entries.count,
+                                 "pagesAtLimitTwo": pages, "ownerVerified": true, "snapshotRereadEqual": true])
+            }
+            guard let a = ids["production-standard"], let b = ids["production-member-active"] else { throw Stage.identity }
+            try await accounts.select(a)
+            guard wallet.snapshot == nil, wallet.entries.isEmpty else { throw Stage.isolation }
+            await wallet.refresh()
+            await service.holdNextAccount()
+            heldRequest = Task { await wallet.refreshAccount() }
+            let deadline = Date().addingTimeInterval(30)
+            while !(await service.hasHeldResponse()), Date() < deadline { try await Task.sleep(nanoseconds: 20_000_000) }
+            guard await service.hasHeldResponse() else { throw Stage.delay }
+            // The held response already came from the real server. Only its
+            // delivery to the store is delayed; no wallet payload is fabricated.
+            try await accounts.select(b)
+            guard wallet.snapshot == nil, wallet.entries.isEmpty, wallet.checkedAt == nil else { throw Stage.isolation }
+            await wallet.refresh()
+            guard wallet.snapshot == snapshots["production-member-active"], wallet.entries == ledgers["production-member-active"] else { throw Stage.isolation }
+            try await accounts.select(a)
+            guard wallet.snapshot == nil, wallet.entries.isEmpty, wallet.checkedAt == nil else { throw Stage.isolation }
+            await wallet.refresh()
+            guard wallet.snapshot == snapshots["production-standard"], wallet.entries == ledgers["production-standard"],
+                  let newCheckedAt = wallet.checkedAt else { throw Stage.isolation }
+            await service.release()
+            await heldRequest?.value; heldRequest = nil
+            guard wallet.checkedAt == newCheckedAt, wallet.snapshot == snapshots["production-standard"],
+                  wallet.entries == ledgers["production-standard"] else { throw Stage.stale }
+            abaVerified = true
+        } catch {
+            failure = true
+            if let stage = error as? Stage { XCTFail("Managed wallet validation failed at \(stage)") }
+            else if let walletError = error as? WalletError { XCTFail("Managed wallet service failed: \(walletError)") }
+            else { XCTFail("Managed wallet validation failed; private response contents omitted") }
+        }
+        await service.release(); await heldRequest?.value
+        var allSignedOut = true
+        for user in accounts.overview.users {
+            do { try await accounts.remove(user.id); if accounts.notice != nil { allSignedOut = false } }
+            catch { allSignedOut = false }
+        }
+        let restored = AccountStore(session: AccountSession(vault: vault)); await restored.restore()
+        let empty = restored.user == nil && restored.overview.users.isEmpty
+        let counts = await service.counts()
+        XCTAssertTrue(allSignedOut && empty, "Revoke all validation sessions and empty the isolated Keychain")
+        XCTAssertNil(wallet.snapshot); XCTAssertTrue(wallet.entries.isEmpty); XCTAssertNil(wallet.checkedAt)
+        XCTAssertEqual(counts.excluded, 0, "Never call reconciliation, purchase readiness, or purchase verification")
+        if !failure { XCTAssertTrue(abaVerified); XCTAssertEqual(evidence.count, 3) }
+        let attachment = XCTAttachment(data: try JSONSerialization.data(withJSONObject: [
+            "accounts": evidence, "accountReadCalls": counts.account, "ledgerReadCalls": counts.ledger,
+            "excludedMethodCalls": counts.excluded, "abaLateRealResponseIgnored": abaVerified,
+            "remoteSignOut": allSignedOut, "emptyKeychain": empty,
+            "scope": "Real HTTP reads and native WalletStore; controlled response delivery delay; no UI or purchase",
+        ], options: [.prettyPrinted, .sortedKeys]), uniformTypeIdentifier: "public.json")
+        attachment.name = "managed-wallet-read-validation"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+    private struct Pool: Decodable { let accounts: [Credential] }
+    private struct Credential: Decodable { let id: String; let environment: String; let username: String; let password: String }
+    private enum Stage: Error { case identity, isolation, read, pagination, changed, delay, stale }
+}
+
+private actor ReadOnlyWalletProbe: WalletServing {
+    private let live = WalletService()
+    private var accountCalls = 0, ledgerCalls = 0, excludedCalls = 0
+    private var holdNext = false
+    private var activeHold: UUID?
+    private var held: CheckedContinuation<Void, Never>?
+    func holdNextAccount() { holdNext = true; activeHold = UUID() }
+    func hasHeldResponse() -> Bool { held != nil }
+    func release() { holdNext = false; activeHold = nil; held?.resume(); held = nil }
+    func counts() -> (account: Int, ledger: Int, excluded: Int) { (accountCalls, ledgerCalls, excludedCalls) }
+    func account(identity: AuthorizedAccount) async throws -> WalletSnapshot {
+        accountCalls += 1
+        let delay = holdNext ? activeHold : nil; holdNext = false
+        let value = try await live.account(identity: identity)
+        if let delay, delay == activeHold { await withCheckedContinuation { held = $0 } }
+        return value
+    }
+    func transactions(skip: Int, limit: Int, identity: AuthorizedAccount) async throws -> CoinLedgerPage {
+        ledgerCalls += 1; return try await live.transactions(skip: skip, limit: limit, identity: identity)
+    }
+    func verify(transactionID: String, identity: AuthorizedAccount) async throws -> IapVerificationReceipt {
+        excludedCalls += 1; throw WalletError.forbidden
+    }
+    func reconcile(identity: AuthorizedAccount) async throws -> WalletReconciliation {
+        excludedCalls += 1; throw WalletError.forbidden
+    }
+    func purchaseReadiness(identity: AuthorizedAccount) async throws {
+        excludedCalls += 1; throw WalletError.forbidden
+    }
+}
+
 /// Samples the rendered positions of real dock cells through both shared
 /// animation call sites: an explicit transaction and an implicit value change.
 @MainActor

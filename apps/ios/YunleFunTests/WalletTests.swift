@@ -64,11 +64,84 @@ final class WalletServiceTests: XCTestCase {
         XCTAssertEqual(fields["transactionIds"] as? [String], [])
         XCTAssertNil(fields["transactionId"])
     }
-    private func service(_ replies: [(Int, String)]) -> (WalletService, AuthHTTPFixture) {
+    func testSandboxRoutesEveryRequestWithoutReconcilingProductionOrders() async throws {
+        let (service, fixture) = service([
+            (200, sandbox(walletSnapshotJSON)), (200, sandbox(#"{"items":[],"nextSkip":null}"#)),
+            (200, sandbox(#"{"granted":true,"outTradeNo":"iap_123"}"#)), (200, sandbox(#"{"results":[]}"#))
+        ], environment: .sandbox)
+        let reconciliation = try await service.reconcile(identity: identity)
+        XCTAssertEqual(reconciliation.reconciled, 0)
+        XCTAssertTrue(fixture.requests.isEmpty)
+        _ = try await service.account(identity: identity)
+        _ = try await service.transactions(skip: 0, limit: 20, identity: identity)
+        _ = try await service.verify(transactionID: "123", identity: identity)
+        try await service.purchaseReadiness(identity: identity)
+        XCTAssertEqual(fixture.requests.compactMap { $0.url?.lastPathComponent },
+                       ["account-api-sandbox", "account-api-sandbox", "iap-order-sandbox", "iap-order-sandbox"])
+        for request in fixture.requests {
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer fixture-token")
+            let fields = try JSONSerialization.jsonObject(with: walletRequestBody(request)) as! [String: Any]
+            XCTAssertNil(fields["userId"]); XCTAssertNil(fields["environment"]); XCTAssertNil(fields["collection"])
+        }
+    }
+    func testSandboxRequiresAnExplicitLedgerMarkerForEveryResponse() async throws {
+        let payloads = [walletSnapshotJSON, #"{"items":[],"nextSkip":null}"#,
+                        #"{"granted":true,"outTradeNo":"iap_123"}"#, #"{"results":[]}"#]
+        for (operation, payload) in payloads.enumerated() {
+            for marked in [payload, sandbox(payload).replacingOccurrences(of: "Sandbox", with: "Production")] {
+                let (service, fixture) = service([(200, marked)], environment: .sandbox)
+                do { try await perform(operation, service: service); XCTFail("A test endpoint must identify its test ledger") }
+                catch { XCTAssertEqual(error as? WalletError, .invalidResponse) }
+                XCTAssertEqual(fixture.requests.count, 1)
+                XCTAssertTrue(fixture.requests[0].url!.lastPathComponent.hasSuffix("-sandbox"))
+            }
+        }
+    }
+    func testSandboxFailuresNeverRetryAgainstProduction() async throws {
+        for operation in 0..<4 {
+            for (status, expected) in [(401, WalletError.unauthorized), (403, .forbidden), (404, .unavailable), (503, .unavailable)] {
+                let (service, fixture) = service([(status, "{}")], environment: .sandbox)
+                do { try await perform(operation, service: service); XCTFail("Expected the test service failure") }
+                catch { XCTAssertEqual(error as? WalletError, expected) }
+                XCTAssertEqual(fixture.requests.count, 1)
+                XCTAssertTrue(fixture.requests[0].url!.lastPathComponent.hasSuffix("-sandbox"))
+            }
+        }
+    }
+    func testSandboxLaunchSelectionAndOwnershipStorageAreExplicit() {
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: []), .production)
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox=false"]), .production)
+        #if DEBUG
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox"]), .sandbox)
+        #else
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox"]), .production)
+        #endif
+        XCTAssertEqual(WalletEnvironment.production.ownershipService(bundleID: "fixture.app"), "fixture.app.iap-owners")
+        XCTAssertEqual(WalletEnvironment.sandbox.ownershipService(bundleID: "fixture.app"), "fixture.app.iap-sandbox-owners")
+        XCTAssertEqual(WalletService().environment, .production)
+    }
+    func testProductionReconciliationKeepsItsExistingEndpoint() async throws {
+        let (service, fixture) = service([(200, #"{"reconciled":2,"paid":1,"regranted":0}"#)])
+        let result = try await service.reconcile(identity: identity)
+        XCTAssertEqual(result.paid, 1)
+        XCTAssertEqual(fixture.requests[0].url?.lastPathComponent, "wxpay-order")
+    }
+    private func sandbox(_ json: String) -> String {
+        "{\"ledgerEnvironment\":\"Sandbox\"," + json.dropFirst()
+    }
+    private func perform(_ operation: Int, service: WalletService) async throws {
+        switch operation {
+        case 0: _ = try await service.account(identity: identity)
+        case 1: _ = try await service.transactions(skip: 0, limit: 20, identity: identity)
+        case 2: _ = try await service.verify(transactionID: "123", identity: identity)
+        default: try await service.purchaseReadiness(identity: identity)
+        }
+    }
+    private func service(_ replies: [(Int, String)], environment: WalletEnvironment = .production) -> (WalletService, AuthHTTPFixture) {
         let host = UUID().uuidString.lowercased() + ".wallet.test"; hosts.append(host)
         let fixture = AuthHTTPFixture(replies: replies); AuthHTTPProtocol.register(host, fixture: fixture)
         let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [AuthHTTPProtocol.self]
-        return (WalletService(session: URLSession(configuration: config), gateway: URL(string: "https://\(host)")!), fixture)
+        return (WalletService(session: URLSession(configuration: config), gateway: URL(string: "https://\(host)")!, environment: environment), fixture)
     }
 }
 

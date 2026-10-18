@@ -29,6 +29,7 @@ final class WalletStore: ObservableObject {
     var isLoadingTransactions: Bool { isCurrent && (ledgerLoading || reconciliation != nil) }
     var checkedAt: Date? { isCurrent ? fetchedAt : nil }
     var reconciliationError: String? { isCurrent ? storedReconciliationError : nil }
+    var isSandbox: Bool { service.environment == .sandbox }
 
     func identityChanged() {
         projection = access.boundary; storedSnapshot = nil; storedEntries = []; storedNextSkip = 0

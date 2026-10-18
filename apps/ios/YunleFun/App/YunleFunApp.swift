@@ -23,7 +23,7 @@ struct YunleFunApp: App {
         _diagnostics = StateObject(wrappedValue: diagnostics)
         _library = StateObject(wrappedValue: library)
         _runtime = StateObject(wrappedValue: runtime)
-        let accounts = AccountStore(identityDidChange: { id in
+        let accounts = AccountStore(accountWillRemove: { id in try runtime.retireAccount(id) }, identityDidChange: { id in
             diagnostics.activateAccount(id)
             diagnostics.record(.info, message: "account.scope.activated")
             runtime.resetIdentity(to: id)

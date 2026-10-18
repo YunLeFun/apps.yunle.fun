@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import WebKit
 
 struct RuntimeIssue: Identifiable {
     let id = UUID()
@@ -19,8 +20,11 @@ final class NativeWebRuntime: ObservableObject {
     private struct Session {
         let browser: WebViewController
         let presentation: UINavigationController
+        var profile: WebProfileRepository.Selection?
     }
     private var sessions: [String: Session] = [:]
+    private let webProfiles: WebProfileRepository
+    private var profileAccountID: String?
     private struct PendingOpen {
         let application: CloudApplication
         let url: URL
@@ -43,7 +47,11 @@ final class NativeWebRuntime: ObservableObject {
     private let limit = WebViewSessionPolicy.automaticLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
     private let personalMarketService: DeveloperProfileServing
 
-    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService()) {
+    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), webProfiles: WebProfileRepository? = nil) {
+        self.webProfiles = webProfiles ?? WebProfileRepository(
+            fileURL: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("WebProfiles/ownership-v1.json"),
+            namespace: CloudbaseAuthService.gateway.absoluteString)
         self.personalMarketService = personalMarketService
         memoryObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: .main
@@ -64,6 +72,7 @@ final class NativeWebRuntime: ObservableObject {
     func configureAuthorization(accounts: AccountStore) {
         self.accounts = accounts
         authorizationBroker = NativeAuthorizationBroker(accounts: accounts)
+        if profileAccountID != accounts.user?.id { resetIdentity(to: accounts.user?.id) }
     }
 
     func configureCommerce(wallet: WalletStore, purchases: PurchaseCoordinator) {
@@ -249,6 +258,19 @@ final class NativeWebRuntime: ObservableObject {
             controller = saved.browser
         } else {
             controller = WebViewController()
+            var profile: WebProfileRepository.Selection?
+            if #available(iOS 17, *) {
+                do {
+                    let selected = try webProfiles.select(profileAccountID.map(WebProfileRepository.Principal.account) ?? .guest, application: app)
+                    profile = selected
+                    controller.websiteDataStore = WKWebsiteDataStore(forIdentifier: selected.identifier)
+                } catch {
+                    issue = RuntimeIssue(title: "无法安全打开应用", message: "原有应用数据已保留。请稍后重试。")
+                    return
+                }
+            }
+            // iOS 16 remains on the existing compatibility path until its
+            // persistent isolation and migration policy is implemented.
             controller.url = url
             controller.displayMode = .titlebar
             controller.usesSystemNavigationBar = true
@@ -287,7 +309,7 @@ final class NativeWebRuntime: ObservableObject {
             }
             let navigation = NativeWebNavigationController(rootViewController: controller)
             navigation.modalPresentationStyle = .fullScreen
-            sessions[app.id] = Session(browser: controller, presentation: navigation)
+            sessions[app.id] = Session(browser: controller, presentation: navigation, profile: profile)
         }
         controller.localMenuPageFactory = { [weak self, weak controller] currentURL, perform in
             guard let self, let controller, let accounts = self.accounts,
@@ -329,28 +351,54 @@ final class NativeWebRuntime: ObservableObject {
         removeSession(app)
     }
 
+    func retireAccount(_ id: String) throws {
+        if #available(iOS 17, *) { try webProfiles.retire(id) }
+    }
+
     func resetIdentity(to id: String? = nil) {
+        profileAccountID = id
         scopedOpenID = UUID(); scopedOpenTask?.cancel(); scopedOpenTask = nil; verifyingScopedApplicationID = nil
         let reset = UUID()
         identityReset = reset
         pendingOpen = nil
         isClearingIdentity = true
         let continuation = authorizationBroker?.identityWillChange(to: id) as? NativeAuthorizationPage
-        let kept = continuation?.browser
+        var kept = continuation?.browser
+        var profileError: RuntimeIssue?
+        if #available(iOS 17, *), let continuation, let browser = kept {
+            do {
+                guard let id, let key = sessions.first(where: { $0.value.browser === browser })?.key,
+                      let selected = sessions[key]?.profile else { throw WebProfileRepository.Failure.staleSelection }
+                let result = try webProfiles.bindGuestContinuation(selected, to: id)
+                switch result {
+                case .adopted(let profile), .retained(let profile, _): sessions[key]?.profile = profile
+                }
+            } catch {
+                authorizationBroker?.cancel(page: continuation)
+                kept = nil
+                profileError = RuntimeIssue(title: "无法安全切换应用", message: "原有应用数据已保留。请重新打开应用后再试。")
+            }
+        }
         for session in sessions.values where session.browser !== kept {
             session.browser.cancelPendingAuthorizations()
             session.presentation.presentingViewController?.dismiss(animated: false)
         }
         sessions = sessions.filter { $0.value.browser === kept }
-        authorizationPages = authorizationPages.filter { $0.value === continuation }
+        authorizationPages = authorizationPages.filter { kept != nil && $0.value === continuation }
         applications = applications.filter { sessions[$0.id] != nil }
-        issue = nil
-        HostIdentitySessions.clear { [weak self] in
+        issue = profileError
+        let complete: () -> Void = { [weak self] in
             guard let self, self.identityReset == reset else { return }
             self.isClearingIdentity = false
             self.authorizationBroker?.identityCookiesCleared()
             self.drainPendingOpen()
         }
+        if #available(iOS 17, *) {
+            // Account stores are disjoint. Only a guest continuation keeps its
+            // old browser, and its store was durably detached from future guests.
+            // Never clear unrelated drafts or adopt the legacy default store.
+            complete()
+        } else { HostIdentitySessions.clear(completion: complete) }
     }
 
     private func removeSession(_ app: CloudApplication) {

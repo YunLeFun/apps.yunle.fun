@@ -7,11 +7,12 @@ import XCTest
 @testable import YunleFun
 
 /// Drives real page controls and the native consent button in-process. Host
-/// credentials stay in AccountStore; no identity or token is injected into JS.
+/// credentials never enter JavaScript; no identity or token is injected into JS.
 @MainActor
 final class HostIdentitySwitchLiveTests: XCTestCase {
     func testRealCloudApplicationDoesNotRestoreAnotherHostAccount() async throws {
         let env = ProcessInfo.processInfo.environment
+        let guestFirst = env["YUNLEFUN_LIVE_HOST_GUEST_PROFILE"] == "1"
         guard env["YUNLEFUN_LIVE_HOST_IDENTITY_SWITCH"] == "1" else {
             throw XCTSkip("Requires explicit managed-account SSO identity validation")
         }
@@ -40,7 +41,8 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         let library = HomeLibrary(directory: directory)
         let catalog = CatalogStore()
         let runtime = NativeWebRuntime()
-        let accounts = AccountStore(session: AccountSession(vault: KeychainAccountVault(service: keychain)), identityDidChange: { id in
+        let accounts = AccountStore(session: AccountSession(vault: KeychainAccountVault(service: keychain)),
+                                    accountWillRemove: { id in try runtime.retireAccount(id) }, identityDidChange: { id in
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
             library.setAutoSyncEnabled(false)
@@ -71,6 +73,8 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         var application: CloudApplication?
         weak var lastBrowser: WebViewController?
         var consentCount = 0
+        var guestLoginSucceeded = false
+        var guestFormDiagnostics: [String: Bool] = [:]
         do {
             await catalog.load()
             guard let app = catalog.applications.first(where: { $0.marketShortName == "ai-sfc" }) else {
@@ -79,7 +83,69 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
             application = app
             for (index, credential) in [first, second, first].enumerated() {
                 stage = "host-selection-\(index)"
-                if index == 2, let initialID { try await accounts.select(initialID) }
+                var continuedGuest: WebViewController?
+                if index == 0 && guestFirst {
+                    stage = "guest-page-open"
+                    try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && root.presentedViewController == nil }
+                    runtime.open(app, catalog: catalog, library: library)
+                    try await wait(seconds: 30) {
+                        guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
+                              let state = try? await self.pageState(web) else { return false }
+                        return !web.isLoading && state["ready"] as? Bool == true && state["name"] as? String == ""
+                    }
+                    let guestBrowser = try XCTUnwrap(browser(in: window))
+                    let guestWeb = try XCTUnwrap(webView(in: guestBrowser.view))
+                    _ = try await guestWeb.evaluateJavaScript("localStorage.setItem('\(draftKey)', 'account-a-draft')")
+                    _ = try await guestWeb.evaluateJavaScript("document.querySelector('a[aria-label=\"我的春联\"]').click()")
+                    try await wait(seconds: 10) {
+                        (try? await self.pageState(guestWeb))?["historyLoginGate"] as? Bool == true
+                    }
+                    _ = try await guestWeb.evaluateJavaScript("document.querySelector('button.account-login').click()")
+                    stage = "guest-native-password-form"
+                    try await wait(seconds: 15) {
+                        guard let sheet = guestBrowser.presentedViewController else { return false }
+                        return self.segmentedControl(in: sheet.view) != nil && !sheet.isBeingPresented
+                    }
+                    let sheet = try XCTUnwrap(guestBrowser.presentedViewController)
+                    let picker = try XCTUnwrap(segmentedControl(in: sheet.view))
+                    let passwordIndex = try XCTUnwrap((0..<picker.numberOfSegments).first { picker.titleForSegment(at: $0) == "密码" })
+                    picker.selectedSegmentIndex = passwordIndex
+                    picker.sendActions(for: .valueChanged)
+                    try await wait(seconds: 5) { self.textFields(in: sheet.view).contains { $0.isSecureTextEntry } }
+                    let fields = textFields(in: sheet.view)
+                    let username = try XCTUnwrap(fields.first { !$0.isSecureTextEntry && $0.placeholder == "用户名、邮箱或手机号" })
+                    let password = try XCTUnwrap(fields.first { $0.isSecureTextEntry })
+                    guard username.becomeFirstResponder() else { throw ProbeFailure.observation }
+                    username.insertText(credential.username)
+                    username.sendActions(for: .editingChanged)
+                    await Task.yield()
+                    guard password.becomeFirstResponder() else { throw ProbeFailure.observation }
+                    password.insertText(credential.password)
+                    password.sendActions(for: .editingChanged)
+                    try await Task.sleep(nanoseconds: 300_000_000)
+                    guard username.text == credential.username, password.text == credential.password else { throw ProbeFailure.observation }
+                    // Dispatch the text field's submit control event, as UIKit
+                    // does after Return. Calling its delegate alone omits this.
+                    password.sendActions(for: .editingDidEndOnExit)
+                    stage = "guest-native-login-submit"
+                    do {
+                        try await wait(seconds: 35) { accounts.user?.username == credential.username }
+                    } catch {
+                        // Record only known static UI messages and booleans, never
+                        // text-field values, response bodies or arbitrary labels.
+                        let labels = self.staticLabels(in: sheet.view)
+                        guestFormDiagnostics = [
+                            "errorElementPresent": self.hasElement(in: sheet.view, identifier: "login.error"),
+                            "processingLabelPresent": labels.contains("正在处理"),
+                            "usernameStillMatches": username.text == credential.username,
+                            "passwordStillMatches": password.text == credential.password,
+                            "sheetStillPresented": sheet.presentingViewController != nil]
+                        throw error
+                    }
+                    guestLoginSucceeded = true
+                    guard self.browser(in: window) === guestBrowser else { throw ProbeFailure.observation }
+                    continuedGuest = guestBrowser
+                } else if index == 2, let initialID { try await accounts.select(initialID) }
                 else { try await accounts.passwordSignIn(identifier: credential.username, password: credential.password, captcha: nil) }
                 guard let host = accounts.user, host.username == credential.username, host.isUsable else {
                     throw ProbeFailure.observation
@@ -89,11 +155,11 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                 if index == 0 { initialID = host.id }
                 if index == 1, host.id == initialID { throw ProbeFailure.observation }
                 if index == 1, signedInNames.first == host.displayName { throw ProbeFailure.ambiguousDisplayName }
-                try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && root.presentedViewController == nil }
+                try await wait(seconds: 15) { !runtime.isIdentityCleanupPending && (continuedGuest != nil || root.presentedViewController == nil) }
                 let oldSessionRemoved = !runtime.contains(app)
-                guard oldSessionRemoved else { throw ProbeFailure.observation }
+                guard oldSessionRemoved || continuedGuest != nil else { throw ProbeFailure.observation }
                 stage = "reopen-\(index)"
-                runtime.open(app, catalog: catalog, library: library)
+                if continuedGuest == nil { runtime.open(app, catalog: catalog, library: library) }
                 try await wait(seconds: 30) {
                     guard let browser = self.browser(in: window), let web = self.webView(in: browser.view),
                           let state = try? await self.pageState(web) else { return false }
@@ -104,8 +170,9 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                 let newBrowser = lastBrowser == nil || lastBrowser !== browser
                 lastBrowser = browser
                 guard newBrowser else { throw ProbeFailure.observation }
-                // Observe before any test cleanup or new SSO request. A cached
-                // foreign name is a failure even if the app later replaces it.
+                // Observe before cleanup or consent. In the guest-first phase
+                // the login request already began; other phases precede SSO.
+                // A cached foreign name fails even if the app later replaces it.
                 stage = "preauthorization-identity-\(index)"
                 var state = try await pageState(web)
                 let cachedName = state["name"] as? String ?? ""
@@ -127,28 +194,31 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                 if index == 1, !(draft is NSNull) { throw ProbeFailure.observation }
                 if index == 2, draft as? String != "account-a-draft" { throw ProbeFailure.observation }
                 if index == 0 {
+                    if guestFirst && draft as? String != "account-a-draft" { throw ProbeFailure.observation }
                     _ = try await web.evaluateJavaScript("localStorage.setItem('\(draftKey)', 'account-a-draft')")
                 }
-                var historyGate = false
-                var activatedLogin = false
+                var historyGate = continuedGuest != nil
+                var activatedLogin = continuedGuest != nil
                 if cachedName.isEmpty {
                     guard state["hasLogin"] as? Bool == true else { throw ProbeFailure.observation }
-                    let clicked = try await web.evaluateJavaScript("""
-                    (() => { const a = document.querySelector('a[aria-label="我的春联"]');
-                      if (!a) return false; a.click(); return true; })()
-                    """) as? Bool
-                    guard clicked == true else { throw ProbeFailure.observation }
-                    try await wait(seconds: 10) {
-                        guard let state = try? await self.pageState(web) else { return false }
-                        return state["historyLoginGate"] as? Bool == true
+                    if continuedGuest == nil {
+                        let clicked = try await web.evaluateJavaScript("""
+                        (() => { const a = document.querySelector('a[aria-label="我的春联"]');
+                          if (!a) return false; a.click(); return true; })()
+                        """) as? Bool
+                        guard clicked == true else { throw ProbeFailure.observation }
+                        try await wait(seconds: 10) {
+                            guard let state = try? await self.pageState(web) else { return false }
+                            return state["historyLoginGate"] as? Bool == true
+                        }
+                        historyGate = true
+                        let login = try await web.evaluateJavaScript("""
+                        (() => { const b = document.querySelector('button.account-login');
+                          if (!b || b.disabled) return false; b.click(); return true; })()
+                        """) as? Bool
+                        guard login == true else { throw ProbeFailure.observation }
+                        activatedLogin = true
                     }
-                    historyGate = true
-                    let login = try await web.evaluateJavaScript("""
-                    (() => { const b = document.querySelector('button.account-login');
-                      if (!b || b.disabled) return false; b.click(); return true; })()
-                    """) as? Bool
-                    guard login == true else { throw ProbeFailure.observation }
-                    activatedLogin = true
                     stage = "real-sso-adoption-\(index)"
                     var accepted = Set<ObjectIdentifier>()
                     try await wait(seconds: 35) {
@@ -175,12 +245,17 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                                "freshHostAuthorizationMatches": true,
                                "foreignIdentityBeforeAuthorization": false, "historyLoginGateObserved": historyGate,
                                "realPageLoginActivated": activatedLogin, "displayedIdentityMatchesHost": true,
-                               "draftIsolationAndRetentionChecked": index > 0])
+                               "draftIsolationAndRetentionChecked": index > 0,
+                               "guestBrowserKeptThroughNativePasswordLogin": continuedGuest != nil])
             }
         } catch { failure = true }
         // The actual application's logout control is used after observations,
         // including a failing foreign-identity observation. No storage is wiped.
         var webSignedOut = true
+        var cleanupVisits = 0
+        if cleanupGuestNeeded(accounts), let browser = browser(in: window), let web = webView(in: browser.view) {
+            _ = try? await web.evaluateJavaScript("localStorage.removeItem('\(draftKey)')")
+        }
         // Visit every signed-in host's partition after the observations so both
         // real consumer sessions are signed out without deleting business data.
         let cleanupIDs = accounts.overview.users.map(\.id)
@@ -199,6 +274,7 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
                 }
                 guard let browser = browser(in: window), let web = webView(in: browser.view) else { throw ProbeFailure.observation }
                 _ = try await web.evaluateJavaScript("localStorage.removeItem('\(draftKey)')")
+                cleanupVisits += 1
                 let signedOut = await signOutWebUI(web)
                 webSignedOut = webSignedOut && signedOut
             } catch { webSignedOut = false }
@@ -213,7 +289,10 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         let emptyKeychain = restored.user == nil && restored.overview.users.isEmpty
         let report: [String: Any] = ["phases": phases, "failureStage": failure ? stage : "none",
             "foreignIdentityObserved": foreignIdentityObserved, "nativeConsentCount": consentCount,
-            "applicationLogoutUIConfirmed": webSignedOut, "hostSessionsRemoteSignOut": hostSignedOut,
+            "nativeGuestPasswordFormDriven": guestFirst, "nativeGuestLoginSucceeded": guestLoginSucceeded,
+            "guestFormDiagnostics": guestFormDiagnostics,
+            "applicationLogoutUIConfirmed": webSignedOut, "applicationCleanupVisits": cleanupVisits,
+            "hostSessionsRemoteSignOut": hostSignedOut,
             "emptyKeychain": emptyKeychain, "oneUseInputDeleted": !FileManager.default.fileExists(atPath: input.path),
             "hostCredentialsInjectedIntoWebView": false, "applicationConsumerRemoteRevocationIndependentlyVerified": false,
             "scope": "Real HTTPS and NativeWebRuntime; in-process DOM clicks and UIKit control events; no OS gesture or system other-account flow"]
@@ -225,6 +304,8 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
         XCTAssertEqual(phases.count, 3)
         XCTAssertTrue(webSignedOut); XCTAssertTrue(hostSignedOut); XCTAssertTrue(emptyKeychain)
     }
+
+    private func cleanupGuestNeeded(_ accounts: AccountStore) -> Bool { accounts.overview.users.isEmpty }
 
     private func pageState(_ web: WKWebView) async throws -> [String: Any] {
         guard web.url?.host == "ai-sfc.yunle.fun" else { throw ProbeFailure.observation }
@@ -276,6 +357,21 @@ final class HostIdentitySwitchLiveTests: XCTestCase {
     private func webView(in view: UIView) -> WKWebView? {
         if let web = view as? WKWebView { return web }
         return view.subviews.compactMap { webView(in: $0) }.first
+    }
+    private func segmentedControl(in view: UIView) -> UISegmentedControl? {
+        if let control = view as? UISegmentedControl { return control }
+        return view.subviews.compactMap { segmentedControl(in: $0) }.first
+    }
+    private func textFields(in view: UIView) -> [UITextField] {
+        if let field = view as? UITextField { return [field] }
+        return view.subviews.flatMap { textFields(in: $0) }
+    }
+    private func staticLabels(in view: UIView) -> [String] {
+        let own = (view as? UILabel)?.text.map { [$0] } ?? []
+        return own + view.subviews.flatMap { staticLabels(in: $0) }
+    }
+    private func hasElement(in view: UIView, identifier: String) -> Bool {
+        view.accessibilityIdentifier == identifier || view.subviews.contains { hasElement(in: $0, identifier: identifier) }
     }
     private func button(in view: UIView, identifier: String) -> UIButton? {
         if let button = view as? UIButton, button.accessibilityIdentifier == identifier { return button }

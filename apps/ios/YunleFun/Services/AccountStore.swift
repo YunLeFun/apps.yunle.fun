@@ -11,18 +11,21 @@ final class AccountStore: ObservableObject {
     private let session: AccountSession
     private let signInOverview: @Sendable (AccountSession, AccountSignInCommit) async throws -> AccountOverview
     private let identityDidChange: (String?) -> Void
+    private let accountWillRemove: (String) throws -> Void
     private var selectionOperationEpoch = 0
     private var activeSignInAttemptID: UUID?
     private var lastProvenSuccess: AccountSignInSuccess?
 
     init(session: AccountSession = AccountSession(),
          signInOverview: (@Sendable (AccountSession, AccountSignInCommit) async throws -> AccountOverview)? = nil,
+         accountWillRemove: @escaping (String) throws -> Void = { _ in },
          identityDidChange: @escaping (String?) -> Void = { _ in }) {
         self.session = session
         self.signInOverview = signInOverview ?? { session, commit in
             try await session.overview(matching: commit)
         }
         self.identityDidChange = identityDidChange
+        self.accountWillRemove = accountWillRemove
     }
 
     var user: AccountUser? { overview.activeUser }
@@ -111,6 +114,9 @@ final class AccountStore: ObservableObject {
     }
 
     func remove(_ id: String) async throws {
+        // Persist the detachment before removing the last saved credential.
+        // Failure leaves the account and its existing data available to retry.
+        try accountWillRemove(id)
         _ = beginSelectionOperation()
         let revocation = try await session.remove(id)
         // Clear private data and close identity-bound WebViews immediately;

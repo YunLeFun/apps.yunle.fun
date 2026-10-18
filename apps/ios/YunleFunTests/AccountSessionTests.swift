@@ -251,6 +251,39 @@ final class AccountSessionTests: XCTestCase {
         try await logout.value
     }
 
+    @MainActor
+    func testRemovalPreflightFailurePreservesSavedAccountAndPublishedIdentity() async throws {
+        let vault = try vaultWithAccounts(["a", "b"])
+        let store = AccountStore(session: AccountSession(api: AccountTestAPI(), vault: vault, now: { self.fixedNow }),
+                                 accountWillRemove: { _ in throw AccountError.storage })
+        await store.restore()
+        let before = try vault.read(), generation = store.identityGeneration
+        do { try await store.remove("a"); XCTFail("Removal must not proceed without durable profile detachment") }
+        catch { XCTAssertEqual(error as? AccountError, .storage) }
+        XCTAssertEqual(try vault.read(), before)
+        XCTAssertEqual(store.user?.id, "a")
+        XCTAssertEqual(store.identityGeneration, generation)
+        XCTAssertEqual(store.overview.users.map(\.id), ["a", "b"])
+    }
+
+    @MainActor
+    func testRemovalDetachesWebProfilesBeforeDeletingSavedCredentials() async throws {
+        let vault = try vaultWithAccounts(["a", "b"])
+        var detached: [String] = []
+        let store = AccountStore(session: AccountSession(api: AccountTestAPI(), vault: vault, now: { self.fixedNow }),
+                                 accountWillRemove: { id in
+            let state = try JSONDecoder().decode(AccountVaultState.self, from: XCTUnwrap(vault.read()))
+            XCTAssertTrue(state.accounts.contains { $0.user.id == id })
+            detached.append(id)
+        })
+        await store.restore()
+        try await store.remove("a")
+        XCTAssertEqual(detached, ["a"])
+        let state = try JSONDecoder().decode(AccountVaultState.self, from: XCTUnwrap(vault.read()))
+        XCTAssertEqual(state.accounts.map { $0.user.id }, ["b"])
+        XCTAssertNil(store.user)
+    }
+
     private func vaultWithAccounts(_ ids: [String], expired: Bool = false) throws -> MemoryAccountVault {
         var state = AccountVaultState()
         state.activeID = ids.first

@@ -56,6 +56,8 @@ struct WebAppMenuPage {
 /// 网页底部仍铺满。关闭收口在「更多」展开面板。
 class WebViewController: UIViewController {
     var url: URL?
+    /// Native hosts may provide an identity-bound store before the view loads.
+    var websiteDataStore: WKWebsiteDataStore?
     var customTitle: String = "" {
         didSet { if isViewLoaded { updateHeaderTitle() } }
     }
@@ -217,6 +219,7 @@ class WebViewController: UIViewController {
 
     private func setupWebView() {
         let config = WKWebViewConfiguration()
+        if let websiteDataStore { config.websiteDataStore = websiteDataStore }
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         setupJSBridge(config.userContentController)

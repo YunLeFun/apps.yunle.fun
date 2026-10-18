@@ -5,6 +5,105 @@ import XCTest
 
 @MainActor
 final class NativeRuntimeSessionTests: XCTestCase {
+    /// Uses real NativeWebRuntime / WKWebView storage. Synthetic host IDs and
+    /// a reserved origin keep this independent of accounts, SSO and the network.
+    func testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts() async throws {
+        let fixture = try await Fixture()
+        defer { fixture.close() }
+        let accountA = "storage-fixture-a-" + UUID().uuidString
+        let accountB = "storage-fixture-b-" + UUID().uuidString
+        let key = "native_identity_probe_" + UUID().uuidString.replacingOccurrences(of: "-", with: "")
+        var pages: [WKWebView] = []
+        func open(_ id: String) async throws -> WKWebView {
+            fixture.runtime.resetIdentity(to: id)
+            try await fixture.waitForDismissal()
+            for _ in 0..<100 where fixture.runtime.isIdentityCleanupPending {
+                try await Task.sleep(nanoseconds: 50_000_000)
+            }
+            XCTAssertFalse(fixture.runtime.isIdentityCleanupPending)
+            fixture.runtime.open(fixture.application, catalog: fixture.catalog, library: fixture.library)
+            let browser = try await fixture.waitForApplication(fixture.application)
+            let web = try XCTUnwrap(browser.view.subviews.compactMap { $0 as? WKWebView }.first)
+            pages.append(web)
+            web.loadHTMLString("<html><head><title>identity-storage-probe</title></head><body>Storage fixture</body></html>",
+                               baseURL: URL(string: "https://identity-storage.invalid/"))
+            for _ in 0..<100 {
+                if !web.isLoading,
+                   (try? await web.evaluateJavaScript("document.title")) as? String == "identity-storage-probe" { return web }
+                try await Task.sleep(nanoseconds: 50_000_000)
+            }
+            throw NSError(domain: "NativeRuntimeSessionTests.Storage", code: 1)
+        }
+        let storageScript = """
+        const db = await new Promise((resolve, reject) => {
+          const r = indexedDB.open(key, 1);
+          r.onupgradeneeded = () => r.result.createObjectStore('drafts');
+          r.onsuccess = () => resolve(r.result); r.onerror = () => reject(new Error('open'));
+        });
+        try {
+          if (value !== null) {
+            localStorage.setItem(key, value);
+            document.cookie = key + '=' + value + '; path=/; Secure; SameSite=Lax';
+            await new Promise((resolve, reject) => {
+              const tx = db.transaction('drafts', 'readwrite'); tx.objectStore('drafts').put(value, 'draft');
+              tx.oncomplete = resolve; tx.onerror = tx.onabort = () => reject(new Error('write'));
+            });
+          }
+          const draft = await new Promise((resolve, reject) => {
+            const r = db.transaction('drafts').objectStore('drafts').get('draft');
+            r.onsuccess = () => resolve(r.result ?? ''); r.onerror = () => reject(new Error('read'));
+          });
+          return { local: localStorage.getItem(key) || '', draft,
+            cookie: document.cookie.split('; ').find(x => x.startsWith(key + '='))?.split('=')[1] || '' };
+        } finally { db.close(); }
+        """
+        func storage(_ web: WKWebView, _ value: String? = nil) async throws -> [String: String] {
+            try await web.callAsyncJavaScript(storageScript, arguments: ["key": key, "value": value as Any? ?? NSNull()],
+                                             in: nil, contentWorld: .page) as? [String: String] ?? [:]
+        }
+        do {
+            let first = try await open(accountA)
+            let seeded = try await storage(first, "account-a")
+            XCTAssertEqual(seeded, ["local": "account-a", "draft": "account-a", "cookie": "account-a"])
+            let second = try await open(accountB)
+            let other = try await storage(second)
+            XCTAssertEqual(other, ["local": "", "draft": "", "cookie": ""], "B must not read A's persisted identity or drafts")
+            _ = try await storage(second, "account-b")
+            let returned = try await open(accountA)
+            let restored = try await storage(returned)
+            XCTAssertEqual(restored, ["local": "account-a", "draft": "account-a", "cookie": "account-a"],
+                           "Returning to A must restore A's own data without deleting it")
+        } catch {
+            for web in pages { try? await cleanupStorageProbe(web, key: key) }
+            throw error
+        }
+        for web in pages { try await cleanupStorageProbe(web, key: key) }
+    }
+
+    private func cleanupStorageProbe(_ web: WKWebView, key: String) async throws {
+        _ = try await web.callAsyncJavaScript("""
+        localStorage.removeItem(key); document.cookie = key + '=; Max-Age=0; path=/; Secure; SameSite=Lax';
+        await new Promise((resolve, reject) => {
+          const r = indexedDB.deleteDatabase(key); r.onsuccess = resolve; r.onerror = () => reject(new Error('cleanup'));
+        }); return true;
+        """, arguments: ["key": key], in: nil, contentWorld: .page)
+    }
+
+    func testCorruptOwnershipMetadataCannotFallBackToTheLegacySharedStore() async throws {
+        guard #available(iOS 17, *) else { throw XCTSkip("Named WebKit store integration requires iOS 17") }
+        let fixture = try await Fixture(); defer { fixture.close() }
+        fixture.runtime.end(fixture.application)
+        try await fixture.waitForDismissal()
+        let file = fixture.directory.appendingPathComponent("profiles.json")
+        let invalid = Data("invalid ownership metadata".utf8)
+        try invalid.write(to: file, options: .atomic)
+        fixture.runtime.open(fixture.application, catalog: fixture.catalog, library: fixture.library)
+        XCTAssertNotNil(fixture.runtime.issue)
+        XCTAssertFalse(fixture.runtime.contains(fixture.application))
+        XCTAssertNil(fixture.root.presentedViewController)
+        XCTAssertEqual(try Data(contentsOf: file), invalid)
+    }
+
     func testIdentityResetRemovesSessionAndNestedFirstPartySheets() async throws {
         let fixture = try await Fixture()
         defer { fixture.close() }
@@ -275,7 +374,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         private(set) var browser: WebViewController!
 
         init(personalMarketService: DeveloperProfileServing = DeveloperProfileService()) async throws {
-            runtime = NativeWebRuntime(personalMarketService: personalMarketService)
+            runtime = NativeWebRuntime(personalMarketService: personalMarketService,
+                webProfiles: WebProfileRepository(fileURL: directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture"))
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
             previous = scene.windows.first(where: \.isKeyWindow)
             window = UIWindow(windowScene: scene)

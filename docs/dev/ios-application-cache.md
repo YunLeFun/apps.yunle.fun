@@ -330,3 +330,5 @@ python3 apps/ios/scripts/capture-simulator-startup.py \
 原 xcresult 的键盘附件记录输入字符数从 1 变成 2，但等待旧字段的查询已超时。测试改用当前元素的标识和预期值直接匹配，保留 5 秒期限；普通字段要求精确追加点击的字符，密码字段仍要求可访问值变化。两个 WebKit 存储测试不再反复向尚未就绪的文档执行 `document.title`，而由夹具文档的 load 事件发送带随机标记的就绪消息，并核对主框架和来源。页面就绪与存储脚本回调各有 5 秒原生侧期限，避免 JavaScript 自身计时器因页面挂起而失效。草稿测试使用可见窗口承载当前页面；运行时切换后保留的旧页面在清理时临时恢复可见承载。未加载成功的页面不再触发无来源存储清理，所有夹具窗口和页面均在失败路径释放。
 
 该次账号超时还保存了完整系统 spindump。应用的两个 Swift 工作线程等待 ScreenTime 同步回复，服务端链经过 `ScreenTimeSettingsAgent → dasd → CoreDuetContext`；采样同时提示 cooperative thread limit。这说明现场存在系统服务等待，尚不能证明它是唯一原因，也没有通过关闭 ScreenTime 或重启服务绕开。键盘附件、逐阶段活动、系统采样和构建结果保存在本机 `merge-preflight/ci-fix-investigation/`，后续合并状态以对应提交的完整测试及 Release 终态为准。
+
+提交 `dd0b679` 的 [CI 39125040684](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39125040684) 为 502 通过、2 失败、7 个显式专项跳过。最大字号键盘通过；两个存储用例完成原有业务断言，残余失败均来自就绪消息之后立即读取 `WKWebView.title`：文档已就绪，但原生标题投影短暂为空。夹具因此在同一条就绪消息中携带 `document.title`，继续断言精确标题、主框架、来源和随机标记，避免依赖两个 IPC 通道的到达顺序。没有放宽等待期限或跳过存储断言；该轮失败和 Release 跳过仍保留。

@@ -9,6 +9,7 @@ final class WebStoragePageFixture: NSObject, WKScriptMessageHandler {
     private let token = UUID().uuidString
     private let origin: URL
     private var received = false
+    private var documentTitle: String?
 
     private init(origin: URL) { self.origin = origin }
 
@@ -21,13 +22,15 @@ final class WebStoragePageFixture: NSObject, WKScriptMessageHandler {
         web.loadHTMLString("""
         <html><head><title>\(title)</title></head><body>Storage fixture
         <script>window.addEventListener('load', () => {
-          window.webkit.messageHandlers.\(handler).postMessage('\(probe.token)');
+          window.webkit.messageHandlers.\(handler).postMessage({ token: '\(probe.token)', title: document.title });
         }, { once: true });</script></body></html>
         """, baseURL: origin)
         guard await XCTWaiter.fulfillment(of: [probe.ready], timeout: 5) == .completed else {
             throw Failure.documentNotReady
         }
-        XCTAssertEqual(web.title, title)
+        // The title KVO update can arrive after the script message. Verify
+        // the document that emitted readiness, not that delayed native copy.
+        XCTAssertEqual(probe.documentTitle, title)
     }
 
     static func evaluate(in web: WKWebView, script: String, arguments: [String: Any] = [:]) async throws -> Any? {
@@ -48,7 +51,8 @@ final class WebStoragePageFixture: NSObject, WKScriptMessageHandler {
         guard !received, message.frameInfo.isMainFrame,
               message.frameInfo.securityOrigin.protocol == origin.scheme,
               message.frameInfo.securityOrigin.host == origin.host,
-              message.body as? String == token else { return }
+              let payload = message.body as? [String: String], payload["token"] == token else { return }
+        documentTitle = payload["title"]
         received = true
         ready.fulfill()
     }

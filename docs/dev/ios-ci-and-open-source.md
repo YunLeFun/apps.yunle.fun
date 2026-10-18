@@ -46,7 +46,7 @@ GitHub 明确说明，私有转公开会使代码和 Actions 历史 / 日志可�
 2. 使用已提交的 Xcode 工程与 `Package.resolved`，只解析锁定的 SwiftDraw 版本并核对锁文件不变。
 3. 新建独立 iPhone 18 Pro / iOS 27 模拟器，用 `simctl bootstatus -b` 等待启动迁移结束，再串行运行日常 `YunleFun` Scheme 的单元、集成和访客 UI 测试；每项测试有执行时限。
 4. 模拟器 ad-hoc 签名保留 Keychain 测试能力，随后只编译 Release 模拟器产物；不安装正式 Bundle ID，不归档上传。
-5. 失败时保留日志 / xcresult 三天，完成后删除本次新建模拟器。只授予 `contents: read`，checkout 不保留凭据；两个 Action 固定官方仓库的完整提交 SHA。
+5. 有结果包时，无论成功或失败都导出摘要、测试明细和来源 / 文件摘要回执，保留七天；失败时另外保留完整日志 / xcresult 三天。完成后删除本次新建模拟器。只授予 `contents: read`，checkout 不保留凭据；两个 Action 固定官方仓库的完整提交 SHA。
 
 线上账号联调、真实扣费、Sandbox、签名、TestFlight 与商店提交不包含在日常工作流。整个 job 不注入仓库 secret，使用普通 `pull_request` 事件；公开后外部贡献也不应取得生产或签名凭据。自托管 runner 的信任边界需单独设计，不能直接让外部 PR 在日常开发 Mac 上执行。[工作流安全说明](https://docs.github.com/en/actions/reference/security/secure-use)。
 
@@ -413,3 +413,17 @@ Release 模拟器编译、隔离模拟器清理和七项常规检查全部成功
 来源 `8bb346b73423dd2d54b5f66b753c8b726dc7d64d` 的 [Native CI 39097051280](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39097051280) 首轮自然成功，实际合并 checkout 为 `eb47356f7d724a622873d132b98d805f1dd2564b`。原始日志 **462 个唯一开始与 462 条完整终态**逐项一致，套件总数为 **452 单元 / 集成 + 10 UI，462 / 0 / 0**。Release、隔离模拟器清理和七项常规检查成功，可选作者 Benchmark 跳过，job 1230 秒。成功运行没有上传故障 xcresult，数量依据原始 ZIP 日志，保存为 `native-ci-8bb346b-*`。
 
 此轮首次包含 iOS 17+ 持久分仓与新增的归属 / 移除预检回归；尚不包含后续恢复入口与独立进程 live 夹具。普通字号手机号方法 31.018 秒、随后同步设置 22.793 秒通过。没有提高预算、删除断言或人工重跑；历史身份清理、WebKit 和 AX / 退出延迟的间歇根因仍未关闭。
+
+## 083a841 完整 CI · 2026-10-18 {#ci-083a841}
+
+来源 `083a841317be34bcd1fcdfaa502bcdfd8be4eea3` 的 [Native CI 39098612979](https://github.com/YunLeFun/apps.yunle.fun/actions/runs/39098612979) 首轮自然成功，实际合并 checkout 为 `0e76bed360226b645dbfb1ce7a8eb064888f76b7`。套件汇总为 **458 单元 / 集成 + 10 UI，共 468 通过 / 0 失败 / 0 跳过**。Release、隔离模拟器清理与七项常规检查成功，可选作者 Benchmark 跳过，job 1194 秒。
+
+原日志各有 467 条完整开始和完整终态；一个二维码解码方法的通过终态、一个仓库来源边界方法的开始记录分别被系统日志插入拆开。保留原始 ZIP 和相邻原行，仅对这两个明确片段重建记录后，468 个唯一开始与 468 个唯一通过终态逐项一致，且与套件总数相符。它们不是额外执行或重跑；没有修改原日志，也没有把原始完整行数写成 468。证据为 `native-ci-083a841-*`，本次成功运行尚未上传 xcresult。
+
+此轮包含恢复入口与新增回归，不包含随后新增的真实账号恢复 live 夹具。普通字号手机号方法 33.840 秒、随后同步设置 29.695 秒通过。历史身份清理、WebKit、AX / 退出延迟故障继续保留，不根据这次绿色结果关闭根因。
+
+### 后续结构化报告
+
+工作流新增 `xcresulttool get test-results summary` 与 `tests` 导出；有结果包就生成 JSON，并保存 PR 来源、实际 checkout、run / attempt 以及两份文件的 SHA-256。成功和失败均上传该报告，完整故障附件继续沿用原策略。没有生成结果包时不伪造测试数量，保留构建日志。
+
+actionlint 通过；从实际工作流提取相同脚本，分别对本轮候选通过结果 **2 / 0 / 0**、真实恢复首轮失败结果 **0 / 1 / 0** 及缺少结果包三种情况执行，退出状态、计数、输出标记与文件摘要均符合预期。原始失败结果未改动。证据保存在 `structured-test-report-validation-083a841/`；GitHub 上传步骤仍须由新来源 CI 验证。测试预算、断言、失败附件和清理条件未调整。

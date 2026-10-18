@@ -57,7 +57,9 @@ final class SupportViewTests: XCTestCase {
     func testLargestTextHelpCanScrollToNativeFeedbackEntry() async throws {
         let fixture = try await SupportViewFixture(screen: .help, size: .accessibility5)
         defer { fixture.close() }
-        let text = try await fixture.readScreen(named: "support-help-largest-feedback-entry", containing: "反馈与建议", scrollToFind: true, test: self)
+        // This entry is near the list's end. Materialize the bottom before OCR
+        // so unrelated FAQ rows cannot exhaust the unchanged scan deadline.
+        let text = try await fixture.readScreen(named: "support-help-largest-feedback-entry", containing: "反馈与建议", scrollToFind: true, fromBottom: true, test: self)
         XCTAssertTrue(text.contains("反馈与建议"), "Native scrolling must reveal the feedback destination at the requested text size")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
     }

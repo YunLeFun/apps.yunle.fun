@@ -2,14 +2,14 @@
 
 > 2026-10-18 · **P1 代码已实现，尚未部署，也未真机验收**。首个接入方为 Life（云生，`life-ios`）。同日修订：按业界 App-to-App 做法，把授权入口改为 `www.yunle.fun` 上由云乐坊 App 认领的同一个 HTTPS 地址，并补充拉起云乐坊 App 时的体验设计。
 
-### 实现状态（2026-10-18）
+## 实现状态（2026-10-18）
 
-| 仓库                        | 改动                                                                                                                                                                                         | 自动验证                                       |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 云乐坊 iOS（本仓库）        | `applinks:www.yunle.fun`；`CrossAppAuthorization.swift`（入口解析、回跳编码、`CrossAppAuthorizationPage`、协调器）；`NativeAuthorizationBroker` 增加 `isBusy` 与 `requireConsent`，与网页运行时共用同一个 broker | `CrossAppAuthorizationTests` 等 22 项单测通过  |
-| `www.yunle.fun`             | AASA 只认领 `/auth/app`；`/auth/app` 页面（原生允许名单校验后复用 `sso.vue`）；与 `/auth/sso` 相同的响应头                                                                                   | 13 项单测通过                                  |
-| `@yunlefun/sso`（`ylf`）    | `SsoFailureReason` 增加 `account_selection_required`；共享契约 fixture `packages/sso/test/fixtures/cross-app-redirect.json`                                                                   | 46 项单测通过，需发布新版本                    |
-| Life                        | `applinks:life.yunle.fun`（回调 AASA 只匹配 `/auth/callback#ylf_sso=*`）；事务持久化到 Keychain；等待界面；`account_selection_required` 自动转网页授权                                       | 账号包 20 项、App 测试通过                     |
+| 仓库                     | 改动                                                                                                                                                                                                             | 自动验证                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 云乐坊 iOS（本仓库）     | `applinks:www.yunle.fun`；`CrossAppAuthorization.swift`（入口解析、回跳编码、`CrossAppAuthorizationPage`、协调器）；`NativeAuthorizationBroker` 增加 `isBusy` 与 `requireConsent`，与网页运行时共用同一个 broker | `CrossAppAuthorizationTests` 等 22 项单测通过 |
+| `www.yunle.fun`          | AASA 只认领 `/auth/app`；`/auth/app` 页面（原生允许名单校验后复用 `sso.vue`）；与 `/auth/sso` 相同的响应头                                                                                                       | 13 项单测通过                                 |
+| `@yunlefun/sso`（`ylf`） | `SsoFailureReason` 增加 `account_selection_required`；共享契约 fixture `packages/sso/test/fixtures/cross-app-redirect.json`                                                                                      | 46 项单测通过，需发布新版本                   |
+| Life                     | `applinks:life.yunle.fun`（回调 AASA 只匹配 `/auth/callback#ylf_sso=*`）；事务持久化到 Keychain；等待界面；`account_selection_required` 自动转网页授权                                                           | 账号包 20 项、App 测试通过                    |
 
 与本文的几处差异：
 

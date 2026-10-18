@@ -8,6 +8,8 @@
 
 尚未取得余额和权益时明确显示未获取；服务失败不会变成零余额或未开通。已有内存快照可保留并显示获取时间与更新错误。流水核对服务端 userId、金额范围、记录 ID 和分页进度，账号切换与 A → B → A 会立即隐藏旧数据。
 
+首次进入钱包时，历史订单核对也计入余额和流水的加载状态，避免实际读取前短暂显示“暂无流水”。核对失败后仍读取当前余额与流水，并保留核对错误提示；换号立即隔离旧操作的加载状态与结果。
+
 访客通过原生“登录并继续”进入账号流程，取消返回原页面。登录与旧购买确认由页面容器呈现，避免在 List 的 Section 上附加弹层导致点击后没有弹出。旧购买确认与操作均绑定账号身份代次，换号后失效。
 
 ## 账户与商品契约
@@ -112,10 +114,24 @@ M3 与整个迁移 Goal 保持未完成，没有上传 TestFlight 或提审。
 
 12 条新增结算边界测试在旧实现上失败，修复后通过；完整支付目录 **21 文件 / 312 通过 / 0 失败 / 0 跳过**。其中 7 条入口测试覆盖实际 `iap-order` / `appstore-notify` 路由，但 Apple 服务与数据库为本地替身；正式发放、恢复去重及退款仍通过。库同步和定向 lint 通过，原始失败及修复证据保存为 `iap-environment-*`。
 
-此保护尚未部署，也没有实现独立 Sandbox 权益服务或 App Review 测试购买流程。不能用它代替真实 Sandbox 发放、退款与跨设备恢复验收；完整 G5 和 G1–G6 目标继续保持未完成。
+该次提交只提供正式权益保护；后续独立 Sandbox 候选见下节。候选尚未部署，不能代替真实 Sandbox 发放、退款、App Review 测试购买或跨设备恢复验收；完整 G5 和 G1–G6 目标继续保持未完成。
 
 后续只读盘点中，CloudBase 连接器当前账号 / 区域视图仅返回现有上海正式环境，尚未确认独立 Sandbox 权益环境；这不代表已盘点所有区域或其他账号。App Store Connect 商品、Sandbox Apple Account 与开发签名仍需实际确认。Apple 将[本地 Xcode 测试和 Sandbox](https://developer.apple.com/documentation/storekit/testing-at-all-stages-of-development-with-xcode-and-the-sandbox)明确区分：前者交易由 Xcode 签名，不能替代 App Store 签名交易和服务端联调。本次仅列环境，没有创建资源、部署或尝试购买；记录为 `sandbox-readiness-b61908b.json`。
 
 ## 余额减少动态效果 · 2026-10-18
 
 已修复余额数字变化忽略系统“减少动态效果”的问题：开启后直接更新，普通模式保留数字过渡。实际 `WalletCoinBalance` 样例取样中，旧实现开启时仍有 30 个中间帧，修复后为 0；普通模式保留 31 个中间帧，最终两种模式 **2 / 0 / 0**，真实系统开关恢复。完整方法、原始失败和证据边界见[余额渲染验证](./ios-accessibility-audits.md#wallet-numeric-reduced-motion)。这项视觉夹具没有读取或修改真实余额。
+
+## 同环境 Sandbox 钱包候选 · 2026-10-18
+
+按后续要求复用既有 CloudBase 环境，测试账本使用固定 `ios_sandbox_` 集合，不再要求另外建立环境。支付与退款入口位于 www 候选，账户读取入口位于 API 候选，三个独立函数为 `iap-order-sandbox`、`appstore-notify-sandbox`、`account-api-sandbox`。它们尚未部署；不能把下面的本地验证视为在线可用。
+
+Debug 构建在启动时显式传入 `--iap-sandbox` 才选择测试钱包；Release 和 Benchmark 忽略该参数。配置在进程内固定，钱包存储和购买协调器共用同一服务实例。余额、会员、流水使用 `account-api-sandbox`，购买校验、就绪检查和恢复使用 `iap-order-sandbox`。客户端不传 UID、集合或环境覆盖参数，所有测试响应必须带 `ledgerEnvironment: "Sandbox"`，缺失、错误或服务不可用时直接失败，没有正式端点回退。
+
+测试钱包不调用正式 `wxpay-order/reconcileOrders`；Sandbox 仅有 IAP，未完成交易及恢复仍由 StoreKit 路径重新验单。购买归属 Keychain 使用独立 `.iap-sandbox-owners` 服务，正式 `.iap-owners` 保持兼容，防止两种环境相同交易 ID 混淆归属。钱包和会员页显示“内购测试钱包”。这只隔离内购钱包，其他应用功能仍使用真实账号服务，不能当作整个 App 的测试环境。
+
+账户读取服务只开放余额/会员快照和流水分页，通过真实账号封禁/注销状态后读取独立测试账本；不会复制完整账户 action 或开放扣币、兑换、管理员入口。后端测试 UID 白名单、Apple 验签环境及账号标记均由服务端决定。离线包不含密钥、不会调用部署工具。
+
+本地账户回归 **580 项通过**；支付回归 **371 项通过**。原生实际 `WalletService` 和模型、现有 HTTP 测试及新增路由用例抽取至 macOS 测试宿主，Debug / Release 各 **11 项通过**，覆盖测试路由、禁止正式对账、标记校验、失败不回退、默认正式模式和独立归属存储。仅账号类型为最小测试声明；这些结果证明 HTTP 路由及编译分支，不证明 iOS 页面、Keychain 实跑或真实 Apple/CloudBase 服务。Swift 语法检查通过；并行任务占用模拟器期间没有启动本任务的 iOS 构建或测试。
+
+后续仍需在自有模拟器完成完整 iOS 构建与测试标识检查，确认云端集合、索引、权限、函数配置及实际事务，并取得独立的真实 Apple Sandbox 交易证据。仅模拟器约束下继续本地 StoreKit 验证，不将它计作真实 Sandbox 购买。

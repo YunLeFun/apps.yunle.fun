@@ -8,6 +8,7 @@ struct WalletView: View {
     @State private var legacyConfirmation: LegacyPurchaseConfirmation?
     var body: some View {
         List {
+            WalletSandboxSection()
             if accounts.user == nil { WalletLoginSection(showLogin: $showLogin) }
             else {
                 WalletBalanceSection()
@@ -64,6 +65,7 @@ struct MembershipView: View {
     @State private var legacyConfirmation: LegacyPurchaseConfirmation?
     var body: some View {
         List {
+            WalletSandboxSection()
             if accounts.user == nil { WalletLoginSection(showLogin: $showLogin) }
             else {
                 Section("会员状态") {
@@ -97,6 +99,20 @@ struct MembershipView: View {
         .task(id: accounts.identityGeneration) {
             guard accounts.user != nil else { return }
             await wallet.refreshAccount(); await purchases.loadProducts(); await purchases.processUnfinished()
+        }
+    }
+}
+
+private struct WalletSandboxSection: View {
+    @EnvironmentObject private var wallet: WalletStore
+    var body: some View {
+        if wallet.isSandbox {
+            Section {
+                Label("内购测试钱包", systemImage: "testtube.2")
+                    .font(.headline).accessibilityIdentifier("wallet.sandbox")
+                Text("测试余额和会员仅用于内购验证。其他功能仍使用正式账号服务。")
+                    .font(.subheadline).foregroundStyle(.secondary)
+            }
         }
     }
 }

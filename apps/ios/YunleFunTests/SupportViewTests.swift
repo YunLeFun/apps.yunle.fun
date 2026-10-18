@@ -15,7 +15,7 @@ final class SupportViewTests: XCTestCase {
         XCTAssertTrue(fixture.logs.entries.isEmpty)
         XCTAssertNotNil(fixture.logs.storageError)
         let corrupt = try Data(contentsOf: fixture.logFile)
-        let screen = try await fixture.readScreen(named: "support-corrupt-log-clear", containing: "清除本地日志", scrollToFind: true, fromBottom: true, test: self)
+        let screen = try await fixture.readScreen(named: "support-corrupt-log-clear", containing: "清除本地日志", scrollToFind: true, startAt: .logs, test: self)
         XCTAssertTrue(screen.contains("清除本地日志"))
         XCTAssertEqual(try Data(contentsOf: fixture.logFile), corrupt, "Rendering the recovery action must not delete the preserved file")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
@@ -28,7 +28,7 @@ final class SupportViewTests: XCTestCase {
         XCTAssertEqual(fixture.logs.entries.count, 1)
         let original = fixture.logs.entries
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
-        let screen = try await fixture.readScreen(named: "support-signed-in-preview-entry", containing: "预览并上传日志", scrollToFind: true, fromBottom: true, test: self)
+        let screen = try await fixture.readScreen(named: "support-signed-in-preview-entry", containing: "预览并上传日志", scrollToFind: true, startAt: .bottom, test: self)
         XCTAssertTrue(screen.contains("预览并上传日志"))
         XCTAssertFalse(fixture.hasPresentedSheet, "Rendering FeedbackView must not automatically open consent or a contact composer")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty, "Rendering the upload entry must not submit logs")
@@ -47,7 +47,7 @@ final class SupportViewTests: XCTestCase {
         // OCR so scanning unrelated contact rows cannot consume its deadline.
         let expected = "支持编号暂时无法读取"
         let text = try await fixture.readScreen(named: "support-corrupt-receipt-read-failure",
-            containing: expected, scrollToFind: true, fromBottom: true, test: self)
+            containing: expected, scrollToFind: true, startAt: .bottom, test: self)
         XCTAssertTrue(text.contains(expected), "A missing usable receipt must not hide its disk-read failure")
         XCTAssertEqual(try Data(contentsOf: file), corrupt, "Displaying a receipt error must retain the damaged evidence")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
@@ -59,7 +59,7 @@ final class SupportViewTests: XCTestCase {
         defer { fixture.close() }
         // This entry is near the list's end. Materialize the bottom before OCR
         // so unrelated FAQ rows cannot exhaust the unchanged scan deadline.
-        let text = try await fixture.readScreen(named: "support-help-largest-feedback-entry", containing: "反馈与建议", scrollToFind: true, fromBottom: true, test: self)
+        let text = try await fixture.readScreen(named: "support-help-largest-feedback-entry", containing: "反馈与建议", scrollToFind: true, startAt: .bottom, test: self)
         XCTAssertTrue(text.contains("反馈与建议"), "Native scrolling must reveal the feedback destination at the requested text size")
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
     }
@@ -69,7 +69,7 @@ final class SupportViewTests: XCTestCase {
         defer { fixture.close() }
         let contact = try await fixture.readScreen(named: "support-feedback-largest-copy", containing: "复制反馈内容", scrollToFind: true, test: self)
         XCTAssertTrue(contact.contains("复制反馈内容"), "Mail-independent feedback must remain visible at the largest text size")
-        let empty = try await fixture.readScreen(named: "support-feedback-largest-empty-logs", containing: "所选时间内没有本地日志", scrollToFind: true, fromBottom: true, test: self)
+        let empty = try await fixture.readScreen(named: "support-feedback-largest-empty-logs", containing: "所选时间内没有本地日志", scrollToFind: true, startAt: .logs, test: self)
         XCTAssertTrue(empty.contains("所选时间内没有本地日志"))
         XCTAssertTrue(fixture.uploadHTTP.requests.isEmpty)
     }
@@ -78,6 +78,7 @@ final class SupportViewTests: XCTestCase {
 @MainActor
 private final class SupportViewFixture {
     enum Screen { case feedback, help }
+    enum ScanStart { case top, bottom, logs }
     let directory: URL
     let receiptDirectory: URL
     let receiptFile: URL?
@@ -155,12 +156,31 @@ private final class SupportViewFixture {
 
     var hasPresentedSheet: Bool { controller.presentedViewController != nil }
 
-    func readScreen(named name: String, containing expected: String, scrollToFind: Bool, fromBottom: Bool = false,
+    func readScreen(named name: String, containing expected: String, scrollToFind: Bool, startAt: ScanStart = .top,
                     test: XCTestCase) async throws -> String {
         let deadline = Date().addingTimeInterval(10)
+        let fromBottom = startAt == .bottom
         var image: UIImage?, lines: [String] = []
         var scan: [String] = []
         var sample = 0, candidateScreenshots = 0
+        if scrollToFind, startAt == .logs {
+            // These guest fixtures have no receipt: their final two native
+            // sections are logs and upload. Start at the first log row so OCR
+            // does not spend its deadline on unrelated contact rows or on the
+            // tall upload explanation at accessibility5. The unchanged text
+            // assertion still requires the complete target in a visible frame.
+            XCTAssertNil(receiptFile)
+            XCTAssertNil(accounts.user)
+            let collection = try XCTUnwrap(scrollView(in: controller.view) as? UICollectionView)
+            controller.view.layoutIfNeeded()
+            let sections = (0..<collection.numberOfSections).filter {
+                collection.numberOfItems(inSection: $0) > 0
+            }
+            let section = try XCTUnwrap(sections.dropLast().last)
+            scan.append("Materialize first log item: section=\(section) item=0")
+            collection.scrollToItem(at: IndexPath(item: 0, section: section), at: .top, animated: false)
+            try await settle()
+        }
         if scrollToFind, fromBottom, let scroll = scrollView(in: controller.view) {
             // List estimates unloaded row heights. Materialize its final item
             // before using contentSize to start the upward scan.

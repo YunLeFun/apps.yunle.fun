@@ -14,7 +14,7 @@ final class WalletStore: ObservableObject {
     @Published private var ledgerLoading = false
     @Published private var fetchedAt: Date?
     @Published private var storedReconciliationError: String?
-    private var reconciliation: UUID?
+    @Published private var reconciliation: UUID?
     private var accountRequest = UUID(), ledgerRequest = UUID()
     init(accounts: IdentityScopedAccountAuthorizing, service: WalletServing = WalletService()) {
         access = AccountRequestAccess(accounts: accounts); self.service = service
@@ -25,10 +25,11 @@ final class WalletStore: ObservableObject {
     var nextSkip: Int? { isCurrent ? storedNextSkip : 0 }
     var snapshotError: String? { isCurrent ? accountError : nil }
     var transactionsError: String? { isCurrent ? ledgerError : nil }
-    var isLoading: Bool { isCurrent && accountLoading }
-    var isLoadingTransactions: Bool { isCurrent && ledgerLoading }
+    var isLoading: Bool { isCurrent && (accountLoading || reconciliation != nil) }
+    var isLoadingTransactions: Bool { isCurrent && (ledgerLoading || reconciliation != nil) }
     var checkedAt: Date? { isCurrent ? fetchedAt : nil }
     var reconciliationError: String? { isCurrent ? storedReconciliationError : nil }
+    var isSandbox: Bool { service.environment == .sandbox }
 
     func identityChanged() {
         projection = access.boundary; storedSnapshot = nil; storedEntries = []; storedNextSkip = 0

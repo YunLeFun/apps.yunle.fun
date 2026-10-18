@@ -284,6 +284,93 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertNil(store.user)
     }
 
+    @MainActor
+    func testFailedVaultRemovalPreservesAccountAndOwnerOnlyProfileRecovery() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let file = directory.appendingPathComponent("profiles.json")
+        let profiles = WebProfileRepository(fileURL: file, namespace: "removal-fixture")
+        let app = CloudApplication(id: "removal-fixture", name: "Removal fixture",
+                                   websiteUrl: "https://profiles.invalid/removal")
+        let original = try profiles.select(.account("a"), application: app)
+        let other = try profiles.select(.account("b"), application: app)
+        let guest = try profiles.select(.guest, application: app)
+        let vault = try vaultWithAccounts(["a", "b"])
+        let api = AccountTestAPI()
+        let store = AccountStore(session: AccountSession(api: api, vault: vault, now: { self.fixedNow }),
+                                 accountWillRemove: { try profiles.retire($0) })
+        await store.restore()
+        let saved = try vault.read(), generation = store.identityGeneration
+        vault.failNextWrite()
+        do { try await store.remove("a"); XCTFail("The failed vault write must be reported") }
+        catch { XCTAssertEqual(error as? AccountError, .storage) }
+
+        XCTAssertEqual(try vault.read(), saved)
+        XCTAssertEqual(store.user?.id, "a")
+        XCTAssertEqual(store.identityGeneration, generation)
+        let failedSignOuts = await api.signOutCount
+        XCTAssertEqual(failedSignOuts, 0, "A failed local removal must not revoke the saved session")
+
+        // Reconstruct both stores from their durable state. Detachment already
+        // committed, so this failure preserves recovery rather than rolling it back.
+        let reloaded = WebProfileRepository(fileURL: file, namespace: "removal-fixture")
+        let restored = AccountStore(session: AccountSession(api: api, vault: vault, now: { self.fixedNow }),
+                                    accountWillRemove: { try reloaded.retire($0) })
+        await restored.restore()
+        XCTAssertEqual(restored.user?.id, "a")
+        XCTAssertEqual(restored.overview.users.map(\.id), ["a", "b"])
+        let detached = try reloaded.snapshot(for: .account("a"), application: app)
+        XCTAssertNil(detached.active)
+        XCTAssertEqual(detached.retained, [original])
+        XCTAssertEqual(try reloaded.select(.account("b"), application: app), other)
+        XCTAssertEqual(try reloaded.select(.guest, application: app), guest)
+        XCTAssertThrowsError(try reloaded.activateRetained(original, accountID: "b", application: app,
+                                                          replacing: other))
+
+        let fresh = try reloaded.select(.account("a"), application: app)
+        XCTAssertNotEqual(fresh.identifier, original.identifier)
+        try reloaded.activateRetained(original, accountID: "a", application: app, replacing: fresh)
+        XCTAssertEqual(try reloaded.select(.account("a"), application: app), original)
+        XCTAssertEqual(try reloaded.retained(for: .account("a"), application: app), [fresh])
+
+        try await restored.remove("a")
+        XCTAssertNil(restored.user)
+        let state = try JSONDecoder().decode(AccountVaultState.self, from: XCTUnwrap(vault.read()))
+        XCTAssertEqual(state.accounts.map { $0.user.id }, ["b"])
+        let retried = try reloaded.snapshot(for: .account("a"), application: app)
+        XCTAssertNil(retried.active)
+        XCTAssertEqual(retried.retained, [fresh, original], "Retry must preserve both stores exactly once")
+        let completedSignOuts = await api.signOutCount
+        XCTAssertEqual(completedSignOuts, 1)
+        XCTAssertEqual(try reloaded.select(.account("b"), application: app), other)
+        XCTAssertEqual(try reloaded.select(.guest, application: app), guest)
+    }
+
+    @MainActor
+    func testFailedInactiveAccountRemovalDoesNotChangeTheSelectedAccount() async throws {
+        let vault = try vaultWithAccounts(["a", "b"])
+        let api = AccountTestAPI()
+        let store = AccountStore(session: AccountSession(api: api, vault: vault, now: { self.fixedNow }))
+        await store.restore()
+        let saved = try vault.read(), generation = store.identityGeneration
+        vault.failNextWrite()
+        do { try await store.remove("b"); XCTFail("The failed vault write must be reported") }
+        catch { XCTAssertEqual(error as? AccountError, .storage) }
+        XCTAssertEqual(try vault.read(), saved)
+        XCTAssertEqual(store.user?.id, "a")
+        XCTAssertEqual(store.overview.users.map(\.id), ["a", "b"])
+        XCTAssertEqual(store.identityGeneration, generation)
+        let failedSignOuts = await api.signOutCount
+        XCTAssertEqual(failedSignOuts, 0)
+
+        try await store.remove("b")
+        XCTAssertEqual(store.user?.id, "a")
+        XCTAssertEqual(store.overview.users.map(\.id), ["a"])
+        XCTAssertEqual(store.identityGeneration, generation)
+        let completedSignOuts = await api.signOutCount
+        XCTAssertEqual(completedSignOuts, 1)
+    }
+
     private func vaultWithAccounts(_ ids: [String], expired: Bool = false) throws -> MemoryAccountVault {
         var state = AccountVaultState()
         state.activeID = ids.first
@@ -330,6 +417,7 @@ private actor AccountTestAPI: AccountAuthenticating {
     enum RefreshFailure { case network, revoked }
     private(set) var refreshCount = 0
     private(set) var userCount = 0
+    private(set) var signOutCount = 0
     private let refreshGate: AccountTestGate?
     private var userGate: AccountTestGate?
     private let signOutGate: AccountTestGate?
@@ -365,7 +453,10 @@ private actor AccountTestAPI: AccountAuthenticating {
         let id = String(accessToken.split(separator: "-").last!)
         return AccountUser(id: id, name: profiles[id]?.name, description: profiles[id]?.description)
     }
-    func signOut(accessToken: String, deviceID: String) async throws { await signOutGate?.wait() }
+    func signOut(accessToken: String, deviceID: String) async throws {
+        signOutCount += 1
+        await signOutGate?.wait()
+    }
     func sendVerification(address: VerificationAddress, deviceID: String, captcha: String?) async throws -> VerificationChallenge { throw AccountError.unavailable }
     func verify(_ challenge: VerificationChallenge, code: String, deviceID: String, captcha: String?) async throws -> AuthTokenResponse { throw AccountError.unavailable }
     func updateProfile(userID: String, name: String, description: String, accessToken: String, deviceID: String) async throws {

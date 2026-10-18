@@ -85,6 +85,53 @@ jobs:
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
             2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
 
+      - name: Export structured test results
+        if: always() && steps.simulator.outputs.id != ''
+        id: test-report
+        env:
+          YLF_CI_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ ! -d "$YLF_CI_OUTPUT/native-tests.xcresult" ]]; then
+            echo "No result bundle was produced; build logs remain in failure diagnostics."
+            exit 0
+          fi
+          mkdir -p "$YLF_CI_OUTPUT/test-report"
+          xcrun xcresulttool get test-results summary --path "$YLF_CI_OUTPUT/native-tests.xcresult" \
+            > "$YLF_CI_OUTPUT/test-report/summary.json"
+          xcrun xcresulttool get test-results tests --path "$YLF_CI_OUTPUT/native-tests.xcresult" \
+            > "$YLF_CI_OUTPUT/test-report/tests.json"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          directory = Path(os.environ["YLF_CI_OUTPUT"]) / "test-report"
+          files = [directory / name for name in ["summary.json", "tests.json"]]
+          for file in files:
+              json.loads(file.read_text())
+          receipt = {
+              "sourceHead": os.environ["YLF_CI_SOURCE_HEAD"],
+              "checkout": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "runID": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "sha256": {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in files},
+          }
+          (directory / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          PY
+          echo "available=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload structured test results
+        if: always() && steps.test-report.outputs.available == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: native-ios-test-report-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/yunlefun-ios-ci/test-report/*.json
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Compile native Release for simulator
         run: |
           set -o pipefail

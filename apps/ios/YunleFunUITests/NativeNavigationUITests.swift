@@ -78,12 +78,30 @@ final class NativeNavigationUITests: XCTestCase {
             XCTFail("A visible software key and the focused field value must be available")
             return
         }
+        let fieldType = field.elementType
         typingKey.tap()
         let entered = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             guard let value = field.value as? String else { return false }
+            // Secure fields expose an accessibility value, not the password.
+            // A localized character-count description can change while its
+            // string length stays constant. The selected software key above
+            // is an insertion key, so require an observable value change.
+            if fieldType == .secureTextField { return value != before }
             return value.utf16.count > before.utf16.count
         }, object: field)
-        XCTAssertEqual(XCTWaiter.wait(for: [entered], timeout: 5), .completed,
+        let entry = XCTWaiter.wait(for: [entered], timeout: 5)
+        if entry != .completed {
+            let value = field.value as? String
+            let detail = XCTAttachment(string: """
+                elementType=\(fieldType.rawValue)
+                beforeUTF16Count=\(before.utf16.count)
+                afterUTF16Count=\(value?.utf16.count.description ?? "unavailable")
+                valueChanged=\(value.map { String($0 != before) } ?? "unavailable")
+                beforeMatchesPlaceholder=\(field.placeholderValue == before)
+                """)
+            detail.name = "native-login-key-entry-\(name)"; detail.lifetime = .keepAlways; add(detail)
+        }
+        XCTAssertEqual(entry, .completed,
                        "Tapping the software keyboard must actually enter a character")
         XCTAssertTrue(dismiss.waitForExistence(timeout: 5))
         XCTAssertTrue(dismiss.isHittable)

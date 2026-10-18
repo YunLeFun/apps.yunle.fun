@@ -1,3 +1,4 @@
+import UIKit
 import WebKit
 import XCTest
 @testable import YunleFun
@@ -13,6 +14,26 @@ final class HostIdentitySessionsTests: XCTestCase {
         configuration.websiteDataStore = dataStore
         let webView = WKWebView(frame: .zero, configuration: configuration)
         defer { withExtendedLifetime(webView) {} }
+        // Keep the isolated store backed by a ready, visible page throughout
+        // its cookie operations. An unloaded zero-size view can become inactive
+        // between callbacks even after the initial cookie-store round trip.
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        defer {
+            webView.stopLoading(); webView.removeFromSuperview()
+            window.isHidden = true; window.rootViewController = nil
+            previousWindow?.makeKey()
+        }
+        window.rootViewController = UIViewController()
+        window.makeKeyAndVisible()
+        let host = try XCTUnwrap(window.rootViewController?.view)
+        webView.frame = host.bounds
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        host.addSubview(webView)
+        try await WebStoragePageFixture.load(in: webView,
+                                             origin: URL(string: "https://identity-cookies.invalid/")!,
+                                             title: "identity-cookie-probe")
         let store = webView.configuration.websiteDataStore.httpCookieStore
         // Complete a round trip before the first write to the cold WebKit store.
         let initial = try await cookies(in: store)

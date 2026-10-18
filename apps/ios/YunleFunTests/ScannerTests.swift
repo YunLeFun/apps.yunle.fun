@@ -165,26 +165,34 @@ final class QRScannerModelTests: XCTestCase {
         model.continueScanning(); XCTAssertEqual(camera.starts.count, count + 1)
         await running(camera, model)
     }
-    func testPhotoFailureIsNotAResultAndCanBeRetriedWithoutCameraPermission() async {
-        let camera = ScannerCamera(), model = QRScannerModel(purpose: .general, permission: ScannerPermission(.denied), camera: camera,
+    func testPhotoFailureIsNotAResultAndCanBeRetriedWithoutCameraPermission() async throws {
+        let permission = ScannerPermission(.denied), camera = ScannerCamera()
+        let model = QRScannerModel(purpose: .general, permission: permission, camera: camera,
                                                            decoder: ScannerDecoder(error: .noCode))
         model.appear()
-        let failed = expectation(description: "image error")
-        let observer = model.$issue.compactMap { $0 }.sink { _ in failed.fulfill() }
-        model.readPhoto { Data([1]) }
-        await fulfillment(of: [failed], timeout: 3); withExtendedLifetime(observer) {}
-        XCTAssertEqual(model.issue, ScanImageError.noCode.message); XCTAssertTrue(model.candidates.isEmpty)
-        XCTAssertFalse(model.isReadingPhoto); XCTAssertTrue(camera.starts.isEmpty)
+        for _ in 0..<2 {
+            let read = try XCTUnwrap(model.readPhoto { Data([1]) })
+            XCTAssertNil(model.issue, "A retry must clear the previous error")
+            // Join the operation, including its deferred state cleanup, instead
+            // of racing its task scheduling against a publisher deadline.
+            await read.value
+            XCTAssertEqual(model.issue, ScanImageError.noCode.message); XCTAssertTrue(model.candidates.isEmpty)
+            XCTAssertFalse(model.isReadingPhoto); XCTAssertTrue(camera.starts.isEmpty)
+            XCTAssertEqual(permission.requests, 0)
+        }
     }
-    func testDismissedScannerDiscardsAnUncooperativeLatePhotoDecode() async {
+    func testDismissedScannerDiscardsAnUncooperativeLatePhotoDecode() async throws {
         let gate = ScannerGate(), camera = ScannerCamera(), model = QRScannerModel(purpose: .general, permission: ScannerPermission(.denied), camera: camera,
                                                                                  decoder: ScannerDecoder(gate: gate))
-        model.appear(); model.readPhoto { Data([1]) }
+        model.appear()
+        let read = try XCTUnwrap(model.readPhoto { Data([1]) })
         await fulfillment(of: [gate.entered], timeout: 3)
-        let leaked = expectation(description: "late image ignored"); leaked.isInverted = true
-        let observer = model.$candidates.filter { !$0.isEmpty }.sink { _ in leaked.fulfill() }
+        var publishedLateResult = false
+        let observer = model.$candidates.filter { !$0.isEmpty }.sink { _ in publishedLateResult = true }
         model.disappear(); await gate.open()
-        await fulfillment(of: [leaked], timeout: 0.1); withExtendedLifetime(observer) {}
+        await read.value
+        withExtendedLifetime(observer) {}
+        XCTAssertFalse(publishedLateResult)
         XCTAssertTrue(model.candidates.isEmpty); XCTAssertNil(model.issue); XCTAssertFalse(model.isReadingPhoto)
     }
     private func running(_ camera: ScannerCamera, _ model: QRScannerModel) async {

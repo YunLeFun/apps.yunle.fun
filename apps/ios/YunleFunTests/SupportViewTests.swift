@@ -236,8 +236,11 @@ private final class SupportViewFixture {
                 let top = -scroll.adjustedContentInset.top
                 let bottom = max(top,
                     scroll.contentSize.height - scroll.bounds.height + scroll.adjustedContentInset.bottom)
-                let divisor: CGFloat = fromBottom ? 4 : 2
-                let step = max(100, (scroll.bounds.height - scroll.adjustedContentInset.top - scroll.adjustedContentInset.bottom) / divisor)
+                // Keep half a viewport of overlap so the complete expected
+                // clause fits between samples, including at accessibility5.
+                // Quarter-page steps spend the scan deadline on the large
+                // upload footer before the preceding log text becomes visible.
+                let step = max(100, (scroll.bounds.height - scroll.adjustedContentInset.top - scroll.adjustedContentInset.bottom) / 2)
                 let next = fromBottom ? max(scroll.contentOffset.y - step, top) : min(scroll.contentOffset.y + step, bottom)
                 scan.append("Requested next offset.y=\(next)")
                 guard next != scroll.contentOffset.y else { break }

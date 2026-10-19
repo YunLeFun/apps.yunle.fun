@@ -130,7 +130,7 @@ struct HomeView: View {
                         if !library.snapshot.applications.isEmpty {
                             Button(action: enterEditing) { Label("编辑云居", systemImage: "square.and.pencil") }
                         }
-                        if accounts.user != nil {
+                        if accounts.user != nil || sync.supportsICloud {
                             NavigationLink { HomeSyncSettingsView() } label: {
                                 Label(sync.message, systemImage: "icloud")
                             }
@@ -211,7 +211,7 @@ struct HomeView: View {
     }
 
     @ViewBuilder private var syncStatus: some View {
-        if accounts.user != nil && library.snapshot.syncEnabled {
+        if sync.isActive {
             switch sync.phase {
             case .syncing:
                 ProgressView("正在同步云居")
@@ -455,7 +455,7 @@ private struct HomeOptionsView: View {
             if !library.snapshot.applications.isEmpty {
                 Button { editing = true; dismiss() } label: { Label("编辑云居", systemImage: "square.and.pencil") }
             }
-            if accounts.user != nil {
+            if accounts.user != nil || sync.supportsICloud {
                 NavigationLink { HomeSyncSettingsView() } label: { Label(sync.message, systemImage: "icloud") }
             }
             if !runtime.applications.isEmpty {

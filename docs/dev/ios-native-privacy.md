@@ -12,19 +12,19 @@ Apple 的[数据使用声明说明](https://developer.apple.com/documentation/bu
 
 下列“实现”指请求与存储路径已存在，不代表每条生产业务已联调成功。单元 / 模拟器通过也不能替代服务端留存与删除核对。
 
-| 类型                  | 客户端事实与目标                                                                                               | 主要源码                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Name                  | 昵称、用户名资料通过认证网关读取 / 修改；资料表单两次保存及恢复已真实验证                                      | `Account`、`CloudbaseAuthService`                           |
-| Email Address         | 用户主动输入邮箱，用于认证 / 验证码；账号资料包含邮箱                                                          | `VerificationAddress`、`CloudbaseAuthService`               |
-| Phone Number          | 用户主动输入手机号，用于认证 / 验证码；账号资料包含手机号                                                      | `VerificationAddress`、`CloudbaseAuthService`               |
-| User ID               | CloudBase UID 关联认证、业务请求、云居、内容与支持编号；不把显示昵称当成身份凭据                               | `AccountSession`、各业务 Service                            |
-| Device ID             | 认证状态创建随机 UUID 并保存在本机 Keychain，通过 `x-device-id` 发送到认证网关；不是 IDFA、IDFV 或 Aegis `aid` | `AccountVaultState`、`CloudbaseAuthService`                 |
-| Purchase History      | StoreKit 交易 ID 发送到 `iap-order`，读取云币流水与会员、恢复结果；未读取用户银行卡或支付方式                  | `NativeStoreKit`、`WalletService`                           |
-| Photos or Videos      | 工坊编辑器可从系统选图 / 文件入口取得图标，归一化 PNG 后上传到 `/api/apps/icon-assets`，与当前账号关联         | `ApplicationEditorModel`、`PublishingService`               |
-| Other User Content    | 应用资料、版本、评价、举报、资料简介；AI 提示词及会话内容发送到对应业务接口 / CloudBase AI Bot                 | `PublishingService`、`CommunityService`、`AssistantService` |
-| Customer Support      | 用户填写问题描述，预览后确认提交；系统邮件 / 分享另由用户完成发送                                              | `FeedbackView`、`DiagnosticService`、`SupportMailComposer`  |
-| Product Interaction   | 安装、常用、最近使用、文件夹与作者来源在本机保存，启用账号同步时发送 `/api/home-screen`                        | `HomeLibrary`、`HomeSyncService`                            |
-| Other Diagnostic Data | 有界宿主事件、所选时间范围、App / 系统版本；确认后发往 `/api/diagnostics/logs`，账号由鉴权关联                 | `DiagnosticLogStore`、`DiagnosticService`                   |
+| 类型                  | 客户端事实与目标                                                                                                                                | 主要源码                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Name                  | 昵称、用户名资料通过认证网关读取 / 修改；资料表单两次保存及恢复已真实验证                                                                       | `Account`、`CloudbaseAuthService`                           |
+| Email Address         | 用户主动输入邮箱，用于认证 / 验证码；账号资料包含邮箱                                                                                           | `VerificationAddress`、`CloudbaseAuthService`               |
+| Phone Number          | 用户主动输入手机号，用于认证 / 验证码；账号资料包含手机号                                                                                       | `VerificationAddress`、`CloudbaseAuthService`               |
+| User ID               | CloudBase UID 关联认证、业务请求、云居、内容与支持编号；不把显示昵称当成身份凭据                                                                | `AccountSession`、各业务 Service                            |
+| Device ID             | 认证状态创建随机 UUID 并保存在本机 Keychain，通过 `x-device-id` 发送到认证网关；不是 IDFA、IDFV 或 Aegis `aid`                                  | `AccountVaultState`、`CloudbaseAuthService`                 |
+| Purchase History      | StoreKit 交易 ID 发送到 `iap-order`，读取云币流水与会员、恢复结果；未读取用户银行卡或支付方式                                                   | `NativeStoreKit`、`WalletService`                           |
+| Photos or Videos      | 工坊编辑器可从系统选图 / 文件入口取得图标，归一化 PNG 后上传到 `/api/apps/icon-assets`，与当前账号关联                                          | `ApplicationEditorModel`、`PublishingService`               |
+| Other User Content    | 应用资料、版本、评价、举报、资料简介；AI 提示词及会话内容发送到对应业务接口 / CloudBase AI Bot                                                  | `PublishingService`、`CommunityService`、`AssistantService` |
+| Customer Support      | 用户填写问题描述，预览后确认提交；系统邮件 / 分享另由用户完成发送                                                                               | `FeedbackView`、`DiagnosticService`、`SupportMailComposer`  |
+| Product Interaction   | 安装、常用、最近使用、文件夹与作者来源在本机保存，启用账号同步时发送 `/api/home-screen`；访客开启 iCloud 同步时只写入用户自己的 iCloud 键值存储 | `HomeLibrary`、`HomeSyncService`                            |
+| Other Diagnostic Data | 有界宿主事件、所选时间范围、App / 系统版本；确认后发往 `/api/diagnostics/logs`，账号由鉴权关联                                                  | `DiagnosticLogStore`、`DiagnosticService`                   |
 
 认证服务为 `yunlefun-8g7ybcxc7345c490.api.tcloudbasegateway.com`，第一方业务默认域名为 `apps.yunle.fun`。本次没有重新验证所有线上路由；生产同步入口与其他业务缺口按各专项继续保留。
 

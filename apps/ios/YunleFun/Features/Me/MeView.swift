@@ -62,7 +62,7 @@ struct MeView: View {
                     HelpView(logs: diagnostics, accounts: accounts, navigateTab: navigateTab)
                 }
                 .accessibilityIdentifier("me.help")
-                navigationRow("反馈与建议", systemImage: "bubble.left.and.bubble.right.fill", color: .green, entry: .feedback) {
+                navigationRow("反馈与建议", systemImage: "bubble.left.and.bubble.right", color: .green, entry: .feedback) {
                     FeedbackView(logs: diagnostics, accounts: accounts)
                 }
                 .accessibilityIdentifier("me.feedback")

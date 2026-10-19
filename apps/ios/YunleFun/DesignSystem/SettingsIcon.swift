@@ -9,7 +9,7 @@ struct SettingsIcon: View {
 
     var body: some View {
         Image(systemName: systemImage)
-            .font(.system(size: size * 0.56, weight: .medium))
+            .font(.system(size: size * 0.5, weight: .medium))
             .foregroundStyle(.white)
             .frame(width: size, height: size)
             .background(color, in: RoundedRectangle(cornerRadius: size * 0.225, style: .continuous))

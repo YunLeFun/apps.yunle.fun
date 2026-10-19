@@ -1,3 +1,4 @@
+import OSLog
 import SwiftUI
 import UIKit
 import WebKit
@@ -47,6 +48,7 @@ final class NativeWebRuntime: ObservableObject {
     private var isClearingIdentity = false
     private let limit = WebViewSessionPolicy.automaticLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
     private let personalMarketService: DeveloperProfileServing
+    private let launchLogger = Logger(subsystem: "fun.yunle.apps", category: "cache-launch")
 
     init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), applicationCache: ApplicationCacheStore? = nil, webProfiles: WebProfileRepository? = nil) {
         self.applicationCache = applicationCache ?? ApplicationCacheStore()
@@ -291,18 +293,32 @@ final class NativeWebRuntime: ObservableObject {
                 Task { @MainActor [weak self, weak controller] in
                     defer { prepared() }
                     guard let self, let controller else { return }
-                    let snapshot = try? await self.applicationCache.repository.snapshot(for: app)
+                    let snapshot: (entry: ApplicationCacheEntry, archive: Data)?
+                    var unreadable: Error?
+                    do { snapshot = try await self.applicationCache.repository.snapshot(for: app) }
+                    catch { snapshot = nil; unreadable = error }
                     guard self.identityReset == identity, self.sessions[app.id]?.browser === controller else { return }
                     self.applicationCache.sessionStarted(app, revision: snapshot?.entry.downloadedAt)
                     if let snapshot {
                         controller.initialContentFailure = { [weak self, weak controller] web in
                             guard let self, let controller, self.identityReset == identity,
                                   self.sessions[app.id]?.browser === controller else { return }
+                            self.launchLogger.error("application=\(app.id, privacy: .public) source=network reason=archive-load-failed")
                             self.applicationCache.sessionStarted(app, revision: nil)
                             web.load(URLRequest(url: url))
                         }
+                        self.launchLogger.notice("application=\(app.id, privacy: .public) source=archive bytes=\(snapshot.entry.byteCount, privacy: .public) resources=\(snapshot.entry.resourceCount, privacy: .public) downloaded-at=\(snapshot.entry.downloadedAt.timeIntervalSince1970, privacy: .public)")
                         web.load(snapshot.archive, mimeType: "application/x-webarchive", characterEncodingName: "UTF-8", baseURL: url)
-                    } else { web.load(URLRequest(url: url)) }
+                    } else {
+                        if let unreadable {
+                            let failure = unreadable as NSError
+                            self.launchLogger.error("application=\(app.id, privacy: .public) source=network reason=cache-unreadable error-domain=\(failure.domain, privacy: .public) error-code=\(failure.code, privacy: .public)")
+                        } else {
+                            let reason = ApplicationCacheEntry.supports(app) ? "not-downloaded" : "unsupported"
+                            self.launchLogger.notice("application=\(app.id, privacy: .public) source=network reason=\(reason, privacy: .public)")
+                        }
+                        web.load(URLRequest(url: url))
+                    }
                 }
             }
             controller.displayMode = .titlebar

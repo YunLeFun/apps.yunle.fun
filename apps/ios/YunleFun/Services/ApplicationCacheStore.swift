@@ -7,6 +7,7 @@ final class ApplicationCacheStore: ObservableObject {
     private let logger = Logger(subsystem: "fun.yunle.apps", category: "cache-store")
     @Published private(set) var entries: [ApplicationCacheEntry] = []
     @Published private(set) var downloadingID: String?
+    @Published private(set) var downloadingName: String?
     @Published private(set) var progress: Double = 0
     @Published private(set) var isClearing = false
     @Published private(set) var isAutomaticDownload = false
@@ -49,7 +50,8 @@ final class ApplicationCacheStore: ObservableObject {
     private var network = ApplicationCacheNetwork()
     private var catalog: [CloudApplication] = []
     private var retries: [String: Retry]
-    private var runningRevisions: [String: Date] = [:]
+    /// Archive revision each running session loaded; `.distantPast` means it loaded online.
+    @Published private(set) var runningRevisions: [String: Date] = [:]
     var isBusy: Bool { downloadingID != nil || isClearing }
     var totalBytes: Int64 { entries.reduce(0) { $0 + Int64($1.byteCount) } }
 
@@ -107,12 +109,12 @@ final class ApplicationCacheStore: ObservableObject {
         scheduledCheck?.cancel()
         let operation = UUID(), id = ApplicationCacheEntry.key(for: application)
         operationID = operation
-        downloadingID = id; progress = 0; message = nil; isAutomaticDownload = automatic
+        downloadingID = id; downloadingName = application.name; progress = 0; message = nil; isAutomaticDownload = automatic
         let downloader = automatic ? makeAutomaticDownloader(wifiOnly) : makeDownloader()
         task = Task { [self] in
             defer {
                 if operationID == operation {
-                    downloadingID = nil; isAutomaticDownload = false; task = nil
+                    downloadingID = nil; downloadingName = nil; isAutomaticDownload = false; task = nil
                     scheduleAutomaticCheck()
                 }
             }

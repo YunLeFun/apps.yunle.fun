@@ -6,6 +6,7 @@ struct ApplicationCacheView: View {
     @State private var confirmClear = false
     private var entry: ApplicationCacheEntry? { store.entry(for: application) }
     private var isDownloading: Bool { store.downloadingID == ApplicationCacheEntry.key(for: application) }
+    private var runningRevision: Date? { store.runningRevisions[ApplicationCacheEntry.key(for: application)] }
 
     var body: some View {
         List {
@@ -16,6 +17,13 @@ struct ApplicationCacheView: View {
                     LabeledContent("更新时间") { Text(entry.downloadedAt, format: .dateTime.year().month().day().hour().minute()) }
                     LabeledContent("已保存资源", value: "\(entry.resourceCount) 项")
                 } else { Text("尚未下载缓存").foregroundStyle(.secondary) }
+                if let runningRevision {
+                    LabeledContent("本次打开") {
+                        if runningRevision == .distantPast { Text("在线加载") }
+                        else { Text("下载缓存（\(runningRevision.formatted(.dateTime.month().day().hour().minute()))）") }
+                    }
+                    .accessibilityIdentifier("cache.launch-source")
+                }
             } footer: {
                 Text("保存首页及加载时取得的网页资源。登录、实时数据、视频和其他页面仍可能需要联网。缓存由系统按可用空间保留。")
             }
@@ -76,7 +84,7 @@ struct ApplicationCacheSettingsView: View {
                 LabeledContent("下载缓存", value: ByteCountFormatter.string(fromByteCount: store.totalBytes, countStyle: .file))
                 Text("\(store.entries.count) 个应用已下载").foregroundStyle(.secondary)
                 if store.downloadingID != nil {
-                    ProgressView(value: store.progress) { Text("正在下载应用资源") }
+                    ProgressView(value: store.progress) { Text(store.downloadingName.map { "正在下载 \($0)" } ?? "正在下载应用资源") }
                     Button("取消下载") { store.cancelDownload() }.disabled(store.isClearing)
                 }
             } footer: { Text("单个应用最多 25 MB，总计最多 200 MB。下载缓存可加快启动；是否能离线使用取决于应用功能。") }

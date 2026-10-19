@@ -1,59 +1,173 @@
 import SwiftUI
 
+/// What the cache means for one application right now, in the order a person cares about it.
+enum ApplicationCacheState: Equatable {
+    case unsupported, notDownloaded, downloading(updating: Bool), updateReady, downloaded
+
+    @MainActor init(application: CloudApplication, store: ApplicationCacheStore) {
+        let key = ApplicationCacheEntry.key(for: application)
+        if store.downloadingID == key { self = .downloading(updating: store.entry(for: application) != nil) }
+        else if !ApplicationCacheEntry.supports(application) { self = .unsupported }
+        else if store.entry(for: application) == nil { self = .notDownloaded }
+        else if store.updatesReady.contains(key) { self = .updateReady }
+        else { self = .downloaded }
+    }
+
+    var title: String {
+        switch self {
+        case .unsupported: return "暂不支持下载"
+        case .notDownloaded: return "尚未下载缓存"
+        case .downloading(let updating): return updating ? "正在更新" : "正在下载"
+        case .updateReady: return "更新已就绪"
+        case .downloaded: return "已下载到本地"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .unsupported: return "icloud.slash"
+        case .notDownloaded: return "icloud.and.arrow.down"
+        case .downloading: return "arrow.down.circle"
+        case .updateReady: return "sparkles"
+        case .downloaded: return "checkmark.circle.fill"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .unsupported, .notDownloaded: return .secondary
+        case .downloading, .updateReady: return .blue
+        case .downloaded: return .green
+        }
+    }
+}
+
+/// Where the running session of an application loaded its first page from.
+struct ApplicationLaunchSourceLabel: View {
+    let revision: Date
+
+    var body: some View {
+        if revision == .distantPast {
+            Label("本次在线加载", systemImage: "globe").foregroundStyle(.orange)
+        } else {
+            Label("本次从下载缓存打开", systemImage: "bolt.fill").foregroundStyle(.green)
+        }
+    }
+}
+
 struct ApplicationCacheView: View {
     let application: CloudApplication
     @ObservedObject var store: ApplicationCacheStore
     @State private var confirmClear = false
+    private var key: String { ApplicationCacheEntry.key(for: application) }
     private var entry: ApplicationCacheEntry? { store.entry(for: application) }
-    private var isDownloading: Bool { store.downloadingID == ApplicationCacheEntry.key(for: application) }
+    private var state: ApplicationCacheState { ApplicationCacheState(application: application, store: store) }
+    private var runningRevision: Date? { store.runningRevisions[key] }
 
     var body: some View {
         List {
-            Section {
-                Label(application.name, systemImage: "app")
-                if let entry {
-                    LabeledContent("下载大小", value: ByteCountFormatter.string(fromByteCount: Int64(entry.byteCount), countStyle: .file))
-                    LabeledContent("更新时间") { Text(entry.downloadedAt, format: .dateTime.year().month().day().hour().minute()) }
-                    LabeledContent("已保存资源", value: "\(entry.resourceCount) 项")
-                } else { Text("尚未下载缓存").foregroundStyle(.secondary) }
-            } footer: {
-                Text("保存首页及加载时取得的网页资源。登录、实时数据、视频和其他页面仍可能需要联网。缓存由系统按可用空间保留。")
-            }
-            Section {
-                if store.updatesReady.contains(ApplicationCacheEntry.key(for: application)) {
-                    Label("更新已就绪，下次重新打开生效", systemImage: "checkmark.circle")
-                        .foregroundStyle(.secondary)
-                }
-                if isDownloading {
-                    ProgressView(value: store.progress) { Text(entry == nil ? "正在下载" : "正在更新") }
-                        .accessibilityIdentifier("cache.progress")
-                    Button("取消下载") { store.cancelDownload() }.disabled(store.isClearing)
-                } else {
-                    Button { store.download(application) } label: {
-                        Label(entry == nil ? "下载到本地" : "更新缓存", systemImage: entry == nil ? "arrow.down.circle" : "arrow.triangle.2.circlepath")
+            Section { header } footer: { Text(headerFooter) }
+            if let runningRevision {
+                Section {
+                    ApplicationLaunchSourceLabel(revision: runningRevision)
+                        .accessibilityIdentifier("cache.launch-source")
+                    if runningRevision != .distantPast {
+                        LabeledContent("使用的版本") { Text(runningRevision, format: .dateTime.month().day().hour().minute()) }
                     }
-                    .disabled(store.isBusy || !ApplicationCacheEntry.supports(application))
-                    .accessibilityIdentifier("cache.download")
-                }
-                if entry != nil {
-                    Button("清理此应用下载缓存", role: .destructive) { confirmClear = true }
-                        .disabled(store.isClearing).accessibilityIdentifier("cache.clear")
-                }
-            } footer: {
-                Text(ApplicationCacheEntry.supports(application)
-                     ? "更新会重新下载网页资源，失败时保留旧缓存。正在运行的应用需结束后重新打开，才会使用更新或清理后的内容。"
-                     : "暂时只支持云乐坊中公开、免费的应用。需要登录、会员、购买或工坊权限的应用继续在线使用。")
+                } header: { Text("当前运行") } footer: { Text(launchFooter(runningRevision)) }
             }
-            if let message = store.message { Section { Text(message).foregroundStyle(.secondary).accessibilityIdentifier("cache.message") } }
+            if ApplicationCacheEntry.supports(application) {
+                Section { actions } footer: {
+                    Text("更新会重新下载网页资源，失败时保留旧缓存。正在运行的应用需结束后重新打开，才会使用更新或清理后的内容。")
+                }
+            }
+            if let entry {
+                Section("缓存内容") {
+                    LabeledContent("下载大小", value: ByteCountFormatter.string(fromByteCount: Int64(entry.byteCount), countStyle: .file))
+                    LabeledContent("已保存资源", value: "\(entry.resourceCount) 项")
+                    LabeledContent("更新时间") {
+                        Text(entry.downloadedAt, format: .dateTime.year().month().day().hour().minute())
+                    }
+                }
+                Section {
+                    Button(role: .destructive) { confirmClear = true } label: {
+                        Label("清理此应用下载缓存", systemImage: "trash")
+                    }
+                    .disabled(store.isClearing)
+                    .accessibilityIdentifier("cache.clear")
+                }
+            }
         }
+        .animation(.default, value: state)
         .navigationTitle("应用下载缓存")
         .navigationBarTitleDisplayMode(.inline)
         .runtimeMenuToolbar()
         .task { await store.refresh() }
         .alert("清理这个应用的下载缓存？", isPresented: $confirmClear) {
             Button("取消", role: .cancel) { }
-            Button("清理下载缓存", role: .destructive) { Task { await store.clear(id: ApplicationCacheEntry.key(for: application)) } }
+            Button("清理下载缓存", role: .destructive) { Task { await store.clear(id: key) } }
         } message: { Text("只删除下载的网页资源，云居记录、网站登录和本地使用数据会保留。") }
+    }
+
+    private var header: some View {
+        HStack(spacing: 14) {
+            ApplicationIcon(application: application, size: 56)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(application.name).font(.headline)
+                Label(state.title, systemImage: state.systemImage)
+                    .font(.subheadline)
+                    .foregroundStyle(state.tint)
+                if let entry, case .downloaded = state {
+                    Text("\(ByteCountFormatter.string(fromByteCount: Int64(entry.byteCount), countStyle: .file)) · 更新于 \(entry.downloadedAt.formatted(.relative(presentation: .named)))")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var headerFooter: String {
+        ApplicationCacheEntry.supports(application)
+            ? "保存首页及加载时取得的网页资源，打开更快。登录、实时数据、视频和其他页面仍可能需要联网。缓存由系统按可用空间保留。"
+            : "暂时只支持云乐坊中公开、免费的应用。需要登录、会员、购买或工坊权限的应用继续在线使用。"
+    }
+
+    private func launchFooter(_ revision: Date) -> String {
+        if revision != .distantPast {
+            return state == .updateReady ? "已下载更新，结束应用后重新打开即可使用新版本。" : "首页来自本地缓存；接口请求和未缓存的资源仍会联网。"
+        }
+        return entry == nil ? "下载后，下次打开会先读取本地缓存。" : "缓存是在本次打开之后保存的，结束应用后重新打开即可使用。"
+    }
+
+    @ViewBuilder private var actions: some View {
+        if case .downloading = state {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(state.title)
+                    Spacer()
+                    Text(store.progress, format: .percent.precision(.fractionLength(0)))
+                        .monospacedDigit().foregroundStyle(.secondary)
+                }
+                ProgressView(value: store.progress)
+                    .accessibilityIdentifier("cache.progress")
+            }
+            .padding(.vertical, 4)
+            Button(role: .cancel) { store.cancelDownload() } label: { Label("取消下载", systemImage: "xmark.circle") }
+                .disabled(store.isClearing)
+        } else {
+            Button { store.download(application) } label: {
+                Label(entry == nil ? "下载到本地" : "更新缓存", systemImage: entry == nil ? "arrow.down.circle.fill" : "arrow.triangle.2.circlepath")
+                    .fontWeight(.semibold)
+            }
+            .disabled(store.isBusy)
+            .accessibilityIdentifier("cache.download")
+            if store.isBusy, !store.isClearing, let name = store.downloadingName {
+                Text("正在下载 \(name)，完成后可继续。").font(.footnote).foregroundStyle(.secondary)
+            }
+        }
+        if let message = store.message, store.messageApplicationID == key {
+            Text(message).font(.footnote).foregroundStyle(.secondary).accessibilityIdentifier("cache.message")
+        }
     }
 }
 
@@ -62,6 +176,7 @@ struct ApplicationCacheSettingsView: View {
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var catalog: CatalogStore
     @State private var confirmClearAll = false
+    @State private var pendingClear: ApplicationCacheEntry?
 
     private var available: [CloudApplication] {
         var seen = Set<String>()
@@ -70,56 +185,124 @@ struct ApplicationCacheSettingsView: View {
             .filter { ApplicationCacheEntry.supports($0) && store.entry(for: $0) == nil && seen.insert(ApplicationCacheEntry.key(for: $0)).inserted }
     }
 
+    private var usage: Double {
+        min(1, Double(store.totalBytes) / Double(ApplicationCacheRepository.maximumTotalBytes))
+    }
+
     var body: some View {
         List {
             Section {
-                LabeledContent("下载缓存", value: ByteCountFormatter.string(fromByteCount: store.totalBytes, countStyle: .file))
-                Text("\(store.entries.count) 个应用已下载").foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(ByteCountFormatter.string(fromByteCount: store.totalBytes, countStyle: .file))
+                            .font(.title2.weight(.semibold)).monospacedDigit()
+                        Text("/ \(ByteCountFormatter.string(fromByteCount: Int64(ApplicationCacheRepository.maximumTotalBytes), countStyle: .file))")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    ProgressView(value: usage).tint(usage > 0.9 ? .orange : .accentColor)
+                    Text("\(store.entries.count) 个应用已下载").font(.footnote).foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 4)
                 if store.downloadingID != nil {
-                    ProgressView(value: store.progress) { Text("正在下载应用资源") }
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(store.downloadingName.map { "正在下载 \($0)" } ?? "正在下载应用资源").lineLimit(1)
+                            Spacer()
+                            Text(store.progress, format: .percent.precision(.fractionLength(0)))
+                                .monospacedDigit().foregroundStyle(.secondary)
+                        }
+                        ProgressView(value: store.progress)
+                    }
                     Button("取消下载") { store.cancelDownload() }.disabled(store.isClearing)
                 }
             } footer: { Text("单个应用最多 25 MB，总计最多 200 MB。下载缓存可加快启动；是否能离线使用取决于应用功能。") }
-            Section {
-                Toggle("自动更新已下载应用", isOn: $store.automaticUpdatesEnabled)
-                    .accessibilityIdentifier("cache.auto-update")
-                Toggle("仅在 Wi-Fi 下下载", isOn: $store.wifiOnly)
-                    .disabled(!store.automaticUpdatesEnabled)
-                    .accessibilityIdentifier("cache.wifi-only")
-            } header: { Text("自动更新") } footer: {
-                Text("开启后，使用云乐坊期间每隔至少 24 小时静默更新已下载的应用。默认仅 Wi-Fi，低数据模式下暂停。关闭 Wi-Fi 限制会使用蜂窝数据。更新在下次重新打开应用时生效；失败保留旧缓存并稍后重试。")
-            }
             if !store.entries.isEmpty {
-                Section("已下载") {
+                Section {
                     ForEach(store.entries) { entry in
                         NavigationLink {
                             ApplicationCacheView(application: entry.application, store: store)
-                        } label: {
-                            LabeledContent(entry.application.name,
-                                           value: ByteCountFormatter.string(fromByteCount: Int64(entry.byteCount), countStyle: .file))
+                        } label: { DownloadedRow(entry: entry, store: store) }
+                        .swipeActions {
+                            Button("清理", role: .destructive) { pendingClear = entry }
                         }
                     }
-                }
+                } header: { Text("已下载") } footer: { Text("左滑可清理单个应用。") }
             }
             if !available.isEmpty {
-                Section("云居中的应用") {
+                Section {
                     ForEach(available) { application in
-                        NavigationLink(application.name) { ApplicationCacheView(application: application, store: store) }
+                        NavigationLink { ApplicationCacheView(application: application, store: store) } label: {
+                            HStack(spacing: 12) {
+                                ApplicationIcon(application: application, size: 32)
+                                Text(application.name)
+                                Spacer()
+                                Button { store.download(application) } label: {
+                                    Image(systemName: "arrow.down.circle").font(.title3)
+                                }
+                                .buttonStyle(.borderless)
+                                .disabled(store.isBusy)
+                                .accessibilityLabel("下载\(application.name)")
+                            }
+                        }
                     }
-                }
+                } header: { Text("云居中的应用") } footer: { Text("点按右侧图标直接下载。") }
             }
             Section {
-                Button("清理全部下载缓存", role: .destructive) { confirmClearAll = true }
+                Toggle(isOn: $store.automaticUpdatesEnabled) {
+                    SettingsLabel("自动更新已下载应用", systemImage: "arrow.triangle.2.circlepath", color: .blue)
+                }
+                .accessibilityIdentifier("cache.auto-update")
+                Toggle(isOn: $store.wifiOnly) {
+                    SettingsLabel("仅在 Wi-Fi 下下载", systemImage: "wifi", color: .teal)
+                }
+                .disabled(!store.automaticUpdatesEnabled)
+                .accessibilityIdentifier("cache.wifi-only")
+            } header: { Text("自动更新") } footer: {
+                Text("开启后，使用云乐坊期间每隔至少 24 小时静默更新已下载的应用。默认仅 Wi-Fi，低数据模式下暂停。关闭 Wi-Fi 限制会使用蜂窝数据。更新在下次重新打开应用时生效；失败保留旧缓存并稍后重试。")
+            }
+            Section {
+                Button(role: .destructive) { confirmClearAll = true } label: { Label("清理全部下载缓存", systemImage: "trash") }
                     .disabled(store.isClearing)
                     .accessibilityIdentifier("cache.clear-all")
             } footer: { Text("云居记录、账号、网站登录和本地使用数据会保留。运行中的应用在结束后重新打开时生效。") }
             if let message = store.message { Section { Text(message).foregroundStyle(.secondary) } }
         }
+        .animation(.default, value: store.entries)
         .navigationTitle("应用下载缓存")
         .task { await store.refresh() }
         .alert("清理全部应用下载缓存？", isPresented: $confirmClearAll) {
             Button("取消", role: .cancel) { }
             Button("清理全部", role: .destructive) { Task { await store.clear() } }
         } message: { Text("正在进行的下载会取消。之后仍可按需重新下载。") }
+        .alert("清理这个应用的下载缓存？", isPresented: Binding(get: { pendingClear != nil }, set: { if !$0 { pendingClear = nil } }),
+               presenting: pendingClear) { entry in
+            Button("取消", role: .cancel) { }
+            Button("清理下载缓存", role: .destructive) { Task { await store.clear(id: entry.id) } }
+        } message: { entry in Text("只删除「\(entry.application.name)」下载的网页资源，云居记录、网站登录和本地使用数据会保留。") }
+    }
+}
+
+private struct DownloadedRow: View {
+    let entry: ApplicationCacheEntry
+    @ObservedObject var store: ApplicationCacheStore
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ApplicationIcon(application: entry.application, size: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.application.name)
+                Text("\(ByteCountFormatter.string(fromByteCount: Int64(entry.byteCount), countStyle: .file)) · \(entry.downloadedAt.formatted(.relative(presentation: .named)))")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if store.downloadingID == entry.id {
+                ProgressView().accessibilityLabel("正在更新")
+            } else if store.updatesReady.contains(entry.id) {
+                Text("更新已就绪").font(.caption).foregroundStyle(.blue)
+            } else if let revision = store.runningRevisions[entry.id] {
+                Text(revision == .distantPast ? "运行中" : "运行中 · 缓存").font(.caption).foregroundStyle(.secondary)
+            }
+        }
     }
 }

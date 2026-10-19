@@ -77,9 +77,12 @@ private struct ApplicationCacheUpdateNotice: View {
     @ObservedObject var store: ApplicationCacheStore
 
     var body: some View {
-        if store.updatesReady.contains(ApplicationCacheEntry.key(for: application)) {
+        let key = ApplicationCacheEntry.key(for: application)
+        if store.updatesReady.contains(key) {
             Label("更新已就绪，下次重新打开生效", systemImage: "checkmark.circle")
                 .font(.footnote).foregroundStyle(.secondary)
+        } else if let revision = store.runningRevisions[key], revision != .distantPast || store.entry(for: application) != nil {
+            ApplicationLaunchSourceLabel(revision: revision).font(.footnote)
         }
     }
 }

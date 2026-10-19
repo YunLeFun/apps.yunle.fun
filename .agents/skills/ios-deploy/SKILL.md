@@ -9,12 +9,12 @@ description: 打包、部署或发布云乐坊原生 iOS 客户端到手机、�
 
 ## TestFlight 日常更新
 
-读取同级 [ios-testflight](../ios-testflight/SKILL.md) 共用技能，再读仓库 `docs/dev/testflight.md`，执行其中的项目参数和命令。共用技能也可安装在个人 skills 目录，供云生的 `life-testflight` 调用；两边的打包脚本与数据迁移仍归各自项目维护。
+先读取已安装的 `ios-testflight`，再读 `docs/dev/testflight.md` 的项目参数。共用技能唯一维护源是 [YunYouJun/ai](https://github.com/YunYouJun/ai/blob/main/skills/ios-testflight/SKILL.md)，安装命令为 `npx skills add YunYouJun/ai --skill=ios-testflight`。未安装时可读取已有 ai checkout 的 `skills/ios-testflight/`，或取得该可信仓库的技能及引用文件；不再维护本仓库的同名副本。
 
 - Scheme：`YunleFun`；正式 Bundle ID：`fun.yunle.apps`；App ID：`6759859441`；内部组：云乐坊内测组。
 - 版本来源：`apps/ios/project.yml`；此仓库跟踪 `YunleFun.xcodeproj`，版本调整后按项目要求同步并审查生成差异。不要混入个人 `Info.plist` 或签名改动。
-- 原生分步脚本：`bash apps/ios/scripts/testflight.sh archive|export|validate|upload`。上传只在本次用户已授权时设置 `YUNLEFUN_CONFIRM_UPLOAD=1`，不因脚本变量再次询问已有授权。
-- 发布助手位于 `apps/mobile/scripts/ios-testflight-publish.mjs`，虽然在 mobile 目录，也用于同 App 的原生构建。按文档同时传 `--version` 与 `--build`，先 dry run 再发布；默认沿用现有测试员。
+- 默认按共用技能的 ASC CLI 路径执行：归档、导出、精确版本查询、上传和内部组验收；Apple IPA 校验保留 altool。导出配置为 `apps/ios/ExportOptions-TestFlight.plist`。
+- `apps/ios/scripts/testflight.sh` 和 `apps/mobile/scripts/ios-testflight-publish.mjs` 只作已确认兼容问题的回退，详见 `docs/dev/testflight-fallback.md`。上传仍要求本次授权；已有明确授权不重复确认。默认不新增测试员。
 
 ## 手机或模拟器部署
 

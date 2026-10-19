@@ -12,6 +12,8 @@ final class ApplicationCacheStore: ObservableObject {
     @Published private(set) var isClearing = false
     @Published private(set) var isAutomaticDownload = false
     @Published private(set) var message: String?
+    /// The application `message` is about; nil for store-wide results such as clearing everything.
+    @Published private(set) var messageApplicationID: String?
     @Published private(set) var updatesReady: Set<String> = []
     @Published var automaticUpdatesEnabled: Bool {
         didSet {
@@ -77,7 +79,7 @@ final class ApplicationCacheStore: ObservableObject {
 
     func refresh() async {
         do { entries = try await repository.entries() }
-        catch { message = "无法读取下载缓存，请稍后重试。" }
+        catch { message = "无法读取下载缓存，请稍后重试。"; messageApplicationID = nil }
     }
 
     func setApplicationActive(_ active: Bool) {
@@ -109,7 +111,7 @@ final class ApplicationCacheStore: ObservableObject {
         scheduledCheck?.cancel()
         let operation = UUID(), id = ApplicationCacheEntry.key(for: application)
         operationID = operation
-        downloadingID = id; downloadingName = application.name; progress = 0; message = nil; isAutomaticDownload = automatic
+        downloadingID = id; downloadingName = application.name; progress = 0; message = nil; messageApplicationID = id; isAutomaticDownload = automatic
         let downloader = automatic ? makeAutomaticDownloader(wifiOnly) : makeDownloader()
         task = Task { [self] in
             defer {
@@ -130,9 +132,9 @@ final class ApplicationCacheStore: ObservableObject {
                 try await repository.save(data, for: application, now: now())
                 retries[id] = nil; persistRetries()
                 await refresh(); updateReadyState()
-                if !Task.isCancelled { message = automatic ? "自动更新已就绪，下次重新打开应用时生效。" : "缓存已保存。下次重新打开应用时使用新缓存。" }
+                if !Task.isCancelled { messageApplicationID = id; message = automatic ? "自动更新已就绪，下次重新打开应用时生效。" : "缓存已保存。下次重新打开应用时使用新缓存。" }
             } catch is CancellationError {
-                if !automatic && !isClearing { message = "已取消下载，原有缓存继续保留。" }
+                if !automatic && !isClearing { messageApplicationID = id; message = "已取消下载，原有缓存继续保留。" }
             } catch {
                 if !Task.isCancelled {
                     let failure = error as NSError
@@ -143,9 +145,9 @@ final class ApplicationCacheStore: ObservableObject {
                         let failures = min((retries[id]?.failures ?? 0) + 1, 6)
                         retries[id] = Retry(failures: failures, after: now().addingTimeInterval(min(3600 * pow(2, Double(failures - 1)), Self.automaticUpdateInterval)))
                         persistRetries()
-                        message = "自动更新未完成，继续使用旧缓存，稍后自动重试。"
+                        messageApplicationID = id; message = "自动更新未完成，继续使用旧缓存，稍后自动重试。"
                     } else {
-                        message = (error as? ApplicationCacheError)?.localizedDescription ?? "无法保存下载缓存，请检查网络或可用空间后重试。"
+                        messageApplicationID = id; message = (error as? ApplicationCacheError)?.localizedDescription ?? "无法保存下载缓存，请检查网络或可用空间后重试。"
                     }
                 }
             }
@@ -162,7 +164,7 @@ final class ApplicationCacheStore: ObservableObject {
 
     func clear(id: String? = nil) async {
         guard !isClearing else { return }
-        isClearing = true; message = nil
+        isClearing = true; message = nil; messageApplicationID = id
         scheduledCheck?.cancel(); checkID = UUID()
         task?.cancel()
         // Wait for any in-flight atomic write before deletion, so late downloads cannot recreate the cache.

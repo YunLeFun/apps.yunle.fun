@@ -247,6 +247,7 @@ class WebViewController: UIViewController {
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.allowsBackForwardNavigationGestures = true
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         view.addSubview(webView)
 
         // 沉浸：顶部到屏幕最顶；标题栏：顶部从导航栏底下开始。底部都铺到屏幕最底
@@ -1934,15 +1935,7 @@ extension WebViewController: WKNavigationDelegate {
         let isUserClick = navigationAction.navigationType == .linkActivated
         let isMainFrame = isNewWindow || navigationAction.targetFrame?.isMainFrame == true
         if (isUserClick || isNewWindow), isMainFrame, isCrossSite(targetURL) {
-            switch externalLinkBehavior {
-            case .defaultBrowser:
-                UIApplication.shared.open(targetURL)
-            case .safariView:
-                // 沉浸视图之上弹系统浏览器视图，不跳出 App（与 @capacitor/browser 同为 SFSafariViewController）
-                let safari = SFSafariViewController(url: targetURL)
-                safari.preferredControlTintColor = UIColor(hex: appInfo?.themeColor ?? "")
-                present(safari, animated: true)
-            }
+            openExternalLink(targetURL)
             decisionHandler(.cancel)
             return
         }
@@ -1954,6 +1947,27 @@ extension WebViewController: WKNavigationDelegate {
             return
         }
         decisionHandler(.allow)
+    }
+
+    /// 跨站外链按设置打开。已安装对应 App 的通用链接（如 B 站视频）优先唤起该 App
+    private func openExternalLink(_ target: URL) {
+        switch externalLinkBehavior {
+        case .defaultBrowser:
+            UIApplication.shared.open(target)
+        case .safariView:
+            UIApplication.shared.open(target, options: [.universalLinksOnly: true]) { [weak self] opened in
+                guard !opened, let self else { return }
+                // 沉浸视图之上弹系统浏览器视图，不跳出 App（与 @capacitor/browser 同为 SFSafariViewController）
+                let safari = SFSafariViewController(url: target)
+                safari.preferredControlTintColor = UIColor(hex: self.appInfo?.themeColor ?? "")
+                // 面板等已占用 present 时叠在最上层，避免弹出被系统忽略
+                var presenter: UIViewController = self
+                while let presented = presenter.presentedViewController, !presented.isBeingDismissed {
+                    presenter = presented
+                }
+                presenter.present(safari, animated: true)
+            }
+        }
     }
 
     /// 与应用初始域名是否跨站（按可注册域比较，子域之间视为同站）
@@ -1976,6 +1990,35 @@ extension WebViewController: WKNavigationDelegate {
         let lastTwo = labels.suffix(2).joined(separator: ".")
         let count = secondLevelSuffixes.contains(lastTwo) ? 3 : 2
         return labels.suffix(count).joined(separator: ".")
+    }
+}
+
+// MARK: - WKUIDelegate
+
+extension WebViewController: WKUIDelegate {
+    /// window.open 不经过 decidePolicyFor，未实现时 WebKit 直接丢弃新窗口请求；
+    /// 按 target=_blank 链接同样的规则处理，不创建新 WebView
+    func webView(
+        _ webView: WKWebView,
+        createWebViewWith _: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction,
+        windowFeatures _: WKWindowFeatures
+    ) -> WKWebView? {
+        guard let targetURL = navigationAction.request.url,
+              let scheme = targetURL.scheme?.lowercased()
+        else { return nil }
+        if !["http", "https"].contains(scheme) {
+            if !["about", "blob", "data", "file", "javascript"].contains(scheme) {
+                UIApplication.shared.open(targetURL)
+            }
+            return nil
+        }
+        if isCrossSite(targetURL) {
+            openExternalLink(targetURL)
+        } else {
+            webView.load(URLRequest(url: targetURL))
+        }
+        return nil
     }
 }
 

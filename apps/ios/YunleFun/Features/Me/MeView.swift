@@ -49,24 +49,24 @@ struct MeView: View {
                 }
             }
             Section {
-                navigationRow("钱包", systemImage: "wallet.pass", entry: .wallet) { WalletView() }
-                navigationRow("云乐坊会员", systemImage: "crown", entry: .membership) { MembershipView() }
-                navigationRow("我的应用", systemImage: "square.and.pencil", entry: .applications) { MyApplicationsView() }
-                navigationRow("个人工坊", systemImage: "person.2.crop.square.stack", entry: .workshops) { MyWorkshopsView() }
-                navigationRow("账号管理", systemImage: "person.2", entry: .accounts) { AccountManagementView() }
-                navigationRow("设置", systemImage: "gearshape", entry: .settings) { SettingsView() }
-                navigationRow("关于云乐坊", systemImage: "info.circle", entry: .about) { AboutView() }
+                navigationRow("钱包", systemImage: "wallet.pass.fill", color: .green, entry: .wallet) { WalletView() }
+                navigationRow("云乐坊会员", systemImage: "crown.fill", color: .orange, entry: .membership) { MembershipView() }
+                navigationRow("我的应用", systemImage: "square.and.pencil", color: .blue, entry: .applications) { MyApplicationsView() }
+                navigationRow("个人工坊", systemImage: "person.2.crop.square.stack.fill", color: .purple, entry: .workshops) { MyWorkshopsView() }
+                navigationRow("账号管理", systemImage: "person.2.fill", color: .teal, entry: .accounts) { AccountManagementView() }
+                navigationRow("设置", systemImage: "gearshape.fill", color: .gray, entry: .settings) { SettingsView() }
+                navigationRow("关于云乐坊", systemImage: "info", color: .indigo, entry: .about) { AboutView() }
             }
             Section {
                 Text("支持").font(.headline).foregroundStyle(Color.primary)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
-                navigationRow("我的举报", systemImage: "flag", entry: .reports) { MyReportsView() }
-                navigationRow("使用帮助", systemImage: "questionmark.circle", entry: .help) {
+                navigationRow("我的举报", systemImage: "flag.fill", color: .red, entry: .reports) { MyReportsView() }
+                navigationRow("使用帮助", systemImage: "questionmark", color: .blue, entry: .help) {
                     HelpView(logs: diagnostics, accounts: accounts, navigateTab: navigateTab)
                 }
                 .accessibilityIdentifier("me.help")
-                navigationRow("反馈与建议", systemImage: "bubble.left.and.bubble.right", entry: .feedback) {
+                navigationRow("反馈与建议", systemImage: "bubble.left.and.bubble.right", color: .green, entry: .feedback) {
                     FeedbackView(logs: diagnostics, accounts: accounts)
                 }
                 .accessibilityIdentifier("me.feedback")
@@ -81,22 +81,22 @@ struct MeView: View {
         }
     }
 
-    private func navigationRow<Destination: View>(_ title: String, systemImage: String, entry: Entry,
+    private func navigationRow<Destination: View>(_ title: String, systemImage: String, color: Color, entry: Entry,
                                                   @ViewBuilder destination: @escaping () -> Destination) -> some View {
         NavigationLink { destination().onAppear { returningEntry = entry; focusedEntry = nil } } label: {
-            navigationLabel(title, systemImage: systemImage)
+            navigationLabel(title, systemImage: systemImage, color: color)
         }
         .accessibilityFocused($focusedEntry, equals: entry)
     }
 
-    @ViewBuilder private func navigationLabel(_ title: String, systemImage: String) -> some View {
+    @ViewBuilder private func navigationLabel(_ title: String, systemImage: String, color: Color) -> some View {
         if dynamicTypeSize.isAccessibilitySize {
             Text(title).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
         } else {
             Label {
                 Text(title).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
             } icon: {
-                Image(systemName: systemImage).font(.body).accessibilityHidden(true)
+                SettingsIcon(systemImage: systemImage, color: color)
             }
         }
     }
@@ -127,21 +127,31 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("外观") {
-                Picker("显示模式", selection: $appearance) {
+                Picker(selection: $appearance) {
                     ForEach(AppAppearance.allCases) { Text($0.label).tag($0) }
-                }
+                } label: { SettingsLabel("显示模式", systemImage: "circle.lefthalf.filled", color: .blue) }
             }
             Section("云居") {
-                Toggle("显示最近使用", isOn: $showRecent)
-                Toggle("显示常用应用", isOn: Binding(get: { library.snapshot.dockVisible }, set: library.setDockVisible))
-                NavigationLink("云居同步") { HomeSyncSettingsView() }
-                NavigationLink("云居备份") { HomeBackupsView(library: library, accounts: accounts) }
-                Button("清空最近使用", role: .destructive) { confirmClear = true }
-                    .disabled(library.snapshot.recentIDs.isEmpty)
+                Toggle(isOn: $showRecent) { SettingsLabel("显示最近使用", systemImage: "clock.fill", color: .indigo) }
+                Toggle(isOn: Binding(get: { library.snapshot.dockVisible }, set: library.setDockVisible)) {
+                    SettingsLabel("显示常用应用", systemImage: "dock.rectangle", color: .orange)
+                }
+                NavigationLink { HomeSyncSettingsView() } label: { SettingsLabel("云居同步", systemImage: "icloud.fill", color: .cyan) }
+                NavigationLink { HomeBackupsView(library: library, accounts: accounts) } label: {
+                    SettingsLabel("云居备份", systemImage: "clock.arrow.circlepath", color: .green)
+                }
+                Button(role: .destructive) { confirmClear = true } label: {
+                    SettingsLabel("清空最近使用", systemImage: "trash.fill", color: .red)
+                }
+                .disabled(library.snapshot.recentIDs.isEmpty)
             }
             Section {
-                NavigationLink("应用下载缓存") { ApplicationCacheSettingsView(store: runtime.applicationCache) }
-                NavigationLink("旧版数据导入") { LegacyMigrationView(library: library, accounts: accounts) }
+                NavigationLink { ApplicationCacheSettingsView(store: runtime.applicationCache) } label: {
+                    SettingsLabel("应用下载缓存", systemImage: "internaldrive.fill", color: .gray)
+                }
+                NavigationLink { LegacyMigrationView(library: library, accounts: accounts) } label: {
+                    SettingsLabel("旧版数据导入", systemImage: "square.and.arrow.down.fill", color: .purple)
+                }
             }
         }
         .navigationTitle("设置")

@@ -89,15 +89,46 @@ enum VerificationAddress: Equatable, Sendable {
     case phone(String)
     case email(String)
 
+    /// Reduce typed, pasted or autofilled phone input to the national number:
+    /// drop formatting and a mainland China prefix (+86, 0086, 86). Another
+    /// region's prefix is kept as "+<digits>" so submission can explain it.
+    static func normalizedPhoneInput(_ input: String) -> String {
+        var digits = ""
+        for character in input {
+            guard let scalar = character.unicodeScalars.first, character.unicodeScalars.count == 1,
+                  scalar.properties.numericType == .decimal, let value = character.wholeNumberValue else { continue }
+            digits.append(String(value))
+        }
+        let international = input.drop { !$0.isNumber && $0 != "+" }.first == "+"
+        if international {
+            guard digits.hasPrefix("86") else { return "+" + digits }
+            digits.removeFirst(2)
+        } else if digits.hasPrefix("0086") {
+            digits.removeFirst(4)
+        } else if digits.hasPrefix("86"), digits.count > 11 {
+            digits.removeFirst(2)
+        }
+        return String(digits.prefix(11))
+    }
+
+    static func isMainlandMobile(_ number: String) -> Bool {
+        number.count == 11 && number.first == "1"
+    }
+
     static func phoneInput(_ input: String) throws -> VerificationAddress {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        var digits = trimmed.filter(\.isNumber)
-        if digits.hasPrefix("86"), digits.count == 13 { digits.removeFirst(2) }
-        guard digits.count == 11, digits.first == "1",
-              trimmed.allSatisfy({ $0.isNumber || "+ -()".contains($0) }) else {
+        guard trimmed.allSatisfy({ $0.isNumber || $0.isWhitespace || "+-()".contains($0) || isFormatting($0) }) else {
             throw AccountError.invalidPhone
         }
-        return .phone("+86 \(digits)")
+        let number = normalizedPhoneInput(trimmed)
+        if number.hasPrefix("+"), number.count > 2 { throw AccountError.unsupportedPhoneRegion }
+        guard isMainlandMobile(number) else { throw AccountError.invalidPhone }
+        return .phone("+86 \(number)")
+    }
+
+    /// Contacts and autofill can wrap numbers in invisible direction marks.
+    private static func isFormatting(_ character: Character) -> Bool {
+        character.unicodeScalars.allSatisfy { $0.properties.generalCategory == .format }
     }
 
     static func emailInput(_ input: String) throws -> VerificationAddress {
@@ -119,8 +150,8 @@ enum VerificationAddress: Equatable, Sendable {
             guard case .email(let email) = try emailInput(value) else { throw AccountError.invalidEmail }
             return email
         }
-        let digits = value.filter(\.isNumber)
-        if value.hasPrefix("+86") || (digits.count == 11 && digits.count == value.count) {
+        let phoneLike = value.allSatisfy { $0.isNumber || $0.isWhitespace || "+-()".contains($0) || isFormatting($0) }
+        if value.hasPrefix("+86") || (phoneLike && isMainlandMobile(normalizedPhoneInput(value))) {
             guard case .phone(let number) = try phoneInput(value) else { throw AccountError.invalidPhone }
             return number
         }
@@ -146,7 +177,7 @@ struct CaptchaImage: Decodable, Sendable {
 enum AccountError: Error, Equatable, LocalizedError, Sendable {
     case invalidResponse, sessionChanged, signedOut, expiredSession, blockedAccount
     case invalidCredentials, invalidVerification, captchaRequired, invalidCaptcha, rateLimited
-    case unavailable, invalidPhone, invalidEmail, missingIdentifier, missingPassword
+    case unavailable, invalidPhone, unsupportedPhoneRegion, invalidEmail, missingIdentifier, missingPassword
     case verificationExpired, storage, unsupportedVault
 
     var errorDescription: String? {
@@ -163,6 +194,7 @@ enum AccountError: Error, Equatable, LocalizedError, Sendable {
         case .rateLimited: return "操作有些频繁，请稍后再试。"
         case .unavailable: return "暂时无法连接账号服务，请稍后重试。"
         case .invalidPhone: return "请输入正确的中国大陆手机号。"
+        case .unsupportedPhoneRegion: return "暂时只支持中国大陆（+86）手机号，其他地区请使用邮箱登录。"
         case .invalidEmail: return "请输入正确的邮箱地址。"
         case .missingIdentifier: return "请输入用户名、邮箱或手机号。"
         case .missingPassword: return "请输入密码。"

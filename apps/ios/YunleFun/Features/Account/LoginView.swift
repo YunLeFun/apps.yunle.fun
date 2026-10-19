@@ -61,8 +61,8 @@ struct LoginView: View {
                 }
                 .disabled(isBusy)
                 Section {
-                    identifierField
                     if method == .password {
+                        identifierField
                         SecureField("密码", text: $password)
                             .accessibilityLabel("密码")
                             .accessibilityIdentifier("login.password")
@@ -70,22 +70,19 @@ struct LoginView: View {
                             .focused($focus, equals: .password)
                             .submitLabel(.go)
                             .onSubmit { perform(.signIn) }
+                    } else if dynamicTypeSize.isAccessibilitySize {
+                        identifierField
+                        codeField
+                        sendCodeButton
                     } else {
-                        TextField("6 位验证码", text: $code)
-                            .accessibilityLabel("验证码")
-                            .accessibilityIdentifier("login.code")
-                            .textContentType(.oneTimeCode)
-                            .keyboardType(.numberPad)
-                            .focused($focus, equals: .code)
-                            .onChange(of: code) { value in code = String(value.filter { $0.isASCII && $0.isNumber }.prefix(6)) }
-                        TimelineView(VerificationResendTimeline(deadline: resendAt)) { context in
-                            let seconds = max(0, Int(ceil(resendAt.timeIntervalSince(context.date))))
-                            Button(seconds > 0 ? "\(seconds) 秒后重新获取" : "获取验证码") { perform(.sendCode) }
-                                .disabled(seconds > 0)
+                        HStack {
+                            identifierField
+                            sendCodeButton.buttonStyle(.borderless).fixedSize()
                         }
+                        codeField
                     }
                 } footer: {
-                    if method != .password { Text("未注册的手机号或邮箱将在验证后创建账号。") }
+                    if method != .password { Text(codeFooter) }
                 }
                 .disabled(isBusy)
                 if let error {
@@ -130,7 +127,14 @@ struct LoginView: View {
                 CaptchaView { token in perform(action, captcha: token) }
             }
             .onChange(of: method) { _ in resetChallenge(); password = ""; identifier = ""; error = nil }
-            .onChange(of: identifier) { _ in resetChallenge(); error = nil }
+            .onChange(of: identifier) { value in
+                // Pasted or autofilled numbers often carry +86 / 0086 or spacing.
+                if method == .phone {
+                    let number = VerificationAddress.normalizedPhoneInput(value)
+                    if number != value { identifier = number }
+                }
+                resetChallenge(); error = nil
+            }
             .onDisappear { cancel(); password = ""; code = "" }
         }
     }
@@ -151,7 +155,9 @@ struct LoginView: View {
         switch method {
         case .phone:
             HStack {
-                Text("+86").foregroundStyle(.secondary).accessibilityLabel("中国大陆，区号 86")
+                if !identifier.hasPrefix("+") {
+                    Text("+86").foregroundStyle(.secondary).accessibilityLabel("中国大陆，区号 86")
+                }
                 TextField("手机号", text: $identifier)
                     .accessibilityLabel("手机号")
                     .accessibilityIdentifier("login.phone")
@@ -164,7 +170,10 @@ struct LoginView: View {
                 .accessibilityIdentifier("login.email")
                 .textContentType(.emailAddress).keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
-                .focused($focus, equals: .identifier)
+                .focused($focus, equals: .identifier).submitLabel(.send)
+                .onSubmit {
+                    if challenge != nil, Date() < resendAt { focus = .code } else { perform(.sendCode) }
+                }
         case .password:
             TextField("用户名、邮箱或手机号", text: $identifier)
                 .accessibilityLabel("用户名、邮箱或手机号")
@@ -172,6 +181,42 @@ struct LoginView: View {
                 .textContentType(.username).textInputAutocapitalization(.never).autocorrectionDisabled()
                 .focused($focus, equals: .identifier).submitLabel(.next)
                 .onSubmit { focus = .password }
+        }
+    }
+
+    private var codeField: some View {
+        TextField("6 位验证码", text: $code)
+            .accessibilityLabel("验证码")
+            .accessibilityIdentifier("login.code")
+            .textContentType(.oneTimeCode)
+            .keyboardType(.numberPad)
+            .focused($focus, equals: .code)
+            .submitLabel(.go)
+            .onSubmit { perform(.signIn) }
+            .onChange(of: code) { value in
+                let digits = String(value.filter { $0.isASCII && $0.isNumber }.prefix(6))
+                guard digits == value else { code = digits; return }
+                // The number pad has no return key: a complete code signs in.
+                if digits.count == 6, challenge != nil { perform(.signIn) }
+            }
+    }
+
+    private var sendCodeButton: some View {
+        TimelineView(VerificationResendTimeline(deadline: resendAt)) { context in
+            let seconds = max(0, Int(ceil(resendAt.timeIntervalSince(context.date))))
+            Button(seconds > 0 ? "\(seconds) 秒后重发" : challenge == nil ? "获取验证码" : "重新获取") { perform(.sendCode) }
+                .disabled(seconds > 0)
+                .font(.body.monospacedDigit())
+                .accessibilityIdentifier("login.send-code")
+        }
+    }
+
+    private var codeFooter: String {
+        let note = "未注册的手机号或邮箱将在验证后创建账号。"
+        switch challenge?.address {
+        case .phone(let number): return "验证码已发送至 \(number)。\(note)"
+        case .email(let email): return "验证码已发送至 \(email)。\(note)"
+        case nil: return note
         }
     }
 
@@ -234,6 +279,9 @@ struct LoginView: View {
                 guard !Task.isCancelled else { return }
                 self.error = AccountError.message(for: error)
                 errorFocused = true
+                if action == .signIn, method != .password, error as? AccountError == .invalidVerification, challenge != nil {
+                    code = ""; focus = .code
+                }
             }
         }
     }

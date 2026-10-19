@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 protocol HomeSyncServing: Sendable {
@@ -82,5 +83,114 @@ private final class HomeRedirectPolicy: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         completionHandler(nil)
+    }
+}
+
+/// Key-value storage the guest Home Screen syncs through: iCloud in the app,
+/// memory in tests.
+protocol HomeKeyValueStoring: AnyObject {
+    func data(forKey key: String) -> Data?
+    func set(_ data: Data?, forKey key: String)
+    @discardableResult func synchronize() -> Bool
+}
+extension NSUbiquitousKeyValueStore: HomeKeyValueStoring {}
+
+/// Guest-only Home Screen sync through the person's own iCloud key-value
+/// storage. Signed-in accounts keep using `HomeSyncService`; the two copies
+/// never mix. The record is a schema 3 `RemoteHomeScreen`, so the coordinator's
+/// revision, conflict and acknowledgement rules apply unchanged.
+@MainActor
+final class HomeICloudSync {
+    static let recordKey = "home.guest.v1"
+    /// iCloud key-value storage holds at most 1 MB per app.
+    static let maximumBytes = 1_000_000
+    private static let enabledKey = "home.icloud.enabled"
+    private static let identityKey = "home.icloud.identity"
+    private let store: HomeKeyValueStoring
+    private let defaults: UserDefaults
+    private let identity: () -> Data?
+    private let now: () -> Date
+    private var observers: [NSObjectProtocol] = []
+    var onExternalChange: (() -> Void)?
+
+    init(store: HomeKeyValueStoring = NSUbiquitousKeyValueStore.default, defaults: UserDefaults = .standard,
+         identity: @escaping () -> Data? = HomeICloudSync.currentIdentity, now: @escaping () -> Date = Date.init,
+         observeChanges: Bool = true) {
+        self.store = store
+        self.defaults = defaults
+        self.identity = identity
+        self.now = now
+        guard observeChanges else { return }
+        let center = NotificationCenter.default
+        for name in [NSUbiquitousKeyValueStore.didChangeExternallyNotification, .NSUbiquityIdentityDidChange] {
+            observers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor in self?.onExternalChange?() }
+            })
+        }
+        store.synchronize()
+    }
+    deinit { observers.forEach { NotificationCenter.default.removeObserver($0) } }
+
+    /// A device preference: each device opts in on its own.
+    var isEnabled: Bool {
+        get { defaults.bool(forKey: Self.enabledKey) }
+        set { defaults.set(newValue, forKey: Self.enabledKey) }
+    }
+    /// Signed in to iCloud. Without it writes would only stay on this device.
+    var isAvailable: Bool { identity() != nil }
+
+    nonisolated static func currentIdentity() -> Data? {
+        FileManager.default.ubiquityIdentityToken.flatMap {
+            try? NSKeyedArchiver.archivedData(withRootObject: $0, requiringSecureCoding: false)
+        }
+    }
+
+    /// True once after the iCloud account changed since the last check, so the
+    /// device compares its layout with the new account's instead of adopting it.
+    func consumeIdentityChange() -> Bool {
+        guard let current = identity() else { return false }
+        let previous = defaults.data(forKey: Self.identityKey)
+        defaults.set(current, forKey: Self.identityKey)
+        return previous != nil && previous != current
+    }
+
+    func load() throws -> RemoteHomeScreen {
+        guard isAvailable else { throw HomeSyncError.iCloudUnavailable }
+        store.synchronize()
+        guard let data = store.data(forKey: Self.recordKey) else {
+            return RemoteHomeScreen(revision: nil, configuration: HomeConfiguration())
+        }
+        // A damaged record is reported, never treated as an empty cloud.
+        do { return try JSONDecoder().decode(RemoteHomeScreen.self, from: data) }
+        catch { throw HomeSyncError.invalidResponse }
+    }
+
+    func save(_ write: HomeScreenWrite) throws -> RemoteHomeScreen {
+        try write.configuration.validate()
+        let current = try load()
+        let revision = try Self.revision(for: write)
+        // A retried write that already landed returns the stored copy.
+        if current.revision == revision { return current }
+        guard current.revision == write.baseRevision else { throw HomeSyncError.conflict(current) }
+        var configuration = write.configuration
+        configuration.updatedAt = max(Int64(now().timeIntervalSince1970 * 1000), current.configuration.updatedAt + 1)
+        let saved = RemoteHomeScreen(revision: revision, configuration: configuration)
+        try saved.validate()
+        let data = try JSONEncoder().encode(saved)
+        guard data.count <= Self.maximumBytes else { throw HomeSyncError.iCloudFull }
+        store.set(data, forKey: Self.recordKey)
+        store.synchronize()
+        return saved
+    }
+
+    /// Lowercase SHA-256 of the write's identity and content, the same shape
+    /// as server revisions.
+    static func revision(for write: HomeScreenWrite) throws -> String {
+        var content = write.configuration
+        content.updatedAt = 0
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let digest = SHA256.hash(data: Data("yunle-home-icloud-v1:\(write.mutationId):".utf8) + (try encoder.encode(content)))
+        return digest.map { String(format: "%02x", $0) }.joined()
     }
 }

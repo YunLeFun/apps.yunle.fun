@@ -302,6 +302,7 @@ struct HomeLibrarySnapshot: Codable, Equatable {
 
 enum HomeSyncError: Error, LocalizedError {
     case unauthorized, forbidden, unavailable, invalidResponse, unsupportedSchema, storage, conflict(RemoteHomeScreen), identityChanged
+    case iCloudUnavailable, iCloudFull
     var errorDescription: String? {
         switch self {
         case .unauthorized: return "登录状态需要更新，请重新登录后同步。"
@@ -312,6 +313,8 @@ enum HomeSyncError: Error, LocalizedError {
         case .storage: return "无法保存云居，请检查设备存储空间后重试。"
         case .conflict: return "另一台设备更新了云居，请选择要保留的版本。"
         case .identityChanged: return "账号已发生变化，请重新操作。"
+        case .iCloudUnavailable: return "iCloud 当前不可用，请在系统设置中登录 iCloud。更改已保存在此设备。"
+        case .iCloudFull: return "云居内容超出 iCloud 同步容量，更改已保存在此设备。"
         }
     }
 }

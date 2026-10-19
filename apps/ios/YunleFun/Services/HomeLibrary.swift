@@ -301,6 +301,18 @@ final class HomeLibrary: ObservableObject {
         guard persist(next) else { throw HomeSyncError.storage }
     }
 
+    /// Forgets the cloud copy this device last matched and keeps the layout as
+    /// an unsynced change, so a different cloud (another iCloud account) is
+    /// compared with it instead of replacing it.
+    func detachCloudBase() throws {
+        guard snapshot.base != nil || !snapshot.hasPendingChanges else { return }
+        var next = snapshot
+        next.base = nil
+        next.hasPendingChanges = true
+        next.mutationId = UUID().uuidString
+        guard persist(next) else { throw HomeSyncError.storage }
+    }
+
     func keepCloud(_ remote: RemoteHomeScreen) throws {
         guard canWrite else { throw HomeSyncError.storage }
         let backup = fileURL.deletingPathExtension().appendingPathExtension("conflict-\(UUID().uuidString).json")

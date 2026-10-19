@@ -142,32 +142,19 @@ cmd_export() {
   rm -rf "$EXPORT_DIR"
   mkdir -p "$EXPORT_DIR"
 
-  # 与旧版脚本一致：Xcode 26 起 stripSwiftSymbols / uploadSymbols 会让导出在
-  # packaging 阶段失败，先关闭；dSYM 留在归档中，需要时单独上传。
-  local signing
-  if [ -n "${IOS_EXPORT_PROFILE_NAME:-}" ]; then
-    signing="<key>signingStyle</key><string>manual</string>
-	<key>signingCertificate</key><string>$SIGNING_CERTIFICATE</string>
-	<key>provisioningProfiles</key><dict><key>$BUNDLE_ID</key><string>$IOS_EXPORT_PROFILE_NAME</string></dict>"
-  else
-    signing="<key>signingStyle</key><string>automatic</string>"
-  fi
-  cat > "$EXPORT_DIR/ExportOptions.plist" <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>destination</key><string>export</string>
-	<key>method</key><string>app-store-connect</string>
-	<key>teamID</key><string>$TEAM_ID</string>
-	$signing
-	<key>stripSwiftSymbols</key><false/>
-	<key>uploadSymbols</key><false/>
-	<key>manageAppVersionAndBuildNumber</key><false/>
-	<key>testFlightInternalTestingOnly</key><true/>
-</dict>
-</plist>
-EOF
+  # 默认配置与 ASC CLI 共用，避免两条路径的内部限制或符号选项漂移。
+  cp "$IOS_DIR/ExportOptions-TestFlight.plist" "$EXPORT_DIR/ExportOptions.plist"
+  python3 - "$EXPORT_DIR/ExportOptions.plist" "$TEAM_ID" "${IOS_EXPORT_PROFILE_NAME:-}" "$BUNDLE_ID" "$SIGNING_CERTIFICATE" <<'PY_OPTIONS'
+import pathlib, plistlib, sys
+path = pathlib.Path(sys.argv[1])
+options = plistlib.loads(path.read_bytes())
+options['teamID'] = sys.argv[2]
+if sys.argv[3]:
+    options['signingStyle'] = 'manual'
+    options['signingCertificate'] = sys.argv[5]
+    options['provisioningProfiles'] = {sys.argv[4]: sys.argv[3]}
+path.write_bytes(plistlib.dumps(options))
+PY_OPTIONS
 
   echo "==> 导出 App Store Connect .ipa"
   xcodebuild -exportArchive \

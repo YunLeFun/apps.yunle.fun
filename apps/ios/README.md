@@ -6,7 +6,7 @@ SwiftUI 主壳，系统组件优先，云应用复用现有 UIKit / WKWebView �
 
 ## 开发
 
-日常 TestFlight 更新见[原生发布流程](../../docs/dev/testflight.md)，Codex 通过 [ios-deploy](../../.agents/skills/ios-deploy/SKILL.md) 调用与云生共用的 [ios-testflight](../../.agents/skills/ios-testflight/SKILL.md)。2026-10-19 已完成原生 0.2.0 (1) 的内部测试发布与手机 TestFlight 安装；后续按每次用户明确要求执行发布或安装。
+日常 TestFlight 更新见[原生发布流程](../../docs/dev/testflight.md)，Codex 通过 [ios-deploy](../../.agents/skills/ios-deploy/SKILL.md) 调用 [YunYouJun/ai 的共用 ios-testflight](https://github.com/YunYouJun/ai/blob/main/skills/ios-testflight/SKILL.md)。默认复用 ASC CLI，项目参数和导出配置留在本仓库。
 
 提交的 `YunleFun.xcodeproj` 可直接用 Xcode 打开。修改 `project.yml` 后用 XcodeGen 重新生成；首次实施使用 XcodeGen 2.46.0 与 Xcode 27.0。
 

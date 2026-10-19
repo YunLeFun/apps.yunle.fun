@@ -20,8 +20,9 @@ struct AssistantView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    if chat.messages.isEmpty { welcome }
+                    // The sign-in / membership notice leads so it never starts hidden behind the composer.
                     accessNotice
+                    if chat.messages.isEmpty { welcome }
                     ForEach(chat.messages) { message in
                         if message.role == .user {
                             AssistantUserBubble(message: message) { chat.draft = $0; focused = true }
@@ -381,12 +382,12 @@ private struct AssistantLinkRow<Content: View>: View {
     }
 }
 
-/// iOS 26 floats the composer as a bar with the system scroll edge effect;
-/// earlier systems inset the content above it.
+/// iOS 26 floats the composer as a bar with a hard scroll edge so content
+/// scrolling beneath stays legible; earlier systems inset the content above it.
 private struct AssistantBottomBar<Bar: View>: ViewModifier {
     @ViewBuilder var bar: () -> Bar
     @ViewBuilder func body(content: Content) -> some View {
-        if #available(iOS 26, *) { content.safeAreaBar(edge: .bottom, content: bar) }
+        if #available(iOS 26, *) { content.scrollEdgeEffectStyle(.hard, for: .bottom).safeAreaBar(edge: .bottom, content: bar) }
         else { content.safeAreaInset(edge: .bottom, content: bar) }
     }
 }

@@ -27,7 +27,11 @@ struct MeView: View {
                                     loginText
                                 }
                             } else {
-                                Label { loginText } icon: { loginIcon }
+                                // Label centers a large icon in its narrow icon column, pushing it past the row margin.
+                                HStack(spacing: 12) {
+                                    loginIcon
+                                    loginText
+                                }
                             }
                         }
                         .padding(.vertical, 8)
@@ -108,6 +112,7 @@ struct MeView: View {
         }
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
     }
 }
 

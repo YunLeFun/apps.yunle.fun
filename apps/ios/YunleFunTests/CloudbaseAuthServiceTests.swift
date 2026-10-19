@@ -116,6 +116,27 @@ final class CloudbaseAuthServiceTests: XCTestCase {
         XCTAssertFalse(AccountError.message(for: AccountError.captchaRequired).contains("untrusted"))
     }
 
+    func testPhoneInputDropsTheMainlandCountryPrefixFromPastedAndAutofilledNumbers() throws {
+        for input in ["13800000000", "+8613800000000", "+86 138 0000 0000", "0086-138-0000-0000",
+                      "8613800000000", "\u{202A}+86 138 0000 0000\u{202C}", "１３８００００００００"] {
+            XCTAssertEqual(VerificationAddress.normalizedPhoneInput(input), "13800000000", input)
+            XCTAssertEqual(try VerificationAddress.phoneInput(input), .phone("+86 13800000000"), input)
+        }
+        // Partial input stays editable while the user types a prefix.
+        XCTAssertEqual(VerificationAddress.normalizedPhoneInput("+"), "+")
+        XCTAssertEqual(VerificationAddress.normalizedPhoneInput("+8"), "+8")
+        XCTAssertEqual(VerificationAddress.normalizedPhoneInput("+86"), "")
+        XCTAssertEqual(VerificationAddress.normalizedPhoneInput("1380000000099"), "13800000000")
+        XCTAssertEqual(VerificationAddress.normalizedPhoneInput("+1 415 555 0100"), "+14155550100")
+        XCTAssertThrowsError(try VerificationAddress.phoneInput("+1 415 555 0100")) {
+            XCTAssertEqual($0 as? AccountError, .unsupportedPhoneRegion)
+        }
+        XCTAssertThrowsError(try VerificationAddress.phoneInput("+8")) { XCTAssertEqual($0 as? AccountError, .invalidPhone) }
+        for input in ["+8613800000000", "0086 138 0000 0000"] {
+            XCTAssertEqual(try VerificationAddress.passwordIdentifier(input), "+86 13800000000", input)
+        }
+    }
+
     func testInvalidInputsAndExpiredChallengeDoNotSendARequest() async throws {
         let (api, fixture) = service([])
         do { _ = try await api.passwordSignIn(identifier: "", password: "test", deviceID: "test-device", captcha: nil); XCTFail() }

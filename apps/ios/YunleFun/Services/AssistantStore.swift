@@ -118,7 +118,9 @@ final class AssistantStore: ObservableObject {
     func deleteAll() {
         guard current, let store = historyStore, let uid = historyAccountID else { return }
         if rawRunning { stop() }
-        store.deleteAll(accountID: uid); rawHistory = []; savedMessages = rawMessages
+        // Keep showing what is still on disk if the file could not be removed.
+        guard store.deleteAll(accountID: uid) else { rawHistory = store.load(accountID: uid); return }
+        rawHistory = []; savedMessages = rawMessages
     }
     private var historyAccountID: String? {
         guard historyStore != nil, let uid = access.boundary.uid, access.accounts.user?.isUsable == true else { return nil }

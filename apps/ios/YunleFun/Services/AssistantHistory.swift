@@ -47,12 +47,17 @@ struct AssistantHistory: Sendable {
     @discardableResult func delete(_ id: String, accountID: String) -> [AssistantConversation] {
         write(load(accountID: accountID).filter { $0.id != id }, accountID: accountID).0
     }
-    func deleteAll(accountID: String) {
-        try? FileManager.default.removeItem(at: fileURL(accountID: accountID))
+    /// Removes the account's history file; false when it is still on disk.
+    @discardableResult func deleteAll(accountID: String) -> Bool {
+        let file = fileURL(accountID: accountID)
+        do { try FileManager.default.removeItem(at: file) } catch { return !FileManager.default.fileExists(atPath: file.path) }
+        return true
     }
     private func write(_ conversations: [AssistantConversation], accountID: String) -> ([AssistantConversation], Bool) {
         var list = conversations
-        guard !list.isEmpty else { deleteAll(accountID: accountID); return ([], true) }
+        guard !list.isEmpty else {
+            return deleteAll(accountID: accountID) ? ([], true) : (load(accountID: accountID), false)
+        }
         var data = (try? Self.encoder.encode(list)) ?? Data()
         while data.count > Self.byteLimit && list.count > 1 {
             list.removeLast(); data = (try? Self.encoder.encode(list)) ?? Data()

@@ -66,6 +66,16 @@ final class AssistantHistoryTests: XCTestCase {
         try FileManager.default.removeItem(at: directory)
         XCTAssertTrue(history.save(conversation("new", at: 3), accountID: "alice").saved)
     }
+    func testAFailedRemovalIsReportedAndKeepsTheHistory() throws {
+        history.save(conversation("only", at: 1), accountID: "alice")
+        // A read-only folder makes removing its files fail.
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: directory.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: directory.path) }
+        XCTAssertFalse(history.deleteAll(accountID: "alice"))
+        XCTAssertEqual(history.delete("only", accountID: "alice").map(\.id), ["only"])
+        XCTAssertEqual(history.load(accountID: "alice").map(\.id), ["only"])
+        XCTAssertTrue(history.deleteAll(accountID: "bob"), "A missing file counts as deleted.")
+    }
     func testSnapshotDropsInFlightStateAndNeedsAQuestion() throws {
         XCTAssertNil(AssistantHistory.conversation(id: "t", messages: []))
         let saved = try XCTUnwrap(AssistantHistory.conversation(id: "t", messages: [

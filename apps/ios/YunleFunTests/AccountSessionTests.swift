@@ -294,8 +294,15 @@ final class AccountSessionTests: XCTestCase {
                 messages: [AssistantMessage(id: "q", role: .user, content: "问题")])), accountID: id)
         }
         let vault = try vaultWithAccounts(["a", "b"])
+        final class Box { var store: AccountStore?; var userAtCleanup: String?? }
+        let box = Box()
         let store = AccountStore(session: AccountSession(api: AccountTestAPI(), vault: vault, now: { self.fixedNow }),
-                                 accountDidRemove: { history.deleteAll(accountID: $0) })
+                                 accountDidRemove: { id in
+            // Identity-scoped stores must already see the change, so nothing can write for the removed account.
+            box.userAtCleanup = .some(box.store?.user?.id)
+            history.deleteAll(accountID: id)
+        })
+        box.store = store
         await store.restore()
         vault.failNextWrite()
         do { try await store.remove("a"); XCTFail("The failed vault write must be reported") }
@@ -303,6 +310,8 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertEqual(store.user?.id, "a")
         XCTAssertEqual(history.load(accountID: "a").map(\.id), ["thread-a"], "A failed local removal keeps the account's history")
         try await store.remove("a")
+        XCTAssertNotNil(box.userAtCleanup)
+        XCTAssertNotEqual(box.userAtCleanup ?? nil, "a", "History is deleted only after the removed identity is published")
         XCTAssertTrue(history.load(accountID: "a").isEmpty)
         XCTAssertEqual(history.load(accountID: "b").map(\.id), ["thread-b"])
     }

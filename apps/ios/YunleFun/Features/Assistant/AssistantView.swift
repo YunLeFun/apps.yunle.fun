@@ -24,7 +24,7 @@ struct AssistantView: View {
                     if chat.messages.isEmpty { welcome }
                     ForEach(chat.messages) { message in
                         if message.role == .user {
-                            AssistantUserBubble(message: message) { chat.draft = $0; focused = true }
+                            AssistantUserBubble(message: message) { fillDraft($0); focused = true }
                         } else {
                             AssistantReply(message: message, isLatest: message.id == chat.messages.last?.id, canRegenerate: !chat.running) {
                                 focused = false; chat.retry()
@@ -91,7 +91,7 @@ struct AssistantView: View {
         .onChange(of: accounts.identityGeneration) { _ in
             modal = nil
             if let prompt = pendingGuestPrompt, accounts.user?.isUsable == true {
-                chat.identityChanged(); chat.draft = prompt; pendingGuestPrompt = nil
+                chat.identityChanged(); fillDraft(prompt); pendingGuestPrompt = nil
             }
         }
         // A vertical TextField inserts a newline for Return instead of calling onSubmit, so the 发送 key is
@@ -169,7 +169,8 @@ struct AssistantView: View {
         .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 8)
         .modifier(AssistantComposerChrome())
         .overlay(alignment: .top) {
-            if !endVisible && !chat.messages.isEmpty {
+            // Appearance of the lazy end marker is only a hint, so recovery stays available whenever following is paused.
+            if (!endVisible || !followLatest) && !chat.messages.isEmpty {
                 Button { followLatest = true; scrollToEnd(proxy, animated: true) } label: {
                     Image(systemName: "arrow.down").font(.body.weight(.semibold)).frame(width: 44, height: 44)
                 }
@@ -182,6 +183,7 @@ struct AssistantView: View {
         }
         .animation(Motion.fade, value: chat.running)
         .animation(Motion.fade, value: endVisible)
+        .animation(Motion.fade, value: followLatest)
         .animation(Motion.fade, value: showsSuggestions)
     }
     /// Example prompts sit next to the thumb; tapping one fills the draft so it can be edited before sending.
@@ -189,7 +191,7 @@ struct AssistantView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(AssistantStore.examples, id: \.self) { prompt in
-                    Button { chat.draft = prompt; focused = true } label: {
+                    Button { fillDraft(prompt); focused = true } label: {
                         Text(prompt).font(.subheadline).lineLimit(1)
                             .padding(.horizontal, 14).padding(.vertical, 9)
                             .modifier(AssistantChipBackground())
@@ -251,6 +253,12 @@ struct AssistantView: View {
             .accessibilityHint(sendHint)
             .accessibilityIdentifier("assistant.send")
         }
+    }
+    /// Programmatic draft changes (examples, editing an earlier question, a restored guest prompt) record
+    /// the new text as the baseline first, so they can never look like a typed Return and send.
+    private func fillDraft(_ text: String) {
+        lastDraft = text
+        chat.draft = text
     }
     private func scrollToEnd(_ proxy: ScrollViewProxy, animated: Bool) {
         if animated && !reduceMotion { withAnimation(Motion.spring) { proxy.scrollTo(Self.end, anchor: .bottom) } }

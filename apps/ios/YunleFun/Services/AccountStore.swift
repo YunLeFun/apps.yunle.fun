@@ -122,12 +122,13 @@ final class AccountStore: ObservableObject {
         try accountWillRemove(id)
         _ = beginSelectionOperation()
         let revocation = try await session.remove(id)
-        // Irreversible cleanup waits for the committed local removal, so a
-        // failed vault write leaves the account and its data intact.
-        accountDidRemove(id)
         // Clear private data and close identity-bound WebViews immediately;
         // a slow/offline remote sign-out must not delay the local transition.
         await publish()
+        // Irreversible cleanup waits for the committed local removal, so a failed vault write
+        // leaves the account and its data intact. It also runs after the identity change is
+        // published, so identity-scoped stores can no longer write for the removed account.
+        accountDidRemove(id)
         let revoked = await revocation.value
         notice = revoked ? nil : "已在此设备退出，暂时未能同步退出状态。"
     }

@@ -34,9 +34,12 @@ struct HomeView: View {
         return assistantRollout.rollout.admits(userID: user, isMember: wallet.snapshot?.membership.isActive)
     }
 
-    private func loadMembershipIfUnknown() async {
-        guard assistantRollout.rollout.audience == .members, accounts.user?.isUsable == true,
-              wallet.snapshot == nil, !wallet.isLoading else { return }
+    /// Membership decides the members-only entry. An explicit refresh always re-reads it; otherwise only an
+    /// unknown membership, or one older than ten minutes, is read again (for example after launching offline,
+    /// or after the membership changed on another device).
+    private func loadMembership(force: Bool = false) async {
+        guard assistantRollout.rollout.audience == .members, accounts.user?.isUsable == true, !wallet.isLoading else { return }
+        if !force, wallet.snapshot != nil, let checked = wallet.checkedAt, Date().timeIntervalSince(checked) < 10 * 60 { return }
         await wallet.refreshAccount()
     }
 
@@ -118,13 +121,12 @@ struct HomeView: View {
         .haptic(.selection, trigger: pinChanges)
         .refreshable {
             await sync.recheck()
-            await loadMembershipIfUnknown()
+            await loadMembership(force: true)
         }
         .navigationTitle("云居")
-        // Membership decides the members-only entry: load it once per identity, and retry an unknown
-        // membership (for example after launching offline) on refresh and on returning to the app.
-        .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembershipIfUnknown() }
-        .onChange(of: scenePhase) { if $0 == .active { Task { await loadMembershipIfUnknown() } } }
+        // Read membership once per identity, and again when it is unknown or stale on returning to the app.
+        .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembership() }
+        .onChange(of: scenePhase) { if $0 == .active { Task { await loadMembership() } } }
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .general) }
         .sheet(item: $openFolder) { HomeFolderView(folderID: $0.id) }
         .toolbar {

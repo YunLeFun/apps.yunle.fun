@@ -21,6 +21,7 @@ final class AssistantStore: ObservableObject {
     @Published private var rawRunning = false
     @Published private var rawAccess = Access.unknown
     @Published private var rawHistory: [AssistantConversation] = []
+    @Published private var rawHistoryUnsaved = false
     @Published private(set) var scrollRevision = 0
     var messages: [AssistantMessage] { current ? rawMessages : [] }
     var error: String? { current ? rawError : nil }
@@ -28,6 +29,9 @@ final class AssistantStore: ObservableObject {
     var accessState: Access { current ? rawAccess : .unknown }
     /// Saved conversations of the current signed-in account; empty for guests and across identity changes.
     var history: [AssistantConversation] { current ? rawHistory : [] }
+    /// The open conversation could not be written to history; it is retried at the next save point
+    /// and is lost only if the user starts a new conversation anyway.
+    var historyUnsaved: Bool { current && rawHistoryUnsaved }
     var draft: String {
         get { current ? rawDraft : "" }
         set { prepareIdentity(); rawDraft = newValue }
@@ -45,7 +49,7 @@ final class AssistantStore: ObservableObject {
         guard !current else { return }
         task?.cancel(); task = nil; operation = UUID(); boundary = access.boundary
         rawMessages = []; rawError = nil; rawDraft = ""; rawRunning = false; rawAccess = .unknown
-        threadID = "thread_" + UUID().uuidString; savedMessages = nil
+        threadID = "thread_" + UUID().uuidString; savedMessages = nil; rawHistoryUnsaved = false
         loadHistory()
     }
     func refreshAccess() async {
@@ -82,7 +86,7 @@ final class AssistantStore: ObservableObject {
         persist()
     }
     func reset() {
-        stop(); rawMessages = []; rawError = nil; savedMessages = nil
+        stop(); rawMessages = []; rawError = nil; savedMessages = nil; rawHistoryUnsaved = false
         rawDraft = ""; threadID = "thread_" + UUID().uuidString; scrollRevision += 1
     }
     /// Continues a saved conversation in the same Agent thread.
@@ -92,7 +96,7 @@ final class AssistantStore: ObservableObject {
         // prefer the freshly saved copy when it is still there.
         stop()
         let conversation = rawHistory.first(where: { $0.id == id }) ?? selected
-        rawMessages = conversation.messages; savedMessages = conversation.messages
+        rawMessages = conversation.messages; savedMessages = conversation.messages; rawHistoryUnsaved = false
         threadID = conversation.id; rawError = nil; rawDraft = ""; scrollRevision += 1
     }
     func delete(_ id: String) {
@@ -119,8 +123,10 @@ final class AssistantStore: ObservableObject {
     private func persist() {
         guard current, !rawRunning, rawMessages != savedMessages, let store = historyStore, let uid = historyAccountID,
               let conversation = AssistantHistory.conversation(id: threadID, messages: rawMessages) else { return }
-        rawHistory = store.save(conversation, accountID: uid)
-        savedMessages = rawMessages
+        let result = store.save(conversation, accountID: uid)
+        rawHistory = result.conversations
+        rawHistoryUnsaved = !result.saved
+        if result.saved { savedMessages = rawMessages }
     }
     private func begin(prompt: String, retry: Bool) -> Task<Void, Never>? {
         guard access.boundary.uid != nil, access.accounts.user?.isUsable == true else {

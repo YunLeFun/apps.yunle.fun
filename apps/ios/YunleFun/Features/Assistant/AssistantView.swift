@@ -74,7 +74,9 @@ struct AssistantView: View {
         }
         .confirmationDialog("开始新对话？", isPresented: $confirmReset, titleVisibility: .visible) {
             Button("开始新对话", role: .destructive) { focused = false; chat.reset() }
-        } message: { Text(accounts.user?.isUsable == true ? "当前对话已保存到历史对话。" : "当前对话只保留在本机内存中，开始新对话后不能找回。") }
+        } message: {
+            Text(accounts.user?.isUsable == true && !chat.historyUnsaved ? "当前对话已保存到历史对话。" : "当前对话未保存到历史对话，开始新对话后不能找回。")
+        }
         .sheet(item: $modal, onDismiss: { if accounts.user == nil { pendingGuestPrompt = nil } }) { item in
             switch item {
             case .login: LoginView(continuationMessage: "登录后继续使用 AI 助手，发送前会核对会员状态。")
@@ -320,7 +322,11 @@ private struct AssistantReply: View {
             if message.status == .stopped {
                 Label("已停止", systemImage: "stop.circle").font(.subheadline).foregroundStyle(.secondary)
             }
-            if isLatest && !streaming && !message.content.isEmpty { actions }
+            if message.status == .failed {
+                Label("未能完成回复", systemImage: "exclamationmark.circle").font(.subheadline).foregroundStyle(.secondary)
+            }
+            // Regenerate stays available for a reply that failed or stopped before any text; copy and share need text.
+            if isLatest && !streaming && (!message.content.isEmpty || canRegenerate) { actions }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .haptic(.success, trigger: copied) { _, new in new }
@@ -398,11 +404,13 @@ private struct AssistantReply: View {
     }
     private var actions: some View {
         HStack(spacing: 4) {
-            Button(action: copy) {
-                if copied { Label("已复制", systemImage: "checkmark").frame(minWidth: 36, minHeight: 32) }
-                else { Label("复制回复", systemImage: "doc.on.doc").frame(minWidth: 36, minHeight: 32) }
+            if !message.content.isEmpty {
+                Button(action: copy) {
+                    if copied { Label("已复制", systemImage: "checkmark").frame(minWidth: 36, minHeight: 32) }
+                    else { Label("复制回复", systemImage: "doc.on.doc").frame(minWidth: 36, minHeight: 32) }
+                }
+                ShareLink(item: message.content) { Label("分享回复", systemImage: "square.and.arrow.up").frame(minWidth: 36, minHeight: 32) }
             }
-            ShareLink(item: message.content) { Label("分享回复", systemImage: "square.and.arrow.up").frame(minWidth: 36, minHeight: 32) }
             if canRegenerate {
                 Button(action: regenerate) { Label("重新生成", systemImage: "arrow.clockwise").frame(minWidth: 36, minHeight: 32) }
             }
@@ -493,6 +501,12 @@ struct AssistantHistoryView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
+                        if chat.historyUnsaved {
+                            Section {
+                                Label("当前对话暂时未能保存，会在下次回复结束时重试；打开其他对话会放弃它。", systemImage: "exclamationmark.triangle")
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
                         Section {
                             ForEach(chat.history) { conversation in
                                 Button { open(conversation.id) } label: {

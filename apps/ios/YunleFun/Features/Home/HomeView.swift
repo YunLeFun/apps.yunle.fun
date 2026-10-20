@@ -10,6 +10,7 @@ struct HomeView: View {
     @EnvironmentObject private var assistantRollout: AssistantRolloutStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("home.showRecent") private var showRecent = true
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var editing = false
@@ -31,6 +32,12 @@ struct HomeView: View {
     private var showsAssistant: Bool {
         let user = accounts.user?.isUsable == true ? accounts.user?.id : nil
         return assistantRollout.rollout.admits(userID: user, isMember: wallet.snapshot?.membership.isActive)
+    }
+
+    private func loadMembershipIfUnknown() async {
+        guard assistantRollout.rollout.audience == .members, accounts.user?.isUsable == true,
+              wallet.snapshot == nil, !wallet.isLoading else { return }
+        await wallet.refreshAccount()
     }
 
     var body: some View {
@@ -109,14 +116,15 @@ struct HomeView: View {
             if editing && keys == ["|"] { withAnimation(Motion.fade) { editing = false } }
         }
         .haptic(.selection, trigger: pinChanges)
-        .refreshable { await sync.recheck() }
-        .navigationTitle("云居")
-        .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") {
-            // Membership decides the members-only entry; load it once per identity if nothing else has.
-            guard assistantRollout.rollout.audience == .members, accounts.user?.isUsable == true,
-                  wallet.snapshot == nil, !wallet.isLoading else { return }
-            await wallet.refreshAccount()
+        .refreshable {
+            await sync.recheck()
+            await loadMembershipIfUnknown()
         }
+        .navigationTitle("云居")
+        // Membership decides the members-only entry: load it once per identity, and retry an unknown
+        // membership (for example after launching offline) on refresh and on returning to the app.
+        .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembershipIfUnknown() }
+        .onChange(of: scenePhase) { if $0 == .active { Task { await loadMembershipIfUnknown() } } }
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .general) }
         .sheet(item: $openFolder) { HomeFolderView(folderID: $0.id) }
         .toolbar {

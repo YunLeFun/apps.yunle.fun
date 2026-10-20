@@ -31,36 +31,42 @@ struct AssistantHistory: Sendable {
               let saved = try? Self.decoder.decode([AssistantConversation].self, from: data) else { return [] }
         return Array(saved.sorted { $0.updatedAt > $1.updatedAt }.prefix(Self.limit))
     }
-    /// Inserts or replaces the conversation and returns the saved list, newest first.
-    @discardableResult func save(_ conversation: AssistantConversation, accountID: String) -> [AssistantConversation] {
+    struct SaveResult: Equatable {
+        /// What is stored now, newest first; the previous list when the write failed.
+        let conversations: [AssistantConversation]
+        let saved: Bool
+    }
+    /// Inserts or replaces the conversation; `saved` is false when it could not be written.
+    @discardableResult func save(_ conversation: AssistantConversation, accountID: String) -> SaveResult {
         var list = load(accountID: accountID).filter { $0.id != conversation.id }
         list.insert(conversation, at: 0)
         list.sort { $0.updatedAt > $1.updatedAt }
-        return write(Array(list.prefix(Self.limit)), accountID: accountID)
+        let (stored, written) = write(Array(list.prefix(Self.limit)), accountID: accountID)
+        return SaveResult(conversations: stored, saved: written && stored.contains { $0.id == conversation.id })
     }
     @discardableResult func delete(_ id: String, accountID: String) -> [AssistantConversation] {
-        write(load(accountID: accountID).filter { $0.id != id }, accountID: accountID)
+        write(load(accountID: accountID).filter { $0.id != id }, accountID: accountID).0
     }
     func deleteAll(accountID: String) {
         try? FileManager.default.removeItem(at: fileURL(accountID: accountID))
     }
-    private func write(_ conversations: [AssistantConversation], accountID: String) -> [AssistantConversation] {
+    private func write(_ conversations: [AssistantConversation], accountID: String) -> ([AssistantConversation], Bool) {
         var list = conversations
-        guard !list.isEmpty else { deleteAll(accountID: accountID); return [] }
+        guard !list.isEmpty else { deleteAll(accountID: accountID); return ([], true) }
         var data = (try? Self.encoder.encode(list)) ?? Data()
         while data.count > Self.byteLimit && list.count > 1 {
             list.removeLast(); data = (try? Self.encoder.encode(list)) ?? Data()
         }
-        guard !data.isEmpty, data.count <= Self.byteLimit else { return load(accountID: accountID) }
+        guard !data.isEmpty, data.count <= Self.byteLimit else { return (load(accountID: accountID), false) }
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             var folder = directory; try? Self.excludeFromBackup(&folder)
             var file = fileURL(accountID: accountID)
             try data.write(to: file, options: [.atomic, .completeFileProtectionUnlessOpen])
             try? Self.excludeFromBackup(&file)
-            return list
+            return (list, true)
         } catch {
-            return load(accountID: accountID)
+            return (load(accountID: accountID), false)
         }
     }
     private static func excludeFromBackup(_ url: inout URL) throws {

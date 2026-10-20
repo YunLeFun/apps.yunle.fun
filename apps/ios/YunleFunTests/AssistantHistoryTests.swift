@@ -56,6 +56,16 @@ final class AssistantHistoryTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: history.fileURL(accountID: "alice").path))
         XCTAssertEqual(history.load(accountID: "bob").map(\.id), ["b"])
     }
+    func testAFailedWriteIsReportedAsUnsaved() throws {
+        history.save(conversation("kept", at: 1), accountID: "alice")
+        // Replace the folder with a file so the next write fails.
+        try FileManager.default.removeItem(at: directory)
+        try Data().write(to: directory)
+        let result = history.save(conversation("new", at: 2), accountID: "alice")
+        XCTAssertFalse(result.saved)
+        try FileManager.default.removeItem(at: directory)
+        XCTAssertTrue(history.save(conversation("new", at: 3), accountID: "alice").saved)
+    }
     func testSnapshotDropsInFlightStateAndNeedsAQuestion() throws {
         XCTAssertNil(AssistantHistory.conversation(id: "t", messages: []))
         let saved = try XCTUnwrap(AssistantHistory.conversation(id: "t", messages: [
@@ -159,6 +169,18 @@ final class AssistantStoreHistoryTests: XCTestCase {
         store.open("t0")
         XCTAssertEqual(store.threadID, "t0", "Saving the stopped reply must not lose the selected conversation")
         XCTAssertEqual(store.messages.first?.content, "问题0")
+    }
+    func testAFailedSaveIsRetriedInsteadOfMarkedSaved() async throws {
+        let accounts = BillingAccounts(), history = AssistantHistory(directory: directory)
+        let store = AssistantStore(accounts: accounts, service: AssistantFixture(), wallet: AssistantWalletFixture(), history: history)
+        try Data().write(to: directory)  // Storage is unavailable while the reply finishes.
+        store.draft = "存不下的问题"; await store.send()?.value
+        XCTAssertTrue(store.historyUnsaved)
+        XCTAssertTrue(store.history.isEmpty)
+        try FileManager.default.removeItem(at: directory)
+        store.stop()  // The next save point retries the unchanged conversation.
+        XCTAssertFalse(store.historyUnsaved)
+        XCTAssertEqual(history.load(accountID: "alice").map(\.title), ["存不下的问题"])
     }
     func testGuestsAndStoresWithoutHistoryNeverWrite() async {
         let accounts = BillingAccounts(); accounts.select(nil)

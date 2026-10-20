@@ -217,6 +217,9 @@ export default defineNuxtConfig({
     appsAcquisitionInternalToken: process.env.NUXT_APPS_ACQUISITION_INTERNAL_TOKEN || process.env.APPS_ACQUISITION_INTERNAL_TOKEN || '',
     // 第三方模型与接口预留，但产品入口默认关闭并展示「敬请期待」。
     appThirdPartySubmissionsEnabled: process.env.NUXT_APP_THIRD_PARTY_SUBMISSIONS_ENABLED === 'true',
+    // 原生 AI 助手入口灰度：off | members | signedIn | everyone，按账号稳定分桶放量；/api/features 公开下发。
+    assistantAudience: process.env.NUXT_ASSISTANT_AUDIENCE || 'members',
+    assistantRolloutPercent: process.env.NUXT_ASSISTANT_ROLLOUT_PERCENT || '100',
     tmsRegion: 'ap-guangzhou',
     tmsBizType: '',
     public: {

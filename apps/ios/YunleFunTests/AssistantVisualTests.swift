@@ -19,7 +19,7 @@ final class AssistantVisualTests: XCTestCase {
         }
         let chat = AssistantStore(accounts: BillingAccounts(), service: AssistantVisualService(), wallet: AssistantWalletFixture(), history: history)
         XCTAssertEqual(chat.history.count, 3)
-        let controller = UIHostingController(rootView: AssistantHistoryView { _ in }.environmentObject(chat))
+        let controller = UIHostingController(rootView: AssistantHistoryView { _, _ in true }.environmentObject(chat))
         let image = try await snapshot(controller)
         let attachment = XCTAttachment(image: image)
         attachment.name = "assistant-history-sheet"; attachment.lifetime = .keepAlways; add(attachment)

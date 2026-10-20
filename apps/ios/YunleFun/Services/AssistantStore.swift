@@ -85,19 +85,27 @@ final class AssistantStore: ObservableObject {
         }
         persist()
     }
-    func reset() {
-        stop(); rawMessages = []; rawError = nil; savedMessages = nil; rawHistoryUnsaved = false
+    /// Starts a new conversation. When the current one could not be saved to history, it is kept and
+    /// false is returned, unless the user chose to discard it.
+    @discardableResult func reset(discardUnsaved: Bool = false) -> Bool {
+        stop()
+        guard discardUnsaved || !historyUnsaved else { return false }
+        rawMessages = []; rawError = nil; savedMessages = nil; rawHistoryUnsaved = false
         rawDraft = ""; threadID = "thread_" + UUID().uuidString; scrollRevision += 1
+        return true
     }
-    /// Continues a saved conversation in the same Agent thread.
-    func open(_ id: String) {
-        guard current, let selected = rawHistory.first(where: { $0.id == id }) else { return }
+    /// Continues a saved conversation in the same Agent thread. Like `reset`, it keeps a current
+    /// conversation that could not be saved and returns false, unless the user chose to discard it.
+    @discardableResult func open(_ id: String, discardUnsaved: Bool = false) -> Bool {
+        guard current, let selected = rawHistory.first(where: { $0.id == id }) else { return false }
         // Stopping saves a running thread, which can push the selection past the limit;
         // prefer the freshly saved copy when it is still there.
         stop()
+        guard discardUnsaved || !historyUnsaved else { return false }
         let conversation = rawHistory.first(where: { $0.id == id }) ?? selected
         rawMessages = conversation.messages; savedMessages = conversation.messages; rawHistoryUnsaved = false
         threadID = conversation.id; rawError = nil; rawDraft = ""; scrollRevision += 1
+        return true
     }
     func delete(_ id: String) {
         guard current, let store = historyStore, let uid = historyAccountID else { return }

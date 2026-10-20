@@ -16,6 +16,7 @@ struct AssistantView: View {
     @State private var followLatest = true
     @State private var endVisible = true
     @State private var confirmReset = false
+    @State private var confirmDiscard = false
     @State private var lastDraft = ""
     var body: some View {
         ScrollViewReader { proxy in
@@ -73,17 +74,22 @@ struct AssistantView: View {
             }
         }
         .confirmationDialog("开始新对话？", isPresented: $confirmReset, titleVisibility: .visible) {
-            Button("开始新对话", role: .destructive) { focused = false; chat.reset() }
+            Button("开始新对话", role: .destructive) { focused = false; if !chat.reset() { confirmDiscard = true } }
         } message: {
             Text(accounts.user?.isUsable == true && !chat.historyUnsaved ? "当前对话已保存到历史对话。" : "当前对话未保存到历史对话，开始新对话后不能找回。")
         }
+        .confirmationDialog("当前对话未能保存", isPresented: $confirmDiscard, titleVisibility: .visible) {
+            Button("放弃并开始新对话", role: .destructive) { chat.reset(discardUnsaved: true) }
+        } message: { Text("保存到这台设备失败，可以稍后再试。开始新对话会丢失当前对话的内容。") }
         .sheet(item: $modal, onDismiss: { if accounts.user == nil { pendingGuestPrompt = nil } }) { item in
             switch item {
             case .login: LoginView(continuationMessage: "登录后继续使用 AI 助手，发送前会核对会员状态。")
             case .membership: NavigationStack { MembershipView().toolbar { ToolbarItem(placement: .cancellationAction) { Button("完成") { modal = nil } } } }
             case .history:
-                AssistantHistoryView { id in
-                    modal = nil; followLatest = true; chat.open(id)
+                AssistantHistoryView { id, discard in
+                    guard chat.open(id, discardUnsaved: discard) else { return false }
+                    modal = nil; followLatest = true
+                    return true
                 }
             }
         }
@@ -492,10 +498,12 @@ private struct AssistantTypingIndicator: View {
 
 /// Saved conversations of the current account on this device.
 struct AssistantHistoryView: View {
-    let open: (String) -> Void
+    /// Opens a conversation; false when the current one could not be saved and was kept.
+    let open: (_ id: String, _ discardUnsaved: Bool) -> Bool
     @EnvironmentObject private var chat: AssistantStore
     @Environment(\.dismiss) private var dismiss
     @State private var confirmClear = false
+    @State private var pendingOpen: String?
     var body: some View {
         NavigationStack {
             Group {
@@ -517,7 +525,7 @@ struct AssistantHistoryView: View {
                         }
                         Section {
                             ForEach(chat.history) { conversation in
-                                Button { open(conversation.id) } label: {
+                                Button { if !open(conversation.id, false) { pendingOpen = conversation.id } } label: {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(verbatim: conversation.title).lineLimit(2).foregroundStyle(.primary)
                                         Text(conversation.updatedAt, format: .relative(presentation: .named))
@@ -546,6 +554,10 @@ struct AssistantHistoryView: View {
                         .disabled(chat.history.isEmpty)
                 }
             }
+            .confirmationDialog("当前对话未能保存", isPresented: Binding(get: { pendingOpen != nil }, set: { if !$0 { pendingOpen = nil } }),
+                                titleVisibility: .visible) {
+                Button("放弃当前对话并打开", role: .destructive) { if let id = pendingOpen { _ = open(id, true) }; pendingOpen = nil }
+            } message: { Text("保存到这台设备失败。打开其他对话会丢失当前对话的内容。") }
             .confirmationDialog("清除全部历史对话？", isPresented: $confirmClear, titleVisibility: .visible) {
                 Button("清除全部", role: .destructive) { chat.deleteAll() }
             } message: { Text("只删除这台设备上当前账号的对话，删除后不能恢复。") }

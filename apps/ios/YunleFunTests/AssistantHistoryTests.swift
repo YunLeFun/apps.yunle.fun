@@ -182,6 +182,26 @@ final class AssistantStoreHistoryTests: XCTestCase {
         XCTAssertFalse(store.historyUnsaved)
         XCTAssertEqual(history.load(accountID: "alice").map(\.title), ["存不下的问题"])
     }
+    func testResetAndOpenKeepAConversationThatCouldNotBeSaved() async throws {
+        let accounts = BillingAccounts(), history = AssistantHistory(directory: directory)
+        history.save(try XCTUnwrap(AssistantHistory.conversation(id: "older", messages: [
+            AssistantMessage(id: "q", role: .user, content: "旧问题")
+        ])), accountID: "alice")
+        let service = AssistantFixture(automatic: false)
+        let store = AssistantStore(accounts: accounts, service: service, wallet: AssistantWalletFixture(), history: history)
+        store.draft = "进行中的问题"; let run = store.send()
+        await fulfillment(of: [service.started], timeout: 5)
+        // Storage becomes unavailable while the reply is still streaming.
+        try FileManager.default.removeItem(at: directory); try Data().write(to: directory)
+        XCTAssertFalse(store.reset(), "A conversation that could not be saved is kept")
+        await run?.value
+        XCTAssertTrue(store.historyUnsaved)
+        XCTAssertEqual(store.messages.first?.content, "进行中的问题")
+        XCTAssertFalse(store.open("older"))
+        XCTAssertEqual(store.messages.first?.content, "进行中的问题")
+        XCTAssertTrue(store.reset(discardUnsaved: true))
+        XCTAssertTrue(store.messages.isEmpty); XCTAssertFalse(store.historyUnsaved)
+    }
     func testGuestsAndStoresWithoutHistoryNeverWrite() async {
         let accounts = BillingAccounts(); accounts.select(nil)
         let history = AssistantHistory(directory: directory)

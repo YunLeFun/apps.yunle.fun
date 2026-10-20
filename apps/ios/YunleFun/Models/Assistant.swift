@@ -225,3 +225,16 @@ struct AssistantRunAccumulator {
         guard content.utf8.count <= 64 * 1024 else { throw AssistantError.tooLong }
     }
 }
+
+/// Return handling for the multi-line composer, whose 发送 key inserts a newline instead of calling onSubmit.
+enum AssistantComposer {
+    /// The draft before a just-typed Return when `new` differs from `old` by exactly one inserted
+    /// newline, at any caret position; nil for pastes and programmatic edits, which stay draft-only.
+    static func submission(from old: String, to new: String) -> String? {
+        guard new.count == old.count + 1 else { return nil }
+        var o = old.startIndex, n = new.startIndex
+        while o < old.endIndex, old[o] == new[n] { o = old.index(after: o); n = new.index(after: n) }
+        guard new[n] == "\n", new[new.index(after: n)...] == old[o...] else { return nil }
+        return old
+    }
+}

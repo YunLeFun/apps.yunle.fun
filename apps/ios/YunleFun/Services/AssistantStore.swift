@@ -87,19 +87,25 @@ final class AssistantStore: ObservableObject {
     }
     /// Continues a saved conversation in the same Agent thread.
     func open(_ id: String) {
+        guard current, let selected = rawHistory.first(where: { $0.id == id }) else { return }
+        // Stopping saves a running thread, which can push the selection past the limit;
+        // prefer the freshly saved copy when it is still there.
         stop()
-        guard current, let conversation = rawHistory.first(where: { $0.id == id }) else { return }
+        let conversation = rawHistory.first(where: { $0.id == id }) ?? selected
         rawMessages = conversation.messages; savedMessages = conversation.messages
         threadID = conversation.id; rawError = nil; rawDraft = ""; scrollRevision += 1
     }
     func delete(_ id: String) {
         guard current, let store = historyStore, let uid = historyAccountID else { return }
+        // Finish an active reply first, so its final snapshot cannot save the deleted thread again.
+        if id == threadID && rawRunning { stop() }
         rawHistory = store.delete(id, accountID: uid)
         // A deleted open conversation is only saved again if it gets new messages.
         if id == threadID { savedMessages = rawMessages }
     }
     func deleteAll() {
         guard current, let store = historyStore, let uid = historyAccountID else { return }
+        if rawRunning { stop() }
         store.deleteAll(accountID: uid); rawHistory = []; savedMessages = rawMessages
     }
     private var historyAccountID: String? {

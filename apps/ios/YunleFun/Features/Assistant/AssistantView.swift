@@ -16,6 +16,7 @@ struct AssistantView: View {
     @State private var followLatest = true
     @State private var endVisible = true
     @State private var confirmReset = false
+    @State private var lastDraft = ""
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -91,15 +92,17 @@ struct AssistantView: View {
                 chat.identityChanged(); chat.draft = prompt; pendingGuestPrompt = nil
             }
         }
-        // A vertical TextField inserts a newline for Return instead of calling onSubmit, so the 发送 key is handled here.
+        // A vertical TextField inserts a newline for Return instead of calling onSubmit, so the 发送 key is
+        // recognised as a single typed newline; pasted text never sends.
         .onChange(of: chat.draft) { value in
-            guard value.hasSuffix("\n") else { return }
-            chat.draft = String(value.dropLast())
+            defer { lastDraft = chat.draft }
+            guard let submitted = AssistantComposer.submission(from: lastDraft, to: value) else { return }
+            chat.draft = submitted
             send()
         }
         .onChange(of: scenePhase) { if $0 != .active { chat.stop() } }
         // Pushing a card's detail page keeps the reply streaming; leaving the assistant stops it (see AssistantScreenLifetime).
-        .onAppear { lifetime.chat = chat }
+        .onAppear { lifetime.chat = chat; lastDraft = chat.draft }
         .haptic(.impact, trigger: chat.messages.count) { old, new in new > old }
         .environment(\.openURL, OpenURLAction { url in AssistantMarkdown.safeLink(url) ? .systemAction : .discarded })
     }

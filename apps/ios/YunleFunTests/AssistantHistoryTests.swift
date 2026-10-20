@@ -119,11 +119,64 @@ final class AssistantStoreHistoryTests: XCTestCase {
         store.stop()
         XCTAssertTrue(history.load(accountID: "alice").isEmpty, "Leaving after clearing must not save the open conversation again")
     }
+    func testDeletingTheOpenConversationDuringAReplyNeverRestoresIt() async throws {
+        try await deleteDuringActiveReply(clearAll: false)
+    }
+    func testClearingHistoryDuringAReplyNeverRestoresIt() async throws {
+        try await deleteDuringActiveReply(clearAll: true)
+    }
+    private func deleteDuringActiveReply(clearAll: Bool) async throws {
+        let accounts = BillingAccounts(), history = AssistantHistory(directory: directory)
+        let first = AssistantStore(accounts: accounts, service: AssistantFixture(), wallet: AssistantWalletFixture(), history: history)
+        first.draft = "问题一"; await first.send()?.value
+        let thread = first.threadID
+        let service = AssistantFixture(automatic: false)
+        let store = AssistantStore(accounts: accounts, service: service, wallet: AssistantWalletFixture(), history: history)
+        store.open(thread)
+        store.draft = "追问"; let run = store.send()
+        await fulfillment(of: [service.started], timeout: 5)
+        XCTAssertTrue(store.running)
+        if clearAll { store.deleteAll() } else { store.delete(thread) }
+        XCTAssertFalse(store.running, "Deleting the open conversation ends its reply")
+        if let input = await service.inputs.last { try await service.emitAndFinish(input) }
+        await run?.value
+        store.stop()
+        XCTAssertTrue(store.history.isEmpty)
+        XCTAssertTrue(history.load(accountID: "alice").isEmpty, "A late reply must not save the deleted conversation again")
+    }
+    func testOpeningTheOldestConversationWhileANewReplyStreams() async throws {
+        let accounts = BillingAccounts(), history = AssistantHistory(directory: directory)
+        for index in 0..<AssistantHistory.limit {
+            history.save(try XCTUnwrap(AssistantHistory.conversation(id: "t\(index)",
+                messages: [AssistantMessage(id: "q\(index)", role: .user, content: "问题\(index)")],
+                now: Date(timeIntervalSince1970: Double(index)))), accountID: "alice")
+        }
+        let service = AssistantFixture(automatic: false)
+        let store = AssistantStore(accounts: accounts, service: service, wallet: AssistantWalletFixture(), history: history)
+        XCTAssertEqual(store.history.last?.id, "t0")
+        store.draft = "新问题"; _ = store.send()
+        await fulfillment(of: [service.started], timeout: 5)
+        store.open("t0")
+        XCTAssertEqual(store.threadID, "t0", "Saving the stopped reply must not lose the selected conversation")
+        XCTAssertEqual(store.messages.first?.content, "问题0")
+    }
     func testGuestsAndStoresWithoutHistoryNeverWrite() async {
         let accounts = BillingAccounts(); accounts.select(nil)
         let history = AssistantHistory(directory: directory)
         let store = AssistantStore(accounts: accounts, service: AssistantFixture(), wallet: AssistantWalletFixture(), history: history)
         store.draft = "问题"; await store.send()?.value; store.reset()
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
+    }
+}
+
+final class AssistantComposerTests: XCTestCase {
+    func testOnlyASingleTypedNewlineSubmits() {
+        XCTAssertEqual(AssistantComposer.submission(from: "记账", to: "记账\n"), "记账")
+        XCTAssertEqual(AssistantComposer.submission(from: "记账工具", to: "记账\n工具"), "记账工具", "Return in the middle of the text")
+        XCTAssertEqual(AssistantComposer.submission(from: "", to: "\n"), "")
+        XCTAssertNil(AssistantComposer.submission(from: "记", to: "记账"), "Typing another character")
+        XCTAssertNil(AssistantComposer.submission(from: "", to: "粘贴的问题\n"), "A paste ending in a newline stays a draft")
+        XCTAssertNil(AssistantComposer.submission(from: "第一行\n", to: "第一行"), "Deleting a newline")
+        XCTAssertNil(AssistantComposer.submission(from: "ab", to: "a\nc"))
     }
 }

@@ -295,8 +295,13 @@ final class AccountSessionTests: XCTestCase {
         }
         let vault = try vaultWithAccounts(["a", "b"])
         let store = AccountStore(session: AccountSession(api: AccountTestAPI(), vault: vault, now: { self.fixedNow }),
-                                 accountWillRemove: { history.deleteAll(accountID: $0) })
+                                 accountDidRemove: { history.deleteAll(accountID: $0) })
         await store.restore()
+        vault.failNextWrite()
+        do { try await store.remove("a"); XCTFail("The failed vault write must be reported") }
+        catch { XCTAssertEqual(error as? AccountError, .storage) }
+        XCTAssertEqual(store.user?.id, "a")
+        XCTAssertEqual(history.load(accountID: "a").map(\.id), ["thread-a"], "A failed local removal keeps the account's history")
         try await store.remove("a")
         XCTAssertTrue(history.load(accountID: "a").isEmpty)
         XCTAssertEqual(history.load(accountID: "b").map(\.id), ["thread-b"])

@@ -285,6 +285,24 @@ final class AccountSessionTests: XCTestCase {
     }
 
     @MainActor
+    func testRemovingAnAccountDeletesOnlyItsAssistantHistory() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let history = AssistantHistory(directory: directory)
+        for id in ["a", "b"] {
+            history.save(try XCTUnwrap(AssistantHistory.conversation(id: "thread-" + id,
+                messages: [AssistantMessage(id: "q", role: .user, content: "问题")])), accountID: id)
+        }
+        let vault = try vaultWithAccounts(["a", "b"])
+        let store = AccountStore(session: AccountSession(api: AccountTestAPI(), vault: vault, now: { self.fixedNow }),
+                                 accountWillRemove: { history.deleteAll(accountID: $0) })
+        await store.restore()
+        try await store.remove("a")
+        XCTAssertTrue(history.load(accountID: "a").isEmpty)
+        XCTAssertEqual(history.load(accountID: "b").map(\.id), ["thread-b"])
+    }
+
+    @MainActor
     func testFailedVaultRemovalPreservesAccountAndOwnerOnlyProfileRecovery() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

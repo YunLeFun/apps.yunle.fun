@@ -160,6 +160,7 @@ final class HomeLayoutVisualTests: XCTestCase {
         let content = NavigationStack { HomeView {} }
             .environmentObject(catalog).environmentObject(library).environmentObject(runtime)
             .environmentObject(accounts).environmentObject(sync)
+            .environmentObject(WalletStore(accounts: accounts, service: AssistantWalletFixture(member: false))).environmentObject(AssistantRolloutStore())
             .environment(\.dynamicTypeSize, size)
             .preferredColorScheme(dark ? .dark : .light)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
@@ -233,6 +234,7 @@ private final class HomeStateFixture {
         let content = NavigationStack { HomeView {} }
             .environmentObject(catalog).environmentObject(library).environmentObject(runtime)
             .environmentObject(accounts).environmentObject(sync)
+            .environmentObject(WalletStore(accounts: accounts, service: AssistantWalletFixture(member: false))).environmentObject(AssistantRolloutStore())
             .environment(\.dynamicTypeSize, size)
             .preferredColorScheme(dark ? .dark : .light)
         let controller = UIHostingController(rootView: content)

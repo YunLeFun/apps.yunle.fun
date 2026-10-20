@@ -1468,7 +1468,7 @@ final class HostAuthorizationLiveTests: XCTestCase {
         let previous = window.rootViewController
         let page = UIHostingController(rootView: AppRootView().environmentObject(catalog).environmentObject(library)
             .environmentObject(runtime).environmentObject(accounts).environmentObject(wallet).environmentObject(purchases)
-            .environmentObject(sync).environmentObject(assistant))
+            .environmentObject(sync).environmentObject(assistant).environmentObject(AssistantRolloutStore()))
         window.rootViewController = page; window.makeKeyAndVisible()
         defer {
             runtime.resetIdentity()

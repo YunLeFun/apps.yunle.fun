@@ -6,6 +6,8 @@ struct HomeView: View {
     @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var accounts: AccountStore
     @EnvironmentObject private var sync: HomeSyncCoordinator
+    @EnvironmentObject private var wallet: WalletStore
+    @EnvironmentObject private var assistantRollout: AssistantRolloutStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("home.showRecent") private var showRecent = true
@@ -23,6 +25,12 @@ struct HomeView: View {
     /// glide into place after add / remove / pin instead of jumping.
     private var layoutKey: [String] {
         library.snapshot.applications.map(\.homeKey) + ["|"] + library.snapshot.dockApplications.map(\.homeKey)
+    }
+
+    /// The entry follows the rollout; a members-only entry stays hidden until membership is known.
+    private var showsAssistant: Bool {
+        let user = accounts.user?.isUsable == true ? accounts.user?.id : nil
+        return assistantRollout.rollout.admits(userID: user, isMember: wallet.snapshot?.membership.isActive)
     }
 
     var body: some View {
@@ -103,12 +111,20 @@ struct HomeView: View {
         .haptic(.selection, trigger: pinChanges)
         .refreshable { await sync.recheck() }
         .navigationTitle("云居")
+        .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") {
+            // Membership decides the members-only entry; load it once per identity if nothing else has.
+            guard assistantRollout.rollout.audience == .members, accounts.user?.isUsable == true,
+                  wallet.snapshot == nil, !wallet.isLoading else { return }
+            await wallet.refreshAccount()
+        }
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .general) }
         .sheet(item: $openFolder) { HomeFolderView(folderID: $0.id) }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                NavigationLink { AssistantView() } label: { Label("AI 助手", systemImage: "sparkles").labelStyle(.iconOnly) }
-                    .accessibilityIdentifier("home.assistant")
+                if showsAssistant {
+                    NavigationLink { AssistantView() } label: { Label("AI 助手", systemImage: "sparkles").labelStyle(.iconOnly) }
+                        .accessibilityIdentifier("home.assistant")
+                }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: browse) { Label("添加应用", systemImage: "plus").labelStyle(.iconOnly) }

@@ -6,6 +6,35 @@ import XCTest
 final class AssistantVisualTests: XCTestCase {
     func testNativeReplyAndCardsInLightMode() async throws { try await render(accessibility: false) }
     func testNativeReplySupportsDarkAccessibilityText() async throws { try await render(accessibility: true) }
+    func testHistorySheetListsSavedConversations() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let history = AssistantHistory(directory: directory)
+        let questions = ["有没有适合整理灵感的工具？", "推荐几个好玩的应用", "找一个适合写代码的开发工具"]
+        for (index, question) in questions.enumerated() {
+            history.save(try XCTUnwrap(AssistantHistory.conversation(id: "thread-\(index)", messages: [
+                AssistantMessage(id: "q\(index)", role: .user, content: question),
+                AssistantMessage(id: "a\(index)", role: .assistant, content: "回复")
+            ], now: Date().addingTimeInterval(Double(-3600 * 26 * index)))), accountID: "alice")
+        }
+        let chat = AssistantStore(accounts: BillingAccounts(), service: AssistantVisualService(), wallet: AssistantWalletFixture(), history: history)
+        XCTAssertEqual(chat.history.count, 3)
+        let controller = UIHostingController(rootView: AssistantHistoryView { _ in }.environmentObject(chat))
+        let image = try await snapshot(controller)
+        let attachment = XCTAttachment(image: image)
+        attachment.name = "assistant-history-sheet"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+    private func snapshot(_ controller: UIViewController) async throws -> UIImage {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene); window.frame = scene.coordinateSpace.bounds
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
+        try await Task.sleep(nanoseconds: 350_000_000); controller.view.layoutIfNeeded()
+        return UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
+            controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        }
+    }
     private func render(accessibility: Bool) async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

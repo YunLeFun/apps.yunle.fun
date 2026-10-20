@@ -760,6 +760,8 @@ final class ApplicationBenchmarks: XCTestCase {
         guard !isLegacy else { throw XCTSkip("Verifies native assistant UI") }
         continueAfterFailure = false
         let app = app
+        // The entry is members-only by default; open it to guests for this run only.
+        app.launchArguments += ["-assistantRolloutAudience", "everyone", "-assistantRolloutPercent", "100"]
         app.terminate(); app.launch(); app.tabBars.buttons["我"].tap()
         guard app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("Requires a guest simulator; never signs out a real account")

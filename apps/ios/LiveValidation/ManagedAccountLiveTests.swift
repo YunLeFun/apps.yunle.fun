@@ -838,7 +838,7 @@ final class FeedbackLoginLiveTests: XCTestCase {
         window.rootViewController = UIHostingController(rootView: AppRootView()
             .environmentObject(catalog).environmentObject(library).environmentObject(runtime)
             .environmentObject(accounts).environmentObject(wallet).environmentObject(purchases)
-            .environmentObject(sync).environmentObject(assistant).environmentObject(logs))
+            .environmentObject(sync).environmentObject(assistant).environmentObject(logs).environmentObject(AssistantRolloutStore()))
         window.makeKeyAndVisible()
         defer {
             runtime.resetIdentity()

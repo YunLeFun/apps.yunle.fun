@@ -10,6 +10,7 @@ struct YunleFunApp: App {
     @StateObject private var wallet: WalletStore
     @StateObject private var purchases: PurchaseCoordinator
     @StateObject private var assistant: AssistantStore
+    @StateObject private var assistantRollout = AssistantRolloutStore()
     @StateObject private var diagnostics: DiagnosticLogStore
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance = AppAppearance.system
@@ -23,7 +24,11 @@ struct YunleFunApp: App {
         _diagnostics = StateObject(wrappedValue: diagnostics)
         _library = StateObject(wrappedValue: library)
         _runtime = StateObject(wrappedValue: runtime)
-        let accounts = AccountStore(accountWillRemove: { id in try runtime.retireAccount(id) }, identityDidChange: { id in
+        let assistantHistory = AssistantHistory()
+        let accounts = AccountStore(accountWillRemove: { id in
+            try runtime.retireAccount(id)
+            assistantHistory.deleteAll(accountID: id)
+        }, identityDidChange: { id in
             diagnostics.activateAccount(id)
             diagnostics.record(.info, message: "account.scope.activated")
             runtime.resetIdentity(to: id)
@@ -43,7 +48,7 @@ struct YunleFunApp: App {
         let purchases = PurchaseCoordinator(accounts: accounts, wallet: wallet, service: billingService, journal: journal)
         _purchases = StateObject(wrappedValue: purchases)
         runtime.configureCommerce(wallet: wallet, purchases: purchases)
-        _assistant = StateObject(wrappedValue: AssistantStore(accounts: accounts))
+        _assistant = StateObject(wrappedValue: AssistantStore(accounts: accounts, history: assistantHistory))
     }
 
     var body: some Scene {
@@ -57,12 +62,14 @@ struct YunleFunApp: App {
                 .environmentObject(wallet)
                 .environmentObject(purchases)
                 .environmentObject(assistant)
+                .environmentObject(assistantRollout)
                 .environmentObject(diagnostics)
                 .preferredColorScheme(appearance.colorScheme)
                 .task { await catalog.load() }
                 .task { await accounts.restore() }
                 .task { homeSync.identityChanged() }
                 .task { await purchases.start() }
+                .task { await assistantRollout.refresh(force: true) }
                 .task {
                     runtime.applicationCache.updateAutomaticApplications(catalog.applications)
                     runtime.applicationCache.setApplicationActive(scenePhase == .active)
@@ -97,6 +104,7 @@ struct YunleFunApp: App {
                     if $0 == .active {
                         diagnostics.record(.info, message: "app.foregrounded")
                         homeSync.schedule()
+                        Task { await assistantRollout.refresh() }
                     }
                 }
         }

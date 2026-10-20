@@ -78,6 +78,7 @@ struct AccountIdentityLabel: View {
                 Text(user.displayName).font(.headline).foregroundStyle(.primary)
                 Text(user.detail).font(.subheadline).foregroundStyle(.secondary)
             }
+            .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)

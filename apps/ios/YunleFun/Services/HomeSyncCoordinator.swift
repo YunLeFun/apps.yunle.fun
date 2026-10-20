@@ -13,7 +13,8 @@ struct HomeSyncConflict: Equatable, Identifiable {
     let id = UUID()
     let remote: RemoteHomeScreen
     let localMutationId: String
-    let accountID: String
+    /// nil for the guest Home Screen synced through iCloud.
+    let accountID: String?
     let generation: UUID
 }
 
@@ -24,6 +25,7 @@ final class HomeSyncCoordinator: ObservableObject {
     private let accounts: AccountAuthorizing
     private let library: HomeLibrary
     private let service: HomeSyncServing
+    private let iCloud: HomeICloudSync?
     private let monitor: NWPathMonitor?
     private var operation: Task<Void, Never>?
     private var scheduled: Task<Void, Never>?
@@ -31,10 +33,12 @@ final class HomeSyncCoordinator: ObservableObject {
     private var repeatRequested = false
     private var observedLibraryGeneration: UUID
 
-    init(accounts: AccountAuthorizing, library: HomeLibrary, service: HomeSyncServing = HomeSyncService(), monitorNetwork: Bool = true) {
+    init(accounts: AccountAuthorizing, library: HomeLibrary, service: HomeSyncServing = HomeSyncService(),
+         iCloud: HomeICloudSync? = nil, monitorNetwork: Bool = true) {
         self.accounts = accounts
         self.library = library
         self.service = service
+        self.iCloud = iCloud
         observedLibraryGeneration = library.generation
         monitor = monitorNetwork ? NWPathMonitor() : nil
         library.onUserChange = { [weak self] in
@@ -42,6 +46,7 @@ final class HomeSyncCoordinator: ObservableObject {
             if self.observedLibraryGeneration != self.library.generation { self.identityChanged() }
             else { self.schedule() }
         }
+        iCloud?.onExternalChange = { [weak self] in self?.schedule() }
         monitor?.pathUpdateHandler = { [weak self] path in
             if path.status == .satisfied { Task { @MainActor in self?.schedule() } }
         }
@@ -50,8 +55,28 @@ final class HomeSyncCoordinator: ObservableObject {
     deinit { monitor?.cancel(); operation?.cancel(); scheduled?.cancel() }
 
     var isSyncing: Bool { phase == .syncing }
+    /// Guests can sync their Home Screen through iCloud on this build.
+    var supportsICloud: Bool { iCloud != nil }
+    var iCloudEnabled: Bool { iCloud?.isEnabled == true }
+    /// Whether the visible Home Screen currently syncs, by account or by iCloud.
+    var isActive: Bool {
+        guard library.snapshot.syncEnabled else { return false }
+        if let user = accounts.user { return user.id == library.accountID }
+        return library.accountID == nil && iCloudEnabled
+    }
+    func setICloudEnabled(_ enabled: Bool) {
+        guard let iCloud, iCloud.isEnabled != enabled else { return }
+        objectWillChange.send()
+        iCloud.isEnabled = enabled
+        if enabled && !library.snapshot.syncEnabled { library.setSyncEnabled(true) }
+        if case .conflict = phase { phase = .idle }
+        schedule()
+    }
     var message: String {
-        if accounts.user == nil { return "登录后可同步云居" }
+        if accounts.user == nil {
+            guard supportsICloud else { return "登录后可同步云居" }
+            guard isActive else { return "iCloud 同步已关闭" }
+        }
         if !library.snapshot.syncEnabled { return "云同步已关闭" }
         switch phase {
         case .syncing: return "正在同步云居"
@@ -75,8 +100,7 @@ final class HomeSyncCoordinator: ObservableObject {
     }
     func schedule() {
         scheduled?.cancel()
-        guard accounts.user?.id == library.accountID, accounts.user != nil,
-              library.snapshot.syncEnabled else {
+        guard isActive else {
             operation?.cancel()
             operation = nil
             flightID = nil
@@ -92,10 +116,18 @@ final class HomeSyncCoordinator: ObservableObject {
         }
     }
     func synchronize() async {
-        guard let uid = accounts.user?.id, uid == library.accountID, library.snapshot.syncEnabled else { return }
+        guard isActive else { return }
+        let uid = accounts.user?.id
         if let operation { await operation.value; return }
         if case .conflict = phase { return }
         guard library.storageError == nil else { phase = .failed(HomeSyncError.storage.localizedDescription); return }
+        if uid == nil, let iCloud {
+            guard iCloud.isAvailable else { phase = .failed(HomeSyncError.iCloudUnavailable.localizedDescription); return }
+            if iCloud.consumeIdentityChange() {
+                do { try library.detachCloudBase() }
+                catch { phase = .failed(message(for: error)); return }
+            }
+        }
         let generation = library.generation
         let flight = UUID()
         flightID = flight
@@ -134,21 +166,24 @@ final class HomeSyncCoordinator: ObservableObject {
         } catch { phase = .failed(message(for: error)) }
     }
 
-    private func run(uid: String, generation: UUID) async {
+    private func run(uid: String?, generation: UUID) async {
         do {
-            let remote = try await authorized(uid: uid, generation: generation) { identity in
-                try await self.service.load(identity: identity)
-            }
+            let remote = try await load(uid: uid, generation: generation)
             try ensureCurrent(uid: uid, generation: generation)
+            let current = library.snapshot
+            if uid == nil, !current.configuration.hasSameContent(as: HomeConfiguration()),
+               (current.base == nil && !current.hasPendingChanges) || (remote.revision == nil && current.base?.revision != nil) {
+                // An iCloud copy never silently replaces a guest layout it was
+                // not compared with, and an empty or reset record never erases it.
+                try library.detachCloudBase()
+            }
             let local = library.snapshot
             if !local.hasPendingChanges || (remote.carriesSources && local.configuration.matches(remote)) {
                 try library.adopt(remote)
             } else if local.base?.revision == remote.revision {
                 guard remote.carriesSources else { throw HomeSyncError.unsupportedSchema }
                 let write = HomeScreenWrite(baseRevision: remote.revision, mutationId: local.mutationId, configuration: local.configuration)
-                let saved = try await authorized(uid: uid, generation: generation) { identity in
-                    try await self.service.save(write, identity: identity)
-                }
+                let saved = try await save(write, uid: uid, generation: generation)
                 try ensureCurrent(uid: uid, generation: generation)
                 try library.acknowledge(saved, uploadedMutationId: write.mutationId)
             } else {
@@ -161,6 +196,24 @@ final class HomeSyncCoordinator: ObservableObject {
         } catch {
             guard isCurrent(uid: uid, generation: generation), !Task.isCancelled else { return }
             phase = .failed(message(for: error))
+        }
+    }
+    private func load(uid: String?, generation: UUID) async throws -> RemoteHomeScreen {
+        guard let uid else {
+            guard let iCloud else { throw HomeSyncError.identityChanged }
+            return try iCloud.load()
+        }
+        return try await authorized(uid: uid, generation: generation) { identity in
+            try await self.service.load(identity: identity)
+        }
+    }
+    private func save(_ write: HomeScreenWrite, uid: String?, generation: UUID) async throws -> RemoteHomeScreen {
+        guard let uid else {
+            guard let iCloud else { throw HomeSyncError.identityChanged }
+            return try iCloud.save(write)
+        }
+        return try await authorized(uid: uid, generation: generation) { identity in
+            try await self.service.save(write, identity: identity)
         }
     }
     private func authorized<T>(uid: String, generation: UUID,
@@ -177,14 +230,14 @@ final class HomeSyncCoordinator: ObservableObject {
             return try await action(identity)
         }
     }
-    private func isCurrent(uid: String, generation: UUID) -> Bool {
-        accounts.user?.id == uid && library.accountID == uid && library.generation == generation && library.snapshot.syncEnabled
+    private func isCurrent(uid: String?, generation: UUID) -> Bool {
+        accounts.user?.id == uid && library.accountID == uid && library.generation == generation && isActive
     }
-    private func ensureCurrent(uid: String, generation: UUID) throws {
+    private func ensureCurrent(uid: String?, generation: UUID) throws {
         try Task.checkCancellation()
         guard isCurrent(uid: uid, generation: generation) else { throw HomeSyncError.identityChanged }
     }
-    private func showConflict(_ remote: RemoteHomeScreen, uid: String, generation: UUID) {
+    private func showConflict(_ remote: RemoteHomeScreen, uid: String?, generation: UUID) {
         phase = .conflict(HomeSyncConflict(remote: remote, localMutationId: library.snapshot.mutationId,
                                            accountID: uid, generation: generation))
     }

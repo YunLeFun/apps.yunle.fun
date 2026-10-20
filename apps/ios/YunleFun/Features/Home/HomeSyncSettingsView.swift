@@ -13,21 +13,20 @@ struct HomeSyncSettingsView: View {
                 Label(sync.message, systemImage: sync.isSyncing ? "arrow.triangle.2.circlepath" : "icloud")
                 if sync.isSyncing { ProgressView() }
                 if accounts.user == nil {
+                    if sync.supportsICloud {
+                        Toggle("iCloud 同步", isOn: Binding(get: { sync.isActive }, set: sync.setICloudEnabled))
+                            .accessibilityIdentifier("home.sync.icloud")
+                        if sync.isActive { syncControls }
+                    }
                     Button("登录云乐坊") { showLogin = true }
                 } else {
                     Toggle("云同步", isOn: Binding(get: { library.snapshot.syncEnabled }, set: library.setSyncEnabled))
-                    if library.snapshot.syncEnabled {
-                        Toggle("自动同步", isOn: Binding(get: { library.snapshot.autoSyncEnabled }, set: library.setAutoSyncEnabled))
-                        Button("立即同步") { Task { await sync.recheck() } }
-                            .disabled(sync.isSyncing)
-                        if let date = library.snapshot.base?.configuration.updatedAt, date > 0 {
-                            LabeledContent("云端更新时间", value: Date(timeIntervalSince1970: Double(date) / 1000).formatted(date: .abbreviated, time: .shortened))
-                        }
-                    }
+                    if library.snapshot.syncEnabled { syncControls }
                 }
             } footer: {
-                Text(accounts.user == nil ? "访客云居保存在此设备，登录后使用账号独立的云居。"
-                     : "同步安装顺序、文件夹、常用应用、最近使用和所选作者来源。关闭同步后，更改仍保存在此设备。")
+                Text(accounts.user != nil ? "同步安装顺序、文件夹、常用应用、最近使用和所选作者来源。关闭同步后，更改仍保存在此设备。"
+                     : sync.supportsICloud ? "访客云居默认只保存在此设备。开启 iCloud 同步后，登录同一 Apple 账户的设备会同步安装顺序、文件夹、常用应用、最近使用和所选作者来源。登录云乐坊后使用账号独立的云居，两者互不影响。"
+                     : "访客云居保存在此设备，登录后使用账号独立的云居。")
             }
             if case .conflict(let conflict) = sync.phase {
                 Section("有两个不同版本") {
@@ -54,6 +53,15 @@ struct HomeSyncSettingsView: View {
         }
         .navigationTitle("云居同步")
         .sheet(isPresented: $showLogin) { LoginView() }
+    }
+
+    @ViewBuilder private var syncControls: some View {
+        Toggle("自动同步", isOn: Binding(get: { library.snapshot.autoSyncEnabled }, set: library.setAutoSyncEnabled))
+        Button("立即同步") { Task { await sync.recheck() } }
+            .disabled(sync.isSyncing)
+        if let date = library.snapshot.base?.configuration.updatedAt, date > 0 {
+            LabeledContent("云端更新时间", value: Date(timeIntervalSince1970: Double(date) / 1000).formatted(date: .abbreviated, time: .shortened))
+        }
     }
 }
 

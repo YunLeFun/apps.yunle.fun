@@ -38,7 +38,7 @@ struct YunleFunApp: App {
         _catalog = StateObject(wrappedValue: catalog)
         _accounts = StateObject(wrappedValue: accounts)
         runtime.configureAuthorization(accounts: accounts)
-        _homeSync = StateObject(wrappedValue: HomeSyncCoordinator(accounts: accounts, library: library))
+        _homeSync = StateObject(wrappedValue: HomeSyncCoordinator(accounts: accounts, library: library, iCloud: HomeICloudSync()))
         let billingEnvironment = WalletEnvironment.forLaunch()
         let billingService = WalletService(environment: billingEnvironment)
         let wallet = WalletStore(accounts: accounts, service: billingService)

@@ -219,7 +219,8 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["设置"].waitForExistence(timeout: 5))
         app.buttons["云居同步"].tap()
         XCTAssertTrue(app.navigationBars["云居同步"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["登录后可同步云居"].exists)
+        XCTAssertTrue(app.staticTexts["iCloud 同步已关闭"].exists)
+        XCTAssertTrue(app.switches["home.sync.icloud"].exists)
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "native-sync-guest"
         attachment.lifetime = .keepAlways

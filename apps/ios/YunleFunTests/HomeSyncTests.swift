@@ -262,6 +262,140 @@ final class HomeSyncTests: XCTestCase {
         XCTAssertEqual(library.snapshot, local)
         XCTAssertEqual(library.snapshot.applications.first?.personalMarketOwnerLogin, "LocalAuthor")
     }
+
+    // MARK: Guest iCloud sync
+
+    func testGuestICloudUploadsAndASecondDeviceAdoptsIt() async throws {
+        let store = HomeTestKeyValueStore()
+        let first = HomeLibrary(directory: directory.appendingPathComponent("first"))
+        first.add(CloudApplication(id: "guest-app", name: "访客应用"))
+        let firstSync = guestCoordinator(first, iCloud(store))
+        await firstSync.synchronize()
+        XCTAssertEqual(firstSync.phase, .idle)
+        XCTAssertFalse(first.snapshot.hasPendingChanges)
+        XCTAssertNotNil(store.values[HomeICloudSync.recordKey])
+
+        let second = HomeLibrary(directory: directory.appendingPathComponent("second"))
+        let secondSync = guestCoordinator(second, iCloud(store))
+        await secondSync.synchronize()
+        XCTAssertEqual(second.snapshot.configuration, first.snapshot.configuration)
+        XCTAssertEqual(second.snapshot.base?.revision, first.snapshot.base?.revision)
+    }
+
+    func testGuestICloudNeverSilentlyReplacesALayoutItWasNotComparedWith() async throws {
+        let store = HomeTestKeyValueStore()
+        let first = HomeLibrary(directory: directory.appendingPathComponent("first"))
+        first.add(CloudApplication(id: "first-app", name: "第一台"))
+        await guestCoordinator(first, iCloud(store)).synchronize()
+
+        let second = HomeLibrary(directory: directory.appendingPathComponent("second"))
+        second.add(CloudApplication(id: "second-app", name: "第二台"))
+        let original = second.snapshot.configuration
+        let sync = guestCoordinator(second, iCloud(store))
+        await sync.synchronize()
+        guard case .conflict(let conflict) = sync.phase else { return XCTFail("Both guest layouts must stay available") }
+        XCTAssertNil(conflict.accountID)
+        XCTAssertEqual(second.snapshot.configuration, original)
+        await sync.resolve(.device, conflict: conflict)
+        XCTAssertEqual(sync.phase, .idle)
+        let stored = try JSONDecoder().decode(RemoteHomeScreen.self, from: XCTUnwrap(store.values[HomeICloudSync.recordKey]))
+        XCTAssertTrue(original.hasSameContent(as: stored.configuration))
+    }
+
+    func testEmptyICloudNeverErasesTheGuestLayout() async throws {
+        let store = HomeTestKeyValueStore()
+        let library = HomeLibrary(directory: directory)
+        library.add(CloudApplication(id: "kept", name: "保留的应用"))
+        let sync = guestCoordinator(library, iCloud(store))
+        await sync.synchronize()
+        store.values = [:]
+        await sync.synchronize()
+        XCTAssertEqual(library.snapshot.applications.map(\.id), ["kept"])
+        XCTAssertFalse(library.snapshot.hasPendingChanges)
+        XCTAssertNotNil(store.values[HomeICloudSync.recordKey])
+    }
+
+    func testAnotherICloudAccountIsComparedInsteadOfAdopted() async throws {
+        let store = HomeTestKeyValueStore()
+        var appleID = Data("apple-id-a".utf8)
+        let library = HomeLibrary(directory: directory)
+        library.add(CloudApplication(id: "mine", name: "本机应用"))
+        let sync = guestCoordinator(library, iCloud(store, identity: { appleID }))
+        await sync.synchronize()
+        XCTAssertFalse(library.snapshot.hasPendingChanges)
+        let original = library.snapshot.configuration
+
+        let other = HomeTestKeyValueStore()
+        _ = try iCloud(other).save(HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString,
+                                                   configuration: HomeConfiguration(installedApps: [.init(appId: "theirs")])))
+        store.values = other.values
+        appleID = Data("apple-id-b".utf8)
+        await sync.synchronize()
+        guard case .conflict = sync.phase else { return XCTFail("A different iCloud account must not replace the layout") }
+        XCTAssertEqual(library.snapshot.configuration, original)
+    }
+
+    func testGuestICloudReportsUnavailableAndStaysOffUntilEnabled() async throws {
+        let store = HomeTestKeyValueStore()
+        let library = HomeLibrary(directory: directory)
+        library.add(CloudApplication(id: "local", name: "本机应用"))
+        let off = iCloud(store)
+        off.isEnabled = false
+        let idle = guestCoordinator(library, off)
+        await idle.synchronize()
+        XCTAssertFalse(idle.isActive)
+        XCTAssertEqual(idle.message, "iCloud 同步已关闭")
+        XCTAssertTrue(store.values.isEmpty)
+
+        let signedOut = guestCoordinator(library, iCloud(store, identity: { nil }))
+        await signedOut.synchronize()
+        XCTAssertEqual(signedOut.phase, .failed(HomeSyncError.iCloudUnavailable.localizedDescription))
+        XCTAssertTrue(store.values.isEmpty)
+        XCTAssertTrue(library.snapshot.hasPendingChanges)
+    }
+
+    func testSignedInAccountsNeverWriteToICloud() async throws {
+        let store = HomeTestKeyValueStore()
+        let library = HomeLibrary(directory: directory, accountID: "a")
+        library.add(CloudApplication(id: "account-app", name: "账号应用"))
+        let service = HomeTestService(remote: cloud(nil))
+        let sync = HomeSyncCoordinator(accounts: HomeTestAuthorizer("a"), library: library, service: service,
+                                       iCloud: iCloud(store), monitorNetwork: false)
+        await sync.synchronize()
+        let writes = await service.writes
+        XCTAssertEqual(writes.count, 1)
+        XCTAssertTrue(store.values.isEmpty)
+    }
+
+    func testICloudRetryOfALandedWriteReturnsTheStoredCopy() throws {
+        let sync = iCloud(HomeTestKeyValueStore())
+        let write = HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString,
+                                    configuration: HomeConfiguration(installedApps: [.init(appId: "one")]))
+        let saved = try sync.save(write)
+        XCTAssertEqual(try sync.save(write), saved)
+        let stale = HomeScreenWrite(baseRevision: nil, mutationId: UUID().uuidString,
+                                    configuration: HomeConfiguration(installedApps: [.init(appId: "two")]))
+        XCTAssertThrowsError(try sync.save(stale)) { error in
+            guard case HomeSyncError.conflict(let current) = error else { return XCTFail("Stale writes must conflict") }
+            XCTAssertEqual(current, saved)
+        }
+    }
+
+    private func iCloud(_ store: HomeTestKeyValueStore, identity: @escaping () -> Data? = { Data("apple-id-a".utf8) }) -> HomeICloudSync {
+        let suite = "HomeSyncTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let sync = HomeICloudSync(store: store, defaults: defaults, identity: identity, observeChanges: false)
+        sync.isEnabled = true
+        return sync
+    }
+    private func guestCoordinator(_ library: HomeLibrary, _ iCloud: HomeICloudSync) -> HomeSyncCoordinator {
+        let guest = HomeTestAuthorizer("unused")
+        guest.user = nil
+        library.setAutoSyncEnabled(false)
+        return HomeSyncCoordinator(accounts: guest, library: library, service: HomeTestService(remote: cloud(nil)),
+                                   iCloud: iCloud, monitorNetwork: false)
+    }
 }
 
 @MainActor
@@ -314,4 +448,10 @@ private actor HomeTestGate {
     }
     func waitUntilEntered() async { if !entered { await withCheckedContinuation { entry.append($0) } } }
     func open() { opened = true; waiting.forEach { $0.resume() }; waiting = [] }
+}
+private final class HomeTestKeyValueStore: HomeKeyValueStoring {
+    var values: [String: Data] = [:]
+    func data(forKey key: String) -> Data? { values[key] }
+    func set(_ data: Data?, forKey key: String) { values[key] = data }
+    func synchronize() -> Bool { true }
 }

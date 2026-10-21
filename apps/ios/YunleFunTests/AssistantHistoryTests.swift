@@ -220,15 +220,3 @@ final class AssistantStoreHistoryTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
     }
 }
-
-final class AssistantComposerTests: XCTestCase {
-    func testOnlyASingleTypedNewlineSubmits() {
-        XCTAssertEqual(AssistantComposer.submission(from: "记账", to: "记账\n"), "记账")
-        XCTAssertEqual(AssistantComposer.submission(from: "记账工具", to: "记账\n工具"), "记账工具", "Return in the middle of the text")
-        XCTAssertEqual(AssistantComposer.submission(from: "", to: "\n"), "")
-        XCTAssertNil(AssistantComposer.submission(from: "记", to: "记账"), "Typing another character")
-        XCTAssertNil(AssistantComposer.submission(from: "", to: "粘贴的问题\n"), "A paste ending in a newline stays a draft")
-        XCTAssertNil(AssistantComposer.submission(from: "第一行\n", to: "第一行"), "Deleting a newline")
-        XCTAssertNil(AssistantComposer.submission(from: "ab", to: "a\nc"))
-    }
-}

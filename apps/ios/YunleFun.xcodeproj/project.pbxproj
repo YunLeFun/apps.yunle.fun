@@ -16,6 +16,7 @@
 		0D5CD1ED5E5DC46B2ABCDBEB /* ApplicationCacheView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD54E316DEE8DE55E46F369 /* ApplicationCacheView.swift */; };
 		0E07AC436622BC7C8F3A1D0E /* LegacyMigrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C5914465A699F79FCBD2B4 /* LegacyMigrationView.swift */; };
 		0EB4E8C774EAA0FD9001B691 /* NativeApplicationMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AEABB76F5959C8CEAC15A1 /* NativeApplicationMenuTests.swift */; };
+		1024383943FDCCF2140B20E3 /* AssistantComposerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F32BA8D789C73F249A3CECD5 /* AssistantComposerUITests.swift */; };
 		1039E0265896C5E44C75297C /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = 85FBE316A2D2381404760C36 /* SwiftDraw */; };
 		13840EE4625AC49CE03B115E /* ApplicationEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5435F9767CA269FED208A87 /* ApplicationEditorModel.swift */; };
 		15A2321C482E717E08AB0A2A /* HomeFolderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718FD4337D218B4CAAD3DE2A /* HomeFolderView.swift */; };
@@ -179,6 +180,7 @@
 		E20938681ED5D7ED227D63B1 /* HomeBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C347F44B3B4DD4B972358FA5 /* HomeBackup.swift */; };
 		E3F5ECD618A714D3319A37A3 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C255AED5457EAE3310EAB4A /* WebViewController.swift */; };
 		E61BD9BFC57587D7E84D2108 /* WalletTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F7E20307BE7EBBCC7D47FED /* WalletTests.swift */; };
+		E68073EE56D020541649766C /* AssistantComposerFieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEC023C8B20FF1B0608C6D2 /* AssistantComposerFieldTests.swift */; };
 		EFC4E935FFCB128B4AE7B427 /* MyWorkshopsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34202F9F06A469796DBC94C /* MyWorkshopsView.swift */; };
 		F08DC2A7811F58268815CB1E /* AssistantCancellationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F9584AF29E10731E29C7D9 /* AssistantCancellationTests.swift */; };
 		F1839D0B6938799F48E88A71 /* NativeNavigationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A6C05BD6F159893221D84 /* NativeNavigationUITests.swift */; };
@@ -189,6 +191,7 @@
 		F9A08E9A3BFA251934C7AD3F /* CatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3FBCBE02747467F7CA00C5 /* CatalogTests.swift */; };
 		FA55ADC498C2253C6CF72286 /* ApplicationCacheUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6883DE98E7C209F7EC8513 /* ApplicationCacheUITests.swift */; };
 		FB149C968E4580240C1B6A67 /* NativeWebRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE89F9570E54A55D52A4928B /* NativeWebRuntime.swift */; };
+		FC89B5C57842FD9940DD8B45 /* AssistantComposerField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE16B5AC6A49812FAFC68EE /* AssistantComposerField.swift */; };
 		FE7A2816D5105FDEA8AD2FDE /* WalletVisualFixtureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80ACDE8DD828BCBB5B220B47 /* WalletVisualFixtureTests.swift */; };
 		FFB2D2968748F4A40901611B /* SupportMailComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7754D6FCD87D4767163DF9BC /* SupportMailComposer.swift */; };
 		FFFBB5BD351434D37648B670 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29EF81B3F893020A70E7CEE4 /* HomeView.swift */; };
@@ -331,6 +334,7 @@
 		797DDCF6F5F42A5C90A95DAB /* ApplicationAcquisitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationAcquisitionView.swift; sourceTree = "<group>"; };
 		7B3DEBCFA58143A7AC789E5B /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		7C255AED5457EAE3310EAB4A /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		7CEC023C8B20FF1B0608C6D2 /* AssistantComposerFieldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantComposerFieldTests.swift; sourceTree = "<group>"; };
 		7DD246AFF9847BCECB513B71 /* InAppWebViewPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppWebViewPlugin.swift; sourceTree = "<group>"; };
 		80ACDE8DD828BCBB5B220B47 /* WalletVisualFixtureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletVisualFixtureTests.swift; sourceTree = "<group>"; };
 		8356600EF2C46252EFFEE984 /* ApplicationBenchmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationBenchmarks.swift; sourceTree = "<group>"; };
@@ -412,11 +416,13 @@
 		E82678BFEE73A557287B2AFE /* HomeEditCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeEditCanvas.swift; sourceTree = "<group>"; };
 		EB8B245227FD1D501409847E /* WebStoragePageFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebStoragePageFixture.swift; sourceTree = "<group>"; };
 		EC1B63E1B44278210C81D0B6 /* ContentStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentStateView.swift; sourceTree = "<group>"; };
+		EDE16B5AC6A49812FAFC68EE /* AssistantComposerField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantComposerField.swift; sourceTree = "<group>"; };
 		EE9CEAAFF9CD97FC484A3957 /* HomeGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeGrid.swift; sourceTree = "<group>"; };
 		EF05F6FDE79BB411600C35BF /* HomeBackupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeBackupStore.swift; sourceTree = "<group>"; };
 		EF06F6B83794882B6121256F /* NativeWebNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeWebNavigationTests.swift; sourceTree = "<group>"; };
 		EF1A8E60138E9E1071D72C30 /* CatalogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogService.swift; sourceTree = "<group>"; };
 		F08F60F4C711CE6C895B14AF /* HomeSyncHTTPTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncHTTPTests.swift; sourceTree = "<group>"; };
+		F32BA8D789C73F249A3CECD5 /* AssistantComposerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantComposerUITests.swift; sourceTree = "<group>"; };
 		F6839C305AE0E672008B91F6 /* ApplicationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailView.swift; sourceTree = "<group>"; };
 		FB0BEBE6F399E0E22ADEBDFB /* ApplicationIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationIcon.swift; sourceTree = "<group>"; };
 		FBD54E316DEE8DE55E46F369 /* ApplicationCacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCacheView.swift; sourceTree = "<group>"; };
@@ -479,6 +485,7 @@
 				27CA6215055E7CDC2716EC48 /* ApplicationDetailLayoutTests.swift */,
 				41BED686047B5CD8FB88FBC4 /* ApplicationIconTests.swift */,
 				29F9584AF29E10731E29C7D9 /* AssistantCancellationTests.swift */,
+				7CEC023C8B20FF1B0608C6D2 /* AssistantComposerFieldTests.swift */,
 				4625B55BF2E2D543FF9E615A /* AssistantHistoryTests.swift */,
 				B40362F2DC688A79C6BF236F /* AssistantRolloutTests.swift */,
 				9DB5DA2365D8E76A88C4B1B2 /* AssistantTests.swift */,
@@ -589,6 +596,7 @@
 			isa = PBXGroup;
 			children = (
 				AC6883DE98E7C209F7EC8513 /* ApplicationCacheUITests.swift */,
+				F32BA8D789C73F249A3CECD5 /* AssistantComposerUITests.swift */,
 				556A6C05BD6F159893221D84 /* NativeNavigationUITests.swift */,
 				30FA306481E1D9BEE93724E8 /* NativeSupportUITests.swift */,
 			);
@@ -863,6 +871,7 @@
 		F06525A9F4228CF12C33D705 /* Assistant */ = {
 			isa = PBXGroup;
 			children = (
+				EDE16B5AC6A49812FAFC68EE /* AssistantComposerField.swift */,
 				B880AE1936C2460C496F2D58 /* AssistantMarkdown.swift */,
 				692B0B5A46452EC83A8192FE /* AssistantView.swift */,
 			);
@@ -1137,6 +1146,7 @@
 				258D6AE80830A2359ECE94E6 /* ApplicationImagePipeline.swift in Sources */,
 				23E77173AD963E565B10E175 /* ApplicationReviewsView.swift in Sources */,
 				75B26700C2E4337D3621545D /* Assistant.swift in Sources */,
+				FC89B5C57842FD9940DD8B45 /* AssistantComposerField.swift in Sources */,
 				3B75717B26319838C8E5502F /* AssistantHistory.swift in Sources */,
 				A2C5937DCA8DBC41F5131037 /* AssistantMarkdown.swift in Sources */,
 				40DD88AE201968E23D5B838C /* AssistantRollout.swift in Sources */,
@@ -1273,6 +1283,7 @@
 				7478EE0177CC4A350B13FC1F /* ApplicationDetailLayoutTests.swift in Sources */,
 				DAE782629EF66C9AC921F161 /* ApplicationIconTests.swift in Sources */,
 				F08DC2A7811F58268815CB1E /* AssistantCancellationTests.swift in Sources */,
+				E68073EE56D020541649766C /* AssistantComposerFieldTests.swift in Sources */,
 				94B1C1BC1B2E2973F935E2EB /* AssistantHistoryTests.swift in Sources */,
 				180997BF3A4F304C99537761 /* AssistantRolloutTests.swift in Sources */,
 				F20ED261239F0C4FEC5EA205 /* AssistantTests.swift in Sources */,
@@ -1316,6 +1327,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA55ADC498C2253C6CF72286 /* ApplicationCacheUITests.swift in Sources */,
+				1024383943FDCCF2140B20E3 /* AssistantComposerUITests.swift in Sources */,
 				F1839D0B6938799F48E88A71 /* NativeNavigationUITests.swift in Sources */,
 				7E9968FD8C28FC4CA52E4F2A /* NativeSupportUITests.swift in Sources */,
 			);

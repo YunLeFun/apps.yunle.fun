@@ -10,14 +10,13 @@ struct AssistantView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var lifetime = AssistantScreenLifetime()
     @ScaledMetric(relativeTo: .body) private var actionSize: CGFloat = 30
-    @FocusState private var focused: Bool
+    @State private var focused = false
     @State private var modal: Modal?
     @State private var pendingGuestPrompt: String?
     @State private var followLatest = true
     @State private var endVisible = true
     @State private var confirmReset = false
     @State private var confirmDiscard = false
-    @State private var lastDraft = ""
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -100,17 +99,9 @@ struct AssistantView: View {
                 chat.identityChanged(); fillDraft(prompt); pendingGuestPrompt = nil
             }
         }
-        // A vertical TextField inserts a newline for Return instead of calling onSubmit, so the 发送 key is
-        // recognised as a single typed newline; pasted text never sends.
-        .onChange(of: chat.draft) { value in
-            defer { lastDraft = chat.draft }
-            guard let submitted = AssistantComposer.submission(from: lastDraft, to: value) else { return }
-            chat.draft = submitted
-            send()
-        }
         .onChange(of: scenePhase) { if $0 != .active { chat.stop() } }
         // Pushing a card's detail page keeps the reply streaming; leaving the assistant stops it (see AssistantScreenLifetime).
-        .onAppear { lifetime.chat = chat; lastDraft = chat.draft }
+        .onAppear { lifetime.chat = chat }
         .haptic(.impact, trigger: chat.messages.count) { old, new in new > old }
         .environment(\.openURL, OpenURLAction { url in AssistantMarkdown.safeLink(url) ? .systemAction : .discarded })
     }
@@ -157,13 +148,9 @@ struct AssistantView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
             HStack(alignment: .bottom, spacing: 4) {
-                TextField("描述想做的事，比如记账、番茄钟…", text: $chat.draft, axis: .vertical)
-                    .lineLimit(1...6)
-                    .focused($focused)
-                    .submitLabel(.send)
-                    .onSubmit(send)
-                    .padding(.leading, 16).padding(.vertical, 11)
-                    .accessibilityIdentifier("assistant.input")
+                // Keyboard 发送 / Return sends, Shift+Return adds a line, pastes and dictation stay in the draft.
+                AssistantComposerField(text: $chat.draft, isFocused: $focused,
+                                       placeholder: "描述想做的事，比如记账、番茄钟…", onSubmit: send)
                 composerAction.padding(.trailing, 2).padding(.bottom, 2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -260,12 +247,9 @@ struct AssistantView: View {
             .accessibilityIdentifier("assistant.send")
         }
     }
-    /// Programmatic draft changes (examples, editing an earlier question, a restored guest prompt) record
-    /// the new text as the baseline first, so they can never look like a typed Return and send.
-    private func fillDraft(_ text: String) {
-        lastDraft = text
-        chat.draft = text
-    }
+    /// Programmatic draft changes (examples, editing an earlier question, a restored guest prompt) never pass
+    /// through the keyboard, so `AssistantComposerField` cannot mistake them for the 发送 key.
+    private func fillDraft(_ text: String) { chat.draft = text }
     private func scrollToEnd(_ proxy: ScrollViewProxy, animated: Bool) {
         if animated && !reduceMotion { withAnimation(Motion.spring) { proxy.scrollTo(Self.end, anchor: .bottom) } }
         else { proxy.scrollTo(Self.end, anchor: .bottom) }

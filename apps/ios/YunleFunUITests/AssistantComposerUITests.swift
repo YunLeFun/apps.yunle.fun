@@ -40,6 +40,7 @@ final class AssistantComposerUITests: XCTestCase {
     }
 
     func testPastedNewlinesStayInTheDraft() throws {
+        executionTimeAllowance = 180 // Two pastes through the edit menu, each possibly retried.
         let (app, input) = try openAssistant()
         // A paste ending in a newline, into an empty draft.
         paste("问题\n", into: input, app: app)
@@ -57,11 +58,16 @@ final class AssistantComposerUITests: XCTestCase {
         shot.lifetime = .keepAlways; add(shot)
     }
     private func paste(_ text: String, into input: XCUIElement, app: XCUIApplication) {
-        UIPasteboard.general.string = text
-        input.tap()
-        input.press(forDuration: 1.2)
         let paste = app.menuItems.matching(NSPredicate(format: "label IN %@", ["粘贴", "Paste"])).firstMatch
-        XCTAssertTrue(paste.waitForExistence(timeout: 5))
+        // A slow runner can miss the first long press, or show the edit menu before the pasteboard
+        // write arrives; alternate a long press with a tap on the caret, which also opens the menu.
+        for attempt in 0..<4 where !paste.exists {
+            UIPasteboard.general.string = text
+            input.tap()
+            if attempt.isMultiple(of: 2) { input.press(forDuration: 1.2) } else { input.tap() }
+            _ = paste.waitForExistence(timeout: 5)
+        }
+        XCTAssertTrue(paste.exists, "The edit menu never offered 粘贴 (pasteboard holds the text: \(UIPasteboard.general.string == text))")
         paste.tap()
     }
 }

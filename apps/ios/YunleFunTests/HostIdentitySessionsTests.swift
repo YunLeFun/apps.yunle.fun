@@ -6,6 +6,9 @@ import XCTest
 @MainActor
 final class HostIdentitySessionsTests: XCTestCase {
     func testClearWaitsForAllowedCookiesAndPreservesUnrelatedSessions() async throws {
+        // About twenty real WebKit round trips; a slow shared CI runner can need more than the
+        // two-minute default even when every callback completes.
+        executionTimeAllowance = 180
         // A separate non-persistent store keeps the test away from the user's
         // real web sessions and the development app's default cookie store.
         let dataStore = WKWebsiteDataStore.nonPersistent()

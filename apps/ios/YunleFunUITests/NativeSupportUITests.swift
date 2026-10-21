@@ -75,6 +75,14 @@ final class NativeSupportUITests: XCTestCase {
         waitForExpectations(timeout: 5)
         XCTAssertTrue(clear.isEnabled); clear.tap(); app.buttons["清除日志"].tap()
         let empty = app.staticTexts["feedback.logs.empty"]
+        // On a slow runner, launch work (a catalog refresh, a home sync step) can still
+        // log right after the clear. Clear again while a new entry re-enabled the button.
+        for _ in 0..<3 {
+            if empty.waitForExistence(timeout: 3) && !clear.isEnabled { break }
+            guard clear.isEnabled else { continue }
+            clear.tap()
+            XCTAssertTrue(app.buttons["清除日志"].waitForExistence(timeout: 5)); app.buttons["清除日志"].tap()
+        }
         reveal(empty, in: app, upward: false)
         XCTAssertTrue(empty.exists)
         XCTAssertFalse(clear.isEnabled)

@@ -108,8 +108,11 @@ final class AssistantComposerTextView: UITextView {
     func updatePlaceholder() { placeholderLabel.isHidden = !text.isEmpty }
 
     override func insertText(_ text: String) {
-        // While an input method is composing, Return confirms the candidate instead of sending.
-        if text == "\n", markedTextRange == nil { onSubmit?(); return }
+        if text == "\n" {
+            // While an input method is composing, Return only confirms the candidate: no send, no newline.
+            if markedTextRange != nil { unmarkText() } else { onSubmit?() }
+            return
+        }
         super.insertText(text)
     }
 

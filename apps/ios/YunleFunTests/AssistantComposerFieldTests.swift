@@ -45,11 +45,13 @@ final class AssistantComposerFieldTests: XCTestCase {
         let commands = try XCTUnwrap(view.keyCommands).filter { $0.input == "\r" }
         XCTAssertEqual(Set(commands.map(\.modifierFlags.rawValue)), [UIKeyModifierFlags.shift.rawValue, UIKeyModifierFlags.command.rawValue])
     }
-    func testReturnWhileAnInputMethodIsComposingDoesNotSend() {
+    func testReturnWhileAnInputMethodIsComposingOnlyConfirmsTheCandidate() {
         let view = makeView()
         view.setMarkedText("ji", selectedRange: NSRange(location: 2, length: 0))
         XCTAssertNotNil(view.markedTextRange)
         view.insertText("\n")
         XCTAssertEqual(submissions, 0)
+        XCTAssertNil(view.markedTextRange)
+        XCTAssertEqual(view.text, "ji", "Confirming the candidate must not add a newline")
     }
 }

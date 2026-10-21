@@ -6,8 +6,11 @@ struct HomeView: View {
     @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var accounts: AccountStore
     @EnvironmentObject private var sync: HomeSyncCoordinator
+    @EnvironmentObject private var wallet: WalletStore
+    @EnvironmentObject private var assistantRollout: AssistantRolloutStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("home.showRecent") private var showRecent = true
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var editing = false
@@ -23,6 +26,21 @@ struct HomeView: View {
     /// glide into place after add / remove / pin instead of jumping.
     private var layoutKey: [String] {
         library.snapshot.applications.map(\.homeKey) + ["|"] + library.snapshot.dockApplications.map(\.homeKey)
+    }
+
+    /// The entry follows the rollout; a members-only entry stays hidden until membership is known.
+    private var showsAssistant: Bool {
+        let user = accounts.user?.isUsable == true ? accounts.user?.id : nil
+        return assistantRollout.rollout.admits(userID: user, isMember: wallet.snapshot?.membership.isActive)
+    }
+
+    /// Membership decides the members-only entry. An explicit refresh always re-reads it; otherwise only an
+    /// unknown membership, or one older than ten minutes, is read again (for example after launching offline,
+    /// or after the membership changed on another device).
+    private func loadMembership(force: Bool = false) async {
+        guard assistantRollout.rollout.audience == .members, accounts.user?.isUsable == true, !wallet.isLoading else { return }
+        if !force, wallet.snapshot != nil, let checked = wallet.checkedAt, Date().timeIntervalSince(checked) < 10 * 60 { return }
+        await wallet.refreshAccount()
     }
 
     var body: some View {
@@ -101,14 +119,22 @@ struct HomeView: View {
             if editing && keys == ["|"] { withAnimation(Motion.fade) { editing = false } }
         }
         .haptic(.selection, trigger: pinChanges)
-        .refreshable { await sync.recheck() }
+        .refreshable {
+            await sync.recheck()
+            await loadMembership(force: true)
+        }
         .navigationTitle("云居")
+        // Read membership once per identity, and again when it is unknown or stale on returning to the app.
+        .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembership() }
+        .onChange(of: scenePhase) { if $0 == .active { Task { await loadMembership() } } }
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .general) }
         .sheet(item: $openFolder) { HomeFolderView(folderID: $0.id) }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                NavigationLink { AssistantView() } label: { Label("AI 助手", systemImage: "sparkles").labelStyle(.iconOnly) }
-                    .accessibilityIdentifier("home.assistant")
+                if showsAssistant {
+                    NavigationLink { AssistantView() } label: { Label("AI 助手", systemImage: "sparkles").labelStyle(.iconOnly) }
+                        .accessibilityIdentifier("home.assistant")
+                }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: browse) { Label("添加应用", systemImage: "plus").labelStyle(.iconOnly) }

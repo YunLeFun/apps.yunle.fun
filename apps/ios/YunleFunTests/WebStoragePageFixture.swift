@@ -25,7 +25,8 @@ final class WebStoragePageFixture: NSObject, WKScriptMessageHandler {
           window.webkit.messageHandlers.\(handler).postMessage({ token: '\(probe.token)', title: document.title });
         }, { once: true });</script></body></html>
         """, baseURL: origin)
-        guard await XCTWaiter.fulfillment(of: [probe.ready], timeout: 5) == .completed else {
+        // A cold WebContent launch on a shared CI runner has taken 14 seconds; success returns at once.
+        guard await XCTWaiter.fulfillment(of: [probe.ready], timeout: 30) == .completed else {
             throw Failure.documentNotReady
         }
         // The title KVO update can arrive after the script message. Verify
@@ -41,7 +42,7 @@ final class WebStoragePageFixture: NSObject, WKScriptMessageHandler {
             completed.fulfill()
         }
         // A timer inside JavaScript cannot bound a suspended WebContent process.
-        guard await XCTWaiter.fulfillment(of: [completed], timeout: 5) == .completed else {
+        guard await XCTWaiter.fulfillment(of: [completed], timeout: 30) == .completed else {
             throw Failure.scriptDidNotReturn
         }
         return try XCTUnwrap(result).get()

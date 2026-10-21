@@ -60,7 +60,8 @@ final class ApplicationCacheWebKitTests: XCTestCase {
     }
 
     private func wait(_ web: WKWebView, script: String) async throws {
-        for _ in 0..<100 {
+        // Up to 30 seconds of polling: a cold WebContent launch on a shared CI runner is slow.
+        for _ in 0..<600 {
             if (try? await web.evaluateJavaScript(script)) as? Bool == true { return }
             try await Task.sleep(nanoseconds: 50_000_000)
         }

@@ -26,7 +26,7 @@ enum AssistantError: Error, Equatable, AccountRequestFailure {
         }
     }
 }
-struct AssistantAppCard: Identifiable, Equatable, Sendable {
+struct AssistantAppCard: Identifiable, Equatable, Codable, Sendable {
     let applicationID: String?
     let slug: String
     let name: String
@@ -42,9 +42,9 @@ struct AssistantAppCard: Identifiable, Equatable, Sendable {
         return candidates.count == 1 ? candidates[0] : nil
     }
 }
-struct AssistantMessage: Identifiable, Equatable, Sendable {
-    enum Role: String, Encodable, Sendable { case user, assistant }
-    enum Status: Equatable, Sendable { case streaming, done, stopped, failed }
+struct AssistantMessage: Identifiable, Equatable, Codable, Sendable {
+    enum Role: String, Codable, Sendable { case user, assistant }
+    enum Status: String, Codable, Sendable { case streaming, done, stopped, failed }
     let id: String
     let role: Role
     var content: String

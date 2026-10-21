@@ -42,7 +42,8 @@ final class NativeApplicationMenuTests: XCTestCase {
         navigation.modalPresentationStyle = .fullScreen
         let presented = XCTestExpectation(description: "UIKit completed the application presentation")
         root.present(navigation, animated: false) { presented.fulfill() }
-        let presentationResult = await XCTWaiter.fulfillment(of: [presented], timeout: 5)
+        // Returns as soon as UIKit finishes; the long limit only covers a slow shared CI runner.
+        let presentationResult = await XCTWaiter.fulfillment(of: [presented], timeout: 30)
         XCTAssertEqual(presentationResult, .completed)
         try await waitForState("The application must be stable in its window") {
             navigation.presentingViewController === root && browser.viewIfLoaded?.window != nil
@@ -63,7 +64,7 @@ final class NativeApplicationMenuTests: XCTestCase {
                 && menu.transitionCoordinator == nil
         }
         if let closed {
-            let closeResult = await XCTWaiter.fulfillment(of: [closed], timeout: 5)
+            let closeResult = await XCTWaiter.fulfillment(of: [closed], timeout: 30)
             XCTAssertEqual(closeResult, .completed)
         }
         XCTAssertEqual(ended, invalidateDuringDismissal ? 0 : 1)
@@ -72,7 +73,8 @@ final class NativeApplicationMenuTests: XCTestCase {
     }
 
     private func waitForState(_ message: String, condition: () -> Bool) async throws {
-        for _ in 0..<100 {
+        // Polls for up to 30 seconds so a slow CI runner does not fail a state UIKit is still reaching.
+        for _ in 0..<600 {
             if condition() { return }
             try await Task.sleep(nanoseconds: 50_000_000)
         }

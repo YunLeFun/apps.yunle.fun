@@ -8,6 +8,9 @@ final class AssistantStore: ObservableObject {
     private let access: AccountRequestAccess<AssistantError>
     private let service: AssistantServing
     private let wallet: WalletServing
+    private let historyStore: AssistantHistory?
+    /// The messages last written to history, so re-saving an unchanged conversation never reorders the list.
+    private var savedMessages: [AssistantMessage]?
     private var boundary: AccountRequestBoundary?
     private var operation = UUID()
     private var task: Task<Void, Never>?
@@ -17,27 +20,37 @@ final class AssistantStore: ObservableObject {
     @Published private var rawDraft = ""
     @Published private var rawRunning = false
     @Published private var rawAccess = Access.unknown
+    @Published private var rawHistory: [AssistantConversation] = []
+    @Published private var rawHistoryUnsaved = false
     @Published private(set) var scrollRevision = 0
     var messages: [AssistantMessage] { current ? rawMessages : [] }
     var error: String? { current ? rawError : nil }
     var running: Bool { current && rawRunning }
     var accessState: Access { current ? rawAccess : .unknown }
+    /// Saved conversations of the current signed-in account; empty for guests and across identity changes.
+    var history: [AssistantConversation] { current ? rawHistory : [] }
+    /// The open conversation could not be written to history; it is retried at the next save point
+    /// and is lost only if the user starts a new conversation anyway.
+    var historyUnsaved: Bool { current && rawHistoryUnsaved }
     var draft: String {
         get { current ? rawDraft : "" }
         set { prepareIdentity(); rawDraft = newValue }
     }
     var canSend: Bool { !running && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && draft.utf16.count <= 4000 }
     private var current: Bool { boundary == access.boundary }
-    init(accounts: IdentityScopedAccountAuthorizing, service: AssistantServing = AssistantService(), wallet: WalletServing = WalletService()) {
-        access = AccountRequestAccess(accounts: accounts); self.service = service; self.wallet = wallet
+    init(accounts: IdentityScopedAccountAuthorizing, service: AssistantServing = AssistantService(), wallet: WalletServing = WalletService(),
+         history: AssistantHistory? = nil) {
+        access = AccountRequestAccess(accounts: accounts); self.service = service; self.wallet = wallet; historyStore = history
         boundary = access.boundary
+        loadHistory()
     }
     func identityChanged() { prepareIdentity() }
     private func prepareIdentity() {
         guard !current else { return }
         task?.cancel(); task = nil; operation = UUID(); boundary = access.boundary
         rawMessages = []; rawError = nil; rawDraft = ""; rawRunning = false; rawAccess = .unknown
-        threadID = "thread_" + UUID().uuidString
+        threadID = "thread_" + UUID().uuidString; savedMessages = nil; rawHistoryUnsaved = false
+        loadHistory()
     }
     func refreshAccess() async {
         prepareIdentity()
@@ -70,10 +83,60 @@ final class AssistantStore: ObservableObject {
         for index in rawMessages.indices where rawMessages[index].status == .streaming {
             rawMessages[index].status = .stopped; rawMessages[index].toolStatus = nil
         }
+        persist()
     }
-    func reset() {
-        stop(); rawMessages = []; rawError = nil
+    /// Starts a new conversation. When the current one could not be saved to history, it is kept and
+    /// false is returned, unless the user chose to discard it.
+    @discardableResult func reset(discardUnsaved: Bool = false) -> Bool {
+        stop()
+        guard discardUnsaved || !historyUnsaved else { return false }
+        rawMessages = []; rawError = nil; savedMessages = nil; rawHistoryUnsaved = false
         rawDraft = ""; threadID = "thread_" + UUID().uuidString; scrollRevision += 1
+        return true
+    }
+    /// Continues a saved conversation in the same Agent thread. Like `reset`, it keeps a current
+    /// conversation that could not be saved and returns false, unless the user chose to discard it.
+    @discardableResult func open(_ id: String, discardUnsaved: Bool = false) -> Bool {
+        guard current, let selected = rawHistory.first(where: { $0.id == id }) else { return false }
+        // Stopping saves a running thread, which can push the selection past the limit;
+        // prefer the freshly saved copy when it is still there.
+        stop()
+        guard discardUnsaved || !historyUnsaved else { return false }
+        let conversation = rawHistory.first(where: { $0.id == id }) ?? selected
+        rawMessages = conversation.messages; savedMessages = conversation.messages; rawHistoryUnsaved = false
+        threadID = conversation.id; rawError = nil; rawDraft = ""; scrollRevision += 1
+        return true
+    }
+    func delete(_ id: String) {
+        guard current, let store = historyStore, let uid = historyAccountID else { return }
+        // Finish an active reply first, so its final snapshot cannot save the deleted thread again.
+        if id == threadID && rawRunning { stop() }
+        rawHistory = store.delete(id, accountID: uid)
+        // A deleted open conversation is only saved again if it gets new messages.
+        if id == threadID { savedMessages = rawMessages }
+    }
+    func deleteAll() {
+        guard current, let store = historyStore, let uid = historyAccountID else { return }
+        if rawRunning { stop() }
+        // Keep showing what is still on disk if the file could not be removed.
+        guard store.deleteAll(accountID: uid) else { rawHistory = store.load(accountID: uid); return }
+        rawHistory = []; savedMessages = rawMessages
+    }
+    private var historyAccountID: String? {
+        guard historyStore != nil, let uid = access.boundary.uid, access.accounts.user?.isUsable == true else { return nil }
+        return uid
+    }
+    private func loadHistory() {
+        rawHistory = historyAccountID.flatMap { uid in historyStore?.load(accountID: uid) } ?? []
+    }
+    /// Saves the current conversation for the current account only, once it has changed.
+    private func persist() {
+        guard current, !rawRunning, rawMessages != savedMessages, let store = historyStore, let uid = historyAccountID,
+              let conversation = AssistantHistory.conversation(id: threadID, messages: rawMessages) else { return }
+        let result = store.save(conversation, accountID: uid)
+        rawHistory = result.conversations
+        rawHistoryUnsaved = !result.saved
+        if result.saved { savedMessages = rawMessages }
     }
     private func begin(prompt: String, retry: Bool) -> Task<Void, Never>? {
         guard access.boundary.uid != nil, access.accounts.user?.isUsable == true else {
@@ -131,10 +194,12 @@ final class AssistantStore: ObservableObject {
                 }
                 self.update(assistantID) { $0.status = .done; $0.toolStatus = nil }
                 self.scrollRevision += 1
+                self.rawRunning = false; self.persist()
             } catch {
                 guard valid() else { return }
                 self.setError(error)
                 self.update(assistantID) { $0.status = .failed; $0.toolStatus = nil }
+                self.rawRunning = false; self.persist()
             }
         }
         task = worker

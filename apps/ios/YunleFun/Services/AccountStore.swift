@@ -12,6 +12,7 @@ final class AccountStore: ObservableObject {
     private let signInOverview: @Sendable (AccountSession, AccountSignInCommit) async throws -> AccountOverview
     private let identityDidChange: (String?) -> Void
     private let accountWillRemove: (String) throws -> Void
+    private let accountDidRemove: (String) -> Void
     private var selectionOperationEpoch = 0
     private var activeSignInAttemptID: UUID?
     private var lastProvenSuccess: AccountSignInSuccess?
@@ -19,6 +20,7 @@ final class AccountStore: ObservableObject {
     init(session: AccountSession = AccountSession(),
          signInOverview: (@Sendable (AccountSession, AccountSignInCommit) async throws -> AccountOverview)? = nil,
          accountWillRemove: @escaping (String) throws -> Void = { _ in },
+         accountDidRemove: @escaping (String) -> Void = { _ in },
          identityDidChange: @escaping (String?) -> Void = { _ in }) {
         self.session = session
         self.signInOverview = signInOverview ?? { session, commit in
@@ -26,6 +28,7 @@ final class AccountStore: ObservableObject {
         }
         self.identityDidChange = identityDidChange
         self.accountWillRemove = accountWillRemove
+        self.accountDidRemove = accountDidRemove
     }
 
     var user: AccountUser? { overview.activeUser }
@@ -122,6 +125,10 @@ final class AccountStore: ObservableObject {
         // Clear private data and close identity-bound WebViews immediately;
         // a slow/offline remote sign-out must not delay the local transition.
         await publish()
+        // Irreversible cleanup waits for the committed local removal, so a failed vault write
+        // leaves the account and its data intact. It also runs after the identity change is
+        // published, so identity-scoped stores can no longer write for the removed account.
+        accountDidRemove(id)
         let revoked = await revocation.value
         notice = revoked ? nil : "已在此设备退出，暂时未能同步退出状态。"
     }

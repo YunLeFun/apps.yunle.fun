@@ -472,7 +472,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         private func present(_ controller: UIViewController, from presenter: UIViewController) async throws {
             let completed = XCTestExpectation(description: "UIKit completed the nested presentation")
             presenter.present(controller, animated: false) { completed.fulfill() }
-            guard await XCTWaiter.fulfillment(of: [completed], timeout: 5) == .completed else {
+            // Returns as soon as UIKit finishes; the long limit only covers a slow shared CI runner.
+            guard await XCTWaiter.fulfillment(of: [completed], timeout: 30) == .completed else {
                 XCTFail("UIKit did not complete the nested presentation")
                 throw NSError(domain: "NativeRuntimeSessionTests", code: 2)
             }

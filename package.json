@@ -54,10 +54,10 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^8.3.0",
-    "@cloudbase/node-sdk": "^3.18.3",
-    "@unocss/eslint-config": "^66.7.5",
-    "esbuild": "0.25.12",
-    "eslint": "^10.7.0",
+    "@cloudbase/node-sdk": "^3.18.7",
+    "@unocss/eslint-config": "^66.11.0",
+    "esbuild": "0.28.2",
+    "eslint": "^10.13.0",
     "eslint-plugin-format": "^2.0.1"
   }
 }

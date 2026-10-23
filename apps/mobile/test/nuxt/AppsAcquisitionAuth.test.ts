@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import { useCloudbaseOAuth } from '~/composables/auth/useCloudbaseOAuth'
@@ -99,11 +100,48 @@ describe('apps direct authentication acquisition hooks', () => {
     expect(mocks.record).not.toHaveBeenCalled()
   })
 
-  it('records a direct password auth attempt as unknown method and lets the backend reject old accounts', async () => {
-    const { typed } = core()
-    await useCloudbaseOtp(typed).signInWithPassword({ username: 'test', password: 'not-real' })
+  // Generate a disposable value so no static credential is stored in fixtures.
+  const password = ` ${randomUUID()} `
+
+  it.each([
+    [{ username: ' test ' }, { username: 'test', password }],
+    [{ email: ' test@example.com ' }, { email: 'test@example.com', password }],
+    [{ phone: ' +86-test ' }, { phone: '+86-test', password }],
+    [{ email: ' ', phone: '', username: 'test' }, { username: 'test', password }],
+  ])('forwards a valid password identifier and records its authentication attempt: %j', async (identifier, credentials) => {
+    const { state, typed } = core()
+    await useCloudbaseOtp(typed).signInWithPassword({ ...identifier, password })
+    expect(state.auth.signInWithPassword).toHaveBeenCalledWith(credentials)
     expect(mocks.begin).toHaveBeenCalledWith('unknown')
     expect(mocks.record).toHaveBeenCalledOnce()
+  })
+
+  it.each([
+    {},
+    { username: '' },
+    { email: ' ', phone: '\t', username: '\n' },
+  ])('rejects missing or empty password identifiers before contacting auth: %j', async (identifier) => {
+    const { state, typed } = core()
+    await expect(useCloudbaseOtp(typed).signInWithPassword({ ...identifier, password }))
+      .rejects
+      .toThrow('请输入用户名、邮箱或手机号')
+    expect(state.auth.signInWithPassword).not.toHaveBeenCalled()
+    expect(state.fetchUser).not.toHaveBeenCalled()
+    expect(mocks.begin).not.toHaveBeenCalled()
+    expect(mocks.record).not.toHaveBeenCalled()
+    expect(state.toast.showError).toHaveBeenCalledWith('请输入用户名、邮箱或手机号')
+    expect(state.loading.value).toBe(false)
+  })
+
+  it('rejects an empty password before contacting auth', async () => {
+    const { state, typed } = core()
+    await expect(useCloudbaseOtp(typed).signInWithPassword({ username: 'test', password: '' }))
+      .rejects
+      .toThrow('请输入密码')
+    expect(state.auth.signInWithPassword).not.toHaveBeenCalled()
+    expect(mocks.begin).not.toHaveBeenCalled()
+    expect(mocks.record).not.toHaveBeenCalled()
+    expect(state.loading.value).toBe(false)
   })
 
   it('binds Web OAuth to the actual SDK authorization URL state before navigation', async () => {

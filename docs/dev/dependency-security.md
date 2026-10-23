@@ -1,75 +1,97 @@
 # 依赖安全（pnpm audit）
 
-记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-07-29**。
+记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-10-24**。
 
 ## 现状
 
-| 等级     | 修复前 | 未忽略 | 精确接受（见下） |
-| -------- | ------ | ------ | ---------------- |
-| critical | 0      | **0**  | 0                |
-| high     | 11     | **0**  | 2                |
-| moderate | 4      | **0**  | 2                |
-| low      | 0      | **0**  | 0                |
+本轮优先升级主依赖并刷新锁文件，再处理升级后保留的传递依赖告警。升级前统计包含原有 GHSA 忽略项。
 
-`pnpm audit` 会显示 `4 vulnerabilities found`，随后明确标注 `2 moderate (2 ignored) | 2 high (2 ignored)`；
-`pnpm audit --json` 的 `advisories` 为空，表示没有未处理告警。
+| 等级     | 升级前锁文件 | 当前未处理 | 已补丁并精确忽略（见下） |
+| -------- | ------------ | ---------- | ------------------------ |
+| critical | 2            | **0**      | 0                        |
+| high     | 44           | **0**      | 2                        |
+| moderate | 41           | **0**      | 0                        |
+| low      | 8            | **0**      | 0                        |
+| 合计     | 95           | **0**      | 2                        |
 
-验证命令：
-
-```bash
-pnpm audit --audit-level high   # 应无未忽略的 critical / high
-pnpm audit                      # 查看完整列表
-```
-
-## 修复策略：pnpm overrides
-
-绝大多数漏洞来自**传递依赖**（不是我们直接引入的包），无法通过升级直接依赖解决，
-因此在 [`pnpm-workspace.yaml`](https://github.com/YunYouJun/apps.yunle.fun/blob/main/pnpm-workspace.yaml) 的
-`overrides` 字段把它们钉死到已修复的版本。
-
-> 本仓库使用 pnpm 11.x + workspace，`overrides` 写在 `pnpm-workspace.yaml`（不是 `package.json`）。
-
-`allowBuilds` 只显式放行当前锁文件中确实需要安装脚本的 6 个构建/原生依赖：
-`@parcel/watcher`、`core-js`、`core-js-pure`、`esbuild`、`protobufjs`、`unrs-resolver`；
-没有通配符，新增带安装脚本的包仍会被 pnpm 拦截并要求单独审查。
-
-主要修复项（完整列表见配置文件注释）：
-
-- `protobufjs ^7.6.5` — critical 任意代码执行（飞书 SDK 带的，仅部署用）
-- `axios ^1.18.1` — 多个 SSRF / 原型污染 / MITM
-- `tar ^7.5.21` — node-tar 多个路径穿越 / 符号链接 / 栈溢出（Capacitor CLI、node-pre-gyp）。
-  注意：`@capacitor/cli` < 7.5.0 按 tar v6 API 调用，在此 override 下 `cap sync` 会报
-  `Cannot read properties of undefined (reading 'extract')`，需保持 `@capacitor/cli >= 7.5.0`
-  （其 tar 依赖已升至 ^7.5.3）。
-- `shelljs ^0.8.5`、`shell-quote ^1.10.0`、`@xmldom/xmldom ^0.8.13`、`serialize-javascript ^7.0.7`、
-  `flatted ^3.4.2`、`h3 ^1.15.11`、`picomatch`、`lodash ^4.18.1`、`ws ^8.21.0`、
-  `defu`、`simple-git`、`basic-ftp`、`fast-uri`、`js-cookie`、`tmp`、
-  `@babel/plugin-transform-modules-systemjs` 等。
-- 2026-07-16 新增：`@babel/core ^7.29.1`、`esbuild`（分版本段）、`form-data`（v3/v4 分段）、
-  `js-yaml ^4.1.2`、`launch-editor ^2.14.1`、`lodash.unset ^4.18.0`、`undici ^7.28.0`、
-  `uuid ^11.1.1`、`vite ^7.3.5`。
-- 2026-07-29 新增或上调：`brace-expansion ^5.0.8`、`fast-uri ^3.1.4`、
-  `immutable ^5.1.8`、`linkify-it ^5.0.2`、`postcss ^8.5.18`、`svgo ^4.0.2`、
-  `tar ^7.5.21`、`valibot ^1.4.2`。
-- 其他 moderate 的安全小版本升级：`unhead`、`ip-address`、`qs`、`yaml`、
-  `follow-redirects`、`postcss`、`brace-expansion`。
-- `@capacitor/haptics` 固定在 `8.0.1`：`8.0.2` 缺少前一稳定版具备的 provenance，
-  会触发 `trustPolicy: no-downgrade`；未通过 `trustPolicyExclude` 放宽供应链策略。
-
-改动 override 后务必重新验证：
+`pnpm audit --json` 的 `advisories` 为空，metadata 仍记录 2 项 high。两项均已应用仓库补丁；
+pnpm 根据包版本匹配公告，不能识别补丁是否已修复问题，所以在 `auditConfig.ignoreGhsas` 中精确忽略。
+这表示没有未处理告警，不表示审计服务已将这两个版本认定为无漏洞。
 
 ```bash
-pnpm install
-pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:nuxt && pnpm build
+pnpm audit --audit-level high
+pnpm audit --json
 ```
 
-## 精确接受项（2 high + 2 moderate）
+## 修复策略
 
-只在 `auditConfig.ignoreGhsas` 中按 GHSA 编号接受，不按包名或等级做宽泛忽略：
+1. 优先升级直接依赖及其构建工具，并同步提交 `pnpm-lock.yaml`。移动与桌面当前统一为 Nuxt `4.6.2`、
+   Vue `3.5.44` 和 Vite `8.3.5`；根构建工具使用 esbuild `0.28.2`，其余依赖在声明的 semver 范围内刷新。
+2. 上游依赖范围仍保留易受影响版本时，在 [`pnpm-workspace.yaml`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/pnpm-workspace.yaml)
+   使用与调用方 API 兼容的安全覆盖。跨主版本覆盖需验证实际调用链，并尽量限定到对应父依赖。
+3. 上游尚无已发布修复版时，回移最小补丁并测试恶意输入与合法行为；只有此类已修复且有证据的告警才按 GHSA 精确忽略。
+   上游发布修复版或移除依赖后，删除补丁和对应忽略项。
 
-| 包 / GHSA                                                                                               | 链路                                                     | 接受依据                                                                                                                                                                                                                                                | 退出条件                                                           |
-| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `vite@5.4.21` / `GHSA-fx2h-pf6j-xcff`（high）、`GHSA-4w7w-66w2-5vf9`、`GHSA-v6wh-96g9-6wx3`（moderate） | `docs > vitepress@1.6.4 > vite@5.4.21`                   | VitePress 1.6.4 的依赖范围仍是 Vite 5，修复版在 Vite 6；问题都需要启动开发服务器，文档 CI 只做静态构建，线上不运行该服务器。                                                                                                                            | VitePress 2 发布稳定版并完成迁移后，移除 3 个 GHSA 例外。          |
-| `lodash.set@4.3.2` / `GHSA-p6mc-m468-83gw`（high）                                                      | `@cloudbase/node-sdk > @cloudbase/database > lodash.set` | 审计声称的 `4.3.3` 从未发布，npm 最新仍为 `4.3.2`。仓库通过 `patchedDependencies` 应用 `patches/lodash.set@4.3.2.patch`，回移 Lodash 的 `__proto__` / `constructor` / `prototype` 路径拦截；`test/unit/lodash-set-patch.test.ts` 持续验证三条污染路径。 | CloudBase 移除该依赖或上游发布真实修复版后，删除补丁与 GHSA 例外。 |
+本仓库使用 pnpm `11.13.1` + workspace，`overrides`、`patchedDependencies` 与安装脚本策略写在
+`pnpm-workspace.yaml`。`allowBuilds` 显式放行 `@parcel/watcher`、`core-js`、`core-js-pure`、
+`electron`、`electron-winstaller`、`esbuild`、`fs-xattr`、`macos-alias`、`protobufjs`、`unrs-resolver`；
+没有通配符，新增带安装脚本的包仍需单独审查。
 
-`esbuild` 已从 VitePress 链升级到可用修复线 `0.25.x`，`uuid` 已覆盖到 `11.1.1`，不再属于接受项。
+## 本轮传递依赖与兼容处理
+
+- 文档保留稳定版 VitePress `1.6.4`，只对其 Vite 覆盖到 `6.4.5`，满足 `@vitejs/plugin-vue@5` 的 peer 范围。
+  原 Vite 5 的三个 GHSA 忽略项与发布信任例外已移除，无需为修复漏洞迁移到 VitePress 预发布版。
+- `get-uri@6.0.5 > basic-ftp` 限定覆盖到 `6.2.3`，保留 `Client` API；已使用本地 FTP fixture 验证连接和完整下载。
+- `appdmg@0.6.6 > image-size` 限定覆盖到 `2.0.4`，并通过 `patches/appdmg@0.6.6.patch`
+  将旧 callback 调用适配到 `image-size/fromFile` 的 Promise API。独立 fixture 已验证图片尺寸、缺文件、坏图片与无背景跳过分支。
+- 继续保留按版本段限定的 esbuild、form-data、picomatch、undici 等安全覆盖，避免改写兼容的新版本声明。
+  删除会误缩窄通用 peer 范围的旧 Vite／esbuild 覆盖；Vue runtime、compiler-sfc 与 server-renderer 同步到 `3.5.44`。
+- H3 安全覆盖只命中旧 1.x 范围，保留新 devframe 所需的 H3 2，避免全局覆盖导致缺少 `H3` 导出。
+- 两端 `@playwright/test` 精确固定为 `1.61.1`，保持既有 Electron `44.7.0` 的测试驱动基线；
+  后续升级需通过完整跨平台集成测试。
+- 其他覆盖包含 protobufjs、axios、tar、brace-expansion、fast-uri、js-yaml、katex、tinypool、ws 等；
+  完整版本与适用依赖链以 workspace 注释和锁文件为准。
+
+当前安装仍有 `@stencil/vue-output-target` 声明 `vue-router ^4.5.0`、项目使用 `5.1.0` 的既有 peer 提示。
+这与安全告警分开跟踪，不能用忽略 peer 检查来宣称所有声明均兼容。
+
+## 发布信任策略
+
+保持 `trustPolicy: no-downgrade`。Workbox `7.4.1` 引入的
+`@trickfilm400/rollup-plugin-off-main-thread@3.0.0-pre1` 缺少 provenance，
+本轮在 Workbox 链内限定使用具备 provenance 的 `2.5.0`；已比对两者发布包中的生产代码逐字相同，未新增信任例外。
+
+`@capacitor/haptics` 仍固定在 `8.0.1`：`8.0.2` 缺少前一稳定版具备的 provenance。
+Vue `3.5.40` 的旧 `minimumReleaseAgeExclude` 已移除。当前仍保留的精确发布信任例外为
+`@octokit/endpoint@9.0.6`、`rollup@2.80.0` 与 `chokidar@4.0.3`；没有新增包名通配例外。
+
+## 已补丁的精确忽略项（2 high）
+
+| 包 / GHSA                                                                                       | 依赖链与补丁证据                                                                                                                                                                                                                                                                                                                                                                    | 退出条件                                                             |
+| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `lodash.set@4.3.2` / [`GHSA-p6mc-m468-83gw`](https://github.com/advisories/GHSA-p6mc-m468-83gw) | `@cloudbase/node-sdk > @cloudbase/database > lodash.set`。公告声称的 `4.3.3` 尚未发布；`patches/lodash.set@4.3.2.patch` 回移 `__proto__` / `constructor` / `prototype` 路径拦截，`apps/mobile/test/unit/lodash-set-patch.test.ts` 覆盖三条污染路径。                                                                                                                                | CloudBase 移除该依赖或上游发布真实修复版后，删除补丁与 GHSA 忽略项。 |
+| `node-forge@1.4.0` / [`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv) | `listhen > node-forge`。尚无已发布修复版；`patches/node-forge@1.4.0.patch` 回移上游 [PR #1152](https://github.com/digitalbazaar/forge/pull/1152) 的 RSA DigestAlgorithm 嵌套元素数量校验。`apps/mobile/test/unit/node-forge-patch.test.ts` 参考上游 [PR #1158](https://github.com/digitalbazaar/forge/pull/1158)，覆盖两种恶意结构、两种合法结构及真实 RSA 签名／篡改消息，共五项。 | 上游发布修复版或 listhen 移除该依赖后，删除补丁与 GHSA 忽略项。      |
+
+## 验证命令
+
+依赖变更需同时验证移动／Web、桌面和文档消费者。以下命令用于本轮回归，实际通过结果以 PR 验证记录为准：
+
+```bash
+pnpm install --frozen-lockfile
+pnpm audit --audit-level high
+pnpm lint
+pnpm typecheck
+pnpm test:unit
+pnpm test:nuxt
+pnpm build
+pnpm check:server-runtime-deps
+pnpm --dir apps/mobile exec playwright test --project=chromium
+pnpm typecheck:desktop
+pnpm test:desktop
+pnpm test:desktop:e2e
+pnpm make:desktop
+pnpm verify:desktop
+pnpm verify:desktop-artifacts
+pnpm verify:desktop-launch
+pnpm docs:build
+```

@@ -1,6 +1,6 @@
 # 客户端工作区与部署
 
-更新日期：2026-10-14。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web、iOS 和 Android 客户端；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
+更新日期：2026-10-24。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web、iOS 和 Android 客户端；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
 
 ## 目录与命令
 
@@ -47,7 +47,7 @@ pnpm make:desktop
 
 产品仓库现阶段保持私有，`desktop.updatesEnabled` 为 `false`，CI 不发布 Release，默认产物未配置分发签名。`check:desktop-release` 只校验稳定 Tag、桌面版本与目标仓库；启用公共 Electron 更新服务还要求明确确认目标仓库可见性为 public。图标从移动端既有标志导出，macOS 可用 `icons:desktop` 更新 ICNS／ICO／PNG，其它平台使用提交的导出文件。完整命令与产物字段见 [桌面构建与私有内测](./desktop-build.md)。
 
-桌面接入复用模板的 Electron 44.7.0、Forge 8.0.1 与 Vite 8.3.4 主进程构建；Nuxt、Vue、TypeScript 和 pnpm 先与原产品工作区保持兼容，分别采用 Nuxt 4.4.8、Vue 3.5.40、TypeScript 5.9.3 和 pnpm 11.13.1。renderer 使用对应 Nuxt builder 的 Vite 7.3.6；主进程通过 `vite-electron` 别名单独使用 Vite 8.3.4，各构建日志与锁文件记录实际版本。
+桌面接入继续使用 Electron 44.7.0 和 Forge 8.0.1。当前移动与桌面统一到 Nuxt 4.6.2、Vue 3.5.44 和 Vite 8.3.5，TypeScript 为 5.9.3，pnpm 为 11.13.1；主进程通过 `vite-electron` 别名也使用 Vite 8.3.5。文档保留稳定版 VitePress 1.6.4，并将其 Vite 单独覆盖到兼容的 6.4.5。各构建日志与锁文件记录实际版本，安全补丁及精确例外见[依赖安全](./dependency-security.md)。
 
 实际接入来源为 `vitesse-nuxt-electron` 的 `3821916`，包含开发重建队列和退出治理；产品进一步监听 `shared` 与 `packages/app-core`，保留各应用开发进程的退出清理。
 
@@ -76,7 +76,7 @@ pnpm make:desktop
 
 根目录由控制台管理；进入 `apps/mobile` 后，平台读取该目录的 `edgeone.json`，其构建、安装和输出目录设置优先于控制台同名配置。应用配置保留 AASA 与工坊 API 的响应头。根 `edgeone.json` 也转发到专用构建入口；如果误用仓库根目录导致自动适配器未启用，构建检查会失败，避免再次发布只有静态资源的版本。
 
-当前 Nuxt 4.4.8 使用 Nitro 2.13.4，该版本没有内置 EdgeOne preset；采用平台官方适配器生成 `.edgeone`，不在产品工作区新增适配器 beta 依赖。客户端保持 `ssr: false`；生产仍保留运行 Nitro API 的 Node 服务。
+当前 Nuxt 4.6.2 锁定 Nitro 2.13.5；EdgeOne 部署继续采用平台官方适配器生成 `.edgeone`，不在产品工作区新增适配器 beta 依赖。客户端保持 `ssr: false`；生产仍保留运行 Nitro API 的 Node 服务。
 
 官方适配器先在 Nuxt 配置中注入临时模块，再运行 `build:edgeone`；该命令只执行 Nuxt 构建并检查本阶段的静态资源、Nitro 入口、chunk 和 CloudBase 运行依赖。命令返回后，适配器才生成 `handler.js`、版本 3 的 `config.json`，恢复 Nuxt 配置，并由平台补齐函数启动入口。完成适配后可从仓库根执行 `pnpm check:edgeone-output`，校验函数路由覆盖 `/login`、`/tabs/home` 和应用 API。直接运行普通 Nuxt 构建不会完成平台适配；无适配器预处理的 `build:edgeone` 会报错。
 
@@ -148,7 +148,7 @@ macOS 的 `preMake` hook 检查 DMG maker 声明的 `macos-alias`／`fs-xattr` �
 - 打包后的桌面 UI：实际 ASAR `.app` 从 `app://shell/` 加载，Electron 为 44.7.0；线上目录显示 `online` 和 25 项，无目录错误；`cook.yunle.fun` 在 WebContentsView 中加载“食用手册”，guest 的 `require` 和 `window.desktop` 均为 `undefined`。
 - 根 lint 与文档构建通过。当前 PR 的原生工程构建、生产部署、签名、公证、真机登录与跨版本更新另行验收。
 
-依赖安装仍有 Nitro 安全覆盖的 esbuild 0.28.1 与旧 unplugin 声明 `^0.25` 的两项 optional peer 提示；实际构建和测试通过，保留安全覆盖。
+2026-10-24 依赖整理将根 esbuild 更新到 0.28.2，并移除误缩窄通用 peer 范围的旧 Vite／esbuild 覆盖。当前仍有 `@stencil/vue-output-target` 声明 `vue-router ^4.5.0`、项目使用 5.1.0 的既有 peer 提示；安全审计未处理项为 0，另有 2 项已应用补丁并精确忽略的 high，详见[依赖安全](./dependency-security.md)。此轮构建与测试结果以依赖升级 PR 的验证记录为准，不沿用上述迁移验收数量。
 
 本机验证应覆盖：
 

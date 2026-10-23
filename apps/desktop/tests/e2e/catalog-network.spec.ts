@@ -6,6 +6,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { _electron as electron, expect, test } from '@playwright/test'
 import { CATALOG_NETWORK_PARTITION } from '../../electron/catalog'
+import { cleanupElectronTest } from './electron-cleanup'
 
 // eslint-disable-next-line no-empty-pattern -- Playwright requires destructured fixture arguments.
 test('catalog uses Chromium proxy routing while omitting cookies and refusing redirects', async ({}, testInfo) => {
@@ -49,6 +50,7 @@ test('catalog uses Chromium proxy routing while omitting cookies and refusing re
   origin = `http://127.0.0.1:${(server.address() as { port: number }).port}`
   const userData = await fs.mkdtemp(path.join(os.tmpdir(), 'yunle-catalog-network-'))
   let application: ElectronApplication | undefined
+  let failed = false
   try {
     const env: Record<string, string> = Object.fromEntries(Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
     for (const key of ['ELECTRON_RUN_AS_NODE', 'YUNLE_DESKTOP_DEV_ORIGIN', 'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'NO_PROXY', 'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy', 'NODE_OPTIONS', 'NODE_USE_ENV_PROXY'])
@@ -88,19 +90,12 @@ test('catalog uses Chromium proxy routing while omitting cookies and refusing re
     expect(refused.error).toBeTruthy()
     expect(refused.apps.map(app => app.slug)).toEqual(['proxy-app'])
     expect(redirectHits).toBe(0)
-    await application.context().tracing.stop()
   }
   catch (error) {
-    if (application) {
-      const trace = testInfo.outputPath('electron-trace.zip')
-      await application.context().tracing.stop({ path: trace }).catch(() => undefined)
-      await testInfo.attach('Electron trace', { path: trace, contentType: 'application/zip' }).catch(() => undefined)
-    }
+    failed = true
     throw error
   }
   finally {
-    await application?.close()
-    await new Promise<void>(resolve => server.close(() => resolve()))
-    await fs.rm(userData, { recursive: true, force: true })
+    await cleanupElectronTest({ application, testInfo, server, userData, failed })
   }
 })

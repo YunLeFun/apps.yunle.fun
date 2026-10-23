@@ -199,17 +199,17 @@ shell preload 只暴露带 schema 校验的宿主操作、事件和取消订阅�
 
 `vitesse-nuxt-electron` 现在可作为 Nuxt + Electron 的通用起点。模板已具备静态界面、安全 preload、受限 IPC、WebContentsView 示例和 Forge 发布流程；产品匿名目录和共享应用数据已接入，账号和宿主 SSO 继续分阶段建设。
 
-| 核对项   | 模板当前实现                                                                                     | 产品接入或后续完善                                                                                                                        |
-| -------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 依赖基线 | Nuxt 4.6.1、Vue 3.5.44、Vite 8.3.4、Electron 44.7.0、Forge 8.0.1、pnpm 12.11.2，构建使用 Node 24 | 产品先采用 Nuxt 4.4.8、Vue 3.5.40、TypeScript 5.9.3、pnpm 11.13.1；renderer Vite 7.3.6，主进程别名 Vite 8.3.4，Electron／Forge 沿模板基线 |
-| 渲染隔离 | shell／guest 独立 sandbox preload，固定接口及发送者／主 frame／Origin 校验                       | 增加云乐坊宿主协议和授权生命周期，保留原生能力授信检查                                                                                    |
-| 本地加载 | `app://shell` 服务 `.output/public`，CSP 使用内联脚本哈希，已验证路由刷新                        | 验证产品自定义 Origin、API、登录和最终 Nuxt／Ionic 产物                                                                                   |
-| 内嵌应用 | 两个文档站示例、按应用持久化 Session，一次保留一个 guest                                         | AppManifest、ViewManager、多标签与账号配置隔离；登录弹窗、下载和请求权限                                                                  |
-| 开发编排 | 端口和健康检查、主进程／preload 构建、重建队列、变更重启与退出治理                               | 已扩展 `shared/` 与 `app-core` 监听并验证启动／退出清理；窗口状态、原生菜单和故障诊断后续建设                                             |
-| 打包     | Forge，静态客户端和运行时依赖进入 ASAR；生产二进制 fuse 校验                                     | 产品通过官方 Forge Core API 兼容 pnpm 11，物化完整生产依赖树；macOS arm64 `.app`／DMG／ZIP、ASAR 与 fuses 已验证                          |
-| 发布更新 | macOS DMG／ZIP、Windows Squirrel、Linux deb；草稿发布和 `update-electron-app`                    | 配置证书、验证签名／公证及真实跨版本更新；按产品需求选择更新分发源                                                                        |
-| CI       | 模板三平台 CI 通过，macOS x64 另配置发布任务                                                     | 产品三平台 CI 已触发，但 Actions 预算阻止 runner 启动；远端三平台尚未验收，产品 macOS x64 与真实安装发布测试仍需补充                      |
-| 依赖维护 | 人工升级，Dependabot 自动 PR 已停用；精确发布信任例外和 DevTools 兼容补丁已记录                  | 清理过期例外，跟进上游修复；运行时和开发工具链审计分别跟踪                                                                                |
+| 核对项   | 模板当前实现                                                                                     | 产品接入或后续完善                                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 依赖基线 | Nuxt 4.6.1、Vue 3.5.44、Vite 8.3.4、Electron 44.7.0、Forge 8.0.1、pnpm 12.11.2，构建使用 Node 24 | 产品当前采用 Nuxt 4.6.2、Vue 3.5.44、TypeScript 5.9.3、pnpm 11.13.1；renderer 与主进程别名均为 Vite 8.3.5，Electron／Forge 沿模板基线 |
+| 渲染隔离 | shell／guest 独立 sandbox preload，固定接口及发送者／主 frame／Origin 校验                       | 增加云乐坊宿主协议和授权生命周期，保留原生能力授信检查                                                                                |
+| 本地加载 | `app://shell` 服务 `.output/public`，CSP 使用内联脚本哈希，已验证路由刷新                        | 验证产品自定义 Origin、API、登录和最终 Nuxt／Ionic 产物                                                                               |
+| 内嵌应用 | 两个文档站示例、按应用持久化 Session，一次保留一个 guest                                         | AppManifest、ViewManager、多标签与账号配置隔离；登录弹窗、下载和请求权限                                                              |
+| 开发编排 | 端口和健康检查、主进程／preload 构建、重建队列、变更重启与退出治理                               | 已扩展 `shared/` 与 `app-core` 监听并验证启动／退出清理；窗口状态、原生菜单和故障诊断后续建设                                         |
+| 打包     | Forge，静态客户端和运行时依赖进入 ASAR；生产二进制 fuse 校验                                     | 产品通过官方 Forge Core API 兼容 pnpm 11，物化完整生产依赖树；macOS arm64 `.app`／DMG／ZIP、ASAR 与 fuses 已验证                      |
+| 发布更新 | macOS DMG／ZIP、Windows Squirrel、Linux deb；草稿发布和 `update-electron-app`                    | 配置证书、验证签名／公证及真实跨版本更新；按产品需求选择更新分发源                                                                    |
+| CI       | 模板三平台 CI 通过，macOS x64 另配置发布任务                                                     | 产品三平台 CI 已触发，但 Actions 预算阻止 runner 启动；远端三平台尚未验收，产品 macOS x64 与真实安装发布测试仍需补充                  |
+| 依赖维护 | 人工升级，Dependabot 自动 PR 已停用；精确发布信任例外和 DevTools 兼容补丁已记录                  | 清理过期例外，跟进上游修复；运行时和开发工具链审计分别跟踪                                                                            |
 
 首版继续 Nuxt 的理由是复用现有业务：请求插件、运行时配置、路由和账户逻辑已经使用 Nuxt 接口。桌面只生成静态 SPA，服务端留在云端。移动导航和 Capacitor 判断需要平台适配；更换界面框架不会替代这些工作。
 
@@ -234,7 +234,7 @@ shell preload 只暴露带 schema 校验的宿主操作、事件和取消订阅�
 
 2026-10-13 在原本机工作区的迁移阶段已验证本地生产 Node server 的 `/`、`/tabs/home` 和 `/login` 返回 200，匿名 `/api/apps/public` 返回 200 JSON 与 25 个公开应用。打包后的 macOS ASAR `.app` 从 `app://shell/` 启动，线上目录为 `online`、25 项且无错误；实际 `cook.yunle.fun` 在 WebContentsView 加载“食用手册”，guest 的 `require` 和 `window.desktop` 均为 `undefined`。当时的 Chromium、iOS Simulator、Android、macOS 打包、ASAR／fuses、原生启动与开发退出清理记录保留在[迁移验收说明](./monorepo.md#验证迁移)。该工作区包含其它未提交功能，当前 PR 的原生工程与正式部署仍需独立验收。
 
-当前保留 Nitro 安全覆盖的 esbuild 0.28.1；旧 unplugin 的 `^0.25` 声明产生两项 optional peer 提示，实际构建和测试通过。
+2026-10-24 依赖整理将根 esbuild 更新到 0.28.2，并移除误缩窄通用 peer 范围的旧 Vite／esbuild 覆盖。当前仍有 `@stencil/vue-output-target` 声明 `vue-router ^4.5.0`、项目使用 5.1.0 的既有 peer 提示。安全审计未处理项为 0，另有 2 项已应用补丁并精确忽略的 high；修复与退出条件见[依赖安全](./dependency-security.md)，本轮构建与测试结果以依赖升级 PR 记录为准。
 
 1. **通用模板基础已完成**：静态 Nuxt renderer、隔离 preload、自定义协议、单 guest 示例、健康检查和三平台 CI。继续完善统一配置、AppManifest 与 ViewManager，形成可供产品接入的小接口。
 2. **产品接入验证**：`apps/mobile` 结构迁移和本机原有功能验证已完成，`apps/desktop` 接入安全容器并从 `packages/app-core` 复用公共模块。完整云居／工坊、Electron HostRuntime Adapter、自定义 Origin 下 CloudBase 登录刷新和数据同步继续逐项接入；凭据持久化和认证回调单独验收。

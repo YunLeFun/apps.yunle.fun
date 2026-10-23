@@ -1,10 +1,11 @@
-import type { ElectronApplication, TestInfo } from '@playwright/test'
+import type { ElectronApplication } from '@playwright/test'
 import fs from 'node:fs/promises'
 import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 import { _electron as electron, expect, test } from '@playwright/test'
 import { COOK_FEATURE_IMAGE_URL } from '../../shared/editorial-media'
+import { cleanupElectronTest } from './electron-cleanup'
 
 async function nativeGuest(application: ElectronApplication, origin: string) {
   return application.evaluate(({ BaseWindow, WebContentsView }, targetOrigin) => {
@@ -14,24 +15,6 @@ async function nativeGuest(application: ElectronApplication, origin: string) {
       return null
     return { id: view.webContents.id, visible: view.getVisible(), bounds: view.getBounds(), window: owner.getContentBounds() }
   }, origin)
-}
-
-async function finishElectronTrace(application: ElectronApplication | undefined, testInfo: TestInfo, failed: boolean) {
-  if (!application)
-    return
-  try {
-    if (failed || testInfo.status !== testInfo.expectedStatus) {
-      const trace = testInfo.outputPath('electron-trace.zip')
-      await application.context().tracing.stop({ path: trace })
-      await testInfo.attach('Electron trace', { path: trace, contentType: 'application/zip' })
-    }
-    else {
-      await application.context().tracing.stop()
-    }
-  }
-  catch (error) {
-    console.warn('Could not save Electron trace:', error)
-  }
 }
 
 // eslint-disable-next-line no-empty-pattern -- Playwright requires destructured fixture arguments.
@@ -297,10 +280,7 @@ test('shared product catalog, static routes, restricted bridges, application iso
     throw error
   }
   finally {
-    await finishElectronTrace(application, testInfo, failed)
-    await application?.close()
-    await new Promise<void>(resolve => server.close(() => resolve()))
-    await fs.rm(userData, { recursive: true, force: true })
+    await cleanupElectronTest({ application, testInfo, server, userData, failed })
   }
 })
 
@@ -412,9 +392,6 @@ test('real shared offline snapshot and catalog search remain usable when the API
     throw error
   }
   finally {
-    await finishElectronTrace(application, testInfo, failed)
-    await application?.close()
-    await new Promise<void>(resolve => server.close(() => resolve()))
-    await fs.rm(userData, { recursive: true, force: true })
+    await cleanupElectronTest({ application, testInfo, server, userData, failed })
   }
 })

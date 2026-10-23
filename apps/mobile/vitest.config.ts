@@ -9,6 +9,9 @@ const nuxtProject = await defineVitestProject({
     name: 'nuxt',
     include: ['test/nuxt/*.{test,spec}.ts'],
     environment: 'nuxt',
+    // Each worker boots Nuxt and preloads route components. Limit concurrent
+    // cold starts so that resource contention does not exhaust setup hooks.
+    maxWorkers: 2,
     server: {
       deps: {
         // Konsta ships Vue source files; transform them in Vite instead of

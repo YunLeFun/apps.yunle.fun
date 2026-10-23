@@ -158,8 +158,22 @@ export function useCloudbaseOtp(core: ReturnType<typeof useCloudbaseAuthCore>) {
     try {
       loading.value = true
       error.value = null
+      const email = params.email?.trim()
+      const phone = params.phone?.trim()
+      const username = params.username?.trim()
+      const credentials = email
+        ? { email, password: params.password }
+        : phone
+          ? { phone, password: params.password }
+          : username
+            ? { username, password: params.password }
+            : null
+      if (!credentials)
+        throw new Error('请输入用户名、邮箱或手机号')
+      if (!params.password)
+        throw new Error('请输入密码')
       beginAuthentication('unknown')
-      const { error: signInError } = await auth.signInWithPassword(params)
+      const { error: signInError } = await auth.signInWithPassword(credentials)
       if (signInError)
         throw new Error(signInError.message || '密码登录失败')
       await fetchUser()

@@ -38,12 +38,13 @@ export async function cleanupElectronTest(options: {
   await attempt(async () => {
     if (!application)
       return
+    const child = application.process()
     const started = Date.now()
     await application.close()
     const result = {
       elapsedMs: Date.now() - started,
-      exitCode: application.process().exitCode,
-      signalCode: application.process().signalCode,
+      exitCode: child.exitCode,
+      signalCode: child.signalCode,
     }
     // eslint-disable-next-line no-console -- Preserve evidence of natural process termination.
     console.info('[desktop] Electron natural exit:', JSON.stringify(result))

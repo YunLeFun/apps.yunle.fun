@@ -4,6 +4,7 @@
 
 ## 当前入口与能力缺口
 
+- 2026-10-24 新增默认开启、可在设置关闭的[截屏反馈快捷入口](./ios-screenshot-feedback.md)，只显示短暂按钮，点击后复用原生反馈页；首版不提供图片附件。
 - 此前 [MeView](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Features/Me/MeView.swift) 的帮助和反馈为外链。现已改用 `HelpView` / `FeedbackView` 原生导航；“我的举报”保持现有原生实现，文档、隐私与条款使用系统网页。
 - 旧版 [help.vue](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/pages/help.vue) 提供新手引导和 FAQ；[feedback.vue](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/pages/feedback.vue) 提供日志范围、确认上传、清除、邮件、微信客服与评分入口。
 - 此前 [CatalogStore](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Services/CatalogStore.swift) 的 OSLog 不等同于可上传缓冲。现由 `DiagnosticLogStore` 单独记录白名单宿主事件，不读取 OSLog 或拦截云应用的 console。

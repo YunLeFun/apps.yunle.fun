@@ -15,6 +15,8 @@ struct FeedbackView: View {
     @State private var completedUpload: DiagnosticUploadReceipt?
     @State private var showUploadSuccess = false
     @Environment(\.requestFeedbackLogin) private var requestLogin
+    @Environment(\.screenshotFeedbackCoordinator) private var screenshotFeedback
+    @State private var screenshotFeedbackVisibilityID = UUID()
     @FocusState private var descriptionFocused: Bool
     @AccessibilityFocusState(for: .voiceOver) private var errorFocused: Bool
 
@@ -42,6 +44,8 @@ struct FeedbackView: View {
             }
         }
         .navigationTitle("反馈与建议")
+        .onAppear { screenshotFeedback?.feedbackVisibilityChanged(screenshotFeedbackVisibilityID, visible: true) }
+        .onDisappear { screenshotFeedback?.feedbackVisibilityChanged(screenshotFeedbackVisibilityID, visible: false) }
         .scrollDismissesKeyboard(.interactively)
         .toolbar { keyboardToolbar }
         .sheet(item: $sheet, onDismiss: {

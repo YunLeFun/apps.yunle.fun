@@ -41,6 +41,7 @@ targets:
     sources:
       - path: YunleFun
       - path: ../mobile/ios/App/App/WebViewController.swift
+      - path: ../mobile/ios/App/App/HostAuthorizationProtocol.swift
       - path: ../mobile/ios/App/App/InAppWebViewPlugin.swift
       - path: ../mobile/ios/App/App/Assets.xcassets
         buildPhase: resources

@@ -9,8 +9,8 @@ struct ApplicationIcon: View {
 
     var body: some View {
         ZStack {
-            ApplicationIconImage(candidates: application.iconCandidates(dark: colorScheme == .dark),
-                                 size: size, pixelSize: Int((size * displayScale).rounded(.up)), pipeline: pipeline) { fallback }
+            CatalogApplicationIconImage(application: application,
+                                 pixelSize: Int((size * displayScale).rounded(.up)), pipeline: pipeline) { fallback }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
@@ -67,43 +67,6 @@ private enum ApplicationPlaceholderImages {
     }
 }
 
-private struct ApplicationIconImage<Fallback: View>: View {
-    let candidates: [ApplicationIconCandidate]
-    let size: CGFloat
-    let pixelSize: Int
-    var pipeline: ApplicationImagePipeline = .shared
-    @ViewBuilder var fallback: () -> Fallback
-    @State private var loaded: LoadedApplicationIcon?
-    @State private var loadedKey: Request?
-    private struct Request: Hashable { let candidates: [ApplicationIconCandidate]; let pixels: Int }
-    private var key: Request { Request(candidates: candidates, pixels: pixelSize) }
-    var body: some View {
-        Group {
-            if let loaded, loadedKey == key {
-                Image(uiImage: UIImage(cgImage: loaded.bitmap.image))
-                    .resizable().scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(loaded.candidate.role == .appIcon ? Color.clear : Color(uiColor: .tertiarySystemFill))
-            } else { fallback() }
-        }
-        .task(id: key) {
-            let request = key
-            loaded = nil; loadedKey = nil
-            let started = Date()
-            do {
-                let value = try await pipeline.load(request.candidates, pixelSize: request.pixels)
-                try Task.checkCancellation()
-                // Memory-cache hits swap instantly so revisited screens don't
-                // flicker; only real network / decode waits fade in.
-                withAnimation(Date().timeIntervalSince(started) > 0.08 ? Motion.fade : nil) {
-                    loaded = value; loadedKey = request
-                }
-            } catch is CancellationError { return }
-            catch { loaded = nil; loadedKey = request }
-        }
-    }
-}
-
 struct ApplicationAssetThumbnail: View {
     let source: String
     let role: ApplicationIconRolePresentation
@@ -111,7 +74,7 @@ struct ApplicationAssetThumbnail: View {
     @Environment(\.displayScale) private var displayScale
     var body: some View {
         ApplicationIconImage(candidates: PublicMediaURL.resolve(source).map { [ApplicationIconCandidate(url: $0, role: role)] } ?? [],
-                             size: size, pixelSize: Int((size * displayScale).rounded(.up))) {
+                             pixelSize: Int((size * displayScale).rounded(.up))) {
             Image(systemName: "photo").foregroundStyle(.secondary)
         }
         .frame(width: size, height: size)

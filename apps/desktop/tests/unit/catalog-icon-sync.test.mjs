@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { readDesktopAssets, renderDesktopAssets } from '../../scripts/sync-catalog-icons.mjs'
+import { describe, expect, it, vi } from 'vitest'
+import { catalogURL, readDesktopAssets, readOnlineCatalog, renderDesktopAssets, renderNativeAssets } from '../../scripts/sync-catalog-icons.mjs'
 
 function asset(slug = 'cook', version = 'v2') {
   return { slug, desktopAsset: { kind: 'official', usage: 'desktop-selected', version, thumbnail: {
@@ -13,6 +13,22 @@ function asset(slug = 'cook', version = 'v2') {
 }
 
 describe('central icon catalog sync', () => {
+  it('reads the shared online catalog and uses only its source mirror when unavailable', async () => {
+    const source = JSON.stringify({ schemaVersion: 1, assets: [asset()] })
+    const fetchCatalog = vi.fn().mockResolvedValueOnce(new Response(source))
+    expect(await readOnlineCatalog(fetchCatalog)).toBe(source)
+    expect(fetchCatalog.mock.calls[0][0]).toBe(catalogURL)
+    expect(fetchCatalog).toHaveBeenCalledTimes(1)
+    fetchCatalog.mockReset().mockRejectedValueOnce(new Error('ECONNRESET')).mockResolvedValueOnce(new Response(source))
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      expect(await readOnlineCatalog(fetchCatalog)).toBe(source)
+      expect(fetchCatalog.mock.calls[1][0]).toBe('https://raw.githubusercontent.com/YunLeFun/icons/main/assets/catalog/app-assets.json')
+      expect(warning).toHaveBeenCalledOnce()
+    }
+    finally { warning.mockRestore() }
+  })
+
   it('syncs selected desktop assets without promoting candidate variants', () => {
     const assets = [asset('fc'), { ...asset(), candidates: [asset('cook', 'v1')] }]
     const source = JSON.stringify({ schemaVersion: 1, assets })
@@ -47,6 +63,29 @@ describe('central icon catalog sync', () => {
     ]) {
       const modified = { ...base, desktopAsset: { ...base.desktopAsset, thumbnail: { ...image, ...patch } } }
       expect(() => readDesktopAssets(JSON.stringify({ schemaVersion: 1, assets: [modified] }))).toThrow()
+    }
+  })
+
+  it('shares official sources and selected fallbacks with both native platforms', () => {
+    const official = asset()
+    official.desktopAsset.source = { kind: 'official-source', url: 'https://cook.yunle.fun/brand/cook-app-icon.svg', sha256: 'b'.repeat(64) }
+    const generated = asset('air-conditioner', 'v1')
+    generated.desktopAsset.kind = 'generated'
+    generated.candidates = [{ url: 'https://example.com/never-selected.svg' }]
+    const source = JSON.stringify({ schemaVersion: 1, assets: [official, generated] })
+    const output = renderNativeAssets(source)
+    expect(output).toContain('official: "https://cook.yunle.fun/brand/cook-app-icon.svg"')
+    expect(output).toContain('"air-conditioner": Asset(official: nil')
+    expect(output).toContain('/v2/cook.webp')
+    expect(output).not.toContain('never-selected')
+    expect(output.match(/Source SHA-256: (.*)/)[1]).toBe(renderDesktopAssets(source).match(/Source SHA-256: (.*)/)[1])
+  })
+
+  it('rejects invalid official sources instead of generating a partially valid snapshot', () => {
+    for (const url of ['http://example.com/a.svg', 'https://user:secret@example.com/a.svg', 'https://example.com/a.svg?token=private', 'https://example.com/page.html']) {
+      const selected = asset()
+      selected.desktopAsset.source = { kind: 'official-source', url, sha256: 'b'.repeat(64) }
+      expect(() => renderNativeAssets(JSON.stringify({ schemaVersion: 1, assets: [selected] }))).toThrow()
     }
   })
 })

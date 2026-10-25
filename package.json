@@ -48,9 +48,13 @@
     "verify:desktop-launch": "pnpm --dir apps/desktop run verify:launch",
     "check:desktop-release": "pnpm --dir apps/desktop run check:release",
     "icons:desktop": "pnpm --dir apps/desktop run icons",
+    "icons:sync": "node apps/desktop/scripts/sync-catalog-icons.mjs",
     "typecheck:desktop": "pnpm --dir apps/desktop run typecheck",
     "test:desktop": "pnpm --dir apps/desktop run test",
-    "test:desktop:e2e": "pnpm --dir apps/desktop run test:e2e"
+    "test:desktop:e2e": "pnpm --dir apps/desktop run test:e2e",
+    "dev:macos": "./script/build_and_run.sh",
+    "build:macos": "./script/build_and_run.sh --build",
+    "test:macos": "./script/build_and_run.sh --test"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^8.3.0",

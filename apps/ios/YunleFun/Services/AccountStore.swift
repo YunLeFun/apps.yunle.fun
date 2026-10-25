@@ -2,6 +2,13 @@ import Combine
 import Foundation
 
 @MainActor
+protocol AccountAuthorizing: AnyObject {
+    var user: AccountUser? { get }
+    func authorization(forceRefresh: Bool) async throws -> AuthorizedAccount
+}
+extension AccountStore: AccountAuthorizing {}
+
+@MainActor
 final class AccountStore: ObservableObject {
     @Published private(set) var overview = AccountOverview()
     @Published private(set) var isRestoring = false

@@ -1,5 +1,9 @@
 import XCTest
+#if os(macOS)
+@testable import YunleFunMac
+#else
 @testable import YunleFun
+#endif
 
 @MainActor
 final class NativeAuthorizationBrokerTests: XCTestCase {

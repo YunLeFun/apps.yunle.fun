@@ -8,7 +8,8 @@ const loginPage = readFileSync(new URL('../../app/pages/login/index.vue', import
 const userStore = readFileSync(new URL('../../app/stores/user.ts', import.meta.url), 'utf8')
 const appDetailPage = readFileSync(new URL('../../app/pages/app/[id].vue', import.meta.url), 'utf8')
 const appViewController = readFileSync(new URL('../../ios/App/App/AppViewController.swift', import.meta.url), 'utf8')
-const native = readFileSync(new URL('../../ios/App/App/WebViewController.swift', import.meta.url), 'utf8')
+const nativeProtocol = readFileSync(new URL('../../ios/App/App/HostAuthorizationProtocol.swift', import.meta.url), 'utf8')
+const native = readFileSync(new URL('../../ios/App/App/WebViewController.swift', import.meta.url), 'utf8') + nativeProtocol
 const nativePlugin = readFileSync(new URL('../../ios/App/App/InAppWebViewPlugin.swift', import.meta.url), 'utf8')
 const androidPlugin = readFileSync(new URL('../../android/app/src/main/java/fun/yunle/apps/HostRuntimePlugin.kt', import.meta.url), 'utf8')
 const androidAuthorizationSheet = readFileSync(new URL('../../android/app/src/main/java/fun/yunle/apps/AuthorizationConsentSheet.kt', import.meta.url), 'utf8')
@@ -180,7 +181,7 @@ describe('native WebView authorization boundary', () => {
     expect(contract).toContain('authorizeWithOtherAccount:')
     expect(nativePlugin).toContain('CAPPluginMethod(name: "authorizeWithOtherAccount"')
     expect(nativePlugin).toContain('@objc func authorizeWithOtherAccount')
-    expect(nativePlugin).toContain('case other')
+    expect(nativeProtocol).toContain('case other')
     expect(nativePlugin).toContain('complete(.other)')
     expect(native).toContain('ASWebAuthenticationSession(')
     expect(androidPlugin).toContain('fun authorizeWithOtherAccount')

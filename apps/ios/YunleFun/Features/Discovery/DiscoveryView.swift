@@ -52,7 +52,7 @@ struct DiscoveryView: View {
             } else {
                 ContentStateView(title: "稍后再来看看", systemImage: "safari",
                                  message: catalog.error ?? "工坊里的新鲜应用会出现在这里。",
-                                 actionTitle: "刷新", action: { Task { await catalog.load() } })
+                                 actionTitle: "刷新", action: { Task { await catalog.refreshWithIcons() } })
             }
         }
         .navigationTitle("寻乐")
@@ -62,7 +62,7 @@ struct DiscoveryView: View {
                 self.returningApplicationID = nil
             }
         }
-        .refreshable { await catalog.load() }
+        .refreshable { await catalog.refreshWithIcons() }
     }
 
     /// The featured card zooms into its detail like an App Store story; list

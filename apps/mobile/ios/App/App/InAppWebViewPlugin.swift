@@ -6,22 +6,6 @@ import ImageIO
 import UIKit
 import WebKit
 
-struct AuthorizationSheetContent {
-    let applicationName: String
-    let applicationOrigin: String
-    let applicationIconURL: String?
-    let accountName: String
-    let accountAvatarURL: String?
-    let permissionDescription: String
-    let authorizationNotice: String?
-}
-
-enum AuthorizationSheetChoice: String {
-    case current
-    case other
-    case cancel
-}
-
 /// Reads image metadata without decoding the source at full resolution, then
 /// creates only the small thumbnail needed by the authorization surface.
 enum AuthorizationImageDecoder {

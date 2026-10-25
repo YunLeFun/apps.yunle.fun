@@ -1,5 +1,11 @@
 import Foundation
 
+/// Identity boundary shared by interactive login and account-bound requests.
+struct AccountRequestBoundary: Equatable {
+    let uid: String?
+    let generation: UUID
+}
+
 /// Proof of the particular interactive login accepted by AccountSession.
 /// This contains no credentials and is not an authorization to make requests.
 struct AccountSignInCommit: Equatable, Sendable {

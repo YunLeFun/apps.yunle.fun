@@ -19,6 +19,7 @@
 		BB0000001FED79650016851B /* InAppWebViewPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000001FED79650016851A /* InAppWebViewPlugin.swift */; };
 		CC0000001FED79650016851B /* AppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000001FED79650016851A /* AppViewController.swift */; };
 		D9C1A0022F10000000000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D9C1A0012F10000000000001 /* PrivacyInfo.xcprivacy */; };
+		8BED60ABCD011D93FB582AC8 /* HostAuthorizationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2952B5F7DCAB4567BE59EF41 /* HostAuthorizationProtocol.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		CC0000001FED79650016851A /* AppViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewController.swift; sourceTree = "<group>"; };
 		D9C1A0012F10000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
+		2952B5F7DCAB4567BE59EF41 /* HostAuthorizationProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				CC0000001FED79650016851A /* AppViewController.swift */,
 				AA0000001FED79650016851A /* WebViewController.swift */,
+				2952B5F7DCAB4567BE59EF41 /* HostAuthorizationProtocol.swift */,
 				BB0000001FED79650016851A /* InAppWebViewPlugin.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
@@ -229,6 +232,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				CC0000001FED79650016851B /* AppViewController.swift in Sources */,
 				AA0000001FED79650016851B /* WebViewController.swift in Sources */,
+				8BED60ABCD011D93FB582AC8 /* HostAuthorizationProtocol.swift in Sources */,
 				BB0000001FED79650016851B /* InAppWebViewPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

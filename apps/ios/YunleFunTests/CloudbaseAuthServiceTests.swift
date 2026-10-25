@@ -1,5 +1,9 @@
 import XCTest
+#if os(macOS)
+@testable import YunleFunMac
+#else
 @testable import YunleFun
+#endif
 
 final class CloudbaseAuthServiceTests: XCTestCase {
     private var fixtures: [String] = []

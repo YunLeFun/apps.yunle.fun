@@ -53,6 +53,7 @@ struct YunleFunApp: App {
     var body: some Scene {
         WindowGroup {
             AppRootView()
+                .modifier(CatalogIconUpdates())
                 .environmentObject(catalog)
                 .environmentObject(library)
                 .environmentObject(runtime)

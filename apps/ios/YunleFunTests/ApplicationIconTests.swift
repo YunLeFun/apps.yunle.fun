@@ -1,7 +1,11 @@
 import ImageIO
 import SwiftUI
 import XCTest
+#if os(macOS)
+@testable import YunleFunMac
+#else
 @testable import YunleFun
+#endif
 
 final class ApplicationIconTests: XCTestCase {
     func testPublicCloudIconReopensWithoutSignedURLOrAccount() throws {
@@ -56,6 +60,7 @@ final class ApplicationIconTests: XCTestCase {
         for xml in contents { XCTAssertThrowsError(try ApplicationImageDecoder.decode(Data(xml.utf8), maximumPixelSize: 128), xml) }
     }
 
+    #if os(iOS)
     func testSVGUploadUsesSamePNGAndMarkSafeAreaContract() async throws {
         let xml = ##"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect x="25" y="25" width="50" height="50" fill="red"/></svg>"##
         let data = try await ApplicationIconNormalizer().normalize(Data(xml.utf8), role: .mark)
@@ -68,6 +73,8 @@ final class ApplicationIconTests: XCTestCase {
         do { _ = try await ApplicationIconNormalizer().normalize(nonSquare, role: .appIcon); XCTFail("Reject a stretched full icon") }
         catch { XCTAssertEqual(error as? IconNormalizationError, .notSquare) }
     }
+
+    #endif
 
     func testConcurrentLoadsCoalesceAndUseMemoryCache() async throws {
         let fixture = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
@@ -104,6 +111,42 @@ final class ApplicationIconTests: XCTestCase {
         XCTAssertEqual(result.candidate.role, .legacy)
     }
 
+    func testCompleteCandidateChainReachesSelectedImageAfterAllVariantsFail() async throws {
+        let fixture = IconHTTPFixture(replies: ["/selected.svg": (200, iconTestSVG, nil)])
+        let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
+        var candidates = (0..<10).map {
+            ApplicationIconCandidate(url: URL(string: "https://\(host)/missing-\($0)")!, role: .appIcon)
+        }
+        candidates.append(ApplicationIconCandidate(url: URL(string: "https://\(host)/selected.svg")!, role: .appIcon))
+        let result = try await pipeline.load(candidates, pixelSize: 128)
+        XCTAssertEqual(result.candidate.url.lastPathComponent, "selected.svg")
+        XCTAssertEqual(fixture.requests.count, 11)
+    }
+
+    func testUnavailableIsReportedOnlyAfterEveryImageSourceFails() async throws {
+        let fixture = IconHTTPFixture(replies: [:])
+        let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = ["official.svg", "selected.webp"].map {
+            ApplicationIconCandidate(url: URL(string: "https://\(host)/\($0)")!, role: .appIcon)
+        }
+        do { _ = try await pipeline.load(candidates, pixelSize: 128); XCTFail("All missing sources must fail") }
+        catch { XCTAssertEqual(fixture.requests.count, 2) }
+    }
+
+    func testManifestRevisionInvalidatesMemoryCacheForTheSameURL() async throws {
+        let fixture = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
+        let url = URL(string: "https://\(host)/icon.svg")!
+        let old = ApplicationIconCandidate(url: url, role: .appIcon, revision: "revision-1")
+        let new = ApplicationIconCandidate(url: url, role: .appIcon, revision: "revision-2")
+        _ = try await pipeline.load([old], pixelSize: 128)
+        _ = try await pipeline.load([old], pixelSize: 128)
+        XCTAssertEqual(fixture.requests.count, 1)
+        _ = try await pipeline.load([new], pixelSize: 128)
+        XCTAssertEqual(fixture.requests.count, 2, "A new manifest revision must not reuse pixels from the previous revision")
+    }
+
+    #if os(iOS)
     @MainActor
     func testIconLightAndDarkRenderFixtures() async throws {
         let darkSVG = Data(##"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#4f46e5"/><circle cx="50" cy="50" r="25" fill="#fbbf24"/></svg>"##.utf8)
@@ -145,6 +188,8 @@ final class ApplicationIconTests: XCTestCase {
         }
         XCTAssertEqual(fixture.requests.count, 3)
     }
+
+    #endif
 
     private func pixel(_ image: CGImage, x: Int, y: Int) throws -> [UInt8] {
         let context = try XCTUnwrap(CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: image.width * 4,

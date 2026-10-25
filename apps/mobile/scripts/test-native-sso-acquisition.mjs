@@ -1,16 +1,12 @@
-import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
 
-// Compile and exercise the actual Foundation-only protocol from the iOS app.
+// Compile and exercise the shared Foundation/Security protocol used by iOS and macOS.
 // This verifies URL/context behavior without booting a simulator or launching a login.
-const source = readFileSync(new URL('../ios/App/App/WebViewController.swift', import.meta.url), 'utf8')
-const begin = source.indexOf('private struct NativeSsoRequest {')
-const end = source.indexOf('// MARK: - 页面 JSAPI 分发与鉴权', begin)
-assert(begin >= 0 && end > begin, 'Native SSO protocol section must exist')
+const source = readFileSync(new URL('../ios/App/App/HostAuthorizationProtocol.swift', import.meta.url), 'utf8')
 const directory = mkdtempSync(join(tmpdir(), 'ylf-sso-swift-'))
 const path = join(directory, 'main.swift')
 const assertions = String.raw`
@@ -51,7 +47,7 @@ assert(NativeSsoProtocol.authorizationURL(request: stillValid, state: String(rep
 print("iOS optional acquisition and unchanged PKCE binding passed")
 `
 try {
-  writeFileSync(path, `import Foundation\nimport Security\n${source.slice(begin, end)}\n${assertions}`)
+  writeFileSync(path, `${source}\n${assertions}`)
   const result = spawnSync('swift', [path], { stdio: 'inherit' })
   if (result.error)
     throw result.error

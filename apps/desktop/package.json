@@ -65,7 +65,7 @@
     "@types/node": "^24.19.2",
     "@yunlefun/app-core": "workspace:*",
     "@yunlefun/ui": "0.0.6",
-    "electron": "44.7.0",
+    "electron": "44.9.1",
     "eslint": "^10.13.0",
     "nuxt": "4.6.2",
     "typescript": "5.9.3",

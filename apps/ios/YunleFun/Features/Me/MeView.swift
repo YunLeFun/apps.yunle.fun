@@ -122,6 +122,7 @@ struct SettingsView: View {
     @EnvironmentObject private var accounts: AccountStore
     @AppStorage("appearance") private var appearance = AppAppearance.system
     @AppStorage("home.showRecent") private var showRecent = true
+    @AppStorage(ScreenshotFeedbackPromptState.preferenceKey) private var screenshotFeedbackEnabled = true
     @State private var confirmClear = false
 
     var body: some View {
@@ -152,6 +153,14 @@ struct SettingsView: View {
                 NavigationLink { LegacyMigrationView(library: library, accounts: accounts) } label: {
                     SettingsLabel("旧版数据导入", systemImage: "square.and.arrow.down.fill", color: .purple)
                 }
+            }
+            Section {
+                Toggle("截屏后显示反馈入口", isOn: $screenshotFeedbackEnabled)
+                    .accessibilityIdentifier("settings.screenshot-feedback")
+            } header: {
+                Text("反馈")
+            } footer: {
+                Text("截屏后短暂显示反馈按钮，点按后进入反馈页。不会读取或上传截图。")
             }
         }
         .navigationTitle("设置")

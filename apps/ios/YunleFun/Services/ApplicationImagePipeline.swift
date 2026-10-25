@@ -1,6 +1,6 @@
 import Foundation
 import ImageIO
-import UIKit
+import CoreGraphics
 
 struct ApplicationBitmap: @unchecked Sendable {
     let image: CGImage
@@ -53,10 +53,10 @@ actor ApplicationImagePipeline {
     }
     func load(_ candidates: [ApplicationIconCandidate], pixelSize: Int) async throws -> LoadedApplicationIcon {
         var lastError: Error = ApplicationImageError.unavailable
-        for candidate in candidates.prefix(10) {
+        for candidate in candidates {
             try Task.checkCancellation()
             do {
-                let value = try await bitmap(candidate.url, pixelSize: min(1024, max(64, pixelSize)))
+                let value = try await bitmap(candidate.url, pixelSize: min(1024, max(64, pixelSize)), revision: candidate.revision)
                 try Task.checkCancellation()
                 return LoadedApplicationIcon(bitmap: value, candidate: candidate)
             } catch is CancellationError { throw CancellationError() }
@@ -65,9 +65,9 @@ actor ApplicationImagePipeline {
         throw lastError
     }
 
-    private func bitmap(_ url: URL, pixelSize: Int) async throws -> ApplicationBitmap {
+    private func bitmap(_ url: URL, pixelSize: Int, revision: String?) async throws -> ApplicationBitmap {
         guard PublicMediaURL.resolve(url.absoluteString) == url else { throw ApplicationImageError.invalid }
-        let key = url.absoluteString + "#" + String(pixelSize)
+        let key = url.absoluteString + "#" + String(pixelSize) + "#" + (revision ?? "")
         if let entry = cache.object(forKey: key as NSString), entry.expiresAt > Date() { return entry.bitmap }
         if let task = inflight[key] { return try await task.value }
         if let retryAt = failedUntil[key], retryAt > Date() { throw ApplicationImageError.unavailable }

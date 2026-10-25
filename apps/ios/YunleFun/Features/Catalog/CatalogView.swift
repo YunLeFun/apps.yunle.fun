@@ -24,7 +24,7 @@ struct CatalogView: View {
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .workshop) }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
-        .refreshable { await catalog.load() }
+        .refreshable { await catalog.refreshWithIcons() }
         .animation(Motion.standard(reduceMotion: reduceMotion), value: category)
         .haptic(.selection, trigger: category)
         .toolbar {
@@ -58,7 +58,7 @@ struct CatalogView: View {
                 ProgressView("正在载入工坊").frame(maxWidth: .infinity).padding()
             } else if let error = catalog.error, catalog.applications.isEmpty {
                 ContentStateView(title: "暂时无法连接工坊", systemImage: "wifi.exclamationmark", message: error,
-                                 actionTitle: "重试", action: { Task { await catalog.load() } })
+                                 actionTitle: "重试", action: { Task { await catalog.refreshWithIcons() } })
             } else if filtered.isEmpty {
                 ContentStateView(title: query.isEmpty ? "还没有应用" : "没有找到相关应用", systemImage: "magnifyingglass",
                                  message: query.isEmpty ? "稍后再来看看。" : "试试其他关键词或分类。",

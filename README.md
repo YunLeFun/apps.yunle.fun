@@ -6,7 +6,7 @@
 [![Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/workflows/desktop.yml/badge.svg)](https://github.com/YunLeFun/apps.yunle.fun/actions/workflows/desktop.yml)
 [![License](https://img.shields.io/github/license/YunLeFun/apps.yunle.fun)](./LICENSE)
 
-本仓库使用 pnpm workspace。现有 Web、iOS 和 Android 客户端位于 `apps/mobile/`，继续提供 `apps.yunle.fun` 浏览器版本；桌面端使用独立入口 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
+本仓库使用 pnpm workspace。现有 Web、iOS 和 Android 客户端位于 `apps/mobile/`，继续提供 `apps.yunle.fun` 浏览器版本；原生 iOS 位于 `apps/ios/`，原生 macOS 位于 `apps/macos/`，Electron 桌面端位于 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
 
 ## ✨ 特性
 
@@ -61,6 +61,18 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 | `pnpm build:ios`             | 同步移动版本号并创建 iOS archive                 |
 | `pnpm release`               | 更新移动版本；发布前核对独立移动 Tag，见迁移文档 |
 
+### macOS 原生开发
+
+`apps/macos/` 使用 SwiftUI + WKWebView，直接复用 iOS 的目录、认证、Keychain、网页数据仓库与 SSO 授权流程。支持公开免费应用、原生登录、会话恢复和已接入云应用的自动登录；Windows / Linux 继续使用下面的 Electron 入口。
+
+```bash
+pnpm dev:macos    # 构建并启动原生 Mac 应用
+pnpm build:macos  # 只编译
+pnpm test:macos   # 共享认证测试与 Mac Keychain / WebKit 测试
+```
+
+开发环境、复用边界和验证说明见 [macOS 原生客户端](./apps/macos/README.md)。
+
 ### 桌面开发
 
 ```bash
@@ -81,23 +93,25 @@ pnpm verify:desktop-launch    # 实际启动当前平台原生包
 
 ## 🏗️ 技术栈
 
-| 层级   | 选型                                     |
-| ------ | ---------------------------------------- |
-| 框架   | Nuxt 4（CSR 模式，`ssr: false`） + Vue 3 |
-| UI     | Ionic Vue（ios 模式） + Konsta UI        |
-| 样式   | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS |
-| 状态   | Pinia                                    |
-| 移动端 | Capacitor 8（iOS / Android）             |
-| 桌面端 | Electron 44.7.0 + Electron Forge 8.0.1   |
-| 后端   | Nitro Server + 腾讯 CloudBase            |
-| 认证   | CloudBase Auth + 微信 SDK + GitHub OAuth |
-| 部署   | EdgeOne Pages（Git 集成）                |
+| 层级            | 选型                                                  |
+| --------------- | ----------------------------------------------------- |
+| 框架            | Nuxt 4（CSR 模式，`ssr: false`） + Vue 3              |
+| UI              | Ionic Vue（ios 模式） + Konsta UI                     |
+| 样式            | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS              |
+| 状态            | Pinia                                                 |
+| 移动端          | Capacitor 8（iOS / Android）                          |
+| 原生 macOS      | SwiftUI + AppKit + WKWebView（复用 iOS Swift 业务层） |
+| Electron 桌面端 | Electron 44.7.0 + Electron Forge 8.0.1                |
+| 后端            | Nitro Server + 腾讯 CloudBase                         |
+| 认证            | CloudBase Auth + 微信 SDK + GitHub OAuth              |
+| 部署            | EdgeOne Pages（Git 集成）                             |
 
 ## 📁 目录结构
 
 ```text
 apps/
 ├── ios/                # 独立 SwiftUI 原生客户端（改造进行中）
+├── macos/              # SwiftUI + WKWebView，共享 iOS 目录与认证源码
 ├── mobile/             # Web + Ionic + Capacitor
 │   ├── app/            # Nuxt 4 页面、组件、composables、stores、plugins
 │   ├── server/         # 云端 Nitro API

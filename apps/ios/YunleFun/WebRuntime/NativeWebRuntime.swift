@@ -379,7 +379,7 @@ final class NativeWebRuntime: ObservableObject {
         controller.extraTrustedHosts = app.runtimeTrustedHosts
         controller.appInfo = WebAppInfo(
             id: app.id, slug: app.publicKey, name: app.name, emoji: app.emoji ?? "",
-            logo: app.iconURL?.absoluteString ?? "", themeColor: app.themeColor ?? "#007AFF",
+            logo: app.iconCandidates(dark: false, downloaded: CatalogIconStore.shared.assets).first?.url.absoluteString ?? "", themeColor: app.themeColor ?? "#007AFF",
             description: app.summary, category: app.browseCategory,
             developer: app.personalMarketOwnerLogin ?? app.ownerLogin ?? "", developerName: app.developerName ?? "",
             rating: app.displayRating ?? 0, ratingCount: app.ratingCount ?? 0)

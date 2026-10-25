@@ -5,6 +5,8 @@ struct AppRootView: View {
     @State private var workshopPath = NavigationPath()
     @StateObject private var feedbackLogin = FeedbackLoginCoordinator()
     @StateObject private var crossAppAuthorization = CrossAppAuthorizationCoordinator()
+    @StateObject private var screenshotFeedback = ScreenshotFeedbackCoordinator()
+    @AppStorage(ScreenshotFeedbackPromptState.preferenceKey) private var screenshotFeedbackEnabled = true
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var runtime: NativeWebRuntime
@@ -13,10 +15,16 @@ struct AppRootView: View {
 
     var body: some View {
         tabs
+            .environment(\.screenshotFeedbackCoordinator, screenshotFeedback)
             .environment(\.requestFeedbackLogin, { text in
                 feedbackLogin.begin(text: text, origin: accountBoundary, isRestoring: accounts.isRestoring)
             })
             .background(RuntimePresentationAnchor(runtime: runtime, catalog: catalog, library: library).frame(width: 0, height: 0))
+            .background(ScreenshotFeedbackAnchor(coordinator: screenshotFeedback, enabled: screenshotFeedbackEnabled,
+                logs: diagnostics, accounts: accounts, requestLogin: { [feedbackLogin, accounts] text in
+                    feedbackLogin.begin(text: text, origin: .init(uid: accounts.user?.id, generation: accounts.identityGeneration),
+                                        isRestoring: accounts.isRestoring)
+                }).frame(width: 0, height: 0))
             .onOpenURL(perform: handleLink)
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                 if let url = activity.webpageURL { handleLink(url) }
@@ -33,6 +41,7 @@ struct AppRootView: View {
                                             proofIsCurrent: continuationIsCurrent) {
                     selectedTab = .me
                 }
+                screenshotFeedback.loginDidDismiss()
             }) { intent in
                 LoginView(continuationMessage: "登录后返回反馈与建议，并保留问题描述。上传前仍需重新预览并确认。",
                           continuation: intent.continuation,
@@ -44,6 +53,8 @@ struct AppRootView: View {
                 .onAppear { feedbackLogin.didPresent(intent.id) }
             }
             .onChange(of: accounts.identityGeneration) { _ in
+                screenshotFeedback.discard()
+                screenshotFeedback.cancelPendingLogin()
                 updateFeedbackIdentity()
             }
             .onChange(of: accounts.selectionOperationGeneration) { _ in updateFeedbackIdentity() }
@@ -89,10 +100,14 @@ struct AppRootView: View {
     }
     private func handleLink(_ url: URL) {
         // 跨 App 授权入口优先：只弹授权面板，不切换 Tab、不打断当前页面
-        if crossAppAuthorization.handle(url, runtime: runtime, accounts: accounts) { return }
+        if crossAppAuthorization.handle(url, runtime: runtime, accounts: accounts) {
+            screenshotFeedback.cancelPendingLogin()
+            return
+        }
         // Authentication callbacks belong to ASWebAuthenticationSession, never
         // to the navigation parser. No raw callback URL is stored or logged.
         guard let destination = NativeLink.destination(url) else { return }
+        screenshotFeedback.cancelPendingLogin()
         feedbackLogin.cancel()
         selectedTab = .workshop
         workshopPath.append(destination)

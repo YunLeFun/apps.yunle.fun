@@ -90,3 +90,21 @@ enum ScanImageError: Error, Equatable {
         }
     }
 }
+
+enum WorkshopLink {
+    static func normalize(_ input: String) -> String? {
+        let value = input.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return value.range(of: "^[2-9A-HJKMNP-Z]{6}$", options: .regularExpression) != nil ? value : nil
+    }
+    static func parse(_ input: String) -> String? {
+        let value = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let id = normalize(value) { return id }
+        guard let url = URLComponents(string: value), url.scheme?.lowercased() == "https", url.host?.lowercased() == "apps.yunle.fun",
+              url.user == nil, url.password == nil, url.port == nil || url.port == 443,
+              url.query == nil, url.fragment == nil else { return nil }
+        let segments = url.path.split(separator: "/", omittingEmptySubsequences: false)
+        guard segments.count == 3 || (segments.count == 4 && segments.last == ""),
+              segments[0] == "", segments[1] == "w" else { return nil }
+        return normalize(String(segments[2]))
+    }
+}

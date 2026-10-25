@@ -1,0 +1,132 @@
+name: YunleFunMac
+configs:
+  Debug: debug
+  Testing: debug
+  Release: release
+options:
+  bundleIdPrefix: fun.yunle
+  deploymentTarget:
+    macOS: '14.0'
+  developmentLanguage: zh-Hans
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    MARKETING_VERSION: 0.1.0
+    CURRENT_PROJECT_VERSION: '1'
+    CODE_SIGN_STYLE: Automatic
+packages:
+  SwiftDraw:
+    url: https://github.com/swhitty/SwiftDraw.git
+    exactVersion: 0.29.0
+targets:
+  YunleFunMac:
+    type: application
+    platform: macOS
+    dependencies:
+      - package: SwiftDraw
+    sources:
+      - path: YunleFunMac
+      # Compile the same platform-independent sources as iOS, without copies.
+      - path: ../ios/YunleFun/Models/Account.swift
+      - path: ../ios/YunleFun/Models/AccountSignIn.swift
+      - path: ../ios/YunleFun/Models/CloudApplication.swift
+      - path: ../ios/YunleFun/Models/DeveloperProfile.swift
+      - path: ../ios/YunleFun/Models/ScanResult.swift
+      - path: ../ios/YunleFun/Services/AccountSession.swift
+      - path: ../ios/YunleFun/Services/AccountStore.swift
+      - path: ../ios/YunleFun/Services/CloudbaseAuthService.swift
+      - path: ../ios/YunleFun/Services/KeychainAccountVault.swift
+      - path: ../ios/YunleFun/Services/CatalogService.swift
+      - path: ../ios/YunleFun/Services/CatalogStore.swift
+      - path: ../ios/YunleFun/Services/ApplicationIconSource.swift
+      - path: ../ios/YunleFun/Services/CatalogIconAssets.generated.swift
+      - path: ../ios/YunleFun/Services/CatalogIconStore.swift
+      - path: ../ios/YunleFun/Services/ApplicationImagePipeline.swift
+      - path: ../ios/YunleFun/Services/SVGIconDecoder.swift
+      - path: ../ios/YunleFun/DesignSystem/ApplicationIconImage.swift
+      - path: ../ios/YunleFun/Resources/SwiftDraw-LICENSE.txt
+        buildPhase: resources
+      - path: ../ios/YunleFun/WebRuntime/WebProfileRepository.swift
+      - path: ../ios/YunleFun/Services/HostAuthorizationService.swift
+      - path: ../ios/YunleFun/WebRuntime/NativeAuthorizationBroker.swift
+      - path: ../mobile/ios/App/App/HostAuthorizationProtocol.swift
+      - path: ../desktop/build/icons/icon.icns
+        buildPhase: resources
+    info:
+      path: YunleFunMac/Info.plist
+      properties:
+        CFBundleDisplayName: 云乐坊
+        CFBundleName: 云乐坊
+        CFBundleIconFile: icon
+        LSApplicationCategoryType: public.app-category.lifestyle
+        NSPrincipalClass: NSApplication
+        NSHumanReadableCopyright: © 云乐坊
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.macos
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        CODE_SIGN_ENTITLEMENTS: YunleFunMac/YunleFunMac.entitlements
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.macos.dev
+        Testing:
+          PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.macos.tests-host
+          CODE_SIGN_ENTITLEMENTS: YunleFunMacTests/FixtureHost.entitlements
+  YunleFunMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: YunleFunMacTests
+      - path: ../ios/YunleFunTests/CatalogTests.swift
+      - path: ../ios/YunleFunTests/ApplicationIconTests.swift
+      - path: ../ios/YunleFunTests/CatalogIconAssetsTests.swift
+      - path: ../ios/YunleFunTests/CatalogIconStoreTests.swift
+      - path: ../ios/YunleFunTests/AccountSessionTests.swift
+      - path: ../ios/YunleFunTests/AccountInteractiveSignInTests.swift
+      - path: ../ios/YunleFunTests/CloudbaseAuthServiceTests.swift
+      - path: ../ios/YunleFunTests/HostAuthorizationServiceTests.swift
+      - path: ../ios/YunleFunTests/NativeAuthorizationBrokerTests.swift
+      - path: ../ios/YunleFunTests/HostAuthorizationProtocolTests.swift
+      - path: ../ios/YunleFunTests/WebStoragePageFixture.swift
+    dependencies:
+      - target: YunleFunMac
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.macos.tests
+  YunleFunMacLiveTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: LiveValidation
+      - path: ../ios/LiveValidation/PublicIconLiveTests.swift
+    dependencies:
+      - target: YunleFunMac
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.macos.live-tests
+schemes:
+  YunleFunMac:
+    build:
+      targets:
+        YunleFunMac: all
+    run:
+      config: Debug
+    test:
+      config: Testing
+      gatherCoverageData: false
+      targets:
+        - YunleFunMacTests
+  YunleFunMacLiveValidation:
+    build:
+      targets:
+        YunleFunMac: all
+        YunleFunMacLiveTests: [test]
+    test:
+      config: Testing
+      gatherCoverageData: false
+      targets:
+        - YunleFunMacLiveTests

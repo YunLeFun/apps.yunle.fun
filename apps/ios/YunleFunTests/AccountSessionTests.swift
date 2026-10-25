@@ -1,6 +1,10 @@
 import Security
 import XCTest
+#if os(macOS)
+@testable import YunleFunMac
+#else
 @testable import YunleFun
+#endif
 
 final class AccountSessionTests: XCTestCase {
     private let fixedNow = Date(timeIntervalSince1970: 1_800_000_000)
@@ -196,7 +200,7 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertEqual(try vault.read(), original)
     }
 
-    func testActualKeychainRoundTripUsesDeviceOnlyProtection() throws {
+    func testActualKeychainRoundTripDoesNotSynchronizeCredentials() throws {
         let service = "fun.yunle.apps.tests.\(UUID().uuidString)"
         let vault = KeychainAccountVault(service: service)
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service]
@@ -206,13 +210,58 @@ final class AccountSessionTests: XCTestCase {
         try vault.write(Data("rotated-test-value".utf8))
         XCTAssertEqual(try vault.read(), Data("rotated-test-value".utf8))
         var attributesQuery = query
+        // Explicitly require a non-synchronizable item on both platforms.
+        attributesQuery[kSecAttrSynchronizable as String] = false
         attributesQuery[kSecReturnAttributes as String] = true
         var attributes: CFTypeRef?
         XCTAssertEqual(SecItemCopyMatching(attributesQuery as CFDictionary, &attributes), errSecSuccess)
-        XCTAssertEqual((attributes as? [String: Any])?[kSecAttrAccessible as String] as? String,
+        let savedAttributes = try XCTUnwrap(attributes as? [String: Any])
+        // A missing synchronizable attribute also means false for the macOS
+        // file-based keychain. See Apple's kSecAttrSynchronizable documentation.
+        XCTAssertFalse(savedAttributes[kSecAttrSynchronizable as String] as? Bool ?? false)
+        #if os(iOS)
+        XCTAssertEqual(savedAttributes[kSecAttrAccessible as String] as? String,
                        kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String)
+        #endif
+        // macOS file-based keychain items do not expose kSecAttrAccessible.
+        // That attribute applies there only when the data-protection keychain
+        // or synchronizable items are explicitly enabled; this vault uses neither.
     }
 
+    @MainActor
+    func testAccountIdentityChangesBeforePublishingAndBeforeRemoteLogoutCompletes() async throws {
+        let gate = AccountTestGate()
+        let api = AccountTestAPI(signOutGate: gate)
+        let vault = try vaultWithAccounts(["a", "b"])
+        weak var visibleStore: AccountStore?
+        var previousIDs: [String?] = []
+        var projectedID: String?
+        let logoutPublished = expectation(description: "Local account identity cleared")
+        let store = AccountStore(session: AccountSession(api: api, vault: vault, now: { self.fixedNow }), identityDidChange: { id in
+            previousIDs.append(visibleStore?.user?.id)
+            projectedID = id
+            if id == nil { logoutPublished.fulfill() }
+        })
+        visibleStore = store
+        await store.restore()
+        XCTAssertEqual(projectedID, "a")
+        XCTAssertEqual(previousIDs.count, 1)
+        XCTAssertNil(previousIDs[0])
+        try await store.select("b")
+        XCTAssertEqual(previousIDs[1], "a", "Identity consumers must transition before the new metadata is published")
+        XCTAssertEqual(projectedID, "b")
+        let logout = Task { try await store.remove("b") }
+        await gate.waitUntilEntered()
+        await fulfillment(of: [logoutPublished], timeout: 2)
+        XCTAssertNil(projectedID)
+        XCTAssertNil(store.user, "Remote signout must not hold the old identity on screen")
+        XCTAssertEqual(previousIDs.last!, "b")
+        await gate.open()
+        try await logout.value
+    }
+
+    #if os(iOS)
+    // The iOS HomeLibrary integration extends the shared identity ordering test.
     @MainActor
     func testAccountProjectionChangesBeforePublishingAndBeforeRemoteLogoutCompletes() async throws {
         let gate = AccountTestGate()
@@ -250,6 +299,7 @@ final class AccountSessionTests: XCTestCase {
         await gate.open()
         try await logout.value
     }
+    #endif
 
     @MainActor
     func testRemovalPreflightFailurePreservesSavedAccountAndPublishedIdentity() async throws {
@@ -284,6 +334,7 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertNil(store.user)
     }
 
+    #if os(iOS)
     @MainActor
     func testRemovingAnAccountDeletesOnlyItsAssistantHistory() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
@@ -315,6 +366,7 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertTrue(history.load(accountID: "a").isEmpty)
         XCTAssertEqual(history.load(accountID: "b").map(\.id), ["thread-b"])
     }
+    #endif
 
     @MainActor
     func testFailedVaultRemovalPreservesAccountAndOwnerOnlyProfileRecovery() async throws {

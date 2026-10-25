@@ -1,7 +1,11 @@
 import Foundation
 import SwiftUI
 import XCTest
+#if os(macOS)
+@testable import YunleFunMac
+#else
 @testable import YunleFun
+#endif
 
 private let interactiveSignInNow = Date(timeIntervalSince1970: 1_800_000_000)
 
@@ -380,6 +384,9 @@ final class AccountInteractiveSignInTests: XCTestCase {
         XCTAssertTrue(store.isCurrent(success))
     }
 
+    #if os(iOS)
+    // Feedback navigation belongs to the iOS presentation layer. The account
+    // continuation and cancellation contracts are tested above on both platforms.
     @MainActor
     func testRealStoreCommitRestoresFeedbackTextOnlyAfterActualSheetDismissal() async throws {
         let store = AccountStore(session: try makeSession())
@@ -453,6 +460,7 @@ final class AccountInteractiveSignInTests: XCTestCase {
         flow.identityChanged(to: target, isUsable: true, proofIsCurrent: store.isCurrent(success))
         XCTAssertNil(flow.success)
     }
+    #endif
 
     @MainActor
     func testOldStoreCancellationCannotInvalidateANewerAttemptOrItsSuccessProof() async throws {
@@ -750,6 +758,8 @@ private actor InteractiveSignInAPI: AccountAuthenticating {
     }
 }
 
+#if os(iOS)
+// This schedule is declared by the iOS LoginView, not the shared account layer.
 final class VerificationResendTimelineTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 1_800_000_000)
     func testIdleLoginDoesNotScheduleRecurringRefreshes() {
@@ -769,3 +779,4 @@ final class VerificationResendTimelineTests: XCTestCase {
         XCTAssertEqual(Array(schedule.entries(from: resumed, mode: .lowFrequency).prefix(10)), [resumed])
     }
 }
+#endif

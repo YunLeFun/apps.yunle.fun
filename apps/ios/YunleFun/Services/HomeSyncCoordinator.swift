@@ -2,13 +2,6 @@ import Combine
 import Foundation
 import Network
 
-@MainActor
-protocol AccountAuthorizing: AnyObject {
-    var user: AccountUser? { get }
-    func authorization(forceRefresh: Bool) async throws -> AuthorizedAccount
-}
-extension AccountStore: AccountAuthorizing {}
-
 struct HomeSyncConflict: Equatable, Identifiable {
     let id = UUID()
     let remote: RemoteHomeScreen

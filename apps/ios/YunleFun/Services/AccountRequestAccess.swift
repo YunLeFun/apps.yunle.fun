@@ -4,10 +4,6 @@ import Foundation
 protocol IdentityScopedAccountAuthorizing: AccountAuthorizing { var identityGeneration: UUID { get } }
 extension AccountStore: IdentityScopedAccountAuthorizing {}
 
-struct AccountRequestBoundary: Equatable {
-    let uid: String?
-    let generation: UUID
-}
 protocol AccountRequestFailure: Error {
     static var identityChanged: Self { get }
     var isUnauthorized: Bool { get }

@@ -334,6 +334,7 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertNil(store.user)
     }
 
+    #if os(iOS)
     @MainActor
     func testRemovingAnAccountDeletesOnlyItsAssistantHistory() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
@@ -365,6 +366,7 @@ final class AccountSessionTests: XCTestCase {
         XCTAssertTrue(history.load(accountID: "a").isEmpty)
         XCTAssertEqual(history.load(accountID: "b").map(\.id), ["thread-b"])
     }
+    #endif
 
     @MainActor
     func testFailedVaultRemovalPreservesAccountAndOwnerOnlyProfileRecovery() async throws {

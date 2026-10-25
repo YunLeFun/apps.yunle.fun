@@ -93,18 +93,18 @@ pnpm verify:desktop-launch    # 实际启动当前平台原生包
 
 ## 🏗️ 技术栈
 
-| 层级   | 选型                                     |
-| ------ | ---------------------------------------- |
-| 框架   | Nuxt 4（CSR 模式，`ssr: false`） + Vue 3 |
-| UI     | Ionic Vue（ios 模式） + Konsta UI        |
-| 样式   | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS |
-| 状态   | Pinia                                    |
-| 移动端 | Capacitor 8（iOS / Android）             |
-| 原生 macOS | SwiftUI + AppKit + WKWebView（复用 iOS Swift 业务层） |
-| Electron 桌面端 | Electron 44.7.0 + Electron Forge 8.0.1   |
-| 后端   | Nitro Server + 腾讯 CloudBase            |
-| 认证   | CloudBase Auth + 微信 SDK + GitHub OAuth |
-| 部署   | EdgeOne Pages（Git 集成）                |
+| 层级            | 选型                                                  |
+| --------------- | ----------------------------------------------------- |
+| 框架            | Nuxt 4（CSR 模式，`ssr: false`） + Vue 3              |
+| UI              | Ionic Vue（ios 模式） + Konsta UI                     |
+| 样式            | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS              |
+| 状态            | Pinia                                                 |
+| 移动端          | Capacitor 8（iOS / Android）                          |
+| 原生 macOS      | SwiftUI + AppKit + WKWebView（复用 iOS Swift 业务层） |
+| Electron 桌面端 | Electron 44.7.0 + Electron Forge 8.0.1                |
+| 后端            | Nitro Server + 腾讯 CloudBase                         |
+| 认证            | CloudBase Auth + 微信 SDK + GitHub OAuth              |
+| 部署            | EdgeOne Pages（Git 集成）                             |
 
 ## 📁 目录结构
 

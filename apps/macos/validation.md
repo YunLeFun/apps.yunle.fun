@@ -4,17 +4,17 @@
 
 ## 构建与自动测试
 
-| 检查 | 结果 |
-| --- | --- |
-| `./script/build_and_run.sh --test` | **142 项通过，0 失败，0 跳过**；含旧文档清空回归及并行图标工作新增的共享测试，摘要见 `build/validation/full-tests-summary.json` |
-| `./apps/macos/scripts/verify_web_persistence.sh` | seed / restore 两个独立进程，各 1 项通过，0 失败，0 跳过 |
-| `./apps/macos/scripts/verify_managed_sso.sh --run-managed-accounts` | 真实 Play SSO 与隔离旅程 1 项通过，0 失败，0 跳过；远端退出与本地清理完成 |
-| `./apps/macos/scripts/verify_other_account_sso.sh --run-managed-accounts` | AI 春联、原生面板和 Chrome 155 完整真实 UI 旅程及 purge 各 1 项通过，0 失败，0 跳过；脚本退出码 0，剩余仓 0 |
-| `./script/build_and_run.sh --verify` | 最终 Debug 构建通过，脚本退出码 0，`apps/macos/build/YunleFunMac.app` 成功启动 |
-| iOS `YunleFun / Debug / generic iOS Simulator` | App 编译通过；未启动或新建模拟器 |
-| 移动端 `native-auth-boundary.test.ts` | 22 项通过；共享协议的 acquisition / PKCE Swift 检查通过 |
-| Shell 语法、package.json、`git diff --check` | 通过 |
-| Electron 边界 | 本轮 SSO 未修改 Electron 实现；Windows / Linux 仍走现有 Electron 构建 |
+| 检查                                                                      | 结果                                                                                                                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `./script/build_and_run.sh --test`                                        | **142 项通过，0 失败，0 跳过**；含旧文档清空回归及并行图标工作新增的共享测试，摘要见 `build/validation/full-tests-summary.json` |
+| `./apps/macos/scripts/verify_web_persistence.sh`                          | seed / restore 两个独立进程，各 1 项通过，0 失败，0 跳过                                                                        |
+| `./apps/macos/scripts/verify_managed_sso.sh --run-managed-accounts`       | 真实 Play SSO 与隔离旅程 1 项通过，0 失败，0 跳过；远端退出与本地清理完成                                                       |
+| `./apps/macos/scripts/verify_other_account_sso.sh --run-managed-accounts` | AI 春联、原生面板和 Chrome 155 完整真实 UI 旅程及 purge 各 1 项通过，0 失败，0 跳过；脚本退出码 0，剩余仓 0                     |
+| `./script/build_and_run.sh --verify`                                      | 最终 Debug 构建通过，脚本退出码 0，`apps/macos/build/YunleFunMac.app` 成功启动                                                  |
+| iOS `YunleFun / Debug / generic iOS Simulator`                            | App 编译通过；未启动或新建模拟器                                                                                                |
+| 移动端 `native-auth-boundary.test.ts`                                     | 22 项通过；共享协议的 acquisition / PKCE Swift 检查通过                                                                         |
+| Shell 语法、package.json、`git diff --check`                              | 通过                                                                                                                            |
+| Electron 边界                                                             | 本轮 SSO 未修改 Electron 实现；Windows / Linux 仍走现有 Electron 构建                                                           |
 
 测试覆盖共享目录与认证协议、登录取消与并发、凭据轮换、退出后禁止恢复、真实 macOS Keychain、导航限制、网页生命周期、账号/访客隔离与退役仓隔离，以及共享 SSO 服务/状态机和真实 WebKit 桥。常规账号测试使用合成认证 API；真实 Keychain 测试使用随机 service 并精确删除测试项。独立的夹具恢复用例在没有指定 UUID 时不执行清理；不会扫描其他任务的数据仓。
 
@@ -60,10 +60,10 @@ macOS 已复用 iOS 的授权服务、状态机、bridge 和 PKCE 协议。完�
 
 此前三轮均未通过完整旅程，原始失败结论保留：
 
-| 轮次 UUID | 旅程停止位置 | 后续精确清理 |
-| --- | --- | --- |
-| `48905EBA-6CCA-468C-9382-13C0DA1D66E5` | 四个系统浏览器交互阶段通过，停在 `host-signout-retirement-and-guest` | purge 完成，剩余仓 0 |
-| `2E6F0466-D215-4266-9999-EB15382B42AA` | 首次取消通过，操作超时停在 `login-b-system-session` | purge 完成，剩余仓 0 |
+| 轮次 UUID                              | 旅程停止位置                                                                    | 后续精确清理         |
+| -------------------------------------- | ------------------------------------------------------------------------------- | -------------------- |
+| `48905EBA-6CCA-468C-9382-13C0DA1D66E5` | 四个系统浏览器交互阶段通过，停在 `host-signout-retirement-and-guest`            | purge 完成，剩余仓 0 |
+| `2E6F0466-D215-4266-9999-EB15382B42AA` | 首次取消通过，操作超时停在 `login-b-system-session`                             | purge 完成，剩余仓 0 |
 | `A37B79B3-F14E-4118-A66C-44956E512D90` | 四个系统浏览器交互阶段及宿主账号移除通过，停在 `host-signout-old-page-released` | purge 完成，剩余仓 0 |
 
 报告位于 `build/validation/other-account-sso/<UUID>/`；上述三轮 `journeyPassed=false`，清理成功不改变旅程失败结论。

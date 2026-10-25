@@ -15,7 +15,7 @@ export default nuxt(
     {
       // generated.ts 由 admin gen:apps-snapshot 生成，不参与 lint；
       // scripts/*iap*.mjs 为 App Store Connect 一次性运维脚本，不受应用 lint 约束
-      ignores: ['**/ios/**', '**/android/**', '**/.media/**', '.codebuddy/**/*.md', 'CODEBUDDY.md', '**/app/constants/apps/generated.ts', 'packages/app-core/src/catalog/generated.ts', 'docs/product/app-reviews-moderation.md', '**/scripts/*iap*.mjs'],
+      ignores: ['**/ios/**', '**/android/**', '**/.media/**', 'apps/macos/build/**', 'apps/macos/DerivedData/**', '.codebuddy/**/*.md', 'CODEBUDDY.md', '**/app/constants/apps/generated.ts', 'packages/app-core/src/catalog/generated.ts', 'docs/product/app-reviews-moderation.md', '**/scripts/*iap*.mjs'],
     },
     {
       files: ['apps/desktop/**'],

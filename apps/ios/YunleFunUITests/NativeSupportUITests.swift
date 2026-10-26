@@ -4,6 +4,44 @@ import XCTest
 final class NativeSupportUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
+    func testCompleteSupportWebsiteOpensInsideTheApp() {
+        let app = XCUIApplication(); app.launch()
+        openFeedback(app)
+        let entry = app.buttons["feedback.support-website"]
+        reveal(entry, in: app); entry.tap()
+        let website = app.webViews.firstMatch
+        XCTAssertTrue(website.waitForExistence(timeout: 15))
+        XCTAssertTrue(website.staticTexts["常见问题"].waitForExistence(timeout: 20), "The complete public Support page must render in the App's WebKit view")
+        XCTAssertTrue(app.buttons["support.browser.close"].exists)
+        capture(app, "support-complete-website-in-app")
+        app.buttons["support.browser.close"].tap()
+        XCTAssertTrue(app.navigationBars["反馈与建议"].waitForExistence(timeout: 5))
+    }
+
+    func testOnlineFeedbackUsesNativeEditorAndPreservesExistingDraft() {
+        let app = XCUIApplication(); app.launch()
+        openFeedback(app)
+        let field = app.textViews["feedback.description"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap(); field.typeText("Native online support draft")
+        app.buttons["feedback.dismiss-keyboard"].tap()
+        let entry = app.buttons["feedback.support-center"]
+        reveal(entry, in: app); entry.tap()
+        let editor = app.textViews["support.center.description"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 10))
+        XCTAssertEqual(editor.value as? String, "Native online support draft")
+        XCTAssertEqual(app.webViews.count, 0, "The composer must use SwiftUI controls")
+        XCTAssertFalse(app.staticTexts["support.center.receipt"].exists, "Opening the editor must not submit feedback")
+        capture(app, "native-online-support-compose")
+        editor.tap(); editor.typeText(" edited")
+        let edited = editor.value as? String
+        app.buttons["完成输入"].tap()
+        app.navigationBars["在线反馈"].buttons["完成"].tap()
+        XCTAssertTrue(app.navigationBars["反馈与建议"].waitForExistence(timeout: 5))
+        XCTAssertTrue(edited?.contains(" edited") == true)
+        XCTAssertEqual(field.value as? String, edited, "Edits in the native center must return to the original draft")
+    }
+
     func testHelpExplainsRuntimeAndNavigatesToDiscovery() {
         let app = XCUIApplication(); app.launch()
         openMe(app)

@@ -1,5 +1,79 @@
 # 原生帮助、反馈与诊断日志契约
 
+## 统一支持中心接入 · 2026-10-26
+
+“我 → 反馈与建议”新增在线反馈、需求墙与反馈管理入口，保留原有邮件、微信客服和诊断日志流程。
+在线反馈使用 SwiftUI `List` / `Picker` / `TextEditor`，与原反馈页同步问题描述；提交前通过系统确认，
+成功后保留工单入口。日志上传仍走原有独立预览确认，不会随在线反馈自动附带。
+
+- 原生渲染：私密反馈提交、公开需求列表及详情、管理员按产品读取私密反馈列表及详情。
+  云食册正式 Web / iOS 的应用意见共用 `cook` 队列，按 `context.source` 的 `cook-web` /
+  `cook-ios` 展示来源平台，并显示 `context.version`；无上下文的历史记录显示“未记录”。
+  这是客户端上报的排查线索，不能作为身份或权限凭据。菜谱纠错仍在 Cook 独立审核后台。
+- App 内网页：工单回复、投票、完整路线图与管理编辑。使用独立、非持久化 `WKWebView`，
+  标准系统导航和返回手势；外站链接在系统网页打开。
+- 当前 Support 产品协议尚无独立 `apps` 产品；客户端默认选择 `www`（云乐坊账号与服务），
+  其他产品沿用 Support 已注册的 `cook` / `play` / `yunbox` / `drive` / `cms` / `advjs`。
+
+### 身份与权限
+
+1. 登录用户复用原生 `AccountStore`，通过已注册的 `support-web` 签发一次性授权码；
+   使用安全随机 nonce / verifier 和 S256 PKCE，解析注册策略，显式授权策略需要用户点按允许。
+2. 授权码经 `https://api.yunle.fun/sso-ticket` 交换取得签名身份断言。
+   客户端无需采用返回的临时 CloudBase ticket，也不会修改原生账号会话。
+3. `POST https://support.yunle.fun/api/v1/session/exchange` 接收原生 CloudBase access token、
+   Support audience 的签名断言与相同 nonce。服务端校验 subject、audience、app、scope、nonce、
+   手机号准入和账号状态，再设置 `__Host-ylf-support-session`。
+4. 访客通过 `/api/v1/feedback/guest` 获取单独的 HttpOnly 访客 cookie 和 CSRF。
+   私密反馈通过 `/api/v1/private-feedback` 提交；保留同一未修改内容的幂等键供用户显式重试。
+5. 原生管理列表读取 `/api/internal/v1/dashboard`；每次由服务端按 UID 与产品成员记录授权。
+   客户端没有 `yunyoujun` 用户名提权规则，也不会替当前用户登录另一个账号。
+
+凭据、断言、cookie、私密反馈只保留在内存，不进入 URL、日志或本地文件。
+WebKit 只收到支持中心的 HttpOnly cookie，拿不到原生 access token、verifier 或身份断言。
+切号（含 A→B→A）、退出和取消后拒收旧请求结果；关闭中心或切号时尝试撤销本次 Support 会话，
+不退出 App 账号。访客工单访问链接是服务端返回的私密凭证，用户可主动保存到个人备忘录，界面提醒勿转发。
+
+### 验证边界
+
+- 已核对线上公开需求读取与未登录管理接口的 401，以及线上 `support-web` 的 trusted 注册策略。
+- 模拟器定向测试覆盖 S256 / nonce、UID 绑定、显式授权、CSRF / 幂等键、无隐式提交、
+  HTML 兜底拒绝、管理拒绝、工单链接域名边界、401 刷新一次、切号隐藏私密数据与迟到结果丢弃。
+- 原生 UI 旅程检查描述带入、系统 `TextEditor`（无 WebView）和返回保留草稿，截图使用合成内容。
+- iOS 26.5 / iPhone 17 Pro 的综合检查为 16 通过 / 0 失败；最后收紧 cookie 允许名单后，
+  8 项服务边界复测全部通过（包含 1 项新增 cookie 拒绝用例），合计覆盖 17 个不同用例。
+  初轮两项测试因 `URLProtocol` 将请求体转为 stream 而失败，已修正测试记录器并保留原始结果。
+  本次临时设备为 `Yunle Support QA 20261026` / `846EC47D-1994-44D6-9C3A-20CC3938B201`，
+  导出截图与结果后在同一任务中删除；未操作其他任务设备。结果位于仓库外
+  `~/.codex/artifacts/yunlefun/support-ios-20261026-01a1781a/`。
+- `yunyoujun` 真实账号自动登录、生产私密反馈写入、真实管理员数据、工单回复与 WebKit 会话延续仍待实际账号验收。
+  尚未为此功能打包或发布 TestFlight。
+
+实现：`SupportCenterView`、`SupportCenterService`、`SupportCenterStore`、`SupportBrowserView`。
+Support API 依据为远端 `YunLeFun/support.yunle.fun` 的 `397bbae` 及本次线上只读核验；
+初次盘点时本地 Support 主分支落后；后续 Web 改造已快进到上述远端基准，不能用此前旧版本的 GitHub Discussions 流程描述当前生产站点。
+
+### 完整网页入口与 Web 外观 · 2026-10-26
+
+- “我 → 反馈与建议 → 打开完整支持中心”直接进入 `SupportWebsiteView`，登录账号先完成相同的 Support SSO，访客可直接浏览公开页面。
+- `WKWebView` 使用 `YunleFunSupport/1` 的 User-Agent 展示提示，仍然只接受独立 Support cookie。
+  网站据此省去重复页头，保留帮助、需求墙、反馈、工单与管理导航；权限验证与 Cookie/CSRF 规则保持不变。
+- 原生关闭、返回和刷新集中在顶部；Web 底部导航保留安全区。通过 KVO 跟踪网页历史，覆盖 SPA 内部路由变化。
+- Support Web 的系统字体、分组背景、深浅色、表单触摸区域与响应式布局在其仓库统一实现。
+  完整页面继续由 WebKit 渲染；前述原生表单与列表继续由 SwiftUI 渲染。
+- iOS 26.5 临时设备 `Yunle Support Web QA 20261026` / `BB61D8D8-9644-477C-A24D-E9296B7715D6`
+  实际打开完整生产网页并返回原反馈页的 UI 测试通过（1/1）。这验证网页入口，生产网页当时仍使用旧样式；
+  新 Web 外观已在本地浏览器验证，待正式站部署。截图与结果保留在本节前述仓库外目录，测试后删除临时设备。
+
+### 提交与发布待办 · 2026-10-26
+
+- [ ] 使用真实 `yunyoujun` 账号验证自动登录、按产品成员记录授权、私密反馈和工单回复；仅凭用户名不得授予全产品管理权限。
+- [ ] 在部署新版 Support Web 后复验 App 内网页的主题、键盘、安全区、返回与最大动态字体；真机操作及 iOS 16 覆盖按后续明确验收范围执行。
+- [ ] 排查独立 TestFlight 收尾任务报告的 4 项完整回归失败：最大字号详情布局 2 项、帮助页入口 1 项、Duo 导航 1 项。其模拟器同时报告数据迁移失败，原因未定，不将失败归结为本次 Support 代码或记为已解决。
+- [ ] 将本次已提交 Support 源码纳入新的候选构建，重新执行相应构建、签名及 IPA 校验，再按发布流程验收和分发；其他任务此前的候选 IPA 不包含这些未提交改动，不能复用其校验结论。
+
+本次源码提交不包含 TestFlight 上传，也不代表 App 完整回归通过。Web 部署与原生构建独立记录。
+
 > 2026-10-17 接入原生帮助、反馈、诊断缓冲、上传确认和系统邮件界面；2026-10-18 已在独占模拟器验证合成日志真实上传、回执恢复及精确清理，范围见文末。自动到期删除、系统邮件投递和旧日志迁移仍待验收。后续仅使用 iOS 模拟器。
 
 ## 当前入口与能力缺口

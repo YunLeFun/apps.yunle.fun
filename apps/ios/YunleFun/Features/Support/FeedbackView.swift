@@ -32,6 +32,7 @@ struct FeedbackView: View {
     var body: some View {
         Form {
             descriptionSection
+            supportCenterSection
             SupportContactSection(issueDescription: issueDescription, supportCode: upload.receipt?.supportCode)
             rangeSection
             logSection
@@ -54,6 +55,11 @@ struct FeedbackView: View {
         }) { destination in
             switch destination {
             case .login: LoginView()
+            case .support(let destination):
+                SupportCenterView(accounts: accounts, destination: destination, initialDescription: issueDescription,
+                                  onDescriptionChanged: { issueDescription = $0 })
+            case .website:
+                SupportWebsiteView(accounts: accounts)
             case .review(let confirmation):
                 DiagnosticUploadReviewSheet(confirmation: confirmation, store: upload,
                                             accountName: accounts.user?.displayName ?? "云乐坊账号",
@@ -92,6 +98,30 @@ struct FeedbackView: View {
             completedUpload = nil; showUploadSuccess = false
             upload.identityChanged(); preparationError = nil
         }
+    }
+
+    private var supportCenterSection: some View {
+        Section {
+            Button { descriptionFocused = false; sheet = .website } label: {
+                Label("打开完整支持中心", systemImage: "globe")
+            }
+            .accessibilityIdentifier("feedback.support-website")
+            Button { descriptionFocused = false; sheet = .support(.compose) } label: {
+                Label("在线反馈与处理进度", systemImage: "bubble.left.and.text.bubble.right")
+            }
+            .accessibilityIdentifier("feedback.support-center")
+            Button { descriptionFocused = false; sheet = .support(.board) } label: {
+                Label("需求墙与路线图", systemImage: "lightbulb")
+            }
+            .accessibilityIdentifier("feedback.support-board")
+            if accounts.user != nil {
+                Button { descriptionFocused = false; sheet = .support(.manage) } label: {
+                    Label("反馈管理", systemImage: "tray.full")
+                }
+                .accessibilityIdentifier("feedback.support-manage")
+            }
+        } header: { Text("云乐坊支持中心") }
+        footer: { Text("在线反馈会保留上面的问题描述。已登录时自动使用当前账号，管理权限由支持中心验证。") }
     }
 
     private var descriptionSection: some View {
@@ -255,9 +285,14 @@ private enum FeedbackRangePreset: String, CaseIterable, Identifiable {
     }
 }
 private enum FeedbackSheet: Identifiable {
-    case login, review(DiagnosticUploadConfirmation)
+    case login, review(DiagnosticUploadConfirmation), support(SupportDestination), website
     var id: String {
-        switch self { case .login: return "login"; case .review(let snapshot): return snapshot.id.uuidString }
+        switch self {
+        case .login: return "login"
+        case .review(let snapshot): return snapshot.id.uuidString
+        case .support(let destination): return "support-" + destination.rawValue
+        case .website: return "support-website"
+        }
     }
 }
 private struct FeedbackClearRequest { let scope: UUID; let accountGeneration: UUID }

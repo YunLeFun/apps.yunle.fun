@@ -12,6 +12,7 @@ struct CommerceTransaction: Equatable, Sendable {
     let accountToken: UUID?
     let isLocalTest: Bool
     let isRevoked: Bool
+    var environment: WalletEnvironment? = .production
 }
 enum CommercePurchaseResult: Sendable { case transaction(CommerceTransaction), cancelled, pending }
 enum CommerceEvent: Sendable { case transaction(CommerceTransaction), unverified }
@@ -95,6 +96,7 @@ actor NativeStoreKit: CommerceServing {
         let id = String(tx.id)
         verifiedTransactions[id] = tx
         return CommerceTransaction(id: id, productID: tx.productID, accountToken: tx.appAccountToken,
-                                  isLocalTest: tx.environment == .xcode || tx.originalID == 0, isRevoked: tx.revocationDate != nil)
+                                  isLocalTest: tx.environment == .xcode, isRevoked: tx.revocationDate != nil,
+                                  environment: tx.environment == .production ? .production : tx.environment == .sandbox ? .sandbox : nil)
     }
 }

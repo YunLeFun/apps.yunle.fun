@@ -2,7 +2,11 @@ import Foundation
 
 enum WalletEnvironment: Sendable {
     case production, sandbox
-    static func forLaunch(arguments: [String] = ProcessInfo.processInfo.arguments) -> Self {
+    static func forLaunch(arguments: [String] = ProcessInfo.processInfo.arguments,
+                          receiptURL: URL? = Bundle.main.appStoreReceiptURL) -> Self {
+        // TestFlight is a Release build, but its Apple transactions are Sandbox.
+        // Keep the entire wallet in the isolated lane, including restore/retry.
+        if receiptURL?.lastPathComponent == "sandboxReceipt" { return .sandbox }
         #if DEBUG
         if arguments.contains("--iap-sandbox") { return .sandbox }
         #endif

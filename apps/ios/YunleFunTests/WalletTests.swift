@@ -109,16 +109,20 @@ final class WalletServiceTests: XCTestCase {
         }
     }
     func testSandboxLaunchSelectionAndOwnershipStorageAreExplicit() {
-        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: []), .production)
-        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox=false"]), .production)
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: [], receiptURL: nil), .production)
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox=false"], receiptURL: nil), .production)
         #if DEBUG
-        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox"]), .sandbox)
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox"], receiptURL: nil), .sandbox)
         #else
-        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox"]), .production)
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: ["--iap-sandbox"], receiptURL: nil), .production)
         #endif
         XCTAssertEqual(WalletEnvironment.production.ownershipService(bundleID: "fixture.app"), "fixture.app.iap-owners")
         XCTAssertEqual(WalletEnvironment.sandbox.ownershipService(bundleID: "fixture.app"), "fixture.app.iap-sandbox-owners")
         XCTAssertEqual(WalletService().environment, .production)
+    }
+    func testTestFlightReleaseReceiptSelectsIsolatedWalletWithoutLaunchFlag() {
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: [], receiptURL: URL(fileURLWithPath: "/StoreKit/sandboxReceipt")), .sandbox)
+        XCTAssertEqual(WalletEnvironment.forLaunch(arguments: [], receiptURL: URL(fileURLWithPath: "/StoreKit/receipt")), .production)
     }
     func testProductionReconciliationKeepsItsExistingEndpoint() async throws {
         let (service, fixture) = service([(200, #"{"reconciled":2,"paid":1,"regranted":0}"#)])
@@ -147,6 +151,20 @@ final class WalletServiceTests: XCTestCase {
 
 @MainActor
 final class PurchaseCoordinatorTests: XCTestCase {
+    func testSandboxAndUnknownTransactionsNeverReachProductionSettlementOrFinish() async throws {
+        for environment: WalletEnvironment? in [.sandbox, nil] {
+            var tx = billingTransaction()
+            tx.environment = environment
+            let rig = billingRig(unfinished: [tx])
+            await rig.coordinator.processUnfinished()
+            var calls = await rig.log.values
+            XCTAssertFalse(calls.contains("verify.begin")); XCTAssertFalse(calls.contains("finish"))
+            XCTAssertNotNil(rig.coordinator.error)
+            await rig.coordinator.restore()
+            calls = await rig.log.values
+            XCTAssertFalse(calls.contains("verify.begin")); XCTAssertFalse(calls.contains("finish"))
+        }
+    }
     func testSuccessfulReceiptPrecedesFinish() async throws {
         let rig = billingRig()
         await rig.coordinator.loadProducts(); await rig.coordinator.purchase(coinProduct)

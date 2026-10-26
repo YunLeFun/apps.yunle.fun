@@ -175,6 +175,9 @@ final class PurchaseCoordinator: ObservableObject {
             try await commerce.finish(id: tx.id)
             return .localTest
         }
+        // Never submit a Sandbox transaction to the production settlement API,
+        // even when the receipt is absent/stale or a transaction is restored.
+        guard tx.environment == service.environment else { throw WalletError.unavailable }
         guard !tx.isRevoked else { throw CommerceError.revoked }
         let binding = try await journal.binding(for: tx.id)
         guard access.isCurrent(boundary) else { throw WalletError.identityChanged }

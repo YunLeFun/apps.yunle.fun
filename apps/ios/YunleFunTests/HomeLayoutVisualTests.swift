@@ -114,10 +114,51 @@ final class HomeLayoutVisualTests: XCTestCase {
         defer { loading.cancel(); Task { await gate.open() } }
         try await gate.waitUntilEntered()
         XCTAssertEqual(fixture.sync.phase, .syncing)
-        let screen = try await fixture.readScreen(named: "home-empty-syncing", containing: "正在同步云居", test: self)
-        XCTAssertTrue(screen.contains("正在同步云居"), "An empty local home must show that the account's cloud home is still loading")
+        let screen = try await fixture.readScreen(named: "home-empty-syncing", containing: "把喜欢的应用带回云居", test: self)
+        XCTAssertFalse(screen.contains("正在同步云居"), "Background sync must not insert a loading row into the home content")
+        let activity = try XCTUnwrap(fixture.toolbarActivityFrame, "The navigation bar must indicate that the cloud home is still loading")
+        XCTAssertLessThan(activity.maxY, 150, "Sync activity belongs in the navigation bar")
         XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
         await gate.open(); await loading.value
+    }
+
+    func testBackgroundSyncKeepsApplicationPositionsStable() async throws {
+        try await assertStableHomeDuringSync(size: .large, dark: false)
+    }
+
+    func testBackgroundSyncKeepsApplicationPositionsStableAtLargestText() async throws {
+        try await assertStableHomeDuringSync(size: .accessibility5, dark: true)
+    }
+
+    private func assertStableHomeDuringSync(size: DynamicTypeSize, dark: Bool) async throws {
+        let gate = HomeStateLoadGate()
+        let remote = RemoteHomeScreen(revision: String(repeating: "c", count: 64),
+            configuration: HomeConfiguration(installedApps: [HomeAppReference(appId: "offline-reading")]))
+        let fixture = try await HomeStateFixture(service: HomeStateService(remote: remote, gate: gate), size: size, dark: dark)
+        defer { fixture.close() }
+        fixture.library.add(CloudApplication(id: "offline-reading", name: "离线阅读", emoji: "📖"))
+        try fixture.library.adopt(remote)
+        let before = fixture.library.snapshot
+        let suffix = dark ? "largest-text-dark" : "standard-light"
+        _ = try await fixture.readScreen(named: "home-before-sync-" + suffix, containing: "离线阅读", test: self)
+        let idleBounds = try XCTUnwrap(fixture.visibleTextBounds["离线阅读"])
+        XCTAssertNil(fixture.toolbarActivityFrame)
+
+        let loading = Task { await fixture.sync.synchronize() }
+        defer { loading.cancel(); Task { await gate.open() } }
+        try await gate.waitUntilEntered()
+        _ = try await fixture.readScreen(named: "home-background-sync-" + suffix, containing: "离线阅读", test: self)
+        let syncingBounds = try XCTUnwrap(fixture.visibleTextBounds["离线阅读"])
+        XCTAssertNotNil(fixture.toolbarActivityFrame)
+        XCTAssertEqual(syncingBounds.minY, idleBounds.minY, accuracy: 0.002, "Starting sync must not move applications")
+
+        await gate.open(); await loading.value
+        XCTAssertEqual(fixture.sync.phase, .idle)
+        _ = try await fixture.readScreen(named: "home-after-sync-" + suffix, containing: "离线阅读", test: self)
+        let finishedBounds = try XCTUnwrap(fixture.visibleTextBounds["离线阅读"])
+        XCTAssertNil(fixture.toolbarActivityFrame)
+        XCTAssertEqual(finishedBounds.minY, idleBounds.minY, accuracy: 0.002, "Finishing sync must not move applications")
+        XCTAssertEqual(fixture.library.snapshot, before)
     }
 
     func testEmptySignedInHomeShowsSyncFailureAndRetry() async throws {
@@ -302,6 +343,17 @@ private final class HomeStateFixture {
     let workspaceDefaults: UserDefaults
     private let defaultsSuite: String
     private let iconFixtureHosts: Set<String>
+    private(set) var visibleTextBounds: [String: CGRect] = [:]
+
+    var toolbarActivityFrame: CGRect? {
+        func activity(in view: UIView, withinNavigationBar: Bool = false) -> UIActivityIndicatorView? {
+            let inBar = withinNavigationBar || view is UINavigationBar
+            if inBar, let indicator = view as? UIActivityIndicatorView, indicator.isAnimating { return indicator }
+            return view.subviews.lazy.compactMap { activity(in: $0, withinNavigationBar: inBar) }.first
+        }
+        guard let indicator = activity(in: controller.view) else { return nil }
+        return indicator.convert(indicator.bounds, to: controller.view)
+    }
 
     init(service: HomeStateService, size: DynamicTypeSize = .large, dark: Bool = false,
          width: CGFloat = 390, height: CGFloat = 844,
@@ -392,6 +444,9 @@ private final class HomeStateFixture {
             request.usesLanguageCorrection = false
             try VNImageRequestHandler(cgImage: XCTUnwrap(rendered.cgImage)).perform([request])
             lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
+            visibleTextBounds = Dictionary((request.results ?? []).compactMap { observation in
+                observation.topCandidates(1).first.map { (Self.normalized($0.string), observation.boundingBox) }
+            }, uniquingKeysWith: { first, _ in first })
             if scrollToFind, !Self.normalized(lines.joined()).contains(Self.normalized(expected)),
                let scroll = scrollView(in: controller.view) {
                 let bottom = max(-scroll.adjustedContentInset.top,

@@ -14,6 +14,7 @@ struct HomeView: View {
     @AppStorage("home.showRecent") private var showRecent = true
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var editing = false
+    @State private var isRefreshing = false
     @State private var showScanner = false
     @State private var removals = 0
     /// Width between the layout margins, measured by the grid's scroll view.
@@ -120,6 +121,8 @@ struct HomeView: View {
         }
         .haptic(.selection, trigger: pinChanges)
         .refreshable {
+            isRefreshing = true
+            defer { isRefreshing = false }
             await sync.recheck()
             await loadMembership(force: true)
         }
@@ -146,8 +149,10 @@ struct HomeView: View {
                         .accessibilityIdentifier("home.edit.done")
                 } else if dynamicTypeSize.isAccessibilitySize {
                     NavigationLink { HomeOptionsView(editing: $editing) } label: {
-                        Label("云居选项", systemImage: "ellipsis").labelStyle(.iconOnly)
+                        optionsLabel
                     }
+                    .accessibilityLabel("云居选项")
+                    .accessibilityValue(showsSyncActivity ? "正在同步云居" : "")
                     .accessibilityIdentifier("home.options")
                 } else {
                     Menu {
@@ -166,11 +171,34 @@ struct HomeView: View {
                                 Label("正在运行（\(runtime.applications.count)）", systemImage: "square.stack")
                             }
                         }
-                    } label: { Label("云居选项", systemImage: "ellipsis").labelStyle(.iconOnly) }
+                    } label: { optionsLabel }
+                    .accessibilityLabel("云居选项")
+                    .accessibilityValue(showsSyncActivity ? "正在同步云居" : "")
                     .accessibilityIdentifier("home.options")
                 }
             }
         }
+    }
+
+    private var showsSyncActivity: Bool {
+        sync.isActive && sync.isSyncing && !isRefreshing
+    }
+
+    /// Keep the options button's footprint while sync runs in the background.
+    /// Pull-to-refresh already supplies its own system activity indicator.
+    private var optionsLabel: some View {
+        ZStack {
+            if showsSyncActivity {
+                ProgressView()
+                    .controlSize(.small)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                    .accessibilityIdentifier("home.sync.progress")
+            } else {
+                Image(systemName: "ellipsis")
+            }
+        }
+        .frame(width: 24, height: 24)
     }
 
     private func enterEditing() {
@@ -239,10 +267,6 @@ struct HomeView: View {
     @ViewBuilder private var syncStatus: some View {
         if sync.isActive {
             switch sync.phase {
-            case .syncing:
-                ProgressView("正在同步云居")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityIdentifier("home.sync.progress")
             case .failed:
                 VStack(alignment: .leading, spacing: 12) {
                     Label(sync.message, systemImage: "exclamationmark.icloud")
@@ -260,7 +284,7 @@ struct HomeView: View {
                     }
                 }
                 .accessibilityIdentifier("home.sync.conflict")
-            case .idle where library.snapshot.base == nil:
+            case .idle where library.snapshot.base == nil && !library.snapshot.autoSyncEnabled:
                 VStack(alignment: .leading, spacing: 12) {
                     Label("尚未同步", systemImage: "icloud")
                     Text("此设备尚未读取云端云居。").font(.subheadline).foregroundStyle(.secondary)

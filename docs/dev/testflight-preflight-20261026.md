@@ -6,7 +6,7 @@
 
 IPA 已通过共用 `ios-testflight/scripts/verify_release.py ipa` 和 Apple `altool --validate-app`，可以作为**核心功能内部测试**的待上传产物。支付环境尚未具备完整内测条件：独立 Sandbox 钱包 / 验单函数未部署，TestFlight 钱包会安全失败，不回退正式账本。不能将本轮写成购买、恢复到账或退款验收通过。
 
-完整设备矩阵也未完成。现有 iOS 27.1 运行时只支持 iPhone Duo，首轮在该设备出现布局断言和黑屏导航失败；iOS 26.5 / 27.0 标准 iPhone 的结果分别记录，不能用它们宣布 Duo 问题已经修复。
+**完整上传前回归未全部通过。** 现有 iOS 27.1 运行时只支持 iPhone Duo。结束前用隔离候选源码复测，复用设备仍出现最大字号布局、帮助页及导航失败，并报告 Data Migration Failed。为排除旧数据影响，临时创建干净 Duo，启动迁移正常，16 项专项仍为 6 通过、10 失败（3 个渲染断言、7 个导航 Tab 查询）。运行时快照能显示界面及四个侧边 Tab，不能仅凭首轮黑屏推断 App 永远无法启动，也不能据此宣布导航已通过。Xcode 在测试结束后的结果收集停滞，终止后保留日志和按测试事件生成的摘要；不把不完整 xcresult 当作有效回执。见 `duo-clean-runtime-log-summary.json`、`duo-clean-runtime.log` 及截图。iOS 26.5 / 27.0 标准 iPhone 的通过结果分别记录，不能替代 Duo 验收。
 
 ## 源码与版本
 
@@ -39,6 +39,7 @@ IPA 已通过共用 `ios-testflight/scripts/verify_release.py ipa` 和 Apple `al
 | --- | --- | --- |
 | iPhone 17 / iOS 26.5 日常单元与集成 | 594 项：590 通过、4 条件跳过、0 失败 | `candidate-unit.xcresult`；含作品及钱包环境边界 |
 | iPhone 17 / iOS 27.0 布局及访客导航专项 | 16 通过、0 失败、0 跳过 | `ios27-focused.xcresult`；详情、帮助、键盘、同步设置、备份及导入入口 |
+| Duo / iOS 27.1 候选专项 | 16 项：6 通过、10 失败 | 干净临时设备；原始日志及 `duo-clean-runtime-log-summary.json`，结果收集停滞后终止，非有效 xcresult |
 | 完整访客 UI / iOS 27.0 | 15 项：12 通过、3 条件跳过、0 失败 | `ui-regression-final.xcresult`；缓存专项未启用，跳过不代表验收 |
 | 真实三账号、钱包与正式云同步 | 3 通过、0 失败、0 跳过 | `managed-final.xcresult` |
 | 真实 Cook 原生 SSO | 1 通过 | `candidate-live2.xcresult`；原生密码登录、授权取消与重试、能力调用 |
@@ -112,6 +113,6 @@ IPA SHA-256：`1c6400a57519b55094be11fc12ca7d5f3cecbbded77870bf8a19bdeaa76b8a8a`
 
 App / dSYM UUID：`615CE577-27F3-3E87-82F9-4EF55D06DDAD`（arm64）。Privacy Report SHA-256：`ac7318c1cb0c98782f4b92b34cde285ca86389ec49ad09f6dcdf09bf02e8b0f1`。
 
-复用设备：iPhone 17 / iOS 26.5，`01FE903A-4A70-4B18-B970-B84AE10207A1`；初始空闲、无云乐坊安装。另复用 iPhone Duo / 27.1 `388406F2-5C67-448B-9394-E39BF543D2BA` 取得首轮失败。其他任务的设备未关闭、擦除或删除。临时设备仅 `YunleFun Preflight iOS27 20261026` / `32C05BB0-C4D7-410B-9649-B8CC4C05C901`，用于隔离的跨运行时回归，完成后删除并记录清理回执。尝试建立标准 iPhone 的 27.1 对照设备被运行时以 incompatible device 拒绝，未产生新设备。
+复用设备：iPhone 17 / iOS 26.5，`01FE903A-4A70-4B18-B970-B84AE10207A1`；初始空闲、无云乐坊安装。另复用 iPhone Duo / 27.1 `388406F2-5C67-448B-9394-E39BF543D2BA` 取得首轮失败。其他任务的设备未关闭、擦除或删除。临时设备共两个：`YunleFun Preflight iOS27 20261026` / `32C05BB0-C4D7-410B-9649-B8CC4C05C901` 用于隔离的跨运行时回归；`YunleFun Preflight Duo 20261026` / `C176493F-F7CB-463F-B0C1-360E39B558DB` 用于排除旧 Duo 的迁移故障。两者均在本次任务中关闭、删除并记录清理回执。尝试建立标准 iPhone 的 27.1 对照设备被运行时以 incompatible device 拒绝，未产生新设备。
 
 硬件相机、锁屏 Keychain / 文件保护、实际触觉、跨设备 iCloud、物理 TestFlight 覆盖升级、iPad、最低 iOS 16、完整无障碍及性能矩阵均未由本轮覆盖。整个原生迁移目标不因此关闭。

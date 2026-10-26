@@ -14,6 +14,7 @@ final class NativeWebRuntime: ObservableObject {
     let applicationCache: ApplicationCacheStore
     @Published private(set) var applications: [CloudApplication] = []
     @Published var issue: RuntimeIssue?
+    @Published var unavailableApplication: CloudApplication?
     @Published private(set) var verifyingScopedApplicationID: String?
     private var scopedOpenTask: Task<Void, Never>?
     private var scopedOpenID = UUID()
@@ -134,7 +135,7 @@ final class NativeWebRuntime: ObservableObject {
         // later be replaced by an earlier asynchronous publication lookup.
         invalidateOpenRequest()
         guard app.isUnavailable != true else {
-            issue = RuntimeIssue(title: "应用资料尚未载入", message: "安装记录仍保留在云居。请联网更新应用资料后再试。")
+            unavailableApplication = app
             return
         }
         guard !isClearingIdentity else {
@@ -209,6 +210,7 @@ final class NativeWebRuntime: ObservableObject {
     private func invalidateOpenRequest() {
         scopedOpenTask?.cancel(); scopedOpenID = UUID(); scopedOpenTask = nil
         verifyingScopedApplicationID = nil; pendingOpen = nil
+        unavailableApplication = nil
     }
 
     private func drainPendingOpen() {
@@ -433,6 +435,7 @@ final class NativeWebRuntime: ObservableObject {
     }
 
     func resetIdentity(to id: String? = nil) {
+        unavailableApplication = nil
         profileAccountID = id
         scopedOpenID = UUID(); scopedOpenTask?.cancel(); scopedOpenTask = nil; verifyingScopedApplicationID = nil
         let reset = UUID()

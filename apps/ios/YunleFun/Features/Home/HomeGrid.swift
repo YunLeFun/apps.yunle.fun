@@ -43,6 +43,7 @@ struct HomeAppGlyph<Icon: View>: View {
     let name: String
     var showsName = true
     var labelWidth: CGFloat = HomeGridMetrics.iconSize
+    var isUnavailable = false
     @ViewBuilder var icon: () -> Icon
 
     var body: some View {
@@ -51,7 +52,7 @@ struct HomeAppGlyph<Icon: View>: View {
             if showsName {
                 Text(name)
                     .font(.caption)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(isUnavailable ? Color.secondary : Color.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(width: labelWidth)

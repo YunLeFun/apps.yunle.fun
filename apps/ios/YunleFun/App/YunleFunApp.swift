@@ -32,7 +32,7 @@ struct YunleFunApp: App {
             diagnostics.record(.info, message: "account.scope.activated")
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
-            library.updateCatalog(catalog.applications)
+            library.updateCatalog(catalog.applications, markingMissingPublicAppsUnavailable: catalog.successfulLoadID != nil)
         })
         _catalog = StateObject(wrappedValue: catalog)
         _accounts = StateObject(wrappedValue: accounts)
@@ -84,6 +84,9 @@ struct YunleFunApp: App {
                     library.updateCatalog($0)
                     runtime.applicationCache.updateAutomaticApplications($0)
                     diagnostics.record(.info, message: "catalog.updated")
+                }
+                .onChange(of: catalog.successfulLoadID) { _ in
+                    library.updateCatalog(catalog.applications, markingMissingPublicAppsUnavailable: true)
                 }
                 .onChange(of: catalog.error) { if $0 != nil { diagnostics.record(.error, message: "catalog.load.failed") } }
                 .onChange(of: runtime.issue?.id) { if $0 != nil { diagnostics.record(.error, message: "runtime.operation.failed") } }

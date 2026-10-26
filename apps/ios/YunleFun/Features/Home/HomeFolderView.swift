@@ -103,13 +103,14 @@ struct HomeFolderView: View {
                 LazyVGrid(columns: metrics.gridItems, spacing: HomeGridMetrics.rowSpacing) {
                     ForEach(apps, id: \.homeKey) { app in
                         Button { open(app) } label: {
-                            HomeAppGlyph(name: app.name, labelWidth: metrics.labelWidth) {
+                            HomeAppGlyph(name: app.name, labelWidth: metrics.labelWidth, isUnavailable: app.isUnavailable == true) {
                                 ApplicationIcon(application: app, size: HomeGridMetrics.iconSize)
                             }
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(PressableButtonStyle())
                         .accessibilityLabel("打开\(app.name)")
+                        .accessibilityValue(app.accessLabel ?? "")
                         .accessibilityIdentifier("home.folder.app.\(app.homeKey)")
                         .contextMenu {
                             Button { withAnimation(Motion.fade) { library.removeFromFolder(app.homeKey) } } label: {

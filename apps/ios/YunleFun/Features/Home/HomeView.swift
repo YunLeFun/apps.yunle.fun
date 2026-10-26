@@ -51,7 +51,7 @@ struct HomeView: View {
                     ContentStateView(title: "云居需要一点帮助", systemImage: "externaldrive.badge.exclamationmark", message: issue,
                                      actionTitle: "重试") {
                         library.activateAccount(library.accountID)
-                        library.updateCatalog(catalog.applications)
+                        library.updateCatalog(catalog.applications, markingMissingPublicAppsUnavailable: catalog.successfulLoadID != nil)
                         sync.identityChanged()
                     }
                 }
@@ -451,7 +451,7 @@ struct HomeView: View {
             if dynamicTypeSize.isAccessibilitySize {
                 ApplicationRow(application: app).foregroundStyle(.primary)
             } else {
-                HomeAppGlyph(name: app.name, showsName: showsName, labelWidth: metrics.labelWidth) {
+                HomeAppGlyph(name: app.name, showsName: showsName, labelWidth: metrics.labelWidth, isUnavailable: app.isUnavailable == true) {
                     ApplicationIcon(application: app, size: HomeGridMetrics.iconSize)
                 }
                 .contentShape(Rectangle())

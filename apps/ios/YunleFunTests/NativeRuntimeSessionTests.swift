@@ -328,6 +328,15 @@ final class NativeRuntimeSessionTests: XCTestCase {
         XCTAssertNil(fixture.runtime.verifyingScopedApplicationID)
     }
 
+    func testIdentitySwitchDismissesTheUnavailableApplication() async throws {
+        let fixture = try await Fixture()
+        defer { fixture.close() }
+        fixture.runtime.open(CloudApplication(id: "removed", name: "旧账号应用", isUnavailable: true), catalog: fixture.catalog, library: fixture.library)
+        XCTAssertNotNil(fixture.runtime.unavailableApplication)
+        fixture.runtime.resetIdentity(to: "other-account")
+        XCTAssertNil(fixture.runtime.unavailableApplication)
+    }
+
     func testUnavailableOpenCancelsThePreviousPersonalReadInsteadOfAllowingALateApplication() async throws {
         let personal = CloudApplication(id: "personal-fixture", name: "作者版本", websiteUrl: "https://runtime.invalid/personal",
                                         accessMode: "public", audience: "public", isPublic: true, personalMarketOwnerLogin: "Author")
@@ -338,10 +347,11 @@ final class NativeRuntimeSessionTests: XCTestCase {
         await fulfillment(of: [gate.entered], timeout: 3)
         fixture.runtime.open(CloudApplication(id: "unavailable", name: "已失效", isUnavailable: true), catalog: fixture.catalog, library: fixture.library)
         XCTAssertNil(fixture.runtime.verifyingScopedApplicationID)
-        let issue = try XCTUnwrap(fixture.runtime.issue)
+        let unavailable = try XCTUnwrap(fixture.runtime.unavailableApplication)
         await gate.open(); await fulfillment(of: [gate.returned], timeout: 3); await Task.yield()
         XCTAssertFalse(fixture.runtime.contains(personal))
-        XCTAssertEqual(fixture.runtime.issue?.id, issue.id)
+        XCTAssertEqual(fixture.runtime.unavailableApplication, unavailable)
+        XCTAssertNil(fixture.runtime.issue)
         XCTAssertEqual(fixture.runtime.applications.first?.id, fixture.application.id)
     }
 

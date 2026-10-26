@@ -32,6 +32,9 @@ struct AppRootView: View {
             .alert(item: $runtime.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             }
+            .sheet(item: $runtime.unavailableApplication) { application in
+                ApplicationUnavailableView(application: application).environmentObject(library)
+            }
             .background(EmptyView().alert(item: $crossAppAuthorization.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             })
@@ -138,5 +141,107 @@ struct AppRootView: View {
     private func updateFeedbackIdentity() {
         feedbackLogin.identityChanged(to: accountBoundary, isUsable: accounts.user?.isUsable == true,
                                       proofIsCurrent: continuationIsCurrent)
+    }
+}
+
+/// Checking status preserves the installation; removal is an explicit confirmed action.
+struct ApplicationUnavailableView: View {
+    let application: CloudApplication
+    var service: ApplicationAvailabilityServing = CatalogService()
+    @EnvironmentObject private var library: HomeLibrary
+    @Environment(\.dismiss) private var dismiss
+    @State private var refreshID = UUID()
+    @State private var phase = Phase.checking
+    @State private var confirmsRemoval = false
+    @State private var removalGeneration: UUID?
+
+    private enum Phase {
+        case checking, unavailable(ApplicationUnavailableReason), available, failed
+    }
+
+    private var isChecking: Bool { if case .checking = phase { return true }; return false }
+    private var isInHome: Bool {
+        let configuration = library.snapshot.configuration
+        return configuration.installedApps.contains { $0.appId == application.homeKey }
+            || configuration.dockApps.contains { $0.appId == application.homeKey }
+            || configuration.recentApps.contains { $0.appId == application.homeKey }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    HStack(spacing: 16) {
+                        ApplicationIcon(application: application)
+                        Text(application.name).font(.headline).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Section {
+                    switch phase {
+                    case .checking:
+                        ProgressView("正在确认应用状态")
+                    case .unavailable(let reason):
+                        Label(reason.title, systemImage: "info.circle").font(.headline)
+                        Text(reason.message).fixedSize(horizontal: false, vertical: true)
+                    case .available:
+                        Label("应用已恢复可用", systemImage: "checkmark.circle").font(.headline)
+                        Text("应用资料已更新，可以返回云居重新打开。")
+                    case .failed:
+                        Label("暂时无法确认应用状态", systemImage: "wifi.exclamationmark").font(.headline)
+                        Text("无法连接应用服务。请检查网络后重试，云居中的安装记录和缓存已保留。")
+                    }
+                }
+                Section {
+                    Button { refreshID = UUID() } label: { Label("刷新状态", systemImage: "arrow.clockwise") }
+                        .disabled(isChecking)
+                        .accessibilityIdentifier("application.availability.refresh")
+                }
+                Section {
+                    Button(role: .destructive) { confirmsRemoval = true } label: {
+                        Label("从云居移除", systemImage: "minus.circle")
+                    }
+                    .disabled(!isInHome)
+                    .accessibilityIdentifier("application.availability.remove")
+                    if let error = library.storageError { Text(error).foregroundStyle(.red) }
+                } footer: {
+                    Text("仅移除云居记录，不会删除应用本身或缓存。")
+                }
+            }
+            .navigationTitle("应用状态")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
+            .onAppear { if removalGeneration == nil { removalGeneration = library.generation } }
+            .confirmationDialog("从云居移除此应用？", isPresented: $confirmsRemoval, titleVisibility: .visible) {
+                Button("从云居移除", role: .destructive, action: removeFromHome)
+                Button("取消", role: .cancel) { }
+            } message: {
+                Text("会从云居、常用应用和最近使用中移除，应用本身和缓存仍会保留。")
+            }
+            .task(id: refreshID) { await refresh() }
+            .accessibilityIdentifier("application.availability")
+        }
+    }
+
+    private func removeFromHome() {
+        guard removalGeneration == library.generation else { dismiss(); return }
+        library.remove(application)
+        if !isInHome { dismiss() }
+    }
+
+    private func refresh() async {
+        let generation = library.generation
+        phase = .checking
+        do {
+            let current = try await service.application(reference: application.homeKey)
+            try Task.checkCancellation()
+            guard library.generation == generation else { return }
+            library.updateCatalog([current])
+            phase = .available
+        } catch is CancellationError { return }
+        catch {
+            guard !Task.isCancelled, library.generation == generation else { return }
+            if let reason = error as? ApplicationUnavailableReason { phase = .unavailable(reason) }
+            else { phase = .failed }
+        }
     }
 }

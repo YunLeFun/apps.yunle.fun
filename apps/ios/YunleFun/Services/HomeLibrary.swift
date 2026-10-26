@@ -260,9 +260,21 @@ final class HomeLibrary: ObservableObject {
     func setAutoSyncEnabled(_ enabled: Bool) { preference { $0.autoSyncEnabled = enabled } }
     func setDockVisible(_ visible: Bool) { preference { $0.dockVisible = visible } }
 
-    func updateCatalog(_ applications: [CloudApplication]) {
+    func updateCatalog(_ applications: [CloudApplication], markingMissingPublicAppsUnavailable: Bool = false) {
         var next = snapshot
         for app in applications { cache(app, in: &next, preservingSavedSource: true) }
+        if markingMissingPublicAppsUnavailable {
+            let availableIDs = Set(applications.map(\.id))
+            for index in next.cachedApplications.indices {
+                let app = next.cachedApplications[index]
+                guard app.id != "yun-home", !availableIDs.contains(app.id),
+                      app.accessWorkshopID == nil, app.accessOwnerID == nil, app.personalMarketOwnerLogin == nil,
+                      app.isPublic != false, app.audience == nil || app.audience == "public" else { continue }
+                // Keep artwork and names for recognition; only a successful,
+                // complete public read can establish that an entry is missing.
+                next.cachedApplications[index].isUnavailable = true
+            }
+        }
         if next.cachedApplications != snapshot.cachedApplications { _ = persist(next) }
     }
 

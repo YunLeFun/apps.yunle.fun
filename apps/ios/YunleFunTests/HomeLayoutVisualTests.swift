@@ -6,6 +6,39 @@ import XCTest
 
 @MainActor
 final class HomeLayoutVisualTests: XCTestCase {
+    func testUnavailableStatusExplainsDelistingWithoutRemovingTheInstallation() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let library = HomeLibrary(directory: directory)
+        try library.adopt(RemoteHomeScreen(revision: String(repeating: "a", count: 64),
+            configuration: HomeConfiguration(installedApps: [.init(appId: "removed")])))
+        let before = library.snapshot
+        let application = try XCTUnwrap(library.snapshot.applications.first)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene); window.frame = CGRect(x: 0, y: 0, width: 320, height: 800)
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
+        for dark in [false, true] {
+            let content = ApplicationUnavailableView(application: application, service: UnavailableStatusFixture())
+                .environmentObject(library).preferredColorScheme(dark ? .dark : .light)
+            let controller = UIHostingController(rootView: content)
+            window.rootViewController = controller; window.makeKeyAndVisible()
+            try await Task.sleep(nanoseconds: 350_000_000)
+            controller.view.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true) }
+            let request = VNRecognizeTextRequest(); request.recognitionLevel = .accurate; request.recognitionLanguages = ["zh-Hans"]
+            try VNImageRequestHandler(cgImage: XCTUnwrap(image.cgImage)).perform([request])
+            let text = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined()
+                .replacingOccurrences(of: " ", with: "")
+            XCTAssertTrue(text.contains("应用已下架"), text)
+            XCTAssertTrue(text.contains("安装记录已保留"), text)
+            XCTAssertTrue(text.contains("刷新状态"), text)
+            let attachment = XCTAttachment(image: image); attachment.name = "unavailable-status-" + (dark ? "dark" : "light")
+            attachment.lifetime = .keepAlways; add(attachment)
+            XCTAssertEqual(library.snapshot, before)
+        }
+    }
+
     func testWorkshopHomeShowsPrivateAppsWithoutInstallingThem() async throws {
         let fixture = try await HomeStateFixture(service: HomeStateService(), workshopService: HomeWorkspaceServiceFixture(), workspaceID: "ABC234")
         defer { fixture.close() }
@@ -322,6 +355,10 @@ final class HomeLayoutVisualTests: XCTestCase {
         if let scroll = view as? UIScrollView { return scroll }
         return view.subviews.lazy.compactMap { self.scrollView(in: $0) }.first
     }
+}
+
+private struct UnavailableStatusFixture: ApplicationAvailabilityServing {
+    func application(reference: String) async throws -> CloudApplication { throw ApplicationUnavailableReason.delisted }
 }
 
 /// Hosts the production HomeView, its real coordinator and the actual native

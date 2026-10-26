@@ -209,6 +209,56 @@ final class ApplicationIconTests: XCTestCase {
         XCTAssertEqual(fixture.requests.count, 3)
     }
 
+    @MainActor
+    func testUnavailableArtworkIsGrayAndMissingArtworkKeepsADashedPlaceholder() async throws {
+        let fixture = IconHTTPFixture(replies: ["/art.svg": (200, iconTestSVG, nil)])
+        let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
+        let original = CloudApplication(id: "artwork", name: "原应用", logo: "https://\(host)/art.svg")
+        var cached = original; cached.isUnavailable = true
+        let missing = CloudApplication(id: "unknown", name: "暂不可用", isUnavailable: true)
+        let emoji = CloudApplication(id: "emoji", name: "缓存图标", emoji: "🎨", isUnavailable: true)
+        _ = try await pipeline.load(original.iconCandidates(dark: false), pixelSize: Int(64 * UIScreen.main.scale))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene); window.frame = CGRect(x: 0, y: 0, width: 390, height: 280)
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
+        for dark in [false, true] {
+            for (name, app) in [("available", original), ("cached-unavailable", cached), ("missing", missing), ("emoji-unavailable", emoji)] {
+                let controller = UIHostingController(rootView: ApplicationIcon(application: app, size: 64, pipeline: pipeline)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(uiColor: .systemBackground)).preferredColorScheme(dark ? .dark : .light))
+                window.rootViewController = controller; window.makeKeyAndVisible()
+                try await Task.sleep(nanoseconds: 180_000_000)
+                controller.view.layoutIfNeeded()
+                let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true) }
+                let cg = try XCTUnwrap(image.cgImage)
+                let center = try pixel(cg, x: cg.width / 2, y: cg.height / 2)
+                if name == "available" { XCTAssertGreaterThan(Int(center[0]) - Int(center[2]), 100, "Actual loaded artwork must render before testing its unavailable state") }
+                else { XCTAssertLessThanOrEqual(Int(center.prefix(3).max()!) - Int(center.prefix(3).min()!), 2, "Unavailable artwork must be desaturated in both appearances") }
+            }
+            let apps = [missing, cached, emoji, CloudApplication(id: "available-emoji", name: "云空调", emoji: "❄️")]
+            let content = VStack(alignment: .leading, spacing: 24) {
+                Text("我的应用").font(.title2.bold())
+                HStack(alignment: .top, spacing: 30) {
+                    ForEach(apps) { app in
+                        HomeAppGlyph(name: app.name, labelWidth: 64, isUnavailable: app.isUnavailable == true) {
+                            ApplicationIcon(application: app, size: 64, pipeline: pipeline)
+                        }
+                    }
+                }
+            }.padding(16).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .background(Color(uiColor: .systemBackground)).preferredColorScheme(dark ? .dark : .light)
+            let controller = UIHostingController(rootView: content)
+            window.rootViewController = controller; window.makeKeyAndVisible()
+            try await Task.sleep(nanoseconds: 200_000_000)
+            controller.view.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true) }
+            let attachment = XCTAttachment(image: image); attachment.name = "home-unavailable-icons-" + (dark ? "dark" : "light")
+            attachment.lifetime = .keepAlways; add(attachment)
+        }
+        XCTAssertEqual(fixture.requests.count, 1, "Showing cached unavailable artwork must reuse the existing image cache")
+    }
+
     #endif
 
     private func pixel(_ image: CGImage, x: Int, y: Int) throws -> [UInt8] {

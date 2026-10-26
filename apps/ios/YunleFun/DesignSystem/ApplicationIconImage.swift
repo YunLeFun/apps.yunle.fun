@@ -11,7 +11,7 @@ struct CatalogApplicationIconImage<Fallback: View>: View {
 
     var body: some View {
         ApplicationIconImage(candidates: application.iconCandidates(dark: colorScheme == .dark, downloaded: catalog.assets, websites: catalog.websiteIcons),
-                             pixelSize: pixelSize, pipeline: pipeline, fallback: fallback)
+                             pixelSize: pixelSize, pipeline: pipeline, isUnavailable: application.isUnavailable == true, fallback: fallback)
     }
 }
 
@@ -31,6 +31,7 @@ struct ApplicationIconImage<Fallback: View>: View {
     let candidates: [ApplicationIconCandidate]
     let pixelSize: Int
     var pipeline: ApplicationImagePipeline = .shared
+    var isUnavailable = false
     @ViewBuilder var fallback: () -> Fallback
     @State private var loaded: LoadedApplicationIcon?
     @State private var loadedKey: Request?
@@ -51,6 +52,7 @@ struct ApplicationIconImage<Fallback: View>: View {
                     .resizable().scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(loaded.candidate.role == .appIcon ? Color.clear : placeholderFill)
+                    .modifier(ApplicationIconAvailabilityStyle(isUnavailable: isUnavailable))
             } else if !candidates.isEmpty && finishedKey != key {
                 ProgressView().controlSize(.small)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -75,5 +77,30 @@ struct ApplicationIconImage<Fallback: View>: View {
                 loaded = nil; loadedKey = request; finishedKey = request
             }
         }
+    }
+}
+
+/// Decorates actual artwork only. A missing image keeps its plain dashed placeholder.
+struct ApplicationIconAvailabilityStyle: ViewModifier {
+    let isUnavailable: Bool
+    func body(content: Content) -> some View {
+        content
+            .saturation(isUnavailable ? 0 : 1)
+            .opacity(isUnavailable ? 0.55 : 1)
+            .overlay {
+                if isUnavailable {
+                    GeometryReader { proxy in
+                        let size = min(proxy.size.width, proxy.size.height)
+                        Image(systemName: "nosign")
+                            .resizable().scaledToFit()
+                            .foregroundStyle(.secondary)
+                            .padding(size * 0.025)
+                            .frame(width: size * 0.3, height: size * 0.3)
+                            .background(.background, in: Circle())
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                            .padding(size * 0.05)
+                    }
+                }
+            }
     }
 }

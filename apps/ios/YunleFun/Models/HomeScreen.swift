@@ -214,11 +214,19 @@ struct HomeLibrarySnapshot: Codable, Equatable {
                                        description: "打开时读取作者当前公开发布的版本。", ownerLogin: source.ownerLogin,
                                        personalMarketOwnerLogin: source.ownerLogin)
             }
+        } else if reference == "yun-home" {
+            // Web ships this first-party entry outside the public database.
+            // Resolve only its reserved legacy ID, never an arbitrary slug or URL.
+            app = CloudApplication(id: "yun-home", name: "Yun Home", slug: "yun-home",
+                                   description: "云端智能家居市场与设备控制台", websiteUrl: "https://home.yunle.fun/",
+                                   emoji: "🏠", category: "生活方式", isOfficial: true)
         } else if let cached, cached.personalMarketOwnerLogin == nil {
             app = cached
         } else {
             // A remote market selection must not reuse the former author's URL.
-            app = CloudApplication(id: cached?.id ?? reference, name: cached?.name ?? "暂不可用的应用", isUnavailable: true)
+            app = CloudApplication(id: cached?.id ?? reference, name: cached?.name.nilIfEmpty ?? "暂不可用",
+                                   logo: cached?.logo, emoji: cached?.emoji, themeColor: cached?.themeColor,
+                                   iconAssets: cached?.iconAssets, isUnavailable: true)
         }
         app.homeReference = reference
         return app

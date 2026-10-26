@@ -3,6 +3,7 @@ import {
   catalogAppViewToRecord,
   createCloudbaseCatalogResolver,
 } from '../../../domain/catalog/cloudbase'
+import { publicAppUnavailableReason } from '../../../utils/public-app-availability'
 
 const PUBLIC_APP_KEY_RE = /^[\w.-]{1,128}$/
 
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  setResponseHeader(event, 'Cache-Control', 'no-store')
   const resolver = createCloudbaseCatalogResolver()
   const view = await resolver.resolveCatalog({ surface: 'public_market' }, null)
   const found = view.apps.find(app => app._id === key || app.marketShortName === key.toLowerCase())
@@ -23,9 +25,9 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 404,
       statusMessage: '应用不存在',
+      data: { code: 'APP_UNAVAILABLE', reasonCode: await publicAppUnavailableReason(key) },
     })
   }
 
-  setResponseHeader(event, 'Cache-Control', 'no-store')
   return { app }
 })

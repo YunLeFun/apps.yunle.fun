@@ -18,10 +18,24 @@ struct ApplicationIcon: View {
     }
 
     private var fallback: some View {
-        ZStack {
-            Color(uiColor: .tertiarySystemFill)
-            ApplicationPlaceholderImage(text: application.emoji?.nilIfEmpty ?? String(application.name.prefix(1)),
-                                        size: size, scale: displayScale, colorScheme: colorScheme)
+        Group {
+            if application.isUnavailable == true, application.emoji?.nilIfEmpty == nil {
+                ZStack {
+                    Color(uiColor: .quaternarySystemFill)
+                    RoundedRectangle(cornerRadius: size * 0.22, style: .continuous)
+                        .strokeBorder(.secondary, style: StrokeStyle(lineWidth: max(1, size / 64), dash: [size * 0.065, size * 0.05]))
+                    Image(systemName: "app")
+                        .font(.system(size: size * 0.4, weight: .light))
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                ZStack {
+                    Color(uiColor: .tertiarySystemFill)
+                    ApplicationPlaceholderImage(text: application.emoji?.nilIfEmpty ?? String(application.name.prefix(1)),
+                                                size: size, scale: displayScale, colorScheme: colorScheme)
+                }
+                .modifier(ApplicationIconAvailabilityStyle(isUnavailable: application.isUnavailable == true))
+            }
         }
     }
 }

@@ -10,6 +10,75 @@ final class HomeLibraryTests: XCTestCase {
     }
     override func tearDownWithError() throws { try FileManager.default.removeItem(at: directory) }
 
+    func testLegacyBuiltInYunHomeRestoresWithoutChangingCloudReferences() throws {
+        let library = HomeLibrary(directory: directory)
+        let configuration = HomeConfiguration(installedApps: [.init(appId: "yun-home"), .init(appId: "valaxy")],
+                                              recentApps: [.init(appId: "yun-home", usedAt: 1)])
+        try library.adopt(RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: configuration))
+        let home = try XCTUnwrap(library.snapshot.applications.first)
+        XCTAssertEqual(home.name, "Yun Home")
+        XCTAssertEqual(home.launchURL?.absoluteString, "https://home.yunle.fun/")
+        XCTAssertTrue(home.canOpenAsGuest)
+        XCTAssertEqual(home.homeKey, "yun-home")
+        XCTAssertEqual(library.snapshot.recentApplications.first, home)
+        XCTAssertEqual(library.snapshot.configuration, configuration)
+        XCTAssertFalse(library.snapshot.hasPendingChanges)
+        XCTAssertEqual(library.snapshot.applications[1].isUnavailable, true, "An intentionally unlisted app must not be republished by a legacy fallback")
+    }
+
+    func testUnknownHomeApplicationUsesShortUnavailableName() throws {
+        var snapshot = HomeLibrarySnapshot()
+        snapshot.configuration.installedApps = [.init(appId: "unknown")]
+        let app = try XCTUnwrap(snapshot.applications.first)
+        XCTAssertEqual(app.name, "暂不可用")
+        XCTAssertEqual(app.homeKey, "unknown")
+        XCTAssertEqual(app.isUnavailable, true)
+        XCTAssertNil(app.launchURL)
+    }
+
+    func testConfirmedPublicRemovalPreservesArtworkAndDoesNotDisableScopedApps() throws {
+        let library = HomeLibrary(directory: directory)
+        let cached = CloudApplication(id: "former-public", name: "原应用", logo: "https://example.test/icon.png", emoji: "🎨")
+        let personal = CloudApplication(id: "personal", name: "作者作品", personalMarketOwnerLogin: "Author")
+        let workshop = CloudApplication(id: "workshop", name: "工坊应用", accessWorkshopID: "ABC234")
+        let owner = CloudApplication(id: "owner", name: "本人作品", accessOwnerID: "owner")
+        [cached, personal, workshop, owner].forEach(library.add)
+        let configuration = library.snapshot.configuration
+        let mutation = library.snapshot.mutationId
+        library.updateCatalog([])
+        XCTAssertNotEqual(library.snapshot.applications[0].isUnavailable, true, "A partial or offline merge cannot establish removal")
+        library.updateCatalog([], markingMissingPublicAppsUnavailable: true)
+        let unavailable = library.snapshot.applications[0]
+        XCTAssertEqual(unavailable.name, cached.name)
+        XCTAssertEqual(unavailable.logo, cached.logo)
+        XCTAssertEqual(unavailable.emoji, cached.emoji)
+        XCTAssertEqual(unavailable.isUnavailable, true)
+        XCTAssertFalse(unavailable.canOpenAsGuest)
+        XCTAssertTrue(library.snapshot.applications.dropFirst().allSatisfy { $0.isUnavailable != true })
+        XCTAssertEqual(library.snapshot.configuration, configuration)
+        XCTAssertEqual(library.snapshot.mutationId, mutation, "Availability metadata must not rewrite the cloud layout")
+        XCTAssertEqual(HomeLibrary(directory: directory).snapshot, library.snapshot)
+        library.updateCatalog([cached], markingMissingPublicAppsUnavailable: true)
+        XCTAssertNotEqual(library.snapshot.applications[0].isUnavailable, true, "A relisted application becomes usable again")
+    }
+
+    func testChangingSourceKeepsOnlyCachedPresentationForAnUnavailableMarketEntry() throws {
+        let library = HomeLibrary(directory: directory)
+        let personal = CloudApplication(id: "record", name: "旧作品", websiteUrl: "https://author.invalid/", logo: "https://example.test/icon.png",
+                                        emoji: "🎨", trustedHosts: ["author.invalid"], personalMarketOwnerLogin: "Author")
+        library.add(personal)
+        try library.adopt(RemoteHomeScreen(revision: String(repeating: "a", count: 64),
+                                          configuration: HomeConfiguration(installedApps: [.init(appId: "record")])))
+        let app = try XCTUnwrap(library.snapshot.applications.first)
+        XCTAssertEqual(app.name, personal.name)
+        XCTAssertEqual(app.logo, personal.logo)
+        XCTAssertEqual(app.emoji, personal.emoji)
+        XCTAssertEqual(app.isUnavailable, true)
+        XCTAssertNil(app.launchURL)
+        XCTAssertTrue(app.runtimeTrustedHosts.isEmpty)
+        XCTAssertNil(app.personalMarketOwnerLogin)
+    }
+
     func testPersistsOrderAndRecentUseWithoutMixingAccounts() {
         let a = CloudApplication(id: "a", name: "应用 A")
         let b = CloudApplication(id: "b", name: "应用 B")

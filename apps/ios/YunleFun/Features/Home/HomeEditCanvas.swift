@@ -259,7 +259,7 @@ struct HomeEditCanvas: View {
             case .app(let app):
                 let checked = selectionSection == section && selection.contains(key)
                 HomeEditTile(key: key, name: app.name, showsName: section != .dock, labelWidth: metrics.labelWidth,
-                             wobbling: !reduceMotion && !lifted, selected: checked, merging: merging,
+                             wobbling: !reduceMotion && !lifted, selected: checked, merging: merging, isUnavailable: app.isUnavailable == true,
                              remove: { remove(app) }) {
                     ApplicationIcon(application: app, size: HomeGridMetrics.iconSize)
                 }
@@ -568,11 +568,12 @@ struct HomeEditTile<Icon: View>: View {
     let selected: Bool
     /// Another icon rests on this one's centre: a drop makes / fills a folder.
     let merging: Bool
+    var isUnavailable = false
     let remove: () -> Void
     @ViewBuilder var icon: () -> Icon
 
     var body: some View {
-        HomeAppGlyph(name: name, showsName: showsName, labelWidth: labelWidth) {
+        HomeAppGlyph(name: name, showsName: showsName, labelWidth: labelWidth, isUnavailable: isUnavailable) {
             TimelineView(.animation(minimumInterval: nil, paused: !wobbling || reduceMotion)) { context in
                 icon()
                     .rotationEffect(.degrees(wobbling && !reduceMotion ? angle(at: context.date) : 0))

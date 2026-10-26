@@ -8,6 +8,7 @@ final class CatalogStore: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var error: String?
     @Published private(set) var isCached = false
+    @Published private(set) var successfulLoadID: UUID?
     private let service: CatalogServing
     private let cacheURL: URL
     private let logger = Logger(subsystem: "fun.yunle.apps", category: "catalog")
@@ -41,6 +42,7 @@ final class CatalogStore: ObservableObject {
             applications = result
             error = nil
             isCached = false
+            successfulLoadID = UUID()
             do {
                 let data = try JSONEncoder().encode(result)
                 try FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)

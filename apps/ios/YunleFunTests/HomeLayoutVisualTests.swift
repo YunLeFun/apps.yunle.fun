@@ -89,8 +89,10 @@ final class HomeLayoutVisualTests: XCTestCase {
         let other = try await fixture.readScreen(named: "home-workspace-after-switch", containing: "灵感笔记", test: self)
         XCTAssertTrue(other.contains("灵感笔记")); XCTAssertFalse(other.contains("管理后台")); XCTAssertFalse(other.contains("支持中心"))
         fixture.workspaceDefaults.set("", forKey: HomeWorkspaceView.selectionKey(userID: "home-state-user"))
-        let personal = try await fixture.readScreen(named: "home-workspace-personal", containing: "把喜欢的应用带回云居", test: self)
-        XCTAssertTrue(personal.contains("我的云居")); XCTAssertTrue(personal.contains("把喜欢的应用带回云居"))
+        // Vision may omit the narrow “的” in this bold heading on the CI renderer.
+        // Verify the distinguishing visible phrase and selected workspace independently.
+        let personal = try await fixture.readScreen(named: "home-workspace-personal", containing: "带回云居", test: self)
+        XCTAssertTrue(personal.contains("我的云居")); XCTAssertTrue(personal.contains("带回云居"))
         XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
         XCTAssertTrue(fixture.runtime.applications.isEmpty)
     }
@@ -466,7 +468,9 @@ private final class HomeStateFixture {
     }
 
     func readScreen(named name: String, containing expected: String, scrollToFind: Bool = false, test: XCTestCase) async throws -> String {
-        let deadline = Date().addingTimeInterval(5)
+        // A large-text scan needs several OCR passes before the target reaches
+        // the viewport. On CI, Vision can take seconds per pass.
+        let deadline = Date().addingTimeInterval(scrollToFind ? 30 : 5)
         var image: UIImage?, lines: [String] = []
         repeat {
             try await Task.sleep(nanoseconds: 100_000_000)

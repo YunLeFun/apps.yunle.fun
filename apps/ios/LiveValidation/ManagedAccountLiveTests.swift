@@ -201,6 +201,7 @@ final class ManagedWalletReadLiveTests: XCTestCase {
             failure = true
             if let stage = error as? Stage { XCTFail("Managed wallet validation failed at \(stage)") }
             else if let walletError = error as? WalletError { XCTFail("Managed wallet service failed: \(walletError)") }
+            else if let authError = error as? AccountError { XCTFail("Managed wallet auth failed: \(authError)") }
             else { XCTFail("Managed wallet validation failed; private response contents omitted") }
         }
         await service.release(); await heldRequest?.value

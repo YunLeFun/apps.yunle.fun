@@ -48,15 +48,18 @@ final class NativeWebRuntime: ObservableObject {
     private var isClearingIdentity = false
     private let limit = WebViewSessionPolicy.automaticLimit(physicalMemory: ProcessInfo.processInfo.physicalMemory)
     private let personalMarketService: DeveloperProfileServing
+    private let publishingService: PublishingServing
     private let launchLogger = Logger(subsystem: "fun.yunle.apps", category: "cache-launch")
 
-    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), applicationCache: ApplicationCacheStore? = nil, webProfiles: WebProfileRepository? = nil) {
+    init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), applicationCache: ApplicationCacheStore? = nil, webProfiles: WebProfileRepository? = nil,
+         publishingService: PublishingServing = PublishingService()) {
         self.applicationCache = applicationCache ?? ApplicationCacheStore()
         self.webProfiles = webProfiles ?? WebProfileRepository(
             fileURL: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("WebProfiles/ownership-v1.json"),
             namespace: CloudbaseAuthService.gateway.absoluteString)
         self.personalMarketService = personalMarketService
+        self.publishingService = publishingService
         memoryObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: .main
         ) { [weak self] _ in Task { @MainActor in self?.releasePausedSessions() } }
@@ -170,7 +173,7 @@ final class NativeWebRuntime: ObservableObject {
                 do {
                     let current: CloudApplication
                     if app.accessOwnerID != nil {
-                        current = try await OwnerPreviewAuthorization(accounts: accounts).resolve(app, boundary: boundary)
+                        current = try await OwnerPreviewAuthorization(accounts: accounts, service: self.publishingService).resolve(app, boundary: boundary)
                     } else {
                         current = try await WorkshopLaunchAuthorization(accounts: accounts).resolve(app, boundary: boundary)
                     }

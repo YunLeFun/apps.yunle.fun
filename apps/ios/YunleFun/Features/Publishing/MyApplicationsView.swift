@@ -2,7 +2,8 @@ import SwiftUI
 
 struct MyApplicationsView: View {
     @EnvironmentObject private var accounts: AccountStore
-    var body: some View { MyApplicationsContent(accounts: accounts).id(accounts.identityGeneration) }
+    var service: PublishingServing = PublishingService()
+    var body: some View { MyApplicationsContent(accounts: accounts, service: service).id(accounts.identityGeneration) }
 }
 private struct MyApplicationsContent: View {
     @ObservedObject var accounts: AccountStore
@@ -10,7 +11,7 @@ private struct MyApplicationsContent: View {
     @State private var showLogin = false
     @State private var showCreate = false
     @State private var query = ""
-    init(accounts: AccountStore) { self.accounts = accounts; _store = StateObject(wrappedValue: PublishingStore(accounts: accounts)) }
+    init(accounts: AccountStore, service: PublishingServing) { self.accounts = accounts; _store = StateObject(wrappedValue: PublishingStore(accounts: accounts, service: service)) }
     var body: some View {
         List {
             if accounts.user == nil {

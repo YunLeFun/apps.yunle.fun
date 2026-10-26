@@ -110,6 +110,7 @@
 		8A2424E7DBD2C78C8FE5BF8D /* AccountSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A98310CC5BAF574BC9C78C /* AccountSignIn.swift */; };
 		8BD09C6A48037B5291769009 /* DiagnosticLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DCF7B4B9047BF4833DA4FF /* DiagnosticLogStore.swift */; };
 		91AC0F6609A31D32188681CF /* HomeBackupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF05F6FDE79BB411600C35BF /* HomeBackupStore.swift */; };
+		91AF4796DA1A521A42496009 /* PublishingCandidateLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAE1655F9687DB025CE06D2 /* PublishingCandidateLiveTests.swift */; };
 		91C41E8E3BB05B9DC83078DD /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46F681E612C20AB024C7ADE /* AccountStore.swift */; };
 		92070CC8C241963495192458 /* NativeAuthorizationBroker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2B0F1152B7482AFA76A0A /* NativeAuthorizationBroker.swift */; };
 		93BBFBA3433149FEE69A878D /* HostAuthorizationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC985DB464BEAD0784DFE4A /* HostAuthorizationProtocol.swift */; };
@@ -422,6 +423,7 @@
 		CC9136AE3091627214FA5E20 /* DeveloperProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperProfile.swift; sourceTree = "<group>"; };
 		CD2ACC46A15815DE5714A400 /* NativeRuntimeSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRuntimeSessionTests.swift; sourceTree = "<group>"; };
 		CE3FBCBE02747467F7CA00C5 /* CatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTests.swift; sourceTree = "<group>"; };
+		CEAE1655F9687DB025CE06D2 /* PublishingCandidateLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingCandidateLiveTests.swift; sourceTree = "<group>"; };
 		CEE7EF9B75AF44185997988B /* Community.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Community.swift; sourceTree = "<group>"; };
 		D0EF59D82409EC05C152CEC2 /* HomeSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncService.swift; sourceTree = "<group>"; };
 		D1E2B0F1152B7482AFA76A0A /* NativeAuthorizationBroker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthorizationBroker.swift; sourceTree = "<group>"; };
@@ -655,6 +657,7 @@
 				97D9CFE7293B436B0E5F4311 /* KeyboardLayoutDiagnostics.swift */,
 				6B4852DB61BBB9719B249882 /* ManagedAccountLiveTests.swift */,
 				C0D1CF174CA2F91B416E92D7 /* PublicIconLiveTests.swift */,
+				CEAE1655F9687DB025CE06D2 /* PublishingCandidateLiveTests.swift */,
 				95BE967444DF7CA0826745D3 /* WalletPresentationLiveTests.swift */,
 				DB891A24C2837E7FE180BD2E /* WebProfileProcessLiveTests.swift */,
 				61FA4DFE35928660E8971D33 /* WebProfileRecoveryLiveTests.swift */,
@@ -1295,6 +1298,7 @@
 				60FA64FB27A0A53A8CB97730 /* KeyboardLayoutDiagnostics.swift in Sources */,
 				C84CD9EC1F69F26D2EABE8E5 /* ManagedAccountLiveTests.swift in Sources */,
 				54DA859FABDDDF03DE7C2E4A /* PublicIconLiveTests.swift in Sources */,
+				91AF4796DA1A521A42496009 /* PublishingCandidateLiveTests.swift in Sources */,
 				2009E98802053BCA31C84DEE /* WalletPresentationLiveTests.swift in Sources */,
 				8724EB11FF79C82DB2B02493 /* WebProfileProcessLiveTests.swift in Sources */,
 				6662F9B3675951CFD089EEB4 /* WebProfileRecoveryLiveTests.swift in Sources */,

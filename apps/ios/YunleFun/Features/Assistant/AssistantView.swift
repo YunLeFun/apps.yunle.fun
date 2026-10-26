@@ -4,9 +4,11 @@ struct AssistantView: View {
     private enum Modal: String, Identifiable { case login, membership, history; var id: Self { self } }
     private static let end = "assistant-end"
     private static let draftLimit = 4000
+    private static let contentWidth: CGFloat = 640
     @EnvironmentObject private var chat: AssistantStore
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var lifetime = AssistantScreenLifetime()
     @ScaledMetric(relativeTo: .body) private var actionSize: CGFloat = 30
@@ -37,6 +39,8 @@ struct AssistantView: View {
                         .onDisappear { endVisible = false }
                 }
                 .padding(.horizontal, 16).padding(.vertical, 12)
+                .frame(maxWidth: Self.contentWidth)
+                .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
             // Only scrolling back through history pauses auto-follow; the end marker resumes it.
@@ -60,13 +64,22 @@ struct AssistantView: View {
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
+                if focused {
+                    Button { focused = false } label: {
+                        Label("收起键盘", systemImage: "keyboard.chevron.compact.down")
+                    }
+                    .accessibilityIdentifier("assistant.dismiss-keyboard")
+                }
                 if accounts.user?.isUsable == true {
                     Button { focused = false; modal = .history } label: {
                         Label("历史对话", systemImage: "clock.arrow.circlepath")
                     }
                     .accessibilityIdentifier("assistant.history")
                 }
-                Button { if chat.messages.isEmpty { chat.reset() } else { confirmReset = true } } label: {
+                Button {
+                    focused = false
+                    if chat.messages.isEmpty { chat.reset() } else { confirmReset = true }
+                } label: {
                     Label("新对话", systemImage: "square.and.pencil")
                 }
                 .disabled(chat.messages.isEmpty && chat.draft.isEmpty)
@@ -106,14 +119,31 @@ struct AssistantView: View {
         .environment(\.openURL, OpenURLAction { url in AssistantMarkdown.safeLink(url) ? .systemAction : .discarded })
     }
     private var welcome: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "sparkles").font(.largeTitle).foregroundStyle(Color.accentColor).accessibilityHidden(true)
-            Text("想找什么应用？").font(.title2.bold()).accessibilityAddTraits(.isHeader)
-            Text("说说想做的事，助手会检索云乐坊的公开应用。").font(.subheadline).foregroundStyle(.secondary)
+        VStack(spacing: 28) {
+            VStack(spacing: 12) {
+                Image(systemName: "sparkles")
+                    .font(.largeTitle).foregroundStyle(Color.accentColor)
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge).accessibilityHidden(true)
+                Text("想找什么应用？").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                Text("说说想做的事，帮你找到合适的云应用。")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("试试这样问")
+                    .font(.footnote).foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
+                    .accessibilityAddTraits(.isHeader)
+                suggestions
+            }
         }
-        .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
-        .padding(.top, 56)
+        .padding(.top, 28)
+        .padding(.bottom, 12)
     }
     private func errorNotice(_ error: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -137,10 +167,8 @@ struct AssistantView: View {
         Button("重新核对会员") { Task { await chat.refreshAccess() } }.buttonStyle(.bordered).disabled(chat.running)
     }
     private var draftLength: Int { chat.draft.utf16.count }
-    private var showsSuggestions: Bool { chat.messages.isEmpty && chat.draft.isEmpty }
     private func composer(_ proxy: ScrollViewProxy) -> some View {
-        VStack(spacing: 8) {
-            if showsSuggestions { suggestions.transition(.opacity) }
+        VStack(spacing: 0) {
             if draftLength > Self.draftLimit - 400 {
                 Text(verbatim: draftLength > Self.draftLimit ? "问题过长，请缩短后发送（\(draftLength)/\(Self.draftLimit)）" : "\(draftLength)/\(Self.draftLimit)")
                     .font(.caption.monospacedDigit())
@@ -150,16 +178,18 @@ struct AssistantView: View {
             HStack(alignment: .bottom, spacing: 4) {
                 // Keyboard 发送 / Return sends, Shift+Return adds a line, pastes and dictation stay in the draft.
                 AssistantComposerField(text: $chat.draft, isFocused: $focused,
-                                       placeholder: "描述想做的事，比如记账、番茄钟…", onSubmit: send)
-                composerAction.padding(.trailing, 2).padding(.bottom, 2)
+                                       placeholder: "想找什么应用？", onSubmit: send)
+                composerAction.padding(.trailing, 4).padding(.bottom, 2)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
             // Taps on the padding around the text still focus the field.
             .background { Color.clear.contentShape(Rectangle()).onTapGesture { focused = true } }
             .modifier(AssistantFieldBackground())
             accessLine
         }
         .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 8)
+        .frame(maxWidth: Self.contentWidth)
+        .frame(maxWidth: .infinity)
         .modifier(AssistantComposerChrome())
         .overlay(alignment: .top) {
             // Appearance of the lazy end marker is only a hint, so recovery stays available whenever following is paused.
@@ -177,26 +207,46 @@ struct AssistantView: View {
         .animation(Motion.fade, value: chat.running)
         .animation(Motion.fade, value: endVisible)
         .animation(Motion.fade, value: followLatest)
-        .animation(Motion.fade, value: showsSuggestions)
     }
-    /// Example prompts sit next to the thumb; tapping one fills the draft so it can be edited before sending.
+    /// Keep every example readable in the scrollable content, including at accessibility text sizes.
+    /// Choosing one fills an editable draft; it never sends a request.
     private var suggestions: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(AssistantStore.examples, id: \.self) { prompt in
-                    Button { fillDraft(prompt); focused = true } label: {
-                        Text(prompt).font(.subheadline).lineLimit(1)
-                            .padding(.horizontal, 14).padding(.vertical, 9)
-                            .modifier(AssistantChipBackground())
-                            .contentShape(Capsule())
+        let icons: [(symbol: String, color: Color)] = [
+            ("chevron.left.forwardslash.chevron.right", .blue),
+            ("gamecontroller", .purple),
+            ("lightbulb", .orange)
+        ]
+        return VStack(spacing: 0) {
+            ForEach(Array(AssistantStore.examples.enumerated()), id: \.element) { index, prompt in
+                if index > 0 { Divider().padding(.leading, dynamicTypeSize.isAccessibilitySize ? 16 : 52) }
+                Button { fillDraft(prompt); focused = true } label: {
+                    HStack(spacing: 12) {
+                        if !dynamicTypeSize.isAccessibilitySize {
+                            Image(systemName: icons[index % icons.count].symbol)
+                                .font(.body).foregroundStyle(icons[index % icons.count].color)
+                                .frame(width: 24).accessibilityHidden(true)
+                        }
+                        Text(prompt)
+                            .font(.subheadline).foregroundStyle(.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        if !dynamicTypeSize.isAccessibilitySize {
+                            Image(systemName: "arrow.up.left")
+                                .font(.footnote.weight(.medium)).foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("填入输入框，可修改后发送")
+                    .padding(.horizontal, 16).padding(.vertical, 14)
+                    .frame(minHeight: 52)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(prompt)
+                .accessibilityIdentifier("assistant.suggestion.\(index)")
+                .accessibilityHint("填入输入框，可修改后发送")
             }
-            .padding(.horizontal, 16)
         }
-        .padding(.horizontal, -16)
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
     /// One quiet line instead of a card: guests can type first and sign in when they send.
     @ViewBuilder private var accessLine: some View {
@@ -212,12 +262,24 @@ struct AssistantView: View {
         }
     }
     private func accessHint(_ message: String, action: String, perform: @escaping () -> Void) -> some View {
-        HStack(spacing: 4) {
-            Text(verbatim: message + " ·").foregroundStyle(.secondary)
-            Button(action, action: perform).fontWeight(.semibold).buttonStyle(.borderless)
+        Button(action: perform) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 4) {
+                    Text(verbatim: message + " ·").foregroundStyle(.secondary)
+                    Text(verbatim: action).fontWeight(.semibold).foregroundStyle(Color.accentColor)
+                }
+                VStack(spacing: 4) {
+                    Text(verbatim: message).foregroundStyle(.secondary)
+                    Text(verbatim: action).fontWeight(.semibold).foregroundStyle(Color.accentColor)
+                }
+            }
+            .font(.footnote)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
         }
-        .font(.footnote)
-        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .accessibilityLabel(message + "，" + action)
     }
     private var sendHint: String {
         if accounts.user == nil { return "登录后发送" }
@@ -226,19 +288,21 @@ struct AssistantView: View {
     @ViewBuilder private var composerAction: some View {
         if chat.running {
             Button { chat.stop() } label: {
-                Image(systemName: "stop.circle.fill").font(.system(size: actionSize))
+                Image(systemName: "stop.circle.fill").font(.system(size: min(actionSize, 40)))
                     .symbolRenderingMode(.hierarchical).foregroundStyle(Color.primary)
-                    .frame(minWidth: 40, minHeight: 40)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(PressableButtonStyle())
             .accessibilityLabel("停止生成")
             .accessibilityIdentifier("assistant.stop")
         } else {
             Button(action: send) {
-                Image(systemName: "arrow.up.circle.fill").font(.system(size: actionSize))
+                Image(systemName: "arrow.up.circle.fill").font(.system(size: min(actionSize, 40)))
                     .foregroundStyle(chat.canSend ? Color.white : Color(uiColor: .secondaryLabel),
                                      chat.canSend ? Color.accentColor : Color(uiColor: .tertiarySystemFill))
-                    .frame(minWidth: 40, minHeight: 40)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(PressableButtonStyle())
             .disabled(!chat.canSend)
@@ -554,8 +618,11 @@ struct AssistantHistoryView: View {
 private struct AssistantBottomBar<Bar: View>: ViewModifier {
     @ViewBuilder var bar: () -> Bar
     @ViewBuilder func body(content: Content) -> some View {
-        if #available(iOS 26, *) { content.scrollEdgeEffectStyle(.hard, for: .bottom).safeAreaBar(edge: .bottom, content: bar) }
-        else { content.safeAreaInset(edge: .bottom, content: bar) }
+        if #available(iOS 26, *) {
+            content.scrollEdgeEffectStyle(.hard, for: .bottom).safeAreaBar(edge: .bottom) {
+                GlassEffectContainer(spacing: 12, content: bar)
+            }
+        } else { content.safeAreaInset(edge: .bottom, spacing: 0, content: bar) }
     }
 }
 
@@ -568,16 +635,6 @@ private struct AssistantFieldBackground: ViewModifier {
         } else {
             content.background(Color(uiColor: .systemBackground), in: shape)
                 .overlay { shape.strokeBorder(Color(uiColor: .separator), lineWidth: 0.5) }
-        }
-    }
-}
-
-private struct AssistantChipBackground: ViewModifier {
-    @ViewBuilder func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content.glassEffect(.regular.interactive(), in: Capsule())
-        } else {
-            content.background(Color(uiColor: .secondarySystemBackground), in: Capsule())
         }
     }
 }

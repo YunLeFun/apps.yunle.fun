@@ -28,8 +28,41 @@ final class AssistantComposerUITests: XCTestCase {
         XCTAssertFalse(app.navigationBars["登录并继续"].waitForExistence(timeout: 2), message)
     }
 
+    func testWelcomeAndKeyboardRespectTheAvailableSpace() throws {
+        let (app, input) = try openAssistant()
+        XCTAssertFalse(app.tabBars.firstMatch.exists, "The conversation owns the bottom safe area")
+        let send = app.buttons["assistant.send"]
+        XCTAssertFalse(send.isEnabled)
+        XCTAssertGreaterThanOrEqual(send.frame.width, 44)
+        XCTAssertGreaterThanOrEqual(send.frame.height, 44)
+        for index in 0..<3 {
+            let suggestion = app.buttons["assistant.suggestion.\(index)"]
+            XCTAssertTrue(suggestion.exists)
+            XCTAssertGreaterThanOrEqual(suggestion.frame.height, 44)
+            XCTAssertTrue(app.frame.contains(suggestion.frame), "Every example is visible without horizontal scrolling")
+        }
+        let welcome = XCTAttachment(screenshot: app.screenshot())
+        welcome.name = "assistant-native-welcome"; welcome.lifetime = .keepAlways; add(welcome)
+
+        input.tap()
+        input.typeText("notes")
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        XCTAssertLessThanOrEqual(input.frame.maxY, keyboard.frame.minY + 1)
+        XCTAssertLessThanOrEqual(send.frame.maxY, keyboard.frame.minY + 1)
+        let dismiss = app.buttons["assistant.dismiss-keyboard"]
+        XCTAssertTrue(dismiss.waitForExistence(timeout: 5))
+        let editing = XCTAttachment(screenshot: app.screenshot())
+        editing.name = "assistant-native-keyboard"; editing.lifetime = .keepAlways; add(editing)
+        dismiss.tap()
+        XCTAssertTrue(keyboard.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(input.value as? String, "notes")
+    }
+
     func testExampleFillsTheDraftAndReturnSends() throws {
         let (app, input) = try openAssistant()
+        let welcome = XCTAttachment(screenshot: app.screenshot())
+        welcome.name = "assistant-example-welcome"; welcome.lifetime = .keepAlways; add(welcome)
         app.buttons[example].tap()
         XCTAssertEqual(input.value as? String, example)
         assertStillDraft(app, "Tapping an example only fills the draft")

@@ -43,10 +43,17 @@ struct AssistantComposerField: UIViewRepresentable {
         }
         view.placeholderLabel.text = placeholder
         view.accessibilityLabel = placeholder
+        let coordinator = context.coordinator
         if isFocused, !view.isFirstResponder, view.window != nil {
-            DispatchQueue.main.async { view.becomeFirstResponder() }
+            DispatchQueue.main.async {
+                guard coordinator.parent.isFocused else { return }
+                view.becomeFirstResponder()
+            }
         } else if !isFocused, view.isFirstResponder {
-            DispatchQueue.main.async { view.resignFirstResponder() }
+            DispatchQueue.main.async {
+                guard !coordinator.parent.isFocused else { return }
+                view.resignFirstResponder()
+            }
         }
     }
 
@@ -74,10 +81,12 @@ struct AssistantComposerField: UIViewRepresentable {
             if parent.text != textView.text { parent.text = textView.text }
         }
         func textViewDidBeginEditing(_ textView: UITextView) {
-            if !parent.isFocused { DispatchQueue.main.async { self.parent.isFocused = true } }
+            // UIKit delegate events already arrive on the main actor. Publish immediately so a
+            // pending SwiftUI update cannot mistake a user's tap for a request to dismiss.
+            if !parent.isFocused { parent.isFocused = true }
         }
         func textViewDidEndEditing(_ textView: UITextView) {
-            if parent.isFocused { DispatchQueue.main.async { self.parent.isFocused = false } }
+            if parent.isFocused { parent.isFocused = false }
         }
     }
 }

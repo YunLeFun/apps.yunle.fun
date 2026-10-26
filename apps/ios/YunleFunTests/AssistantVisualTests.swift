@@ -6,6 +6,9 @@ import XCTest
 final class AssistantVisualTests: XCTestCase {
     func testNativeReplyAndCardsInLightMode() async throws { try await render(accessibility: false) }
     func testNativeReplySupportsDarkAccessibilityText() async throws { try await render(accessibility: true) }
+    func testWelcomeInLightMode() async throws { try await render(accessibility: false, conversation: false) }
+    func testWelcomeInDarkMode() async throws { try await render(accessibility: false, conversation: false, colorScheme: .dark) }
+    func testWelcomeSupportsDarkAccessibilityText() async throws { try await render(accessibility: true, conversation: false) }
     func testHistorySheetListsSavedConversations() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -35,7 +38,7 @@ final class AssistantVisualTests: XCTestCase {
             controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
         }
     }
-    private func render(accessibility: Bool) async throws {
+    private func render(accessibility: Bool, conversation: Bool = true, colorScheme: ColorScheme? = nil) async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
         let host = UUID().uuidString.lowercased() + ".assistant.test"
@@ -50,7 +53,8 @@ final class AssistantVisualTests: XCTestCase {
         await accounts.restore()
         let walletService = AssistantWalletFixture()
         let chat = AssistantStore(accounts: accounts, service: AssistantVisualService(), wallet: walletService)
-        chat.draft = "有没有适合整理灵感的工具？"; await chat.send()?.value
+        if conversation { chat.draft = "有没有适合整理灵感的工具？"; await chat.send()?.value }
+        else { await chat.refreshAccess() }
         let catalog = CatalogStore(service: AssistantVisualCatalog(), cacheURL: directory.appendingPathComponent("catalog.json"))
         await catalog.load()
         let library = HomeLibrary(directory: directory.appendingPathComponent("home"), accountID: "alice")
@@ -59,11 +63,12 @@ final class AssistantVisualTests: XCTestCase {
         let purchases = PurchaseCoordinator(accounts: accounts, wallet: wallet, service: walletService,
             commerce: BillingCommerceFixture(log: log, gate: nil, outcome: .cancelled, unfinished: []),
             journal: PurchaseOwnershipJournal(vault: BillingMemoryVault()))
+        let appearance = colorScheme ?? (accessibility ? .dark : .light)
         let content = NavigationStack { AssistantView() }
             .environmentObject(chat).environmentObject(accounts).environmentObject(catalog)
             .environmentObject(library).environmentObject(runtime).environmentObject(wallet).environmentObject(purchases)
             .environment(\.dynamicTypeSize, accessibility ? .accessibility3 : .large)
-            .preferredColorScheme(accessibility ? .dark : .light)
+            .preferredColorScheme(appearance)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previous = scene.windows.first(where: \.isKeyWindow)
         let window = UIWindow(windowScene: scene); window.frame = scene.coordinateSpace.bounds
@@ -71,14 +76,22 @@ final class AssistantVisualTests: XCTestCase {
         window.rootViewController = controller; window.makeKeyAndVisible()
         defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
         try await Task.sleep(nanoseconds: 350_000_000); controller.view.layoutIfNeeded()
-        XCTAssertEqual(chat.messages.last?.status, .done); XCTAssertNil(chat.error)
-        XCTAssertEqual(chat.messages.last?.cards.count, 1)
-        XCTAssertNotNil(chat.messages.last?.cards.first?.resolve(in: catalog.applications))
+        XCTAssertNil(chat.error)
+        if conversation {
+            XCTAssertEqual(chat.messages.last?.status, .done)
+            XCTAssertEqual(chat.messages.last?.cards.count, 1)
+            XCTAssertNotNil(chat.messages.last?.cards.first?.resolve(in: catalog.applications))
+        } else {
+            XCTAssertTrue(chat.messages.isEmpty)
+            XCTAssertTrue(chat.draft.isEmpty)
+        }
         let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
             controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
         }
         let attachment = XCTAttachment(image: image)
-        attachment.name = accessibility ? "assistant-fixture-dark-accessibility" : "assistant-fixture-light"
+        let screen = conversation ? "reply" : "welcome"
+        let variant = appearance == .dark ? "dark" : "light"
+        attachment.name = "assistant-\(screen)-\(variant)\(accessibility ? "-accessibility" : "")"
         attachment.lifetime = .keepAlways; add(attachment)
         XCTAssertTrue(library.snapshot.applications.isEmpty, "Viewing a suggestion must not install it")
         XCTAssertTrue(runtime.applications.isEmpty)

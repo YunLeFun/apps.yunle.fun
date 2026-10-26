@@ -20,6 +20,25 @@ dist
 playwright-report/
 test-results/
 
+# Legacy native build artifacts left before the apps/mobile migration
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/capacitor-cordova-android-plugins/
+/android/app/src/main/assets/public/
+/android/app/src/main/assets/capacitor.config.json
+/android/app/src/main/assets/capacitor.plugins.json
+/android/app/src/main/res/xml/config.xml
+/ios/App/build/
+/ios/App/Pods/
+/ios/App/output*/
+/ios/App/App.xcarchive/
+/ios/App/App/public/
+/ios/App/App/capacitor.config.json
+/ios/App/App/config.xml
+/ios/capacitor-cordova-ios-plugins/
+
 # VitePress
 docs/.vitepress/dist
 docs/.vitepress/cache

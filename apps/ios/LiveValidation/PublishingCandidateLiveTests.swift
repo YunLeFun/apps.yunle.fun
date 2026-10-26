@@ -45,7 +45,7 @@ final class PublishingCandidateLiveTests: XCTestCase {
             draft.privacyPolicyUrl = "https://www.yunle.fun/privacy"; draft.supportUrl = "https://apps.yunle.fun"
             var record = try JSONSerialization.jsonObject(with: JSONEncoder().encode(draft)) as! [String: Any]
             record.merge(["_id": "historical-author-fixture", "ownerUid": identity.userID,
-                "writeVersion": String(repeating: "a", count: 64), "updatedAt": Date().timeIntervalSince1970 * 1000,
+                "writeVersion": String(repeating: "a", count: 64), "updatedAt": (Date().timeIntervalSince1970 * 1000).rounded(.down),
                 "publicationStatus": "published", "currentRevisionId": "historical-version", "publishedSubmissionId": "historical-version",
                 "latestSubmission": ["_id": "historical-version", "appId": "historical-author-fixture", "submitterUid": "historical-publisher",
                     "revision": 1, "reviewStatus": "approved", "snapshot": record]]) { _, new in new }

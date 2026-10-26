@@ -376,7 +376,13 @@ final class HomeSyncLiveTests: XCTestCase {
         else { return XCTFail("Only the approved fixed synthetic accounts may run this test") }
 
         let directory = cache.appendingPathComponent("HomeSyncLiveValidation-" + UUID().uuidString)
-        let serviceOrigin = try pool.target?.validatedOrigin() ?? URL(string: "http://127.0.0.1:18746")!
+        let production = ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_HOME_PRODUCTION"] == "1"
+        if production {
+            guard pool.target == nil, ProcessInfo.processInfo.environment["YUNLEFUN_OWNED_SIMULATOR_UDID"] == ProcessInfo.processInfo.environment["SIMULATOR_UDID"] else {
+                return XCTFail("Production validation requires the owned simulator and managed identities")
+            }
+        }
+        let serviceOrigin = try pool.target?.validatedOrigin() ?? (production ? CatalogService.productionOrigin : URL(string: "http://127.0.0.1:18746")!)
         let previewSession = try pool.target?.makeSession()
         defer { previewSession?.invalidateAndCancel() }
         let service = HomeSyncService(session: previewSession, origin: serviceOrigin)

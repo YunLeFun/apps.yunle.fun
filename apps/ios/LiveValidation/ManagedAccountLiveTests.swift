@@ -114,6 +114,15 @@ private struct WalletNumericMotionFixture: View {
 @MainActor
 final class ManagedWalletReadLiveTests: XCTestCase {
     func testManagedWalletReadsPaginationAndAccountIsolation() async throws {
+        try await validateManagedWallet(includeMember: true)
+    }
+    func testManagedTwoAccountWalletReadsAndIsolation() async throws {
+        guard ProcessInfo.processInfo.environment["YUNLEFUN_LIVE_WALLET_TWO_ACCOUNTS"] == "1" else {
+            throw XCTSkip("Requires explicit two-account scope; does not validate the membership account")
+        }
+        try await validateManagedWallet(includeMember: false)
+    }
+    private func validateManagedWallet(includeMember: Bool) async throws {
         let env = ProcessInfo.processInfo.environment
         guard env["YUNLEFUN_LIVE_WALLET_READ"] == "1" else { throw XCTSkip("Requires managed wallet accounts") }
         #if !targetEnvironment(simulator)
@@ -129,9 +138,10 @@ final class ManagedWalletReadLiveTests: XCTestCase {
         }
         let data = try Data(contentsOf: input); try FileManager.default.removeItem(at: input)
         let pool = try JSONDecoder().decode(Pool.self, from: data)
-        let expected = ["production-standard": "ylf_prod_standard", "production-member-active": "ylf_prod_member",
+        var expected = ["production-standard": "ylf_prod_standard", "production-member-active": "ylf_prod_member",
                         "production-zero-balance": "ylf_prod_zero"]
-        guard pool.accounts.count == 3, Set(pool.accounts.map(\.id)) == Set(expected.keys),
+        if !includeMember { expected.removeValue(forKey: "production-member-active") }
+        guard pool.accounts.count == expected.count, Set(pool.accounts.map(\.id)) == Set(expected.keys),
               pool.accounts.allSatisfy({ $0.environment == "production" && $0.username == expected[$0.id] && !$0.password.isEmpty }) else {
             return XCTFail("Only the three approved synthetic accounts may run this validation")
         }

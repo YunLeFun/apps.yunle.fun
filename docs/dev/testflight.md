@@ -1,5 +1,7 @@
 # 云乐坊原生 iOS TestFlight 内部测试
 
+> 2026-10-27：已发布 **0.2.0 (4)** 到现有“云乐坊内测组”，完成 `VALID / INTERNAL_ONLY / IN_BETA_TESTING` 验收。归档源码 `cf7fe58`，包含工坊云居快捷切换、登录后工坊访问修复、Liquid Glass 详情与在线站点图标；后续 `4a45cad` / `30d7b13` 仅修正截图测试，不改变 IPA。完整 CI 仍有大字号扫描失败记录，见发布记录。见[发布记录](./testflight-release-20261027.md)与[测试说明](./testflight-notes-0.2.0-4.zh-Hans.md)。下文保留旧候选的历史证据。
+
 > 2026-10-26 源码集成说明：上传前收尾与支持中心 `adb2de8d` 已在候选源码中合并，集成测试 608 通过、4 条件跳过、0 失败，Release 模拟器构建成功。已校验的 0.2.0 (3) IPA 仍归档自 `45b3d28b`，不包含后续支持中心；若上传集成后的源码，须重新归档、导出及 Apple 校验。Duo 和 Sandbox 支付待验项继续保留。
 
 > 2026-10-26：已提交 **0.2.0 (3)**，完成标准 iPhone 候选验证（Duo 专项仍失败）、iCloud capability / 新 profile、Release Archive、仅内部 IPA 导出、共用脚本及 Apple 零错误校验。**未上传或分发**。完整来源、摘要、支付限制和失败记录见[本轮验收](./testflight-preflight-20261026.md)，[中文测试说明](./testflight-notes-0.2.0-3.zh-Hans.md)已准备。已处理最高号为 2；Xcode 导出准备另产生本次构建 3 的 `AWAITING_UPLOAD` 记录及分析元数据（没有 IPA），当前新建下一号为 4；实际上传前先核对并恢复本次记录。

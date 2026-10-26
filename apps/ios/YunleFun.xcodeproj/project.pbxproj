@@ -121,6 +121,7 @@
 		9A32E6C76D4C736FE7E419CF /* ApplicationCacheDownloaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3F9DA602257FA9C93C16A /* ApplicationCacheDownloaderTests.swift */; };
 		9BC08FF648297353C7A6A884 /* CatalogIconStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 287DDD1072E8BBC79E37E324 /* CatalogIconStore.swift */; };
 		9D177D4D4B05B16C8707D8C5 /* WorkshopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3919C9C8281F13A135771E47 /* WorkshopTests.swift */; };
+		9DB608FF2F6FA2E7CC0DCBA0 /* CookExternalLinkLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 262E4E602D6DB2AAEF358FF2 /* CookExternalLinkLiveTests.swift */; };
 		9E4CB2A18B8CBEC87181308C /* NativeVoiceOverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BE42AA9832D09188DB4695 /* NativeVoiceOverTests.swift */; };
 		9EC5FBF1EB48E43D15FC698E /* Community.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE7EF9B75AF44185997988B /* Community.swift */; };
 		9F6C61FC31A864A5355446B2 /* SupportViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178E95E081A6CC47F89C2F53 /* SupportViewTests.swift */; };
@@ -277,6 +278,7 @@
 		208E0C78A488ED3FD3DB510A /* Assistant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assistant.swift; sourceTree = "<group>"; };
 		231DFB369624390113AD7651 /* AccountManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagementView.swift; sourceTree = "<group>"; };
 		251D23F319A863999BC3D62E /* LegacyLocalDataReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyLocalDataReader.swift; sourceTree = "<group>"; };
+		262E4E602D6DB2AAEF358FF2 /* CookExternalLinkLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookExternalLinkLiveTests.swift; sourceTree = "<group>"; };
 		2657198D10E2392D756478FC /* HostAuthorizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationService.swift; sourceTree = "<group>"; };
 		26A33093D728DFEF8FA2A971 /* AssistantStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantStore.swift; sourceTree = "<group>"; };
 		272B234D269D80D84B38F3E6 /* CloudApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudApplication.swift; sourceTree = "<group>"; };
@@ -646,6 +648,7 @@
 		4DF7AA284C3A78AA531280DC /* LiveValidation */ = {
 			isa = PBXGroup;
 			children = (
+				262E4E602D6DB2AAEF358FF2 /* CookExternalLinkLiveTests.swift */,
 				958F203F12172259F4159495 /* CookHostLiveTests.swift */,
 				6E11781B68CFA29A03F01A3D /* HomeSyncLiveTests.swift */,
 				717E85C04C50681D8D783BAC /* HostAuthorizationLiveTests.swift */,
@@ -1285,6 +1288,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9DB608FF2F6FA2E7CC0DCBA0 /* CookExternalLinkLiveTests.swift in Sources */,
 				CE1716C2DB6F36B7371FCE9F /* CookHostLiveTests.swift in Sources */,
 				BC7321977A67B7B0500388E1 /* HomeSyncLiveTests.swift in Sources */,
 				BC7406F16D4DE12D55B8EBCE /* HostAuthorizationLiveTests.swift in Sources */,

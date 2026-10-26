@@ -151,6 +151,7 @@
 		B182472BB3DE904E87F89FF4 /* NativeWebNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF06F6B83794882B6121256F /* NativeWebNavigationTests.swift */; };
 		B29025641135E23C42995517 /* AssistantService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11109FA3231E0B9002791157 /* AssistantService.swift */; };
 		B2BCEE36111224F3A1120C9F /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B193A58BBB520C168766D2 /* Account.swift */; };
+		B36EEE1B019595E991DF69FC /* HomeWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB376826A3317D392418745 /* HomeWorkspaceView.swift */; };
 		B7F304B652EA60375B86DDA5 /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30600513D47FB7C283B23686 /* MeView.swift */; };
 		BB846F590C53202C7201E829 /* ScreenshotFeedbackPromptState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEFEABC67151A2623E93A22E /* ScreenshotFeedbackPromptState.swift */; };
 		BC7321977A67B7B0500388E1 /* HomeSyncLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E11781B68CFA29A03F01A3D /* HomeSyncLiveTests.swift */; };
@@ -435,6 +436,7 @@
 		CA6704E6702EC5E8C9E0F36A /* PurchaseOwnershipJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseOwnershipJournal.swift; sourceTree = "<group>"; };
 		CBD9036B000D0A6C2198DB03 /* ApplicationCacheStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCacheStore.swift; sourceTree = "<group>"; };
 		CC9136AE3091627214FA5E20 /* DeveloperProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperProfile.swift; sourceTree = "<group>"; };
+		CCB376826A3317D392418745 /* HomeWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWorkspaceView.swift; sourceTree = "<group>"; };
 		CD2ACC46A15815DE5714A400 /* NativeRuntimeSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRuntimeSessionTests.swift; sourceTree = "<group>"; };
 		CE3FBCBE02747467F7CA00C5 /* CatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTests.swift; sourceTree = "<group>"; };
 		CEAE1655F9687DB025CE06D2 /* PublishingCandidateLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingCandidateLiveTests.swift; sourceTree = "<group>"; };
@@ -850,6 +852,7 @@
 				EE9CEAAFF9CD97FC484A3957 /* HomeGrid.swift */,
 				6A3AB4A80B4BD642F4ECF189 /* HomeSyncSettingsView.swift */,
 				29EF81B3F893020A70E7CEE4 /* HomeView.swift */,
+				CCB376826A3317D392418745 /* HomeWorkspaceView.swift */,
 				03C5914465A699F79FCBD2B4 /* LegacyMigrationView.swift */,
 			);
 			path = Home;
@@ -1258,6 +1261,7 @@
 				8565A2116AEEA80A7D6E1647 /* HomeSyncService.swift in Sources */,
 				AEEE059EB83EF9755334E51D /* HomeSyncSettingsView.swift in Sources */,
 				FFFBB5BD351434D37648B670 /* HomeView.swift in Sources */,
+				B36EEE1B019595E991DF69FC /* HomeWorkspaceView.swift in Sources */,
 				93BBFBA3433149FEE69A878D /* HostAuthorizationProtocol.swift in Sources */,
 				40A7F12001F7E8B7A63EADB2 /* HostAuthorizationService.swift in Sources */,
 				7DD73F3B4B1ED19F5A378AE4 /* InAppWebViewPlugin.swift in Sources */,

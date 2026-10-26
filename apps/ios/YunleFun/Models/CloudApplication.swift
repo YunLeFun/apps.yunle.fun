@@ -118,7 +118,17 @@ struct CloudApplication: Codable, Identifiable, Hashable {
         return accessWorkshopID.map { CatalogService.productionOrigin.appendingPathComponent("w/\($0)") }
             ?? CatalogService.productionOrigin.appendingPathComponent("app/\(publicKey)")
     }
-    var canRequestWorkshopLaunch: Bool { accessWorkshopID != nil && launchRestriction == nil && launchURL != nil }
+    /// Workshop membership is verified with the active account before launch.
+    /// A login requirement is satisfied at that boundary, while other rights
+    /// still need their own grant even when login_required is the first label.
+    var workshopLaunchRestriction: String? {
+        if isUnavailable == true { return "暂不可用" }
+        if let accessMode, !["public", "login_required"].contains(accessMode) { return "需要邀请" }
+        if requiresMembership == true { return "会员专属" }
+        if let coinCost, coinCost > 0 { return "\(coinCost) 云币" }
+        return nil
+    }
+    var canRequestWorkshopLaunch: Bool { accessWorkshopID != nil && workshopLaunchRestriction == nil && launchURL != nil }
 
 
     var displayRating: Double? {

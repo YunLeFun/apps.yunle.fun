@@ -20,6 +20,10 @@ final class MyWorkshopsStore: ObservableObject {
     var hasLoaded: Bool { loadedBoundary.map(access.isCurrent) ?? false }
     var management: WorkshopManagement? { hasLoaded ? owned : nil }
     var joined: [PersonalWorkshop] { hasLoaded ? joinedRecords : [] }
+    var switchableWorkshops: [PersonalWorkshop] {
+        var seen = Set<String>()
+        return ([management?.workshop].compactMap { $0 } + joined).filter { seen.insert($0.id).inserted }
+    }
     func refresh() async {
         guard !isWriting else { return }
         let boundary = access.boundary, requestID = UUID()

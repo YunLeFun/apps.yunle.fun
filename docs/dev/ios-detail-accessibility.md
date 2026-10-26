@@ -1,5 +1,15 @@
 # 应用详情的动态字号
 
+## 工坊详情与 Liquid Glass · 2026-10-27
+
+详情首区将应用身份和操作分开排列，保留完整名称；辅助字号下图标置于名称上方，操作按宽度横排或纵排。工坊应用显示简短的宿主登录状态，VoiceOver 提示打开时确认工坊访问权限。“应用数据”和“应用下载缓存”合并为“存储与数据”分组。
+
+iOS 26+ 的主要 / 次要操作使用系统 `.glassProminent` / `.glass` 胶囊按钮，并置于 `GlassEffectContainer`；较早版本使用原生 bordered 按钮。导航与分享继续使用系统组件，正文保持清晰的分组内容层。实现遵循 Apple 的 [Adopting Liquid Glass](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass) 和 [Applying Liquid Glass to custom views](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views)。
+
+本轮样例使用实际 `ApplicationDetailView` 和内存登录账号，应用网址为 `example.invalid`；不代表真实管理后台或真机访问已验收。仍保留 320 × 800pt、最大辅助字号下首区及主要操作必须同时可见的几何断言。
+
+Xcode 27.1 / iOS 27.0 模拟器的相关 39 项测试全部通过，其中详情布局 7 项。最大辅助字号下，长名称样例首区高 654.7pt，工坊管理后台样例高 591pt，均小于 684pt 可见高度。已核对导出的浅深色与最大字号截图；完整 VoiceOver、减少透明度 / 动态效果和真机矩阵尚未执行。
+
 详情继续使用原生 NavigationStack、List、系统按钮和语义字体，最低 iOS 16。辅助字号下将图标放在名称 / 作者上方，让正文使用整行宽度；标准字号保留并排布局。使用系统 [AnyLayout](https://developer.apple.com/documentation/swiftui/anylayout) 切换排列，操作与页面状态沿用同一实现。
 
 “获取 / 试用”使用 [ViewThatFits](https://developer.apple.com/documentation/swiftui/viewthatfits) 按实际宽度选择横排或纵排。按钮仍执行原有获取、权限核验和运行时操作，没有缩小字体、截断名称或用图片替代正文。

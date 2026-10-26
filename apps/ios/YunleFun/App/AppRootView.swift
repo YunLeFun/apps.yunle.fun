@@ -80,7 +80,7 @@ struct AppRootView: View {
 
     private var home: some View {
         NavigationStack {
-            HomeView { selectedTab = .workshop }
+            HomeWorkspaceView(accounts: accounts) { selectedTab = .workshop }
                 .id(accounts.identityGeneration)
                 .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
         }

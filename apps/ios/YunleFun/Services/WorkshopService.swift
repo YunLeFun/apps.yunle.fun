@@ -133,10 +133,10 @@ struct WorkshopLaunchAuthorization {
     let accounts: IdentityScopedAccountAuthorizing
     var service: WorkshopServing = WorkshopService()
     func resolve(_ app: CloudApplication, boundary: AccountRequestBoundary) async throws -> CloudApplication {
-        guard let id = app.accessWorkshopID, app.launchRestriction == nil else { throw WorkshopError.forbidden }
+        guard let id = app.accessWorkshopID, app.workshopLaunchRestriction == nil else { throw WorkshopError.forbidden }
         let access = AccountRequestAccess<WorkshopError>(accounts: accounts)
         let page = try await access.perform(boundary: boundary) { try await service.page(id: id, identity: $0) }
-        guard page.permitsApps, var current = page.apps.first(where: { $0.id == app.id }), current.launchRestriction == nil,
+        guard page.permitsApps, var current = page.apps.first(where: { $0.id == app.id }), current.workshopLaunchRestriction == nil,
               current.launchURL != nil else { throw WorkshopError.forbidden }
         current.accessWorkshopID = id
         return current

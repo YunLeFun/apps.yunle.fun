@@ -133,6 +133,7 @@ final class WorkshopStoreTests: XCTestCase {
         let calls = await service.privateReads
         XCTAssertEqual(calls, 0); XCTAssertTrue(accounts.refreshes.isEmpty)
         XCTAssertNil(store.management); XCTAssertTrue(store.joined.isEmpty); XCTAssertFalse(store.hasLoaded)
+        XCTAssertTrue(store.switchableWorkshops.isEmpty)
     }
     func testLateManagementLoadCannotAppearInAnotherAccount() async {
         let accounts = WorkshopAccounts("owner"), gate = WorkshopGate(), service = WorkshopFixture(loadGate: gate)
@@ -142,6 +143,7 @@ final class WorkshopStoreTests: XCTestCase {
         accounts.select("another")
         await gate.open(); await loading.value
         XCTAssertNil(store.management); XCTAssertTrue(store.joined.isEmpty); XCTAssertFalse(store.hasLoaded)
+        XCTAssertTrue(store.switchableWorkshops.isEmpty)
     }
     func testCoalescedAccountSwitchInvalidatesBothPrivateRowsAndConfirmations() async throws {
         let accounts = WorkshopAccounts("owner"), service = WorkshopFixture(), store = MyWorkshopsStore(accounts: accounts, service: service)
@@ -149,6 +151,7 @@ final class WorkshopStoreTests: XCTestCase {
         let initial = try XCTUnwrap(store.management), generation = accounts.identityGeneration
         accounts.select("another"); accounts.select("owner")
         XCTAssertNil(store.management); XCTAssertTrue(store.joined.isEmpty)
+        XCTAssertTrue(store.switchableWorkshops.isEmpty)
         do { try await store.decide(member: initial.pending[0], action: .approve, generation: generation); XCTFail() }
         catch { XCTAssertEqual(error as? WorkshopError, .identityChanged) }
         var draft = WorkshopDraft(); draft.name = "旧表单"
@@ -216,6 +219,17 @@ final class WorkshopStoreTests: XCTestCase {
         XCTAssertEqual(entry.accessWorkshopID, "ABC234"); XCTAssertEqual(entry.name, app.name)
         XCTAssertFalse(entry.canOpenAsGuest)
     }
+    func testWorkspaceChoicesIncludeOwnedAndJoinedWorkshopsOnce() async {
+        let accounts = WorkshopAccounts("owner"), service = WorkshopFixture()
+        let store = MyWorkshopsStore(accounts: accounts, service: service)
+        await store.refresh()
+        XCTAssertEqual(store.switchableWorkshops.map(\.id), ["ABC234"], "The owned workshop must not repeat if joined also includes it")
+        XCTAssertEqual(store.switchableWorkshops.first?.ownerUid, "owner")
+        accounts.select("another")
+        XCTAssertTrue(store.switchableWorkshops.isEmpty, "Do not offer a previous account's private workshop")
+        XCTAssertNotEqual(HomeWorkspaceView.selectionKey(userID: "owner"), HomeWorkspaceView.selectionKey(userID: "another"))
+        XCTAssertNotEqual(HomeWorkspaceView.selectionKey(userID: nil), HomeWorkspaceView.selectionKey(userID: "owner"))
+    }
     func testWorkshopLaunchUsesFreshURLAndRejectsRevokedOrPaidAccess() async throws {
         let accounts = WorkshopAccounts("owner")
         var cached = workshopApp(); cached.accessWorkshopID = "ABC234"; cached.websiteUrl = "https://example.invalid/old"
@@ -227,9 +241,53 @@ final class WorkshopStoreTests: XCTestCase {
             catch { XCTAssertEqual(error as? WorkshopError, .forbidden) }
         }
     }
+    func testLoggedInWorkshopMemberCanOpenLoginRequiredApplication() async throws {
+        let accounts = WorkshopAccounts("owner")
+        var cached = workshopApp(); cached.accessWorkshopID = "ABC234"; cached.accessMode = "login_required"
+        XCTAssertTrue(cached.canRequestWorkshopLaunch, "A login requirement must offer an action that verifies the signed-in workshop member")
+        let boundary = AccountRequestBoundary(uid: "owner", generation: accounts.identityGeneration)
+        for access in [WorkshopAccess.active, .owner] {
+            let current = try await WorkshopLaunchAuthorization(accounts: accounts, service: WorkshopFixture(initialAccess: access, accessMode: "login_required"))
+                .resolve(cached, boundary: boundary)
+            XCTAssertEqual(current.accessMode, "login_required")
+            XCTAssertEqual(current.launchURL?.absoluteString, "https://example.invalid/current")
+            XCTAssertEqual(current.accessWorkshopID, "ABC234")
+            XCTAssertFalse(current.canOpenAsGuest)
+        }
+        XCTAssertEqual(accounts.refreshes, [false, false], "Opening must verify the active identity with the service")
+    }
+    func testWorkshopLoginDoesNotGrantOtherRightsOrRevokedMembership() async throws {
+        let accounts = WorkshopAccounts("owner")
+        var cached = workshopApp(); cached.accessWorkshopID = "ABC234"; cached.accessMode = "login_required"
+        let boundary = AccountRequestBoundary(uid: "owner", generation: accounts.identityGeneration)
+        for service in [WorkshopFixture(initialAccess: .none, accessMode: "login_required"),
+                        WorkshopFixture(initialAccess: .blocked, accessMode: "login_required"),
+                        WorkshopFixture(disabled: true, accessMode: "login_required"),
+                        WorkshopFixture(paid: true, accessMode: "login_required"),
+                        WorkshopFixture(membershipRequired: true, accessMode: "login_required"),
+                        WorkshopFixture(accessMode: "invite_only"), WorkshopFixture(accessMode: "unknown")] {
+            do { _ = try await WorkshopLaunchAuthorization(accounts: accounts, service: service).resolve(cached, boundary: boundary); XCTFail("Login alone cannot grant other rights") }
+            catch { XCTAssertEqual(error as? WorkshopError, .forbidden) }
+        }
+        cached.coinCost = 10
+        XCTAssertEqual(cached.workshopLaunchRestriction, "10 云币")
+        XCTAssertFalse(cached.canRequestWorkshopLaunch)
+        cached.requiresMembership = true
+        XCTAssertEqual(cached.workshopLaunchRestriction, "会员专属")
+    }
+    func testGuestCannotUseAWorkshopLoginRequirementAsAuthorization() async throws {
+        let accounts = WorkshopAccounts(nil)
+        var app = workshopApp(); app.accessWorkshopID = "ABC234"; app.accessMode = "login_required"
+        do {
+            _ = try await WorkshopLaunchAuthorization(accounts: accounts, service: WorkshopFixture(accessMode: "login_required"))
+                .resolve(app, boundary: .init(uid: nil, generation: accounts.identityGeneration))
+            XCTFail("A guest must never receive a launch proof")
+        } catch { XCTAssertEqual(error as? WorkshopError, .identityChanged) }
+        XCTAssertTrue(accounts.refreshes.isEmpty)
+    }
     func testAccountSwitchWhileCheckingWorkshopPermissionCancelsLaunchProof() async throws {
         let accounts = WorkshopAccounts("owner"), gate = WorkshopGate(), service = WorkshopFixture(pageGate: gate)
-        var cached = workshopApp(); cached.accessWorkshopID = "ABC234"
+        var cached = workshopApp(); cached.accessWorkshopID = "ABC234"; cached.accessMode = "login_required"
         let boundary = AccountRequestBoundary(uid: "owner", generation: accounts.identityGeneration)
         let pending = Task { try await WorkshopLaunchAuthorization(accounts: accounts, service: service).resolve(cached, boundary: boundary) }
         await fulfillment(of: [gate.entered], timeout: 3)
@@ -263,13 +321,15 @@ private actor WorkshopFixture: WorkshopServing {
     var writes = 0
     let loadGate: WorkshopGate?, writeGate: WorkshopGate?, pageGate: WorkshopGate?
     let failWrites: Bool, failPageAfterWrite: Bool, initialAccess: WorkshopAccess, disabled: Bool, paid: Bool, membershipRequired: Bool
+    let accessMode: String
     var unauthorizedPageOnce: Bool
     init(loadGate: WorkshopGate? = nil, writeGate: WorkshopGate? = nil, pageGate: WorkshopGate? = nil, failWrites: Bool = false,
          initialAccess: WorkshopAccess = .active, failPageAfterWrite: Bool = false, unauthorizedPageOnce: Bool = false,
-         disabled: Bool = false, paid: Bool = false, membershipRequired: Bool = false) {
+         disabled: Bool = false, paid: Bool = false, membershipRequired: Bool = false, accessMode: String = "public") {
         self.loadGate = loadGate; self.writeGate = writeGate; self.pageGate = pageGate; self.failWrites = failWrites
         self.initialAccess = initialAccess; self.failPageAfterWrite = failPageAfterWrite; self.unauthorizedPageOnce = unauthorizedPageOnce
         self.disabled = disabled; self.paid = paid; self.membershipRequired = membershipRequired
+        self.accessMode = accessMode
     }
     func mine(identity: AuthorizedAccount) async throws -> WorkshopManagement? {
         privateReads += 1; await loadGate?.wait()
@@ -280,9 +340,9 @@ private actor WorkshopFixture: WorkshopServing {
         await pageGate?.wait()
         if unauthorizedPageOnce { unauthorizedPageOnce = false; throw WorkshopError.unauthorized }
         if failPageAfterWrite && writes > 0 { throw WorkshopError.unavailable }
-        var app = workshopApp(); app.coinCost = paid ? 10 : nil; app.requiresMembership = membershipRequired
+        var app = workshopApp(); app.coinCost = paid ? 10 : nil; app.requiresMembership = membershipRequired; app.accessMode = accessMode
         app.accessWorkshopID = id
-        return WorkshopPage(surface: "workshop", access: initialAccess, workshop: workshop(status: disabled ? .disabled : .active), apps: initialAccess == .active && !disabled ? [app] : [])
+        return WorkshopPage(surface: "workshop", access: initialAccess, workshop: workshop(status: disabled ? .disabled : .active), apps: (initialAccess == .active || initialAccess == .owner) && !disabled ? [app] : [])
     }
     func create(draft: WorkshopDraft, identity: AuthorizedAccount) async throws -> PersonalWorkshop { try await update(id: "ABC234", draft: draft, identity: identity) }
     func update(id: String, draft: WorkshopDraft, identity: AuthorizedAccount) async throws -> PersonalWorkshop {

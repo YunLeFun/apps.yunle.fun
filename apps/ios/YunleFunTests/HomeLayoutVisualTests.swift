@@ -6,6 +6,94 @@ import XCTest
 
 @MainActor
 final class HomeLayoutVisualTests: XCTestCase {
+    func testWorkshopHomeShowsPrivateAppsWithoutInstallingThem() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), workshopService: HomeWorkspaceServiceFixture(), workspaceID: "ABC234")
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-private-light", containing: "支持中心", test: self)
+        XCTAssertTrue(text.contains("云乐坊私有工坊")); XCTAssertTrue(text.contains("管理后台")); XCTAssertTrue(text.contains("支持中心"))
+        XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
+        XCTAssertTrue(fixture.runtime.applications.isEmpty)
+    }
+
+    func testWorkspacePickerShowsPersonalAndAuthorizedWorkshops() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), workshopService: HomeWorkspaceServiceFixture(),
+            workspaceID: "ABC234", workspacePicker: true)
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-picker", containing: "灵感工坊", test: self)
+        XCTAssertTrue(text.contains("我的云居")); XCTAssertTrue(text.contains("云乐坊私有工坊")); XCTAssertTrue(text.contains("灵感工坊"))
+    }
+
+    func testWorkspaceSwitcherKeepsPersonalHomeReachableAtLargestText() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), size: .accessibility5, width: 320, height: 800,
+            workshopService: HomeWorkspaceServiceFixture())
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-personal-largest-text", containing: "去工坊看看", scrollToFind: true, test: self)
+        XCTAssertTrue(text.contains("去工坊看看"))
+    }
+
+    func testWorkshopHomeInDark() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), dark: true,
+            workshopService: HomeWorkspaceServiceFixture(), workspaceID: "ABC234")
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-private-dark", containing: "支持中心", test: self)
+        XCTAssertTrue(text.contains("管理后台")); XCTAssertTrue(text.contains("支持中心"))
+    }
+
+    func testWorkshopHomeCanScrollAtLargestText() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), size: .accessibility5, dark: true, width: 320, height: 800,
+            workshopService: HomeWorkspaceServiceFixture(), workspaceID: "ABC234")
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-largest-text", containing: "support.yunle.fun", scrollToFind: true, test: self)
+        XCTAssertTrue(text.contains("supportyunlefun"))
+        XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
+    }
+
+    func testSwitchingWorkshopsAndReturningToPersonalHomeKeepsLibrarySeparate() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), workshopService: HomeWorkspaceServiceFixture(), workspaceID: "ABC234")
+        defer { fixture.close() }
+        _ = try await fixture.readScreen(named: "home-workspace-before-switch", containing: "支持中心", test: self)
+        fixture.workspaceDefaults.set("DEF567", forKey: HomeWorkspaceView.selectionKey(userID: "home-state-user"))
+        let other = try await fixture.readScreen(named: "home-workspace-after-switch", containing: "灵感笔记", test: self)
+        XCTAssertTrue(other.contains("灵感笔记")); XCTAssertFalse(other.contains("管理后台")); XCTAssertFalse(other.contains("支持中心"))
+        fixture.workspaceDefaults.set("", forKey: HomeWorkspaceView.selectionKey(userID: "home-state-user"))
+        let personal = try await fixture.readScreen(named: "home-workspace-personal", containing: "把喜欢的应用带回云居", test: self)
+        XCTAssertTrue(personal.contains("我的云居")); XCTAssertTrue(personal.contains("把喜欢的应用带回云居"))
+        XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
+        XCTAssertTrue(fixture.runtime.applications.isEmpty)
+    }
+
+    func testRestoredMissingWorkshopReturnsToPersonalHome() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(), workshopService: HomeWorkspaceServiceFixture(), workspaceID: "XYZ234")
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-removed", containing: "把喜欢的应用带回云居", test: self)
+        XCTAssertTrue(text.contains("我的云居"))
+        XCTAssertEqual(fixture.workspaceDefaults.string(forKey: HomeWorkspaceView.selectionKey(userID: "home-state-user")), "")
+    }
+
+    func testWorkshopHomeDoesNotShowPrivateAppsWhenAccessIsRevoked() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(),
+            workshopService: HomeWorkspaceServiceFixture(access: .none), workspaceID: "ABC234")
+        defer { fixture.close() }
+        let text = try await fixture.readScreen(named: "home-workspace-revoked", containing: "暂不能访问这个工坊", test: self)
+        XCTAssertTrue(text.contains("暂不能访问这个工坊"))
+        XCTAssertFalse(text.contains("管理后台")); XCTAssertFalse(text.contains("支持中心"))
+    }
+
+    func testLateWorkshopResponseCannotReplaceTheNewSelection() async throws {
+        let gate = HomeStateLoadGate()
+        let fixture = try await HomeStateFixture(service: HomeStateService(),
+            workshopService: HomeWorkspaceServiceFixture(firstPageGate: gate), workspaceID: "ABC234")
+        defer { fixture.close(); Task { await gate.open() } }
+        try await gate.waitUntilEntered()
+        fixture.workspaceDefaults.set("DEF567", forKey: HomeWorkspaceView.selectionKey(userID: "home-state-user"))
+        let text = try await fixture.readScreen(named: "home-workspace-switch-while-loading", containing: "灵感笔记", test: self)
+        XCTAssertTrue(text.contains("灵感笔记"))
+        await gate.open()
+        let after = try await fixture.readScreen(named: "home-workspace-late-response", containing: "灵感笔记", test: self)
+        XCTAssertTrue(after.contains("灵感笔记")); XCTAssertFalse(after.contains("管理后台")); XCTAssertFalse(after.contains("支持中心"))
+        XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
+    }
+
     func testCompactHomeWithStandardText() async throws {
         try await render(size: .large, dark: false)
     }
@@ -211,9 +299,13 @@ private final class HomeStateFixture {
     let library: HomeLibrary
     let runtime: NativeWebRuntime
     let sync: HomeSyncCoordinator
+    let workspaceDefaults: UserDefaults
+    private let defaultsSuite: String
+    private let iconFixtureHosts: Set<String>
 
     init(service: HomeStateService, size: DynamicTypeSize = .large, dark: Bool = false,
-         width: CGFloat = 390, height: CGFloat = 844) async throws {
+         width: CGFloat = 390, height: CGFloat = 844,
+         workshopService: WorkshopServing? = nil, workspaceID: String = "", workspacePicker: Bool = false) async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let authHost = UUID().uuidString.lowercased() + ".home-state.test"
         let auth = AuthHTTPFixture(replies: [(200, #"{"sub":"home-state-user","status":"ACTIVE"}"#)])
@@ -231,7 +323,37 @@ private final class HomeStateFixture {
         library.setAutoSyncEnabled(false)
         let runtime = NativeWebRuntime()
         let sync = HomeSyncCoordinator(accounts: accounts, library: library, service: service, monitorNetwork: false)
-        let content = NavigationStack { HomeView {} }
+        let defaultsSuite = "HomeWorkspaceTests." + UUID().uuidString
+        let workspaceDefaults = try XCTUnwrap(UserDefaults(suiteName: defaultsSuite))
+        workspaceDefaults.set(workspaceID, forKey: HomeWorkspaceView.selectionKey(userID: "home-state-user"))
+        var iconPipeline = ApplicationImagePipeline.shared
+        var iconHosts = Set<String>()
+        if workshopService != nil {
+            let assets = CatalogIconAssets.byOrigin.values
+            let urls = assets.compactMap { URL(string: $0.url) }
+            let fixture = IconHTTPFixture(replies: Dictionary(urls.map { ($0.path, (200, iconTestSVG, nil as Int?)) }, uniquingKeysWith: { first, _ in first }))
+            iconHosts = Set(urls.compactMap(\.host))
+            for host in iconHosts { IconHTTPProtocol.register(host, fixture) }
+            let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [IconHTTPProtocol.self]
+            iconPipeline = ApplicationImagePipeline(session: URLSession(configuration: config))
+            for asset in assets {
+                let candidate = ApplicationIconCandidate(url: URL(string: asset.url)!, role: asset.role, revision: asset.revision)
+                _ = try await iconPipeline.load([candidate], pixelSize: Int(HomeGridMetrics.iconSize * UIScreen.main.scale))
+            }
+        }
+        let content = Group {
+            if workspacePicker, let workshopService {
+                HomeWorkspacePicker(accounts: accounts, workshops: MyWorkshopsStore(accounts: accounts, service: workshopService),
+                    selectedID: Binding(get: { workspaceDefaults.string(forKey: HomeWorkspaceView.selectionKey(userID: accounts.user?.id)) ?? "" },
+                                        set: { workspaceDefaults.set($0, forKey: HomeWorkspaceView.selectionKey(userID: accounts.user?.id)) }))
+            } else {
+                NavigationStack {
+                    if let workshopService {
+                        HomeWorkspaceView(accounts: accounts, service: workshopService, defaults: workspaceDefaults, iconPipeline: iconPipeline, browse: {})
+                    } else { HomeView {} }
+                }
+            }
+        }
             .environmentObject(catalog).environmentObject(library).environmentObject(runtime)
             .environmentObject(accounts).environmentObject(sync)
             .environmentObject(WalletStore(accounts: accounts, service: AssistantWalletFixture(member: false))).environmentObject(AssistantRolloutStore())
@@ -242,6 +364,8 @@ private final class HomeStateFixture {
         self.directory = directory; self.authHost = authHost
         self.accounts = accounts; self.catalog = catalog; self.library = library
         self.runtime = runtime; self.sync = sync; self.controller = controller
+        self.workspaceDefaults = workspaceDefaults; self.defaultsSuite = defaultsSuite
+        self.iconFixtureHosts = iconHosts
         previous = scene.windows.first(where: \.isKeyWindow)
         window = UIWindow(windowScene: scene)
         window.frame = CGRect(x: 0, y: 0, width: width, height: height)
@@ -272,9 +396,12 @@ private final class HomeStateFixture {
                let scroll = scrollView(in: controller.view) {
                 let bottom = max(-scroll.adjustedContentInset.top,
                     scroll.contentSize.height - scroll.bounds.height + scroll.adjustedContentInset.bottom)
-                guard scroll.contentOffset.y < bottom else { break }
-                let step = max(100, (scroll.bounds.height - scroll.adjustedContentInset.top - scroll.adjustedContentInset.bottom) / 2)
-                scroll.setContentOffset(CGPoint(x: 0, y: min(scroll.contentOffset.y + step, bottom)), animated: false)
+                // A loading row can initially be the bottom of a short list.
+                // Keep waiting for the requested content until the deadline.
+                if scroll.contentOffset.y < bottom {
+                    let step = max(100, (scroll.bounds.height - scroll.adjustedContentInset.top - scroll.adjustedContentInset.bottom) / 2)
+                    scroll.setContentOffset(CGPoint(x: 0, y: min(scroll.contentOffset.y + step, bottom)), animated: false)
+                }
             }
         } while !Self.normalized(lines.joined()).contains(Self.normalized(expected)) && Date() < deadline
         if let image {
@@ -367,6 +494,8 @@ private final class HomeStateFixture {
         window.isHidden = true; window.rootViewController = nil; previous?.makeKey()
         UIView.setAnimationsEnabled(animationsWereEnabled)
         AuthHTTPProtocol.unregister(authHost)
+        workspaceDefaults.removePersistentDomain(forName: defaultsSuite)
+        iconFixtureHosts.forEach(IconHTTPProtocol.unregister)
         try? FileManager.default.removeItem(at: directory)
     }
 
@@ -379,6 +508,39 @@ private final class HomeStateFixture {
         if let scroll = view as? UIScrollView { return scroll }
         return view.subviews.lazy.compactMap { self.scrollView(in: $0) }.first
     }
+}
+
+private struct HomeWorkspaceServiceFixture: WorkshopServing {
+    var access: WorkshopAccess = .active
+    var firstPageGate: HomeStateLoadGate?
+    private func workshop(_ id: String) -> PersonalWorkshop {
+        PersonalWorkshop(id: id, ownerName: "云乐坊", ownerAvatar: nil,
+            name: id == "ABC234" ? "云乐坊私有工坊" : "灵感工坊", description: nil, joinPolicy: .closed, status: .active, ownerUid: "home-state-user")
+    }
+    func mine(identity: AuthorizedAccount) async throws -> WorkshopManagement? {
+        WorkshopManagement(workshop: workshop("ABC234"), pending: [], guests: [], blocked: [])
+    }
+    func joined(identity: AuthorizedAccount) async throws -> [PersonalWorkshop] { [workshop("ABC234"), workshop("DEF567")] }
+    func page(id: String, identity: AuthorizedAccount?) async throws -> WorkshopPage {
+        guard identity?.userID == "home-state-user" else { throw WorkshopError.unauthorized }
+        if id == "ABC234" { await firstPageGate?.wait() }
+        let apps: [CloudApplication]
+        if id == "ABC234" {
+            apps = [CloudApplication(id: "workspace-admin", name: "管理后台", websiteUrl: "https://admin.yunle.fun", emoji: "🛠️",
+                        accessMode: "login_required", audience: "workshop", accessWorkshopID: id),
+                    CloudApplication(id: "workspace-support", name: "支持中心", websiteUrl: "https://support.yunle.fun", emoji: "💬",
+                        accessMode: "login_required", audience: "workshop", accessWorkshopID: id)]
+        } else {
+            apps = [CloudApplication(id: "workspace-notes", name: "灵感笔记", websiteUrl: "https://example.invalid", emoji: "📝",
+                        accessMode: "public", audience: "workshop", accessWorkshopID: id)]
+        }
+        return WorkshopPage(surface: "workshop", access: access, workshop: workshop(id), apps: access == .active ? apps : [])
+    }
+    func create(draft: WorkshopDraft, identity: AuthorizedAccount) async throws -> PersonalWorkshop { throw WorkshopError.forbidden }
+    func update(id: String, draft: WorkshopDraft, identity: AuthorizedAccount) async throws -> PersonalWorkshop { throw WorkshopError.forbidden }
+    func join(id: String, identity: AuthorizedAccount) async throws -> WorkshopJoinResult { throw WorkshopError.forbidden }
+    func leave(id: String, identity: AuthorizedAccount) async throws -> WorkshopMembership { throw WorkshopError.forbidden }
+    func decide(id: String, member: WorkshopMembership, action: WorkshopDecision, identity: AuthorizedAccount) async throws -> WorkshopMembership { throw WorkshopError.forbidden }
 }
 
 private actor HomeStateService: HomeSyncServing {

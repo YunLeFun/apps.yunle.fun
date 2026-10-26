@@ -27,41 +27,50 @@ struct ApplicationDetailView: View {
     private var content: some View {
         List {
             Section {
-                let layout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
-                    : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
-                layout {
-                    ApplicationIcon(application: app, size: 84)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(app.name).font(.title2.bold())
-                        Text(app.author).font(.subheadline).foregroundStyle(.secondary)
-                        action
-                        if addedHere && library.contains(app) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).accessibilityHidden(true)
-                                Text("已加入云居").foregroundStyle(.secondary)
-                            }
-                            .font(.footnote)
-                            .accessibilityElement(children: .combine)
-                            .transition(.opacity)
-                            .accessibilityIdentifier("detail.added")
+                VStack(alignment: .leading, spacing: 16) {
+                    let layout = dynamicTypeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+                        : AnyLayout(HStackLayout(alignment: .center, spacing: 16))
+                    layout {
+                        ApplicationIcon(application: app, size: 80)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(app.name).font(.title2.bold()).fixedSize(horizontal: false, vertical: true)
+                            Text(app.author).font(.subheadline).foregroundStyle(.secondary)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .animation(Motion.standard(reduceMotion: reduceMotion), value: library.contains(app))
-                    .animation(Motion.fade, value: runtime.verifyingScopedApplicationID)
+                    if app.canRequestWorkshopLaunch {
+                        Label(accounts.user?.isUsable == true ? "已登录" : "需要登录",
+                              systemImage: accounts.user?.isUsable == true ? "person.crop.circle.badge.checkmark" : "person.crop.circle")
+                            .font(.footnote).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityHint("打开时确认工坊访问权限")
+                            .accessibilityIdentifier("detail.workshop-access")
+                    }
+                    action
+                    if addedHere && library.contains(app) {
+                        Label("已加入云居", systemImage: "checkmark.circle.fill")
+                            .font(.footnote).foregroundStyle(.secondary)
+                            .transition(.opacity).accessibilityIdentifier("detail.added")
+                    }
                 }
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
+                .animation(Motion.standard(reduceMotion: reduceMotion), value: library.contains(app))
+                .animation(Motion.fade, value: runtime.verifyingScopedApplicationID)
                 .haptic(.success, trigger: library.contains(app)) { old, new in !old && new }
             }
+            .listRowBackground(Color.clear)
             Section("关于这个应用") { Text(app.summary).textSelection(.enabled) }
-            if #available(iOS 17, *) {
-                Section {
+            Section("存储与数据") {
+                if #available(iOS 17, *) {
                     NavigationLink {
                         WebProfileRecoveryView(application: app)
                     } label: { Label("应用数据", systemImage: "archivebox") }
                     .accessibilityIdentifier("detail.web-profiles")
                 }
+                NavigationLink {
+                    ApplicationCacheView(application: app, store: runtime.applicationCache)
+                } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
             }
             if app.accessWorkshopID == nil && app.accessOwnerID == nil && app.personalMarketOwnerLogin == nil {
                 Section { NavigationLink("评分与评价") { ApplicationReviewsView(application: app) } }
@@ -74,11 +83,6 @@ struct ApplicationDetailView: View {
                         NavigationLink("查看云乐坊版本") { ApplicationDetailView(application: marketVersion) }
                     }
                 }
-            }
-            Section {
-                NavigationLink {
-                    ApplicationCacheView(application: app, store: runtime.applicationCache)
-                } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
             }
             Section("信息") {
                 LabeledContent("分类", value: app.browseCategory)
@@ -118,7 +122,7 @@ struct ApplicationDetailView: View {
 
     @ViewBuilder private var action: some View {
         if let menu = runtimeMenu, menu.represents(app) {
-            Button("返回应用", action: menu.dismiss).buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+            Button("返回应用", action: menu.dismiss).modifier(DetailActionStyle(prominent: true))
         } else if app.personalMarketOwnerLogin != nil && !app.canOpenAsGuest {
             VStack(alignment: .leading, spacing: 6) {
                 Label(app.accessLabel ?? "暂时无法打开", systemImage: "lock").font(.subheadline)
@@ -127,32 +131,72 @@ struct ApplicationDetailView: View {
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
             }
-        } else if let condition = app.accessOwnerID != nil ? app.ownerPreviewRestriction : (app.accessWorkshopID != nil ? app.launchRestriction : (app.isUnavailable == true ? app.launchRestriction : nil)) {
+        } else if let condition = app.accessOwnerID != nil ? app.ownerPreviewRestriction : (app.accessWorkshopID != nil ? app.workshopLaunchRestriction : (app.isUnavailable == true ? app.launchRestriction : nil)) {
             Label(condition, systemImage: "lock").font(.subheadline).foregroundStyle(.secondary)
         } else if app.launchURL == nil {
             Text("暂时无法打开").font(.subheadline).foregroundStyle(.secondary)
         } else {
-            ViewThatFits(in: .horizontal) {
-                HStack { acquisitionActions }
-                VStack(alignment: .leading) { acquisitionActions }
+            if #available(iOS 26, *) {
+                GlassEffectContainer(spacing: 12) { adaptiveAcquisitionActions }
+            } else {
+                adaptiveAcquisitionActions
             }
+        }
+    }
+
+    private var adaptiveAcquisitionActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) { acquisitionActions }
+            VStack(alignment: .leading, spacing: 12) { acquisitionActions }
         }
     }
 
     @ViewBuilder private var acquisitionActions: some View {
         if runtime.verifyingScopedApplicationID == app.id { ProgressView("正在确认访问权限") }
+        else if app.canRequestWorkshopLaunch {
+            Button("打开") { runtime.open(app, catalog: catalog, library: library) }
+                .modifier(DetailActionStyle(prominent: true))
+                .accessibilityIdentifier("detail.open")
+            if !library.contains(app) {
+                Button("加入云居") { addedHere = true; library.add(app) }
+                    .modifier(DetailActionStyle(prominent: false))
+                    .accessibilityIdentifier("detail.acquire")
+            }
+        }
         else if library.contains(app) {
             Button("打开") { runtime.open(app, catalog: catalog, library: library) }
-                .buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+                .modifier(DetailActionStyle(prominent: true))
+                .accessibilityIdentifier("detail.open")
         } else {
             Button("获取") {
                 if app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil { addedHere = true; library.add(app) }
                 else { addedHere = true; runtime.acquire(app, intent: .install, catalog: catalog, library: library) }
-            }.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+            }.modifier(DetailActionStyle(prominent: true))
+                .accessibilityIdentifier("detail.acquire")
         }
-        if !library.contains(app) && runtime.verifyingScopedApplicationID != app.id && (app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil) {
-            Button("试用") { runtime.open(app, catalog: catalog, library: library) }.buttonStyle(.bordered).buttonBorderShape(.capsule)
+        if !app.canRequestWorkshopLaunch && !library.contains(app) && runtime.verifyingScopedApplicationID != app.id && (app.canOpenAsGuest || app.accessWorkshopID != nil || app.accessOwnerID != nil) {
+            Button("试用") { runtime.open(app, catalog: catalog, library: library) }
+                .modifier(DetailActionStyle(prominent: false))
+                .accessibilityIdentifier("detail.try")
         }
+    }
+}
+
+private struct DetailActionStyle: ViewModifier {
+    let prominent: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    func body(content: Content) -> some View {
+        Group {
+            if #available(iOS 26, *) {
+                if prominent { content.buttonStyle(.glassProminent) }
+                else { content.buttonStyle(.glass) }
+            } else {
+                if prominent { content.buttonStyle(.borderedProminent) }
+                else { content.buttonStyle(.bordered) }
+            }
+        }
+        .buttonBorderShape(.capsule)
+        .controlSize(dynamicTypeSize.isAccessibilitySize ? .regular : .large)
     }
 }
 

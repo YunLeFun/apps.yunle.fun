@@ -1,6 +1,6 @@
 # 原生 iOS 0.2.0 (3) 上传前验收
 
-2026-10-26，范围截至 IPA 校验。没有上传构建、分发、提审或安装真机。
+2026-10-26，范围截至 IPA 校验。没有上传 IPA、分发、提审或安装真机。Xcode 导出准备产生的远端记录及分析元数据另见下文。
 
 ## 交付结论
 
@@ -14,7 +14,7 @@ IPA 已通过共用 `ios-testflight/scripts/verify_release.py ipa` 和 Apple `al
 - 分支：`codex/ios-testflight-preflight`，独立工作树，未合并或推送。
 - 归档提交：`45b3d28b505b13723dda5d83ac949bc59668107a`。
 - 后续提交只调整 LiveValidation、StoreKit 测试夹具及文档；132 个原生 App / 共享运行时 / 资产输入与归档提交逐字节相同，记录于 `source-provenance.json`。测试夹具未进入 IPA。
-- ASC 两次查询已处理构建和上传记录：最高均为 2，下一可用号为 3。本次没有预留上传；真正上传前仍需重新查询，避免被其他发布占用。
+- 选号前 ASC 已处理及上传记录最高均为 2，因此采用 3。结束查询发现 Xcode 自动签名导出于 20:27:22 创建了本次构建 3 的 `AWAITING_UPLOAD` 记录 `387c07b2-f763-4dab-b949-c05ecb74faff`，并完成两个分析资产（`ASSET_SPI` / `ASSET_DESCRIPTION`）的传输，随后签名失败。没有 IPA 资产，也没有已处理的构建 3。当前新建下一号为 4；后续真正上传应先检查这条属于本次导出准备的记录，再恢复同版上传，不能把 3 当作全新空闲号或盲目重复预留。见 `asc-build-preparation.json` 与 ASC 查询回执。
 - `project.yml` 与跟踪的 Xcode 工程均为 **0.2.0 (3)**。正式标识 `fun.yunle.apps`，Team `QT792GAY4C`，App ID `6759859441`。
 - 主工作区并行的支持中心改动、根目录未跟踪的 `ios/`、`android/` 不属于本候选。
 
@@ -85,7 +85,7 @@ Apple 明确说明 [TestFlight 内购使用 Sandbox](https://developer.apple.com
 
 正式 Bundle ID 原只有内购及 Associated Domains，现已启用 iCloud capability。新 profile `YunleFun Internal KVS 20261026`，ASC ID `4TGDFFQMX6`，包含 `QT792GAY4C.*` 的 KVS 授权、正确 App ID、`get-task-allow=false`；有效至 2027-07-04。包内 KVS entitlement 为 **`QT792GAY4C.fun.yunle.apps`**。没有删除产品权限。
 
-自动导出因本机账号没有云托管分发证书权限而失败；使用现有本机 Apple Distribution 私钥及新 profile 的手动导出成功。机器专用配置只在产物目录的 `ExportOptions-Local.plist`，没有改仓库的通用自动签名模板。仍固定局部 export、仅内部 TestFlight、不自动改版本号。
+自动导出因本机账号没有云托管分发证书权限而失败；它在失败前已执行上述远端构建准备和分析元数据传输。使用现有本机 Apple Distribution 私钥及新 profile 的手动导出成功。机器专用配置只在产物目录的 `ExportOptions-Local.plist`，没有改仓库的通用自动签名模板。仍固定局部 export、仅内部 TestFlight、不自动改版本号。
 
 共用脚本通过：唯一 App、Bundle / Team / 版本 / 构建号、仅内部标记、Distribution 签名、App Store profile、无调试权限、隐私清单逐字节匹配、加密声明。Apple 回执为 **`VERIFY SUCCEEDED with no errors`**。
 
@@ -103,6 +103,7 @@ Apple 明确说明 [TestFlight 内购使用 Sandbox](https://developer.apple.com
 | `validate.json` / `validate.log` | Apple 零错误校验回执 |
 | `YunleFun-PrivacyReport.pdf` | Xcode 合并隐私报告 |
 | `source-provenance.json` | 源码提交及 132 个发行输入的摘要 |
+| `asc-build-preparation.json` | Xcode 创建的待上传记录、两个分析资产及未上传 IPA 的核对 |
 | `upgrade-verification.json` | 版本、数据文件及覆盖安装验证 |
 | `release-manifest.json` / `SHA256SUMS` | 最终产物目录及摘要 |
 | `iap-production-safety.patch` | 服务端保护的可审查补丁 |

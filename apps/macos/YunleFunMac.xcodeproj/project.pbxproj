@@ -13,6 +13,7 @@
 		1F7B0F8EB3701B4E69CDF2D9 /* MacStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700724923518F43DC64DB79C /* MacStorage.swift */; };
 		25C62C7B1FB9B8FDCB5A8EC7 /* HostAuthorizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE80C1659390F7A51A8850E /* HostAuthorizationService.swift */; };
 		27122EBC98B99F08CE565201 /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = C9FDC3307E8CC41E9ADE1DCD /* SwiftDraw */; };
+		272DF4A57C83F9C46FA851A8 /* MacCookHostLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D1363844417E5803D63375 /* MacCookHostLiveTests.swift */; };
 		2BD0B08AFDB9618543E94162 /* MacAuthorizationPageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F36B0B308D1EADB2603105 /* MacAuthorizationPageTests.swift */; };
 		3381D2165D470304FBCB3970 /* PublicIconLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D90A8DAF3DA8C1991365F0 /* PublicIconLiveTests.swift */; };
 		36B675097E7FCD9504E931D7 /* MacAuthorizationUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A0915B4F5079D099354C3 /* MacAuthorizationUI.swift */; };
@@ -131,6 +132,7 @@
 		9418D2B88DD44B406F8B4936 /* HostAuthorizationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationServiceTests.swift; sourceTree = "<group>"; };
 		9649CB243A814D70A3E3C297 /* WebStoragePageFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebStoragePageFixture.swift; sourceTree = "<group>"; };
 		9815D763A0CCCB652BB2110C /* NativeAuthorizationBrokerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthorizationBrokerTests.swift; sourceTree = "<group>"; };
+		A3D1363844417E5803D63375 /* MacCookHostLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCookHostLiveTests.swift; sourceTree = "<group>"; };
 		A79CB53CC9A823D7B816FC7A /* YunleFunMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YunleFunMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A95AE07DCCE5C65EEBA68D68 /* CatalogIconStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogIconStore.swift; sourceTree = "<group>"; };
 		A961C6ECA7AA35FEA2F0BA83 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -415,6 +417,7 @@
 		B0302A774ECA00986B56668A /* LiveValidation */ = {
 			isa = PBXGroup;
 			children = (
+				A3D1363844417E5803D63375 /* MacCookHostLiveTests.swift */,
 				409F1C79091234D58DFE512D /* MacManagedSSOLiveTests.swift */,
 				C0F08A0C5675460FE441D96D /* MacOtherAccountLiveTests.swift */,
 				13BB8EA341EA04D74D49602D /* OtherAccountValidation.md */,
@@ -654,6 +657,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				272DF4A57C83F9C46FA851A8 /* MacCookHostLiveTests.swift in Sources */,
 				D0E314F3F0013A3200A47475 /* MacManagedSSOLiveTests.swift in Sources */,
 				867D911C2E76BF6B98627505 /* MacOtherAccountLiveTests.swift in Sources */,
 				3381D2165D470304FBCB3970 /* PublicIconLiveTests.swift in Sources */,

@@ -8,6 +8,21 @@ import UIKit
 #endif
 
 final class PublicIconLiveTests: XCTestCase {
+    func testRegisteredWebsiteIconsLoadFromTheOnlineRegistry() async throws {
+        let manifest = try await CatalogIconService().manifest()
+        let pipeline = ApplicationImagePipeline()
+        for origin in ["https://admin.yunle.fun", "https://support.yunle.fun"] {
+            let asset = try XCTUnwrap(manifest.websiteIcons[origin], "The central online registry must contain this site")
+            let app = CloudApplication(id: "private", name: "工坊应用", websiteUrl: origin + "/app", audience: "workshop", accessWorkshopID: "ABC234")
+            let candidates = app.iconCandidates(dark: false, websites: manifest.websiteIcons)
+            XCTAssertEqual(candidates.first?.url.absoluteString, asset.url)
+            let image = try await pipeline.load(candidates, pixelSize: 256)
+            XCTAssertEqual(image.bitmap.image.width, 256)
+            let attachment = iconAttachment(image.bitmap.image)
+            attachment.name = "registered-website-" + (URL(string: origin)?.host ?? "site")
+            attachment.lifetime = .keepAlways; add(attachment)
+        }
+    }
     private func iconAttachment(_ image: CGImage) -> XCTAttachment {
         #if os(macOS)
         XCTAttachment(image: NSImage(cgImage: image, size: .zero))

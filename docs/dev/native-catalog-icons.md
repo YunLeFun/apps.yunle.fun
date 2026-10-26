@@ -29,6 +29,14 @@ pnpm icons:sync --source https://icons.yunle.fun/app-assets/manifest.json --chec
 
 ## 选择和失败回退
 
+### 按站点登记的 SVG · 2026-10-27
+
+在线清单的可选 `websiteIcons` 数组为精确 HTTPS origin 关联已登记的 canonical SVG，包含图标名、URL 与 SHA-256。admin 共用 `brand-app-icon`，support 使用已有 `support-app-icon`；维护入口在 `YunLeFun/icons`，不在客户端手写域名与图标表。
+
+原生两端沿用同一次清单刷新、校验和本地缓存；网站图标摘要变化会刷新图片缓存。私有 / 工坊修订仍不继承公开 slug 的品牌，但可以按自身网站 origin 获取已登记的图标。应用明确提供的图片优先，站点关联作为图片来源兜底。旧清单缺少该可选字段时仍可读取，内置兜底快照由同步脚本生成，仅包含在线 URL 和摘要，不复制 SVG 资源。
+
+中央仓库已提交 [`678a386`](https://github.com/YunLeFun/icons/commit/678a386a66e15ad5862f31c0ef26604e5b172a23)，在线清单与本地生成快照核对一致。对应 iOS 的图标 / 清单 / 缓存和工坊页面 31 项测试通过；真实在线读取与解码另有独立验证用例。客户端仍需安装包含此字段解析能力的版本，之后登记和素材更新由在线清单控制。
+
 有运行时清单（包括上次成功的本地缓存）时：
 
 1. 应用明确提供的深色完整图标（深色外观下）。

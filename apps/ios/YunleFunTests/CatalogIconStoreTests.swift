@@ -7,6 +7,22 @@ import XCTest
 #endif
 
 final class CatalogIconManifestTests: XCTestCase {
+    func testWebsiteRegistryUsesExactOriginsAndUpdatesPrivateAppsWithoutPublicSlugInheritance() throws {
+        let entry = websiteEntry()
+        let manifest = try CatalogIconManifest(data: manifestData([manifestEntry()], websites: [entry]))
+        var app = CloudApplication(id: "private", name: "私有应用", slug: "cook", websiteUrl: "https://new.yunle.fun/path?q=1", audience: "workshop", accessWorkshopID: "ABC234")
+        let candidates = app.iconCandidates(dark: false, downloaded: manifest.assets, websites: manifest.websiteIcons)
+        XCTAssertEqual(candidates.map { $0.url.absoluteString }, ["https://icons.yunle.fun/products/brand/app-icon.svg"])
+        XCTAssertEqual(candidates.first?.revision, String(repeating: "c", count: 64))
+        app.websiteUrl = "https://new.yunle.fun.attacker.test"
+        XCTAssertTrue(app.iconCandidates(dark: false, websites: manifest.websiteIcons).isEmpty)
+        XCTAssertTrue(try CatalogIconManifest(data: manifestData([manifestEntry()])).websiteIcons.isEmpty, "Old cached manifests remain readable")
+        for patch in [["origin": "https://new.yunle.fun/path"], ["url": "https://example.com/icon.svg"], ["icon": "invalid"], ["sha256": "bad"]] {
+            var invalid = entry; patch.forEach { invalid[$0.key] = $0.value }
+            XCTAssertThrowsError(try CatalogIconManifest(data: manifestData([manifestEntry()], websites: [invalid])))
+        }
+        XCTAssertThrowsError(try CatalogIconManifest(data: manifestData([manifestEntry()], websites: [entry, entry])))
+    }
     func testOnlySelectedAssetsBecomeRuntimeEntries() throws {
         var entry = manifestEntry()
         entry["candidates"] = [["url": "https://example.test/not-selected.svg"]]
@@ -72,6 +88,22 @@ final class CatalogIconStoreTests: XCTestCase {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     }
     override func tearDownWithError() throws { try FileManager.default.removeItem(at: directory) }
+
+    func testWebsiteBindingsRefreshAndReopenFromCacheIndependentlyOfCatalogArtwork() async throws {
+        let service = ManifestFixtureService(data: try manifestData([manifestEntry()], websites: [websiteEntry()]))
+        let store = CatalogIconStore(service: service, cacheURL: cacheURL)
+        await store.refresh()
+        let first = try XCTUnwrap(store.websiteIcons["https://new.yunle.fun"])
+        var next = websiteEntry(); next["sha256"] = String(repeating: "d", count: 64)
+        await service.setData(try manifestData([manifestEntry()], websites: [next]))
+        await store.refresh(force: true)
+        XCTAssertNotEqual(first.revision, store.websiteIcons["https://new.yunle.fun"]?.revision)
+        let restored = CatalogIconStore(service: service, cacheURL: cacheURL)
+        XCTAssertEqual(restored.websiteIcons, store.websiteIcons)
+        await service.setFailure(true)
+        await store.refresh(force: true)
+        XCTAssertEqual(store.websiteIcons, restored.websiteIcons)
+    }
 
     func testColdStartPublishesUpdateAndReopensFromDiskWithoutNetworking() async throws {
         let service = ManifestFixtureService(data: try manifestData([manifestEntry()]))
@@ -196,8 +228,13 @@ private func manifestEntry(slug: String = "cook", official: Bool = true, hash: S
         "thumbnail": ["url": thumbnail(slug, "v3"), "width": 256, "height": 256, "mime": "image/webp", "bytes": 100, "sha256": String(repeating: hash, count: 64)],
         "source": ["kind": official ? "official-source" : "generated-artwork", "url": "https://example.test/official.svg", "sha256": String(repeating: "b", count: 64)]]]
 }
-private func manifestData(_ entries: [[String: Any]], schema: Int = 1) throws -> Data {
-    try JSONSerialization.data(withJSONObject: ["schemaVersion": schema, "assets": entries])
+private func websiteEntry() -> [String: Any] {
+    ["origin": "https://new.yunle.fun", "icon": "brand-app-icon", "url": "https://icons.yunle.fun/products/brand/app-icon.svg", "sha256": String(repeating: "c", count: 64)]
+}
+private func manifestData(_ entries: [[String: Any]], schema: Int = 1, websites: [[String: Any]]? = nil) throws -> Data {
+    var document: [String: Any] = ["schemaVersion": schema, "assets": entries]
+    if let websites { document["websiteIcons"] = websites }
+    return try JSONSerialization.data(withJSONObject: document)
 }
 
 private func expectCalls(_ service: ManifestFixtureService, _ expected: Int, file: StaticString = #filePath, line: UInt = #line) async {

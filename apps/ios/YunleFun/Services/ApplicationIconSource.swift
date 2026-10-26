@@ -8,6 +8,11 @@ struct ApplicationIconCandidate: Hashable, Sendable {
 }
 
 enum PublicMediaURL {
+    static func origin(of url: URL?) -> String? {
+        guard let url, url.scheme?.lowercased() == "https", let host = url.host?.lowercased(),
+              url.user == nil, url.password == nil, url.port == nil || url.port == 443 else { return nil }
+        return "https://" + host
+    }
     // Explicitly matches apps/mobile/app/constants/cloudbase.ts and its public media path policy.
     static let environment = "yunlefun-8g7ybcxc7345c490"
     static let bucket = "7975-yunlefun-8g7ybcxc7345c490-1325586649"
@@ -38,7 +43,8 @@ enum PublicMediaURL {
 }
 
 extension CloudApplication {
-    func iconCandidates(dark: Bool, downloaded: [String: CatalogIconAssets.Asset] = [:]) -> [ApplicationIconCandidate] {
+    func iconCandidates(dark: Bool, downloaded: [String: CatalogIconAssets.Asset] = [:],
+                        websites: [String: CatalogIconAssets.WebsiteAsset] = [:]) -> [ApplicationIconCandidate] {
         // A private/author revision can reuse a public slug without adopting its brand.
         let isPublicCatalog = accessWorkshopID == nil && accessOwnerID == nil && personalMarketOwnerLogin == nil
             && isPublic != false && (audience == nil || audience == "public")
@@ -72,6 +78,10 @@ extension CloudApplication {
         append(live?.thumbnail, role: .appIcon, revision: live?.revision)
         append(bundled?.official, role: .appIcon)
         append(bundled?.thumbnail, role: .appIcon)
+        // Website bindings are registered online, independently of public slugs.
+        if let origin = PublicMediaURL.origin(of: launchURL), let asset = websites[origin] ?? CatalogIconAssets.byOrigin[origin] {
+            append(asset.url, role: asset.role, revision: asset.revision)
+        }
         return candidates
     }
 }

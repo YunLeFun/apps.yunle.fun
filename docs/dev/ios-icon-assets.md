@@ -1,5 +1,13 @@
 # iOS 原生图标资产
 
+## 在线站点图标登记 · 2026-10-27
+
+云居工坊样例之前只设置 emoji，因此显示占位图。站点与图标的关联现在统一登记在 `YunLeFun/icons` 在线清单的 `websiteIcons`：`https://admin.yunle.fun` 共用已有 `brand-app-icon`，`https://support.yunle.fun` 使用已有 `support-app-icon`。不创建重复 SVG，也不在应用仓库维护固定站点映射。
+
+客户端运行时读取在线 URL、变体与 SHA-256，继续保留已验证清单缓存和自动生成的 URL 兜底快照。明确配置的 `iconAssets`、Logo 和目录资产仍优先；站点按精确 HTTPS origin 匹配，不按公开目录 slug 推断私有应用品牌。源 SVG 只存在于中央图标仓库并通过在线资源加载。
+
+此前为演示复制的 SVG 测试快照已移除；单元测试使用合成图片数据，`PublicIconLiveTests/testRegisteredWebsiteIconsLoadFromTheOnlineRegistry` 则读取真实在线清单并下载、解码中央 SVG。中央登记提交为 [`678a386`](https://github.com/YunLeFun/icons/commit/678a386a66e15ad5862f31c0ef26604e5b172a23)。客户端改动尚未打包发布。
+
 2026-10-24 后续更新：原生 macOS / iOS 已支持运行时刷新在线清单、本地清单缓存和内置快照兜底；以后更新目录图标无需随客户端发版。详见[运行时目录图标](./native-catalog-icons.md)。
 2026-10-24 更新：macOS / iOS 已统一接入中央素材清单，并修正下文记录的星纸、SMAP 旧地址与 macOS 加载回退缺口。同步方式、优先级和共享测试见[原生目录图标](./native-catalog-icons.md)。以下验收数据保留为 2026-10-16 的历史记录。
 

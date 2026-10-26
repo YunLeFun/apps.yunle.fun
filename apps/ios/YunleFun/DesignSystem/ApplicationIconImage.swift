@@ -10,7 +10,7 @@ struct CatalogApplicationIconImage<Fallback: View>: View {
     @ViewBuilder var fallback: () -> Fallback
 
     var body: some View {
-        ApplicationIconImage(candidates: application.iconCandidates(dark: colorScheme == .dark, downloaded: catalog.assets),
+        ApplicationIconImage(candidates: application.iconCandidates(dark: colorScheme == .dark, downloaded: catalog.assets, websites: catalog.websiteIcons),
                              pixelSize: pixelSize, pipeline: pipeline, fallback: fallback)
     }
 }

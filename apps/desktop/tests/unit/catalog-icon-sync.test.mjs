@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { catalogURL, readDesktopAssets, readOnlineCatalog, renderDesktopAssets, renderNativeAssets } from '../../scripts/sync-catalog-icons.mjs'
+import { catalogURL, readDesktopAssets, readOnlineCatalog, readWebsiteAssets, renderDesktopAssets, renderNativeAssets } from '../../scripts/sync-catalog-icons.mjs'
 
 function asset(slug = 'cook', version = 'v2') {
   return { slug, desktopAsset: { kind: 'official', usage: 'desktop-selected', version, thumbnail: {
@@ -13,6 +13,18 @@ function asset(slug = 'cook', version = 'v2') {
 }
 
 describe('central icon catalog sync', () => {
+  it('syncs centrally registered website bindings into a URL-only native fallback', () => {
+    const website = { origin: 'https://admin.yunle.fun', icon: 'brand-app-icon', url: 'https://icons.yunle.fun/products/brand/app-icon.svg', sha256: 'a'.repeat(64) }
+    const selected = asset()
+    selected.desktopAsset.kind = 'generated'
+    const source = JSON.stringify({ schemaVersion: 1, assets: [selected], websiteIcons: [website] })
+    expect(readWebsiteAssets(source)).toEqual([website])
+    expect(renderNativeAssets(source)).toContain('"https://admin.yunle.fun": WebsiteAsset(url: "https://icons.yunle.fun/products/brand/app-icon.svg", role: .appIcon')
+    for (const patch of [{ origin: 'https://admin.yunle.fun/path' }, { url: 'https://example.com/brand-app-icon.svg' }, { icon: 'bad' }, { sha256: 'bad' }]) {
+      expect(() => readWebsiteAssets(JSON.stringify({ websiteIcons: [{ ...website, ...patch }] }))).toThrow()
+    }
+    expect(() => readWebsiteAssets(JSON.stringify({ websiteIcons: [website, website] }))).toThrow()
+  })
   it('reads the shared online catalog and uses only its source mirror when unavailable', async () => {
     const source = JSON.stringify({ schemaVersion: 1, assets: [asset()] })
     const fetchCatalog = vi.fn().mockResolvedValueOnce(new Response(source))

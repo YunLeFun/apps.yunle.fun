@@ -8,6 +8,7 @@ struct CatalogIconManifest: Sendable {
     static let maximumBytes = 2 * 1024 * 1024
     let data: Data
     let assets: [String: CatalogIconAssets.Asset]
+    let websiteIcons: [String: CatalogIconAssets.WebsiteAsset]
 
     init(data: Data) throws {
         guard !data.isEmpty, data.count <= Self.maximumBytes else { throw CatalogIconError.invalidManifest }
@@ -38,6 +39,21 @@ struct CatalogIconManifest: Sendable {
             let revision = selected.version + ":" + image.sha256 + ":" + (selected.kind == "official" ? selected.source!.sha256 : "")
             assets[entry.slug] = .init(official: official, thumbnail: image.url, revision: revision)
         }
+        var websites: [String: CatalogIconAssets.WebsiteAsset] = [:]
+        for entry in document.websiteIcons ?? [] {
+            guard websites.count < 2_000, websites[entry.origin] == nil,
+                  let origin = Self.publicURL(entry.origin), PublicMediaURL.origin(of: origin) == entry.origin,
+                  Self.matches(origin.host ?? "", #"^[a-z0-9-]+(?:\.[a-z0-9-]+)+$"#),
+                  Self.matches(entry.icon, #"^([a-z0-9]+(?:-[a-z0-9]+)*)-(app-icon|mark)$"#),
+                  Self.publicURL(entry.url) != nil, Self.isHash(entry.sha256) else { throw CatalogIconError.invalidManifest }
+            let variant = entry.icon.hasSuffix("-app-icon") ? "app-icon" : "mark"
+            let product = String(entry.icon.dropLast(variant.count + 1))
+            let canonical = "https://icons.yunle.fun/products/\(product)/\(variant).svg"
+            let pinned = #"^https://raw\.githubusercontent\.com/YunLeFun/icons/[a-f0-9]{40}/packages/icons/svg/"# + entry.icon + #"\.svg$"#
+            guard entry.url == canonical || Self.matches(entry.url, pinned) else { throw CatalogIconError.invalidManifest }
+            websites[entry.origin] = .init(url: entry.url, role: variant == "app-icon" ? .appIcon : .mark, revision: entry.sha256)
+        }
+        self.websiteIcons = websites
         self.data = data
         self.assets = assets
     }
@@ -54,7 +70,8 @@ struct CatalogIconManifest: Sendable {
         return parts.url
     }
 
-    private struct Document: Decodable { let schemaVersion: Int; let assets: [Entry] }
+    private struct Document: Decodable { let schemaVersion: Int; let assets: [Entry]; let websiteIcons: [Website]? }
+    private struct Website: Decodable { let origin: String; let icon: String; let url: String; let sha256: String }
     private struct Entry: Decodable { let slug: String; let desktopAsset: Selected }
     private struct Selected: Decodable {
         let kind: String; let version: String; let usage: String; let status: String?
@@ -136,6 +153,7 @@ final class CatalogIconStore: ObservableObject {
 
     /// Only downloaded entries live here. The resolver always keeps the bundled snapshot behind them.
     @Published private(set) var assets: [String: CatalogIconAssets.Asset] = [:]
+    @Published private(set) var websiteIcons: [String: CatalogIconAssets.WebsiteAsset] = [:]
     private(set) var source: Source = .bundled
     private(set) var lastSuccess: Date?
     private(set) var lastAttempt: Date?
@@ -155,7 +173,7 @@ final class CatalogIconStore: ObservableObject {
         if let size = try? self.cacheURL.resourceValues(forKeys: [.fileSizeKey]).fileSize,
            size <= CatalogIconManifest.maximumBytes,
            let data = try? Data(contentsOf: self.cacheURL), let manifest = try? CatalogIconManifest(data: data) {
-            assets = manifest.assets; source = .cache
+            assets = manifest.assets; websiteIcons = manifest.websiteIcons; source = .cache
         }
     }
 
@@ -178,6 +196,7 @@ final class CatalogIconStore: ObservableObject {
             let manifest = try await service.manifest()
             try Task.checkCancellation()
             if assets != manifest.assets { assets = manifest.assets }
+            if websiteIcons != manifest.websiteIcons { websiteIcons = manifest.websiteIcons }
             source = .network; lastSuccess = now()
             do {
                 try FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)

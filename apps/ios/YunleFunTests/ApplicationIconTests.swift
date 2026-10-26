@@ -8,6 +8,26 @@ import XCTest
 #endif
 
 final class ApplicationIconTests: XCTestCase {
+    func testFirstPartyWorkshopIconsReuseTheirWebsiteAssets() {
+        let admin = CloudApplication(id: "private-admin", name: "管理后台", websiteUrl: "https://admin.yunle.fun/console?tab=apps",
+            emoji: "🛠️", audience: "workshop", accessWorkshopID: "ABC234")
+        let support = CloudApplication(id: "private-support", name: "支持中心", websiteUrl: "https://support.yunle.fun/tickets",
+            emoji: "💬", audience: "workshop", accessWorkshopID: "ABC234")
+        XCTAssertEqual(admin.iconCandidates(dark: false).first?.url.absoluteString, CatalogIconAssets.byOrigin["https://admin.yunle.fun"]?.url)
+        XCTAssertEqual(admin.iconCandidates(dark: true).first?.role, .appIcon)
+        XCTAssertEqual(support.iconCandidates(dark: false).first?.url.absoluteString, CatalogIconAssets.byOrigin["https://support.yunle.fun"]?.url)
+        XCTAssertEqual(support.iconCandidates(dark: true).first?.role, .appIcon)
+    }
+    func testWebsiteIconFallbackRespectsConfiguredArtworkAndExactOrigin() {
+        let app = CloudApplication(id: "support", name: "支持中心", websiteUrl: "https://support.yunle.fun/",
+            logo: "https://example.test/custom.svg", iconAssets: .init(appIcon: .init(src: "https://example.test/app.png")))
+        XCTAssertEqual(app.iconCandidates(dark: false).map { $0.url.absoluteString },
+            ["https://example.test/app.png", "https://example.test/custom.svg", CatalogIconAssets.byOrigin["https://support.yunle.fun"]!.url])
+        for url in ["https://support.yunle.fun.attacker.test", "https://support.yunle.fun:8443", "http://support.yunle.fun", "https://user:password@admin.yunle.fun"] {
+            let unverified = CloudApplication(id: "admin", name: "应用", websiteUrl: url)
+            XCTAssertTrue(unverified.iconCandidates(dark: false).isEmpty, url)
+        }
+    }
     func testPublicCloudIconReopensWithoutSignedURLOrAccount() throws {
         let path = "/app-icons/0123456789abcdef/123e4567-e89b-12d3-a456-426614174000.png"
         let source = "cloud://" + PublicMediaURL.environment + "." + PublicMediaURL.bucket + path
@@ -201,7 +221,7 @@ final class ApplicationIconTests: XCTestCase {
     }
 }
 
-private let iconTestSVG = Data(##"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#ff6600"/></svg>"##.utf8)
+let iconTestSVG = Data(##"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#ff6600"/></svg>"##.utf8)
 private func iconPipeline(_ fixture: IconHTTPFixture) -> (ApplicationImagePipeline, String) {
     let host = UUID().uuidString.lowercased() + ".icons.test"
     IconHTTPProtocol.register(host, fixture)
@@ -210,7 +230,7 @@ private func iconPipeline(_ fixture: IconHTTPFixture) -> (ApplicationImagePipeli
     config.httpCookieStorage = nil; config.urlCredentialStorage = nil; config.urlCache = nil
     return (ApplicationImagePipeline(session: URLSession(configuration: config)), host)
 }
-private final class IconHTTPFixture: @unchecked Sendable {
+final class IconHTTPFixture: @unchecked Sendable {
     let replies: [String: (Int, Data, Int?)]
     private let lock = NSLock()
     private var captured: [URLRequest] = []
@@ -221,7 +241,7 @@ private final class IconHTTPFixture: @unchecked Sendable {
         return replies[request.url!.path] ?? (404, Data(), nil)
     }
 }
-private final class IconHTTPProtocol: URLProtocol {
+final class IconHTTPProtocol: URLProtocol {
     private static let lock = NSLock()
     private static var fixtures: [String: IconHTTPFixture] = [:]
     static func register(_ host: String, _ fixture: IconHTTPFixture) { lock.lock(); defer { lock.unlock() }; fixtures[host] = fixture }

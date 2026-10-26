@@ -35,18 +35,18 @@ IPA 已通过共用 `ios-testflight/scripts/verify_release.py ipa` 和 Apple `al
 
 ## 本轮测试
 
-| 项目 | 结果 | 证据与范围 |
-| --- | --- | --- |
-| iPhone 17 / iOS 26.5 日常单元与集成 | 594 项：590 通过、4 条件跳过、0 失败 | `candidate-unit.xcresult`；含作品及钱包环境边界 |
-| iPhone 17 / iOS 27.0 布局及访客导航专项 | 16 通过、0 失败、0 跳过 | `ios27-focused.xcresult`；详情、帮助、键盘、同步设置、备份及导入入口 |
-| Duo / iOS 27.1 候选专项 | 16 项：6 通过、10 失败 | 干净临时设备；原始日志及 `duo-clean-runtime-log-summary.json`，结果收集停滞后终止，非有效 xcresult |
-| 完整访客 UI / iOS 27.0 | 15 项：12 通过、3 条件跳过、0 失败 | `ui-regression-final.xcresult`；缓存专项未启用，跳过不代表验收 |
-| 真实三账号、钱包与正式云同步 | 3 通过、0 失败、0 跳过 | `managed-final.xcresult` |
-| 真实 Cook 原生 SSO | 1 通过 | `candidate-live2.xcresult`；原生密码登录、授权取消与重试、能力调用 |
-| 历史作者作品 UI / 预览 | 1 通过 | `candidate-live4.xcresult` 中对应测试及三张截图；同一结果包中旧凭据导致的另两项失败保留，重跑由 `managed-final` 解决 |
-| 实际 Xcode StoreKit 本地购买、会员恢复 | 2 通过、0 失败、0 跳过 | `storekit-valid-identifiers.xcresult`；不调用线上发放 |
-| 支付服务端完整本地回归 | 19 文件 / 267 通过 | `iap-regression-rerun.log`；包括环境边界、真实通知入口的依赖隔离测试 |
-| Release | 设备 Archive、Release 模拟器构建均成功 | `archive.json`、`release-simulator-build.log` |
+| 项目                                    | 结果                                   | 证据与范围                                                                                                           |
+| --------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| iPhone 17 / iOS 26.5 日常单元与集成     | 594 项：590 通过、4 条件跳过、0 失败   | `candidate-unit.xcresult`；含作品及钱包环境边界                                                                      |
+| iPhone 17 / iOS 27.0 布局及访客导航专项 | 16 通过、0 失败、0 跳过                | `ios27-focused.xcresult`；详情、帮助、键盘、同步设置、备份及导入入口                                                 |
+| Duo / iOS 27.1 候选专项                 | 16 项：6 通过、10 失败                 | 干净临时设备；原始日志及 `duo-clean-runtime-log-summary.json`，结果收集停滞后终止，非有效 xcresult                   |
+| 完整访客 UI / iOS 27.0                  | 15 项：12 通过、3 条件跳过、0 失败     | `ui-regression-final.xcresult`；缓存专项未启用，跳过不代表验收                                                       |
+| 真实三账号、钱包与正式云同步            | 3 通过、0 失败、0 跳过                 | `managed-final.xcresult`                                                                                             |
+| 真实 Cook 原生 SSO                      | 1 通过                                 | `candidate-live2.xcresult`；原生密码登录、授权取消与重试、能力调用                                                   |
+| 历史作者作品 UI / 预览                  | 1 通过                                 | `candidate-live4.xcresult` 中对应测试及三张截图；同一结果包中旧凭据导致的另两项失败保留，重跑由 `managed-final` 解决 |
+| 实际 Xcode StoreKit 本地购买、会员恢复  | 2 通过、0 失败、0 跳过                 | `storekit-valid-identifiers.xcresult`；不调用线上发放                                                                |
+| 支付服务端完整本地回归                  | 19 文件 / 267 通过                     | `iap-regression-rerun.log`；包括环境边界、真实通知入口的依赖隔离测试                                                 |
+| Release                                 | 设备 Archive、Release 模拟器构建均成功 | `archive.json`、`release-simulator-build.log`                                                                        |
 
 三账号验证包括真实登录、刷新、账号选择、Keychain 重建恢复、退出后重建无账号；钱包分页、A → B → A 的迟到响应隔离；会员号还执行已有原生助手流测试。云同步使用正式域名、两个独立本地客户端，覆盖写入、断网后的磁盘恢复、冲突与账号隔离，最终回读确认云端原内容已还原、测试项已移除、会话已退出。只操作受管合成账号。
 
@@ -96,18 +96,18 @@ Apple 明确说明 [TestFlight 内购使用 Sandbox](https://developer.apple.com
 
 仓库外目录：`~/.codex/artifacts/yunlefun/testflight-preflight-20261026-2015/`（0700）。
 
-| 文件 | 用途 |
-| --- | --- |
-| `YunleFun.xcarchive` | 提交 `45b3d28b` 的 Release Archive，包含 dSYM |
-| `export/YunleFun.ipa` | 仅内部 TestFlight，未上传 |
-| `ipa-check-final.json` | 共用脚本成功回执与 IPA 摘要 |
-| `validate.json` / `validate.log` | Apple 零错误校验回执 |
-| `YunleFun-PrivacyReport.pdf` | Xcode 合并隐私报告 |
-| `source-provenance.json` | 源码提交及 132 个发行输入的摘要 |
-| `asc-build-preparation.json` | Xcode 创建的待上传记录、两个分析资产及未上传 IPA 的核对 |
-| `upgrade-verification.json` | 版本、数据文件及覆盖安装验证 |
-| `release-manifest.json` / `SHA256SUMS` | 最终产物目录及摘要 |
-| `iap-production-safety.patch` | 服务端保护的可审查补丁 |
+| 文件                                   | 用途                                                    |
+| -------------------------------------- | ------------------------------------------------------- |
+| `YunleFun.xcarchive`                   | 提交 `45b3d28b` 的 Release Archive，包含 dSYM           |
+| `export/YunleFun.ipa`                  | 仅内部 TestFlight，未上传                               |
+| `ipa-check-final.json`                 | 共用脚本成功回执与 IPA 摘要                             |
+| `validate.json` / `validate.log`       | Apple 零错误校验回执                                    |
+| `YunleFun-PrivacyReport.pdf`           | Xcode 合并隐私报告                                      |
+| `source-provenance.json`               | 源码提交及 132 个发行输入的摘要                         |
+| `asc-build-preparation.json`           | Xcode 创建的待上传记录、两个分析资产及未上传 IPA 的核对 |
+| `upgrade-verification.json`            | 版本、数据文件及覆盖安装验证                            |
+| `release-manifest.json` / `SHA256SUMS` | 最终产物目录及摘要                                      |
+| `iap-production-safety.patch`          | 服务端保护的可审查补丁                                  |
 
 IPA SHA-256：`1c6400a57519b55094be11fc12ca7d5f3cecbbded77870bf8a19bdeaa76b8a8a`。
 

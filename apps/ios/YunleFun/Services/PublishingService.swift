@@ -58,6 +58,7 @@ struct PublishingService: PublishingServing {
         let receipt: ApplicationSaveReceipt = try await request(url, method: "POST", fields: body, writeVersion: writeVersion, identity: identity)
         try receipt.app.validate(owner: identity.userID, id: id)
         guard receipt.submission.appId == receipt.app.id, receipt.submission.submitterUid == identity.userID,
+              receipt.app.latestSubmission?.submitterUid == identity.userID,
               PublishingValue.identifier(receipt.submission.id), receipt.submission.id == receipt.app.currentRevisionId,
               receipt.submission.id == receipt.app.latestSubmission?.id,
               receipt.submission.reviewStatus == .draft, receipt.app.latestSubmission?.reviewStatus == .draft,

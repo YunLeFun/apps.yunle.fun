@@ -21,6 +21,53 @@ final class PublishingServiceTests: XCTestCase {
         XCTAssertEqual(legacy.first?.application.accessOwnerID, "owner")
         XCTAssertFalse(try XCTUnwrap(legacy.first).application.canOpenAsGuest)
     }
+    func testOwnedListAcceptsHistoricalVersionsSubmittedByAnotherPublisher() async throws {
+        var record = publishingRecord(review: "approved")
+        var submission = try XCTUnwrap(record["latestSubmission"] as? [String: Any])
+        submission["submitterUid"] = "release-maintainer"
+        record["latestSubmission"] = submission
+        let (service, _) = service([(200, try publishingJSON(["items": [record]]))])
+        let apps = try await service.applications(identity: identity)
+        let app = try XCTUnwrap(apps.first)
+        XCTAssertEqual(apps.count, 1)
+        XCTAssertEqual(app.ownerUid, identity.userID)
+        XCTAssertEqual(app.latestSubmission?.submitterUid, "release-maintainer")
+        XCTAssertEqual(app.application.accessOwnerID, identity.userID)
+        XCTAssertFalse(app.application.canOpenAsGuest)
+    }
+    func testOwnedListStillRejectsUnlinkedOrIncompleteHistoricalVersions() async throws {
+        let mutations: [[String: Any]] = [
+            ["appId": "different-app", "submitterUid": "release-maintainer"],
+            ["submitterUid": ""], ["submitterUid": " \n"],
+            ["revision": 0, "submitterUid": "release-maintainer"],
+        ]
+        let replies = try mutations.map { fields -> (Int, String) in
+            var record = publishingRecord(review: "approved")
+            var submission = try XCTUnwrap(record["latestSubmission"] as? [String: Any])
+            submission.merge(fields) { _, value in value }
+            record["latestSubmission"] = submission
+            return (200, try publishingJSON(["items": [record]]))
+        }
+        let (service, _) = service(replies)
+        for _ in mutations {
+            do { _ = try await service.applications(identity: identity); XCTFail() }
+            catch { XCTAssertEqual(error as? PublishingError, .invalidResponse) }
+        }
+    }
+    func testSaveStillRequiresTheCurrentAccountAsBothReceiptSubmitters() async throws {
+        var record = publishingRecord(revision: "revision-two")
+        let ownerSubmission = try XCTUnwrap(record["latestSubmission"] as? [String: Any])
+        var otherSubmission = ownerSubmission
+        otherSubmission["submitterUid"] = "release-maintainer"
+        var replies = [(200, try publishingJSON(["app": record, "submission": otherSubmission]))]
+        record["latestSubmission"] = otherSubmission
+        replies.append((200, try publishingJSON(["app": record, "submission": ownerSubmission])))
+        let (service, _) = service(replies)
+        for _ in replies {
+            do { _ = try await service.save(id: "app-one", draft: publishingDraft(), writeVersion: publishingVersion, identity: identity); XCTFail() }
+            catch { XCTAssertEqual(error as? PublishingError, .invalidResponse) }
+        }
+    }
     func testSavingCreatesARevisionWithoutInventingApprovalOrPublishingToTheMarket() async throws {
         let record = publishingRecord(revision: "revision-two")
         let (service, fixture) = service([(200, try publishingJSON(["app": record, "submission": record["latestSubmission"]!]))])

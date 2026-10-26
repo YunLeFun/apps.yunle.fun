@@ -181,8 +181,10 @@ struct ManagedApplication: Decodable, Identifiable {
               !application.name.isEmpty, CommunityValue.timestamp(updatedAt) else { throw PublishingError.invalidResponse }
         if let listing { guard listing.appId == self.id, ["unlisted", "listed", "suspended", "delisted"].contains(listing.status) else { throw PublishingError.invalidResponse } }
         if let submission = latestSubmission {
+            // Historical versions may come from an administrator or a previous owner.
+            // Ownership is checked on the application; submitterUid records authorship.
             guard submission.appId == self.id, PublishingValue.identifier(submission.id), submission.revision > 0,
-                  submission.submitterUid == owner else { throw PublishingError.invalidResponse }
+                  !submission.submitterUid.trimmed.isEmpty else { throw PublishingError.invalidResponse }
         }
     }
     var revisionID: String? { currentRevisionId?.nilIfEmpty ?? publishedSubmissionId?.nilIfEmpty }

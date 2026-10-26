@@ -1,5 +1,7 @@
 # 原生 iOS 数据流与隐私资源核对
 
+> 2026-10-26：`45b3d28b` 的发行 Archive / IPA 已核对唯一清单、11 类数据、两项 required-reason 和相机用途说明；Xcode Organizer 合并 Privacy Report 已导出、渲染并逐项查看。图标图片、支持内容、诊断、用户标识及购买记录均声明为功能用途、关联用户、不跟踪；本地 StoreKit 夹具未进入 IPA，共用脚本与 Apple altool 零错误通过。ASC Nutrition Labels、线上政策的实际留存 / 删除履约及云应用自身行为仍需另行核对，不能沿用旧 Capacitor 审计。报告和摘要见[本轮验收](./testflight-preflight-20261026.md)。以下为早期源码记录。
+
 2026-10-18。范围为干净源码 `c8d43bc`、同源模拟器候选及本次隐私资源补充；不包含并行缓存 / Web 修改。这里记录客户端行为与证据，不表示 App Store Connect、线上隐私文本、第三方网页或真机保护已经验收。旧版的[发布隐私核对](./privacy-release-audit.md)继续作为历史记录，不能直接代表原生宿主。
 
 ## 本次修正

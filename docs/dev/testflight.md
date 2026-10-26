@@ -1,5 +1,9 @@
 # 云乐坊原生 iOS TestFlight 内部测试
 
+> 2026-10-26：已提交 **0.2.0 (3)**，完成 iOS 候选验收、iCloud capability / 新 profile、Release Archive、仅内部 IPA 导出、共用脚本及 Apple 零错误校验。**未上传或分发**。完整来源、摘要、支付限制和失败记录见[本轮验收](./testflight-preflight-20261026.md)，[中文测试说明](./testflight-notes-0.2.0-3.zh-Hans.md)已准备。服务器最高号仍为 2；实际上传前重新查询。
+
+本轮本机自动导出缺少云托管分发证书权限，已使用现有本机 Distribution 私钥及含 iCloud KVS 的新 profile 手动导出。机器专用 ExportOptions 留在仓库外；局部 export、仅内部、不改版本号等限制保留，仓库通用模板不写个人签名设置。
+
 默认发布 `apps/ios` 原生客户端，通过 **ASC CLI 归档和导出 → IPA 核验 → Apple 校验 → 上传 → 现有内部组验收**。共用步骤唯一维护在 [YunYouJun/ai 的 ios-testflight](https://github.com/YunYouJun/ai/blob/main/skills/ios-testflight/SKILL.md)，本页维护项目参数和资源准备；入口为 `ios-deploy`。
 
 旧 Capacitor 命令在[历史流程](./testflight-capacitor.md)，不作为原生发布前置步骤。`pnpm build:ios` 仍指向旧 mobile 路径。

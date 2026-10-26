@@ -158,7 +158,9 @@ private final class SupportViewFixture {
 
     func readScreen(named name: String, containing expected: String, scrollToFind: Bool, startAt: ScanStart = .top,
                     test: XCTestCase) async throws -> String {
-        let deadline = Date().addingTimeInterval(10)
+        // Keep the content assertion intact while allowing multiple slow OCR
+        // passes to scroll through an accessibility-sized form on CI.
+        let deadline = Date().addingTimeInterval(scrollToFind ? 30 : 10)
         let fromBottom = startAt == .bottom
         var image: UIImage?, lines: [String] = []
         var scan: [String] = []

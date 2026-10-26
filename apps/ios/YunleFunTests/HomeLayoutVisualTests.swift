@@ -379,7 +379,9 @@ private final class HomeStateFixture {
     }
 
     func readScreen(named name: String, containing expected: String, scrollToFind: Bool = false, test: XCTestCase) async throws -> String {
-        let deadline = Date().addingTimeInterval(5)
+        // A large-text scan needs several OCR passes before the target reaches
+        // the viewport. On CI, Vision can take seconds per pass.
+        let deadline = Date().addingTimeInterval(scrollToFind ? 30 : 5)
         var image: UIImage?, lines: [String] = []
         repeat {
             try await Task.sleep(nanoseconds: 100_000_000)

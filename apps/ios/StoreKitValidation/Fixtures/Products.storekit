@@ -1,10 +1,10 @@
 {
-  "identifier" : "F3A1B2C4-0000-4000-8000-YUNLEFUN0001",
+  "identifier" : "89BA9E92-CCC8-5C97-8F6F-190CE0F519DD",
   "nonRenewingSubscriptions" : [
     {
       "displayPrice" : "12.00",
       "familyShareable" : false,
-      "internalID" : "F3A1B2C4-0000-4000-8000-MEMBERMONTH1",
+      "internalID" : "2E7F488A-ECE7-5CB7-BA8F-FF2864CA8F95",
       "localizations" : [
         {
           "description" : "云乐坊会员 · 1 个自然月 / 1 calendar month",
@@ -19,7 +19,7 @@
     {
       "displayPrice" : "118.00",
       "familyShareable" : false,
-      "internalID" : "F3A1B2C4-0000-4000-8000-MEMBERYEAR01",
+      "internalID" : "9618229F-9E4F-5EA3-AA61-A4A869FB27CE",
       "localizations" : [
         {
           "description" : "云乐坊会员 · 1 个自然年 / 1 calendar year",
@@ -36,7 +36,7 @@
     {
       "displayPrice" : "12.00",
       "familyShareable" : false,
-      "internalID" : "F3A1B2C4-0000-4000-8000-COIN00000100",
+      "internalID" : "E1E7A9CB-5FBF-5C8F-AE4D-F86AB5B7C6C4",
       "localizations" : [
         {
           "description" : "100 云币",
@@ -51,7 +51,7 @@
     {
       "displayPrice" : "58.00",
       "familyShareable" : false,
-      "internalID" : "F3A1B2C4-0000-4000-8000-COIN00000500",
+      "internalID" : "9C4FAAB7-A57A-5AE6-AD67-8327B4AC05A6",
       "localizations" : [
         {
           "description" : "500 云币",
@@ -66,7 +66,7 @@
     {
       "displayPrice" : "108.00",
       "familyShareable" : false,
-      "internalID" : "F3A1B2C4-0000-4000-8000-COIN00001000",
+      "internalID" : "F1B6DCF9-225D-5799-BC23-AF0C4324E820",
       "localizations" : [
         {
           "description" : "1000 云币",

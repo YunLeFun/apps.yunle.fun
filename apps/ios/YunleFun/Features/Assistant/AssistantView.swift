@@ -5,6 +5,12 @@ struct AssistantView: View {
     private static let end = "assistant-end"
     private static let draftLimit = 4000
     private static let contentWidth: CGFloat = 640
+    /// Famicom-inspired red, lifted in dark appearances to keep the thin symbol strokes legible.
+    private static let gameSuggestionColor = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 232.0 / 255, green: 120.0 / 255, blue: 128.0 / 255, alpha: 1) // #E87880
+            : UIColor(red: 166.0 / 255, green: 43.0 / 255, blue: 50.0 / 255, alpha: 1) // #A62B32
+    })
     @EnvironmentObject private var chat: AssistantStore
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -213,7 +219,7 @@ struct AssistantView: View {
     private var suggestions: some View {
         let icons: [(symbol: String, color: Color)] = [
             ("chevron.left.forwardslash.chevron.right", .blue),
-            ("gamecontroller", .purple),
+            ("gamecontroller", Self.gameSuggestionColor),
             ("lightbulb", .orange)
         ]
         return VStack(spacing: 0) {

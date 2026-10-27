@@ -14,6 +14,7 @@ struct FeedbackView: View {
     @State private var preparationError: String?
     @State private var completedUpload: DiagnosticUploadReceipt?
     @State private var showUploadSuccess = false
+    @State private var isTestFlight = false
     @Environment(\.requestFeedbackLogin) private var requestLogin
     @Environment(\.screenshotFeedbackCoordinator) private var screenshotFeedback
     @State private var screenshotFeedbackVisibilityID = UUID()
@@ -31,6 +32,7 @@ struct FeedbackView: View {
 
     var body: some View {
         Form {
+            TestFlightFeedbackSection(appName: "云乐坊", isTestFlight: isTestFlight)
             descriptionSection
             supportCenterSection
             SupportContactSection(issueDescription: issueDescription, supportCode: upload.receipt?.supportCode)
@@ -45,6 +47,7 @@ struct FeedbackView: View {
             }
         }
         .navigationTitle("反馈与建议")
+        .task { isTestFlight = await TestFlightDistribution.current() }
         .onAppear { screenshotFeedback?.feedbackVisibilityChanged(screenshotFeedbackVisibilityID, visible: true) }
         .onDisappear { screenshotFeedback?.feedbackVisibilityChanged(screenshotFeedbackVisibilityID, visible: false) }
         .scrollDismissesKeyboard(.interactively)

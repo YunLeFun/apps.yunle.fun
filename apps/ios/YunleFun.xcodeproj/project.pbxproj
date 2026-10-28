@@ -2066,7 +2066,7 @@
 			repositoryURL = "https://github.com/YunLeFun/ylf.git";
 			requirement = {
 				kind = revision;
-				revision = 5c7592fb101ec3f6f1ad0514a6d62499349f9f16;
+				revision = a03be8d1e1f096cb9aefe7cb4c4d277b1dd46119;
 			};
 		};
 		B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */ = {

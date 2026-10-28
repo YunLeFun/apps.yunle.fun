@@ -6,6 +6,7 @@ struct DiscoveryView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Namespace private var featuredZoom
     @State private var returningApplicationID: String?
+    @State private var isRefreshing = false
     @AccessibilityFocusState(for: .voiceOver) private var focusedApplicationID: String?
     private var official: [CloudApplication] { catalog.applications.filter { $0.isOfficial == true } }
 
@@ -48,13 +49,14 @@ struct DiscoveryView: View {
                     }
                 } header: { Text("随手发现").foregroundStyle(Color.primary) }
             } else if catalog.isLoading {
-                ProgressView("正在寻找小乐趣").frame(maxWidth: .infinity).padding()
+                EmptyView()
             } else {
                 ContentStateView(title: "稍后再来看看", systemImage: "safari",
                                  message: catalog.error ?? "工坊里的新鲜应用会出现在这里。",
                                  actionTitle: "刷新", action: { Task { await catalog.refreshWithIcons() } })
             }
         }
+        .loadingOverlay(catalog.isLoading && catalog.applications.isEmpty && !isRefreshing, label: "正在寻找小乐趣")
         .navigationTitle("寻乐")
         .onAppear {
             if let returningApplicationID {
@@ -62,7 +64,11 @@ struct DiscoveryView: View {
                 self.returningApplicationID = nil
             }
         }
-        .refreshable { await catalog.refreshWithIcons() }
+        .refreshable {
+            isRefreshing = true
+            defer { isRefreshing = false }
+            await catalog.refreshWithIcons()
+        }
     }
 
     /// The featured card zooms into its detail like an App Store story; list

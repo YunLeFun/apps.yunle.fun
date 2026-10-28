@@ -33,6 +33,8 @@ struct YunleFunApp: App {
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
             library.updateCatalog(catalog.applications, markingMissingPublicAppsUnavailable: catalog.successfulLoadID != nil)
+            do { try SharedFeedbackHistory().activate(userID: id, channel: .current) }
+            catch { diagnostics.record(.error, message: "feedback.share.storage.unavailable") }
         })
         _catalog = StateObject(wrappedValue: catalog)
         _accounts = StateObject(wrappedValue: accounts)
@@ -66,7 +68,12 @@ struct YunleFunApp: App {
                 .environmentObject(diagnostics)
                 .preferredColorScheme(appearance.colorScheme)
                 .task { await catalog.load() }
-                .task { await accounts.restore() }
+                .task {
+                    await accounts.restore()
+                    guard !Task.isCancelled, !accounts.isRestoring else { return }
+                    do { try SharedFeedbackHistory().activate(userID: accounts.user?.id, channel: .current) }
+                    catch { diagnostics.record(.error, message: "feedback.share.storage.unavailable") }
+                }
                 .task { homeSync.identityChanged() }
                 .task { await purchases.start() }
                 .task { await assistantRollout.refresh(force: true) }

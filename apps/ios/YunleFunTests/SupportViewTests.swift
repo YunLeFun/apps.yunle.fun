@@ -67,7 +67,7 @@ final class SupportViewTests: XCTestCase {
     func testLargestTextFeedbackKeepsContactAndEmptyLogExplanationReachable() async throws {
         let fixture = try await SupportViewFixture(size: .accessibility5)
         defer { fixture.close() }
-        let contact = try await fixture.readScreen(named: "support-feedback-largest-copy", containing: "复制反馈内容", scrollToFind: true, test: self)
+        let contact = try await fixture.readScreen(named: "support-feedback-largest-copy", containing: "复制反馈内容", scrollToFind: true, startAt: .contacts, test: self)
         XCTAssertTrue(contact.contains("复制反馈内容"), "Mail-independent feedback must remain visible at the largest text size")
         let empty = try await fixture.readScreen(named: "support-feedback-largest-empty-logs", containing: "所选时间内没有本地日志", scrollToFind: true, startAt: .logs, test: self)
         XCTAssertTrue(empty.contains("所选时间内没有本地日志"))
@@ -78,7 +78,7 @@ final class SupportViewTests: XCTestCase {
 @MainActor
 private final class SupportViewFixture {
     enum Screen { case feedback, help }
-    enum ScanStart { case top, bottom, logs }
+    enum ScanStart { case top, bottom, logs, contacts }
     let directory: URL
     let receiptDirectory: URL
     let receiptFile: URL?
@@ -136,8 +136,11 @@ private final class SupportViewFixture {
         let content: AnyView
         switch screen {
         case .feedback:
+            let sharedHistory = SharedFeedbackHistory(directory: directory.appendingPathComponent("shared-feedback"))
+            XCTAssertNil(try sharedHistory.rememberedContext(), "Each rendering fixture starts without shared-feedback records")
             content = AnyView(NavigationStack {
-                FeedbackView(logs: logs, accounts: accounts, service: service, receiptDirectory: receiptDirectory)
+                FeedbackView(logs: logs, accounts: accounts, service: service, receiptDirectory: receiptDirectory,
+                             channel: .standard, sharedHistory: sharedHistory)
             })
         case .help:
             content = AnyView(NavigationStack { HelpView(logs: logs, accounts: accounts, navigateTab: { _ in }) })
@@ -165,6 +168,23 @@ private final class SupportViewFixture {
         var image: UIImage?, lines: [String] = []
         var scan: [String] = []
         var sample = 0, candidateScreenshots = 0
+        if scrollToFind, startAt == .contacts {
+            // This standard-channel guest fixture has no shared receipts. Its
+            // first four nonempty sections are description, screenshots, Support
+            // Center and share receipts. Materialize the contact section before
+            // spending the unchanged OCR budget on its actual visible rows.
+            XCTAssertNil(receiptFile)
+            XCTAssertNil(accounts.user)
+            let collection = try XCTUnwrap(scrollView(in: controller.view) as? UICollectionView)
+            controller.view.layoutIfNeeded()
+            let sections = (0..<collection.numberOfSections).filter {
+                collection.numberOfItems(inSection: $0) > 0
+            }
+            let section = try XCTUnwrap(sections.dropFirst(4).first, "The fixture must contain its contact section")
+            scan.append("Materialize first contact item: section=\(section) item=0")
+            collection.scrollToItem(at: IndexPath(item: 0, section: section), at: .top, animated: false)
+            try await settle()
+        }
         if scrollToFind, startAt == .logs {
             // These guest fixtures have no receipt: their final two native
             // sections are logs and upload. Start at the first log row so OCR

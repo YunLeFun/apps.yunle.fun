@@ -45,9 +45,12 @@ enum ApplicationCacheState: Equatable {
 /// Where the running session of an application loaded its first page from.
 struct ApplicationLaunchSourceLabel: View {
     let revision: Date
+    var staticResources = false
 
     var body: some View {
-        if revision == .distantPast {
+        if staticResources, revision != .distantPast {
+            Label("在线页面 · 已准备公共资源缓存", systemImage: "bolt.fill").foregroundStyle(.green)
+        } else if revision == .distantPast {
             Label("本次在线加载", systemImage: "globe").foregroundStyle(.orange)
         } else {
             Label("本次从下载缓存打开", systemImage: "bolt.fill").foregroundStyle(.green)
@@ -58,18 +61,23 @@ struct ApplicationLaunchSourceLabel: View {
 struct ApplicationCacheView: View {
     let application: CloudApplication
     @ObservedObject var store: ApplicationCacheStore
+    @EnvironmentObject private var runtime: NativeWebRuntime
+    @EnvironmentObject private var library: HomeLibrary
+    @EnvironmentObject private var catalog: CatalogStore
+    @Environment(\.runtimeMenu) private var runtimeMenu
     @State private var confirmClear = false
     private var key: String { ApplicationCacheEntry.key(for: application) }
     private var entry: ApplicationCacheEntry? { store.entry(for: application) }
     private var state: ApplicationCacheState { ApplicationCacheState(application: application, store: store) }
     private var runningRevision: Date? { store.runningRevisions[key] }
+    private var staticResources: Bool { ApplicationStaticResourcePolicy.supports(application) }
 
     var body: some View {
         List {
             Section { header } footer: { Text(headerFooter) }
             if let runningRevision {
                 Section {
-                    ApplicationLaunchSourceLabel(revision: runningRevision)
+                    ApplicationLaunchSourceLabel(revision: runningRevision, staticResources: staticResources)
                         .accessibilityIdentifier("cache.launch-source")
                     if runningRevision != .distantPast {
                         LabeledContent("使用的版本") { Text(runningRevision, format: .dateTime.month().day().hour().minute()) }
@@ -78,20 +86,30 @@ struct ApplicationCacheView: View {
             }
             if ApplicationCacheEntry.supports(application) {
                 Section { actions } footer: {
-                    Text("更新会重新下载网页资源，失败时保留旧缓存。正在运行的应用需结束后重新打开，才会使用更新或清理后的内容。")
+                    Text(staticResources ? "仅下载公开脚本、样式、字体和图片。打开应用时仍实时校验登录并读取接口数据；新资源由网页按版本使用。" : "更新会重新下载网页资源，失败时保留旧缓存。正在运行的应用需结束后重新打开，才会使用更新或清理后的内容。")
                 }
             }
             if let entry {
+                Section {
+                    Button {
+                        if let runtimeMenu, runtimeMenu.represents(application) { runtimeMenu.dismiss() }
+                        else { runtime.open(application, catalog: catalog, library: library) }
+                    } label: { Label("打开应用", systemImage: "play.fill") }
+                    .accessibilityIdentifier("cache.open")
+                }
                 Section("缓存内容") {
+                    if staticResources { LabeledContent("缓存范围", value: "公共静态资源") }
                     LabeledContent("下载大小", value: ByteCountFormatter.string(fromByteCount: Int64(entry.byteCount), countStyle: .file))
                     LabeledContent("已保存资源", value: "\(entry.resourceCount) 项")
                     LabeledContent("更新时间") {
                         Text(entry.downloadedAt, format: .dateTime.year().month().day().hour().minute())
                     }
                 }
+            }
+            if entry != nil || staticResources {
                 Section {
                     Button(role: .destructive) { confirmClear = true } label: {
-                        Label("清理此应用下载缓存", systemImage: "trash")
+                        Label(staticResources ? "删除此站点资源缓存" : "清理此应用下载缓存", systemImage: "trash")
                     }
                     .disabled(store.isClearing)
                     .accessibilityIdentifier("cache.clear")
@@ -127,12 +145,21 @@ struct ApplicationCacheView: View {
     }
 
     private var headerFooter: String {
-        ApplicationCacheEntry.supports(application)
+        if staticResources {
+            return "把网站的公共资源预下载到本机，减少打开和切换页面时的下载。首页、登录校验和接口数据始终联网；网站登录和使用数据不会打包。显示大小为下载资源合计，实际占用由系统管理，系统可能回收缓存。"
+        }
+        if let url = application.launchURL, ApplicationStaticResourcePolicy.origin(for: url) != nil {
+            return "管理后台与支持中心的公共资源缓存需要 iOS 17 或更高版本，当前仍可在线打开应用。"
+        }
+        return ApplicationCacheEntry.supports(application)
             ? "保存首页及加载时取得的网页资源，打开更快。登录、实时数据、视频和其他页面仍可能需要联网。缓存由系统按可用空间保留。"
             : "暂时只支持云乐坊中公开、免费的应用。需要登录、会员、购买或工坊权限的应用继续在线使用。"
     }
 
     private func launchFooter(_ revision: Date) -> String {
+        if staticResources {
+            return "页面和登录校验来自网站实时响应，匹配版本的公共资源由 WebKit 按缓存策略复用。账号切换后可重新下载，为当前账号准备缓存。"
+        }
         if revision != .distantPast {
             return state == .updateReady ? "已下载更新，结束应用后重新打开即可使用新版本。" : "首页来自本地缓存；接口请求和未缓存的资源仍会联网。"
         }
@@ -216,7 +243,7 @@ struct ApplicationCacheSettingsView: View {
                     }
                     Button("取消下载") { store.cancelDownload() }.disabled(store.isClearing)
                 }
-            } footer: { Text("单个应用最多 25 MB，总计最多 200 MB。下载缓存可加快启动；是否能离线使用取决于应用功能。") }
+            } footer: { Text("单次下载最多 25 MB，已下载版本合计最多 200 MB。公共资源缓存的实际占用由系统管理。下载缓存可加快启动；是否能离线使用取决于应用功能。") }
             if !store.entries.isEmpty {
                 Section {
                     ForEach(store.entries) { entry in

@@ -5,22 +5,39 @@ struct SupportCenterView: View {
     @StateObject private var model: SupportCenterStore
     @State private var destination: SupportDestination
     @State private var description: String
+    @State private var screenshots: [FeedbackScreenshot]
+    @State private var isImportingScreenshots = false
+    @State private var pendingSubmission: SubmissionDraft?
     @State private var product = "www"
     @State private var managedProduct: String?
     @State private var category = "problem"
     @State private var browser: SupportBrowserPage?
+    @State private var nativeTicket: SupportTicketPage?
+    @State private var screenshotPreview: FeedbackScreenshot?
     @State private var showLogin = false
     @State private var confirmSubmit = false
     private let onDescriptionChanged: (String) -> Void
+    private let onScreenshotsChanged: ([FeedbackScreenshot]) -> Void
     @Environment(\.dismiss) private var dismiss
     @FocusState private var descriptionFocused: Bool
 
+    private struct SubmissionDraft {
+        let product: String
+        let category: String
+        let description: String
+        let screenshots: [FeedbackScreenshot]
+    }
+
     init(accounts: AccountStore, destination: SupportDestination = .compose, initialDescription: String = "",
-         service: SupportCenterServing = SupportCenterService(), onDescriptionChanged: @escaping (String) -> Void = { _ in }) {
+         initialScreenshots: [FeedbackScreenshot] = [], service: SupportCenterServing = SupportCenterService(),
+         onDescriptionChanged: @escaping (String) -> Void = { _ in },
+         onScreenshotsChanged: @escaping ([FeedbackScreenshot]) -> Void = { _ in }) {
         self.accounts = accounts
         self.onDescriptionChanged = onDescriptionChanged
+        self.onScreenshotsChanged = onScreenshotsChanged
         _destination = State(initialValue: destination)
         _description = State(initialValue: initialDescription)
+        _screenshots = State(initialValue: initialScreenshots)
         _model = StateObject(wrappedValue: SupportCenterStore(accounts: accounts, service: service))
     }
 
@@ -31,6 +48,7 @@ struct SupportCenterView: View {
                     Picker("支持中心", selection: $destination) {
                         ForEach(SupportDestination.allCases) { Text($0.title).tag($0) }
                     }
+                    .disabled(model.isSubmitting)
                     .accessibilityIdentifier("support.center.destination")
                 }
                 if model.isLoading { ProgressView("正在连接支持中心") }
@@ -51,13 +69,14 @@ struct SupportCenterView: View {
                 }
                 Section {
                     Button { open(path: "") } label: { Label("打开完整支持中心", systemImage: "globe") }
+                        .disabled(model.isSubmitting)
                         .accessibilityIdentifier("support.center.website")
                 }
             }
             .navigationTitle(destination.title)
             .scrollDismissesKeyboard(.interactively)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("完成") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("完成") { dismiss() }.disabled(model.isSubmitting) }
                 if descriptionFocused {
                     ToolbarItem(placement: .keyboard) { Button("完成输入") { descriptionFocused = false } }
                 }
@@ -65,24 +84,39 @@ struct SupportCenterView: View {
             .task(id: loadID) { await model.load(destination, product: managedProduct) }
             .refreshable { await model.load(destination, product: managedProduct) }
             .onChange(of: accounts.identityGeneration) { _ in
-                browser = nil; confirmSubmit = false; description = ""; managedProduct = nil
+                browser = nil; nativeTicket = nil; confirmSubmit = false; description = ""; managedProduct = nil
+                screenshotPreview = nil
+                screenshots = []
                 model.identityChanged()
             }
             .onChange(of: destination) { _ in browser = nil; confirmSubmit = false; descriptionFocused = false }
             .onChange(of: description) { onDescriptionChanged($0) }
+            .onChange(of: screenshots) { onScreenshotsChanged($0) }
             .sheet(item: $browser) { page in
                 SupportBrowserView(page: page).id(accounts.identityGeneration)
+            }
+            .sheet(item: $nativeTicket) { page in
+                SupportTicketView(page: page).id(accounts.identityGeneration)
+            }
+            .sheet(item: $screenshotPreview) { screenshot in
+                NavigationStack { ScreenshotPreview(data: screenshot.data, imageLabel: "待提交的截图预览") }
             }
             .sheet(isPresented: $showLogin) {
                 LoginView(continuationMessage: "登录后，支持中心会使用当前账号查看你的工单和管理权限。")
                     .environmentObject(accounts)
             }
-            .confirmationDialog("提交这条私密反馈？", isPresented: $confirmSubmit, titleVisibility: .visible) {
-                Button("提交反馈") { Task { await model.submit(product: product, category: category, description: description) } }
+            .confirmationDialog("提交这条私密反馈？", isPresented: $confirmSubmit, titleVisibility: .visible,
+                                presenting: pendingSubmission) { draft in
+                Button("提交反馈") {
+                    Task { await model.submit(product: draft.product, category: draft.category,
+                                              description: draft.description, screenshots: draft.screenshots) }
+                }
                 Button("取消", role: .cancel) { }
-            } message: {
-                Text("问题描述将发送给\(SupportProduct.title(product))的支持人员。不会自动附带诊断日志。")
+            } message: { draft in
+                Text("问题描述\(draft.screenshots.isEmpty ? "" : "和 \(draft.screenshots.count) 张截图")将发送给\(SupportProduct.title(draft.product))的支持人员。不会自动附带诊断日志。")
             }
+            .onChange(of: model.receipt?.id) { if $0 != nil { screenshots = [] } }
+            .onChange(of: confirmSubmit) { if !$0 { pendingSubmission = nil } }
         }
         .id(accounts.identityGeneration)
         .interactiveDismissDisabled(model.isSubmitting)
@@ -98,7 +132,7 @@ struct SupportCenterView: View {
                 Text(receipt.id).font(.footnote.monospaced()).textSelection(.enabled)
                     .accessibilityIdentifier("support.center.receipt")
                 if let url = SupportCenterService.ticketURL(receipt) {
-                    Button("查看工单与回复") { browser = SupportBrowserPage(url: url, access: model.access) }
+                    Button("查看工单与回复") { nativeTicket = SupportTicketPage(receipt: receipt, access: model.access) }
                     if accounts.user == nil {
                         ShareLink("保存工单访问链接", item: url)
                         Text("此链接包含访客访问凭证，请保存到自己的备忘录，不要转发给他人。")
@@ -107,6 +141,9 @@ struct SupportCenterView: View {
                 }
             } footer: { Text("反馈内容仅支持人员可见。请在工单中查看后续回复。") }
         } else {
+            FeedbackScreenshotSection(screenshots: $screenshots, onPreview: { descriptionFocused = false; screenshotPreview = $0 },
+                                      onImportingChanged: { isImportingScreenshots = $0 })
+                .disabled(model.isSubmitting)
             Section {
                 Picker("相关产品", selection: $product) {
                     ForEach(SupportProduct.submissionIDs, id: \.self) { Text(SupportProduct.title($0)).tag($0) }
@@ -129,11 +166,14 @@ struct SupportCenterView: View {
                     Button("登录云乐坊") { showLogin = true }
                 }
                 Button {
-                    descriptionFocused = false; confirmSubmit = true
+                    descriptionFocused = false
+                    pendingSubmission = SubmissionDraft(product: product, category: category,
+                                                        description: description, screenshots: screenshots)
+                    confirmSubmit = true
                 } label: {
                     Label(model.isSubmitting ? "正在提交" : "提交私密反馈", systemImage: "paperplane")
                 }
-                .disabled(model.access == nil || model.isLoading || model.isSubmitting
+                .disabled(model.access == nil || model.isLoading || model.isSubmitting || isImportingScreenshots
                           || !(5...4000).contains(description.trimmingCharacters(in: .whitespacesAndNewlines).utf16.count))
                 .accessibilityIdentifier("support.center.submit")
                 if model.isSubmitting { ProgressView() }

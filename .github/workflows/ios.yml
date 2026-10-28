@@ -28,7 +28,7 @@ jobs:
     name: Native iOS · Xcode 27
     # GitHub's standard Xcode 27 image is currently a public preview.
     runs-on: xcode-27
-    timeout-minutes: 35
+    timeout-minutes: 60
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
     steps:

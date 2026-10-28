@@ -24,6 +24,10 @@ final class MyWorkshopsStore: ObservableObject {
         var seen = Set<String>()
         return ([management?.workshop].compactMap { $0 } + joined).filter { seen.insert($0.id).inserted }
     }
+    func loadIfNeeded() async {
+        guard !hasLoaded, !isLoading else { return }
+        await refresh()
+    }
     func refresh() async {
         guard !isWriting else { return }
         let boundary = access.boundary, requestID = UUID()

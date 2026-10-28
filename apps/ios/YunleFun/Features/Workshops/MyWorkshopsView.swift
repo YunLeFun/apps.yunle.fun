@@ -9,6 +9,7 @@ private struct MyWorkshopsContent: View {
     @StateObject private var model: MyWorkshopsStore
     @State private var showLogin = false
     @State private var showCreate = false
+    @State private var isRefreshing = false
     init(accounts: AccountStore) {
         self.accounts = accounts; _model = StateObject(wrappedValue: MyWorkshopsStore(accounts: accounts))
     }
@@ -19,7 +20,7 @@ private struct MyWorkshopsContent: View {
                                  message: "登录后创建个人工坊，或查看你加入的工坊。")
                 Button("登录云乐坊") { showLogin = true }
             } else {
-                WorkshopLoadStatus(isLoading: model.isLoading, error: model.error) { await model.refresh() }
+                WorkshopLoadStatus(isLoading: false, error: model.error) { await model.refresh() }
                 if let notice = model.notice { Label(notice, systemImage: "checkmark.circle") }
                 if model.hasLoaded {
                     Section("我的工坊") {
@@ -37,15 +38,29 @@ private struct MyWorkshopsContent: View {
                             NavigationLink { PublicWorkshopView(id: workshop.id) } label: { WorkshopRow(workshop: workshop) }
                         }
                     }
+                } else if model.error == nil {
+                    Section("我的工坊") { workshopPlaceholder }
+                    Section("我加入的工坊") {
+                        ForEach(0..<3) { _ in workshopPlaceholder }
+                    }
                 }
             }
             Section {
                 NavigationLink { WorkshopLookupView() } label: { Label("输入工坊编号或链接", systemImage: "number") }
             }
         }
+        .transaction { $0.animation = nil }
         .navigationTitle("个人工坊").navigationBarTitleDisplayMode(.inline)
-        .task { await model.refresh() }
-        .refreshable { await model.refresh() }
+        .toolbar {
+            WorkshopLoadingToolbarItem(placement: .navigationBarTrailing,
+                isLoading: model.isLoading && !isRefreshing)
+        }
+        .task { await model.loadIfNeeded() }
+        .refreshable {
+            isRefreshing = true
+            defer { isRefreshing = false }
+            await model.refresh()
+        }
         .sheet(isPresented: $showLogin) {
             LoginView(continuationMessage: "登录后可创建和管理个人工坊，或加入其他工坊。").environmentObject(accounts)
         }
@@ -53,7 +68,37 @@ private struct MyWorkshopsContent: View {
             WorkshopEditor(model: model, workshop: nil, generation: accounts.identityGeneration).environmentObject(accounts)
         }
     }
+
+    private var workshopPlaceholder: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("工坊名称").font(.headline)
+            Text("工坊创建者 · 申请加入").font(.subheadline)
+        }
+        .padding(.vertical, 4)
+        .redacted(reason: .placeholder)
+        .accessibilityHidden(true)
+    }
 }
+
+struct WorkshopLoadingToolbarItem: ToolbarContent {
+    let placement: ToolbarItemPlacement
+    let isLoading: Bool
+
+    var body: some ToolbarContent {
+        if #available(iOS 26, *) {
+            ToolbarItem(placement: placement) { indicator }
+                .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: placement) { indicator }
+        }
+    }
+    private var indicator: some View {
+        LoadingIndicator(isLoading: isLoading, label: "正在载入工坊")
+            .controlSize(.small)
+            .frame(width: 24, height: 24)
+    }
+}
+
 struct WorkshopRow: View {
     let workshop: PersonalWorkshop
     var body: some View {

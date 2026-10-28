@@ -82,7 +82,7 @@ private struct ApplicationCacheUpdateNotice: View {
             Label("更新已就绪，下次重新打开生效", systemImage: "checkmark.circle")
                 .font(.footnote).foregroundStyle(.secondary)
         } else if let revision = store.runningRevisions[key], revision != .distantPast || store.entry(for: application) != nil {
-            ApplicationLaunchSourceLabel(revision: revision).font(.footnote)
+            ApplicationLaunchSourceLabel(revision: revision, staticResources: ApplicationStaticResourcePolicy.supports(application)).font(.footnote)
         }
     }
 }

@@ -1,4 +1,5 @@
 import Combine
+import CryptoKit
 import Foundation
 
 @MainActor
@@ -90,16 +91,17 @@ final class SupportCenterStore: ObservableObject {
         }
     }
 
-    func submit(product: String, category: String, description: String) async {
+    func submit(product: String, category: String, description: String, screenshots: [FeedbackScreenshot] = []) async {
         guard isCurrent, let connected, !isLoading, !isSubmitting, savedReceipt == nil else { return }
         let boundary = scope, operation = UUID()
         operationID = operation; isSubmitting = true; error = nil
         let input = [product, category, description.trimmingCharacters(in: .whitespacesAndNewlines)]
+            + screenshots.map { SHA256.hash(data: $0.data).map { String(format: "%02x", $0) }.joined() }
         if input != lastSubmission { lastSubmission = input; submissionKey = UUID().uuidString }
         defer { if operationID == operation { isSubmitting = false } }
         do {
             let receipt = try await service.submit(product: product, category: category, description: input[2],
-                                                   key: submissionKey, access: connected)
+                                                   screenshots: screenshots, key: submissionKey, access: connected)
             try check(boundary, operation)
             savedReceipt = receipt
         } catch {

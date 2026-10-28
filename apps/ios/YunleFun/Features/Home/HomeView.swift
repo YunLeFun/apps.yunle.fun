@@ -85,6 +85,7 @@ struct HomeView: View {
             } else if library.snapshot.applications.isEmpty && library.snapshot.dockApplications.isEmpty {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
+                        catalogStatus
                         syncStatus
                         runningApplicationsLink
                         ContentStateView(title: "把喜欢的应用带回云居", systemImage: "square.grid.2x2",
@@ -121,15 +122,31 @@ struct HomeView: View {
         }
         .haptic(.selection, trigger: pinChanges)
         .refreshable {
-            isRefreshing = true
-            defer { isRefreshing = false }
-            await sync.recheck()
-            await loadMembership(force: true)
+            let identity = accounts.identityGeneration
+            // State updates can replace SwiftUI's refresh action and cancel its task.
+            // Keep this explicit user request alive until the data refresh finishes.
+            await Task { @MainActor in
+                guard identity == accounts.identityGeneration, !isRefreshing else { return }
+                isRefreshing = true
+                defer { isRefreshing = false }
+                await refreshCatalog()
+                guard identity == accounts.identityGeneration else { return }
+                await sync.recheck()
+                guard identity == accounts.identityGeneration else { return }
+                await loadMembership(force: true)
+            }.value
         }
         .navigationTitle("云居")
         // Read membership once per identity, and again when it is unknown or stale on returning to the app.
         .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembership() }
-        .onChange(of: scenePhase) { if $0 == .active { Task { await loadMembership() } } }
+        .onChange(of: scenePhase) {
+            if $0 == .active {
+                Task {
+                    if catalog.error != nil { await refreshCatalog() }
+                    await loadMembership()
+                }
+            }
+        }
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .general) }
         .sheet(item: $openFolder) { HomeFolderView(folderID: $0.id) }
         .toolbar {
@@ -264,6 +281,29 @@ struct HomeView: View {
         app.refreshingPublicMetadata(with: catalog.application(id: app.id))
     }
 
+    private func refreshCatalog() async {
+        await catalog.load()
+        library.updateCatalog(catalog.applications,
+            markingMissingPublicAppsUnavailable: catalog.error == nil && catalog.successfulLoadID != nil)
+    }
+
+    @ViewBuilder private var catalogStatus: some View {
+        if catalog.isLoading && (library.snapshot.applications + library.snapshot.dockApplications).contains(where: { $0.isUnavailable == true }) {
+            ProgressView("正在载入应用信息")
+                .accessibilityIdentifier("home.catalog.loading")
+        } else if let error = catalog.error {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("应用信息载入失败", systemImage: "wifi.exclamationmark")
+                Text(error).foregroundStyle(.secondary)
+                Button("重新载入应用") { Task { await refreshCatalog() } }
+                    .buttonStyle(.bordered)
+                    .disabled(catalog.isLoading)
+                    .accessibilityIdentifier("home.catalog.retry")
+            }
+            .font(.subheadline)
+        }
+    }
+
     @ViewBuilder private var syncStatus: some View {
         if sync.isActive {
             switch sync.phase {
@@ -309,6 +349,7 @@ struct HomeView: View {
     }
 
     @ViewBuilder private var homeSections: some View {
+        catalogStatus
         syncStatus
         runningApplicationsLink
         // The dock leads, as a pinned shelf under the title; edit mode keeps

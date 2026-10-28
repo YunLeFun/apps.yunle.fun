@@ -6,6 +6,74 @@ import XCTest
 
 @MainActor
 final class HomeLayoutVisualTests: XCTestCase {
+    func testHomeRefreshRecoversApplicationMetadataAfterCatalogFailure() async throws {
+        let configuration = HomeConfiguration(installedApps: [.init(appId: "air-conditioner")])
+        let remote = RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: configuration)
+        let catalog = HomeCatalogRecoveryFixture()
+        let fixture = try await HomeStateFixture(service: HomeStateService(remote: remote), catalogService: catalog)
+        defer { fixture.close() }
+        try fixture.library.adopt(remote)
+        await fixture.catalog.load()
+        XCTAssertNotNil(fixture.catalog.error)
+        let missing = try await fixture.readScreen(named: "home-catalog-missing", containing: "暂不可用", test: self)
+        XCTAssertTrue(missing.contains("暂不可用"))
+        try fixture.pullToRefresh()
+        let recovered = try await fixture.readScreen(named: "home-catalog-recovered", containing: "云空调", test: self)
+        XCTAssertTrue(recovered.contains("云空调"), "Refreshing home must retry missing application metadata")
+        XCTAssertNil(fixture.catalog.error)
+        XCTAssertEqual(fixture.library.snapshot.configuration.installedApps, configuration.installedApps)
+    }
+
+    func testHomeRefreshCannotRecheckAnotherAccountsManualSyncConflict() async throws {
+        let gate = HomeStateLoadGate()
+        let remote = RemoteHomeScreen(revision: String(repeating: "a", count: 64),
+            configuration: HomeConfiguration(installedApps: [.init(appId: "air-conditioner")]))
+        let service = HomeStateService(remote: remote)
+        let fixture = try await HomeStateFixture(service: service, catalogService: HomeCatalogGatedFixture(gate: gate),
+                                                 additionalAccountID: "home-state-other")
+        defer { fixture.close(); Task { await gate.open() } }
+        try fixture.library.adopt(remote)
+        _ = try await fixture.readScreen(named: "home-refresh-before-account-switch", containing: "暂不可用", test: self)
+        let originalIdentity = fixture.accounts.identityGeneration
+        try fixture.pullToRefresh()
+        try await gate.waitUntilEntered()
+
+        try await fixture.accounts.select("home-state-other")
+        XCTAssertNotEqual(fixture.accounts.identityGeneration, originalIdentity)
+        fixture.library.activateAccount("home-state-other")
+        fixture.library.setAutoSyncEnabled(false)
+        fixture.library.setSyncEnabled(true)
+        fixture.sync.identityChanged()
+        fixture.library.add(CloudApplication(id: "other-local-app", name: "另一个账号的本机应用",
+                                            websiteUrl: "https://other-local.invalid"))
+        await fixture.sync.synchronize()
+        guard case .conflict(let conflict) = fixture.sync.phase else {
+            XCTFail("The second account must have an unresolved manual-sync conflict before releasing the catalog")
+            return
+        }
+        let snapshot = fixture.library.snapshot
+        let unexpectedSync = expectation(description: "The first account's refresh must not start requests for the second account")
+        unexpectedSync.isInverted = true
+        await service.observeRequests { unexpectedSync.fulfill() }
+        await gate.open()
+        let deadline = Date().addingTimeInterval(5)
+        while fixture.catalog.successfulLoadID == nil && Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertNotNil(fixture.catalog.successfulLoadID, "The public catalog may finish after an account switch")
+        await fulfillment(of: [unexpectedSync], timeout: 0.5)
+
+        let loads = await service.loadUsers, saves = await service.saveUsers
+        XCTAssertEqual(loads, ["home-state-other"], "Only the second account's explicit conflict check may reach the cloud")
+        XCTAssertTrue(saves.isEmpty)
+        XCTAssertEqual(fixture.sync.phase, .conflict(conflict), "An older account's refresh must preserve the current conflict")
+        XCTAssertEqual(fixture.library.snapshot.configuration, snapshot.configuration)
+        XCTAssertEqual(fixture.library.snapshot.mutationId, snapshot.mutationId)
+        XCTAssertEqual(fixture.library.snapshot.base, snapshot.base)
+        XCTAssertTrue(fixture.library.snapshot.syncEnabled)
+        XCTAssertFalse(fixture.library.snapshot.autoSyncEnabled)
+    }
+
     func testUnavailableStatusExplainsDelistingWithoutRemovingTheInstallation() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -54,6 +122,35 @@ final class HomeLayoutVisualTests: XCTestCase {
         defer { fixture.close() }
         let text = try await fixture.readScreen(named: "home-workspace-picker", containing: "灵感工坊", test: self)
         XCTAssertTrue(text.contains("我的云居")); XCTAssertTrue(text.contains("云乐坊私有工坊")); XCTAssertTrue(text.contains("灵感工坊"))
+    }
+
+    func testRefreshingWorkspacePickerKeepsItsRowsInPlace() async throws {
+        let gate = HomeStateLoadGate()
+        let fixture = try await HomeStateFixture(service: HomeStateService(),
+            workshopService: HomeWorkspaceServiceFixture(listReloadGate: gate), workspaceID: "ABC234", workspacePicker: true)
+        defer { fixture.close(); Task { await gate.open() } }
+        _ = try await fixture.readScreen(named: "workspace-before-refresh", containing: "灵感工坊", test: self)
+        let labels = ["我的云居", "灵感工坊", "管理与加入工坊"]
+        func bounds(for label: String) throws -> CGRect {
+            // Vision can include a nearby SF Symbol in the same text observation.
+            try XCTUnwrap(fixture.visibleTextBounds.first { $0.key.contains(label) }?.value)
+        }
+        let before = try labels.map { try bounds(for: $0) }
+        let model = try XCTUnwrap(fixture.workspaceStore)
+        let refreshing = Task { await model.refresh() }
+        try await gate.waitUntilEntered()
+        try await Task.sleep(nanoseconds: 300_000_000)
+        _ = try await fixture.readScreen(named: "workspace-during-refresh", containing: "灵感工坊", test: self)
+        for (label, initial) in zip(labels, before) {
+            let during = try bounds(for: label)
+            XCTAssertEqual(during.minY, initial.minY, accuracy: 0.005, "Refreshing must not move \(label)")
+        }
+        await gate.open(); await refreshing.value
+        _ = try await fixture.readScreen(named: "workspace-after-refresh", containing: "灵感工坊", test: self)
+        for (label, initial) in zip(labels, before) {
+            let after = try bounds(for: label)
+            XCTAssertEqual(after.minY, initial.minY, accuracy: 0.005)
+        }
     }
 
     func testWorkspaceSwitcherKeepsPersonalHomeReachableAtLargestText() async throws {
@@ -380,6 +477,7 @@ private final class HomeStateFixture {
     let runtime: NativeWebRuntime
     let sync: HomeSyncCoordinator
     let workspaceDefaults: UserDefaults
+    let workspaceStore: MyWorkshopsStore?
     private let defaultsSuite: String
     private let iconFixtureHosts: Set<String>
     private(set) var visibleTextBounds: [String: CGRect] = [:]
@@ -396,20 +494,30 @@ private final class HomeStateFixture {
 
     init(service: HomeStateService, size: DynamicTypeSize = .large, dark: Bool = false,
          width: CGFloat = 390, height: CGFloat = 844,
-         workshopService: WorkshopServing? = nil, workspaceID: String = "", workspacePicker: Bool = false) async throws {
+         workshopService: WorkshopServing? = nil, workspaceID: String = "", workspacePicker: Bool = false,
+         catalogService: CatalogServing = CatalogService(), additionalAccountID: String? = nil) async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let authHost = UUID().uuidString.lowercased() + ".home-state.test"
-        let auth = AuthHTTPFixture(replies: [(200, #"{"sub":"home-state-user","status":"ACTIVE"}"#)])
+        var authReplies = [(200, #"{"sub":"home-state-user","status":"ACTIVE"}"#)]
+        if let additionalAccountID {
+            let response = try JSONSerialization.data(withJSONObject: ["sub": additionalAccountID, "status": "ACTIVE"])
+            authReplies.append((200, String(decoding: response, as: UTF8.self)))
+        }
+        let auth = AuthHTTPFixture(replies: authReplies)
         AuthHTTPProtocol.register(authHost, fixture: auth)
         let configuration = URLSessionConfiguration.ephemeral; configuration.protocolClasses = [AuthHTTPProtocol.self]
         var state = AccountVaultState(); state.activeID = "home-state-user"
         state.accounts = [SavedAccount(user: AccountUser(id: "home-state-user"), credential: AccountCredential(
             accessToken: "home-state-fixture-only", refreshToken: "not-used", expiresAt: Date().addingTimeInterval(3600)))]
+        if let additionalAccountID {
+            state.accounts.append(SavedAccount(user: AccountUser(id: additionalAccountID), credential: AccountCredential(
+                accessToken: "home-state-other-fixture-only", refreshToken: "not-used", expiresAt: Date().addingTimeInterval(3600))))
+        }
         let accounts = AccountStore(session: AccountSession(api: CloudbaseAuthService(session: URLSession(configuration: configuration),
             origin: URL(string: "https://\(authHost)")!), vault: BillingMemoryVault(data: try JSONEncoder().encode(state))))
         await accounts.restore()
         XCTAssertEqual(accounts.user?.id, "home-state-user")
-        let catalog = CatalogStore(cacheURL: directory.appendingPathComponent("catalog.json"))
+        let catalog = CatalogStore(service: catalogService, cacheURL: directory.appendingPathComponent("catalog.json"))
         let library = HomeLibrary(directory: directory.appendingPathComponent("home"), accountID: "home-state-user")
         library.setAutoSyncEnabled(false)
         let runtime = NativeWebRuntime()
@@ -432,9 +540,10 @@ private final class HomeStateFixture {
                 _ = try await iconPipeline.load([candidate], pixelSize: Int(HomeGridMetrics.iconSize * UIScreen.main.scale))
             }
         }
+        let workspaceStore = workshopService.map { MyWorkshopsStore(accounts: accounts, service: $0) }
         let content = Group {
-            if workspacePicker, let workshopService {
-                HomeWorkspacePicker(accounts: accounts, workshops: MyWorkshopsStore(accounts: accounts, service: workshopService),
+            if workspacePicker, let workspaceStore {
+                HomeWorkspacePicker(accounts: accounts, workshops: workspaceStore,
                     selectedID: Binding(get: { workspaceDefaults.string(forKey: HomeWorkspaceView.selectionKey(userID: accounts.user?.id)) ?? "" },
                                         set: { workspaceDefaults.set($0, forKey: HomeWorkspaceView.selectionKey(userID: accounts.user?.id)) }))
             } else {
@@ -456,6 +565,7 @@ private final class HomeStateFixture {
         self.accounts = accounts; self.catalog = catalog; self.library = library
         self.runtime = runtime; self.sync = sync; self.controller = controller
         self.workspaceDefaults = workspaceDefaults; self.defaultsSuite = defaultsSuite
+        self.workspaceStore = workspaceStore
         self.iconFixtureHosts = iconHosts
         previous = scene.windows.first(where: \.isKeyWindow)
         window = UIWindow(windowScene: scene)
@@ -465,6 +575,15 @@ private final class HomeStateFixture {
         window.rootViewController = controller; window.makeKeyAndVisible()
         runtime.configureAuthorization(accounts: accounts)
         runtime.anchor = controller
+    }
+
+    func pullToRefresh() throws {
+        func control(in view: UIView) -> UIRefreshControl? {
+            if let refresh = (view as? UIScrollView)?.refreshControl { return refresh }
+            return view.subviews.lazy.compactMap { control(in: $0) }.first
+        }
+        let refresh = try XCTUnwrap(control(in: controller.view))
+        refresh.sendActions(for: .valueChanged)
     }
 
     func readScreen(named name: String, containing expected: String, scrollToFind: Bool = false, test: XCTestCase) async throws -> String {
@@ -606,15 +725,37 @@ private final class HomeStateFixture {
     }
 }
 
+private actor HomeCatalogRecoveryFixture: CatalogServing {
+    private var requests = 0
+    func applications() async throws -> [CloudApplication] {
+        requests += 1
+        if requests == 1 { throw URLError(.notConnectedToInternet) }
+        return [CloudApplication(id: "public-ac", name: "云空调", slug: "air-conditioner", marketShortName: "air-conditioner",
+                                 websiteUrl: "https://ac.yunyoujun.cn", emoji: "❄️")]
+    }
+}
+
+private struct HomeCatalogGatedFixture: CatalogServing {
+    let gate: HomeStateLoadGate
+    func applications() async throws -> [CloudApplication] {
+        await gate.wait()
+        return [CloudApplication(id: "public-ac", name: "云空调", slug: "air-conditioner", marketShortName: "air-conditioner",
+                                 websiteUrl: "https://ac.yunyoujun.cn", emoji: "❄️")]
+    }
+}
+
 private struct HomeWorkspaceServiceFixture: WorkshopServing {
     var access: WorkshopAccess = .active
     var firstPageGate: HomeStateLoadGate?
+    var listReloadGate: HomeStateLoadGate?
+    let listLoads = HomeWorkspaceListLoads()
     private func workshop(_ id: String) -> PersonalWorkshop {
         PersonalWorkshop(id: id, ownerName: "云乐坊", ownerAvatar: nil,
             name: id == "ABC234" ? "云乐坊私有工坊" : "灵感工坊", description: nil, joinPolicy: .closed, status: .active, ownerUid: "home-state-user")
     }
     func mine(identity: AuthorizedAccount) async throws -> WorkshopManagement? {
-        WorkshopManagement(workshop: workshop("ABC234"), pending: [], guests: [], blocked: [])
+        if let listReloadGate, await listLoads.isReload() { await listReloadGate.wait() }
+        return WorkshopManagement(workshop: workshop("ABC234"), pending: [], guests: [], blocked: [])
     }
     func joined(identity: AuthorizedAccount) async throws -> [PersonalWorkshop] { [workshop("ABC234"), workshop("DEF567")] }
     func page(id: String, identity: AuthorizedAccount?) async throws -> WorkshopPage {
@@ -639,23 +780,36 @@ private struct HomeWorkspaceServiceFixture: WorkshopServing {
     func decide(id: String, member: WorkshopMembership, action: WorkshopDecision, identity: AuthorizedAccount) async throws -> WorkshopMembership { throw WorkshopError.forbidden }
 }
 
+private actor HomeWorkspaceListLoads {
+    private var count = 0
+    func isReload() -> Bool { count += 1; return count > 1 }
+}
+
 private actor HomeStateService: HomeSyncServing {
     private let remote: RemoteHomeScreen
     private let failure: Error?
     private let gate: HomeStateLoadGate?
+    private(set) var loadUsers: [String] = []
+    private(set) var saveUsers: [String] = []
+    private var requestObserver: (@Sendable () -> Void)?
     init(remote: RemoteHomeScreen = RemoteHomeScreen(revision: nil, configuration: HomeConfiguration()),
          failure: Error? = nil, gate: HomeStateLoadGate? = nil) {
         self.remote = remote; self.failure = failure; self.gate = gate
     }
     func load(identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
+        loadUsers.append(identity.userID)
+        requestObserver?()
         await gate?.wait()
         if let failure { throw failure }
         return remote
     }
     func save(_ write: HomeScreenWrite, identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
+        saveUsers.append(identity.userID)
+        requestObserver?()
         XCTFail("Rendering a home state must not publish local configuration")
         throw HomeSyncError.unavailable
     }
+    func observeRequests(_ observer: @escaping @Sendable () -> Void) { requestObserver = observer }
 }
 
 private actor HomeStateLoadGate {

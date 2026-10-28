@@ -61,6 +61,11 @@ final class NativeWebRuntime: ObservableObject {
             namespace: CloudbaseAuthService.gateway.absoluteString)
         self.personalMarketService = personalMarketService
         self.publishingService = publishingService
+        self.applicationCache.staticResources.profile = { [weak self] app in
+            guard let self, #available(iOS 17, *) else { throw ApplicationCacheError.unsupported }
+            return try self.webProfiles.select(self.profileAccountID.map(WebProfileRepository.Principal.account) ?? .guest,
+                                               application: app).identifier
+        }
         memoryObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: .main
         ) { [weak self] _ in Task { @MainActor in self?.releasePausedSessions() } }
@@ -285,6 +290,9 @@ final class NativeWebRuntime: ObservableObject {
                     let selected = try webProfiles.select(profileAccountID.map(WebProfileRepository.Principal.account) ?? .guest, application: app)
                     profile = selected
                     controller.websiteDataStore = WKWebsiteDataStore(forIdentifier: selected.identifier)
+                    if let origin = ApplicationStaticResourcePolicy.origin(for: url) {
+                        applicationCache.staticResources.register(selected.identifier, origin: origin)
+                    }
                 } catch {
                     issue = RuntimeIssue(title: "无法安全打开应用", message: "原有应用数据已保留。请稍后重试。")
                     return
@@ -303,6 +311,16 @@ final class NativeWebRuntime: ObservableObject {
                     do { snapshot = try await self.applicationCache.repository.snapshot(for: app) }
                     catch { snapshot = nil; unreadable = error }
                     guard self.identityReset == identity, self.sessions[app.id]?.browser === controller else { return }
+                    if #available(iOS 17, *), ApplicationStaticResourcePolicy.supports(app) {
+                        // Always navigate to the live server. Only public subresources
+                        // can come from the selected account/application's HTTP cache.
+                        let receipt = snapshot.flatMap { try? JSONDecoder().decode(ApplicationStaticResourceReceipt.self, from: $0.archive) }
+                        let matches = receipt?.profileIdentifier == web.configuration.websiteDataStore.identifier
+                        self.applicationCache.sessionStarted(app, revision: matches ? snapshot?.entry.downloadedAt : nil)
+                        self.launchLogger.notice("application=\(app.id, privacy: .public) source=live-page public-resource-cache=\(matches, privacy: .public)")
+                        web.load(ApplicationStaticResourcePolicy.navigationRequest(to: url))
+                        return
+                    }
                     self.applicationCache.sessionStarted(app, revision: snapshot?.entry.downloadedAt)
                     if let snapshot {
                         controller.initialContentFailure = { [weak self, weak controller] web in

@@ -33,6 +33,7 @@ final class ApplicationCacheStore: ObservableObject {
     }
 
     let repository: ApplicationCacheRepository
+    let staticResources: ApplicationStaticResourceCache
     static let automaticUpdateInterval: TimeInterval = 24 * 60 * 60
     private static let enabledKey = "applicationCache.automaticUpdates"
     private static let wifiKey = "applicationCache.wifiOnly"
@@ -59,6 +60,7 @@ final class ApplicationCacheStore: ObservableObject {
 
     init(repository: ApplicationCacheRepository = ApplicationCacheRepository(),
          defaults: UserDefaults = .standard,
+         staticResources: ApplicationStaticResourceCache? = nil,
          monitor: ApplicationCacheNetworkMonitoring? = nil,
          now: @escaping () -> Date = Date.init,
          makeAutomaticDownloader: @escaping @MainActor (Bool) -> ApplicationCacheDownloading = {
@@ -66,6 +68,7 @@ final class ApplicationCacheStore: ObservableObject {
          },
          makeDownloader: @escaping @MainActor () -> ApplicationCacheDownloading = { ApplicationCacheDownloader() }) {
         self.repository = repository; self.makeDownloader = makeDownloader
+        self.staticResources = staticResources ?? ApplicationStaticResourceCache(defaults: defaults)
         self.defaults = defaults; self.monitor = monitor ?? ApplicationCacheNetworkMonitor(); self.now = now
         self.makeAutomaticDownloader = makeAutomaticDownloader
         automaticUpdatesEnabled = defaults.bool(forKey: Self.enabledKey)
@@ -112,7 +115,6 @@ final class ApplicationCacheStore: ObservableObject {
         let operation = UUID(), id = ApplicationCacheEntry.key(for: application)
         operationID = operation
         downloadingID = id; downloadingName = application.name; progress = 0; message = nil; messageApplicationID = id; isAutomaticDownload = automatic
-        let downloader = automatic ? makeAutomaticDownloader(wifiOnly) : makeDownloader()
         task = Task { [self] in
             defer {
                 if operationID == operation {
@@ -121,6 +123,10 @@ final class ApplicationCacheStore: ObservableObject {
                 }
             }
             do {
+                let downloader: ApplicationCacheDownloading
+                if ApplicationStaticResourcePolicy.supports(application) {
+                    downloader = try staticResources.downloader(for: application, wifiOnly: automatic && wifiOnly)
+                } else { downloader = automatic ? makeAutomaticDownloader(wifiOnly) : makeDownloader() }
                 let data = try await downloader.download(url) { [weak self] value in
                     guard let self, self.operationID == operation, !Task.isCancelled else { return }
                     self.progress = value
@@ -170,6 +176,7 @@ final class ApplicationCacheStore: ObservableObject {
         // Wait for any in-flight atomic write before deletion, so late downloads cannot recreate the cache.
         await task?.value
         do {
+            await staticResources.clear(id: id)
             if let id { try await repository.remove(id: id); retries[id] = nil; updatesReady.remove(id) }
             else { try await repository.removeAll(); retries.removeAll(); updatesReady.removeAll() }
             persistRetries()

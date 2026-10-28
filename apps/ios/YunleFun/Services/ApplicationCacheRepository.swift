@@ -8,15 +8,23 @@ struct ApplicationCacheEntry: Codable, Identifiable, Equatable {
     let downloadedAt: Date
     let byteCount: Int
     let resourceCount: Int
+    var kind: String? = nil
+    var isStaticResources: Bool { kind == "public-resources-v1" }
 
     static func key(for application: CloudApplication) -> String {
-        let value = [application.id, application.runtimeScope, application.launchURL?.absoluteString ?? ""]
+        let value: [String]
+        if let url = application.launchURL, let origin = ApplicationStaticResourcePolicy.origin(for: url) {
+            value = ["public-resources-v1", origin.absoluteString]
+        } else { value = [application.id, application.runtimeScope, application.launchURL?.absoluteString ?? ""] }
         let data = (try? JSONEncoder().encode(value)) ?? Data()
         return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
     static func supports(_ application: CloudApplication) -> Bool {
-        application.canOpenAsGuest && application.runtimeScope == "public"
+        if let url = application.launchURL, ApplicationStaticResourcePolicy.origin(for: url) != nil {
+            return ApplicationStaticResourcePolicy.supports(application)
+        }
+        return application.canOpenAsGuest && application.runtimeScope == "public"
     }
 }
 
@@ -25,7 +33,7 @@ enum ApplicationCacheError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notCacheable: return "这个网站不允许保存下载缓存，请在线使用。"
-        case .unsupported: return "暂时只支持下载云乐坊中公开、免费的应用。"
+        case .unsupported: return "支持公开免费应用；管理后台与支持中心可在 iOS 17 及以上缓存公共资源。"
         case .invalidArchive: return "缓存内容不完整，请重新下载。"
         case .tooLarge: return "这个应用的下载缓存超过 25 MB，暂时无法保存。"
         case .quotaExceeded: return "下载缓存已达到 200 MB 上限，请先清理部分应用。"
@@ -65,7 +73,8 @@ actor ApplicationCacheRepository {
     }
 
     func archive(for application: CloudApplication) throws -> Data? {
-        try snapshot(for: application)?.archive
+        let snapshot = try snapshot(for: application)
+        return snapshot?.entry.isStaticResources == true ? nil : snapshot?.archive
     }
 
     func snapshot(for application: CloudApplication) throws -> (entry: ApplicationCacheEntry, archive: Data)? {
@@ -73,7 +82,8 @@ actor ApplicationCacheRepository {
         let url = file(for: ApplicationCacheEntry.key(for: application))
         guard fileManager.fileExists(atPath: url.path) else { return nil }
         let record = try read(url)
-        guard record.entry.id == ApplicationCacheEntry.key(for: application), record.entry.launchURL == application.launchURL else {
+        guard record.entry.id == ApplicationCacheEntry.key(for: application),
+              record.entry.isStaticResources || record.entry.launchURL == application.launchURL else {
             throw ApplicationCacheError.invalidArchive
         }
         return (record.entry, record.archive)
@@ -82,17 +92,26 @@ actor ApplicationCacheRepository {
     func save(_ archive: Data, for application: CloudApplication, now: Date = Date()) throws {
         try Task.checkCancellation()
         guard ApplicationCacheEntry.supports(application), let launchURL = application.launchURL else { throw ApplicationCacheError.unsupported }
-        let count = try Self.validate(archive, launchURL: launchURL)
+        let receipt: ApplicationStaticResourceReceipt?
+        if ApplicationStaticResourcePolicy.supports(application) {
+            let decoded = try JSONDecoder().decode(ApplicationStaticResourceReceipt.self, from: archive)
+            try decoded.validate(for: launchURL); receipt = decoded
+        } else { receipt = nil }
+        let count = try receipt?.resources.count ?? Self.validate(archive, launchURL: launchURL)
         let id = ApplicationCacheEntry.key(for: application)
-        let entry = ApplicationCacheEntry(id: id, application: application, launchURL: launchURL,
-                                          downloadedAt: now, byteCount: archive.count, resourceCount: count)
+        var storedApplication = application
+        if let receipt { storedApplication.websiteUrl = receipt.origin.absoluteString }
+        let entry = ApplicationCacheEntry(id: id, application: storedApplication, launchURL: receipt?.origin ?? launchURL,
+                                          downloadedAt: now, byteCount: receipt?.byteCount ?? archive.count, resourceCount: count,
+                                          kind: receipt == nil ? nil : "public-resources-v1")
         let record = Record(version: 1, entry: entry, archive: archive, digest: Data(SHA256.hash(data: archive)))
         let encoder = PropertyListEncoder(); encoder.outputFormat = .binary
         let data = try encoder.encode(record)
         let existingBytes = try files().filter { $0 != file(for: id) }.reduce(0) { sum, url in
-            sum + (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0)
+            let bytes = try (try? read(url).entry.byteCount) ?? (url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0)
+            return sum + bytes
         }
-        guard existingBytes + data.count <= totalLimit else { throw ApplicationCacheError.quotaExceeded }
+        guard existingBytes + max(entry.byteCount, data.count) <= totalLimit else { throw ApplicationCacheError.quotaExceeded }
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
         try Task.checkCancellation()
         try data.write(to: file(for: id), options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
@@ -120,9 +139,16 @@ actor ApplicationCacheRepository {
         let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
         guard size <= Self.maximumArchiveBytes + 1024 * 1024 else { throw ApplicationCacheError.tooLarge }
         let record = try PropertyListDecoder().decode(Record.self, from: Data(contentsOf: url))
-        guard record.version == 1, record.entry.byteCount == record.archive.count,
+        guard record.version == 1,
               record.digest == Data(SHA256.hash(data: record.archive)) else { throw ApplicationCacheError.invalidArchive }
-        _ = try Self.validate(record.archive, launchURL: record.entry.launchURL)
+        if record.entry.isStaticResources {
+            let receipt = try JSONDecoder().decode(ApplicationStaticResourceReceipt.self, from: record.archive)
+            try receipt.validate(for: record.entry.launchURL)
+            guard record.entry.byteCount == receipt.byteCount, record.entry.resourceCount == receipt.resources.count else { throw ApplicationCacheError.invalidArchive }
+        } else {
+            guard record.entry.kind == nil, record.entry.byteCount == record.archive.count else { throw ApplicationCacheError.invalidArchive }
+            _ = try Self.validate(record.archive, launchURL: record.entry.launchURL)
+        }
         return record
     }
 

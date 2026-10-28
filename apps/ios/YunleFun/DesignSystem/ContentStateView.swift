@@ -1,5 +1,41 @@
 import SwiftUI
 
+/// A quiet system indicator shared by page overlays and toolbar items.
+/// Fast requests finish before it appears; cancellation never leaves it visible.
+struct LoadingIndicator: View {
+    var isLoading = true
+    var label = "正在载入"
+    @State private var isVisible = false
+
+    var body: some View {
+        ProgressView()
+            .progressViewStyle(.circular)
+            .opacity(isLoading && isVisible ? 1 : 0)
+            .accessibilityLabel(Text(label))
+            .accessibilityHidden(!isLoading || !isVisible)
+            .allowsHitTesting(false)
+            .task(id: isLoading) {
+                isVisible = false
+                guard isLoading else { return }
+                do { try await Task.sleep(nanoseconds: 200_000_000) }
+                catch { return }
+                guard !Task.isCancelled else { return }
+                isVisible = true
+            }
+    }
+}
+
+extension View {
+    /// Attach to the page container so loading never inserts a row or shifts content.
+    /// Pull-to-refresh supplies its own indicator; callers suppress this one while refreshing.
+    func loadingOverlay(_ isLoading: Bool, label: String = "正在载入", alignment: Alignment = .top) -> some View {
+        overlay(alignment: alignment) {
+            LoadingIndicator(isLoading: isLoading, label: label)
+                .padding(16)
+        }
+    }
+}
+
 struct ContentStateView: View {
     let title: String
     let systemImage: String

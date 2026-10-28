@@ -27,11 +27,12 @@ struct HomeWorkspaceView: View {
     static func selectionKey(userID: String?) -> String { "home.workshopSelection." + (userID.map { "account." + $0 } ?? "guest") }
     private var selectedWorkshop: PersonalWorkshop? { workshops.switchableWorkshops.first { $0.id == selectedID } }
     private var title: String { selectedID.isEmpty ? "我的云居" : (selectedWorkshop?.name ?? "工坊云居") }
+    private var isLoadingSelection: Bool { workshops.isLoading || (!workshops.hasLoaded && workshops.error == nil) }
 
     var body: some View {
         Group {
             if identity != accounts.identityGeneration {
-                ProgressView("正在切换账号")
+                Color.clear.loadingOverlay(true, label: "正在切换账号", alignment: .center)
             } else if selectedID.isEmpty {
                 HomeView(browse: browse)
             } else if let workshop = selectedWorkshop {
@@ -39,38 +40,37 @@ struct HomeWorkspaceView: View {
                     .id(workshop.id)
             } else {
                 ScrollView {
-                    if workshops.isLoading || (!workshops.hasLoaded && workshops.error == nil) {
-                        ProgressView("正在载入工坊")
-                    } else {
+                    if !isLoadingSelection {
                         ContentStateView(title: "暂时无法载入工坊", systemImage: "person.2.crop.square.stack",
                             message: workshops.error ?? "这个工坊已不在当前账号的工坊列表中。",
                             actionTitle: "重试") { Task { await refreshWorkshops() } }
                         Button("返回我的云居") { selectedID = "" }.buttonStyle(.bordered)
                     }
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .loadingOverlay(isLoadingSelection, label: "正在载入工坊")
                 .navigationTitle("云居")
             }
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            Button { showPicker = true } label: {
-                HStack(spacing: 8) {
-                    if !dynamicTypeSize.isAccessibilitySize {
-                        Image(systemName: selectedID.isEmpty ? "house" : "person.2.crop.square.stack")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Button { showPicker = true } label: {
+                    HStack(spacing: 5) {
+                        Text(dynamicTypeSize.isAccessibilitySize ? "云居" : title)
+                            .font(.headline).lineLimit(1).truncationMode(.tail)
+                        Image(systemName: "chevron.down").font(.caption2.weight(.semibold))
                     }
-                    Text(dynamicTypeSize.isAccessibilitySize ? "工坊" : title).lineLimit(1)
-                    Image(systemName: "chevron.down").font(.caption.weight(.semibold))
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
                 }
-                .padding(.horizontal, 4).padding(.vertical, 2)
+                .buttonStyle(.plain)
+                .accessibilityLabel("切换云居")
+                .accessibilityValue(title)
+                .accessibilityIdentifier("home.workspace.switch")
             }
-            .modifier(WorkspaceSwitcherStyle())
-            .accessibilityLabel("切换工坊")
-            .accessibilityValue(title)
-            .accessibilityIdentifier("home.workspace.switch")
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16).padding(.vertical, 8)
         }
-        .task { await refreshWorkshops() }
+        .task { await refreshWorkshops(ifNeeded: true) }
         .onChange(of: scenePhase) { if $0 == .active { Task { await refreshWorkshops() } } }
         .sheet(isPresented: $showPicker) {
             HomeWorkspacePicker(accounts: accounts, workshops: workshops, selectedID: $selectedID)
@@ -79,24 +79,13 @@ struct HomeWorkspaceView: View {
         }
     }
 
-    private func refreshWorkshops() async {
-        await workshops.refresh()
+    private func refreshWorkshops(ifNeeded: Bool = false) async {
+        if ifNeeded { await workshops.loadIfNeeded() }
+        else { await workshops.refresh() }
         guard identity == accounts.identityGeneration else { return }
         if accounts.user == nil { selectedID = "" }
         guard workshops.hasLoaded, workshops.error == nil else { return }
         if !selectedID.isEmpty && selectedWorkshop == nil { selectedID = "" }
-    }
-}
-
-private struct WorkspaceSwitcherStyle: ViewModifier {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    func body(content: Content) -> some View {
-        Group {
-            if #available(iOS 26, *) { content.buttonStyle(.glass) }
-            else { content.buttonStyle(.bordered) }
-        }
-        .buttonBorderShape(.capsule)
-        .controlSize(dynamicTypeSize.isAccessibilitySize ? .regular : .large)
     }
 }
 
@@ -106,36 +95,55 @@ struct HomeWorkspacePicker: View {
     @Binding var selectedID: String
     @Environment(\.dismiss) private var dismiss
     @State private var showLogin = false
+    @State private var isRefreshing = false
+
+    private var availableWorkshops: [PersonalWorkshop] {
+        guard accounts.user != nil, workshops.hasLoaded else { return [] }
+        return workshops.switchableWorkshops
+    }
+    private var isInitialLoad: Bool {
+        accounts.user != nil && !workshops.hasLoaded && workshops.error == nil
+    }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Button { select("") } label: {
-                        selectionRow("我的云居", systemImage: "house", selected: selectedID.isEmpty)
+                    Picker("云居", selection: $selectedID) {
+                        Label("我的云居", systemImage: "house")
+                            .tag("")
+                            .accessibilityIdentifier("home.workspace.personal")
+                        ForEach(availableWorkshops) { workshop in
+                            WorkspaceWorkshopLabel(name: workshop.name,
+                                detail: workshop.status == .disabled ? "工坊已暂停" : workshop.ownerName)
+                            .tag(workshop.id)
+                            .accessibilityIdentifier("home.workspace.\(workshop.id)")
+                        }
+                        if !selectedID.isEmpty && !availableWorkshops.contains(where: { $0.id == selectedID }) {
+                            Label("当前工坊", systemImage: "person.2.crop.square.stack")
+                                .tag(selectedID)
+                        }
                     }
-                    .accessibilityIdentifier("home.workspace.personal")
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                    if isInitialLoad {
+                        ForEach(0..<3) { _ in
+                            WorkspaceWorkshopLabel(name: "工坊名称", detail: "工坊创建者")
+                                .redacted(reason: .placeholder)
+                                .accessibilityHidden(true)
+                        }
+                    }
                 }
-                Section("我的工坊") {
-                    if accounts.user == nil {
+                if accounts.user == nil {
+                    Section("我的工坊") {
                         Text("登录后切换到你创建或加入的工坊。").foregroundStyle(.secondary)
                         Button("登录云乐坊") { showLogin = true }
-                    } else {
-                        WorkshopLoadStatus(isLoading: workshops.isLoading, error: workshops.error) { await workshops.refresh() }
-                        if workshops.hasLoaded && workshops.error == nil {
-                            if workshops.switchableWorkshops.isEmpty {
-                                Text("还没有可切换的工坊").foregroundStyle(.secondary)
-                            }
-                            ForEach(workshops.switchableWorkshops) { workshop in
-                                Button { select(workshop.id) } label: {
-                                    VStack(alignment: .leading, spacing: 5) {
-                                        selectionRow(workshop.name, systemImage: "person.2.crop.square.stack", selected: selectedID == workshop.id)
-                                        Text(workshop.status == .disabled ? "工坊已暂停" : workshop.ownerName)
-                                            .font(.subheadline).foregroundStyle(Color(uiColor: .secondaryLabel))
-                                    }
-                                }
-                                .accessibilityIdentifier("home.workspace.\(workshop.id)")
-                            }
+                    }
+                } else if workshops.error != nil || (workshops.hasLoaded && availableWorkshops.isEmpty) {
+                    Section("我的工坊") {
+                        WorkshopLoadStatus(isLoading: false, error: workshops.error) { await workshops.refresh() }
+                        if workshops.hasLoaded && workshops.error == nil && workshops.switchableWorkshops.isEmpty {
+                            Text("还没有可切换的工坊").foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -143,24 +151,38 @@ struct HomeWorkspacePicker: View {
                     NavigationLink { MyWorkshopsView() } label: { Label("管理与加入工坊", systemImage: "person.2.badge.gearshape") }
                 }
             }
-            .navigationTitle("切换工坊").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
-            .task { await workshops.refresh() }
-            .refreshable { await workshops.refresh() }
+            .transaction { $0.animation = nil }
+            .navigationTitle("切换云居").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                WorkshopLoadingToolbarItem(placement: .navigationBarLeading,
+                    isLoading: workshops.isLoading && !isRefreshing)
+                ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } }
+            }
+            .task { await workshops.loadIfNeeded() }
+            .refreshable {
+                isRefreshing = true
+                defer { isRefreshing = false }
+                await workshops.refresh()
+            }
+            .onChange(of: selectedID) { _ in dismiss() }
             .sheet(isPresented: $showLogin) { LoginView(continuationMessage: "登录后可在云居切换工坊。") }
         }
     }
+}
 
-    private func select(_ id: String) { selectedID = id; dismiss() }
-    private func selectionRow(_ name: String, systemImage: String, selected: Bool) -> some View {
-        HStack {
-            Label(name, systemImage: systemImage).foregroundStyle(Color.primary)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 12)
-            if selected { Image(systemName: "checkmark").foregroundStyle(.tint).accessibilityHidden(true) }
+private struct WorkspaceWorkshopLabel: View {
+    let name: String
+    let detail: String
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(name).foregroundStyle(.primary)
+                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: "person.2.crop.square.stack")
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(selected ? [.isSelected] : [])
     }
 }
 
@@ -174,6 +196,7 @@ struct HomeWorkshopView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.scenePhase) private var scenePhase
+    @State private var isRefreshing = false
     private let iconPipeline: ApplicationImagePipeline
 
     init(workshop: PersonalWorkshop, accounts: AccountStore, service: WorkshopServing = WorkshopService(),
@@ -207,10 +230,15 @@ struct HomeWorkshopView: View {
                 }
             }
         }
+        .loadingOverlay(isLoading && !isRefreshing, label: "正在载入工坊应用")
         .navigationTitle("云居")
         .task(id: accounts.identityGeneration) { await model.refresh() }
         .onChange(of: scenePhase) { if $0 == .active { Task { await model.refresh() } } }
-        .refreshable { await model.refresh() }
+        .refreshable {
+            isRefreshing = true
+            defer { isRefreshing = false }
+            await model.refresh()
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink { PublicWorkshopView(id: workshop.id) } label: { Label("工坊信息", systemImage: "info.circle") }
@@ -225,6 +253,8 @@ struct HomeWorkshopView: View {
         return page
     }
 
+    private var isLoading: Bool { model.isLoading || (model.page == nil && model.error == nil) }
+
     @ViewBuilder private var content: some View {
         status
         if let page = visiblePage {
@@ -236,8 +266,8 @@ struct HomeWorkshopView: View {
     }
 
     @ViewBuilder private var status: some View {
-        if model.isLoading || (model.page == nil && model.error == nil) {
-            ProgressView("正在载入工坊应用")
+        if isLoading {
+            EmptyView()
         } else if let error = model.error {
             ContentStateView(title: "暂时无法载入工坊", systemImage: "wifi.exclamationmark", message: error,
                              actionTitle: "重试") { Task { await model.refresh() } }

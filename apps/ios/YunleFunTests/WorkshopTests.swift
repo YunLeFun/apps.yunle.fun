@@ -127,6 +127,35 @@ final class WorkshopServiceTests: XCTestCase {
 
 @MainActor
 final class WorkshopStoreTests: XCTestCase {
+    func testReopeningWorkspaceChoicesReusesTheListButAccountSwitchReloadsIt() async {
+        let accounts = WorkshopAccounts("owner"), service = WorkshopFixture()
+        let store = MyWorkshopsStore(accounts: accounts, service: service)
+        await store.loadIfNeeded()
+        await store.loadIfNeeded()
+        let initialReads = await service.privateReads
+        XCTAssertEqual(initialReads, 2)
+        XCTAssertEqual(store.management?.workshop.ownerUid, "owner")
+        accounts.select("another")
+        await store.loadIfNeeded()
+        let switchedReads = await service.privateReads
+        XCTAssertEqual(switchedReads, 4)
+        XCTAssertEqual(store.management?.workshop.ownerUid, "another")
+    }
+
+    func testOpeningWorkspaceChoicesDuringTheHomeLoadDoesNotRestartIt() async {
+        let accounts = WorkshopAccounts("owner"), gate = WorkshopGate(), service = WorkshopFixture(loadGate: gate)
+        let store = MyWorkshopsStore(accounts: accounts, service: service)
+        let loading = Task { await store.loadIfNeeded() }
+        await fulfillment(of: [gate.entered], timeout: 3)
+        await store.loadIfNeeded()
+        let reads = await service.privateReads
+        XCTAssertEqual(reads, 2)
+        XCTAssertTrue(store.isLoading)
+        await gate.open(); await loading.value
+        XCTAssertTrue(store.hasLoaded)
+        XCTAssertFalse(store.isLoading)
+    }
+
     func testGuestManagementDoesNotRequestPrivateEndpoints() async {
         let accounts = WorkshopAccounts(nil), service = WorkshopFixture(), store = MyWorkshopsStore(accounts: accounts, service: service)
         await store.refresh()

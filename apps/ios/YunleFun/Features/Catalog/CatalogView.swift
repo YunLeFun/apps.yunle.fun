@@ -7,6 +7,7 @@ struct CatalogView: View {
     @State private var query = ""
     @State private var category = "全部"
     @State private var showScanner = false
+    @State private var isRefreshing = false
     @State private var returningShortcut: Shortcut?
     @AccessibilityFocusState(for: .voiceOver) private var focusedShortcut: Shortcut?
     private enum Shortcut: Hashable { case applications, workshops, lookup }
@@ -17,6 +18,7 @@ struct CatalogView: View {
 
     var body: some View {
         content
+        .loadingOverlay(catalog.isLoading && catalog.applications.isEmpty && !isRefreshing, label: "正在载入工坊")
         .navigationTitle("工坊")
         .onAppear {
             if let returningShortcut { focusedShortcut = returningShortcut; self.returningShortcut = nil }
@@ -24,7 +26,11 @@ struct CatalogView: View {
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .workshop) }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
-        .refreshable { await catalog.refreshWithIcons() }
+        .refreshable {
+            isRefreshing = true
+            defer { isRefreshing = false }
+            await catalog.refreshWithIcons()
+        }
         .animation(Motion.standard(reduceMotion: reduceMotion), value: category)
         .haptic(.selection, trigger: category)
         .toolbar {
@@ -55,7 +61,7 @@ struct CatalogView: View {
             }
             CatalogStatusView()
             if catalog.isLoading && catalog.applications.isEmpty {
-                ProgressView("正在载入工坊").frame(maxWidth: .infinity).padding()
+                EmptyView()
             } else if let error = catalog.error, catalog.applications.isEmpty {
                 ContentStateView(title: "暂时无法连接工坊", systemImage: "wifi.exclamationmark", message: error,
                                  actionTitle: "重试", action: { Task { await catalog.refreshWithIcons() } })

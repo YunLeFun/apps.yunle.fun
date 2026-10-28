@@ -31,15 +31,15 @@ asc --read-only testflight crashes log --submission-id SUBMISSION_ID
 
 全量分页查询得到 **1 条文字 / 截图反馈、0 条崩溃反馈**。
 
-| 字段 | 内容 |
-| --- | --- |
-| App | 云乐坊 · `6759859441` / `fun.yunle.apps` |
-| 反馈 ID | `ADHXHNjwvH2Te4xRVTRBg-g` |
-| 提交时间 | 2026-10-27 20:02:43（Asia/Shanghai） |
-| 构建 | `4` / `db510ccf-f118-46d2-9330-b5e05daf6ec5` |
-| 系统 | iOS 27.0.1 |
-| 用户原文 | 显示暂不支持下载，需要支持 |
-| 截图 | 「应用下载缓存」页面中的「云乐坊 · 管理后台」显示「暂不支持下载」，没有下载按钮 |
+| 字段     | 内容                                                                            |
+| -------- | ------------------------------------------------------------------------------- |
+| App      | 云乐坊 · `6759859441` / `fun.yunle.apps`                                        |
+| 反馈 ID  | `ADHXHNjwvH2Te4xRVTRBg-g`                                                       |
+| 提交时间 | 2026-10-27 20:02:43（Asia/Shanghai）                                            |
+| 构建     | `4` / `db510ccf-f118-46d2-9330-b5e05daf6ec5`                                    |
+| 系统     | iOS 27.0.1                                                                      |
+| 用户原文 | 显示暂不支持下载，需要支持                                                      |
+| 截图     | 「应用下载缓存」页面中的「云乐坊 · 管理后台」显示「暂不支持下载」，没有下载按钮 |
 
 已通过 API 取得并实际查看该截图，核对其反馈对象为管理后台的云应用资源下载，并非网页文件导出。
 
@@ -62,20 +62,20 @@ asc --read-only testflight crashes log --submission-id SUBMISSION_ID
 
 为避免并行测试互相干扰，本次创建临时设备 `YunLeFun TestFlight Feedback 20261027`（`3F2157B4-629A-408D-A528-E391993ECAE7`），复用已编译的测试产物，在独立环境完成重跑。Xcode 27.1 / iOS 27.0 的实际 `.xcresult` 结构化汇总为 **22 通过、0 失败、0 跳过**：
 
-| 测试类 | 通过数 |
-| --- | ---: |
-| `ApplicationCacheAutomaticUpdateTests` | 9 |
-| `ApplicationCacheRepositoryTests` | 5 |
-| `ApplicationCacheStoreTests` | 3 |
-| `ApplicationStaticResourcePolicyTests` | 4 |
-| `ApplicationStaticResourceLiveTests` | 1 |
+| 测试类                                 | 通过数 |
+| -------------------------------------- | -----: |
+| `ApplicationCacheAutomaticUpdateTests` |      9 |
+| `ApplicationCacheRepositoryTests`      |      5 |
+| `ApplicationCacheStoreTests`           |      3 |
+| `ApplicationStaticResourcePolicyTests` |      4 |
+| `ApplicationStaticResourceLiveTests`   |      1 |
 
 最后一项同时访问两个真实站点，验证下载后在新 WebView 中读取实时页面、复用公共资源，以及清理后 Cookie / localStorage 保留且已下载资源不能再以 `only-if-cached` 读取：
 
-| 站点 | 下载资源 | 资源总字节 | 新页面复用资源数 |
-| --- | ---: | ---: | ---: |
-| 管理后台 | 228 | 7,131,030 | 27 |
-| 支持中心 | 69 | 1,577,779 | 15 |
+| 站点     | 下载资源 | 资源总字节 | 新页面复用资源数 |
+| -------- | -------: | ---------: | ---------------: |
+| 管理后台 |      228 |  7,131,030 |               27 |
+| 支持中心 |       69 |  1,577,779 |               15 |
 
 缓存相关的 6 个实现与测试文件，在编译前、首轮停止后和隔离验证完成后的 SHA-256 均一致。当前源码基线为 `ba5c08b` 加已有工作区改动。本次只新增本反馈记录，未覆盖、提交已有修复或其他任务的修改。
 
@@ -84,7 +84,6 @@ asc --read-only testflight crashes log --submission-id SUBMISSION_ID
 测试脚本已在 `finally` 中关闭并删除临时设备，两步均返回 0；任务结束前重新核对设备列表，确认该 UDID 不存在。删除前 `simctl` 记录设备数据为 789,028,864 字节。导出的结论保存在本记录，临时截图、原始测试日志与结果包已回收，实测回收 250,191,872 字节（du 分配空间）；共享增量构建缓存继续保留。
 
 App Store Connect 中的原始反馈予以保留。本次未上传新版 TestFlight，构建 4 上的旧行为需通过后续新构建交付修复。
-
 
 ## 真机体验安装 · 2026-10-27
 

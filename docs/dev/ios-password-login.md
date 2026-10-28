@@ -6,12 +6,12 @@
 
 ## 已验证的实际交互
 
-| 用例 | 验证内容 |
-| --- | --- |
-| `testGuestCanDismissPasswordKeyboardAtStandardTextSize` | 实际输入、屏幕键盘可见且按键可点击、导航栏收起键盘 |
-| `testPasswordLoginOffersVerificationAndResetsVisibility` | 手机号 / 邮箱验证码入口、数字键盘输入、切换方式后清空密码并恢复隐藏、登录按钮点击范围 |
-| `testPasswordVisibilityPreservesCaretAndRefocusedInput` | 光标移到字符串中间后切换显隐，实际插入得到 `leftaRIGHT`；收起键盘并重新聚焦后追加得到 `leftaRIGHTa` |
-| `testPasswordVisibilityPreservesInputAndKeyboardFocus` | 用户名“下一项”移交密码焦点、连续点击屏幕按键，反复显隐后保留 `aaa`；未聚焦时显隐不唤起键盘 |
+| 用例                                                     | 验证内容                                                                                            |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `testGuestCanDismissPasswordKeyboardAtStandardTextSize`  | 实际输入、屏幕键盘可见且按键可点击、导航栏收起键盘                                                  |
+| `testPasswordLoginOffersVerificationAndResetsVisibility` | 手机号 / 邮箱验证码入口、数字键盘输入、切换方式后清空密码并恢复隐藏、登录按钮点击范围               |
+| `testPasswordVisibilityPreservesCaretAndRefocusedInput`  | 光标移到字符串中间后切换显隐，实际插入得到 `leftaRIGHT`；收起键盘并重新聚焦后追加得到 `leftaRIGHTa` |
+| `testPasswordVisibilityPreservesInputAndKeyboardFocus`   | 用户名“下一项”移交密码焦点、连续点击屏幕按键，反复显隐后保留 `aaa`；未聚焦时显隐不唤起键盘          |
 
 用例保存在 `apps/ios/YunleFunUITests/NativeNavigationUITests.swift`。没有放宽屏幕键盘可见、按键可点击、精确输入值或等待时限断言。专项在访客会话中执行，不提交真实账号凭据、不发送验证码、不触发登录。
 

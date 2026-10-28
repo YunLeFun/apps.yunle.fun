@@ -23,10 +23,10 @@
 
 ## App Group 与身份边界
 
-| 配置 | 主 App Bundle ID | 扩展 Bundle ID | App Group |
-| --- | --- | --- | --- |
-| Release | `fun.yunle.apps` | `fun.yunle.apps.feedback-share` | `group.fun.yunle.apps` |
-| Debug | `fun.yunle.apps.native-dev` | `fun.yunle.apps.native-dev.feedback-share` | `group.fun.yunle.apps.native-dev` |
+| 配置      | 主 App Bundle ID               | 扩展 Bundle ID                                | App Group                            |
+| --------- | ------------------------------ | --------------------------------------------- | ------------------------------------ |
+| Release   | `fun.yunle.apps`               | `fun.yunle.apps.feedback-share`               | `group.fun.yunle.apps`               |
+| Debug     | `fun.yunle.apps.native-dev`    | `fun.yunle.apps.native-dev.feedback-share`    | `group.fun.yunle.apps.native-dev`    |
 | Benchmark | `fun.yunle.apps.benchmark-dev` | `fun.yunle.apps.benchmark-dev.feedback-share` | `group.fun.yunle.apps.benchmark-dev` |
 
 `project.yml` 是配置源；XcodeGen 生成扩展目标、嵌入关系、Info 与 entitlements。扩展开启 `APPLICATION_EXTENSION_API_ONLY`，版本与构建号跟随主 App，包含独立的 `PrivacyInfo.xcprivacy`。
@@ -66,7 +66,7 @@
 
 ## 原生回看与 iOS 26 视觉验收（2026-10-28）
 
-系统分享菜单启动的是随云乐坊安装的 Share Extension；表单由 SwiftUI 呈现，完成后返回照片等发起分享的 App。Share Extension 没有通用的自动拉起主 App 能力，不能用 responder 链或私有接口绕过。主 App 通过 App Group 恢复工单回执。参见 [Apple NSExtensionContext.open](https://developer.apple.com/documentation/foundation/nsextensioncontext/open(_:completionhandler:))。
+系统分享菜单启动的是随云乐坊安装的 Share Extension；表单由 SwiftUI 呈现，完成后返回照片等发起分享的 App。Share Extension 没有通用的自动拉起主 App 能力，不能用 responder 链或私有接口绕过。主 App 通过 App Group 恢复工单回执。参见 [Apple NSExtensionContext.open](<https://developer.apple.com/documentation/foundation/nsextensioncontext/open(_:completionhandler:)>)。
 
 旧版分享回执用 WebKit 直接打开支持中心工单，所以工单中的截图预览仍是网页弹窗。现在系统分享记录与 App 内新提交的工单都先进入原生 `SupportTicketView`，显示状态、交流记录和私密截图。回复等完整网页操作保留为显式入口。仍复用 Support 的现有 requester API，不复制工单数据源、不改生产接口。
 

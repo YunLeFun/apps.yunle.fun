@@ -2,6 +2,7 @@ import Foundation
 import MessageUI
 import SwiftUI
 import UIKit
+import YunleSupportUI
 
 struct SupportMailContext: Equatable, Sendable {
     let appVersion: String
@@ -161,19 +162,22 @@ struct SupportMailFallbackActions: View {
         Button {
             UIPasteboard.general.string = draft.recipient
             copied = .email
-        } label: { Label("复制邮箱", systemImage: "doc.on.doc").frame(minHeight: 44) }
+        } label: { SupportMenuLabel("复制邮箱", icon: .system("doc.on.doc")) }
+            .supportMenuRow()
             .accessibilityLabel("复制邮箱，\(draft.recipient)")
             .accessibilityIdentifier(identifierPrefix + ".copy-email")
         if copied == .email { notice("邮箱已复制。") }
         Button {
             UIPasteboard.general.string = draft.shareText
             copied = .content
-        } label: { Label("复制\(contentName)", systemImage: "doc.on.doc").frame(minHeight: 44) }
+        } label: { SupportMenuLabel("复制\(contentName)", icon: .system("doc.on.doc")) }
+            .supportMenuRow()
             .accessibilityIdentifier(identifierPrefix + ".copy-content")
         if copied == .content { notice("\(contentName)已复制。") }
         ShareLink(item: draft.shareText) {
-            Label("分享\(contentName)", systemImage: "square.and.arrow.up").frame(minHeight: 44)
+            SupportMenuLabel("分享\(contentName)", icon: .system("square.and.arrow.up"))
         }
+        .supportMenuRow()
         .accessibilityIdentifier(identifierPrefix + ".share-content")
     }
 

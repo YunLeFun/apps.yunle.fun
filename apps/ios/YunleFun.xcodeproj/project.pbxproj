@@ -18,7 +18,7 @@
 		0EB4E8C774EAA0FD9001B691 /* NativeApplicationMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AEABB76F5959C8CEAC15A1 /* NativeApplicationMenuTests.swift */; };
 		0F243332071C572AC9E221EC /* SupportCenterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EE269900107246745FAE36 /* SupportCenterService.swift */; };
 		1024383943FDCCF2140B20E3 /* AssistantComposerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F32BA8D789C73F249A3CECD5 /* AssistantComposerUITests.swift */; };
-		1039E0265896C5E44C75297C /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = 85FBE316A2D2381404760C36 /* SwiftDraw */; };
+		1039E0265896C5E44C75297C /* YunleSupportUI in Frameworks */ = {isa = PBXBuildFile; productRef = 522E6B73DE49C6DAC31CCFBB /* YunleSupportUI */; };
 		11E75B15B1D9EBAC219DC6A4 /* ApplicationIconImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B3D92D4DF1E4235BAD0269 /* ApplicationIconImage.swift */; };
 		13840EE4625AC49CE03B115E /* ApplicationEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5435F9767CA269FED208A87 /* ApplicationEditorModel.swift */; };
 		15A2321C482E717E08AB0A2A /* HomeFolderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718FD4337D218B4CAAD3DE2A /* HomeFolderView.swift */; };
@@ -30,7 +30,6 @@
 		1F5F73A0F59C9A5815949699 /* CatalogIconStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8462DB412BD143E95517ED4F /* CatalogIconStoreTests.swift */; };
 		2009E98802053BCA31C84DEE /* WalletPresentationLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BE967444DF7CA0826745D3 /* WalletPresentationLiveTests.swift */; };
 		210C63C7D7A887626042B1E1 /* YunleFunApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139EACD28A83C9489BD6029B /* YunleFunApp.swift */; };
-		214563A163BC55D817A070DF /* TestFlightFeedbackSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07795AE2DE139751C3362663 /* TestFlightFeedbackSection.swift */; };
 		22E47851937ABBE2AB80A4AB /* SupportContactSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F4BE10630069215F3D5809 /* SupportContactSection.swift */; };
 		23E77173AD963E565B10E175 /* ApplicationReviewsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1D242C1F6C89C2FD05A47 /* ApplicationReviewsView.swift */; };
 		24B65B870CD388A89957E9C1 /* LegacyImportStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19F2D789B008EC5171A62D72 /* LegacyImportStore.swift */; };
@@ -55,7 +54,6 @@
 		3B2FE1DBDFD4C982A25E64DB /* CommunityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C2FA3CD44A87AA76311B25 /* CommunityStore.swift */; };
 		3B75717B26319838C8E5502F /* AssistantHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B10FD63B89481DDC53EB06 /* AssistantHistory.swift */; };
 		3DC2270CE412929DC5C8EBC4 /* DeveloperProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E0F82A4D0FE27885835915 /* DeveloperProfileTests.swift */; };
-		3E5757BD979B1AB6DDE0E373 /* TestFlightDistribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73E80CC50D9DE30AFD0F6C8 /* TestFlightDistribution.swift */; };
 		3F09CA0C32DB306AADDC7A75 /* SVGIconDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724D993D691120399054A314 /* SVGIconDecoder.swift */; };
 		40A7F12001F7E8B7A63EADB2 /* HostAuthorizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2657198D10E2392D756478FC /* HostAuthorizationService.swift */; };
 		40DD88AE201968E23D5B838C /* AssistantRollout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F100684792F556F69C508F /* AssistantRollout.swift */; };
@@ -88,7 +86,6 @@
 		6A4ADF2647D98A919E3CEA8B /* NativeAccessibilityAudits.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56D69025168D38F1ACB25FF /* NativeAccessibilityAudits.swift */; };
 		6AFF39502567D91A0B455FBB /* DiagnosticServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75EDC4D3DF5E04BA57C017C0 /* DiagnosticServiceTests.swift */; };
 		6DF818D3A9FE9875F18D90AC /* NativeAuthorizationPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84644E9373ABFDA4E76B0AD1 /* NativeAuthorizationPage.swift */; };
-		6E5D32396C74443C0A0DFD38 /* TestFlightDistributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080DA322213FC1A1DB4CF3D1 /* TestFlightDistributionTests.swift */; };
 		7056931A4D1BC40CACACE31D /* CloudbaseAuthServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A155F7BEB354FA2853BD5BB4 /* CloudbaseAuthServiceTests.swift */; };
 		70D1CF1A30328EA69987FC49 /* AccountInteractiveSignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139CA170DAFCFA7A030D1B30 /* AccountInteractiveSignInTests.swift */; };
 		70FC1304DE519E344FF777F2 /* ApplicationCacheLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D727DDD4B61D5A190ABE739 /* ApplicationCacheLiveTests.swift */; };
@@ -208,6 +205,7 @@
 		F08DC2A7811F58268815CB1E /* AssistantCancellationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F9584AF29E10731E29C7D9 /* AssistantCancellationTests.swift */; };
 		F1839D0B6938799F48E88A71 /* NativeNavigationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A6C05BD6F159893221D84 /* NativeNavigationUITests.swift */; };
 		F20ED261239F0C4FEC5EA205 /* AssistantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB5DA2365D8E76A88C4B1B2 /* AssistantTests.swift */; };
+		F3C4B5F560E8C4B29449D494 /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = 85FBE316A2D2381404760C36 /* SwiftDraw */; };
 		F5222E055A08472CF10571CD /* ContentStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1B63E1B44278210C81D0B6 /* ContentStateView.swift */; };
 		F5841204C33E6BD2EFCC37BE /* ApplicationCacheRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052782C967F7135283504C11 /* ApplicationCacheRepository.swift */; };
 		F6598053617B0A9ED5DA9E50 /* ScreenshotFeedbackPromptStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD9D9AA87AFECCDE39A15EF /* ScreenshotFeedbackPromptStateTests.swift */; };
@@ -268,9 +266,7 @@
 		044EEB65D428F912A3FD4988 /* ScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerTests.swift; sourceTree = "<group>"; };
 		04EA7203D9CBBC97514C9EE4 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		052782C967F7135283504C11 /* ApplicationCacheRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCacheRepository.swift; sourceTree = "<group>"; };
-		07795AE2DE139751C3362663 /* TestFlightFeedbackSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFlightFeedbackSection.swift; sourceTree = "<group>"; };
 		07E8BA15000F0663C8B3815B /* ApplicationIconSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationIconSource.swift; sourceTree = "<group>"; };
-		080DA322213FC1A1DB4CF3D1 /* TestFlightDistributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFlightDistributionTests.swift; sourceTree = "<group>"; };
 		08193E7FA9EB36BF2F7A4BCC /* CloudbaseAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudbaseAuthService.swift; sourceTree = "<group>"; };
 		0976CA2D31E288FE255100AD /* DeveloperProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperProfileStore.swift; sourceTree = "<group>"; };
 		0999BC7416447378C720E4E2 /* HostAuthorizationProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationProtocolTests.swift; sourceTree = "<group>"; };
@@ -472,7 +468,6 @@
 		F08F60F4C711CE6C895B14AF /* HomeSyncHTTPTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncHTTPTests.swift; sourceTree = "<group>"; };
 		F32BA8D789C73F249A3CECD5 /* AssistantComposerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantComposerUITests.swift; sourceTree = "<group>"; };
 		F6839C305AE0E672008B91F6 /* ApplicationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationDetailView.swift; sourceTree = "<group>"; };
-		F73E80CC50D9DE30AFD0F6C8 /* TestFlightDistribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFlightDistribution.swift; sourceTree = "<group>"; };
 		F7E35C4F712EDFEB38126A3A /* ScreenshotFeedbackCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotFeedbackCoordinator.swift; sourceTree = "<group>"; };
 		FB0BEBE6F399E0E22ADEBDFB /* ApplicationIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationIcon.swift; sourceTree = "<group>"; };
 		FBD54E316DEE8DE55E46F369 /* ApplicationCacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCacheView.swift; sourceTree = "<group>"; };
@@ -487,7 +482,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1039E0265896C5E44C75297C /* SwiftDraw in Frameworks */,
+				1039E0265896C5E44C75297C /* YunleSupportUI in Frameworks */,
+				F3C4B5F560E8C4B29449D494 /* SwiftDraw in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,7 +568,6 @@
 				4B28942C12C4600FDF8F8124 /* SupportCenterTests.swift */,
 				135E7BA7CF4238A2D2F8D943 /* SupportContactTests.swift */,
 				178E95E081A6CC47F89C2F53 /* SupportViewTests.swift */,
-				080DA322213FC1A1DB4CF3D1 /* TestFlightDistributionTests.swift */,
 				8F7E20307BE7EBBCC7D47FED /* WalletTests.swift */,
 				80ACDE8DD828BCBB5B220B47 /* WalletVisualFixtureTests.swift */,
 				42B62BD240BDB6A578A8F5E5 /* WebProfileRepositoryTests.swift */,
@@ -596,7 +591,6 @@
 				C2F4BE10630069215F3D5809 /* SupportContactSection.swift */,
 				7754D6FCD87D4767163DF9BC /* SupportMailComposer.swift */,
 				A9E9D55E8DF613B6EC0718CD /* SupportWebsiteView.swift */,
-				07795AE2DE139751C3362663 /* TestFlightFeedbackSection.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -632,7 +626,6 @@
 				37598FCD479F6A029E5A9E0B /* Publishing.swift */,
 				8C00F88E35F0AE928B2572CD /* ScanResult.swift */,
 				10251FAEBE1D089500EBFD91 /* SupportCenter.swift */,
-				F73E80CC50D9DE30AFD0F6C8 /* TestFlightDistribution.swift */,
 				2F237701E510588E96D5B3C7 /* Wallet.swift */,
 				39155D43848A6D19C931B010 /* Workshop.swift */,
 			);
@@ -1057,6 +1050,7 @@
 			);
 			name = YunleFun;
 			packageProductDependencies = (
+				522E6B73DE49C6DAC31CCFBB /* YunleSupportUI */,
 				85FBE316A2D2381404760C36 /* SwiftDraw */,
 			);
 			productName = YunleFun;
@@ -1147,6 +1141,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */,
+				90D473C95402B634FCAD77AC /* XCRemoteSwiftPackageReference "ylf" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6D0FE6E5752490913E476B14 /* Products */;
@@ -1312,8 +1307,6 @@
 				22E47851937ABBE2AB80A4AB /* SupportContactSection.swift in Sources */,
 				FFB2D2968748F4A40901611B /* SupportMailComposer.swift in Sources */,
 				FBDA5E0C5D986D10ECAD1B4E /* SupportWebsiteView.swift in Sources */,
-				3E5757BD979B1AB6DDE0E373 /* TestFlightDistribution.swift in Sources */,
-				214563A163BC55D817A070DF /* TestFlightFeedbackSection.swift in Sources */,
 				44166A45207067BC55661E37 /* Wallet.swift in Sources */,
 				D79A54F92A7FDC019064B067 /* WalletService.swift in Sources */,
 				BEA5A07D60821D4F4A0467AD /* WalletStore.swift in Sources */,
@@ -1413,7 +1406,6 @@
 				7F94651618959EFE5200FF07 /* SupportCenterTests.swift in Sources */,
 				2912EBA421E0403D770D41D3 /* SupportContactTests.swift in Sources */,
 				9F6C61FC31A864A5355446B2 /* SupportViewTests.swift in Sources */,
-				6E5D32396C74443C0A0DFD38 /* TestFlightDistributionTests.swift in Sources */,
 				E61BD9BFC57587D7E84D2108 /* WalletTests.swift in Sources */,
 				FE7A2816D5105FDEA8AD2FDE /* WalletVisualFixtureTests.swift in Sources */,
 				48AE1A2FF6905FC41A5173FA /* WebProfileRepositoryTests.swift in Sources */,
@@ -2069,6 +2061,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		90D473C95402B634FCAD77AC /* XCRemoteSwiftPackageReference "ylf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/YunLeFun/ylf.git";
+			requirement = {
+				kind = revision;
+				revision = 5c7592fb101ec3f6f1ad0514a6d62499349f9f16;
+			};
+		};
 		B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/swhitty/SwiftDraw.git";
@@ -2080,6 +2080,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		522E6B73DE49C6DAC31CCFBB /* YunleSupportUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90D473C95402B634FCAD77AC /* XCRemoteSwiftPackageReference "ylf" */;
+			productName = YunleSupportUI;
+		};
 		85FBE316A2D2381404760C36 /* SwiftDraw */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */;

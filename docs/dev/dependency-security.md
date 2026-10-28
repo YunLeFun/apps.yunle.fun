@@ -1,6 +1,6 @@
 # 依赖安全（pnpm audit）
 
-记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-10-24**。
+记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-10-28**。
 
 ## 现状
 
@@ -11,12 +11,12 @@
 | critical | 2            | **0**      | 0                        |
 | high     | 44           | **0**      | 2                        |
 | moderate | 41           | **0**      | 0                        |
-| low      | 8            | **0**      | 0                        |
-| 合计     | 95           | **0**      | 2                        |
+| low      | 8            | **0**      | 1                        |
+| 合计     | 95           | **0**      | 3                        |
 
-`pnpm audit --json` 的 `advisories` 为空，metadata 仍记录 2 项 high。两项均已应用仓库补丁；
+`pnpm audit --json` 的 `advisories` 为空，metadata 仍记录 2 项 high 和 1 项 low。三项均已应用仓库补丁；
 pnpm 根据包版本匹配公告，不能识别补丁是否已修复问题，所以在 `auditConfig.ignoreGhsas` 中精确忽略。
-这表示没有未处理告警，不表示审计服务已将这两个版本认定为无漏洞。
+这表示没有未处理告警，不表示审计服务已将这些版本认定为无漏洞。
 
 ```bash
 pnpm audit --audit-level high
@@ -65,12 +65,25 @@ pnpm audit --json
 Vue `3.5.40` 的旧 `minimumReleaseAgeExclude` 已移除。当前仍保留的精确发布信任例外为
 `@octokit/endpoint@9.0.6`、`rollup@2.80.0` 与 `chokidar@4.0.3`；没有新增包名通配例外。
 
-## 已补丁的精确忽略项（2 high）
+## 已补丁的精确忽略项（2 high、1 low）
 
 | 包 / GHSA                                                                                       | 依赖链与补丁证据                                                                                                                                                                                                                                                                                                                                                                    | 退出条件                                                             |
 | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `lodash.set@4.3.2` / [`GHSA-p6mc-m468-83gw`](https://github.com/advisories/GHSA-p6mc-m468-83gw) | `@cloudbase/node-sdk > @cloudbase/database > lodash.set`。公告声称的 `4.3.3` 尚未发布；`patches/lodash.set@4.3.2.patch` 回移 `__proto__` / `constructor` / `prototype` 路径拦截，`apps/mobile/test/unit/lodash-set-patch.test.ts` 覆盖三条污染路径。                                                                                                                                | CloudBase 移除该依赖或上游发布真实修复版后，删除补丁与 GHSA 忽略项。 |
 | `node-forge@1.4.0` / [`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv) | `listhen > node-forge`。尚无已发布修复版；`patches/node-forge@1.4.0.patch` 回移上游 [PR #1152](https://github.com/digitalbazaar/forge/pull/1152) 的 RSA DigestAlgorithm 嵌套元素数量校验。`apps/mobile/test/unit/node-forge-patch.test.ts` 参考上游 [PR #1158](https://github.com/digitalbazaar/forge/pull/1158)，覆盖两种恶意结构、两种合法结构及真实 RSA 签名／篡改消息，共五项。 | 上游发布修复版或 listhen 移除该依赖后，删除补丁与 GHSA 忽略项。      |
+
+### 2026-10-28：deepmerge 原型键补丁
+
+`deepmerge` 的真实最新发布仍为 `4.3.1`，`4.3.2` 尚未发布，不能通过升级到该版本消除告警。
+[GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) 当前也没有已发布修复版本。
+遵循上述已验证补丁策略，`patches/deepmerge@4.3.1.patch` 在目标复制和源合并之前统一拒绝字符串
+`__proto__`，覆盖 npm 包的源码、CommonJS 主入口和浏览器 UMD 入口。其余原型检查与合并规则保留。
+
+`apps/mobile/test/unit/deepmerge-patch.test.ts` 从 Nitro 的实际 Rollup 依赖解析已安装包，验证 CJS 与 UMD
+均能拦截无原型目标、空值/原始值占位、目标自有原型键和嵌套输入；同时验证普通对象、数组拼接、Symbol
+及输入不可变性。精确忽略此 low 告警仅针对已应用并验证的版本补丁；此前两项 high 的补丁与退出条件不变。
+
+上游发布真实安全版本后，应升级消费者并移除本补丁与这条 GHSA 精确忽略，不扩大忽略范围或降低审计等级。
 
 ## 验证命令
 

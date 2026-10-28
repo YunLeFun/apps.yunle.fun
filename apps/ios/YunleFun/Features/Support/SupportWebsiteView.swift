@@ -1,4 +1,5 @@
 import SwiftUI
+import YunleSupportUI
 
 /// Direct entry to the complete Support website, with the same account boundary
 /// and SSO proof as the native feedback center.
@@ -15,7 +16,7 @@ struct SupportWebsiteView: View {
     var body: some View {
         ZStack {
             if accounts.user == nil || model.access != nil {
-                SupportBrowserView(page: SupportBrowserPage(url: SupportCenterService.origin, access: model.access))
+                SupportBrowserView(page: SupportBrowserPage(url: SupportConfiguration(productID: "www", appName: "云乐坊").url(for: .help)!, access: model.access))
             } else {
                 NavigationStack {
                     List {

@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import YunleSupportUI
 
 struct FeedbackView: View {
     @ObservedObject private var logs: DiagnosticLogStore
@@ -105,26 +106,30 @@ struct FeedbackView: View {
 
     private var supportCenterSection: some View {
         Section {
-            Button { descriptionFocused = false; sheet = .website } label: {
-                Label("打开完整支持中心", systemImage: "globe")
-            }
-            .accessibilityIdentifier("feedback.support-website")
             Button { descriptionFocused = false; sheet = .support(.compose) } label: {
-                Label("在线反馈与处理进度", systemImage: "bubble.left.and.text.bubble.right")
+                SupportMenuLabel("在线反馈", icon: .system("bubble.left.and.text.bubble.right"))
             }
+            .supportMenuRow()
             .accessibilityIdentifier("feedback.support-center")
-            Button { descriptionFocused = false; sheet = .support(.board) } label: {
-                Label("需求墙与路线图", systemImage: "lightbulb")
+            Button { descriptionFocused = false; sheet = .website } label: {
+                SupportMenuLabel("打开完整支持中心", icon: .system("globe"), external: true)
             }
+            .supportMenuRow()
+            .accessibilityIdentifier("feedback.support-website")
+            Button { descriptionFocused = false; sheet = .support(.board) } label: {
+                SupportMenuLabel("需求墙与路线图", icon: .system("lightbulb"))
+            }
+            .supportMenuRow()
             .accessibilityIdentifier("feedback.support-board")
             if accounts.user != nil {
                 Button { descriptionFocused = false; sheet = .support(.manage) } label: {
-                    Label("反馈管理", systemImage: "tray.full")
+                    SupportMenuLabel("反馈管理", icon: .system("tray.full"))
                 }
+                .supportMenuRow()
                 .accessibilityIdentifier("feedback.support-manage")
             }
         } header: { Text("云乐坊支持中心") }
-        footer: { Text("在线反馈会保留上面的问题描述。已登录时自动使用当前账号，管理权限由支持中心验证。") }
+        footer: { Text("优先使用在线反馈，问题描述会自动带入，提交后可在工单中查看回复。已登录时使用当前账号，管理权限由支持中心验证。") }
     }
 
     private var descriptionSection: some View {

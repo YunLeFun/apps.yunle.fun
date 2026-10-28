@@ -2,15 +2,20 @@ import SwiftUI
 import UIKit
 
 struct FeedbackView: View {
+    private let channel: FeedbackChannel
+    private let sharedHistory: SharedFeedbackHistory
     @ObservedObject private var logs: DiagnosticLogStore
     @ObservedObject private var accounts: AccountStore
     @StateObject private var upload: DiagnosticUploadStore
     @State private var issueDescription = ""
+    @State private var screenshots: [FeedbackScreenshot] = []
+    @State private var isImportingScreenshots = false
     @State private var preset = FeedbackRangePreset.hour
     @State private var start = Date().addingTimeInterval(-3600)
     @State private var end = Date()
     @State private var sheet: FeedbackSheet?
     @State private var pendingClear: FeedbackClearRequest?
+    @State private var pendingShareClear: SharedFeedbackClearRequest?
     @State private var preparationError: String?
     @State private var completedUpload: DiagnosticUploadReceipt?
     @State private var showUploadSuccess = false
@@ -22,7 +27,10 @@ struct FeedbackView: View {
 
     init(logs: DiagnosticLogStore, accounts: AccountStore,
          service: DiagnosticServing = DiagnosticService(), receiptDirectory: URL? = nil,
-         initialIssueDescription: String = "") {
+         initialIssueDescription: String = "", channel: FeedbackChannel = .current,
+         sharedHistory: SharedFeedbackHistory = SharedFeedbackHistory()) {
+        self.channel = channel
+        self.sharedHistory = sharedHistory
         self.logs = logs; self.accounts = accounts
         _issueDescription = State(initialValue: initialIssueDescription)
         _upload = StateObject(wrappedValue: DiagnosticUploadStore(accounts: accounts, logs: logs,
@@ -31,8 +39,24 @@ struct FeedbackView: View {
 
     var body: some View {
         Form {
+            if channel == .testFlight {
+                Section {
+                    Label("优先使用 TestFlight 反馈", systemImage: "airplane")
+                    Text("截屏后，在系统截屏预览中选择“共享 Beta 版反馈”；也可以打开 TestFlight，选择云乐坊，再点“发送 Beta 版反馈”。")
+                    Text("如需持续跟进处理进度，也可使用下方通用反馈。")
+                        .font(.footnote).foregroundStyle(.secondary)
+                } header: { Text("TestFlight 测试反馈（推荐）") }
+                    .accessibilityIdentifier("feedback.testflight")
+            }
             descriptionSection
-            supportCenterSection
+            FeedbackScreenshotSection(screenshots: $screenshots, onPreview: { descriptionFocused = false; sheet = .screenshot($0) },
+                                      onImportingChanged: { isImportingScreenshots = $0 })
+                .id(accounts.identityGeneration)
+            supportCenterSection.disabled(isImportingScreenshots)
+            SharedFeedbackReceiptsSection(accounts: accounts, history: sharedHistory,
+                onOpen: { descriptionFocused = false; sheet = .sharedTicket($0) },
+                onRequestClear: { pendingShareClear = SharedFeedbackClearRequest(context: $0, completed: $1) })
+                .id(accounts.identityGeneration)
             SupportContactSection(issueDescription: issueDescription, supportCode: upload.receipt?.supportCode)
             rangeSection
             logSection
@@ -57,9 +81,14 @@ struct FeedbackView: View {
             case .login: LoginView()
             case .support(let destination):
                 SupportCenterView(accounts: accounts, destination: destination, initialDescription: issueDescription,
-                                  onDescriptionChanged: { issueDescription = $0 })
+                                  initialScreenshots: screenshots, onDescriptionChanged: { issueDescription = $0 },
+                                  onScreenshotsChanged: { screenshots = $0 })
             case .website:
                 SupportWebsiteView(accounts: accounts)
+            case .sharedTicket(let page):
+                SupportTicketView(page: page)
+            case .screenshot(let screenshot):
+                NavigationStack { ScreenshotPreview(data: screenshot.data, imageLabel: "待提交的截图预览") }
             case .review(let confirmation):
                 DiagnosticUploadReviewSheet(confirmation: confirmation, store: upload,
                                             accountName: accounts.user?.displayName ?? "云乐坊账号",
@@ -87,6 +116,18 @@ struct FeedbackView: View {
                 Text("清除当前账号或访客在此设备上的诊断日志，不影响已上传的记录或支持编号。")
             }
         .onChange(of: issueDescription) { _ in invalidateReview() }
+        .confirmationDialog("清除本机分享反馈记录？", isPresented: Binding(
+            get: { pendingShareClear != nil }, set: { if !$0 { pendingShareClear = nil } }),
+                            titleVisibility: .visible, presenting: pendingShareClear) { request in
+            Button("清除本机记录", role: .destructive) {
+                do { try sharedHistory.clear(expected: request.context); request.completed(nil) }
+                catch { request.completed(error) }
+                pendingShareClear = nil
+            }
+            Button("取消", role: .cancel) { pendingShareClear = nil }
+        } message: { _ in
+            Text("只清除本机保存的访问链接，不会删除支持中心的工单。清除前请妥善保存仍需跟进的链接。")
+        }
         .onChange(of: start) { _ in invalidateReview() }
         .onChange(of: end) { _ in invalidateReview() }
         .onChange(of: preset) { value in applyPreset(value) }
@@ -94,7 +135,8 @@ struct FeedbackView: View {
             sheet = nil; pendingClear = nil; upload.invalidateConfirmation()
         }
         .onChange(of: accounts.identityGeneration) { _ in
-            sheet = nil; pendingClear = nil; issueDescription = ""
+            sheet = nil; pendingClear = nil; pendingShareClear = nil; issueDescription = ""
+            screenshots = []
             completedUpload = nil; showUploadSuccess = false
             upload.identityChanged(); preparationError = nil
         }
@@ -285,17 +327,20 @@ private enum FeedbackRangePreset: String, CaseIterable, Identifiable {
     }
 }
 private enum FeedbackSheet: Identifiable {
-    case login, review(DiagnosticUploadConfirmation), support(SupportDestination), website
+    case login, review(DiagnosticUploadConfirmation), support(SupportDestination), website, sharedTicket(SupportTicketPage), screenshot(FeedbackScreenshot)
     var id: String {
         switch self {
         case .login: return "login"
         case .review(let snapshot): return snapshot.id.uuidString
         case .support(let destination): return "support-" + destination.rawValue
         case .website: return "support-website"
+        case .sharedTicket(let page): return "shared-ticket-" + page.id.uuidString
+        case .screenshot(let screenshot): return "screenshot-" + screenshot.id.uuidString
         }
     }
 }
 private struct FeedbackClearRequest { let scope: UUID; let accountGeneration: UUID }
+private struct SharedFeedbackClearRequest { let context: SharedFeedbackContext; let completed: (Error?) -> Void }
 
 private struct DiagnosticUploadReviewSheet: View {
     let confirmation: DiagnosticUploadConfirmation

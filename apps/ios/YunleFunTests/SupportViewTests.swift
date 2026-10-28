@@ -137,7 +137,8 @@ private final class SupportViewFixture {
         switch screen {
         case .feedback:
             content = AnyView(NavigationStack {
-                FeedbackView(logs: logs, accounts: accounts, service: service, receiptDirectory: receiptDirectory)
+                FeedbackView(logs: logs, accounts: accounts, service: service, receiptDirectory: receiptDirectory,
+                             sharedHistory: SharedFeedbackHistory(directory: directory.appendingPathComponent("shared-feedback")))
             })
         case .help:
             content = AnyView(NavigationStack { HelpView(logs: logs, accounts: accounts, navigateTab: { _ in }) })

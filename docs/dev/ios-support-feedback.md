@@ -1,5 +1,28 @@
 # 原生帮助、反馈与诊断日志契约
 
+## 系统分享截图反馈 · 2026-10-27
+
+新增[Share Extension](./ios-share-feedback.md)，从系统截屏预览、照片等图片分享入口选择「云乐坊」，打开「反馈给云乐坊」表单，以访客身份复用本页的私密工单与截图协议。App Group 仅保存有界的工单访问链接，不共享账号凭据、图片或草稿；TestFlight 安装先引导官方反馈。主 App 的「反馈与建议」可以查看本机系统分享工单，切换身份清空。启用 App Group 签名能力及部署截图后端是后续发布条件。
+
+## 截图反馈与 TestFlight 优先入口 · 2026-10-27
+
+- “反馈与建议”和“在线反馈”支持系统 PhotosPicker 选择最多 3 张图片，支持预览和移除；两页共用内存草稿，关闭在线反馈仍保留选择，切换账号清空。
+- 使用 ImageIO 在后台缩小到最长边 2048 像素并重新编码 JPEG，每张最多 1 MiB；导入前限制 20 MiB / 6000 万像素，去除原始文件名、EXIF / GPS 等附加信息。
+- 截图只随在线私密反馈提交。点击提交先冻结描述、产品、类型和截图，系统确认显示截图数量；图片导入期间禁止提交。失败保留输入，显式重试对同一图片字节复用幂等键；新增、移除或更换图片会更换键。成功后清空截图草稿。
+- 日志仍独立预览确认；邮件、分享及日志上传均不自动附带所选截图。系统截屏快捷入口仍不读取或自动附加刚截取的图片。
+- Release 真机按 `sandboxReceipt` 识别 TestFlight 渠道（沿用钱包环境判定依据），在反馈页顶部优先解释 TestFlight 截屏 / Beta 版反馈；开发版和模拟器保持通用反馈。TestFlight 不显示本 App 的截屏胶囊，避免干扰 Apple 的系统反馈。没有收据时保留通用入口；未在真实 TestFlight 安装包验证该提示。
+- 通用私密反馈扩展 `POST /api/v1/private-feedback` 的可选 `screenshots: [{ mimeType: "image/jpeg", data: "<base64>" }]`，使用原有 Cookie / CSRF / 幂等键；无图片时保持旧请求结构。
+- 配套 Support 仓库新增私密截图存储及鉴权查看接口，用户工单和管理工作台复用已有 Reka UI Dialog 预览。上线前需部署 Support 新接口并按其 `docs/feedback-database.json` 准备 `support_feedback_screenshots` 的 ADMINONLY 集合。此任务不部署、不发布 TestFlight。
+
+### 本轮验证
+
+- Support：类型检查、生产构建和根 lint 通过；完整单元测试 212 通过 / 1 既有 live 测试跳过。截图与工单浏览器专项 5 通过，验证移动端深色预览、Escape / 返回焦点、失败重试和既有会话流程。
+- 直接编译并执行 `FeedbackScreenshot.swift`：检查真实 JPEG 输出、尺寸、方向、GPS 移除、无效 / 过大输入及 TestFlight 渠道规则；原生实际生成的 JSON 由 Support 解析通过。
+- 三张 1024×1024、每张约 873 KiB 的原生 JPEG 通过离线 CloudBase 契约检查：请求限额、9 个附件块的完整重建、失败事务零残留、幂等与事务操作数限制。
+- 最终 iOS App + 单元 / UI 测试目标 `build-for-testing` 通过。iOS 27.0 和 26.5 的本轮临时设备均停在系统启动 / 界面服务，未取得 XCTest 运行结果，不计为测试通过；真实 PhotosPicker 导入、预览 / 移除 / 草稿往返、真机和实际 TestFlight 渠道显示继续待验。
+- 默认 UI 测试增加选择器取消保留草稿；需要预置合成图片的完整旅程放在 `FeedbackScreenshotUITests` 的独立 Benchmark 中，要求 `FEEDBACK_SCREENSHOT_QA_SEEDED=1`，不让日常 CI 依赖个人照片库。
+- 临时设备 `Yunle Screenshot QA 20261027` / `C88DD5C7-FB2F-4991-8A6F-D00D6EAA3655` 与 `Yunle Screenshot QA 26.5 20261027` / `4639CFCB-D953-43AE-ADC5-16151508BBBF` 均在本任务清理。保留小型报告与截图于本地忽略的 `apps/ios/build/feedback-screenshots-20261027/`，回收本轮 DerivedData、验包副本与原始结果包；原有共享缓存及其他任务设备保留。
+
 ## 统一支持中心接入 · 2026-10-26
 
 “我 → 反馈与建议”新增在线反馈、需求墙与反馈管理入口，保留原有邮件、微信客服和诊断日志流程。
@@ -78,7 +101,7 @@ Support API 依据为远端 `YunLeFun/support.yunle.fun` 的 `397bbae` 及本次
 
 ## 当前入口与能力缺口
 
-- 2026-10-24 新增默认开启、可在设置关闭的[截屏反馈快捷入口](./ios-screenshot-feedback.md)，只显示短暂按钮，点击后复用原生反馈页；首版不提供图片附件。
+- 2026-10-24 新增默认开启、可在设置关闭的[截屏反馈快捷入口](./ios-screenshot-feedback.md)，只显示短暂按钮，点击后复用原生反馈页；首版不提供图片附件；2026-10-27 增加手动选择并随在线反馈提交，见本文开头。
 - 此前 [MeView](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Features/Me/MeView.swift) 的帮助和反馈为外链。现已改用 `HelpView` / `FeedbackView` 原生导航；“我的举报”保持现有原生实现，文档、隐私与条款使用系统网页。
 - 旧版 [help.vue](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/pages/help.vue) 提供新手引导和 FAQ；[feedback.vue](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/mobile/app/pages/feedback.vue) 提供日志范围、确认上传、清除、邮件、微信客服与评分入口。
 - 此前 [CatalogStore](https://github.com/YunLeFun/apps.yunle.fun/blob/ceee732aac6dbaed547fffb6728708fb9afb2a1e/apps/ios/YunleFun/Services/CatalogStore.swift) 的 OSLog 不等同于可上传缓冲。现由 `DiagnosticLogStore` 单独记录白名单宿主事件，不读取 OSLog 或拦截云应用的 console。

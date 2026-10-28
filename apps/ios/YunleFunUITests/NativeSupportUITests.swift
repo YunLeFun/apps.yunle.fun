@@ -4,6 +4,21 @@ import XCTest
 final class NativeSupportUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
+    func testScreenshotPickerCancellationPreservesTheDescription() {
+        let app = XCUIApplication(); app.launch()
+        openFeedback(app)
+        let field = app.textViews["feedback.description"]
+        field.tap(); field.typeText("Keep this screenshot feedback draft")
+        app.buttons["feedback.dismiss-keyboard"].tap()
+        let add = app.buttons["feedback.screenshot.add"]
+        reveal(add, in: app); add.tap()
+        let cancel = app.buttons.matching(NSPredicate(format: "label == 'Cancel' OR label == '取消'")).firstMatch
+        XCTAssertTrue(cancel.waitForExistence(timeout: 10)); cancel.tap()
+        XCTAssertTrue(app.navigationBars["反馈与建议"].waitForExistence(timeout: 5))
+        XCTAssertEqual(field.value as? String, "Keep this screenshot feedback draft")
+        XCTAssertFalse(app.buttons["feedback.screenshot.preview.0"].exists)
+    }
+
     func testCompleteSupportWebsiteOpensInsideTheApp() {
         let app = XCUIApplication(); app.launch()
         openFeedback(app)

@@ -39,7 +39,7 @@ final class ScreenshotFeedbackCoordinator: ObservableObject {
     func configure(enabled: Bool, logs: DiagnosticLogStore, accounts: AccountStore,
                    requestLogin: @escaping (String) -> Bool) {
         self.logs = logs; self.accounts = accounts; self.requestLogin = requestLogin
-        prompt.setEnabled(enabled)
+        prompt.setEnabled(enabled && FeedbackChannel.current != .testFlight)
         refresh()
     }
 

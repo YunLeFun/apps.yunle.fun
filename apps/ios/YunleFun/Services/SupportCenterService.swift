@@ -7,14 +7,14 @@ protocol SupportCenterServing: Sendable {
     func disconnect(_ access: SupportAccess) async throws
     func board(cursor: String?) async throws -> SupportPage<SupportBoardItem>
     func dashboard(product: String?, cursor: String?, access: SupportAccess) async throws -> SupportDashboard
-    func submit(product: String, category: String, description: String, key: String,
+    func submit(product: String, category: String, description: String, screenshots: [FeedbackScreenshot], key: String,
                 access: SupportAccess) async throws -> SupportFeedbackReceipt
 }
 
 struct SupportCenterService: SupportCenterServing {
-    static let origin = URL(string: "https://support.yunle.fun")!
-    static let cookieName = "__Host-ylf-support-session"
-    static let guestCookieName = "__Host-ylf-support-guest"
+    static let origin = SupportFeedbackClient.origin
+    static let cookieName = SupportFeedbackClient.userCookieName
+    static let guestCookieName = SupportFeedbackClient.guestCookieName
     let session: URLSession
     let authorization: HostAuthorizationServing
 
@@ -32,10 +32,10 @@ struct SupportCenterService: SupportCenterServing {
 
     func connect(identity: AuthorizedAccount?, consent: Bool = false) async throws -> SupportAccess {
         guard let identity else {
-            let (guest, cookies): (Guest, [HTTPCookie]) = try await request("api/v1/feedback/guest", method: "POST", fields: [:])
-            guard guest.kind == "guest", !guest.csrfToken.isEmpty,
-                  cookies.contains(where: { $0.name == Self.guestCookieName }) else { throw SupportCenterError.invalidResponse }
-            return SupportAccess(userID: nil, csrfToken: guest.csrfToken, cookies: cookies)
+            do {
+                let access = try await SupportFeedbackClient(session: session).connectGuest()
+                return SupportAccess(userID: nil, csrfToken: access.csrfToken, cookies: access.cookies)
+            } catch { throw Self.feedbackError(error) }
         }
         let verifier = try randomValue(), nonce = try randomValue()
         let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).supportBase64URL
@@ -97,28 +97,35 @@ struct SupportCenterService: SupportCenterServing {
         return dashboard
     }
 
-    func submit(product: String, category: String, description: String, key: String,
+    func submit(product: String, category: String, description: String, screenshots: [FeedbackScreenshot] = [], key: String,
                 access: SupportAccess) async throws -> SupportFeedbackReceipt {
-        let description = description.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard (5...4000).contains(description.utf16.count), SupportProduct.submissionIDs.contains(product),
-              ["problem", "suggestion", "other"].contains(category) else { throw SupportCenterError.invalidInput }
-        let (result, _): (Submission, [HTTPCookie]) = try await request("api/v1/private-feedback", method: "POST",
-            fields: ["productId": product, "category": category, "description": description], access: access, key: key)
-        guard Self.identifier(result.receipt.id), result.receipt.productId == product,
-              result.receipt.ticketId.map(Self.identifier) ?? true else { throw SupportCenterError.invalidResponse }
-        return result.receipt
+        do {
+            return try await SupportFeedbackClient(session: session).submit(
+                SupportFeedbackSubmission(product: product, category: category, description: description, screenshots: screenshots),
+                key: key, access: SupportFeedbackAccess(csrfToken: access.csrfToken, cookies: access.cookies))
+        } catch { throw Self.feedbackError(error) }
     }
 
-    static func identifier(_ value: String) -> Bool { HostSsoRequest.matches(value, "^[A-Za-z0-9_-]{1,128}$") }
+    private static func feedbackError(_ error: Error) -> Error {
+        guard let failure = error as? SupportFeedbackError else { return error }
+        switch failure {
+        case .invalidResponse: return SupportCenterError.invalidResponse
+        case .invalidInput: return SupportCenterError.invalidInput
+        case .invalidScreenshot: return SupportCenterError.invalidScreenshot
+        case .unavailable: return SupportCenterError.unavailable
+        case .throttled: return SupportCenterError.throttled
+        case .unauthorized: return SupportCenterError.unauthorized
+        case .forbidden: return SupportCenterError.forbidden
+        }
+    }
+
+    static func identifier(_ value: String) -> Bool { SupportFeedbackClient.identifier(value) }
     static func isSupportURL(_ url: URL) -> Bool {
-        url.scheme == "https" && url.host == origin.host && (url.port == nil || url.port == 443)
-            && url.user == nil && url.password == nil
+        SupportFeedbackClient.isSupportURL(url)
     }
     static func pageURL(path: String) -> URL { origin.appendingPathComponent(path) }
     static func ticketURL(_ receipt: SupportFeedbackReceipt) -> URL? {
-        guard let id = receipt.ticketId, identifier(id), let raw = receipt.ticketUrl, let url = URL(string: raw),
-              isSupportURL(url), url.path == "/tickets/" + id, url.query == nil else { return nil }
-        return url
+        SupportFeedbackClient.ticketURL(receipt)
     }
 
     private func request<T: Decodable>(_ path: String, method: String = "GET", query: [String: String?] = [:],
@@ -172,13 +179,11 @@ struct SupportCenterService: SupportCenterServing {
         guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { throw SupportCenterError.unavailable }
         return Data(bytes).supportBase64URL
     }
-    private struct Guest: Decodable { let kind: String; let csrfToken: String }
     private struct Exchange: Decodable { let ok: Bool; let identityAssertion: String }
     private struct Connected: Decodable {
         let ok: Bool; let user: User; let csrfToken: String
         struct User: Decodable { let userId: String }
     }
-    private struct Submission: Decodable { let receipt: SupportFeedbackReceipt }
     private struct Acknowledgement: Decodable { let ok: Bool }
 }
 

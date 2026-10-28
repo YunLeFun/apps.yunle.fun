@@ -8,22 +8,6 @@ enum SupportDestination: String, CaseIterable, Identifiable {
     }
 }
 
-enum SupportProduct {
-    static func title(_ id: String) -> String {
-        switch id {
-        case "www": return "云乐坊账号与服务"
-        case "cook": return "云食册 / 食用手册"
-        case "play": return "Play 游戏"
-        case "yunbox": return "云匣 YunBox"
-        case "drive": return "Drive"
-        case "cms": return "CMS"
-        case "advjs": return "AdvJS"
-        default: return id
-        }
-    }
-    static let submissionIDs = ["www", "cook", "play", "yunbox", "drive", "cms", "advjs"]
-}
-
 struct SupportPage<Item: Decodable>: Decodable {
     let items: [Item]
     let nextCursor: String?
@@ -67,6 +51,7 @@ struct SupportPrivateItem: Decodable, Identifiable {
         switch context?.source {
         case "cook-web": return "Web"
         case "cook-ios": return "iOS"
+        case "apps-ios-share": return "iOS 系统分享"
         case .some(let source) where !source.isEmpty: return source
         default: return "未记录"
         }
@@ -87,13 +72,6 @@ struct SupportDashboard: Decodable {
     let privateFeedback: SupportPage<SupportPrivateItem>
 }
 
-struct SupportFeedbackReceipt: Decodable, Identifiable {
-    let id: String
-    let productId: String
-    let ticketId: String?
-    let ticketUrl: String?
-}
-
 /// A short-lived Support session, kept in memory and scoped to one App identity.
 /// Neither the App's access token nor its SSO assertion enters the WebView.
 struct SupportAccess {
@@ -109,7 +87,7 @@ struct SupportBrowserPage: Identifiable {
 }
 
 enum SupportCenterError: Error, Equatable, AccountRequestFailure {
-    case identityChanged, unauthorized, forbidden, consentRequired, invalidResponse, unavailable, throttled, invalidInput
+    case identityChanged, unauthorized, forbidden, consentRequired, invalidResponse, unavailable, throttled, invalidInput, invalidScreenshot
     var isUnauthorized: Bool { self == .unauthorized }
     var message: String {
         switch self {
@@ -120,6 +98,7 @@ enum SupportCenterError: Error, Equatable, AccountRequestFailure {
         case .invalidResponse: return "支持中心返回了无法识别的内容，请稍后重试。"
         case .unavailable: return "暂时无法连接支持中心，请稍后重试。"
         case .throttled: return "操作有些频繁，请稍后再试。"
+        case .invalidScreenshot: return "截图未能提交。最多可添加 3 张、每张压缩后 1 MB 以内；请重新选择，或稍后重试。"
         case .invalidInput: return "请填写 5 至 4000 个字符的问题描述。"
         }
     }

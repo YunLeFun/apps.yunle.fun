@@ -16,6 +16,7 @@ settings:
     TARGETED_DEVICE_FAMILY: '1,2'
     MARKETING_VERSION: '0.2.0'
     CURRENT_PROJECT_VERSION: '4'
+    FEEDBACK_APP_GROUP: group.fun.yunle.apps
     DEVELOPMENT_TEAM: QT792GAY4C
     CODE_SIGN_STYLE: Automatic
 packages:
@@ -28,11 +29,15 @@ targets:
     platform: iOS
     dependencies:
       - package: SwiftDraw
+      - target: YunleFunFeedbackShare
+        embed: true
+        link: false
     info:
       path: YunleFun/Info.plist
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        YunleFeedbackAppGroup: $(FEEDBACK_APP_GROUP)
         NSCameraUsageDescription: 用于扫描云应用和个人工坊二维码。
         CFBundleURLTypes:
           - CFBundleTypeRole: Editor
@@ -40,6 +45,7 @@ targets:
             CFBundleURLSchemes: [yunlefun]
     sources:
       - path: YunleFun
+      - path: SharedFeedback
       - path: ../mobile/ios/App/App/WebViewController.swift
       - path: ../mobile/ios/App/App/HostAuthorizationProtocol.swift
       - path: ../mobile/ios/App/App/InAppWebViewPlugin.swift
@@ -60,11 +66,52 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       configs:
         Debug:
+          FEEDBACK_APP_GROUP: group.fun.yunle.apps.native-dev
           PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.apps.native-dev
           INFOPLIST_KEY_CFBundleDisplayName: 云乐坊 Native
         Benchmark:
+          FEEDBACK_APP_GROUP: group.fun.yunle.apps.benchmark-dev
           PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.apps.benchmark-dev
           INFOPLIST_KEY_CFBundleDisplayName: 云乐坊 Benchmark
+  YunleFunFeedbackShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: YunleFunFeedbackShare
+      - path: SharedFeedback
+      - path: YunleFun/Models/FeedbackScreenshot.swift
+      - path: YunleFun/Models/FeedbackChannel.swift
+    info:
+      path: YunleFunFeedbackShare/Info.plist
+      properties:
+        CFBundleDisplayName: 反馈给云乐坊
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        YunleFeedbackAppGroup: $(FEEDBACK_APP_GROUP)
+        ITSAppUsesNonExemptEncryption: false
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).FeedbackShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsImageWithMaxCount: 3
+    entitlements:
+      path: YunleFunFeedbackShare/YunleFunFeedbackShare.entitlements
+      properties:
+        com.apple.security.application-groups: [$(FEEDBACK_APP_GROUP)]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.apps.feedback-share
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+        GENERATE_INFOPLIST_FILE: YES
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.apps.native-dev.feedback-share
+          FEEDBACK_APP_GROUP: group.fun.yunle.apps.native-dev
+        Benchmark:
+          PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.apps.benchmark-dev.feedback-share
+          FEEDBACK_APP_GROUP: group.fun.yunle.apps.benchmark-dev
   YunleFunTests:
     type: bundle.unit-test
     platform: iOS

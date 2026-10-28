@@ -50,6 +50,8 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 ## 当前能力与缺口
 
+系统图片分享菜单新增「云乐坊」入口，打开「反馈给云乐坊」表单，支持从截图预览或照片发起访客私密反馈，主 App 保留工单入口；TestFlight 安装优先引导官方反馈。扩展与主 App 的共享容器、账号边界、验证结果和上线前的签名 / 后端条件见[系统分享反馈](../../docs/dev/ios-share-feedback.md)。
+
 另有按需运行的 `YunleFunBenchmarks` Scheme，使用 release 优化和独立的 `fun.yunle.apps.benchmark-dev` 标识，包含四 Tab、真实云空调旅程与显式启用的启动测量。测量条件、环境变量、结果导出和首轮原始数据见 [性能基线](../../docs/dev/ios-performance-baseline.md)。它要求独立访客测试环境，不包含在日常单元测试 Scheme 中；模拟器和真机分别记录结果。
 
 同一 Benchmark Scheme 提供显式启用的系统辅助功能审计，检查四个 Tab 在标准和最大辅助字号下的当前可见区域。使用 iOS 17 起的 Apple Audit API，不过滤报告的问题；执行方式、失败记录与覆盖边界见[辅助功能审计](../../docs/dev/ios-accessibility-audits.md)。
@@ -84,4 +86,4 @@ xcodebuild -project YunleFun.xcodeproj -scheme YunleFun \
 
 键盘布局另有显式启用的 KeyboardLayoutDiagnostics，当前 iOS 27 的 UIKit Sheet / SwiftUI keyboard toolbar 组合仍有可复现告警（1 通过 / 2 失败）。它不属于日常功能验收；未启用时跳过不表示修复。现有 Sheet 与键盘完成操作保留，候选底部工具栏因遮挡已撤回，见[诊断与复测入口](../../docs/dev/ios-keyboard-layout-diagnostics.md)。
 
-原生云应用已接入按需下载缓存、更新和单个 / 全部清理，入口位于应用详情、运行时更多菜单及设置。自动更新默认关闭，可在设置开启；开启后默认仅 Wi-Fi 静默下载、下次重新打开生效，失败保留旧缓存。保存公开免费市场版本的首页与已加载资源；登录和动态内容仍可能联网，详见[应用下载缓存](../../docs/dev/ios-application-cache.md)。
+原生云应用已接入按需下载缓存、更新和单个 / 全部清理，入口位于应用详情、运行时更多菜单及设置。自动更新默认关闭，可在设置开启；开启后默认仅 Wi-Fi 静默下载、下次重新打开生效，失败保留旧缓存。公开免费市场版本保存首页与已加载资源；iOS 17 及以上的管理后台和支持中心只预下载公共静态资源，页面、登录和接口仍在线请求，删除资源缓存保留网站登录与本地使用数据。详见[应用下载缓存](../../docs/dev/ios-application-cache.md)。

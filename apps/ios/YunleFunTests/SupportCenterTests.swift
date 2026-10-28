@@ -1,5 +1,6 @@
 import CryptoKit
 import XCTest
+import UIKit
 @testable import YunleFun
 
 final class SupportCenterServiceTests: XCTestCase {
@@ -89,6 +90,34 @@ final class SupportCenterServiceTests: XCTestCase {
         XCTAssertEqual(request.value(forHTTPHeaderField: "x-csrf-token"), "csrf-a")
         XCTAssertTrue(request.value(forHTTPHeaderField: "Cookie")?.contains("fixture-session") == true)
         XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+    }
+
+    func testScreenshotSubmissionUsesTheSamePrivateSessionAndIncludesOnlyReviewedJPEGData() async throws {
+        let fixture = SupportHTTPFixture(replies: [.json(["receipt": ["id": "fb_photo", "productId": "www"]])])
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 20, height: 30)).image { context in
+            UIColor.white.setFill(); context.fill(CGRect(x: 0, y: 0, width: 20, height: 30))
+        }
+        let shot = try FeedbackScreenshot.prepare(XCTUnwrap(image.pngData()))
+        _ = try await service(fixture).submit(product: "www", category: "problem", description: "Screenshot example",
+            screenshots: [shot], key: "photo-key", access: .init(userID: nil, csrfToken: "guest-csrf", cookies: []))
+        let request = try XCTUnwrap(fixture.requests.first)
+        let payload = try body(request)
+        let images = try XCTUnwrap(payload["screenshots"] as? [[String: String]])
+        XCTAssertEqual(images, [["mimeType": "image/jpeg", "data": shot.data.base64EncodedString()]])
+        XCTAssertEqual(Set(payload.keys), ["productId", "category", "description", "screenshots"])
+        XCTAssertEqual(request.value(forHTTPHeaderField: "x-csrf-token"), "guest-csrf")
+        XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+    }
+
+    func testTooManyScreenshotsAreRejectedBeforeAnyRequest() async throws {
+        let fixture = SupportHTTPFixture(replies: [])
+        let shot = FeedbackScreenshot(id: UUID(), data: Data([1]), width: 1, height: 1)
+        do {
+            _ = try await service(fixture).submit(product: "www", category: "problem", description: "Screenshot example",
+                screenshots: Array(repeating: shot, count: 4), key: "photo-key", access: .init(userID: nil, csrfToken: "guest", cookies: []))
+            XCTFail("Must reject oversized selections locally")
+        } catch { XCTAssertEqual(error as? SupportCenterError, .invalidScreenshot) }
+        XCTAssertTrue(fixture.requests.isEmpty)
     }
 
     func testHTMLAndUnauthorizedManagementAreNotEmptySuccesses() async throws {
@@ -208,6 +237,24 @@ final class SupportCenterStoreTests: XCTestCase {
         let edited = await service.keys
         XCTAssertNotEqual(edited[1], edited[2])
     }
+
+    func testRetryKeyTracksScreenshotBytesAndSurvivesReselectingTheSameImage() async {
+        let accounts = SupportAccounts(nil), service = SupportStoreFixture()
+        let model = SupportCenterStore(accounts: accounts, service: service)
+        await model.load(.compose)
+        let first = FeedbackScreenshot(id: UUID(), data: Data([1]), width: 1, height: 1)
+        let same = FeedbackScreenshot(id: UUID(), data: first.data, width: 1, height: 1)
+        let changed = FeedbackScreenshot(id: UUID(), data: Data([2]), width: 1, height: 1)
+        for shots in [[first], [same], [changed], []] {
+            await model.submit(product: "www", category: "problem", description: "Screenshot example", screenshots: shots)
+        }
+        let keys = await service.keys
+        XCTAssertEqual(keys.count, 4)
+        XCTAssertEqual(keys[0], keys[1])
+        XCTAssertNotEqual(keys[1], keys[2])
+        XCTAssertNotEqual(keys[2], keys[3])
+        XCTAssertNil(model.receipt)
+    }
 }
 
 private actor SupportTestHost: HostAuthorizationServing {
@@ -315,7 +362,7 @@ private actor SupportStoreFixture: SupportCenterServing {
               privateFeedback: .init(items: [.init(id: "fb_fixture", productId: "www", description: "Private fixture",
                   status: "received", category: "problem", createdAt: "2026-10-26", ticketId: nil, context: nil)], nextCursor: nil))
     }
-    func submit(product: String, category: String, description: String, key: String, access: SupportAccess) async throws -> SupportFeedbackReceipt {
+    func submit(product: String, category: String, description: String, screenshots: [FeedbackScreenshot], key: String, access: SupportAccess) async throws -> SupportFeedbackReceipt {
         keys.append(key)
         throw URLError(.timedOut)
     }

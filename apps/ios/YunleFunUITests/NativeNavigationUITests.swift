@@ -14,6 +14,150 @@ final class NativeNavigationUITests: XCTestCase {
         checkLoginKeyboardDismissal(large: true)
     }
 
+    func testPasswordVisibilityPreservesInputAndKeyboardFocus() throws {
+        let app = try openPasswordLogin()
+        let username = app.textFields["login.username"]
+        username.tap(); username.typeText("ui-canary\n")
+        // Tap a real software key without tapping the password field: Next must have moved focus.
+        let first = try tapLetterKey(app)
+        let visibility = app.buttons["login.password-visibility"]
+        XCTAssertEqual(visibility.label, "显示密码")
+        XCTAssertTrue(app.secureTextFields["login.password"].exists)
+        XCTAssertGreaterThanOrEqual(visibility.frame.width, 44)
+        XCTAssertGreaterThanOrEqual(visibility.frame.height, 44)
+        visibility.tap()
+        let revealed = app.textFields["login.password"]
+        XCTAssertTrue(revealed.waitForExistence(timeout: 5))
+        XCTAssertEqual(revealed.value as? String, first)
+        XCTAssertEqual(visibility.label, "隐藏密码")
+        let second = try tapLetterKey(app)
+        XCTAssertEqual(revealed.value as? String, first + second, "Revealing must retain keyboard focus")
+        visibility.tap()
+        XCTAssertTrue(app.secureTextFields["login.password"].waitForExistence(timeout: 5))
+        let third = try tapLetterKey(app)
+        visibility.tap()
+        XCTAssertEqual(revealed.value as? String, first + second + third, "Hiding must not clear or replace existing input")
+        XCTAssertEqual(username.value as? String, "ui-canary")
+        capturePasswordLogin(app, "password-visible-keyboard")
+
+        let dismiss = app.buttons["login.dismiss-keyboard"]
+        dismiss.tap()
+        XCTAssertTrue(dismiss.waitForNonExistence(timeout: 10))
+        visibility.tap()
+        XCTAssertTrue(app.secureTextFields["login.password"].exists)
+        XCTAssertFalse(dismiss.exists, "Revealing or hiding an unfocused field must not reopen the keyboard")
+        XCTAssertTrue(app.keyboards.allElementsBoundByIndex.allSatisfy { !$0.isHittable })
+        visibility.tap()
+        XCTAssertEqual(revealed.value as? String, first + second + third)
+        capturePasswordLogin(app, "password-visible-keyboard-dismissed")
+        app.buttons["取消"].tap()
+    }
+
+    func testPasswordLoginOffersVerificationAndResetsVisibility() throws {
+        let app = try openPasswordLogin()
+        let visibility = app.buttons["login.password-visibility"]
+        app.secureTextFields["login.password"].tap()
+        _ = try tapLetterKey(app)
+        visibility.tap()
+        app.buttons["login.dismiss-keyboard"].tap()
+        let phoneLink = app.buttons["login.use-phone-code"]
+        XCTAssertTrue(phoneLink.isHittable)
+        XCTAssertTrue(app.buttons["login.use-email-code"].isHittable)
+        XCTAssertGreaterThanOrEqual(app.buttons["login.submit"].frame.height, 44)
+        capturePasswordLogin(app, "password-login-actions")
+        phoneLink.tap()
+        let phone = app.textFields["login.phone"]
+        XCTAssertTrue(phone.waitForExistence(timeout: 5))
+        phone.tap()
+        let numberKey = app.keys["1"]
+        XCTAssertTrue(numberKey.waitForExistence(timeout: 5)); numberKey.tap()
+        XCTAssertEqual(phone.value as? String, "1", "The phone route must show a working number pad")
+        app.buttons["login.dismiss-keyboard"].tap()
+        app.segmentedControls.buttons["密码"].tap()
+        let secure = app.secureTextFields["login.password"]
+        XCTAssertTrue(secure.waitForExistence(timeout: 5))
+        XCTAssertEqual(visibility.label, "显示密码")
+        visibility.tap()
+        let revealed = app.textFields["login.password"]
+        XCTAssertTrue(revealed.waitForExistence(timeout: 5))
+        XCTAssertEqual(revealed.value as? String, "密码", "Switching methods must clear the prior password")
+        app.buttons["login.use-email-code"].tap()
+        let email = app.textFields["login.email"]
+        XCTAssertTrue(email.waitForExistence(timeout: 5))
+        email.tap(); email.typeText("ui-canary@example.invalid")
+        XCTAssertEqual(email.value as? String, "ui-canary@example.invalid")
+        app.buttons["login.dismiss-keyboard"].tap()
+        app.segmentedControls.buttons["密码"].tap()
+        XCTAssertTrue(secure.waitForExistence(timeout: 5))
+        XCTAssertEqual(visibility.label, "显示密码")
+        app.buttons["取消"].tap()
+    }
+
+    func testPasswordVisibilityPreservesCaretAndRefocusedInput() throws {
+        let app = try openPasswordLogin()
+        let secure = app.secureTextFields["login.password"]
+        let visibility = app.buttons["login.password-visibility"]
+        secure.tap(); secure.typeText("leftRIGHT")
+        visibility.tap()
+        let revealed = app.textFields["login.password"]
+        XCTAssertTrue(revealed.waitForExistence(timeout: 5))
+        XCTAssertEqual(revealed.value as? String, "leftRIGHT")
+        // Actual arrow-key events move the insertion point five characters from the end.
+        for _ in 0..<5 { app.typeKey(.leftArrow, modifierFlags: []) }
+        visibility.tap()
+        let inserted = try tapLetterKey(app)
+        visibility.tap()
+        let edited = "left" + inserted + "RIGHT"
+        XCTAssertEqual(revealed.value as? String, edited, "Revealing and hiding must preserve the insertion point")
+        capturePasswordLogin(app, "password-middle-insertion")
+
+        visibility.tap()
+        app.buttons["login.dismiss-keyboard"].tap()
+        XCTAssertTrue(app.buttons["login.dismiss-keyboard"].waitForNonExistence(timeout: 10))
+        secure.tap()
+        let appended = try tapLetterKey(app)
+        visibility.tap()
+        XCTAssertEqual(revealed.value as? String, edited + appended, "Refocusing a hidden password must append without clearing it")
+        capturePasswordLogin(app, "password-refocused-input")
+        app.buttons["取消"].tap()
+    }
+
+    private func openPasswordLogin() throws -> XCUIApplication {
+        continueAfterFailure = false
+        let app = XCUIApplication(); app.activate()
+        // Each journey returns to Me. Reuse the running guest app instead of cold-launching it
+        // between in-session keyboard checks; also close a sheet left by a failed prior journey.
+        let cancel = app.navigationBars["账号"].buttons["取消"]
+        if cancel.exists { cancel.tap() }
+        XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["我"].tap()
+        guard app.buttons["me.login"].waitForExistence(timeout: 5) else {
+            throw XCTSkip("Requires a guest simulator; never signs out an existing account")
+        }
+        app.buttons["me.login"].tap()
+        app.segmentedControls.buttons["密码"].tap()
+        XCTAssertTrue(app.secureTextFields["login.password"].waitForExistence(timeout: 5))
+        return app
+    }
+
+    @discardableResult private func tapLetterKey(_ app: XCUIApplication) throws -> String {
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        let key = app.keys.matching(NSPredicate(format: "label IN %@", ["a", "A"])).firstMatch
+        XCTAssertTrue(key.waitForExistence(timeout: 5))
+        XCTAssertTrue(key.isHittable)
+        XCTAssertTrue(app.frame.contains(keyboard.frame), "The actual software keyboard must be onscreen")
+        XCTAssertTrue(keyboard.frame.contains(key.frame))
+        let letter = key.label
+        key.tap()
+        return letter
+    }
+
+    private func capturePasswordLogin(_ app: XCUIApplication, _ name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
+    }
+
     private func checkLoginKeyboardDismissal(large: Bool, passwordMethod: Bool = false) {
         continueAfterFailure = false
         let app = XCUIApplication()

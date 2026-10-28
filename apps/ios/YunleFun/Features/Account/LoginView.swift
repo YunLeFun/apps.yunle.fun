@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct LoginView: View {
     var authorizationApplication: String? = nil
@@ -13,6 +14,9 @@ struct LoginView: View {
     @State private var method = Method.phone
     @State private var identifier = ""
     @State private var password = ""
+    @State private var isPasswordVisible = false
+    @State private var isUsernameFocused = false
+    @State private var isPasswordFocused = false
     @State private var code = ""
     @State private var challenge: VerificationChallenge?
     @State private var resendAt = Date.distantPast
@@ -30,7 +34,7 @@ struct LoginView: View {
         case phone = "手机号", email = "邮箱", password = "密码"
         var id: Self { self }
     }
-    private enum Field { case identifier, password, code }
+    private enum Field { case identifier, code }
     private enum Action: String, Identifiable {
         case sendCode, signIn
         var id: Self { self }
@@ -63,13 +67,11 @@ struct LoginView: View {
                 Section {
                     if method == .password {
                         identifierField
-                        SecureField("密码", text: $password)
-                            .accessibilityLabel("密码")
-                            .accessibilityIdentifier("login.password")
-                            .textContentType(.password)
-                            .focused($focus, equals: .password)
-                            .submitLabel(.go)
-                            .onSubmit { perform(.signIn) }
+                            .frame(minHeight: 44)
+                            .listRowInsets(credentialRowInsets)
+                        passwordField
+                            .frame(minHeight: 44)
+                            .listRowInsets(credentialRowInsets)
                     } else if dynamicTypeSize.isAccessibilitySize {
                         identifierField
                         codeField
@@ -82,7 +84,11 @@ struct LoginView: View {
                         codeField
                     }
                 } footer: {
-                    if method != .password { Text(codeFooter) }
+                    if method == .password {
+                        passwordLoginHelp
+                    } else {
+                        Text(codeFooter)
+                    }
                 }
                 .disabled(isBusy)
                 if let error {
@@ -94,14 +100,19 @@ struct LoginView: View {
                 }
                 Section {
                     Button { perform(.signIn) } label: {
-                        HStack {
+                        HStack(spacing: 8) {
                             Text(method == .password ? "登录" : "登录或注册")
-                            Spacer()
                             if isBusy { ProgressView().accessibilityLabel("正在处理") }
                         }
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, minHeight: 28)
                     }
+                    .modifier(LoginSubmitButtonAppearance())
+                    .controlSize(.large)
                     .disabled(isBusy)
                     .accessibilityIdentifier("login.submit")
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
                 } footer: {
                     Text("继续即表示你已阅读并同意[服务条款](https://www.yunle.fun/docs/terms-of-service)和[隐私政策](https://www.yunle.fun/docs/privacy-policy)。")
                 }
@@ -113,9 +124,9 @@ struct LoginView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("取消") { continuationCancelled = true; onCancelled?(); cancel(); dismiss() }
                 }
-                if focus != nil {
+                if focus != nil || isUsernameFocused || isPasswordFocused {
                     ToolbarItem(placement: keyboardDismissPlacement) {
-                        Button { focus = nil } label: {
+                        Button { dismissKeyboard() } label: {
                             Label("收起键盘", systemImage: "keyboard.chevron.compact.down")
                         }
                         .accessibilityIdentifier("login.dismiss-keyboard")
@@ -126,7 +137,13 @@ struct LoginView: View {
             .sheet(item: $captchaAction) { action in
                 CaptchaView { token in perform(action, captcha: token) }
             }
-            .onChange(of: method) { _ in resetChallenge(); password = ""; identifier = ""; error = nil }
+            .onChange(of: method) { _ in
+                dismissKeyboard()
+                resetChallenge(); password = ""; isPasswordVisible = false; identifier = ""; error = nil
+            }
+            .onChange(of: focus) { field in
+                if field != nil { isUsernameFocused = false; isPasswordFocused = false }
+            }
             .onChange(of: identifier) { value in
                 // Pasted or autofilled numbers often carry +86 / 0086 or spacing.
                 if method == .phone {
@@ -135,7 +152,7 @@ struct LoginView: View {
                 }
                 resetChallenge(); error = nil
             }
-            .onDisappear { cancel(); password = ""; code = "" }
+            .onDisappear { cancel(); password = ""; isPasswordVisible = false; code = "" }
         }
     }
 
@@ -144,6 +161,52 @@ struct LoginView: View {
             ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
         }
         .accessibilityIdentifier("login.method")
+    }
+
+    // The eye's 44pt hit area belongs inside the row, without Form's extra vertical padding.
+    private var credentialRowInsets: EdgeInsets {
+        EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+    }
+
+    private var passwordField: some View {
+        HStack(spacing: 8) {
+            LoginCredentialField(text: $password, isFocused: $isPasswordFocused,
+                                 placeholder: "密码", contentType: .password, identifier: "login.password",
+                                 isSecure: !isPasswordVisible, returnKeyType: .go,
+                                 onSubmit: { perform(.signIn) })
+            Button { isPasswordVisible.toggle() } label: {
+                Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.borderless)
+            .foregroundStyle(.secondary)
+            .accessibilityLabel(isPasswordVisible ? "隐藏密码" : "显示密码")
+            .accessibilityValue(isPasswordVisible ? "密码已显示" : "密码已隐藏")
+            .accessibilityIdentifier("login.password-visibility")
+        }
+    }
+
+    private var passwordLoginHelp: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("忘记密码？可使用手机号或邮箱验证码登录。")
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 16) { verificationLoginButtons }.fixedSize(horizontal: true, vertical: false)
+                VStack(alignment: .leading, spacing: 4) { verificationLoginButtons }
+            }
+        }
+        .disabled(isBusy)
+    }
+
+    private var verificationLoginButtons: some View {
+        Group {
+            Button("手机号验证码登录") { method = .phone }
+                .accessibilityIdentifier("login.use-phone-code")
+            Button("邮箱验证码登录") { method = .email }
+                .accessibilityIdentifier("login.use-email-code")
+        }
+        .buttonStyle(.borderless)
+        .frame(minHeight: 44, alignment: .leading)
     }
 
     private var keyboardDismissPlacement: ToolbarItemPlacement {
@@ -175,12 +238,11 @@ struct LoginView: View {
                     if challenge != nil, Date() < resendAt { focus = .code } else { perform(.sendCode) }
                 }
         case .password:
-            TextField("用户名、邮箱或手机号", text: $identifier)
-                .accessibilityLabel("用户名、邮箱或手机号")
-                .accessibilityIdentifier("login.username")
-                .textContentType(.username).textInputAutocapitalization(.never).autocorrectionDisabled()
-                .focused($focus, equals: .identifier).submitLabel(.next)
-                .onSubmit { focus = .password }
+            // Both credentials share UIKit focus ownership. SwiftUI's focus system must not
+            // issue a deferred keyboard dismissal when Next hands off to the password field.
+            LoginCredentialField(text: $identifier, isFocused: $isUsernameFocused,
+                                 placeholder: "用户名、邮箱或手机号", contentType: .username,
+                                 identifier: "login.username", onSubmit: { isPasswordFocused = true })
         }
     }
 
@@ -222,6 +284,8 @@ struct LoginView: View {
 
     private func resetChallenge() { challenge = nil; code = "" }
 
+    private func dismissKeyboard() { focus = nil; isUsernameFocused = false; isPasswordFocused = false }
+
     private func cancel() {
         // A successful identity publication can rebuild the presenting view
         // before its await resumes. Keep that already committed task alive.
@@ -237,7 +301,7 @@ struct LoginView: View {
         guard !isBusy else { return }
         error = nil
         isBusy = true
-        focus = nil
+        dismissKeyboard()
         operation = Task { @MainActor in
             defer { isBusy = false }
             do {
@@ -283,6 +347,133 @@ struct LoginView: View {
                     code = ""; focus = .code
                 }
             }
+        }
+    }
+}
+
+private struct LoginSubmitButtonAppearance: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.buttonStyle(.glassProminent)
+        } else {
+            content.buttonStyle(.borderedProminent)
+        }
+    }
+}
+
+/// Native credential inputs share focus ownership; revealing a password keeps the same text field.
+private struct LoginCredentialField: UIViewRepresentable {
+    @Binding var text: String
+    @Binding var isFocused: Bool
+    let placeholder: String
+    let contentType: UITextContentType
+    let identifier: String
+    var isSecure = false
+    var returnKeyType: UIReturnKeyType = .next
+    let onSubmit: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UITextField {
+        let field = CredentialTextField()
+        field.delegate = context.coordinator
+        field.placeholder = placeholder
+        field.accessibilityLabel = placeholder
+        field.accessibilityIdentifier = identifier
+        field.textContentType = contentType
+        field.isSecureTextEntry = isSecure
+        field.autocapitalizationType = .none
+        field.autocorrectionType = .no
+        field.spellCheckingType = .no
+        field.returnKeyType = returnKeyType
+        field.textColor = .label
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        field.addTarget(context.coordinator, action: #selector(Coordinator.textChanged), for: .editingChanged)
+        return field
+    }
+
+    func updateUIView(_ field: UITextField, context: Context) {
+        context.coordinator.parent = self
+        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(context.environment.dynamicTypeSize))
+        let font = UIFont.preferredFont(forTextStyle: .body, compatibleWith: traits)
+        if field.font != font { field.font = font }
+        field.isEnabled = context.environment.isEnabled
+        if field.text != text { field.text = text }
+        if field.isSecureTextEntry != isSecure {
+            let selection = Self.selectionOffsets(in: field)
+            field.isSecureTextEntry = isSecure
+            Self.restoreEditingText(text, in: field, selection: selection)
+        }
+        let coordinator = context.coordinator
+        if isFocused, !field.isFirstResponder, field.window != nil {
+            DispatchQueue.main.async {
+                guard coordinator.parent.isFocused else { return }
+                field.becomeFirstResponder()
+            }
+        } else if !isFocused, field.isFirstResponder {
+            DispatchQueue.main.async {
+                guard !coordinator.parent.isFocused else { return }
+                field.resignFirstResponder()
+            }
+        }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextField, context: Context) -> CGSize? {
+        guard let width = proposal.width, width.isFinite else { return nil }
+        return CGSize(width: width, height: ceil((uiView.font ?? .preferredFont(forTextStyle: .body)).lineHeight))
+    }
+
+    private static func selectionOffsets(in field: UITextField) -> (Int, Int)? {
+        field.selectedTextRange.map {
+            (field.offset(from: field.beginningOfDocument, to: $0.start),
+             field.offset(from: field.beginningOfDocument, to: $0.end))
+        }
+    }
+
+    private static func restoreEditingText(_ text: String, in field: UITextField, selection: (Int, Int)?) {
+        if field.isFirstResponder {
+            // A plain text assignment leaves secure entry armed to replace everything on the
+            // next key, both after hiding and after refocusing. Seed the current editing session.
+            field.text = nil
+            field.insertText(text)
+        } else {
+            field.text = text
+        }
+        if let (start, end) = selection,
+           let from = field.position(from: field.beginningOfDocument, offset: start),
+           let to = field.position(from: field.beginningOfDocument, offset: end) {
+            field.selectedTextRange = field.textRange(from: from, to: to)
+        }
+    }
+
+    final class CredentialTextField: UITextField {
+        override func becomeFirstResponder() -> Bool {
+            let wasFocused = isFirstResponder
+            let becameFocused = super.becomeFirstResponder()
+            // UIKit finishes configuring secure replacement after the didBeginEditing callback.
+            if becameFocused, !wasFocused, isSecureTextEntry, let text, !text.isEmpty {
+                LoginCredentialField.restoreEditingText(text, in: self,
+                                                       selection: LoginCredentialField.selectionOffsets(in: self))
+            }
+            return becameFocused
+        }
+    }
+
+    final class Coordinator: NSObject, UITextFieldDelegate {
+        var parent: LoginCredentialField
+        init(_ parent: LoginCredentialField) { self.parent = parent }
+        @objc func textChanged(_ field: UITextField) {
+            let value = field.text ?? ""
+            if parent.text != value { parent.text = value }
+        }
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            if !parent.isFocused { parent.isFocused = true }
+        }
+        func textFieldDidEndEditing(_ textField: UITextField) { parent.isFocused = false }
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            parent.onSubmit()
+            return false
         }
     }
 }

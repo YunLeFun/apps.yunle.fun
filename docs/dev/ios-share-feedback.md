@@ -48,7 +48,7 @@
 - 验收修复了分区重复弹窗：`Section` 上的浏览器会产生多个并发呈现请求；工单浏览器和清除确认现由 `FeedbackView` 的稳定根容器统一呈现，账号变化仍清除待处理路由与确认。
 - 最终共享核心 **19 项 XCTest 通过**，Debug 测试目标和 Release 模拟器构建通过；Release 主 App / 扩展的二进制检查均不包含 loopback 端点，扩展保留正式支持中心域名。
 
-可重复执行的夹具、预检、渠道准备和 UI 运行方式见 [`Validation/ShareFeedback/README.md`](../../apps/ios/Validation/ShareFeedback/README.md)。本地小型报告与截图位于忽略目录 `apps/ios/build/share-feedback-e2e-20261027/`。本轮临时设备 `Yunle Share E2E 18.6 20261027` / `259EB562-B760-4112-B6D9-DA046366B2C6` 已关闭并删除，设备列表复核无残留，本地 API / Web 端口均已关闭。回收约 1.48 GiB 构建 / 结果包及原占约 1.65 GiB 的临时设备，清理期间磁盘可用空间净增加约 3.16 GiB（包含并行任务及恢复设备的空间变化），共享依赖缓存保留。经用户明确授权暂时关闭的三台 Cook 模拟器均已恢复 Booted，未擦除数据。
+可重复执行的夹具、预检、渠道准备和 UI 运行方式见 [`Validation/ShareFeedback/README.md`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/ios/Validation/ShareFeedback/README.md)。本地小型报告与截图位于忽略目录 `apps/ios/build/share-feedback-e2e-20261027/`。本轮临时设备 `Yunle Share E2E 18.6 20261027` / `259EB562-B760-4112-B6D9-DA046366B2C6` 已关闭并删除，设备列表复核无残留，本地 API / Web 端口均已关闭。回收约 1.48 GiB 构建 / 结果包及原占约 1.65 GiB 的临时设备，清理期间磁盘可用空间净增加约 3.16 GiB（包含并行任务及恢复设备的空间变化），共享依赖缓存保留。经用户明确授权暂时关闭的三台 Cook 模拟器均已恢复 Booted，未擦除数据。
 
 ### 初轮构建与核心验证
 
@@ -90,7 +90,7 @@
 
 定位并修复了验收方式的问题：`app.screenshot()` 的 App 范围截图在横屏中出现裁剪 / 方向元数据异常，不能依靠其 `image.size` 或 PNG 编码像素尺寸判断界面是否横屏。现在以实际窗口宽高等待旋转完成，并断言图片比例、完整可见、居中及关闭按钮可达性；证据统一使用 `XCUIScreen.main.screenshot()`，同时保存窗口 / 图片框和方向元数据。图片查看器和方向配置保持原实现。
 
-新增可独立运行的草稿横屏用例，并将相同断言复用到真实系统分享和原生私密工单流程。覆盖左右横屏、横屏放大后旋回竖屏自动适配、关闭保留草稿及移除图片。实测横屏窗口为 **874×402 pt**，完整竖向截图在其中居中显示为约 **139.83×304 pt**，没有拉伸或超出窗口。复现命令见 [`Validation/ShareFeedback/README.md`](../../apps/ios/Validation/ShareFeedback/README.md)；报告与真实整屏截图位于本地忽略目录 `apps/ios/build/share-feedback-rotation26-20261028/`。
+新增可独立运行的草稿横屏用例，并将相同断言复用到真实系统分享和原生私密工单流程。覆盖左右横屏、横屏放大后旋回竖屏自动适配、关闭保留草稿及移除图片。实测横屏窗口为 **874×402 pt**，完整竖向截图在其中居中显示为约 **139.83×304 pt**，没有拉伸或超出窗口。复现命令见 [`Validation/ShareFeedback/README.md`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/ios/Validation/ShareFeedback/README.md)；报告与真实整屏截图位于本地忽略目录 `apps/ios/build/share-feedback-rotation26-20261028/`。
 
 最终 **3 次验收通过，0 失败 / 跳过**：独立草稿横屏、浅色完整系统分享、深色完整系统分享。后两次均从 Photos 真实分享菜单进入，继续验证提交确认、丢失响应后的幂等重试、App 重启恢复、原生工单与鉴权截图、左右横屏，以及清除本机回执不删除服务端工单；两次都只生成一张合成工单。最终 Debug 测试构建通过。本轮仅修改验收代码、生成的测试文件索引与文档；原生预览和方向配置保持原实现，没有发布。
 

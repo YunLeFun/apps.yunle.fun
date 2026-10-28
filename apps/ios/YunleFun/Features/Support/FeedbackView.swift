@@ -3,7 +3,7 @@ import UIKit
 import YunleSupportUI
 
 struct FeedbackView: View {
-    private let channel: FeedbackChannel
+    private let channel: FeedbackChannel?
     private let sharedHistory: SharedFeedbackHistory
     @ObservedObject private var logs: DiagnosticLogStore
     @ObservedObject private var accounts: AccountStore
@@ -20,6 +20,7 @@ struct FeedbackView: View {
     @State private var preparationError: String?
     @State private var completedUpload: DiagnosticUploadReceipt?
     @State private var showUploadSuccess = false
+    @State private var isTestFlight = false
     @Environment(\.requestFeedbackLogin) private var requestLogin
     @Environment(\.screenshotFeedbackCoordinator) private var screenshotFeedback
     @State private var screenshotFeedbackVisibilityID = UUID()
@@ -28,7 +29,7 @@ struct FeedbackView: View {
 
     init(logs: DiagnosticLogStore, accounts: AccountStore,
          service: DiagnosticServing = DiagnosticService(), receiptDirectory: URL? = nil,
-         initialIssueDescription: String = "", channel: FeedbackChannel = .current,
+         initialIssueDescription: String = "", channel: FeedbackChannel? = nil,
          sharedHistory: SharedFeedbackHistory = SharedFeedbackHistory()) {
         self.channel = channel
         self.sharedHistory = sharedHistory
@@ -40,7 +41,7 @@ struct FeedbackView: View {
 
     var body: some View {
         Form {
-            TestFlightFeedbackSection(appName: "云乐坊", isTestFlight: channel == .testFlight)
+            TestFlightFeedbackSection(appName: "云乐坊", isTestFlight: channel.map { $0 == .testFlight } ?? isTestFlight)
                 .accessibilityIdentifier("feedback.testflight")
             descriptionSection
             FeedbackScreenshotSection(screenshots: $screenshots, onPreview: { descriptionFocused = false; sheet = .screenshot($0) },
@@ -63,6 +64,10 @@ struct FeedbackView: View {
             }
         }
         .navigationTitle("反馈与建议")
+        .task {
+            guard channel == nil else { return }
+            isTestFlight = await TestFlightDistribution.current()
+        }
         .onAppear { screenshotFeedback?.feedbackVisibilityChanged(screenshotFeedbackVisibilityID, visible: true) }
         .onDisappear { screenshotFeedback?.feedbackVisibilityChanged(screenshotFeedbackVisibilityID, visible: false) }
         .scrollDismissesKeyboard(.interactively)

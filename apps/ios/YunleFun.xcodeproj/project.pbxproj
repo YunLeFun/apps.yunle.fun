@@ -22,7 +22,7 @@
 		0F243332071C572AC9E221EC /* SupportCenterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EE269900107246745FAE36 /* SupportCenterService.swift */; };
 		0FB56381F1921909B983D623 /* SharedFeedbackHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7C346395F39658CFC7D5E4A /* SharedFeedbackHistory.swift */; };
 		1024383943FDCCF2140B20E3 /* AssistantComposerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F32BA8D789C73F249A3CECD5 /* AssistantComposerUITests.swift */; };
-		1039E0265896C5E44C75297C /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = 85FBE316A2D2381404760C36 /* SwiftDraw */; };
+		1039E0265896C5E44C75297C /* YunleSupportUI in Frameworks */ = {isa = PBXBuildFile; productRef = 522E6B73DE49C6DAC31CCFBB /* YunleSupportUI */; };
 		11E75B15B1D9EBAC219DC6A4 /* ApplicationIconImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B3D92D4DF1E4235BAD0269 /* ApplicationIconImage.swift */; };
 		12F19CEB1C7B14B992439A8A /* ShareFeedbackComposerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5D2D001488D9A5E7696A93 /* ShareFeedbackComposerTests.swift */; };
 		13840EE4625AC49CE03B115E /* ApplicationEditorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5435F9767CA269FED208A87 /* ApplicationEditorModel.swift */; };
@@ -241,6 +241,7 @@
 		F1A9E5FAE84A037C09C9FF34 /* SharedFeedbackTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5304555374B6DC00769774 /* SharedFeedbackTestSupport.swift */; };
 		F1E0E62FFE18CE8B96C323E0 /* SupportTicketClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36855356A2046EAAACB64AEA /* SupportTicketClientTests.swift */; };
 		F20ED261239F0C4FEC5EA205 /* AssistantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB5DA2365D8E76A88C4B1B2 /* AssistantTests.swift */; };
+		F3C4B5F560E8C4B29449D494 /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = 85FBE316A2D2381404760C36 /* SwiftDraw */; };
 		F5222E055A08472CF10571CD /* ContentStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1B63E1B44278210C81D0B6 /* ContentStateView.swift */; };
 		F5841204C33E6BD2EFCC37BE /* ApplicationCacheRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052782C967F7135283504C11 /* ApplicationCacheRepository.swift */; };
 		F6598053617B0A9ED5DA9E50 /* ScreenshotFeedbackPromptStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD9D9AA87AFECCDE39A15EF /* ScreenshotFeedbackPromptStateTests.swift */; };
@@ -570,7 +571,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1039E0265896C5E44C75297C /* SwiftDraw in Frameworks */,
+				1039E0265896C5E44C75297C /* YunleSupportUI in Frameworks */,
+				F3C4B5F560E8C4B29449D494 /* SwiftDraw in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1186,6 +1188,7 @@
 			);
 			name = YunleFun;
 			packageProductDependencies = (
+				522E6B73DE49C6DAC31CCFBB /* YunleSupportUI */,
 				85FBE316A2D2381404760C36 /* SwiftDraw */,
 			);
 			productName = YunleFun;
@@ -1298,6 +1301,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */,
+				90D473C95402B634FCAD77AC /* XCRemoteSwiftPackageReference "ylf" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6D0FE6E5752490913E476B14 /* Products */;
@@ -1729,7 +1733,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = QT792GAY4C;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1901,7 +1905,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = QT792GAY4C;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -2050,7 +2054,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = QT792GAY4C;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -2347,6 +2351,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		90D473C95402B634FCAD77AC /* XCRemoteSwiftPackageReference "ylf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/YunLeFun/ylf.git";
+			requirement = {
+				kind = revision;
+				revision = 5ce0ad76461256f055669aceb2c3b093724459ac;
+			};
+		};
 		B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/swhitty/SwiftDraw.git";
@@ -2358,6 +2370,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		522E6B73DE49C6DAC31CCFBB /* YunleSupportUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90D473C95402B634FCAD77AC /* XCRemoteSwiftPackageReference "ylf" */;
+			productName = YunleSupportUI;
+		};
 		85FBE316A2D2381404760C36 /* SwiftDraw */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B3AE4B42E91B9B660AACF645 /* XCRemoteSwiftPackageReference "SwiftDraw" */;

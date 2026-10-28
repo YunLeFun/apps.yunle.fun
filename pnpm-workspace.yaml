@@ -4,6 +4,7 @@ shellEmulator: true
 auditConfig:
   # 仅接受已回移安全补丁但上游尚未发布修复版的精确告警（详见安全文档）
   ignoreGhsas:
+    - GHSA-gcqx-w48m-w2h4 # deepmerge 无已发布修复；CJS/UMD/源码均阻止原型键并覆盖恶意与合法输入
     - GHSA-86w9-cpqp-85rv # node-forge 无已发布修复；回移上游 RSA 验签补丁并验证
     - GHSA-p6mc-m468-83gw # lodash.set 无上游补丁；本仓库应用等价原型污染防护补丁
 
@@ -78,6 +79,7 @@ overrides:
 patchedDependencies:
   appdmg@0.6.6: patches/appdmg@0.6.6.patch
   cordova-plugin-wechat@3.1.0: patches/cordova-plugin-wechat@3.1.0.patch
+  deepmerge@4.3.1: patches/deepmerge@4.3.1.patch
   lodash.set@4.3.2: patches/lodash.set@4.3.2.patch
   node-forge@1.4.0: patches/node-forge@1.4.0.patch
 allowBuilds:

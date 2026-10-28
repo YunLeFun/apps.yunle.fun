@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import YunleSupportUI
 
 struct FeedbackView: View {
     private let channel: FeedbackChannel
@@ -39,15 +40,8 @@ struct FeedbackView: View {
 
     var body: some View {
         Form {
-            if channel == .testFlight {
-                Section {
-                    Label("优先使用 TestFlight 反馈", systemImage: "airplane")
-                    Text("截屏后，在系统截屏预览中选择“共享 Beta 版反馈”；也可以打开 TestFlight，选择云乐坊，再点“发送 Beta 版反馈”。")
-                    Text("如需持续跟进处理进度，也可使用下方通用反馈。")
-                        .font(.footnote).foregroundStyle(.secondary)
-                } header: { Text("TestFlight 测试反馈（推荐）") }
-                    .accessibilityIdentifier("feedback.testflight")
-            }
+            TestFlightFeedbackSection(appName: "云乐坊", isTestFlight: channel == .testFlight)
+                .accessibilityIdentifier("feedback.testflight")
             descriptionSection
             FeedbackScreenshotSection(screenshots: $screenshots, onPreview: { descriptionFocused = false; sheet = .screenshot($0) },
                                       onImportingChanged: { isImportingScreenshots = $0 })
@@ -144,26 +138,30 @@ struct FeedbackView: View {
 
     private var supportCenterSection: some View {
         Section {
-            Button { descriptionFocused = false; sheet = .website } label: {
-                Label("打开完整支持中心", systemImage: "globe")
-            }
-            .accessibilityIdentifier("feedback.support-website")
             Button { descriptionFocused = false; sheet = .support(.compose) } label: {
-                Label("在线反馈与处理进度", systemImage: "bubble.left.and.text.bubble.right")
+                SupportMenuLabel("在线反馈", icon: .system("bubble.left.and.text.bubble.right"))
             }
+            .supportMenuRow()
             .accessibilityIdentifier("feedback.support-center")
-            Button { descriptionFocused = false; sheet = .support(.board) } label: {
-                Label("需求墙与路线图", systemImage: "lightbulb")
+            Button { descriptionFocused = false; sheet = .website } label: {
+                SupportMenuLabel("打开完整支持中心", icon: .system("globe"), external: true)
             }
+            .supportMenuRow()
+            .accessibilityIdentifier("feedback.support-website")
+            Button { descriptionFocused = false; sheet = .support(.board) } label: {
+                SupportMenuLabel("需求墙与路线图", icon: .system("lightbulb"))
+            }
+            .supportMenuRow()
             .accessibilityIdentifier("feedback.support-board")
             if accounts.user != nil {
                 Button { descriptionFocused = false; sheet = .support(.manage) } label: {
-                    Label("反馈管理", systemImage: "tray.full")
+                    SupportMenuLabel("反馈管理", icon: .system("tray.full"))
                 }
+                .supportMenuRow()
                 .accessibilityIdentifier("feedback.support-manage")
             }
         } header: { Text("云乐坊支持中心") }
-        footer: { Text("在线反馈会保留上面的问题描述。已登录时自动使用当前账号，管理权限由支持中心验证。") }
+        footer: { Text("优先使用在线反馈，问题描述会自动带入，提交后可在工单中查看回复。已登录时使用当前账号，管理权限由支持中心验证。") }
     }
 
     private var descriptionSection: some View {

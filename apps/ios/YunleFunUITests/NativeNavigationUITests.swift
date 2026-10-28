@@ -124,18 +124,21 @@ final class NativeNavigationUITests: XCTestCase {
 
     private func openPasswordLogin() throws -> XCUIApplication {
         continueAfterFailure = false
-        let app = XCUIApplication(); app.activate()
-        // Each journey returns to Me. Reuse the running guest app instead of cold-launching it
-        // between in-session keyboard checks; also close a sheet left by a failed prior journey.
-        let cancel = app.navigationBars["账号"].buttons["取消"]
-        if cancel.exists { cancel.tap() }
+        let app = XCUIApplication()
+        // A prior journey may have launched at an accessibility text size, where the
+        // login method uses a menu. Relaunch with an explicit standard size for this journey.
+        app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launch()
         XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
         app.tabBars.buttons["我"].tap()
         guard app.buttons["me.login"].waitForExistence(timeout: 5) else {
             throw XCTSkip("Requires a guest simulator; never signs out an existing account")
         }
         app.buttons["me.login"].tap()
-        app.segmentedControls.buttons["密码"].tap()
+        XCTAssertTrue(app.navigationBars["账号"].waitForExistence(timeout: 5))
+        let password = app.segmentedControls.buttons["密码"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        password.tap()
         XCTAssertTrue(app.secureTextFields["login.password"].waitForExistence(timeout: 5))
         return app
     }
@@ -161,9 +164,8 @@ final class NativeNavigationUITests: XCTestCase {
     private func checkLoginKeyboardDismissal(large: Bool, passwordMethod: Bool = false) {
         continueAfterFailure = false
         let app = XCUIApplication()
-        if large {
-            app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
-        }
+        app.launchArguments = ["-UIPreferredContentSizeCategoryName",
+                               large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
         app.tabBars.buttons["我"].tap()
@@ -172,8 +174,11 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(login.waitForExistence(timeout: 5))
         XCTAssertTrue(login.label.hasPrefix("登录云乐坊"))
         login.tap()
+        XCTAssertTrue(app.navigationBars["账号"].waitForExistence(timeout: 5))
         if passwordMethod {
-            app.segmentedControls.buttons["密码"].tap()
+            let method = app.segmentedControls.buttons["密码"]
+            XCTAssertTrue(method.waitForExistence(timeout: 5))
+            method.tap()
             let username = app.textFields["login.username"], password = app.secureTextFields["login.password"]
             XCTAssertTrue(username.waitForExistence(timeout: 5))
             XCTAssertEqual(username.label, "用户名、邮箱或手机号")

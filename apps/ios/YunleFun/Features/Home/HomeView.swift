@@ -122,11 +122,19 @@ struct HomeView: View {
         }
         .haptic(.selection, trigger: pinChanges)
         .refreshable {
-            isRefreshing = true
-            defer { isRefreshing = false }
-            await refreshCatalog()
-            await sync.recheck()
-            await loadMembership(force: true)
+            let identity = accounts.identityGeneration
+            // State updates can replace SwiftUI's refresh action and cancel its task.
+            // Keep this explicit user request alive until the data refresh finishes.
+            await Task { @MainActor in
+                guard identity == accounts.identityGeneration, !isRefreshing else { return }
+                isRefreshing = true
+                defer { isRefreshing = false }
+                await refreshCatalog()
+                guard identity == accounts.identityGeneration else { return }
+                await sync.recheck()
+                guard identity == accounts.identityGeneration else { return }
+                await loadMembership(force: true)
+            }.value
         }
         .navigationTitle("云居")
         // Read membership once per identity, and again when it is unknown or stale on returning to the app.

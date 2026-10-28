@@ -24,6 +24,56 @@ final class HomeLayoutVisualTests: XCTestCase {
         XCTAssertEqual(fixture.library.snapshot.configuration.installedApps, configuration.installedApps)
     }
 
+    func testHomeRefreshCannotRecheckAnotherAccountsManualSyncConflict() async throws {
+        let gate = HomeStateLoadGate()
+        let remote = RemoteHomeScreen(revision: String(repeating: "a", count: 64),
+            configuration: HomeConfiguration(installedApps: [.init(appId: "air-conditioner")]))
+        let service = HomeStateService(remote: remote)
+        let fixture = try await HomeStateFixture(service: service, catalogService: HomeCatalogGatedFixture(gate: gate),
+                                                 additionalAccountID: "home-state-other")
+        defer { fixture.close(); Task { await gate.open() } }
+        try fixture.library.adopt(remote)
+        _ = try await fixture.readScreen(named: "home-refresh-before-account-switch", containing: "暂不可用", test: self)
+        let originalIdentity = fixture.accounts.identityGeneration
+        try fixture.pullToRefresh()
+        try await gate.waitUntilEntered()
+
+        try await fixture.accounts.select("home-state-other")
+        XCTAssertNotEqual(fixture.accounts.identityGeneration, originalIdentity)
+        fixture.library.activateAccount("home-state-other")
+        fixture.library.setAutoSyncEnabled(false)
+        fixture.library.setSyncEnabled(true)
+        fixture.sync.identityChanged()
+        fixture.library.add(CloudApplication(id: "other-local-app", name: "另一个账号的本机应用",
+                                            websiteUrl: "https://other-local.invalid"))
+        await fixture.sync.synchronize()
+        guard case .conflict(let conflict) = fixture.sync.phase else {
+            XCTFail("The second account must have an unresolved manual-sync conflict before releasing the catalog")
+            return
+        }
+        let snapshot = fixture.library.snapshot
+        let unexpectedSync = expectation(description: "The first account's refresh must not start requests for the second account")
+        unexpectedSync.isInverted = true
+        await service.observeRequests { unexpectedSync.fulfill() }
+        await gate.open()
+        let deadline = Date().addingTimeInterval(5)
+        while fixture.catalog.successfulLoadID == nil && Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertNotNil(fixture.catalog.successfulLoadID, "The public catalog may finish after an account switch")
+        await fulfillment(of: [unexpectedSync], timeout: 0.5)
+
+        let loads = await service.loadUsers, saves = await service.saveUsers
+        XCTAssertEqual(loads, ["home-state-other"], "Only the second account's explicit conflict check may reach the cloud")
+        XCTAssertTrue(saves.isEmpty)
+        XCTAssertEqual(fixture.sync.phase, .conflict(conflict), "An older account's refresh must preserve the current conflict")
+        XCTAssertEqual(fixture.library.snapshot.configuration, snapshot.configuration)
+        XCTAssertEqual(fixture.library.snapshot.mutationId, snapshot.mutationId)
+        XCTAssertEqual(fixture.library.snapshot.base, snapshot.base)
+        XCTAssertTrue(fixture.library.snapshot.syncEnabled)
+        XCTAssertFalse(fixture.library.snapshot.autoSyncEnabled)
+    }
+
     func testUnavailableStatusExplainsDelistingWithoutRemovingTheInstallation() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -445,15 +495,24 @@ private final class HomeStateFixture {
     init(service: HomeStateService, size: DynamicTypeSize = .large, dark: Bool = false,
          width: CGFloat = 390, height: CGFloat = 844,
          workshopService: WorkshopServing? = nil, workspaceID: String = "", workspacePicker: Bool = false,
-         catalogService: CatalogServing = CatalogService()) async throws {
+         catalogService: CatalogServing = CatalogService(), additionalAccountID: String? = nil) async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let authHost = UUID().uuidString.lowercased() + ".home-state.test"
-        let auth = AuthHTTPFixture(replies: [(200, #"{"sub":"home-state-user","status":"ACTIVE"}"#)])
+        var authReplies = [(200, #"{"sub":"home-state-user","status":"ACTIVE"}"#)]
+        if let additionalAccountID {
+            let response = try JSONSerialization.data(withJSONObject: ["sub": additionalAccountID, "status": "ACTIVE"])
+            authReplies.append((200, String(decoding: response, as: UTF8.self)))
+        }
+        let auth = AuthHTTPFixture(replies: authReplies)
         AuthHTTPProtocol.register(authHost, fixture: auth)
         let configuration = URLSessionConfiguration.ephemeral; configuration.protocolClasses = [AuthHTTPProtocol.self]
         var state = AccountVaultState(); state.activeID = "home-state-user"
         state.accounts = [SavedAccount(user: AccountUser(id: "home-state-user"), credential: AccountCredential(
             accessToken: "home-state-fixture-only", refreshToken: "not-used", expiresAt: Date().addingTimeInterval(3600)))]
+        if let additionalAccountID {
+            state.accounts.append(SavedAccount(user: AccountUser(id: additionalAccountID), credential: AccountCredential(
+                accessToken: "home-state-other-fixture-only", refreshToken: "not-used", expiresAt: Date().addingTimeInterval(3600))))
+        }
         let accounts = AccountStore(session: AccountSession(api: CloudbaseAuthService(session: URLSession(configuration: configuration),
             origin: URL(string: "https://\(authHost)")!), vault: BillingMemoryVault(data: try JSONEncoder().encode(state))))
         await accounts.restore()
@@ -676,6 +735,15 @@ private actor HomeCatalogRecoveryFixture: CatalogServing {
     }
 }
 
+private struct HomeCatalogGatedFixture: CatalogServing {
+    let gate: HomeStateLoadGate
+    func applications() async throws -> [CloudApplication] {
+        await gate.wait()
+        return [CloudApplication(id: "public-ac", name: "云空调", slug: "air-conditioner", marketShortName: "air-conditioner",
+                                 websiteUrl: "https://ac.yunyoujun.cn", emoji: "❄️")]
+    }
+}
+
 private struct HomeWorkspaceServiceFixture: WorkshopServing {
     var access: WorkshopAccess = .active
     var firstPageGate: HomeStateLoadGate?
@@ -721,19 +789,27 @@ private actor HomeStateService: HomeSyncServing {
     private let remote: RemoteHomeScreen
     private let failure: Error?
     private let gate: HomeStateLoadGate?
+    private(set) var loadUsers: [String] = []
+    private(set) var saveUsers: [String] = []
+    private var requestObserver: (@Sendable () -> Void)?
     init(remote: RemoteHomeScreen = RemoteHomeScreen(revision: nil, configuration: HomeConfiguration()),
          failure: Error? = nil, gate: HomeStateLoadGate? = nil) {
         self.remote = remote; self.failure = failure; self.gate = gate
     }
     func load(identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
+        loadUsers.append(identity.userID)
+        requestObserver?()
         await gate?.wait()
         if let failure { throw failure }
         return remote
     }
     func save(_ write: HomeScreenWrite, identity: AuthorizedAccount) async throws -> RemoteHomeScreen {
+        saveUsers.append(identity.userID)
+        requestObserver?()
         XCTFail("Rendering a home state must not publish local configuration")
         throw HomeSyncError.unavailable
     }
+    func observeRequests(_ observer: @escaping @Sendable () -> Void) { requestObserver = observer }
 }
 
 private actor HomeStateLoadGate {

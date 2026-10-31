@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @main
 struct YunleFunApp: App {
@@ -20,6 +21,13 @@ struct YunleFunApp: App {
     @AppStorage("appearance") private var appearance = AppAppearance.system
 
     init() {
+#if DEBUG && targetEnvironment(simulator)
+        // Interaction tests verify visible state and usable controls, while
+        // avoiding XCTest's lost animation-completion notification on iOS 27.
+        if ProcessInfo.processInfo.environment["YUNLEFUN_UI_DISABLE_ANIMATIONS"] == "1" {
+            UIView.setAnimationsEnabled(false)
+        }
+#endif
         let catalog = CatalogStore()
         let library = HomeLibrary()
         let runtime = NativeWebRuntime()

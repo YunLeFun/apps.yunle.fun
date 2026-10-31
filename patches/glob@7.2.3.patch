@@ -1,0 +1,52 @@
+diff --git a/glob.js b/glob.js
+index 37a4d7e60775a381e843d26bebe568270e9c4388..d9fbd95e7797d83fa61128bc4b93324931d2f793 100644
+--- a/glob.js
++++ b/glob.js
+@@ -382,7 +382,8 @@ Glob.prototype._processReaddir2 = function (prefix, read, abs, remain, index, in
+   // dot is set.  Stuff like @(.foo|.bar) isn't allowed.
+   var pn = remain[0]
+   var negate = !!this.minimatch.negate
+-  var rawGlob = pn._glob
++  // Minimatch 11 exposes Matcher.pattern and test() instead of RegExp metadata.
++  var rawGlob = pn._glob === undefined ? pn.pattern : pn._glob
+   var dotOk = this.dot || rawGlob.charAt(0) === '.'
+ 
+   var matchedEntries = []
+@@ -391,9 +392,9 @@ Glob.prototype._processReaddir2 = function (prefix, read, abs, remain, index, in
+     if (e.charAt(0) !== '.' || dotOk) {
+       var m
+       if (negate && !prefix) {
+-        m = !e.match(pn)
++        m = !pn.test(e)
+       } else {
+-        m = e.match(pn)
++        m = pn.test(e)
+       }
+       if (m)
+         matchedEntries.push(e)
+diff --git a/sync.js b/sync.js
+index 2c4f480192d28d3aabc2a7697b6352131ff3c339..2b9d23f960b4aa29abffcb739a1b8dc88823057b 100644
+--- a/sync.js
++++ b/sync.js
+@@ -144,7 +144,8 @@ GlobSync.prototype._processReaddir = function (prefix, read, abs, remain, index,
+   // dot is set.  Stuff like @(.foo|.bar) isn't allowed.
+   var pn = remain[0]
+   var negate = !!this.minimatch.negate
+-  var rawGlob = pn._glob
++  // Minimatch 11 exposes Matcher.pattern and test() instead of RegExp metadata.
++  var rawGlob = pn._glob === undefined ? pn.pattern : pn._glob
+   var dotOk = this.dot || rawGlob.charAt(0) === '.'
+ 
+   var matchedEntries = []
+@@ -153,9 +154,9 @@ GlobSync.prototype._processReaddir = function (prefix, read, abs, remain, index,
+     if (e.charAt(0) !== '.' || dotOk) {
+       var m
+       if (negate && !prefix) {
+-        m = !e.match(pn)
++        m = !pn.test(e)
+       } else {
+-        m = e.match(pn)
++        m = pn.test(e)
+       }
+       if (m)
+         matchedEntries.push(e)

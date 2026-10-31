@@ -1,0 +1,481 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-M0-M5-frozen-candidate-acceptance-closure",
+  "atUTC": "2026-10-31T09:27:27.596547+00:00",
+  "M0M5AcceptanceComplete": true,
+  "goalAchieved": true,
+  "goalStatusToolUpdatedByThisAudit": false,
+  "scope": "Native iOS Games tab and Workshop consolidation, three initial games, resource preparation, invitations and recovery, using each recorded frozen candidate. User additionally authorized compatibility/Star and leave-fix production publication. M6 and TestFlight excluded.",
+  "completionBasis": "Prior independent requirement/scope audit identified only the last-owner leave integration and F12 cleanup as outstanding. Actual publication, O01 changed-branch normal UI regression, F12 normal lifecycle terminal cleanup, restricted ledger CAS and environment closeout now resolve them. Earlier failures and version boundaries remain.",
+  "items": [
+    {
+      "task": "0.1",
+      "status": "passed",
+      "evidenceScope": "M0 consolidated and online addendum;32+11 source references previously independently checked"
+    },
+    {
+      "task": "0.2",
+      "status": "passed",
+      "evidenceScope": "a701 directory and frozen launch contracts cover actually released modes"
+    },
+    {
+      "task": "0.3",
+      "status": "passed",
+      "evidenceScope": "82 data-protection checks, runtime17, and home-to-game compatibility journey"
+    },
+    {
+      "task": "1.1",
+      "status": "passed",
+      "evidenceScope": "real Workshop search4/category5/clear restoration plus public revision and honest empty fallback"
+    },
+    {
+      "task": "1.2",
+      "status": "passed",
+      "evidenceScope": "real member AI6 cards and corrected visible navigation; personal management supported empty state"
+    },
+    {
+      "task": "1.3",
+      "status": "passed",
+      "evidenceScope": "four Tabs with independent stacks; Help to Workshop and legacy entry routing"
+    },
+    {
+      "task": "2.1",
+      "status": "passed",
+      "evidenceScope": "three games with actual publication gates and supported native entry paths"
+    },
+    {
+      "task": "2.2",
+      "status": "passed",
+      "evidenceScope": "a701 actual ready60 samples and actual mode/layout/input journeys"
+    },
+    {
+      "task": "2.3",
+      "status": "passed-with-recorded-local-limits",
+      "evidenceScope": "retained two-gameN10, actual minimize/resume, capacity/memory models, AX/VoiceOver"
+    },
+    {
+      "task": "3.1",
+      "status": "passed",
+      "evidenceScope": "a701 261 resources/687 entries, room static closure and freeze"
+    },
+    {
+      "task": "3.2",
+      "status": "passed-with-recorded-local-limits",
+      "evidenceScope": "cache-only bytes/SHA failure flows preserve Cookie/local/IDB and active game"
+    },
+    {
+      "task": "3.3",
+      "status": "passed-under-user-adjusted-standard",
+      "evidenceScope": "fixed60 actual operable samples and627 independent checks; retain countdown and historical failures"
+    },
+    {
+      "task": "4.1",
+      "status": "passed-with-layered-evidence",
+      "evidenceScope": "final-scope17 clauses include login/invite/role/AASA and actual OS cold/warm links; not every branch claimed production UI"
+    },
+    {
+      "task": "4.2",
+      "status": "passed-with-frozen-evidence-boundaries",
+      "evidenceScope": "Existing creation/join/idempotency/role/capacity evidence plus actual finalized last-owner fix, O01 normal UI playing sole-observer-owner cancellation and exact F12 terminal cleanup"
+    },
+    {
+      "task": "4.3",
+      "status": "passed-with-frozen-evidence-boundaries",
+      "evidenceScope": "Ten valid distinct rooms per game keep original recorded versions; excluded F12 is now terminal-clean without becoming a valid trial; all owned rooms have no pending cleanup"
+    },
+    {
+      "task": "5.1",
+      "status": "passed-with-frozen-evidence-boundaries",
+      "evidenceScope": "Existing runtime17/data82 and real Workshop/AI/tutorial/Home/account journeys plus finalized release, O01 and independently verified F12 cleanup; current concurrent workspace increments excluded"
+    },
+    {
+      "task": "5.2",
+      "status": "passed",
+      "evidenceScope": "shared simulator pool reused; no new device this turn; no hardware performance claim"
+    },
+    {
+      "task": "5.3",
+      "status": "passed-with-frozen-evidence-boundaries",
+      "evidenceScope": "Installed playable normal candidate and source/binary identities retained; measured outcomes, history, rollback inputs, final production identity and cleanup consolidated"
+    }
+  ],
+  "requirementMap": {
+    "R1": [
+      "1.1",
+      "1.2",
+      "1.3"
+    ],
+    "R2": [
+      "0.2",
+      "2.1",
+      "2.2"
+    ],
+    "R3": [
+      "0.3",
+      "2.3",
+      "3.2",
+      "4.1",
+      "4.2"
+    ],
+    "R4": [
+      "3.1",
+      "3.2",
+      "3.3"
+    ],
+    "R5": [
+      "4.1",
+      "4.2",
+      "4.3"
+    ],
+    "R6": [
+      "2.3",
+      "4.3"
+    ],
+    "R7": [
+      "2.1",
+      "2.3",
+      "5.2"
+    ],
+    "R8": [
+      "0.1",
+      "0.2",
+      "1.3",
+      "2.2",
+      "3.3",
+      "4.1",
+      "4.3",
+      "5.1",
+      "5.3"
+    ]
+  },
+  "validRecoveryCounts": {
+    "gomoku": 10,
+    "flight-chess": 10
+  },
+  "validRounds": {
+    "gomoku": [
+      "G01",
+      "G02",
+      "G03",
+      "G04",
+      "G05",
+      "G06",
+      "G07",
+      "G08",
+      "G09",
+      "G10"
+    ],
+    "flight-chess": [
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F09",
+      "F10",
+      "F11",
+      "F13",
+      "F14",
+      "F15"
+    ]
+  },
+  "excludedRounds": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F12"
+  ],
+  "ledger": {
+    "roundCount": 25,
+    "validRoundCount": 20,
+    "pendingCleanupCount": 0,
+    "completed": true,
+    "beforeSHA256": "a18f3c515d5beb36abe582eb79036b579d4ccdc82d46515979d2135df4d12234",
+    "afterSHA256": "2e872fd632097ee6bd8873361d487d8cec89dd328d83640319f2871e0ee6e43c",
+    "beforeBytes": 8693376,
+    "afterBytes": 8695490,
+    "onlyChangedFields": [
+      "completed",
+      "rounds[F12].pendingCleanup",
+      "rounds[F12].terminalCleanupVerification"
+    ],
+    "allOtherRoundsAndHistoricalVersionFieldsUnchanged": true,
+    "privateOriginalBytesBackupRetainedAndVerified": true,
+    "casReceipt": {
+      "artifact": "final-native-n10-ledger-terminal-cleanup-cas-20261031.json",
+      "bytes": 897,
+      "sha256": "1488c3ef4d7d7a0ee6d6f6c05b869079c0e96f973009f398795eb30e17981054"
+    }
+  },
+  "F12": {
+    "cleanupConfirmed": true,
+    "pendingCleanup": false,
+    "passed": false,
+    "permanentlyExcludedFromValidN10": true,
+    "validTrialsAdded": 0,
+    "roomIdSHA256": "514d89e4b9ddf355e5a6ca93ddda043b5cea93caa2183dbc2e0833222eff1224",
+    "terminalStatus": "expired",
+    "terminalRevision": 352,
+    "aggregateAndProjectedMemberCount": 0,
+    "activeGameNextSeatsAndSeatSwapRequestCleared": true,
+    "oldGameStatus": "won",
+    "oldGameRevision": 343,
+    "oldGameAndThirtyDayRetentionUnchanged": true,
+    "normalActionSource": "Native A normal player join; normal disconnect-grace lifecycle removal of offline B and owner transfer; normal final A leave. The SDK queries only observed state.",
+    "accidentalReady350ThenCancel351WithoutNewGamePreserved": true,
+    "earlierUserReportedLeaveChecksStillFailedHistoryPreserved": true,
+    "earlierHeadingReportsCauseEstablished": false,
+    "separateWebSocketRoomLeftAcknowledgementClaimed": false,
+    "finalAuthoritySHA256": "0f8506c12c44e6cd116b9efc86f9a5edfbc00625b57a39743ef879cc327e9789"
+  },
+  "productionRelease": {
+    "finalized": true,
+    "sourceCommit": null,
+    "sourceBaseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "sourceTree": "38f267f3bfaa1fe68004c957e82b4768156ad46d",
+    "sourceIdentityKind": "uncommitted-git-tree",
+    "imageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "manifestAfterSHA256": "0f879b4163981b04676d75f96d598354b4a5e78d2227bb8dbf697ee1c6cc8301",
+    "anonymousHTTPPassed": 8,
+    "anonymousHTTPCount": 8,
+    "independentFinalizedCompiledAndConfigurationReadbackPassed": true,
+    "O01NormalUIPlayingSoleObserverOwnerRegressionPassed": true,
+    "O01SameGameCancelledAndRetainedThirtyDays": true,
+    "old772AndNewSourceImageFourArchivesRetained": true,
+    "finalizeRestartedApplication": false,
+    "restoreLoadTestPerformed": false
+  },
+  "performance": {
+    "recordedFrozenWebCommit": "6ff97db",
+    "catalogVersionPrefix": "a7011d9f",
+    "fixedFormalSampleCount": 60,
+    "perRepresentativeConditionCount": 10,
+    "preparedClickToOperableP50ImprovementPercent": {
+      "gomoku": 25.45,
+      "paper-star": 8.87
+    },
+    "coldResourceP90ImprovementPercent": {
+      "gomoku": 17.98,
+      "paper-star": 6.98
+    },
+    "paperStarThreeSecondCountdownPreserved": true,
+    "uniformThirtyPercentThresholdReplacedByUserApprovedActualBenefitStandard": true,
+    "historicalFailuresReclassifiedOrSamplesRerunThisClosure": false,
+    "simulatorResultsAreNotHardwarePerformance": true
+  },
+  "installedCandidate": {
+    "installedProductFourHashesMatchFrozenNormalCandidate": true,
+    "files": [
+      {
+        "name": "YunleFun",
+        "sha256": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+        "matchesFrozenNormalCandidate": true
+      },
+      {
+        "name": "YunleFun.debug.dylib",
+        "sha256": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+        "matchesFrozenNormalCandidate": true
+      },
+      {
+        "name": "Info.plist",
+        "sha256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+        "matchesFrozenNormalCandidate": true
+      },
+      {
+        "name": "native-game-catalog-v1.json",
+        "sha256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+        "matchesFrozenNormalCandidate": true
+      }
+    ],
+    "nativeReturnedToGamesAfterNormalLeave": true,
+    "newBuildOrInstallPerformedByThisClosure": false,
+    "oldM3AndTwentyRoomsReboundToNewBackendOrConcurrentSource": false
+  },
+  "sourceAndConcurrentWorkBoundary": {
+    "historicalSourceBindingReceipt": "docs/dev/evidence/native-game-discovery/recovery-20261029/resumed-source-binding-20261031.json",
+    "historicalFiveWebKitTestsCoverOnlyTheirRecordedVersion": true,
+    "currentWholeWorkspaceValidated": false,
+    "observedConcurrentSourceTestAndAssetPaths": [
+      "apps/ios/YunleFun/Features/Games/GamesView.swift",
+      "apps/ios/YunleFunTests/NativeWebNavigationTests.swift",
+      "apps/ios/YunleFunUITests/NativeGamesUITests.swift",
+      "apps/mobile/ios/App/App/Assets.xcassets/GameCoverFlight.imageset/Contents.json",
+      "apps/mobile/ios/App/App/Assets.xcassets/GameCoverFlight.imageset/cover.svg",
+      "apps/mobile/ios/App/App/Assets.xcassets/GameCoverGomoku.imageset/Contents.json",
+      "apps/mobile/ios/App/App/Assets.xcassets/GameCoverGomoku.imageset/cover.svg",
+      "apps/mobile/ios/App/App/Assets.xcassets/GameCoverPaperStar.imageset/Contents.json",
+      "apps/mobile/ios/App/App/Assets.xcassets/GameCoverPaperStar.imageset/cover.svg",
+      "apps/mobile/ios/App/App/WebViewController.swift"
+    ],
+    "observationsDoNotFreezeFutureConcurrentChanges": true,
+    "subsequentProductDocumentAndFurtherSourceChangesIncludedInFrozenCandidateAcceptance": false,
+    "concurrentChangesRevertedEditedOrCleanedByThisClosure": false,
+    "thisClosureEditedProductDocument": false,
+    "observationReceipt": {
+      "artifact": "concurrent-app-source-drift-at-final-closeout-20261031.json",
+      "bytes": 4609,
+      "sha256": "233fb5d6f1689ccb12b50045cd3b340931f5ea054693de4b2cc2884ea11d721f"
+    }
+  },
+  "environmentCloseout": {
+    "installedCandidateUnchanged": true,
+    "sharedDeviceUDIDSetUnchanged": true,
+    "observedDeviceCount": 6,
+    "ownDevicesCreatedClonedErasedDeletedOrShutdown": 0,
+    "otherTaskDeviceStatesInterferedWith": false,
+    "nativeReturnedToGames": true,
+    "temporarySingleAccountCredentialFileRecreated": false,
+    "transientAgentBrowserSessionClosedNormally": true,
+    "passwordChanges": 0,
+    "passwordRotationDeferredByUser": true,
+    "BNewPasswordLoginIssueFixedClaimed": false,
+    "ownedBrowserTaskSpaceFinished": true,
+    "finishCallsInFinalRound": 1,
+    "keptPages": [],
+    "rebuildableBuildOrExperimentDirectoryCreatedThisClosure": false,
+    "frozenRollbackAndUniqueEvidenceInputsRetained": true,
+    "physicalFreeSpaceImprovementClaimed": false,
+    "deviceAndSessionReceipt": {
+      "artifact": "post-f12-native-lifecycle-session-closeout-20261031.json",
+      "bytes": 3384,
+      "sha256": "2c8faa365398e8d8f869091f03bb9a6c05ea6cca0368bf8151b4055e6911ba55"
+    },
+    "browserFinishReceipt": {
+      "artifact": "owned-browser-taskspace-finalized-20261031.json",
+      "bytes": 306,
+      "sha256": "80179923644128b3ed4d235a9afbc7727cadb553875e23f5e7c7326c40f15f85"
+    }
+  },
+  "outOfScope": {
+    "M6WebFourTabsMoreGamesOtherPlatforms": "deferred",
+    "TestFlight": "not performed",
+    "hardwarePerformance": "later separate work",
+    "laterConcurrentWorkspaceIncrements": "not validated by this frozen-candidate closure"
+  },
+  "references": [
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-baseline-consolidated-20261030.json",
+      "bytes": 38102,
+      "sha256": "702ba8a03a6f43f2ff524d40f7ccded4d13364aade79a5ee5dc102cdec22d77e"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-gomoku-online-addendum-20261030.json",
+      "bytes": 23598,
+      "sha256": "10414c9f2bad24c6570fd214cf81073535b87ae459867763d6f6d86ff9691aa9"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "bytes": 25597,
+      "sha256": "2a7fc020214342220bf02a99d3b71549b854c5396504c2d34d838ea9c4b2be11"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-freeze.json",
+      "bytes": 5688,
+      "sha256": "7abf6baf7f698124b4311bd56f5bc5556b256c7d7d39fb60e4e98cfda5430e16"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-fixture-lifecycle-final-validation.json",
+      "bytes": 7198,
+      "sha256": "1b75f9dbb8b77aab0533edef820870f2cfd2f481b4004591c681289e5540d473"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-home-game-and-help-journey-20261030.json",
+      "bytes": 9435,
+      "sha256": "90cb4038d8d0d63f56c4c7b181b5a6ac8ee30b75d5538b3254a8948f8b31f03a"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-ai-card-navigation-fix-validation.json",
+      "bytes": 6360,
+      "sha256": "378a5db476712242870590d802d23f6d709e7f2734a0847f38cdb2abe4e134aa"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-unlocked-real-journey-20261030.json",
+      "bytes": 5220,
+      "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/g05-native-foreground-recovery-20261030.json",
+      "bytes": 9794,
+      "sha256": "907a813f80d6eb3411f8069bd564d2ca6e1a19f2169c80656620c7402e7e3976"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/g06-g10-native-foreground-recovery-20261030.json",
+      "bytes": 35816,
+      "sha256": "edb4245d84df16431ed7baf7eccbd56e9dcf2b681bd54506e4174a6d40c9fc85"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f10-f15-native-foreground-recovery-20261030.json",
+      "bytes": 553348,
+      "sha256": "a8ad0b414999ab7ab9cb044ef4c4a0bba1863d7c966e1c3ca73bb7fefa7e78fe"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/final-scope-audit-20261030.json",
+      "bytes": 94265,
+      "sha256": "860f41b666f68efadc711e2ed9a1ec45196fa3f0633e55b3f874e22963ef1a28"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/final-native-candidate-inventory-20261030.json",
+      "bytes": 16905,
+      "sha256": "6a5b1c919f6427061238134bad496abe81aa582d07d6af2c0bd81783a5d50117"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-local-candidate-20261030.json",
+      "bytes": 13796,
+      "sha256": "28cad167c738c0509f70b0427c1d7fb1bc6f0d0279ae419323c3f0e4cb8f0280"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-m5-closure-audit-pending-last-owner-20261030.json",
+      "bytes": 10138,
+      "sha256": "a04fa0ad14cf6c1152e43de785c9a60c18291c335c3a8a8a5a0da8fcb34ba3a2"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/resumed-source-binding-20261031.json",
+      "bytes": 7897,
+      "sha256": "c7e45be99776aeecaa431c107d366082cdaa4036fa4329150c34f11e686cfca4"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-production-deployed-pending-ui-20261031.json",
+      "bytes": 8591,
+      "sha256": "28149d18be737e476d8c01e307b1cf428e16001032cf29a3c57698ea56d93d03"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-production-finalized-20261031.json",
+      "bytes": 7789,
+      "sha256": "1574d653c120fa6b862698d10cb340e8896aa5696a517aa1c689c823c55b1cea"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/o01-production-sole-observer-owner-leave-20261031.json",
+      "bytes": 6956,
+      "sha256": "61367c96257936c9148cf58e69c96cea9385fda04eafb8e84fa49879f9b7825d"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f12-post-user-leave-still-member-20261031.json",
+      "bytes": 5355,
+      "sha256": "3a248a093b6d46cd2faad4a60f7c64b2760b6615bd1e06243a21dfe8e41666b0"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f12-cleanup-native-lifecycle-20261031.json",
+      "bytes": 4159,
+      "sha256": "eff380ba08587feb976737fc7c90a9126ea407b439e433453a0a208bcc17188b"
+    }
+  ],
+  "limits": [
+    "Acceptance covers the named frozen artifacts and layered evidence; not every boundary was a new production UI test.",
+    "No old failure, excluded round, cached natural state or bot action has been relabelled as a clean new success.",
+    "F12 cleanup closes ownership cleanup only; it adds no recovery trial and does not replace O01.",
+    "User-reported B heading attempts and the subsequent still-member reads remain historical facts with no unsupported causal diagnosis.",
+    "Current and subsequent concurrent code, tests, game-cover assets and product-document changes require their own validation; this audit does not endorse them.",
+    "No credentials, environment values, private local artifact locations, raw user IDs, invite codes or raw room/game IDs are copied into this public receipt."
+  ],
+  "finalConsistencyVerification": {
+    "passed": true,
+    "checkCount": 67,
+    "failedChecks": [],
+    "phase": "closed",
+    "readOnlyAuditScriptSHA256": "0b743963e211f249e941ee2cac28528903e5ea1b6a973d0f66dd958b8ab7528a",
+    "privateActualResultArtifact": "final-closure-consistency-result-20261031.json",
+    "privateActualResultSHA256": "66cd2cf5145163d2fe2af56d92bd1f7b4b3f92137201fc07ce3d9f6d64ec15c6",
+    "scopedDocsDiffCheckExitCode": 0,
+    "newUIOrPerformanceRerunClaimed": false
+  }
+}

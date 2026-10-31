@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "kind": "actual-production-last-owner-observer-finalization-with-independent-live-readback",
+  "atUTC": "2026-10-31T08:18:30.548682+00:00",
+  "productionPublicationCompleted": true,
+  "finalized": true,
+  "goalAchieved": false,
+  "authorization": "User explicitly authorized the leave-fix publication and remaining acceptance. No new publication approval is pending.",
+  "sourceCommit": null,
+  "sourceBaseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "sourceTree": "38f267f3bfaa1fe68004c957e82b4768156ad46d",
+  "sourceIdentityKind": "uncommitted-git-tree",
+  "imageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+  "imageIdKind": "platform-manifest",
+  "platformManifestDigest": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+  "imageIndexDigest": null,
+  "manifestBeforeSHA256": "808a84970d2d0cf690259062fd3be7d1b198f570fa15e19959d90cf9e7f84ef3",
+  "manifestAfterSHA256": "0f879b4163981b04676d75f96d598354b4a5e78d2227bb8dbf697ee1c6cc8301",
+  "finalization": {
+    "executed": true,
+    "actualReceiptMatchesIntent": true,
+    "manifestCASResultIndependentlyReadBack": true,
+    "applicationRestarted": false,
+    "sourceRequiredInputsVerified": true,
+    "sourceGitCommitClaimed": false,
+    "sourceArchiveGzipIntegrityVerified": true,
+    "imageArchiveGzipIntegrityVerified": true,
+    "imageArchiveAllBlobsAndLayersAndDiffIDsVerified": true,
+    "archiveFormat": "docker-save-oci-direct-platform",
+    "platformManifestVerified": true,
+    "archiveIndexDigestVerified": false,
+    "archiveIndexJSONSHA256": "4c5c3a68c873a634e265f626bc83f768e132a39fd70987e2745c6ba6bf7e1447",
+    "runtimeFilesAndThreeComposeHashesPreserved": true,
+    "existing772SourceAndImageArchivesRetained": true,
+    "restoreLoadTestPerformed": false,
+    "runtimeEnvironmentValuesEmitted": false,
+    "actualReceipt": {
+      "artifact": "backend-recovery-inputs.json",
+      "bytes": 2892,
+      "sha256": "c0a25d6b11f371226e70de6d6f8d1f17c57f2e8e3bd2a0e88672bcc1a1f49835"
+    },
+    "intentReceipt": {
+      "artifact": "backend-recovery-inputs-intent.json",
+      "bytes": 2892,
+      "sha256": "c0a25d6b11f371226e70de6d6f8d1f17c57f2e8e3bd2a0e88672bcc1a1f49835"
+    }
+  },
+  "independentFinalizedReadback": {
+    "passed": true,
+    "observedAtUTC": "2026-10-31T08:15:48.871842+00:00",
+    "finalizedIdentityVerified": true,
+    "containerId": "e682f0817b78e8229b2ac3ef4bb4fe5bf6877c0a7fb0332bcac3877bffbb8e69",
+    "imageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "manifestSHA256": "0f879b4163981b04676d75f96d598354b4a5e78d2227bb8dbf697ee1c6cc8301",
+    "finalizationReceiptSHA256": "c0a25d6b11f371226e70de6d6f8d1f17c57f2e8e3bd2a0e88672bcc1a1f49835",
+    "compiledSHA256": {
+      "room/service.js": "6a8086bb6957e9a30d3cf6ee880f6b3abaff4e9102c7fb72b12aa4ae345ef5aa",
+      "colyseus/play-room.js": "9aa28f32df203f5172135782d11d7f631e0c9f9b2791d977612b07b14c30bd10"
+    },
+    "threeComposeCopiesMatchDeployedCandidate": true,
+    "composeSHA256": "a14366e7edb2fd95f1e1ae02686c39f4d7b9dd9ebbcea2b3c195e6f01faba4da",
+    "configuredAndFullEnvironmentAndRuntimeFileHashesMatchDeployment": true,
+    "composeMetadataPreserved": true,
+    "applicationRestartedByReadback": false,
+    "productionConfigurationOrDocumentsWrittenByReadback": false,
+    "health": {
+      "capacity": {
+        "activeConnections": 0,
+        "activeOnlinePlayers": 0,
+        "activeOnlineRooms": 0,
+        "paperStarOnlineEnabled": false,
+        "status": "ok"
+      },
+      "multiplayerEnabled": true,
+      "ok": true,
+      "releaseGateSHA256": "424b50860c9ba2f2c632af934f6c9dfeba411c4d5c55378eb5a21d36ad3ee490",
+      "roomStore": "cloudbase"
+    },
+    "runtimeEnvironmentValuesEmitted": false,
+    "retainedRecoveryArchives": {
+      "image-native-7723ae8-amd64.tar.gz": {
+        "bytes": 94920746,
+        "sha256": "decf0ccbfae546c84c25cb96d2b99a2d2c785336c154ff33369e5569c36aaa9a",
+        "mode": "0600",
+        "uid": 0
+      },
+      "image-observer-last-owner-20261030-amd64.tar.gz": {
+        "bytes": 94915701,
+        "sha256": "c6aea1bca00596e3908de4cef2aedd83e900cc8e6ede5fd5ec3caf71f4eaef55",
+        "mode": "0600",
+        "uid": 0
+      },
+      "source-native-7723ae8.tar.gz": {
+        "bytes": 505301,
+        "sha256": "6c9007df6625d44c60eedf48fffcbde55069941175691f5731d4d63cd6f3b3a7",
+        "mode": "0600",
+        "uid": 0
+      },
+      "source-observer-last-owner-20261030.tar.gz": {
+        "bytes": 508464,
+        "sha256": "db3ebf1a675ab1a83fc8be88e872a3cc049bf81c4fe420b40d0783085faf21b5",
+        "mode": "0600",
+        "uid": 0
+      }
+    },
+    "receipt": {
+      "artifact": "live-readback-finalized-20261031.json",
+      "bytes": 3472,
+      "sha256": "59f33ee11e7607507182e9a4c5b31d641ecad2fb3696aa0671d0cdce2ba5790c"
+    }
+  },
+  "downloadedEvidence": {
+    "archive": {
+      "artifact": "release-finalized-phase-20261031.remote.tar.gz",
+      "bytes": 3034,
+      "sha256": "ef4a528555d2b1efed4c6738693d3fd681be9ab675eb41e58125325f5f4b4f97"
+    },
+    "exactFiveRegularMembersMatchedDownloadedCopies": true,
+    "members": [
+      {
+        "artifact": "backend-recovery-inputs-intent.json",
+        "bytes": 2892,
+        "sha256": "c0a25d6b11f371226e70de6d6f8d1f17c57f2e8e3bd2a0e88672bcc1a1f49835"
+      },
+      {
+        "artifact": "backend-recovery-inputs.json",
+        "bytes": 2892,
+        "sha256": "c0a25d6b11f371226e70de6d6f8d1f17c57f2e8e3bd2a0e88672bcc1a1f49835"
+      },
+      {
+        "artifact": "live-readback-finalized-20261031.json",
+        "bytes": 3472,
+        "sha256": "59f33ee11e7607507182e9a4c5b31d641ecad2fb3696aa0671d0cdce2ba5790c"
+      },
+      {
+        "artifact": "live-readback-finalized-20261031.started.json",
+        "bytes": 200,
+        "sha256": "fcec53e2976b71bdeb63913bb8ce926150560f377482b8b9bc6a65867f79d939"
+      },
+      {
+        "artifact": "owner.json",
+        "bytes": 330,
+        "sha256": "555ac9ac0bba1e5eb1fa374d29f26ad895b9fcf04dcaeed4a87af5e120ffd57c"
+      }
+    ],
+    "preparationOrStartedFilesUsedAloneAsSuccess": false
+  },
+  "productionValidation": {
+    "anonymousHTTPPassed": 8,
+    "anonymousHTTPCount": 8,
+    "O01ChangedPlayingSoleObserverOwnerNormalUIBranchPassed": true,
+    "O01Evidence": "docs/dev/evidence/native-game-discovery/recovery-20261029/o01-production-sole-observer-owner-leave-20261031.json",
+    "O01EvidenceSHA256": "61367c96257936c9148cf58e69c96cea9385fda04eafb8e84fa49879f9b7825d"
+  },
+  "remaining": {
+    "F12PendingCleanup": true,
+    "F12Passed": false,
+    "requiresOriginalBDedicatedSession": true,
+    "F12LastVerifiedState": "completed room; one member who is owner B; active won game; not terminal empty",
+    "tasks4.2_4.3_5.1": "remain unchecked until exact F12 cleanup and final acceptance consolidation",
+    "productionPublicationOrO01RetestStillPending": false
+  },
+  "versionBoundaries": {
+    "existingValidRecoveryCounts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "old20RoomsOrM3PerformanceRelabelledThisBackendOrCurrentInteractionSource": false,
+    "F12PermanentlyExcludedFromValidN10": true,
+    "M6": "deferred",
+    "TestFlight": "not included"
+  },
+  "limits": [
+    "Finalization and live readback success do not prove F12 membership cleanup.",
+    "No restore-load drill was performed; archive byte, structure and identity checks are recorded separately.",
+    "The Docker-save archive directly references the platform manifest; no OCI image-index digest is invented.",
+    "Earlier deployed-pending-UI and O01 pre-finalization checkpoints remain unchanged historical observations.",
+    "No credential, private local artifact path, environment value, raw user ID or raw room/game ID is published."
+  ]
+}

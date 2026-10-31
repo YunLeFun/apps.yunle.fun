@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "authorized-last-owner-observer-release-awaiting-remote-login",
+  "atUTC": "2026-10-31T07:21:11.504738+00:00",
+  "status": "production-fix-explicitly-authorized-remote-login-prerequisite-unavailable",
+  "humanProductionAuthorizationReceived": true,
+  "authorizationScope": "Reviewed last-owner observer room-leave fix, production regression and remaining acceptance; no TestFlight. Prior new-fix approval gate is satisfied and must not be asked again.",
+  "productionUploadWriteOrDeploymentPerformed": false,
+  "rootObservedTransport": {
+    "codexLocalBrowserControlEnabled": false,
+    "codexLocalBrowserSettingsChanged": false,
+    "existingTencentCloudCLIReadOnlyStatusAttempt": "AuthFailure.TokenFailure / RefreshTokenError; no remote command execution",
+    "normalConsolePage": "Login required; handed to user through existing task browser page",
+    "credentialsPermissionsOrBrowserSettingsChanged": false
+  },
+  "acceptanceBoundary": {
+    "M4_2Complete": false,
+    "M4_3Complete": false,
+    "M5_1Complete": false,
+    "goalComplete": false,
+    "validRecoveryN10Counts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "F12PermanentlyExcludedFromN10": true,
+    "F12AuthoritativeCleanupPending": true,
+    "newFixPublished": false,
+    "local39PassAndImageEvidenceNotProductionRegression": true
+  },
+  "nextRequiredSteps": [
+    "Restore the already-open normal remote-console login or supported existing control path; do not request production authorization again",
+    "Fresh exact772/configuration/immutable artifact and zero active-client gates before the authorized replacement",
+    "Publish only frozen reviewed candidate with retained772 rollback",
+    "Complete exactF12 terminal cleanup and O01 active-game sole-observer-owner normalUI branch evidence",
+    "Append actual release/readback and regression identities before closing4.2/4.3/5.1"
+  ],
+  "references": [
+    {
+      "kind": "private-root-authorization-and-transport-observation",
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/authorization-and-transport-20261031.json",
+      "bytes": 1369,
+      "sha256": "00a14a50e26c3e99405b29d4e5da20e62d8569c79c4544f2d86ed919a1b30699"
+    },
+    {
+      "kind": "frozen-reviewed-local-release-helpers",
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/helpers/final-helper-freeze-20261030.json",
+      "bytes": 5975,
+      "sha256": "ce56bd70f8d093bd2fd5ee0db7f4feff24514faaea846cc5782d22fbf6b05e93"
+    },
+    {
+      "kind": "historical-local-candidate-before-authorization",
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-local-candidate-20261030.json",
+      "sha256": "28cad167c738c0509f70b0427c1d7fb1bc6f0d0279ae419323c3f0e4cb8f0280",
+      "historicalPendingAuthorizationUnmodified": true
+    }
+  ],
+  "privacy": {
+    "credentialsAccountIdentifiersTokensQRLoginPixelsOrRawSessionContentCopied": false
+  },
+  "actionsThisSummary": {
+    "testsBuildUIRemoteOrProductionOperations": false,
+    "rootObservationsReadFromHashedPrivateReceipt": true,
+    "historicalEvidenceOrProductSourceChanged": false
+  }
+}

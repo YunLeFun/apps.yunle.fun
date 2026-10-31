@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "kind": "actual-production-normal-ui-sole-owner-member-observer-leave-regression",
+  "atUTC": "2026-10-31T08:16:33.443230+00:00",
+  "alias": "O01",
+  "passed": true,
+  "goalAchieved": false,
+  "sourceCommit": null,
+  "sourceBaseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "sourceTree": "38f267f3bfaa1fe68004c957e82b4768156ad46d",
+  "sourceIdentityKind": "uncommitted-git-tree",
+  "actualImageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+  "actualContainerId": "e682f0817b78e8229b2ac3ef4bb4fe5bf6877c0a7fb0332bcac3877bffbb8e69",
+  "roomIdSHA256": "df091539b8366b3f7527e67f76fc4800a38e19b050d0e7913dc51000a1488baa",
+  "gameSessionIdSHA256": "c1c1b3ca49fac085bf5b0d0890daf5332cd38494091233d39ab2e2fe0789abd1",
+  "participants": {
+    "nativeA": {
+      "identityRole": "existing zero-balance dedicated test account",
+      "uidSHA256": "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+      "normalInstalledCandidate": "previously validated iPhone 18 Pro candidate, not the separately tested interaction-settings source"
+    },
+    "browserC": {
+      "testAccountId": "production-member-active",
+      "uidSHA256": "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909",
+      "login": "Normal maintained test-account CLI password/SSO login; distinct from F12 owner B."
+    }
+  },
+  "normalUIJourney": {
+    "source": "Root performed and observed ordinary application UI actions; read-only network collector and exact-room SDK queries corroborate server-visible transitions.",
+    "steps": [
+      "C creates one controlled Flight Chess room; native A enters through normal invite UI; both use normal ready controls and the same game starts.",
+      "C leaves through normal UI while A remains; first C room.left sequence9 is followed by socket-closed sequence10.",
+      "C rejoins the same room normally; A is owner and remains seated while C is a room member without a game seat.",
+      "Native A leaves through normal UI; C becomes the sole room member and owner, stays outside game seats, and the same game continues playing with four bot seats.",
+      "C uses normal leave and confirmation controls; final room.left sequence73/reason left is followed by socket-closed sequence74."
+    ],
+    "rawApplicationCommandsSentByCollector": false,
+    "cookiesOrTokensInjected": false,
+    "roomGameOrMembershipDocumentsWrittenByQueries": false
+  },
+  "beforeFinalLeave": {
+    "normalWireRoomRevision": 42,
+    "normalWireGameRevision": 42,
+    "normalWireRoomSequence": 71,
+    "normalWireGameSequence": 72,
+    "roomAndGamePlaying": true,
+    "soleMemberUIDSHA256": "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909",
+    "memberIsOwner": true,
+    "memberOccupiesGameSeat": false,
+    "authorityRevision": 31,
+    "authorityAtUTC": "2026-10-31T08:10:57.193Z",
+    "allFourGameSeatsAreBots": true,
+    "aggregateAndProjectionMembersMatch": true,
+    "aggregateAndProjectionGameMatch": true,
+    "stableBeforeAndAfterRead": true,
+    "authorityReceipt": {
+      "artifact": "o01-sole-observer-preleave-20261031.json",
+      "bytes": 5087,
+      "sha256": "b212b2abab77d6f4d63e63c527a4ff394fcd232d28afbde5156d97a00614420c"
+    }
+  },
+  "normalLeaveAcknowledgement": {
+    "roomLeftSequence": 73,
+    "reason": "left",
+    "socketClosedSequence": 74,
+    "sameSocketRequestMatched": true,
+    "observedAtUTC": "2026-10-31T08:11:52.186Z",
+    "serverErrorCount": 0,
+    "collectorIssueCount": 0,
+    "finalPhaseReceipt": {
+      "artifact": "phase-final-c-left-acknowledged.json",
+      "bytes": 5273,
+      "sha256": "77a5067a03fca3a8d6b70a00b05a835ce48a2703078b005e7e249cbc334e4561"
+    },
+    "collectorStoppedNormally": true,
+    "rawCDPFramesPersisted": false,
+    "authenticationFramesDecoded": false
+  },
+  "afterFinalLeaveAuthority": {
+    "observedAtUTC": "2026-10-31T08:12:30.315Z",
+    "roomRevision": 43,
+    "sameBoundRoomAndGame": true,
+    "roomStatus": "expired",
+    "memberUIDHashes": [],
+    "memberProjectionCount": 0,
+    "activeGameSessionIdSHA256": null,
+    "nextSeatUIDHashes": null,
+    "seatSwapRequestedByUIDSHA256": null,
+    "sameGameStatus": "cancelled",
+    "turnDeadline": null,
+    "completedAt": 1793434311722,
+    "retainUntil": 1796026311722,
+    "retentionDays": 30,
+    "aggregateAndProjectionMembersMatch": true,
+    "aggregateAndProjectionGameMatch": true,
+    "stableBeforeAndAfterRead": true,
+    "authorityReceipt": {
+      "artifact": "o01-postleave-20261031.json",
+      "bytes": 4548,
+      "sha256": "02686bede761a06880a63f45639bab5852169707749f10b468a4688de3735610"
+    }
+  },
+  "evidenceReferences": [
+    {
+      "artifact": "wire-observations.json",
+      "bytes": 497973,
+      "sha256": "61c35d484d3d50148c3282f696c078f61e6184c7116c297e178b53f2e28817c5"
+    },
+    {
+      "artifact": "collector-status.json",
+      "bytes": 5240,
+      "sha256": "ffed80ec5dc405b625ee47984f39a081ff2bbb56f38867e799a71e2c5ee91297"
+    },
+    {
+      "artifact": "phase-both-playing.json",
+      "bytes": 4549,
+      "sha256": "5f808db3707ab10e16bc08c96dc7cda6f8d9ae58c410664b083603b224f7c6c0"
+    },
+    {
+      "artifact": "phase-owner-first-left.json",
+      "bytes": 5483,
+      "sha256": "22870b04c89bc34f6823752448929a398ad4345b348ae0934493d8a871132492"
+    },
+    {
+      "artifact": "phase-c-rejoined-as-observer.json",
+      "bytes": 5534,
+      "sha256": "12b04bf6bfd3067fe8c35ac114d3f47dc45bd012456fe810f3ac4d053afbdda6"
+    },
+    {
+      "artifact": "phase-sole-owner-member-observer-playing.json",
+      "bytes": 5237,
+      "sha256": "989a48127df144de0edc28f1b4cd7906d8570f98c38445dea8ea5c1eed6f8227"
+    },
+    {
+      "artifact": "phase-before-final-c-ui-leave.json",
+      "bytes": 5353,
+      "sha256": "fde06ed4adb744fa54693da5a86a73ca2ca4bd96bb730d8bf24c4594599c6833"
+    },
+    {
+      "artifact": "o01-authority-phase-20261031.remote.tar.gz",
+      "bytes": 2435,
+      "sha256": "08df1df52c3a255c3036c78540d86a06ee9a4a51b34982931ec301347b4fcca7"
+    }
+  ],
+  "remainingAtThisCheckpoint": {
+    "F12PendingCleanup": true,
+    "F12Passed": false,
+    "finalizationSuccessNotYetObserved": true,
+    "tasks4.2_4.3_5.1Unchecked": true
+  },
+  "limits": [
+    "This is one changed-branch production regression, not a replacement N10 or a full two-player recovery/performance run.",
+    "Bot progression between the authority pre-read and UI leave is expected; no automated bot turn is called a human input.",
+    "F12 is a distinct old room owned by B, remains pending cleanup and permanently excluded from valid N10.",
+    "Existing twenty valid recovery rooms and M3 samples remain bound to their recorded previous native/backend versions.",
+    "Finalization dispatch is not treated as success; a separate actual finalization receipt is required.",
+    "No credentials, private artifact paths, environment values, raw user IDs, invite codes or raw room/game IDs are published."
+  ]
+}

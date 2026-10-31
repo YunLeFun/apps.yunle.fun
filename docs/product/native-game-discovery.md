@@ -1,8 +1,8 @@
 # 寻乐游戏 Tab 与工坊合并计划
 
-> 2026-10-30 当前收口：M0.1 基线、M3 性能与 M4.1 邀请深链单项已通过；五子棋、飞行棋有效新房各十轮已确认。现网 772 的末位观战房主正常离房新缺陷仍待授权、发布及生产复验，4.2／4.3／5.1 与 M4／M5 整体保持未完成，M6 不在本轮范围。当前进展见[实施记录](../dev/native-game-discovery-implementation.md)。
+> 2026-10-31 首批验收完成：M0–M5 按各自冻结版本收口，五子棋、飞行棋各十个有效新房通过，待清理项为零。末位观战房主离房修复已获授权、部署并通过 O01 现网复验；F12 已经正常生命周期确认空房，原失败轮次仍排除。M6、TestFlight 和真机性能留待后续。完整版本及证据边界见[实施记录](../dev/native-game-discovery-implementation.md)和[最终汇总](../dev/evidence/native-game-discovery/recovery-20261029/m0-m5-final-closure-20261031.json)。
 
-新增离房修复已有定向 39／39、生产构建和隔离镜像业务验证，尚未发布；不能以本地候选、关闭标签或零在线容量替代具体房间的正常离房与权威终态。F12 的误导航与后续真实服务端错误分别保留，原轮次不补记干净 N10。[脱敏候选与待验状态](../dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-local-candidate-20261030.json)、[正常原生候选截图](../dev/evidence/native-game-discovery/recovery-20261029/native-games-final-preview-20261030.png)。
+离房修复的定向 39／39、生产构建、隔离镜像验证与后续实际发布分别留档。[发布及最终读回](../dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-production-finalized-20261031.json)、[O01 正常离房复验](../dev/evidence/native-game-discovery/recovery-20261029/o01-production-sole-observer-owner-leave-20261031.json)和[F12 空房终态](../dev/evidence/native-game-discovery/recovery-20261029/f12-cleanup-native-lifecycle-20261031.json)已确认；F12 的误导航、真实服务端错误与较早未清空检查点保留，原轮次不补记干净 N10。当前并发新增的界面改动由自己的提交与 CI 验证，未追记进旧冻结候选结果。[正常原生候选截图](../dev/evidence/native-game-discovery/recovery-20261029/native-games-final-preview-20261030.png)。
 
 ## 四 Tab 的职责
 

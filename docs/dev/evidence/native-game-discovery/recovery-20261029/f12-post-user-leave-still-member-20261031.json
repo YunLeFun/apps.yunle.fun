@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "kind": "F12-post-user-normal-leave-report-authority-still-member",
+  "atUTC": "2026-10-31T08:42:05.719545+00:00",
+  "alias": "F12",
+  "cleanupConfirmed": false,
+  "pendingCleanup": true,
+  "passed": false,
+  "excludedFromValidN10": true,
+  "goalAchieved": false,
+  "productionPublicationAndO01Passed": true,
+  "userReport": {
+    "normalLeaveReported": true,
+    "source": "User reply in the current task",
+    "rawMessageOrSensitiveDataCopied": false,
+    "passwordRotationDeferredByUser": true
+  },
+  "agentUIObservationThisAttempt": {
+    "normalLeaveActionObserved": false,
+    "roomLeftAcknowledgementObserved": false,
+    "socketClosedEvidenceClaimed": false
+  },
+  "authorityAfterUserReport": {
+    "observedAtUTC": "2026-10-31T08:36:36.230Z",
+    "querySucceeded": true,
+    "stableRoomBeforeAfter": true,
+    "roomIdSHA256": "514d89e4b9ddf355e5a6ca93ddda043b5cea93caa2183dbc2e0833222eff1224",
+    "roomStatus": "waiting",
+    "roomRevision": 346,
+    "ownerUIDSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+    "memberUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "memberProjectionCount": 1,
+    "aggregateAndProjectionMemberSetsMatch": true,
+    "activeGameSessionIdSHA256": null,
+    "nextSeatUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+      "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+      "98703623c65cbd04082e6cc577c0d94446e052198c67e5fa2f7385bb4637a0f1",
+      "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+    ],
+    "nextSeatsCount": 4,
+    "firstNextSeatIsB": true,
+    "seatSwapRequestedByUIDSHA256": null,
+    "retainedPreviouslyObservedGameSessionIdSHA256": "3abffabfdee9cd05fd57f4c85683e20787e0cd0d47e303d177420ff1d597089c",
+    "selectedGameSource": "recorded-original-history-only",
+    "retainedGameStatus": "won",
+    "retainedGameTurnDeadline": null,
+    "retainedGameCompletedAt": 1793357174033,
+    "retainedGameRetainUntil": 1795949174033,
+    "selectedGameAggregateAndProjectionMatch": true,
+    "roomTerminalEmptyAuthority": false,
+    "sameRoomAsEarlierF12Authority": true,
+    "earlierRoomStatus": "completed",
+    "earlierRoomRevision": 343,
+    "currentRoomStillHasMemberB": true
+  },
+  "readOnlyCapture": {
+    "containerId": "e682f0817b78e8229b2ac3ef4bb4fe5bf6877c0a7fb0332bcac3877bffbb8e69",
+    "imageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "queryProcessExitCode": 0,
+    "productionDocumentsWritten": false,
+    "normalUIActionPerformedByQuery": false,
+    "runtimeEnvironmentValuesEmitted": false,
+    "actualReceipt": {
+      "artifact": "f12-room-authority-post-user-leave-20261031.json",
+      "bytes": 4497,
+      "sha256": "12fb255e8a7e19750d5c739353c7266d658285b840b94d2ffff51a14fe2afaee"
+    },
+    "archive": {
+      "artifact": "f12-post-user-phase-20261031.remote.tar.gz",
+      "bytes": 2026,
+      "sha256": "c5f6a61a48ae6791e9362b9623e9295a917a3fbc957742de51570046963c8976"
+    },
+    "threeExactRegularArchiveMembersMatchDownloadedCopies": true,
+    "members": [
+      {
+        "artifact": "f12-room-authority-post-user-leave-20261031.json",
+        "bytes": 4497,
+        "sha256": "12fb255e8a7e19750d5c739353c7266d658285b840b94d2ffff51a14fe2afaee"
+      },
+      {
+        "artifact": "f12-room-authority-post-user-leave-20261031.started.json",
+        "bytes": 194,
+        "sha256": "1d833dbfe7ce5ae6ed745bd30a768783db6f564ae8ed3b36e9ea4830e6cdaadf"
+      },
+      {
+        "artifact": "owner.json",
+        "bytes": 330,
+        "sha256": "555ac9ac0bba1e5eb1fa374d29f26ad895b9fcf04dcaeed4a87af5e120ffd57c"
+      }
+    ],
+    "startedReceiptUsedAloneAsQuerySuccess": false
+  },
+  "conclusion": "The user reported normal leave, but this bounded exact-room read still finds B as the sole member and owner. Empty terminal cleanup is not confirmed; cause remains unverified.",
+  "nextStep": {
+    "source": "Root has already requested the user to verify the original B account and use the normal leave plus confirmation controls within five seconds, observe the already-left heading, then close that room tab.",
+    "credentialRotationPerformed": false,
+    "newSourceChangeOrExpandedTestRequested": false
+  },
+  "unchangedAcceptance": {
+    "tasks4.2_4.3_5.1": "pending",
+    "ledgerF12PendingCleanup": true,
+    "F12Passed": false,
+    "validRecoveryCounts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "oldEvidenceReboundToNewSource": false,
+    "M6": "deferred",
+    "TestFlight": "not included"
+  },
+  "limits": [
+    "The user report and the authority result are recorded separately; no normal UI room.left or connection closure is inferred from the report.",
+    "The authority query did not change, expire, repair or remove room, game or member documents.",
+    "The completed-to-waiting state difference does not establish its cause. No claim is made that opening a page revived an expired room.",
+    "F12 remains permanently excluded from valid N10. The independent O01 playing-game branch and finalized publication results remain unchanged.",
+    "Historical receipts retain their original fields. No credential, private local artifact path, environment value, raw room/game ID, raw user ID or invite code is published."
+  ]
+}

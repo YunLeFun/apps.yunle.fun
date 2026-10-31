@@ -120,21 +120,7 @@ struct HomeView: View {
             if editing && keys == ["|"] { withAnimation(Motion.fade) { editing = false } }
         }
         .haptic(.selection, trigger: pinChanges)
-        .refreshable {
-            let identity = accounts.identityGeneration
-            // State updates can replace SwiftUI's refresh action and cancel its task.
-            // Keep this explicit user request alive until the data refresh finishes.
-            await Task { @MainActor in
-                guard identity == accounts.identityGeneration, !isRefreshing else { return }
-                isRefreshing = true
-                defer { isRefreshing = false }
-                await refreshCatalog()
-                guard identity == accounts.identityGeneration else { return }
-                await sync.recheck()
-                guard identity == accounts.identityGeneration else { return }
-                await loadMembership(force: true)
-            }.value
-        }
+        .refreshable { await refreshHome() }
         .navigationTitle("云居")
         // Read membership once per identity, and again when it is unknown or stale on returning to the app.
         .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembership() }
@@ -286,6 +272,23 @@ struct HomeView: View {
             markingMissingPublicAppsUnavailable: catalog.error == nil && catalog.successfulLoadID != nil)
     }
 
+    /// Pull-to-refresh is the retry for a failed catalog load and a failed sync.
+    /// State updates can replace SwiftUI's refresh action and cancel its task, so
+    /// this explicit user request stays alive until the data refresh finishes.
+    private func refreshHome() async {
+        let identity = accounts.identityGeneration
+        await Task { @MainActor in
+            guard identity == accounts.identityGeneration, !isRefreshing else { return }
+            isRefreshing = true
+            defer { isRefreshing = false }
+            await refreshCatalog()
+            guard identity == accounts.identityGeneration else { return }
+            await sync.recheck()
+            guard identity == accounts.identityGeneration else { return }
+            await loadMembership(force: true)
+        }.value
+    }
+
     /// Catalog and sync notices share a tight stack so a network failure does not
     /// push the grids down by two multi-line cards.
     @ViewBuilder private var statusNotices: some View {
@@ -348,11 +351,9 @@ struct HomeView: View {
             HomeStatusStrip(
                 systemImage: "wifi.exclamationmark",
                 message: message,
-                accessibilityMessage: "应用信息载入失败。\(error)",
-                stacksActions: message.count > 12
-            ) {
-                catalogRetryButton
-            }
+                accessibilityMessage: "应用信息载入失败。\(error)。下拉可重试。",
+                refresh: refreshFromBanner
+            )
         }
     }
 
@@ -361,23 +362,21 @@ struct HomeView: View {
             HomeStatusStrip(
                 systemImage: "wifi.exclamationmark",
                 message: HomeStatusBanner.combinedMessage(catalog: catalogFailureMessage, sync: syncFailureMessage),
-                accessibilityMessage: "应用信息载入失败。\(catalogFailureMessage) \(syncFailureMessage)",
-                stacksActions: true
+                accessibilityMessage: "应用信息载入失败。\(catalogFailureMessage) \(syncFailureMessage)。下拉可重试。",
+                refresh: refreshFromBanner
             ) {
-                HomeBannerActionRow(spacing: 8) {
-                    catalogRetryButton
-                    syncRetryButton
-                    syncSettingsLink
-                }
+                syncSettingsLink
             }
         } else if sync.isActive {
             switch sync.phase {
             case .failed:
-                HomeStatusStrip(systemImage: "exclamationmark.icloud", message: sync.message, stacksActions: true) {
-                    HomeBannerActionRow(spacing: 8) {
-                        syncRetryButton
-                        syncSettingsLink
-                    }
+                HomeStatusStrip(
+                    systemImage: "exclamationmark.icloud",
+                    message: sync.message,
+                    accessibilityMessage: "\(sync.message) 下拉可重试。",
+                    refresh: refreshFromBanner
+                ) {
+                    syncSettingsLink
                 }
             case .conflict:
                 NavigationLink { HomeSyncSettingsView() } label: {
@@ -404,23 +403,8 @@ struct HomeView: View {
         }
     }
 
-    private var catalogRetryButton: some View {
-        Button("重新载入应用") { Task { await refreshCatalog() } }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .buttonBorderShape(.capsule)
-            .fixedSize(horizontal: true, vertical: false)
-            .disabled(catalog.isLoading)
-            .accessibilityIdentifier("home.catalog.retry")
-    }
-
-    private var syncRetryButton: some View {
-        Button("重试同步") { Task { await sync.recheck() } }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .buttonBorderShape(.capsule)
-            .fixedSize(horizontal: true, vertical: false)
-            .accessibilityIdentifier("home.sync.retry")
+    private var refreshFromBanner: () -> Void {
+        { Task { await refreshHome() } }
     }
 
     private var syncStartButton: some View {
@@ -734,13 +718,14 @@ enum HomeStatusBanner {
     }
 }
 
-/// One status row: a short message and small actions. Crowded actions sit on
-/// the next line, and accessibility sizes always stack so nothing is truncated.
+/// One status row. A settings link can sit beside or under the message.
+/// Pull-to-refresh retries a failed load; the message exposes that as a VoiceOver action.
 private struct HomeStatusStrip<Actions: View>: View {
     let systemImage: String
     let message: String
     var accessibilityMessage: String?
     var stacksActions = false
+    var refresh: (() -> Void)?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ViewBuilder var actions: () -> Actions
 
@@ -758,7 +743,9 @@ private struct HomeStatusStrip<Actions: View>: View {
     }
 
     @ViewBuilder private var row: some View {
-        if dynamicTypeSize.isAccessibilitySize || stacksActions {
+        if Actions.self == EmptyView.self {
+            messageLabel
+        } else if dynamicTypeSize.isAccessibilitySize || stacksActions {
             VStack(alignment: .leading, spacing: 4) {
                 messageLabel
                 actions()
@@ -779,69 +766,35 @@ private struct HomeStatusStrip<Actions: View>: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
-            Text(message)
-                .font(.subheadline)
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityLabel(accessibilityMessage ?? message)
+            messageText
+        }
+    }
+
+    private var baseText: some View {
+        Text(message)
+            .font(.subheadline)
+            .foregroundStyle(.primary)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel(accessibilityMessage ?? message)
+    }
+
+    @ViewBuilder private var messageText: some View {
+        if let refresh {
+            baseText.accessibilityAction(named: Text("刷新"), refresh)
+        } else {
+            baseText
         }
     }
 }
 
-/// Lays actions on one line and wraps to another instead of truncating them.
-private struct HomeBannerActionRow: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        _ = cache
-        return arrange(proposal: proposal, subviews: subviews).size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        _ = cache
-        let result = arrange(proposal: proposal, subviews: subviews)
-        for (index, subview) in subviews.enumerated() {
-            let frame = result.frames[index]
-            subview.place(
-                at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
-                anchor: .topLeading,
-                proposal: ProposedViewSize(width: frame.width, height: frame.height)
-            )
-        }
-    }
-
-    private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, frames: [CGRect]) {
-        let maxWidth = proposal.width ?? .infinity
-        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
-        var frames = Array(repeating: CGRect.zero, count: sizes.count)
-        var rowStart = 0
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        var usedWidth: CGFloat = 0
-
-        func alignRow(through end: Int) {
-            guard end > rowStart else { return }
-            for index in rowStart..<end {
-                frames[index].origin.y = y + (rowHeight - sizes[index].height) / 2
-            }
-        }
-
-        for (index, size) in sizes.enumerated() {
-            if x > 0, x + size.width > maxWidth {
-                alignRow(through: index)
-                y += rowHeight + spacing
-                x = 0
-                rowHeight = 0
-                rowStart = index
-            }
-            frames[index] = CGRect(origin: CGPoint(x: x, y: y), size: size)
-            rowHeight = max(rowHeight, size.height)
-            x += size.width + spacing
-            usedWidth = max(usedWidth, x - spacing)
-        }
-        alignRow(through: sizes.count)
-        return (CGSize(width: proposal.width ?? usedWidth, height: y + rowHeight), frames)
+extension HomeStatusStrip where Actions == EmptyView {
+    init(systemImage: String, message: String, accessibilityMessage: String? = nil, stacksActions: Bool = false, refresh: (() -> Void)? = nil) {
+        self.systemImage = systemImage
+        self.message = message
+        self.accessibilityMessage = accessibilityMessage
+        self.stacksActions = stacksActions
+        self.refresh = refresh
+        self.actions = { EmptyView() }
     }
 }

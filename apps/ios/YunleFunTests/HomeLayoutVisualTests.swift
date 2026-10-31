@@ -314,14 +314,24 @@ final class HomeLayoutVisualTests: XCTestCase {
     }
 
     func testEmptySignedInHomeShowsSyncFailureAndRetry() async throws {
-        let fixture = try await HomeStateFixture(service: HomeStateService(failure: URLError(.notConnectedToInternet)))
+        let service = HomeStateService(failure: URLError(.notConnectedToInternet))
+        let fixture = try await HomeStateFixture(service: service, catalogService: ImmediateCatalogFailure())
         defer { fixture.close() }
         await fixture.sync.synchronize()
         guard case .failed = fixture.sync.phase else { return XCTFail("The fixture must reach a real coordinator failure") }
         let screen = try await fixture.readScreen(named: "home-empty-sync-failed", containing: "网络暂时无法连接", test: self)
         XCTAssertTrue(screen.contains("网络暂时无法连接"), "An unsuccessful account restore must not look like an ordinary new home")
-        XCTAssertTrue(screen.contains("重试同步"), "The empty home must expose a retry without requiring the options menu")
+        XCTAssertFalse(screen.contains("重试同步"), "Pull to refresh replaces the sync retry button")
         XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
+        let before = await service.loadUsers.count
+        try fixture.pullToRefresh()
+        let deadline = Date().addingTimeInterval(5)
+        var loads = await service.loadUsers.count
+        while loads <= before && Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+            loads = await service.loadUsers.count
+        }
+        XCTAssertGreaterThan(loads, before, "Pull to refresh must retry the failed sync without a retry button")
     }
 
     func testEmptySignedInHomeShowsConflictWithoutAdoptingEitherVersion() async throws {
@@ -369,15 +379,15 @@ final class HomeLayoutVisualTests: XCTestCase {
 
     func testEmptySyncFailureKeepsRetryReachableAtLargestTextInDark() async throws {
         let fixture = try await HomeStateFixture(service: HomeStateService(failure: URLError(.notConnectedToInternet)),
-            size: .accessibility5, dark: true, width: 320, height: 800)
+            size: .accessibility5, dark: true, width: 320, height: 800, catalogService: ImmediateCatalogFailure())
         defer { fixture.close() }
         await fixture.sync.synchronize()
         guard case .failed = fixture.sync.phase else { return XCTFail("The fixture must reach a real coordinator failure") }
         let before = fixture.library.snapshot
         let failure = try await fixture.readScreen(named: "home-empty-sync-failed-dark-accessibility5", containing: "网络暂时无法连接", test: self)
         XCTAssertTrue(failure.contains("网络暂时无法连接"))
-        let retry = try await fixture.readScreen(named: "home-empty-sync-retry-dark-accessibility5", containing: "重试同步", scrollToFind: true, test: self)
-        XCTAssertTrue(retry.contains("重试同步"), "Native scrolling must expose retry without reducing the requested text size")
+        XCTAssertFalse(failure.contains("重试同步"), "Large text keeps the failure readable without a separate retry button")
+        try fixture.pullToRefresh()
         XCTAssertEqual(fixture.library.snapshot, before)
     }
 
@@ -743,6 +753,10 @@ private final class HomeStateFixture {
         if let scroll = view as? UIScrollView { return scroll }
         return view.subviews.lazy.compactMap { self.scrollView(in: $0) }.first
     }
+}
+
+private struct ImmediateCatalogFailure: CatalogServing {
+    func applications() async throws -> [CloudApplication] { throw URLError(.notConnectedToInternet) }
 }
 
 private actor HomeCatalogRecoveryFixture: CatalogServing {

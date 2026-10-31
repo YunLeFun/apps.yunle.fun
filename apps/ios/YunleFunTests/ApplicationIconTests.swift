@@ -392,12 +392,25 @@ final class ApplicationIconTests: XCTestCase {
         }.frame(width: 100, height: 100)
         let controller = UIHostingController(rootView: content)
         window.rootViewController = controller; window.makeKeyAndVisible()
-        try await Task.sleep(nanoseconds: 300_000_000)
-        controller.view.layoutIfNeeded()
-        let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
-            controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        let deadline = Date().addingTimeInterval(10)
+        var observedCenter: [UInt8]?
+        // Disk decoding and SwiftUI's task can start later on a busy runner.
+        // Require the failed refresh to finish and the real artwork to render.
+        while Date() < deadline {
+            if failed.completedResponseCount > 0 {
+                controller.view.layoutIfNeeded()
+                let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
+                    controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+                }
+                let cg = try XCTUnwrap(image.cgImage)
+                let center = try pixel(cg, x: cg.width / 2, y: cg.height / 2)
+                observedCenter = center
+                if center[0] > 240 && center[2] < 20 { break }
+            }
+            try await Task.sleep(nanoseconds: 50_000_000)
         }
-        let cg = try XCTUnwrap(image.cgImage), center = try pixel(cg, x: cg.width / 2, y: cg.height / 2)
+        XCTAssertEqual(failed.completedResponseCount, 1, "The actual 503 refresh must finish before checking retained artwork")
+        let center = try XCTUnwrap(observedCenter, "The view must render after the failed refresh within ten seconds")
         XCTAssertGreaterThan(center[0], 240, "The view must retain locally loaded artwork after a failed update")
         XCTAssertLessThan(center[2], 20)
         XCTAssertEqual(failed.requests.count, 1)
@@ -520,12 +533,15 @@ final class IconHTTPFixture: @unchecked Sendable {
     let headers: [String: String]
     private let lock = NSLock()
     private var captured: [URLRequest] = []
+    private var completedResponses = 0
     var requests: [URLRequest] { lock.lock(); defer { lock.unlock() }; return captured }
+    var completedResponseCount: Int { lock.lock(); defer { lock.unlock() }; return completedResponses }
     init(replies: [String: (Int, Data, Int?)], headers: [String: String] = [:]) { self.replies = replies; self.headers = headers }
     func response(_ request: URLRequest) -> (Int, Data, Int?) {
         lock.lock(); defer { lock.unlock() }; captured.append(request)
         return replies[request.url!.path] ?? (404, Data(), nil)
     }
+    func responseDidFinish() { lock.lock(); defer { lock.unlock() }; completedResponses += 1 }
 }
 final class IconHTTPProtocol: URLProtocol {
     private static let lock = NSLock()
@@ -543,6 +559,7 @@ final class IconHTTPProtocol: URLProtocol {
         client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil,
             headerFields: headers)!, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data); client?.urlProtocolDidFinishLoading(self)
+        fixture.responseDidFinish()
     }
     override func stopLoading() {}
 }

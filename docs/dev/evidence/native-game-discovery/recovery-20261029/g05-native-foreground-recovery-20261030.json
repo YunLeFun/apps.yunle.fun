@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "kind": "G05-independent-native-foreground-recovery-audit",
+  "atUTC": "2026-10-30T09:52:16.250555+00:00",
+  "status": "functionally-qualified-with-first-A-transcription-disclosed",
+  "roundId": "G05",
+  "gameId": "gomoku",
+  "recovery": "Actual OSHome then actual Appicon return",
+  "eligibleForRootCounting": true,
+  "ledgerAtAudit": {
+    "passed": false,
+    "pendingCleanup": false,
+    "ledgerModifiedByAudit": false,
+    "countingOwner": "Root after accepting this independent audit"
+  },
+  "identity": {
+    "roomIdSHA256": "fbbafb4dbcbae91a02157a6af1b6451b33a02b3437fd08ae62e804885b5709ed",
+    "gameSessionIdSHA256": "fe62b1c7774e4b825b14aa77c86a239107c4b8a666126f9f017420378245b2f2",
+    "inviteCodeSHA256": "f084a268acd9e5867cdc4af39c13a51efd25efb788210ed30228585693982067",
+    "orderedSeatUIDHashes": [
+      "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "actorSeats": {
+      "A": 0,
+      "B": 1
+    },
+    "nativeHostPID": 77260,
+    "bundledCatalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63"
+  },
+  "preDispatchSetupFailure": {
+    "atUTC": "2026-10-30T09:38:06.226Z",
+    "selector": "再开一个新房间",
+    "reason": "no_matches; actual initial Gomoku button is 创建五子棋房间",
+    "noClickDispatched": true,
+    "noRoomCreated": true
+  },
+  "creation": {
+    "actualSuccessfulCreationCount": 1,
+    "selectedGame": "gomoku",
+    "playerReadySequence": 990,
+    "requestId": "19204.714",
+    "firstRoomSnapshotSequence": 991,
+    "nativeJoinMembershipConfirmed": true
+  },
+  "grounding": {
+    "newScreenshotSHA256": "c9d41f25256c3b63d1bdcbd0331b4427dabd628d9feed30c23df9e9c6d74c3cb",
+    "canonicalCell00": [
+      1106,
+      806
+    ],
+    "canonicalCell1414": [
+      1590,
+      1290
+    ],
+    "coordinateSpace": "DeviceHub2200x1600-screen-pixels",
+    "firstNativeCell": {
+      "row": 7,
+      "col": 7,
+      "point": [
+        1348,
+        1048
+      ]
+    },
+    "secondNativeCell": {
+      "row": 8,
+      "col": 8,
+      "point": [
+        1382.5714285714284,
+        1082.5714285714284
+      ]
+    },
+    "onlineBoardFlipped": false,
+    "sourceReason": "Published OnlineGameRoom passes state/disabled/move only to GomokuBoard, not flipped; do not apply local two-player board flip.",
+    "acceptedExactLastMovesCorroborateGrounding": true
+  },
+  "actions": [
+    {
+      "phase": "before-foreground",
+      "actor": "A",
+      "seat": 0,
+      "position": {
+        "row": 7,
+        "col": 7
+      },
+      "preSequence": 1002,
+      "actualReadFloor": 1004,
+      "postSequence": 1006,
+      "revision": [
+        5,
+        6
+      ],
+      "moveCount": [
+        0,
+        1
+      ],
+      "singleCellAndLastMoveConfirmed": true,
+      "firstReturnProvenance": "Root immediate transcription, independently matched saved received states"
+    },
+    {
+      "phase": "before-foreground",
+      "actor": "B",
+      "seat": 1,
+      "position": {
+        "row": 7,
+        "col": 8
+      },
+      "preSequence": 1006,
+      "actualReadFloor": 1007,
+      "postSequence": 1010,
+      "revision": [
+        6,
+        7
+      ],
+      "moveCount": [
+        1,
+        2
+      ],
+      "singleCellAndLastMoveConfirmed": true,
+      "firstReturnProvenance": "Original saved helper return"
+    },
+    {
+      "phase": "after-foreground",
+      "actor": "A",
+      "seat": 0,
+      "position": {
+        "row": 8,
+        "col": 8
+      },
+      "preSequence": 1010,
+      "actualReadFloor": 1011,
+      "postSequence": 1013,
+      "revision": [
+        7,
+        8
+      ],
+      "moveCount": [
+        2,
+        3
+      ],
+      "singleCellAndLastMoveConfirmed": true,
+      "firstReturnProvenance": "Original saved helper return"
+    },
+    {
+      "phase": "after-foreground",
+      "actor": "B",
+      "seat": 1,
+      "position": {
+        "row": 8,
+        "col": 7
+      },
+      "preSequence": 1013,
+      "actualReadFloor": 1014,
+      "postSequence": 1017,
+      "revision": [
+        8,
+        9
+      ],
+      "moveCount": [
+        3,
+        4
+      ],
+      "singleCellAndLastMoveConfirmed": true,
+      "firstReturnProvenance": "Original saved helper return"
+    }
+  ],
+  "foregroundProof": {
+    "homeAndReturnedScreenshotsReviewed": true,
+    "operatorActualIconPoint": [
+      1553,
+      490
+    ],
+    "observerClockId": "cua-gomoku-20261030-1793353010992",
+    "homeObservedUptimeMilliseconds": 3017060.007709,
+    "iconClickObservedUptimeMilliseconds": 3018663.496584,
+    "returnedObservedUptimeMilliseconds": 3019852.100459,
+    "sameTwoStoneStateOnReturn": true,
+    "beforeAndReturnedStateSHA256": "04e6e7aa5f080510843dc939ae5bcb8a040b1404e5f05a8ae5bae7a0b3f6a797",
+    "beforeSequence": 1010,
+    "returnedSnapshotSequence": 1010,
+    "unchangedBSnapshotAloneIsNotForegroundProof": true,
+    "freshPostReturnNativeInputSequence": 1013,
+    "freshPostReturnBrowserInputSequence": 1017,
+    "finalStateSHA256": "300906e989c24a7ff7a9aa31f53a821378904ecf9797af0d26a352687673f02d",
+    "beforeStoneCount": 2,
+    "afterStoneCount": 4
+  },
+  "roleAndStream": {
+    "sameExplicitBrowserPlayerSocket": "19204.714",
+    "connectionReadySequence": 990,
+    "role": "player",
+    "newBrowserSocketClaim": false,
+    "finalAuthorityFreshSinceFloor": true,
+    "finalRoomSnapshotSequence": 1016,
+    "nativeProtocolSocketIdNotClaimed": true
+  },
+  "cleanup": {
+    "nativeRemovedRoomSnapshotSequence": 1019,
+    "onlyBrowserMemberRemainedAt1019": true,
+    "browserRoomLeftSequence": 1023,
+    "browserLeaveReason": "left",
+    "browserSocketClosedSequence": 1026,
+    "pendingCleanup": false,
+    "globalZeroHealthClaim": false
+  },
+  "firstAProvenance": {
+    "initialPreIsTranscribed": true,
+    "description": "Root did not bind the first calibration helper return to a variable. It immediately and accurately transcribed that completed actual tool return; pre/post states1002/1006 are independently preserved received snapshots.",
+    "originalToolTransportArtifactSaved": false,
+    "transcriptionNotRelabeledAsOriginalArtifact": true,
+    "crossChecks": [
+      "New ground screenshot and exact Native click point",
+      "Actual read floor1004 exists in observer read log",
+      "Received1002→1006 single black stone at7,7, revision5→6",
+      "Ordered seat0 hash matches controlled NativeA"
+    ],
+    "acceptanceLimit": "Functional input provenance uses disclosed Root transcription plus original received state/image evidence; raw first-tool transport completeness is not claimed."
+  },
+  "timingLimits": {
+    "batchElapsedThisInvocationMilliseconds": 8088.366750000045,
+    "firstACalibrationExcludedFromThatInvocation": true,
+    "observerTimesAreNotNetworkRTTOrNativePerformance": true,
+    "noFlightTimerOrAutoplayFieldsFabricated": true
+  },
+  "screenshots": [
+    {
+      "file": "g05-native-new-board-grounding-20261030.png",
+      "sha256": "c9d41f25256c3b63d1bdcbd0331b4427dabd628d9feed30c23df9e9c6d74c3cb",
+      "bytes": 259914,
+      "caption": "Fresh actual Native15grid before the first accepted A input; no historical coordinates reused."
+    },
+    {
+      "file": "g05-native-os-home-20261030.png",
+      "sha256": "37fffbd601e3dc0034b25c315d11c36abec18bbf2238365f372847111a11dc70",
+      "bytes": 256672,
+      "caption": "Actual OS SpringBoard after Home control; not the App Home tab."
+    },
+    {
+      "file": "g05-native-returned-20261030.png",
+      "sha256": "29ec990e8122975764765525e5c3084fa53ea4a10dd8b2fdad57052ebb0ab8a7",
+      "bytes": 259858,
+      "caption": "App icon returned to same room and two stones before new post-return inputs."
+    },
+    {
+      "file": "g05-native-post-inputs-20261030.png",
+      "sha256": "a8c6a067dab56839e5f86002e678b3e9b7203e838d0892826d9a9bb6c03e1e75",
+      "bytes": 260529,
+      "caption": "After accepted new A and B moves, four stones are visible."
+    }
+  ],
+  "privateEvidenceSHA256": {
+    "g05-foreground-batch.json": "c9d46ba469d314d08a9dc777e28637bc22599331b5c739e3d50eed772d1a4c4a",
+    "g05-new-board-grounding.png": "c9d41f25256c3b63d1bdcbd0331b4427dabd628d9feed30c23df9e9c6d74c3cb",
+    "g05-home.png": "37fffbd601e3dc0034b25c315d11c36abec18bbf2238365f372847111a11dc70",
+    "g05-returned.png": "29ec990e8122975764765525e5c3084fa53ea4a10dd8b2fdad57052ebb0ab8a7",
+    "g05-post-inputs.png": "a8c6a067dab56839e5f86002e678b3e9b7203e838d0892826d9a9bb6c03e1e75",
+    "wire-required-window.json": "698de7af34e5b4e12aaa3caf337765832f5ccc52f99dffa4bc1cae2c8b66f0eb",
+    "ledger-G05-at-audit.json": "f01e8cf5efd8b23a2237ec174e2291eec58765e9d74e21fef292e78e64bdf436"
+  },
+  "sourceReferences": {
+    "observerV3SHA256": "fcb8623aba70e2615c7fdfdce708a2d418fa7f20898149fb82f0b8d24f5a147c",
+    "singleActionHelperSHA256": "49b7dbaea8e2a6a97c22cdac4fff2bb9e2c69de02053436f165bdaf7b6fab3a4",
+    "publicWebReferenceCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "OnlineGameRoomSHA256": "a817543264c5591d7eb261a21b4b836668b6062ede420abf87bc51f9b6e74a03"
+  },
+  "limits": [
+    "One G foreground recovery round; no automatic helperN10, cold start, socket-reconnect or OS-termination claim.",
+    "Both controlled humans have accepted single-cell UI moves before and after foreground recovery. No SDK send or injected DOM move is substituted by this audit.",
+    "G schema has no Flight timer/autoplay fields; omission is preserved, not converted into fabricated empty arrays or deadlines.",
+    "Pre-dispatch wrong-selector setup failure is retained and not counted as a created room or dispatched input.",
+    "This audit only read artifacts/source and added new evidence copies/report; no UI/network, ledger, product source, counts or checkboxes were changed."
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "kind": "anonymous-cdn-required-png-readiness",
+  "checkedAt": "2026-10-29T07:48:03.053673+08:00",
+  "requiredURLsVerifiedInDownloadedLiveRenderer": {
+    "URL": "https://play.yunle.fun/_nuxt/DRT5lYWc.js",
+    "sha256": "2fe8c9e52e7a5c373ee62b969e04838d1158b8194624124f1d525e2ea4cbdbcc"
+  },
+  "requests": [
+    {
+      "requestedURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png?webgl=1",
+      "status": 200,
+      "responseURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png?webgl=1",
+      "byteCount": 956518,
+      "sha256": "11687bec1a36d8166abaeab599daeafd4930080ef86e7b44254553f2b5ababb1",
+      "hasPNGSignature": true,
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "956518",
+        "content-encoding": null,
+        "access-control-allow-origin": "*",
+        "access-control-allow-credentials": null,
+        "cross-origin-resource-policy": null,
+        "cache-control": null,
+        "vary": null
+      },
+      "setCookieHeaderPresent": false
+    },
+    {
+      "requestedURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "status": 200,
+      "responseURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "byteCount": 775328,
+      "sha256": "776670c0c426750e51242e45e4e951a5afaf1b5fc0314620e1aa434a3dbdf9c0",
+      "hasPNGSignature": true,
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "775328",
+        "content-encoding": null,
+        "access-control-allow-origin": null,
+        "access-control-allow-credentials": null,
+        "cross-origin-resource-policy": null,
+        "cache-control": null,
+        "vary": null
+      },
+      "setCookieHeaderPresent": false
+    }
+  ],
+  "scope": "Exact live required URLs, anonymous GET with actual game Origin, Accept */*, normal strict TLS. NoCookie/Auth/no writes. Absence of CORS response headers is a network clue consistent with in-WebKit failure, not a substitute for browser diagnosis. No bytes edited/rehosted on production. Invalid filename preflight preserved separately."
+}

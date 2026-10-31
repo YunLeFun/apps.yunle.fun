@@ -1,0 +1,18 @@
+{
+  "kind": "blank-warmup-experiment-preregistered-scope",
+  "previousGoalTurnClassification": "progress: same-run six-sample startup timing and Star2x10second frame/RSS evidence completed",
+  "currentHypothesis": "Keeping an independently initialized inert about:blank view in the exact prepared named store may change subsequent fresh WKWebView startup costs. SDK provides no guarantee of process reuse.",
+  "plannedScope": "Gomoku computer only, three paired/alternating normal-without-additional-blank versus held inert blank. Same current9ba prepared profile, no HTTP clear between cases. No OS/process-cold claim.",
+  "identityAndSafety": "Explicit test-only opt-in. Accurate gameResourceProfile UUID, no default store, no bridge/game scripts/URLs/baseURL/network/storage manipulation, cancel/memory/profile changes close fixture-owned view. Real game still original runtime/newview/realready.",
+  "costs": "Record shared resource-preparation time, blank initialization/wait/hold/release and pre-initialization-to-real-ready cost; preserve all execution order/carryover. External per-PID RSS only if correlated to same test-host log; no exclusive allocation claim.",
+  "adoptionGate": "Diagnostic N3 cannot satisfy30percent, prove SDK reuse or authorize product default warmup. No product adoption without credible latency plus total-cost/memory/identity/lifecycle results. Star3sec rule and original target unchanged pending user preference.",
+  "testSourceInputSHA256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c",
+  "productSourceChanged": false,
+  "installedSDKNote": {
+    "path": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h",
+    "sha256": "193d71399f402f269b8e70490a9a3a6b0bd41cb96cf1452105654b1d2394f7c2",
+    "sdk": "iPhoneSimulator27.1",
+    "paraphrase": "Each WebView may receive its own content process until an implementation-defined limit; public processPool customization is deprecated and provides no effect on modern iOS. No API promises that an independently initialized blank view will be reused for the real game.",
+    "privateAPIsUsed": false
+  }
+}

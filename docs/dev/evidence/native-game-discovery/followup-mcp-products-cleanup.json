@@ -1,0 +1,30 @@
+{
+  "recordedAt": "2026-10-29T04:59:43.266104+08:00",
+  "records": [
+    {
+      "path": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/test-products/build_sim_2026-10-28T20-33-57-498Z_pid11957_9a891918.xctestproducts",
+      "bytes": 158256793,
+      "fileCount": 102,
+      "purpose": "Superseded automatically exported test products from this task; current CLI uses the retained DerivedData products",
+      "preserved": "Runner metadata and source/build logs; current source and incrementally rebuildable products remain",
+      "reasonForRemoval": "Known task-owned duplicate; no live test command references this package",
+      "recycleCondition": "Current source build succeeded after these superseded exports",
+      "preservedBytes": 11065,
+      "netReclaimedBytes": 158245728
+    },
+    {
+      "path": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/test-products/test_sim_2026-10-28T20-44-07-815Z_pid11957_586a3bfa.xctestproducts",
+      "bytes": 158327835,
+      "fileCount": 102,
+      "purpose": "Superseded automatically exported test products from this task; current CLI uses the retained DerivedData products",
+      "preserved": "Runner metadata and source/build logs; current source and incrementally rebuildable products remain",
+      "reasonForRemoval": "Known task-owned duplicate; no live test command references this package",
+      "recycleCondition": "Current source build succeeded after these superseded exports",
+      "preservedBytes": 11064,
+      "netReclaimedBytes": 158316771
+    }
+  ],
+  "netReclaimedBytesBeforePreservedLogs": 316562499,
+  "preservedLogBytes": 301441,
+  "netReclaimedBytes": 316261058
+}

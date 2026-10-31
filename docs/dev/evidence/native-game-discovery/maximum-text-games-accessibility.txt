@@ -1,0 +1,109 @@
+Attributes: Application, 0x1069efac0, pid: 31992, label: '云乐坊 Native'
+Element subtree:
+ →Application, 0x1069efac0, pid: 31992, label: '云乐坊 Native'
+    Window (Main), 0x1069eee40, {{0.0, 0.0}, {402.0, 874.0}}
+      Other, 0x1069ec140, {{0.0, 0.0}, {402.0, 874.0}}
+      Other, 0x1069ec280, {{0.0, 0.0}, {402.0, 874.0}}
+        Other, 0x1069ec3c0, {{0.0, 0.0}, {402.0, 874.0}}
+          Other, 0x1069ec500, {{0.0, 0.0}, {402.0, 874.0}}
+            Other, 0x1069ec640, {{0.0, 0.0}, {402.0, 874.0}}
+              Other, 0x1069ec780, {{0.0, 0.0}, {402.0, 874.0}}
+                Other, 0x1069ec8c0, {{0.0, 0.0}, {402.0, 874.0}}
+                  Other, 0x1069eca00, {{0.0, 0.0}, {402.0, 874.0}}
+                    Other, 0x1069ecb40, {{0.0, 0.0}, {402.0, 874.0}}
+                      Other, 0x1069ecc80, {{0.0, 0.0}, {402.0, 874.0}}
+                        Other, 0x1069ecdc0, {{0.0, 0.0}, {402.0, 874.0}}
+                          Other, 0x1069ecf00, {{0.0, 0.0}, {402.0, 874.0}}
+                            NavigationBar, 0x1069ed040, {{0.0, 62.0}, {402.0, 188.0}}, identifier: '寻乐'
+                              StaticText, 0x1069eef80, {{180.7, 71.3}, {40.3, 25.3}}, label: '寻乐'
+                              Button, 0x1069ef0c0, {{260.3, 66.0}, {59.7, 36.0}}, identifier: 'games.join-room', label: '加入房间'
+                              Button, 0x1069ef200, {{336.0, 66.0}, {46.0, 36.0}}, identifier: 'games.filter', label: '玩法'
+                              SearchField, 0x1069ef340, {{16.0, 116.0}, {370.0, 124.0}}, label: '搜索游戏', placeholderValue: '搜索游戏'
+                                Image, 0x1069ef480, {{28.0, 153.3}, {50.0, 48.3}}, identifier: 'magnifyingglass', label: '搜索'
+                            Other, 0x1069ef5c0, {{0.0, 0.0}, {402.0, 874.0}}
+                              Other, 0x1069ef700, {{0.0, 0.0}, {402.0, 874.0}}
+                                Other, 0x1069ef840, {{0.0, 0.0}, {402.0, 874.0}}
+                                  Other, 0x1069efc00, {{0.0, 0.0}, {402.0, 874.0}}
+                                    CollectionView, 0x1069efe80, {{0.0, 0.0}, {402.0, 874.0}}
+                                      Other, 0x10324ad00, {{-16.0, -9.7}, {434.0, 3860.0}}
+                                      Cell, 0x10324af80, {{16.0, -9.7}, {370.0, 83.3}}
+                                        Other, 0x10324b200, {{16.0, -9.7}, {370.0, 83.3}}
+                                        Other, 0x10324b340, {{16.0, -9.7}, {370.0, 83.3}}
+                                          Other, 0x10324b480, {{16.0, -9.7}, {370.0, 83.3}}
+                                            Other, 0x10324b700, {{16.0, -9.7}, {370.0, 83.3}}
+                                              StaticText, 0x10324b840, {{16.0, -9.7}, {370.0, 83.3}}, label: '精选游戏'
+                                      Other, 0x10324b5c0, {{0.0, 0.0}, {402.0, 874.0}}
+                                        Other, 0x103248780, {{0.0, 0.0}, {402.0, 290.0}}
+                                        Other, 0x103248f00, {{0.0, 741.0}, {402.0, 133.0}}
+                                      Other, 0x1060503c0, {{0.0, 0.0}, {402.0, 874.0}}
+                                        Other, 0x1060517c0, {{0.0, 0.0}, {402.0, 290.0}}
+                                        Other, 0x106050a00, {{0.0, 741.0}, {402.0, 133.0}}
+                                      Cell, 0x106050dc0, {{16.0, 73.7}, {370.0, 1001.0}}
+                                        Other, 0x106052580, {{16.0, 73.7}, {370.0, 1001.0}}
+                                          Other, 0x106052800, {{16.0, 73.7}, {370.0, 1001.0}}
+                                        Other, 0x106052940, {{16.0, 73.7}, {370.0, 1001.0}}
+                                          Other, 0x106052bc0, {{16.0, 73.7}, {370.0, 1001.0}}
+                                            Other, 0x106052a80, {{16.0, 73.7}, {370.0, 1001.0}}
+                                              Image, 0x106052d00, {{32.0, 98.7}, {56.0, 56.0}}, identifier: 'games.game.gomoku'
+                                              StaticText, 0x106052f80, {{102.0, 98.7}, {150.3, 63.3}}, identifier: 'games.game.gomoku', label: '五子棋'
+                                              StaticText, 0x1060530c0, {{113.0, 167.0}, {189.7, 51.3}}, identifier: 'games.game.gomoku', label: '1–2 人'
+                                              Image, 0x106052e40, {{113.0, 177.3}, {48.7, 33.3}}, identifier: 'games.game.gomoku', label: '两个人'
+                                              StaticText, 0x106053200, {{32.0, 232.3}, {325.3, 348.7}}, identifier: 'games.game.gomoku', label: '十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。'
+                                              Other, 0x106053480, {{32.0, 595.0}, {338.0, 238.0}}, identifier: 'games.game.gomoku'
+                                                Button, 0x1060535c0, {{32.0, 595.0}, {338.0, 72.7}}, identifier: 'games.launch.gomoku.computer', label: '五子棋，电脑对手'
+                                                Button, 0x106053340, {{32.0, 677.7}, {338.0, 72.7}}, identifier: 'games.launch.gomoku.local', label: '五子棋，同屏双人'
+                                                Button, 0x106053700, {{32.0, 760.3}, {338.0, 72.7}}, identifier: 'games.launch.gomoku.online', label: '五子棋，邀请联机', Disabled
+                                              Button, 0x106053840, {{46.7, 847.0}, {236.7, 125.3}}, identifier: 'games.game.gomoku', label: '在 Play 查看玩法'
+                                                StaticText, 0x106053ac0, {{46.7, 847.0}, {236.7, 125.3}}, label: '在 Play 查看玩法'
+                                                Image, 0x106053c00, {{46.7, 859.7}, {38.0, 38.0}}, identifier: 'arrow.up.forward.app', label: 'App矩形上的向上并向前箭头'
+                                              Button, 0x106053d40, {{45.0, 986.3}, {271.0, 63.3}}, identifier: 'games.game.gomoku', label: '游戏资源'
+                                                StaticText, 0x106053980, {{45.0, 986.3}, {271.0, 63.3}}, label: '游戏资源'
+                                                Image, 0x106050000, {{45.0, 997.0}, {42.0, 42.0}}, identifier: 'arrow.down.circle', label: '箭头向下圆圈'
+                                      Other, 0x106a80000, {{369.0, 250.0}, {30.0, 541.0}}, label: '垂直滚动条, 5页', value: 34%
+                                        Other, 0x106a80140, {{396.0, 380.0}, {3.0, 163.0}}
+                                      Other, 0x106a80280, {{369.0, 250.0}, {30.0, 541.0}}, label: '垂直滚动条, 5页', value: 34%
+                                        Other, 0x106a803c0, {{396.0, 380.0}, {3.0, 163.0}}
+                            Toolbar, 0x106a80500, {{0.0, 0.0}, {402.0, 874.0}}, identifier: 'Toolbar', label: '工具栏'
+                              Other, 0x106a80640, {{0.0, 0.0}, {402.0, 874.0}}
+                Other, 0x106a80780, {{0.0, 0.0}, {402.0, 874.0}}
+                  Other, 0x106a808c0, {{0.0, 791.0}, {402.0, 83.0}}
+                    Other, 0x106a80a00, {{0.0, 0.0}, {402.0, 874.0}}
+                      TabBar, 0x106a80b40, {{0.0, 791.0}, {402.0, 83.0}}, label: '标签页栏'
+                        Other, 0x106a80c80, {{21.0, 791.0}, {360.0, 62.0}}
+                          Other, 0x106a80dc0, {{21.0, 791.0}, {98.0, 54.0}}
+                          Other, 0x106a80f00, {{21.0, 791.0}, {360.0, 62.0}}
+                            Button, 0x106a81040, {{25.0, 795.0}, {98.0, 54.0}}, identifier: 'house', label: '云居'
+                              Image, 0x106a81180, {{57.3, 801.0}, {33.3, 28.0}}, identifier: 'house.fill', label: '主页'
+                            Button, 0x106a812c0, {{109.7, 795.0}, {98.0, 54.0}}, identifier: 'gamecontroller', label: '寻乐', Selected
+                              Image, 0x106a81400, {{139.3, 802.7}, {39.0, 24.7}}, identifier: 'gamecontroller.fill', label: '游戏控制器'
+                            Button, 0x106a81540, {{194.3, 795.0}, {98.0, 54.0}}, identifier: 'square.grid.2x2', label: '工坊'
+                              Image, 0x106a81680, {{230.0, 802.3}, {27.0, 25.0}}, identifier: 'square.grid.2x2.fill', label: '网格2x2'
+                            Button, 0x106a817c0, {{279.0, 795.0}, {98.0, 54.0}}, identifier: 'person.crop.circle', label: '我'
+                              Image, 0x106a81900, {{314.3, 801.3}, {27.3, 27.3}}, identifier: 'person.crop.circle.fill', label: '账户'
+                          Other, 0x106a81a40, {{21.0, 791.0}, {360.0, 62.0}}
+                          Other, 0x106a81b80, {{109.7, 795.0}, {98.0, 54.0}}
+                            Other, 0x106a81cc0, {{109.7, 795.0}, {98.0, 54.0}}
+                              Other, 0x106a81e00, {{109.7, 795.0}, {98.0, 54.0}}
+                              Other, 0x106a81f40, {{109.7, 795.0}, {98.0, 54.0}}
+                                Other, 0x106a82080, {{109.7, 795.0}, {98.0, 54.0}}
+                                  Other, 0x106a821c0, {{109.7, 795.0}, {98.0, 54.0}}
+                                    Other, 0x106a82300, {{109.7, 795.0}, {98.0, 54.0}}
+                                  Other, 0x106a82440, {{109.7, 795.0}, {98.0, 54.0}}
+                                Other, 0x106a82580, {{109.7, 795.0}, {98.0, 54.0}}
+                    Other, 0x106a826c0, {{0.0, 791.0}, {402.0, 83.0}}
+                      Other, 0x106a82800, {{0.0, 791.0}, {402.0, 83.0}}
+                        Other, 0x106a82940, {{0.0, 791.0}, {402.0, 83.0}}
+                          Other, 0x106a82a80, {{0.0, 791.0}, {402.0, 83.0}}
+                            Other, 0x106a82bc0, {{0.0, 791.0}, {402.0, 83.0}}
+                              Other, 0x106a82d00, {{0.0, 791.0}, {402.0, 83.0}}
+                          Other, 0x106a82e40, {{0.0, 791.0}, {402.0, 83.0}}
+                            Other, 0x106a82f80, {{0.0, 791.0}, {402.0, 83.0}}
+              Other, 0x106a830c0, {{201.0, 451.0}, {0.0, 0.0}}
+              Other, 0x106a83200, {{201.0, 451.0}, {0.0, 0.0}}
+Path to element:
+ →Application, 0x1069efac0, pid: 31992, label: '云乐坊 Native'
+Query chain:
+ →Find: Target Application 'fun.yunle.apps.native-dev'
+  Output: {
+    Application, 0x106a83340, pid: 31992, label: '云乐坊 Native'
+  }

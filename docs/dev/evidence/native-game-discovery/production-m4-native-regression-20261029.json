@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "readOnlyExportByThisAgent": true,
+  "testOrDeviceRunByThisAgent": false,
+  "sourceRegressionXCResult": "closed-room-regression.xcresult",
+  "sourceSummaryExportSHA256": "14602ce63f503cae18ba73c90b03d42c41ae81726b2e30040b60f19d8104287b",
+  "sourceTestsExportSHA256": "aac376bfd2afe51a85c23c5dabd5037b6b3352eac2a900db8ffbb340aa83b185",
+  "regression": {
+    "result": "Failed",
+    "total": 17,
+    "passed": 14,
+    "failed": 3,
+    "skipped": 0,
+    "startTimeUnix": 1793266409.707,
+    "finishTimeUnix": 1793266650.809,
+    "newTestMethods": [
+      "testClosedOrUnconfirmedFailedRoomOpensDifferentInviteAfterMinimize",
+      "testDifferentInvitePreservesLiveAndRecoverableRoomSessions",
+      "testRoomInviteDoesNotReplaceOrdinaryPlayPage",
+      "testDifferentInviteDoesNotInheritLegacySingleGameProfile"
+    ],
+    "allFourNewTestsPassed": true,
+    "cases": [
+      {
+        "test": "NativeGameRuntimeTests/testCapacityEvictsPausedGameAndReopensWithStoredData()",
+        "result": "Passed",
+        "durationSeconds": 21.538508892059326
+      },
+      {
+        "test": "NativeGameRuntimeTests/testClosedAndFailedRoomsReenterWithNewLaunchWhileKeepingProfileAndStorage()",
+        "result": "Passed",
+        "durationSeconds": 20.400812029838562
+      },
+      {
+        "test": "NativeGameRuntimeTests/testClosedOrUnconfirmedFailedRoomOpensDifferentInviteAfterMinimize()",
+        "result": "Passed",
+        "durationSeconds": 3.2816309928894043
+      },
+      {
+        "test": "NativeGameRuntimeTests/testClosedRoomFromLegacyGameProfileKeepsThatProfileOnReentry()",
+        "result": "Passed",
+        "durationSeconds": 1.507038950920105
+      },
+      {
+        "test": "NativeGameRuntimeTests/testConnectingWaitingAndCompletedRoomsKeepTheirLiveSession()",
+        "result": "Passed",
+        "durationSeconds": 0.9233040809631348
+      },
+      {
+        "test": "NativeGameRuntimeTests/testDifferentInviteDoesNotInheritLegacySingleGameProfile()",
+        "result": "Passed",
+        "durationSeconds": 7.62206506729126
+      },
+      {
+        "test": "NativeGameRuntimeTests/testDifferentInvitePreservesLiveAndRecoverableRoomSessions()",
+        "result": "Passed",
+        "durationSeconds": 3.0052030086517334
+      },
+      {
+        "test": "NativeGameRuntimeTests/testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext()",
+        "result": "Passed",
+        "durationSeconds": 0.8707259893417358
+      },
+      {
+        "test": "NativeGameRuntimeTests/testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation()",
+        "result": "Failed",
+        "durationSeconds": 88.92769002914429
+      },
+      {
+        "test": "NativeGameRuntimeTests/testFailedRoomBeforeFirstConfirmationCanBeOpenedAgain()",
+        "result": "Passed",
+        "durationSeconds": 1.7043089866638184
+      },
+      {
+        "test": "NativeGameRuntimeTests/testFixtureCleanupBeforeOpeningFirstGamePage()",
+        "result": "Passed",
+        "durationSeconds": 0.12181401252746582
+      },
+      {
+        "test": "NativeGameRuntimeTests/testMarketDatabaseIdentityAndCanonicalGameSlugReuseOneSession()",
+        "result": "Passed",
+        "durationSeconds": 0.9050799608230591
+      },
+      {
+        "test": "NativeGameRuntimeTests/testMemoryWarningEvictsPausedGameAndReopensWithStoredData()",
+        "result": "Failed",
+        "durationSeconds": 25.323238015174866
+      },
+      {
+        "test": "NativeGameRuntimeTests/testMemoryWarningWithoutForegroundKeepsMostRecentPausedGame()",
+        "result": "Failed",
+        "durationSeconds": 25.886831045150757
+      },
+      {
+        "test": "NativeGameRuntimeTests/testRealWebKitMessageChecksOriginAndOperationBeforeRecordingReadyOnce()",
+        "result": "Passed",
+        "durationSeconds": 2.5107579231262207
+      },
+      {
+        "test": "NativeGameRuntimeTests/testRoomInviteDoesNotReplaceOrdinaryPlayPage()",
+        "result": "Passed",
+        "durationSeconds": 1.7691450119018555
+      },
+      {
+        "test": "NativeGameRuntimeTests/testRoomSentinelResolvesTheReportedGameAndResumesWithoutDuplicateSession()",
+        "result": "Passed",
+        "durationSeconds": 0.7760840654373169
+      }
+    ],
+    "failureCategories": [
+      {
+        "test": "NativeGameRuntimeTests/testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation()",
+        "failureCategory": "fixture WebKit persistent-store cleanup",
+        "publicReason": "Data store is in use (by network process); one of these tests additionally recorded an owned cleanup timeout",
+        "productBehaviorPassClaim": false
+      },
+      {
+        "test": "NativeGameRuntimeTests/testMemoryWarningEvictsPausedGameAndReopensWithStoredData()",
+        "failureCategory": "fixture WebKit persistent-store cleanup",
+        "publicReason": "Data store is in use (by network process); one of these tests additionally recorded an owned cleanup timeout",
+        "productBehaviorPassClaim": false
+      },
+      {
+        "test": "NativeGameRuntimeTests/testMemoryWarningWithoutForegroundKeepsMostRecentPausedGame()",
+        "failureCategory": "fixture WebKit persistent-store cleanup",
+        "publicReason": "Data store is in use (by network process); one of these tests additionally recorded an owned cleanup timeout",
+        "productBehaviorPassClaim": false
+      }
+    ]
+  },
+  "fixtureOnlyCleanup": {
+    "sourceXCResult": "closed-room-fixture-cleanup.xcresult",
+    "sourceSummaryExportSHA256": "63462dbd9cc26cc444ec43099c39b3a7497f5944e3c38bb487c1ab00ba8cc311",
+    "sourceTestsExportSHA256": "8709b2b6615742580dee502c9b4f7180b5782e6561cd879731570444d823a371",
+    "result": "Passed",
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "test": "NativeGameRuntimeFixtureCleanupTests/testRemoveOnlyPreviouslyOwnedFixtureStores()",
+        "result": "Passed",
+        "durationSeconds": 2.91005802154541
+      }
+    ],
+    "scope": "Task owner explicitly supplied only four UUIDs proven to belong to the first failed fixture run; no account store or broad deletion",
+    "requestedOwnedFixtureCount": 4
+  },
+  "limits": [
+    "The separate cleanup pass does not turn the initial 17-test run green.",
+    "This checkpoint does not include results for the subsequent five-test follow-up.",
+    "The fixed native candidate had not yet been installed and tested against the production failure at this checkpoint."
+  ],
+  "fixedSimulatorUDID": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+}

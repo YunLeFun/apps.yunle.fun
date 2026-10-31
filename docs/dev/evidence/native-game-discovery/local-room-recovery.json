@@ -1,0 +1,394 @@
+{
+  "classification": "local-memory-http-websocket-protocol-only",
+  "startedAt": "2026-10-28T16:58:13.707Z",
+  "completedAt": "2026-10-28T16:58:30.024Z",
+  "endpoint": "http://127.0.0.1:49190",
+  "transport": "real Colyseus SDK and loopback HTTP/WebSocket",
+  "roomStore": "memory",
+  "ticketStore": "memory",
+  "identities": "SessionStore-seeded synthetic test identities; no production credentials",
+  "excluded": [
+    "native SSO",
+    "production deployment",
+    "Universal Links",
+    "production release gates"
+  ],
+  "cleanup": "clients leave, rooms disconnect, SDK signs out, and server shuts down in test hooks",
+  "rounds": [
+    {
+      "gameID": "gomoku",
+      "round": 1,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 256.57,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 1,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 255.6,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 1,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 413.66,
+      "receivedValidMessages": 74
+    },
+    {
+      "gameID": "gomoku",
+      "round": 2,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 259.91,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 2,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 252.74,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 2,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 254.16,
+      "receivedValidMessages": 71
+    },
+    {
+      "gameID": "gomoku",
+      "round": 3,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 252.85,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 3,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 254.35,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 3,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 254.58,
+      "receivedValidMessages": 71
+    },
+    {
+      "gameID": "gomoku",
+      "round": 4,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 256.29,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 4,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 254.35,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 4,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 253.09,
+      "receivedValidMessages": 67
+    },
+    {
+      "gameID": "gomoku",
+      "round": 5,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 255.8,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 5,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 253.65,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 5,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 256.4,
+      "receivedValidMessages": 71
+    },
+    {
+      "gameID": "gomoku",
+      "round": 6,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 203.66,
+      "receivedValidMessages": 21
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 6,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 255.15,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 6,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 253.66,
+      "receivedValidMessages": 71
+    },
+    {
+      "gameID": "gomoku",
+      "round": 7,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 251.32,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 7,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 252.47,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 7,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 255.3,
+      "receivedValidMessages": 67
+    },
+    {
+      "gameID": "gomoku",
+      "round": 8,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 254.23,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 8,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 209.37,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 8,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 256.17,
+      "receivedValidMessages": 67
+    },
+    {
+      "gameID": "gomoku",
+      "round": 9,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 253.8,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 9,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 252.72,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 9,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 255.03,
+      "receivedValidMessages": 71
+    },
+    {
+      "gameID": "gomoku",
+      "round": 10,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 253.91,
+      "receivedValidMessages": 27
+    },
+    {
+      "gameID": "flight-chess",
+      "round": 10,
+      "clients": 2,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 2,
+      "recoveryMilliseconds": 253.36,
+      "receivedValidMessages": 29
+    },
+    {
+      "gameID": "paper-star",
+      "round": 10,
+      "clients": 4,
+      "success": true,
+      "stage": "complete",
+      "createStatus": 201,
+      "ticketCount": 4,
+      "recoveryMilliseconds": 256.58,
+      "receivedValidMessages": 71
+    }
+  ],
+  "serverShutdownVerified": {
+    "portClosed": true,
+    "checkedAtUTC": "2026-10-28T17:00:19.430454+00:00"
+  },
+  "summaries": [
+    {
+      "gameID": "gomoku",
+      "rounds": 10,
+      "clientsPerRound": 2,
+      "passed": 10,
+      "failed": 0,
+      "recoveryP50Milliseconds": 253.91,
+      "recoveryP90Milliseconds": 256.57
+    },
+    {
+      "gameID": "flight-chess",
+      "rounds": 10,
+      "clientsPerRound": 2,
+      "passed": 10,
+      "failed": 0,
+      "recoveryP50Milliseconds": 253.36,
+      "recoveryP90Milliseconds": 255.15
+    },
+    {
+      "gameID": "paper-star",
+      "rounds": 10,
+      "clientsPerRound": 4,
+      "passed": 10,
+      "failed": 0,
+      "recoveryP50Milliseconds": 255.03,
+      "recoveryP90Milliseconds": 256.58
+    }
+  ],
+  "source": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/test/native-host-room-recovery.test.ts",
+    "sha256": "09c604009ecc0bc3a3ecb32d81a001212eb0edd6b3b5ec9b181d21f068f60dfb",
+    "repositoryHEAD": "540e8e343cefeccd386159d9ba0e19f3b27b5952"
+  },
+  "runner": {
+    "name": "repository-installed Vitest CLI",
+    "version": "4.1.12",
+    "nodeVersion": "v24.18.0",
+    "packageInstallPerformed": false,
+    "packageTrustOverrides": false
+  }
+}

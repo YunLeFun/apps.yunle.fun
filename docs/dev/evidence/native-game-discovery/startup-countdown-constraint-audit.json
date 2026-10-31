@@ -1,0 +1,36 @@
+{
+  "kind": "current-fresh-local-mode-performance-rule-constraint",
+  "recordedAt": "2026-10-29T06:33:29.401878+08:00",
+  "selectedGame": "paper-star",
+  "mode": "local",
+  "currentN10LegacyP50Milliseconds": 4192.959999956656,
+  "requiredImprovement": 0.3,
+  "targetP50Milliseconds": 2935.0719999696594,
+  "existingCountdownMilliseconds": 3000,
+  "idealizedZeroOverheadMaximumImprovement": 0.28451499655827583,
+  "finding": "With the existing local start() creating a new game after entry and the unchanged 3-second rule, a total tap-to-operable target below3seconds cannot be reached only by eliminating load overhead under stable clocks. This is a constraint on this measured baseline, not a universal hardware performance bound.",
+  "decision": "Requested user preference: preserve gameplay and separately assess technical loading versus total startup, or permit local opening UX change; unanswered means no change to rule or30percent acceptance.",
+  "goalAndTaskStatus": "M3.3 remains incomplete; no target redefinition or narrower success claim",
+  "sourceEvidence": [
+    {
+      "repository": "play",
+      "path": "packages/games/paper-star/src/index.ts",
+      "sha256": "00ab12e8421a50ae9ac65e0c4700fc3c98b4f3c8ad70e536b707144b5c294a47"
+    },
+    {
+      "repository": "play",
+      "path": "apps/web/app/features/paper-star/local-game.ts",
+      "sha256": "529d2e573cb09374641c8e1a083b3cb075c4b0b072de66c74d83f75435c01afd"
+    },
+    {
+      "repository": "play",
+      "path": "apps/web/app/pages/games/paper-star/local.vue",
+      "sha256": "da65be638e836b1aded2d13b57de899903ba9e2402a1c4e4dab87162087474dd"
+    }
+  ],
+  "benchmarkEvidence": {
+    "path": "operable-final-n10.json",
+    "sha256": "ea9b0b2e14a77b5c3114deab3df80116717466d2ff88ce18083cbd56cf1aa647"
+  },
+  "noGameplayChange": true
+}

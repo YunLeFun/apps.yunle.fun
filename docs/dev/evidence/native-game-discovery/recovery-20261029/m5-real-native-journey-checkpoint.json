@@ -1,0 +1,39 @@
+{
+  "atUTC": "2026-10-29T19:56:12.193719+00:00",
+  "status": "partial-real-native-M5-journey",
+  "M5Complete": false,
+  "ledgerSHA256": "c2e21d816de3dfc6e8bc7a3ea908690531066e607fe5f7dc8aa51b720d8bdcee",
+  "conditions": {
+    "nativeRuntimeSourceSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "nativeControllerSourceSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "accountScope": "existing dedicated test accounts A,D,C only",
+    "productionAuthorizedByUser": true
+  },
+  "verified": [
+    "A→D→A saved-account selection and distinct game history: A gomoku/flight, D paper-star and own room reference; returning A restores A history",
+    "Workshop query AI produces four actual results and hides recommendations",
+    "Clearing search restores AI and featured browsing",
+    "Game category produces five real catalog results; clearing restores browsing",
+    "Nonmember A send disabled with current membership guidance",
+    "Existing member C normal password login through native UI; preset query sent to actual assistant service and completed six app cards; no new membership or paid purchase",
+    "AI return to Workshop",
+    "C personal-workshop and my-application management loaded expected empty test-account states; no workshop or application created",
+    "A cloud home count remains zero before and after account journeys"
+  ],
+  "limits": [
+    "AI recommendation card activation was attempted but detail destination was not observed; independent static audit found no definite root cause. Not counted as successful detail navigation.",
+    "Two initial search input attempts did not modify the field while Device Hub keyboard routing was off; not counted as search matches or product failures. Routing was enabled for actual verified input, then restored off.",
+    "Empty dedicated account lists do not prove preservation of nonempty real user cloud-home or workshop records; existing data-isolation regressions are separate evidence.",
+    "No account logout/remove, role/membership/coin changes, purchase, application acquisition, or message to another person.",
+    "Mac locked at the next Native room-join action; continuation requires manual unlock, no GUI workaround attempted."
+  ],
+  "privateEvidenceSHA256": {
+    "ledger.json": "c2e21d816de3dfc6e8bc7a3ea908690531066e607fe5f7dc8aa51b720d8bdcee",
+    "D-games.png": "5dc643981115d50c0bd13d9e9f60d48484375971211c6d9204ccdd1e2321a8c8",
+    "A-games-restored.png": "00f7d305bda99fed3c17465b6661cfd21f05735b2d7d56475f850da2b3f2b2ff",
+    "workshop-search.png": "12f3dc6e678dce36c1fc3d2c069cd8315abccdd536cbd606d17a4436f399ae6c",
+    "AI-completed.png": "662d38852dac6dd4d066cd6fd499f6b44c2f16504cf3224baf8988de4690480f",
+    "personal-workshops.png": "1111816de1c5600a2477be24bd455ea5ee06a3007c84a484377f68f13a6105f3"
+  }
+}

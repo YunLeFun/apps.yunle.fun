@@ -1,0 +1,544 @@
+{
+  "kind": "external-ps-rss-blank-page-diagnostic",
+  "recordedAt": "2026-10-28T23:09:22.294342+00:00",
+  "command": [
+    "xcodebuild",
+    "test-without-building",
+    "-xctestrun",
+    "/tmp/yunle-native-games.uGZuY9/blank-warmup-phase.xctestrun",
+    "-destination",
+    "platform=iOS Simulator,id=4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "-parallel-testing-enabled",
+    "NO",
+    "-collect-test-diagnostics",
+    "never",
+    "-only-testing:YunleFunTests/NativeGameStartupPhaseLiveTests/testHeldBlankPageStartupPhaseForGomoku",
+    "-resultBundlePath",
+    "/tmp/yunle-native-games.uGZuY9/blank-warmup-phase.xcresult"
+  ],
+  "xcodebuildPID": 48247,
+  "exitCode": 0,
+  "intervalSeconds": 0.5,
+  "events": [
+    {
+      "kind": "BEGIN",
+      "iteration": 1,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 15.371267625014298
+    },
+    {
+      "kind": "END",
+      "iteration": 1,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 16.466712124994956
+    },
+    {
+      "kind": "BEGIN",
+      "iteration": 2,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 16.46674654103117
+    },
+    {
+      "kind": "END",
+      "iteration": 2,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 18.564533500000834
+    },
+    {
+      "kind": "BEGIN",
+      "iteration": 3,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 18.56454879103694
+    },
+    {
+      "kind": "END",
+      "iteration": 3,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 20.121801999979652
+    },
+    {
+      "kind": "BEGIN",
+      "iteration": 4,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 20.12185470800614
+    },
+    {
+      "kind": "END",
+      "iteration": 4,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 20.658021791023202
+    },
+    {
+      "kind": "BEGIN",
+      "iteration": 5,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 20.658033874991816
+    },
+    {
+      "kind": "END",
+      "iteration": 5,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 21.68893666600343
+    },
+    {
+      "kind": "BEGIN",
+      "iteration": 6,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 21.688951332995202
+    },
+    {
+      "kind": "END",
+      "iteration": 6,
+      "hostPID": 48277,
+      "monitorElapsedSeconds": 23.22301408299245
+    }
+  ],
+  "samples": [
+    {
+      "monitorElapsedSeconds": 10.17869370803237,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 347232
+    },
+    {
+      "monitorElapsedSeconds": 10.697903458029032,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 374480
+    },
+    {
+      "monitorElapsedSeconds": 11.216589624993503,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 396224
+    },
+    {
+      "monitorElapsedSeconds": 11.75751450000098,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 417680
+    },
+    {
+      "monitorElapsedSeconds": 12.2891478749807,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 424848
+    },
+    {
+      "monitorElapsedSeconds": 12.803775541018695,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 426672
+    },
+    {
+      "monitorElapsedSeconds": 13.31610845803516,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 427200
+    },
+    {
+      "monitorElapsedSeconds": 13.316120875009801,
+      "observedBlankProbeCase": null,
+      "pid": 48474,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:09 2026",
+      "residentSizeKiB": 143200
+    },
+    {
+      "monitorElapsedSeconds": 13.83264787500957,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 435200
+    },
+    {
+      "monitorElapsedSeconds": 13.832657833001576,
+      "observedBlankProbeCase": null,
+      "pid": 48474,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:09 2026",
+      "residentSizeKiB": 187520
+    },
+    {
+      "monitorElapsedSeconds": 14.347162958001718,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 436448
+    },
+    {
+      "monitorElapsedSeconds": 14.347174750000704,
+      "observedBlankProbeCase": null,
+      "pid": 48474,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:09 2026",
+      "residentSizeKiB": 198800
+    },
+    {
+      "monitorElapsedSeconds": 14.866109291033354,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 437360
+    },
+    {
+      "monitorElapsedSeconds": 14.866120333026629,
+      "observedBlankProbeCase": null,
+      "pid": 48474,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:09 2026",
+      "residentSizeKiB": 202304
+    },
+    {
+      "monitorElapsedSeconds": 15.406955166021362,
+      "observedBlankProbeCase": 1,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 440752
+    },
+    {
+      "monitorElapsedSeconds": 15.951423207996413,
+      "observedBlankProbeCase": 1,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 442624
+    },
+    {
+      "monitorElapsedSeconds": 15.95143741602078,
+      "observedBlankProbeCase": 1,
+      "pid": 48544,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:12 2026",
+      "residentSizeKiB": 199488
+    },
+    {
+      "monitorElapsedSeconds": 16.474923291010782,
+      "observedBlankProbeCase": 2,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 443792
+    },
+    {
+      "monitorElapsedSeconds": 16.998303583008237,
+      "observedBlankProbeCase": 2,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444192
+    },
+    {
+      "monitorElapsedSeconds": 16.99831529101357,
+      "observedBlankProbeCase": 2,
+      "pid": 48576,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:13 2026",
+      "residentSizeKiB": 170544
+    },
+    {
+      "monitorElapsedSeconds": 17.51728612498846,
+      "observedBlankProbeCase": 2,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444336
+    },
+    {
+      "monitorElapsedSeconds": 17.517295541008934,
+      "observedBlankProbeCase": 2,
+      "pid": 48576,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:13 2026",
+      "residentSizeKiB": 170512
+    },
+    {
+      "monitorElapsedSeconds": 17.51730075001251,
+      "observedBlankProbeCase": 2,
+      "pid": 48587,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:14 2026",
+      "residentSizeKiB": 166688
+    },
+    {
+      "monitorElapsedSeconds": 18.060737000021618,
+      "observedBlankProbeCase": 2,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444336
+    },
+    {
+      "monitorElapsedSeconds": 18.06074670801172,
+      "observedBlankProbeCase": 2,
+      "pid": 48576,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:13 2026",
+      "residentSizeKiB": 170352
+    },
+    {
+      "monitorElapsedSeconds": 18.06075200001942,
+      "observedBlankProbeCase": 2,
+      "pid": 48587,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:14 2026",
+      "residentSizeKiB": 192352
+    },
+    {
+      "monitorElapsedSeconds": 18.56999812502181,
+      "observedBlankProbeCase": 3,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444336
+    },
+    {
+      "monitorElapsedSeconds": 19.08600395801477,
+      "observedBlankProbeCase": 3,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444560
+    },
+    {
+      "monitorElapsedSeconds": 19.086016624991316,
+      "observedBlankProbeCase": 3,
+      "pid": 48622,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:15 2026",
+      "residentSizeKiB": 170624
+    },
+    {
+      "monitorElapsedSeconds": 19.619715749984607,
+      "observedBlankProbeCase": 3,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444672
+    },
+    {
+      "monitorElapsedSeconds": 19.619726790988352,
+      "observedBlankProbeCase": 3,
+      "pid": 48622,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:15 2026",
+      "residentSizeKiB": 170560
+    },
+    {
+      "monitorElapsedSeconds": 19.619732375023887,
+      "observedBlankProbeCase": 3,
+      "pid": 48634,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:16 2026",
+      "residentSizeKiB": 244944
+    },
+    {
+      "monitorElapsedSeconds": 20.148296375002246,
+      "observedBlankProbeCase": 4,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444496
+    },
+    {
+      "monitorElapsedSeconds": 20.663538000022527,
+      "observedBlankProbeCase": 5,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444624
+    },
+    {
+      "monitorElapsedSeconds": 21.17861904099118,
+      "observedBlankProbeCase": 5,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444704
+    },
+    {
+      "monitorElapsedSeconds": 21.17863441602094,
+      "observedBlankProbeCase": 5,
+      "pid": 48676,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:18 2026",
+      "residentSizeKiB": 188304
+    },
+    {
+      "monitorElapsedSeconds": 21.69536995800445,
+      "observedBlankProbeCase": 6,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444672
+    },
+    {
+      "monitorElapsedSeconds": 22.20441462501185,
+      "observedBlankProbeCase": 6,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444800
+    },
+    {
+      "monitorElapsedSeconds": 22.204427083022892,
+      "observedBlankProbeCase": 6,
+      "pid": 48748,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:18 2026",
+      "residentSizeKiB": 170640
+    },
+    {
+      "monitorElapsedSeconds": 22.720844790979754,
+      "observedBlankProbeCase": 6,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 444800
+    },
+    {
+      "monitorElapsedSeconds": 22.720855374995153,
+      "observedBlankProbeCase": 6,
+      "pid": 48748,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:18 2026",
+      "residentSizeKiB": 170592
+    },
+    {
+      "monitorElapsedSeconds": 22.720862166024745,
+      "observedBlankProbeCase": 6,
+      "pid": 48763,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 48277,
+      "processName": "com.apple.WebKit.WebContent",
+      "processStartTime": "Thu Oct 29 07:09:19 2026",
+      "residentSizeKiB": 192512
+    },
+    {
+      "monitorElapsedSeconds": 23.229283082997426,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 445936
+    },
+    {
+      "monitorElapsedSeconds": 23.74586291599553,
+      "observedBlankProbeCase": null,
+      "pid": 48277,
+      "role": "native-test-host",
+      "hostPID": 48277,
+      "processName": "YunleFun",
+      "processStartTime": "Thu Oct 29 07:08:59 2026",
+      "residentSizeKiB": 445904
+    }
+  ],
+  "limits": [
+    "RSS from macOS ps, not physical footprint, JS heap, unique allocations or a leak detector. Native test host includes XCTest; it is separate from WebContent.",
+    "Only PIDs explicitly observed as WebContent in this exact YunleFun test-host log are sampled, checked for executable basename and stable process start time. Prior WebContent can remain alive; no RSS sum is called the active game memory.",
+    "Case intervals follow when BEGIN/END log markers are observed by this monitor; log delivery and polling delays remain, not exact cross-clock alignment.",
+    "Simulator and observer overhead; no real-device memory/frame claim; no credentials, environment, argv or descriptors collected."
+  ]
+}

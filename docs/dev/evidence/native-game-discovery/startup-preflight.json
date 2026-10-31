@@ -1,0 +1,56 @@
+{
+  "completed" : true,
+  "games" : [
+    "gomoku",
+    "paper-star"
+  ],
+  "kind" : "preflight",
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "results" : [
+    {
+      "gameId" : "gomoku",
+      "modeId" : "computer",
+      "p50Milliseconds" : 2099.9914166750386,
+      "p90Milliseconds" : 2099.9914166750386,
+      "resourceVersion" : "f9fa8c5d26c7a7edf84879df589c4ba2d849821db6b7cfd24b6d9ee81a7a822a",
+      "samples" : [
+        2099.9914166750386
+      ],
+      "stage" : "cold-resources"
+    },
+    {
+      "gameId" : "gomoku",
+      "modeId" : "computer",
+      "p50Milliseconds" : 802.75649996474385,
+      "p90Milliseconds" : 802.75649996474385,
+      "resourceVersion" : "f9fa8c5d26c7a7edf84879df589c4ba2d849821db6b7cfd24b6d9ee81a7a822a",
+      "samples" : [
+        802.75649996474385
+      ],
+      "stage" : "prepared"
+    },
+    {
+      "gameId" : "paper-star",
+      "modeId" : "local",
+      "p50Milliseconds" : 1770.3772083041258,
+      "p90Milliseconds" : 1770.3772083041258,
+      "resourceVersion" : "8d65c33b845ab7fa8339b005e597b49538d75706a7d4a96e5c7a53f5153c6d4b",
+      "samples" : [
+        1770.3772083041258
+      ],
+      "stage" : "cold-resources"
+    },
+    {
+      "gameId" : "paper-star",
+      "modeId" : "local",
+      "p50Milliseconds" : 1163.0651250015944,
+      "p90Milliseconds" : 1163.0651250015944,
+      "resourceVersion" : "8d65c33b845ab7fa8339b005e597b49538d75706a7d4a96e5c7a53f5153c6d4b",
+      "samples" : [
+        1163.0651250015944
+      ],
+      "stage" : "prepared"
+    }
+  ],
+  "samplesPerScene" : 1
+}

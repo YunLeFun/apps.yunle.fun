@@ -1,0 +1,15 @@
+{
+  "kind": "scoped-old-fixture-recovery",
+  "requestedIDs": 5,
+  "existedBeforeAPI": 4,
+  "remainingAfterAPI": 0,
+  "apiEvidence": "a11y-cleanup-final.xcresult NativeGameRuntimeFixtureCleanupTests",
+  "ownedTemporaryDirectory": "native-game-runtime-F79D2BEB-646E-4F40-8C61-86663A3D49D3",
+  "ownedDefaultsDomain": "native-game-runtime-E7EFDB4B-DAB7-46AF-81FA-917332764659",
+  "filesystemReclaimedBytes": 1276,
+  "notes": [
+    "Only exact recorded fixture IDs were passed to WebKit removal",
+    "Original user/profile stores and other simulators untouched",
+    "No space claim for WebKit internals retained by system"
+  ]
+}

@@ -1,0 +1,357 @@
+{
+  "clock" : "ProcessInfo.processInfo.systemUptime for every phase; seconds since boot",
+  "completed" : true,
+  "expectedSamples" : 6,
+  "kind" : "native-uptime-startup-phase-diagnostic",
+  "limits" : [
+    "Diagnostic N3 is not a replacement N10 result, a hardware benchmark or a 30 percent target claim",
+    "Catalog\/account fixture state is preloaded; no native SSO or production identity",
+    "Initial-loader prepared marks return after web.load on this successful fresh-game branch, not response, commit or network completion",
+    "Callback scheduling, WebKit IPC, observer execution and test machinery remain included; no document clock is subtracted"
+  ],
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "presentationAnimatedArgument" : "Forwarded unchanged; the existing fixture globally disables UIView animations",
+  "resourceTimingObserverEnabled" : true,
+  "results" : [
+    {
+      "completed" : true,
+      "gameId" : "gomoku",
+      "milliseconds" : {
+        "initialLoaderToPrepared" : 53.055333322845399,
+        "preparedToReady" : 1610.6387916952372,
+        "presentEntryToInitialLoader" : 16.176791687030345,
+        "readyMinusPresentationCompleted" : 1609.8467916599475,
+        "tapToPresentationCompleted" : 82.14920834871009,
+        "tapToPresentEntry" : 12.12508330354467,
+        "tapToReady" : 1691.9960000086576
+      },
+      "modeId" : "computer",
+      "points" : [
+        {
+          "millisecondsAfterTap" : 0,
+          "phase" : "tap",
+          "uptimeSeconds" : 359638.38341833337
+        },
+        {
+          "millisecondsAfterTap" : 12.12508330354467,
+          "phase" : "present-entered",
+          "uptimeSeconds" : 359638.39554341667
+        },
+        {
+          "millisecondsAfterTap" : 28.301874990575016,
+          "phase" : "initial-loader-entered",
+          "uptimeSeconds" : 359638.41172020836
+        },
+        {
+          "millisecondsAfterTap" : 81.357208313420415,
+          "phase" : "initial-loader-prepared-after-load-call",
+          "uptimeSeconds" : 359638.46477554168
+        },
+        {
+          "millisecondsAfterTap" : 82.14920834871009,
+          "phase" : "present-completed",
+          "uptimeSeconds" : 359638.46556754172
+        },
+        {
+          "millisecondsAfterTap" : 1691.9960000086576,
+          "phase" : "on-game-ready-received",
+          "uptimeSeconds" : 359640.07541433338
+        }
+      ],
+      "preparationResourceVersion" : "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856",
+      "samePreparedProfileVerified" : true,
+      "sample" : 1,
+      "state" : {
+        "nativeGameState" : "ready",
+        "paperStarPhase" : null,
+        "path" : "\/games\/gomoku\/computer",
+        "rendererReady" : null
+      },
+      "targetPath" : "\/games\/gomoku\/computer"
+    },
+    {
+      "completed" : true,
+      "gameId" : "gomoku",
+      "milliseconds" : {
+        "initialLoaderToPrepared" : 24.619458359666169,
+        "preparedToReady" : 793.57350000645965,
+        "presentEntryToInitialLoader" : 10.859416623134166,
+        "readyMinusPresentationCompleted" : 793.18908334244043,
+        "tapToPresentationCompleted" : 37.9914166405797,
+        "tapToPresentEntry" : 2.1281249937601388,
+        "tapToReady" : 831.18049998302013
+      },
+      "modeId" : "computer",
+      "points" : [
+        {
+          "millisecondsAfterTap" : 0,
+          "phase" : "tap",
+          "uptimeSeconds" : 359640.15533341671
+        },
+        {
+          "millisecondsAfterTap" : 2.1281249937601388,
+          "phase" : "present-entered",
+          "uptimeSeconds" : 359640.1574615417
+        },
+        {
+          "millisecondsAfterTap" : 12.987541616894305,
+          "phase" : "initial-loader-entered",
+          "uptimeSeconds" : 359640.16832095833
+        },
+        {
+          "millisecondsAfterTap" : 37.606999976560473,
+          "phase" : "initial-loader-prepared-after-load-call",
+          "uptimeSeconds" : 359640.19294041669
+        },
+        {
+          "millisecondsAfterTap" : 37.9914166405797,
+          "phase" : "present-completed",
+          "uptimeSeconds" : 359640.19332483335
+        },
+        {
+          "millisecondsAfterTap" : 831.18049998302013,
+          "phase" : "on-game-ready-received",
+          "uptimeSeconds" : 359640.98651391669
+        }
+      ],
+      "preparationResourceVersion" : "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856",
+      "samePreparedProfileVerified" : true,
+      "sample" : 2,
+      "state" : {
+        "nativeGameState" : "ready",
+        "paperStarPhase" : null,
+        "path" : "\/games\/gomoku\/computer",
+        "rendererReady" : null
+      },
+      "targetPath" : "\/games\/gomoku\/computer"
+    },
+    {
+      "completed" : true,
+      "gameId" : "gomoku",
+      "milliseconds" : {
+        "initialLoaderToPrepared" : 22.622333315666765,
+        "preparedToReady" : 1412.0710416464135,
+        "presentEntryToInitialLoader" : 11.571583338081837,
+        "readyMinusPresentationCompleted" : 1411.6788333049044,
+        "tapToPresentationCompleted" : 36.757541703991592,
+        "tapToPresentEntry" : 2.1714167087338865,
+        "tapToReady" : 1448.436375008896
+      },
+      "modeId" : "computer",
+      "points" : [
+        {
+          "millisecondsAfterTap" : 0,
+          "phase" : "tap",
+          "uptimeSeconds" : 359641.11023920833
+        },
+        {
+          "millisecondsAfterTap" : 2.1714167087338865,
+          "phase" : "present-entered",
+          "uptimeSeconds" : 359641.11241062504
+        },
+        {
+          "millisecondsAfterTap" : 13.743000046815723,
+          "phase" : "initial-loader-entered",
+          "uptimeSeconds" : 359641.12398220837
+        },
+        {
+          "millisecondsAfterTap" : 36.365333362482488,
+          "phase" : "initial-loader-prepared-after-load-call",
+          "uptimeSeconds" : 359641.14660454169
+        },
+        {
+          "millisecondsAfterTap" : 36.757541703991592,
+          "phase" : "present-completed",
+          "uptimeSeconds" : 359641.14699675003
+        },
+        {
+          "millisecondsAfterTap" : 1448.436375008896,
+          "phase" : "on-game-ready-received",
+          "uptimeSeconds" : 359642.55867558334
+        }
+      ],
+      "preparationResourceVersion" : "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856",
+      "samePreparedProfileVerified" : true,
+      "sample" : 3,
+      "state" : {
+        "nativeGameState" : "ready",
+        "paperStarPhase" : null,
+        "path" : "\/games\/gomoku\/computer",
+        "rendererReady" : null
+      },
+      "targetPath" : "\/games\/gomoku\/computer"
+    },
+    {
+      "completed" : true,
+      "gameId" : "paper-star",
+      "milliseconds" : {
+        "initialLoaderToPrepared" : 41.180458327289671,
+        "preparedToReady" : 3783.525999984704,
+        "presentEntryToInitialLoader" : 22.521500010043383,
+        "readyMinusPresentationCompleted" : 3783.0583750037476,
+        "tapToPresentationCompleted" : 67.653416655957699,
+        "tapToPresentEntry" : 3.4838333376683295,
+        "tapToReady" : 3850.7117916597053
+      },
+      "modeId" : "local",
+      "points" : [
+        {
+          "millisecondsAfterTap" : 0,
+          "phase" : "tap",
+          "uptimeSeconds" : 359644.9733065
+        },
+        {
+          "millisecondsAfterTap" : 3.4838333376683295,
+          "phase" : "present-entered",
+          "uptimeSeconds" : 359644.97679033334
+        },
+        {
+          "millisecondsAfterTap" : 26.005333347711712,
+          "phase" : "initial-loader-entered",
+          "uptimeSeconds" : 359644.99931183335
+        },
+        {
+          "millisecondsAfterTap" : 67.185791675001383,
+          "phase" : "initial-loader-prepared-after-load-call",
+          "uptimeSeconds" : 359645.04049229168
+        },
+        {
+          "millisecondsAfterTap" : 67.653416655957699,
+          "phase" : "present-completed",
+          "uptimeSeconds" : 359645.04095991666
+        },
+        {
+          "millisecondsAfterTap" : 3850.7117916597053,
+          "phase" : "on-game-ready-received",
+          "uptimeSeconds" : 359648.82401829166
+        }
+      ],
+      "preparationResourceVersion" : "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415",
+      "samePreparedProfileVerified" : true,
+      "sample" : 1,
+      "state" : {
+        "nativeGameState" : "ready",
+        "paperStarPhase" : "playing",
+        "path" : "\/games\/paper-star\/local",
+        "rendererReady" : "true"
+      },
+      "targetPath" : "\/games\/paper-star\/local"
+    },
+    {
+      "completed" : true,
+      "gameId" : "paper-star",
+      "milliseconds" : {
+        "initialLoaderToPrepared" : 34.404625010211021,
+        "preparedToReady" : 4426.9287916831672,
+        "presentEntryToInitialLoader" : 19.455916655715555,
+        "readyMinusPresentationCompleted" : 4426.3740833266638,
+        "tapToPresentationCompleted" : 66.721250012051314,
+        "tapToPresentEntry" : 12.305999989621341,
+        "tapToReady" : 4493.0953333387151
+      },
+      "modeId" : "local",
+      "points" : [
+        {
+          "millisecondsAfterTap" : 0,
+          "phase" : "tap",
+          "uptimeSeconds" : 359648.95684275002
+        },
+        {
+          "millisecondsAfterTap" : 12.305999989621341,
+          "phase" : "present-entered",
+          "uptimeSeconds" : 359648.96914875001
+        },
+        {
+          "millisecondsAfterTap" : 31.761916645336896,
+          "phase" : "initial-loader-entered",
+          "uptimeSeconds" : 359648.98860466667
+        },
+        {
+          "millisecondsAfterTap" : 66.166541655547917,
+          "phase" : "initial-loader-prepared-after-load-call",
+          "uptimeSeconds" : 359649.02300929168
+        },
+        {
+          "millisecondsAfterTap" : 66.721250012051314,
+          "phase" : "present-completed",
+          "uptimeSeconds" : 359649.02356400003
+        },
+        {
+          "millisecondsAfterTap" : 4493.0953333387151,
+          "phase" : "on-game-ready-received",
+          "uptimeSeconds" : 359653.44993808336
+        }
+      ],
+      "preparationResourceVersion" : "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415",
+      "samePreparedProfileVerified" : true,
+      "sample" : 2,
+      "state" : {
+        "nativeGameState" : "ready",
+        "paperStarPhase" : "playing",
+        "path" : "\/games\/paper-star\/local",
+        "rendererReady" : "true"
+      },
+      "targetPath" : "\/games\/paper-star\/local"
+    },
+    {
+      "completed" : true,
+      "gameId" : "paper-star",
+      "milliseconds" : {
+        "initialLoaderToPrepared" : 24.345583340618759,
+        "preparedToReady" : 3829.583166691009,
+        "presentEntryToInitialLoader" : 19.165000005159527,
+        "readyMinusPresentationCompleted" : 3829.122916678898,
+        "tapToPresentationCompleted" : 46.164833358488977,
+        "tapToPresentEntry" : 2.1940000005997717,
+        "tapToReady" : 3875.287750037387
+      },
+      "modeId" : "local",
+      "points" : [
+        {
+          "millisecondsAfterTap" : 0,
+          "phase" : "tap",
+          "uptimeSeconds" : 359653.62969233334
+        },
+        {
+          "millisecondsAfterTap" : 2.1940000005997717,
+          "phase" : "present-entered",
+          "uptimeSeconds" : 359653.63188633334
+        },
+        {
+          "millisecondsAfterTap" : 21.359000005759299,
+          "phase" : "initial-loader-entered",
+          "uptimeSeconds" : 359653.65105133335
+        },
+        {
+          "millisecondsAfterTap" : 45.704583346378058,
+          "phase" : "initial-loader-prepared-after-load-call",
+          "uptimeSeconds" : 359653.67539691669
+        },
+        {
+          "millisecondsAfterTap" : 46.164833358488977,
+          "phase" : "present-completed",
+          "uptimeSeconds" : 359653.6758571667
+        },
+        {
+          "millisecondsAfterTap" : 3875.287750037387,
+          "phase" : "on-game-ready-received",
+          "uptimeSeconds" : 359657.50498008338
+        }
+      ],
+      "preparationResourceVersion" : "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415",
+      "samePreparedProfileVerified" : true,
+      "sample" : 3,
+      "state" : {
+        "nativeGameState" : "ready",
+        "paperStarPhase" : "playing",
+        "path" : "\/games\/paper-star\/local",
+        "rendererReady" : "true"
+      },
+      "targetPath" : "\/games\/paper-star\/local"
+    }
+  ],
+  "samplesPerGame" : 3,
+  "stage" : "prepared-fresh-webview",
+  "tapDefinition" : "Immediately before fixture.open, matching the original N10 API entry point; not a physical UI tap",
+  "UIKitAnimationsEnabledDuringFixture" : false
+}

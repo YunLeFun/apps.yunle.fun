@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "kind": "last-owner-observer-local-fix-pending-production-and-postfix-acceptance",
+  "atUTC": "2026-10-30T10:55:29.773488+00:00",
+  "status": "local-candidate-validated-production-authorization-release-and-normal-UI-regression-pending",
+  "actionsThisDocumentation": {
+    "newBuildTestsUIRemoteRequestsProductionWrites": false,
+    "sourceOrHistoricalEvidenceEdits": false,
+    "newPublicSummaryOnly": true
+  },
+  "productionFailure": {
+    "roomAlias": "F12",
+    "productionBackendBaseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "firstOperatorAction": {
+      "kind": "cleanup misnavigation to feedback",
+      "feedbackSubmitted": false,
+      "normalRoomLeaveProvedByThisAction": false,
+      "countAsProductLeaveFailure": false,
+      "source": "Root observation; original private screenshot is hashed in references"
+    },
+    "laterNormalLeaveObservation": {
+      "actualErrorResponseCount": 5,
+      "code": "INVALID_COMMAND",
+      "message": "消息格式无效",
+      "revisionConflictClaim": false,
+      "rootObservedNormalUIAttempt": true,
+      "emptyArrayUserIdTypeError": "reproduced in original772 local red test; do not label this as a captured production stack trace"
+    },
+    "outboundCaptureLimit": {
+      "savedMetadataCommandCount": 0,
+      "rawFramesPersisted": false,
+      "fiveOutboundRoomLeaveFramesClaimed": false
+    },
+    "sourceDiagnosis": "The only room member is its owner and is observing an already-running all-bot Flight game. Normal room.leave removes that member then dereferences members[0].userId. The real five errors were INVALID_COMMAND/消息格式无效, not a revision conflict."
+  },
+  "candidateSource": {
+    "baseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "candidateGitTree": "38f267f3bfaa1fe68004c957e82b4768156ad46d",
+    "treeIsNotCommit": true,
+    "committedPushedOrPublished": false,
+    "changedFiles": [
+      "apps/game-server/src/room/service.ts",
+      "apps/game-server/test/room-observer-leave.test.ts"
+    ],
+    "productionChange": "23 production lines in RoomService.#leave handle an empty remaining-member list before ownership transfer: cancel the active game, clear its deadline, retain30days, expire room and clear active game/next seats/swap/membership. Existing nonempty observer/real-player paths and revision/permission/CAS guards remain unchanged.",
+    "production772AdmissionGuardSourceAndCompiledCodePreserved": true,
+    "patch": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/last-owner-observer.patch",
+      "bytes": 6063,
+      "sha256": "4c200f1feb59dfae4fca6ccaab8e5f354a82f844c9f91165aa4dc7f11ef983d1"
+    },
+    "sourceArchive": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/artifacts/candidate-772-observer-source.tar.gz",
+      "bytes": 508464,
+      "sha256": "db3ebf1a675ab1a83fc8be88e872a3cc049bf81c4fe420b40d0783085faf21b5"
+    }
+  },
+  "localValidation": {
+    "original772Red": {
+      "numTotalTests": 3,
+      "numPassedTests": 2,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "success": false,
+      "sha256": "a7d2496f8672d4bafbac4d422310224a0a49aa550d9eb50936294813bcc5f0ac"
+    },
+    "candidateGreen": {
+      "numTotalTests": 39,
+      "numPassedTests": 39,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true,
+      "sha256": "0ac231ef64818129a35df538dd764519a7120ab803d6367be783e0699cf8be26"
+    },
+    "groups": {
+      "newRegression": 3,
+      "roomService": 17,
+      "roomPlatform": 7,
+      "existing772SDKAdmissionCompatibility": 12
+    },
+    "serverSourceDevelopmentTypecheckExit": 0,
+    "targetedESLintExit": 0,
+    "diffCheckExit": 0,
+    "actualProductionDockerfileBuildExit": 0,
+    "actualImageBusinessSmokePassed": true,
+    "actualImageConditions": [
+      "linux/amd64 process x64",
+      "UID1000 node",
+      "network none",
+      "read-only filesystem",
+      "no capabilities",
+      "no-new-privileges"
+    ],
+    "compatibilityBoundary": "Existing12 admission tests use isolated synthetic loopback server/SDK, including expired player/spectator400 and zero capacity. Image memory smoke drives the exact business flow. This is not a production UI retest.",
+    "historicalFailuresPreserved": [
+      "6ff initial red test and plain source tsc missing unbuilt workspace dist declarations",
+      "772 original red test",
+      "unsupported --progress CLI rejected before any build began",
+      "first broad physical-devtools assumption failed on inherited TypeScript6.0.3; baseline comparison preserved"
+    ]
+  },
+  "frozenLocalImage": {
+    "tag": "yunlefun/play-game-server:observer-last-owner-20261030",
+    "architecture": "linux/amd64",
+    "DockerInspectId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "DockerInspectIdKind": "OCI platform manifest, not config and not an image index",
+    "archiveOCIIndexSHA256": "4c5c3a68c873a634e265f626bc83f768e132a39fd70987e2745c6ba6bf7e1447",
+    "platformManifestDigest": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "configDigest": "sha256:395a1fcaaddd5f9d2ab6cb3a0312c0aa7c69ceef53234ec54f55d02561dfe3d7",
+    "allBlobDigestsAndRootfsOrderVerified": true
+  },
+  "imageArchive": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/artifacts/candidate-772-observer-image.docker.tar.gz",
+    "bytes": 94915701,
+    "sha256": "c6aea1bca00596e3908de4cef2aedd83e900cc8e6ede5fd5ec3caf71f4eaef55",
+    "exportInvocationCount": 1,
+    "notPublished": true
+  },
+  "dependencies": "All202 physical package name/version metadata records and compiled admission code match production772 under the same readonly audit. TypeScript6.0.3 exists in the virtual store in both images; root direct resolution of typescript/vitest/eslint/tsx is absent. No claim that every development-tool byte is absent; no Dockerfile/lock change was made.",
+  "acceptanceStatus": {
+    "M0_1": "passed as separately recorded",
+    "M3_3": "passed under user-adjusted a701 standard",
+    "M4_1": "closed by Root using layered current scope audit",
+    "M4_2": "open due new normal leave/member-state defect",
+    "M4_3": "open pending production fix and supported F12 normal leave/authority closure",
+    "M5_1": "open pending same production regression and final delivery consolidation",
+    "rootConfirmedValidN10Counts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "countSource": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+      "bytes": 8693376,
+      "sha256": "a18f3c515d5beb36abe582eb79036b579d4ccdc82d46515979d2135df4d12234"
+    },
+    "newFiveFlightReview": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f10-f15-native-foreground-recovery-20261030.json",
+      "bytes": 553348,
+      "sha256": "a8ad0b414999ab7ab9cb044ef4c4a0bba1863d7c966e1c3ca73bb7fefa7e78fe"
+    },
+    "F12": {
+      "countedTowardN10": false,
+      "neverRetroactivelyPromoteOriginalRound": true,
+      "cleanupPending": true,
+      "normalLeavePostfixProved": false
+    },
+    "latestRootReportedSurfaces": {
+      "probe12Closed": true,
+      "BTab10LeftHeadingAndNoWebSocket": true,
+      "roomCleanupInferredFromClosedTab": false
+    },
+    "latestRootReportedPublicCapacity": {
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0,
+      "observationOnly": true,
+      "countsAsF12AuthoritativeCleanup": false
+    },
+    "productionAuthorization": "pending Root/user decision for newly discovered fix",
+    "productionReleasePerformed": false,
+    "productionPostfixAcceptancePerformed": false,
+    "M4OverallComplete": false,
+    "M5OverallComplete": false,
+    "M6WorkAdded": false
+  },
+  "nextRequiredClosure": [
+    "Root approval and fresh candidate-specific release helpers/preflight; old b0-to772 helpers are historical inputs, not executable current instructions.",
+    "Publish exact reviewed candidate only within the approved single-service scope, retain772 rollback, and preserve environment and release gates.",
+    "Use supported normal UI leave on the exact owned F12 and verify authoritative member/room terminal state and connection closure; health0 or a closed tab alone is insufficient.",
+    "Retain original excludedF12 and all failed attempts; append postfix evidence instead of retroactively recording a clean original N10 pass."
+  ],
+  "priorScopeAuditBoundary": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/final-scope-audit-20261030.json",
+    "sha256": "860f41b666f68efadc711e2ed9a1ec45196fa3f0633e55b3f874e22963ef1a28",
+    "unmodified": true,
+    "earlierM4_2ClosureAdvicePredatesNewLastOwnerLeaveFailure": true
+  },
+  "references": [
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/REVIEW.md",
+      "bytes": 3006,
+      "sha256": "47a456c752b404e57d70b81e3dddf892896a3b95070b459fe528f77266d2ef22"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/candidate-review.json",
+      "bytes": 18500,
+      "sha256": "df10880ca6523fbff95dbc2e46a72f67955c611290f6406d9eec13d52f64957a"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/local-validation-772.json",
+      "bytes": 2185,
+      "sha256": "8be6c13a233a9758603063c020df2a409eb9d278a348c8154a864185e3923423"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/checks/red-772.json",
+      "bytes": 3346,
+      "sha256": "a7d2496f8672d4bafbac4d422310224a0a49aa550d9eb50936294813bcc5f0ac"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/checks/green-772.json",
+      "bytes": 15215,
+      "sha256": "0ac231ef64818129a35df538dd764519a7120ab803d6367be783e0699cf8be26"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/image-smoke-result.json",
+      "bytes": 749,
+      "sha256": "37ae76300026c7b3fb7df86c2bcd7605379d5c71f10814fb037d22727cccb397"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/image-export.json",
+      "bytes": 500,
+      "sha256": "936485ee608b057006bfaeeb1b3b1ffa8c7ddec2b628f790bf37783089ad9930"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/image-archive-verification.json",
+      "bytes": 7844,
+      "sha256": "bfd92bf5eeb5e3921747650d58427258eda4bc017d09fdfcdf6008f8928912ca"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030/release-rollback-plan.draft.json",
+      "bytes": 29638,
+      "sha256": "d2e8d550a401e38ea1db5229631094d67a2701820fe5305f4207dc743099a188"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f12-cleanup-misnavigation-feedback-no-submit.png",
+      "bytes": 250689,
+      "sha256": "c417042f4f105dcb5066bb23cef688053d08369f07641eeb12ef7d79de399d5b"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f12-probe-normal-leave-errors.json",
+      "bytes": 1080,
+      "sha256": "daf18034483ff5f5f178e301659e2f15f6ec0e822ae9cfe1b38ebf56cf075f37"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f12-probe-normal-leave-outbound-metadata.json",
+      "bytes": 133,
+      "sha256": "5426ede82d096fa2c754cad2a7f1e6c5b253c89589b0b533a235c600d10ef0cf"
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f12-probe12-closed-before-release.json",
+      "bytes": 814,
+      "sha256": "760f3790c114ca97ebe4af0e2a707ecd3899624ce480a21423181bf4ad0e5bca"
+    }
+  ],
+  "privacy": {
+    "accountIdentifiersPasswordsCookiesTicketsRawInvitesOrNetworkBodiesCopied": false,
+    "roomAliasAndHashesOnly": true,
+    "privateRawInputsRemainOutsideRepository": true
+  },
+  "limitations": [
+    "This summary records existing local build/tests/image and Root observations; its author ran no tests, UI, network, Docker or deployment.",
+    "Image archive/index/platform/config identities describe the frozen local candidate, not current production. The Git tree is not a released commit.",
+    "Original public scope audits and checkpoints keep their original times and advice. A later live defect narrows current closure without rewriting those files.",
+    "The valid10+10 recovery count does not by itself complete normal room exit, M4, M5 or the whole goal."
+  ]
+}

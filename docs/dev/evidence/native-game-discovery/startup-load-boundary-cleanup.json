@@ -1,0 +1,17 @@
+{
+  "kind": "retired-unadopted-build",
+  "version": "41614f5714fb815496ca5eb22dc5b8dc6f7c95b7fa92ad4a21cd955356962455",
+  "taskDirectory": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-load-boundary.c4gceu0v",
+  "wasEverServed": false,
+  "replayRequired": false,
+  "reason": "No proven startup benefit; Header/Reka still preloaded and every manifest grows 741590 bytes. Exact source experiment reverted.",
+  "publicAndRemainingTaskBytesRemoved": 16430047,
+  "buildAndServerBytesAlreadyReclaimed": 33204173,
+  "preservedEvidenceBytesBeforeCleanupReport": 497127,
+  "publicDirectoryRemoved": true,
+  "current18146CatalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "checkedAt": "2026-10-29T04:37:38.591181+08:00",
+  "preservedEvidenceBytes": 498344,
+  "netReclaimedFromBuildAndPublicBytes": 49135876,
+  "terminalBuildRegistryRemoved": true
+}

@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "kind": "final926-attempt1-n10-metrics-with-static-fixture-gap",
+  "atUTC": "2026-10-29T17:17:09.827329+00:00",
+  "raw": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final926-attempt1-operable-n10.json",
+    "sha256": "a9443b172424bcfb863f7ca481c77d38d4da07ec4fd2ec3829b175349d7261ba",
+    "exactExportedAttachment": true
+  },
+  "groups": [
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "same-build-home-detail-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 1229.6337083325852,
+      "p90Milliseconds": 2022.5329583336134
+    },
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "direct-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 913.8807500003168,
+      "p90Milliseconds": 1560.6995416665086
+    },
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "direct-mode-prepared",
+      "n": 10,
+      "p50Milliseconds": 883.8146666666944,
+      "p90Milliseconds": 983.5169999996651
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "same-build-home-detail-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 4338.226458333338,
+      "p90Milliseconds": 4704.907333333722
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "direct-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 4034.999458333914,
+      "p90Milliseconds": 4107.903208333482
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "direct-mode-prepared",
+      "n": 10,
+      "p50Milliseconds": 3954.946333334192,
+      "p90Milliseconds": 4621.681916666603
+    }
+  ],
+  "comparisons": [
+    {
+      "gameId": "gomoku",
+      "preparedP50ReductionPercent": 28.123744438889066,
+      "coldP90ChangePercent": -22.834407457449508,
+      "numericalCurrentThresholdsPass": true
+    },
+    {
+      "gameId": "paper-star",
+      "preparedP50ReductionPercent": 8.834949689242247,
+      "coldP90ChangePercent": -12.68896670441381,
+      "numericalCurrentThresholdsPass": true
+    }
+  ],
+  "sampleCount": 60,
+  "percentileDefinition": "Nearest-rank N10 fifth P50/ninth P90, independently recomputed from all60 raw values",
+  "XCTest": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "numericThresholdsPass": true,
+  "acceptance3_3Complete": false,
+  "acceptanceBlocker": "Owned localfixture returned404 for5 public dependency paths that currentHTTPS actually returns200; this can distort the legacycontrol path. Preserve thisattempt; do not count its observed improvement as final public acceptance. Root will run only one N1 after a recursive staticclosure correction before deciding a final60 rerun.",
+  "introduced404Paths": [
+    "/manifest.webmanifest",
+    "/games/_payload.json",
+    "/games/gomoku/local/_payload.json",
+    "/_nuxt/CAZv4qP2.js",
+    "/_nuxt/games.BtYzn7QJ.css"
+  ],
+  "resourceDisclosure": {
+    "completeNetworkCoverageFalseSamples": 60,
+    "snapshotCount": 68,
+    "allMainDocumentOnly": true,
+    "allResourceTimingBufferOverflowZero": true,
+    "paperStarRendererAndPlayingObservations": [
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "n": 10,
+        "rendererObservedDocumentTimeP50Milliseconds": 869,
+        "rendererObservedDocumentTimeP90Milliseconds": 984,
+        "playingReadySnapshotDocumentTimeP50Milliseconds": 3600,
+        "playingReadySnapshotDocumentTimeP90Milliseconds": 3690,
+        "navigationResponseEndDocumentTimeP50Milliseconds": 5,
+        "configuredCountdownMilliseconds": 3000,
+        "pureResourceWaitWallClockMilliseconds": null,
+        "limit": "Existing same-final-document observations only; partial main-document entries, workers/pending/externalpaths incomplete; configured countdown is a gameplayrule, not a subtractable isolated loading cost."
+      },
+      {
+        "stage": "direct-mode-cold",
+        "n": 10,
+        "rendererObservedDocumentTimeP50Milliseconds": 583,
+        "rendererObservedDocumentTimeP90Milliseconds": 661,
+        "playingReadySnapshotDocumentTimeP50Milliseconds": 3239,
+        "playingReadySnapshotDocumentTimeP90Milliseconds": 3287,
+        "navigationResponseEndDocumentTimeP50Milliseconds": 6,
+        "configuredCountdownMilliseconds": 3000,
+        "pureResourceWaitWallClockMilliseconds": null,
+        "limit": "Existing same-final-document observations only; partial main-document entries, workers/pending/externalpaths incomplete; configured countdown is a gameplayrule, not a subtractable isolated loading cost."
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "n": 10,
+        "rendererObservedDocumentTimeP50Milliseconds": 465,
+        "rendererObservedDocumentTimeP90Milliseconds": 583,
+        "playingReadySnapshotDocumentTimeP50Milliseconds": 3209,
+        "playingReadySnapshotDocumentTimeP90Milliseconds": 3226,
+        "navigationResponseEndDocumentTimeP50Milliseconds": 5,
+        "configuredCountdownMilliseconds": 3000,
+        "pureResourceWaitWallClockMilliseconds": null,
+        "limit": "Existing same-final-document observations only; partial main-document entries, workers/pending/externalpaths incomplete; configured countdown is a gameplayrule, not a subtractable isolated loading cost."
+      }
+    ],
+    "crossClockSubtractionPerformed": false,
+    "totalMinus3000CalledResourceWait": false,
+    "completeResourceWaitMeasured": false
+  },
+  "runBinding": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final926-run-j44zvvkh/final-n10/run-receipt.json",
+    "sha256": "d28e439a0baf973ae90f4f38fa28189afb0b597ec5174b087d7af83f5bc8e22c",
+    "catalogVersion": "9263452a8a0666c437d926ee09476d0a700e58cd3dffbacd6a2f73b46cb966a6",
+    "archiveSHA256": "889928038179a5aac687e77fc0adefd5ad1671708d6cdfc648f08d114200cfec",
+    "sourceAndProductsUnchangedDuringRun": true,
+    "normalAppAndServerCleanup": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final926-run-j44zvvkh/final-n10/cleanup-and-restoration.json",
+      "sha256": "77d0c0c27fbf2427d221865dd01244b58f493026f1d387c6c131b5f557841cdb"
+    }
+  },
+  "scope": "Same-build loopbackHTTP sharedSimulator Debug test; not productionnetwork/physicaldevice or Nativefirstframe; otherroot browser/SDK activities concurrent on sameMac",
+  "remaining": "Correct current public staticdependency closure; wait root to release4502 for N1+then60 only if N1 coverage is clean."
+}

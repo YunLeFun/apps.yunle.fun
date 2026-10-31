@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "screenshots": [
+    {
+      "path": "production-m4-webcontent-termination-error.jpg",
+      "bytes": 56573,
+      "sha256": "629c828187f804201b2ac0f41fe626d54d6d8180b6bd9d58388e7478a105b470",
+      "source": {
+        "basename": "webcontent-actual-termination-error.jpg",
+        "bytes": 56573,
+        "sha256": "629c828187f804201b2ac0f41fe626d54d6d8180b6bd9d58388e7478a105b470"
+      },
+      "review": "Visually inspected; no raw UID, password, cookie, token, invitation code or room URL shown; original image bytes preserved"
+    },
+    {
+      "path": "production-m4-closed-room-blocks-next-invite.jpg",
+      "bytes": 65585,
+      "sha256": "d389393b3cff47b549aa1ab529767f7c94b06c5db6b3c511acaf65f0c015e111",
+      "source": {
+        "basename": "native-closed-room-blocks-next-invite.jpg",
+        "bytes": 65585,
+        "sha256": "d389393b3cff47b549aa1ab529767f7c94b06c5db6b3c511acaf65f0c015e111"
+      },
+      "review": "Visually inspected; no raw UID, password, cookie, token, invitation code or room URL shown; original image bytes preserved"
+    },
+    {
+      "path": "production-m4-managed-accounts-ready.png",
+      "bytes": 115509,
+      "sha256": "a6933c6ce524195cdee4dc51f6609e21d27374e97532cd366a30e13aabe93d43",
+      "source": {
+        "basename": "accounts-ready.png",
+        "bytes": 115509,
+        "sha256": "a6933c6ce524195cdee4dc51f6609e21d27374e97532cd366a30e13aabe93d43"
+      },
+      "review": "Visually inspected; no raw UID, password, cookie, token, invitation code or room URL shown; original image bytes preserved"
+    },
+    {
+      "path": "production-m4-managed-account-no-membership.png",
+      "bytes": 3948,
+      "sha256": "b589a00583ae4d0accd8ad031fd38df1b7c9d5040683195e216149daa7124156",
+      "source": {
+        "basename": "account-a-no-membership.png",
+        "bytes": 3948,
+        "sha256": "b589a00583ae4d0accd8ad031fd38df1b7c9d5040683195e216149daa7124156"
+      },
+      "review": "Visually inspected; no raw UID, password, cookie, token, invitation code or room URL shown; original image bytes preserved"
+    }
+  ],
+  "notes": [
+    "Screenshots are unedited originals.",
+    "The account list exposes only task-scoped account labels and zero-balance/ordinary status; the cropped membership card contains no account identifier.",
+    "Room codes and raw recovery screenshots containing room links are omitted."
+  ]
+}

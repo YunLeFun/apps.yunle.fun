@@ -1,0 +1,361 @@
+{
+  "cleanup" : {
+    "failedProfileIDs" : [
+
+    ],
+    "identityCleanupFinished" : true,
+    "ownedProfileIDs" : [
+      "650C71A1-4E90-4E80-BC4A-E370C9155451"
+    ]
+  },
+  "completed" : false,
+  "DOMReferencePlayGit" : "540e8e343cefeccd386159d9ba0e19f3b27b5952",
+  "events" : [
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : null,
+        "boardVisibleFraction" : 0,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : null,
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 1,
+          "connectStart" : 1,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 1,
+          "domainLookupStart" : 1,
+          "domContentLoadedEventEnd" : 385,
+          "domInteractive" : 310,
+          "duration" : 0,
+          "encodedBodySize" : 6633,
+          "fetchStart" : 1,
+          "loadEventEnd" : 0,
+          "requestStart" : 4,
+          "responseEnd" : 83,
+          "responseStart" : 83,
+          "secureConnectionStart" : 1,
+          "startTime" : 0,
+          "transferSize" : 6933
+        },
+        "path" : "\/",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "interactive",
+        "resourceSummary" : {
+          "completed" : 47,
+          "count" : 47,
+          "crossOrigin" : 4,
+          "decodedBodySize" : 1446762,
+          "encodedBodySize" : 1076213,
+          "sameOrigin" : 43,
+          "transferSize" : 1089113,
+          "types" : {
+            "css" : 17,
+            "fetch" : 1,
+            "img" : 2,
+            "link" : 27
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 1644.8300832998939,
+      "phase" : "home-observed",
+      "receiptUptime" : 365728.95170808333
+    },
+    {
+      "document" : {
+        "before" : {
+          "height" : 44,
+          "width" : 97.03125,
+          "x" : 29.390625,
+          "y" : 1855.53125
+        },
+        "beforeFraction" : 0,
+        "requested" : true,
+        "scrollX" : 0,
+        "scrollY" : 0
+      },
+      "elapsedFromOpenMS" : 1685.7980416389182,
+      "phase" : "public-link-scroll-requested",
+      "receiptUptime" : 365728.99267604167
+    },
+    {
+      "document" : {
+        "fraction" : 1,
+        "rect" : {
+          "height" : 44,
+          "width" : 97.03125,
+          "x" : 29.390625,
+          "y" : 356.53125
+        },
+        "scrollX" : 0,
+        "scrollY" : 1499,
+        "viewport" : {
+          "height" : 758,
+          "width" : 402
+        },
+        "visible" : true
+      },
+      "elapsedFromOpenMS" : 2216.8764583184384,
+      "phase" : "public-link-scroll-settled",
+      "receiptUptime" : 365729.52375445835
+    },
+    {
+      "document" : {
+        "clickedPath" : "\/games\/paper-star"
+      },
+      "elapsedFromOpenMS" : 2237.4947916832753,
+      "phase" : "public-link-click",
+      "receiptUptime" : 365729.54437279172
+    },
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : null,
+        "boardVisibleFraction" : 0,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : null,
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 1,
+          "connectStart" : 1,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 1,
+          "domainLookupStart" : 1,
+          "domContentLoadedEventEnd" : 385,
+          "domInteractive" : 310,
+          "duration" : 936,
+          "encodedBodySize" : 6633,
+          "fetchStart" : 1,
+          "loadEventEnd" : 936,
+          "requestStart" : 4,
+          "responseEnd" : 83,
+          "responseStart" : 83,
+          "secureConnectionStart" : 1,
+          "startTime" : 0,
+          "transferSize" : 6933
+        },
+        "path" : "\/games\/paper-star",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "complete",
+        "resourceSummary" : {
+          "completed" : 66,
+          "count" : 66,
+          "crossOrigin" : 6,
+          "decodedBodySize" : 1648159,
+          "encodedBodySize" : 1254651,
+          "sameOrigin" : 60,
+          "transferSize" : 1272651,
+          "types" : {
+            "css" : 19,
+            "fetch" : 7,
+            "img" : 3,
+            "link" : 36,
+            "other" : 1
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 2280.8222500025295,
+      "phase" : "detail-observed",
+      "receiptUptime" : 365729.58770025003
+    },
+    {
+      "document" : {
+        "before" : {
+          "height" : 47.578125,
+          "width" : 103.375,
+          "x" : 75.890625,
+          "y" : -918.078125
+        },
+        "beforeFraction" : 0,
+        "requested" : true,
+        "scrollX" : 0,
+        "scrollY" : 1499
+      },
+      "elapsedFromOpenMS" : 2303.0801666318439,
+      "phase" : "public-link-scroll-requested",
+      "receiptUptime" : 365729.60995816666
+    },
+    {
+      "document" : {
+        "fraction" : 1,
+        "rect" : {
+          "height" : 47.578125,
+          "width" : 103.375,
+          "x" : 75.890625,
+          "y" : 354.921875
+        },
+        "scrollX" : 0,
+        "scrollY" : 226,
+        "viewport" : {
+          "height" : 758,
+          "width" : 402
+        },
+        "visible" : true
+      },
+      "elapsedFromOpenMS" : 2903.2140833442099,
+      "phase" : "public-link-scroll-settled",
+      "receiptUptime" : 365730.21009208338
+    },
+    {
+      "document" : {
+        "clickedPath" : "\/games\/paper-star\/local"
+      },
+      "elapsedFromOpenMS" : 2925.0752083025873,
+      "phase" : "public-link-click",
+      "receiptUptime" : 365730.23195320833
+    }
+  ],
+  "failure" : {
+    "code" : 20,
+    "domain" : "LegacyHTTPSPreflight"
+  },
+  "game" : "paper-star",
+  "lastObservationOnFailure" : {
+    "appReady" : true,
+    "black" : 0,
+    "board" : null,
+    "boardVisibleFraction" : 0,
+    "canvas" : null,
+    "canvasPixels" : null,
+    "canvasReady" : false,
+    "canvasVisibleFraction" : 0,
+    "cell" : null,
+    "fireSequence" : -1,
+    "gomokuAnyEmptyCellEnabled" : false,
+    "gomokuCellEnabled" : false,
+    "hasFocus" : false,
+    "navigation" : {
+      "connectEnd" : 1,
+      "connectStart" : 1,
+      "decodedBodySize" : 22944,
+      "domainLookupEnd" : 1,
+      "domainLookupStart" : 1,
+      "domContentLoadedEventEnd" : 385,
+      "domInteractive" : 310,
+      "duration" : 936,
+      "encodedBodySize" : 6633,
+      "fetchStart" : 1,
+      "loadEventEnd" : 936,
+      "requestStart" : 4,
+      "responseEnd" : 83,
+      "responseStart" : 83,
+      "secureConnectionStart" : 1,
+      "startTime" : 0,
+      "transferSize" : 6933
+    },
+    "path" : "\/games\/paper-star\/local",
+    "phase" : "playing",
+    "publicOrigin" : true,
+    "readyState" : "complete",
+    "resourceSummary" : {
+      "completed" : 102,
+      "count" : 102,
+      "crossOrigin" : 8,
+      "decodedBodySize" : 4399284,
+      "encodedBodySize" : 2164647,
+      "sameOrigin" : 94,
+      "transferSize" : 2192847,
+      "types" : {
+        "css" : 20,
+        "fetch" : 15,
+        "img" : 3,
+        "link" : 62,
+        "other" : 1,
+        "script" : 1
+      }
+    },
+    "tick" : 1339,
+    "viewport" : {
+      "devicePixelRatio" : 3,
+      "height" : 758,
+      "visual" : {
+        "height" : 758,
+        "offsetLeft" : 0,
+        "offsetTop" : 0,
+        "scale" : 1,
+        "width" : 402
+      },
+      "width" : 402
+    },
+    "visible" : true,
+    "white" : 0
+  },
+  "mode" : "local",
+  "nativeCommit" : "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "nativePresentation" : {
+    "animationsEnabled" : true,
+    "deviceOrientationRaw" : 1,
+    "interfaceOrientationRaw" : 1,
+    "visibleIntersection" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "webAttachedToFixtureWindow" : true,
+    "webInWindow" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "window" : {
+      "height" : 874,
+      "width" : 402,
+      "x" : 0,
+      "y" : 0
+    },
+    "windowHidden" : false
+  },
+  "openUptime" : 365727.30687800003,
+  "productionPlayGit" : "unknown",
+  "sampleCount" : 1,
+  "schema" : "legacy-native-https-preflight-v1",
+  "scope" : "Old runtime.open homepage and original loader; rendered Home -> detail -> offline mode links. Synthetic public DOM click\/keyboard input. DOM receipt upper bounds, not native-ready or engine-ready. Separate native uptime and document performance clocks; no cross-clock subtraction. Production Git unknown; no current-loopback speed comparison. Resource entries are passive completed-buffer observations, excluding pending\/Worker timelines. Computer response includes gameplay think delay. Default interface direction and animation settings retained. Rendered links\/canvas may scrollIntoView normally; scrolling and settling remain inside open-to-observation uptime. Canvas visibility fraction is observed, with no 95 percent canvas threshold."
+}

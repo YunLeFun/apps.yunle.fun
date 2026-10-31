@@ -1,0 +1,98 @@
+{
+  "kind": "same-run-native-document-server-correlation-diagnostic",
+  "recordedAt": "2026-10-29T06:37:37.320260+08:00",
+  "allSixHTMLRequestsUniquelyMatched": true,
+  "rows": [
+    {
+      "gameId": "gomoku",
+      "sample": 1,
+      "launchIDHash": "3ad17eb2090108b5",
+      "serverSequence": 59,
+      "serverHandlingThroughFinishMilliseconds": 1.569666,
+      "documentNavigationResponseEndMilliseconds": 10,
+      "documentSnapshotAtReadyMilliseconds": 652,
+      "nativePreparedToDocumentStartReceiptMilliseconds": 796.4592499774881,
+      "nativeDocumentStartReceiptToReadyMilliseconds": 625.182666699402,
+      "clocksNeverMixed": true
+    },
+    {
+      "gameId": "gomoku",
+      "sample": 2,
+      "launchIDHash": "e1e5f1f8f27f1b28",
+      "serverSequence": 63,
+      "serverHandlingThroughFinishMilliseconds": 0.599916,
+      "documentNavigationResponseEndMilliseconds": 6,
+      "documentSnapshotAtReadyMilliseconds": 167,
+      "nativePreparedToDocumentStartReceiptMilliseconds": 1107.4477499932982,
+      "nativeDocumentStartReceiptToReadyMilliseconds": 157.99125004559755,
+      "clocksNeverMixed": true
+    },
+    {
+      "gameId": "gomoku",
+      "sample": 3,
+      "launchIDHash": "5cd1af98d7ba44ca",
+      "serverSequence": 64,
+      "serverHandlingThroughFinishMilliseconds": 1.592917,
+      "documentNavigationResponseEndMilliseconds": 8,
+      "documentSnapshotAtReadyMilliseconds": 163,
+      "nativePreparedToDocumentStartReceiptMilliseconds": 521.7273749876767,
+      "nativeDocumentStartReceiptToReadyMilliseconds": 152.6525416993536,
+      "clocksNeverMixed": true
+    },
+    {
+      "gameId": "paper-star",
+      "sample": 1,
+      "launchIDHash": "2ebbb5c1d271b765",
+      "serverSequence": 162,
+      "serverHandlingThroughFinishMilliseconds": 1.649333,
+      "documentNavigationResponseEndMilliseconds": 4,
+      "documentSnapshotAtReadyMilliseconds": 3143,
+      "nativePreparedToDocumentStartReceiptMilliseconds": 565.0046250084415,
+      "nativeDocumentStartReceiptToReadyMilliseconds": 3135.971833311487,
+      "clocksNeverMixed": true
+    },
+    {
+      "gameId": "paper-star",
+      "sample": 2,
+      "launchIDHash": "75b4eb89af621c88",
+      "serverSequence": 163,
+      "serverHandlingThroughFinishMilliseconds": 0.700625,
+      "documentNavigationResponseEndMilliseconds": 4,
+      "documentSnapshotAtReadyMilliseconds": 3183,
+      "nativePreparedToDocumentStartReceiptMilliseconds": 634.957125002984,
+      "nativeDocumentStartReceiptToReadyMilliseconds": 3176.1127916979603,
+      "clocksNeverMixed": true
+    },
+    {
+      "gameId": "paper-star",
+      "sample": 3,
+      "launchIDHash": "8ffd4ea287c6f9dd",
+      "serverSequence": 164,
+      "serverHandlingThroughFinishMilliseconds": 2.850625,
+      "documentNavigationResponseEndMilliseconds": 5,
+      "documentSnapshotAtReadyMilliseconds": 3160,
+      "nativePreparedToDocumentStartReceiptMilliseconds": 532.4341250234284,
+      "nativeDocumentStartReceiptToReadyMilliseconds": 3152.0805416512303,
+      "clocksNeverMixed": true
+    }
+  ],
+  "serverObservedRequests": 164,
+  "serverStatusCounts": {
+    "200": 164
+  },
+  "limits": [
+    "N3 only; no replacement N10 or30percent acceptance",
+    "Request handling through server finish excludes arrival wait, client reception, WebKit navigation/startup and script execution. Synchronous JSON logging has observer overhead.",
+    "Server/doc/native clocks have only internal differences; no cross-clock subtraction. Hash links samples, not clocks.",
+    "Allowlist omits other images/fonts/models/audio/external requests; unhashed subresources not arbitrarily assigned to samples.",
+    "ResourceTiming includes completed main-document requests only; pending/worker requests and complete transport path not proven. Zero transfer bytes alone is not proof of cache hit.",
+    "Preflight had an invalid response length field since writeHead headers do not populate getHeader. Field removed before formal run; preflight retained separately, not included."
+  ],
+  "conclusion": "Observed primary HTML server handling and in-document responseEnd are low milliseconds; these six samples do not support attributing the 0.5–1.1s native interval to slow handling of the main HTML. They cannot isolate WebKit process launch from scheduling/IPC/client-side navigation. No product optimization adopted.",
+  "productSourceChanged": false,
+  "serverScript": {
+    "normalSHA256": "4a4513285c19d81288173d02f90113843b2f4c334a4750e1e5e135c8179925f0",
+    "traceSHA256": "62c7c321894640a58db2e089a39c522fafa6b81f214ff1cac297a1debefcdb16"
+  },
+  "testSourceSHA256": "110d8cf861797ed4916f2694a9a26e68e37b6063c5e27eb80b06d9f2712d27d9"
+}

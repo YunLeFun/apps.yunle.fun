@@ -1,0 +1,1213 @@
+{
+  "kind": "fixed20-Star-native-phase-readonly-analysis",
+  "atUTC": "2026-10-29T18:03:40.535381+00:00",
+  "raw": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-star-cold-phase-fixed20-raw.json",
+    "sha256": "21e3f5e56af0032b551b0d038ded0f5741be320009684019dddb448827a517fc",
+    "exactXCTestAttachment": true
+  },
+  "actualRunCount": 1,
+  "sampleCount": 20,
+  "groups": [
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "valuesMillisecondsInSampleOrder": [
+        5310.090916666013,
+        4912.992958332325,
+        4206.975333332593,
+        4389.881916666127,
+        4221.572374999596,
+        4377.435874999719,
+        4285.157124999387,
+        4510.693500000343,
+        4279.620208331835,
+        4563.213458332029
+      ],
+      "descriptiveP50Milliseconds": 4377.435874999719,
+      "descriptiveP90Milliseconds": 4912.992958332325,
+      "largestRows": [
+        {
+          "stage": "same-build-home-detail-mode-cold",
+          "sample": 1,
+          "nativeTapToReadyMilliseconds": 5310.090916666013,
+          "initialDocumentPath": "/",
+          "missingNativePhases": [],
+          "phaseCounts": {
+            "tap": 1,
+            "present-entered": 1,
+            "initial-loader-entered": 1,
+            "initial-loader-prepared-after-load-call": 1,
+            "present-completed": 1,
+            "document-start-received": 1,
+            "dom-content-loaded-received": 1,
+            "window-load-received": 1,
+            "legacy-home-detail-click-receipt": 1,
+            "legacy-detail-mode-click-receipt": 1,
+            "on-game-ready-received": 1
+          },
+          "nativeIntervalsMilliseconds": {
+            "tapToPresent": 7.772208333335584,
+            "presentToLoader": 141.9151249992865,
+            "loaderToLoadReturned": 157.46100000069418,
+            "loadReturnedToDocumentStartReceipt": 948.3992083332851,
+            "documentStartReceiptToReady": 4054.5433749994118,
+            "loadReturnedToReady": 5002.942583332697,
+            "tapToPresentationCompleted": 308.00537499999336,
+            "domReceiptToReady": 3536.0038749986415,
+            "loadReceiptToReady": 3431.893333332482
+          },
+          "separateDocumentObservation": {
+            "renderer": {
+              "atMilliseconds": 1416,
+              "phase": "countdown"
+            },
+            "engineReadyAtMilliseconds": 4087,
+            "responseEndMilliseconds": [
+              8
+            ],
+            "resourceCount": 85,
+            "mainDocumentOnly": true
+          }
+        },
+        {
+          "stage": "same-build-home-detail-mode-cold",
+          "sample": 2,
+          "nativeTapToReadyMilliseconds": 4912.992958332325,
+          "initialDocumentPath": "/",
+          "missingNativePhases": [],
+          "phaseCounts": {
+            "tap": 1,
+            "present-entered": 1,
+            "initial-loader-entered": 1,
+            "initial-loader-prepared-after-load-call": 1,
+            "present-completed": 1,
+            "document-start-received": 1,
+            "dom-content-loaded-received": 1,
+            "window-load-received": 1,
+            "legacy-home-detail-click-receipt": 1,
+            "legacy-detail-mode-click-receipt": 1,
+            "on-game-ready-received": 1
+          },
+          "nativeIntervalsMilliseconds": {
+            "tapToPresent": 4.630791665476863,
+            "presentToLoader": 11.833083333840477,
+            "loaderToLoadReturned": 33.670333334157476,
+            "loadReturnedToDocumentStartReceipt": 1306.8157916659402,
+            "documentStartReceiptToReady": 3556.0429583329096,
+            "loadReturnedToReady": 4862.85874999885,
+            "tapToPresentationCompleted": 50.5665416658303,
+            "domReceiptToReady": 3365.9527499985415,
+            "loadReceiptToReady": 3325.3211666651623
+          },
+          "separateDocumentObservation": {
+            "renderer": {
+              "atMilliseconds": 823,
+              "phase": "countdown"
+            },
+            "engineReadyAtMilliseconds": 3564,
+            "responseEndMilliseconds": [
+              4
+            ],
+            "resourceCount": 84,
+            "mainDocumentOnly": true
+          }
+        },
+        {
+          "stage": "same-build-home-detail-mode-cold",
+          "sample": 10,
+          "nativeTapToReadyMilliseconds": 4563.213458332029,
+          "initialDocumentPath": "/",
+          "missingNativePhases": [],
+          "phaseCounts": {
+            "tap": 1,
+            "present-entered": 1,
+            "initial-loader-entered": 1,
+            "initial-loader-prepared-after-load-call": 1,
+            "present-completed": 1,
+            "document-start-received": 1,
+            "dom-content-loaded-received": 1,
+            "window-load-received": 1,
+            "legacy-home-detail-click-receipt": 1,
+            "legacy-detail-mode-click-receipt": 1,
+            "on-game-ready-received": 1
+          },
+          "nativeIntervalsMilliseconds": {
+            "tapToPresent": 2.212833333032904,
+            "presentToLoader": 11.312958333292045,
+            "loaderToLoadReturned": 27.8110833332903,
+            "loadReturnedToDocumentStartReceipt": 782.1537083327712,
+            "documentStartReceiptToReady": 3739.722874999643,
+            "loadReturnedToReady": 4521.876583332414,
+            "tapToPresentationCompleted": 41.79262499928882,
+            "domReceiptToReady": 3528.8188333324797,
+            "loadReceiptToReady": 3466.7178333329502
+          },
+          "separateDocumentObservation": {
+            "renderer": {
+              "atMilliseconds": 778,
+              "phase": "countdown"
+            },
+            "engineReadyAtMilliseconds": 3388,
+            "responseEndMilliseconds": [
+              27
+            ],
+            "resourceCount": 60,
+            "mainDocumentOnly": true
+          }
+        }
+      ]
+    },
+    {
+      "stage": "direct-mode-cold",
+      "valuesMillisecondsInSampleOrder": [
+        3909.2916666668316,
+        4657.83250000095,
+        3954.7771666675544,
+        4073.5259583343577,
+        4093.590166667127,
+        4071.2769999990996,
+        3971.3396666666085,
+        3990.095333332647,
+        3877.4507499983883,
+        4021.1554583329416
+      ],
+      "descriptiveP50Milliseconds": 3990.095333332647,
+      "descriptiveP90Milliseconds": 4093.590166667127,
+      "largestRows": [
+        {
+          "stage": "direct-mode-cold",
+          "sample": 2,
+          "nativeTapToReadyMilliseconds": 4657.83250000095,
+          "initialDocumentPath": "/games/paper-star/local",
+          "missingNativePhases": [],
+          "phaseCounts": {
+            "tap": 1,
+            "present-entered": 1,
+            "initial-loader-entered": 1,
+            "initial-loader-prepared-after-load-call": 1,
+            "present-completed": 1,
+            "document-start-received": 1,
+            "dom-content-loaded-received": 1,
+            "window-load-received": 1,
+            "on-game-ready-received": 1
+          },
+          "nativeIntervalsMilliseconds": {
+            "tapToPresent": 2.4728333337407093,
+            "presentToLoader": 11.953625000387547,
+            "loaderToLoadReturned": 29.126041667041136,
+            "loadReturnedToDocumentStartReceipt": 1376.8700000000536,
+            "documentStartReceiptToReady": 3237.409999999727,
+            "loadReturnedToReady": 4614.279999999781,
+            "tapToPresentationCompleted": 44.16300000048068,
+            "domReceiptToReady": 3152.2734999998647,
+            "loadReceiptToReady": 3111.9132500007254
+          },
+          "separateDocumentObservation": {
+            "renderer": {
+              "atMilliseconds": 566,
+              "phase": "countdown"
+            },
+            "engineReadyAtMilliseconds": 3246,
+            "responseEndMilliseconds": [
+              5
+            ],
+            "resourceCount": 49,
+            "mainDocumentOnly": true
+          }
+        },
+        {
+          "stage": "direct-mode-cold",
+          "sample": 5,
+          "nativeTapToReadyMilliseconds": 4093.590166667127,
+          "initialDocumentPath": "/games/paper-star/local",
+          "missingNativePhases": [],
+          "phaseCounts": {
+            "tap": 1,
+            "present-entered": 1,
+            "initial-loader-entered": 1,
+            "initial-loader-prepared-after-load-call": 1,
+            "present-completed": 1,
+            "document-start-received": 1,
+            "dom-content-loaded-received": 1,
+            "window-load-received": 1,
+            "on-game-ready-received": 1
+          },
+          "nativeIntervalsMilliseconds": {
+            "tapToPresent": 3.274166665505618,
+            "presentToLoader": 25.256124999941676,
+            "loaderToLoadReturned": 29.834000000846572,
+            "loadReturnedToDocumentStartReceipt": 794.8886666672479,
+            "documentStartReceiptToReady": 3240.3372083335853,
+            "loadReturnedToReady": 4035.225875000833,
+            "tapToPresentationCompleted": 59.08395833284885,
+            "domReceiptToReady": 3140.4711666673393,
+            "loadReceiptToReady": 3096.0062500016647
+          },
+          "separateDocumentObservation": {
+            "renderer": {
+              "atMilliseconds": 695,
+              "phase": "countdown"
+            },
+            "engineReadyAtMilliseconds": 3252,
+            "responseEndMilliseconds": [
+              7
+            ],
+            "resourceCount": 49,
+            "mainDocumentOnly": true
+          }
+        },
+        {
+          "stage": "direct-mode-cold",
+          "sample": 4,
+          "nativeTapToReadyMilliseconds": 4073.5259583343577,
+          "initialDocumentPath": "/games/paper-star/local",
+          "missingNativePhases": [],
+          "phaseCounts": {
+            "tap": 1,
+            "present-entered": 1,
+            "initial-loader-entered": 1,
+            "initial-loader-prepared-after-load-call": 1,
+            "present-completed": 1,
+            "document-start-received": 1,
+            "dom-content-loaded-received": 1,
+            "window-load-received": 1,
+            "on-game-ready-received": 1
+          },
+          "nativeIntervalsMilliseconds": {
+            "tapToPresent": 2.7555416672839783,
+            "presentToLoader": 11.439541665822617,
+            "loaderToLoadReturned": 29.932333334727446,
+            "loadReturnedToDocumentStartReceipt": 797.1252916668163,
+            "documentStartReceiptToReady": 3232.2732499997073,
+            "loadReturnedToReady": 4029.3985416665237,
+            "tapToPresentationCompleted": 44.579375000466825,
+            "domReceiptToReady": 3137.469458333726,
+            "loadReceiptToReady": 3091.7482916665904
+          },
+          "separateDocumentObservation": {
+            "renderer": {
+              "atMilliseconds": 609,
+              "phase": "countdown"
+            },
+            "engineReadyAtMilliseconds": 3240,
+            "responseEndMilliseconds": [
+              6
+            ],
+            "resourceCount": 49,
+            "mainDocumentOnly": true
+          }
+        }
+      ]
+    }
+  ],
+  "allRows": [
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 1,
+      "nativeTapToReadyMilliseconds": 5310.090916666013,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 7.772208333335584,
+        "presentToLoader": 141.9151249992865,
+        "loaderToLoadReturned": 157.46100000069418,
+        "loadReturnedToDocumentStartReceipt": 948.3992083332851,
+        "documentStartReceiptToReady": 4054.5433749994118,
+        "loadReturnedToReady": 5002.942583332697,
+        "tapToPresentationCompleted": 308.00537499999336,
+        "domReceiptToReady": 3536.0038749986415,
+        "loadReceiptToReady": 3431.893333332482
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 1416,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 4087,
+        "responseEndMilliseconds": [
+          8
+        ],
+        "resourceCount": 85,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 2,
+      "nativeTapToReadyMilliseconds": 4912.992958332325,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 4.630791665476863,
+        "presentToLoader": 11.833083333840477,
+        "loaderToLoadReturned": 33.670333334157476,
+        "loadReturnedToDocumentStartReceipt": 1306.8157916659402,
+        "documentStartReceiptToReady": 3556.0429583329096,
+        "loadReturnedToReady": 4862.85874999885,
+        "tapToPresentationCompleted": 50.5665416658303,
+        "domReceiptToReady": 3365.9527499985415,
+        "loadReceiptToReady": 3325.3211666651623
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 823,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3564,
+        "responseEndMilliseconds": [
+          4
+        ],
+        "resourceCount": 84,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 3,
+      "nativeTapToReadyMilliseconds": 4206.975333332593,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.321666666830424,
+        "presentToLoader": 10.373083332524402,
+        "loaderToLoadReturned": 25.484083333140006,
+        "loadReturnedToDocumentStartReceipt": 600.9665833335021,
+        "documentStartReceiptToReady": 3567.8299166665965,
+        "loadReturnedToReady": 4168.796500000099,
+        "tapToPresentationCompleted": 38.61558333301218,
+        "domReceiptToReady": 3391.5446249993693,
+        "loadReceiptToReady": 3324.019458332259
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 826,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3578,
+        "responseEndMilliseconds": [
+          4
+        ],
+        "resourceCount": 83,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 4,
+      "nativeTapToReadyMilliseconds": 4389.881916666127,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.3925000004965113,
+        "presentToLoader": 9.765999999217456,
+        "loaderToLoadReturned": 27.161750000232132,
+        "loadReturnedToDocumentStartReceipt": 749.1723333332629,
+        "documentStartReceiptToReady": 3601.389333332918,
+        "loadReturnedToReady": 4350.561666666181,
+        "tapToPresentationCompleted": 39.874333333500545,
+        "domReceiptToReady": 3395.908666665491,
+        "loadReceiptToReady": 3364.5220833332132
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 886,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3610,
+        "responseEndMilliseconds": [
+          4
+        ],
+        "resourceCount": 84,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 5,
+      "nativeTapToReadyMilliseconds": 4221.572374999596,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.454291665344499,
+        "presentToLoader": 9.809875000428292,
+        "loaderToLoadReturned": 27.02316666727711,
+        "loadReturnedToDocumentStartReceipt": 608.429874999274,
+        "documentStartReceiptToReady": 3573.855166667272,
+        "loadReturnedToReady": 4182.285041666546,
+        "tapToPresentationCompleted": 39.74449999986973,
+        "domReceiptToReady": 3380.8296250008425,
+        "loadReceiptToReady": 3338.4102916661504
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 820,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3586,
+        "responseEndMilliseconds": [
+          5
+        ],
+        "resourceCount": 83,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 6,
+      "nativeTapToReadyMilliseconds": 4377.435874999719,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.149874999304302,
+        "presentToLoader": 10.93708333428367,
+        "loaderToLoadReturned": 26.8657083324797,
+        "loadReturnedToDocumentStartReceipt": 703.0540000014298,
+        "documentStartReceiptToReady": 3634.4292083322216,
+        "loadReturnedToReady": 4337.483208333651,
+        "tapToPresentationCompleted": 40.39600000032806,
+        "domReceiptToReady": 3442.4201250003534,
+        "loadReceiptToReady": 3387.0992499996646
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 586,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3350,
+        "responseEndMilliseconds": [
+          7
+        ],
+        "resourceCount": 66,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 7,
+      "nativeTapToReadyMilliseconds": 4285.157124999387,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.2628333335887874,
+        "presentToLoader": 10.113291666129953,
+        "loaderToLoadReturned": 27.286333333904622,
+        "loadReturnedToDocumentStartReceipt": 606.0993749997579,
+        "documentStartReceiptToReady": 3639.3952916660055,
+        "loadReturnedToReady": 4245.494666665763,
+        "tapToPresentationCompleted": 40.38629166643659,
+        "domReceiptToReady": 3455.2186250002705,
+        "loadReceiptToReady": 3372.1992916671297
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 599,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3352,
+        "responseEndMilliseconds": [
+          7
+        ],
+        "resourceCount": 60,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 8,
+      "nativeTapToReadyMilliseconds": 4510.693500000343,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.939708334452007,
+        "presentToLoader": 12.449291665689088,
+        "loaderToLoadReturned": 29.523166667786427,
+        "loadReturnedToDocumentStartReceipt": 770.9244583329564,
+        "documentStartReceiptToReady": 3694.8568749994593,
+        "loadReturnedToReady": 4465.781333332416,
+        "tapToPresentationCompleted": 45.39087500052119,
+        "domReceiptToReady": 3460.942416666512,
+        "loadReceiptToReady": 3391.345250000086
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 1046,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3707,
+        "responseEndMilliseconds": [
+          8
+        ],
+        "resourceCount": 84,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 9,
+      "nativeTapToReadyMilliseconds": 4279.620208331835,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.753666665739729,
+        "presentToLoader": 10.896125000726897,
+        "loaderToLoadReturned": 29.937333332782146,
+        "loadReturnedToDocumentStartReceipt": 652.9023750008491,
+        "documentStartReceiptToReady": 3583.130708331737,
+        "loadReturnedToReady": 4236.033083332586,
+        "tapToPresentationCompleted": 44.31800000020303,
+        "domReceiptToReady": 3393.0274166650634,
+        "loadReceiptToReady": 3337.254624999332
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 807,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3593,
+        "responseEndMilliseconds": [
+          4
+        ],
+        "resourceCount": 83,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "same-build-home-detail-mode-cold",
+      "sample": 10,
+      "nativeTapToReadyMilliseconds": 4563.213458332029,
+      "initialDocumentPath": "/",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "legacy-home-detail-click-receipt": 1,
+        "legacy-detail-mode-click-receipt": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.212833333032904,
+        "presentToLoader": 11.312958333292045,
+        "loaderToLoadReturned": 27.8110833332903,
+        "loadReturnedToDocumentStartReceipt": 782.1537083327712,
+        "documentStartReceiptToReady": 3739.722874999643,
+        "loadReturnedToReady": 4521.876583332414,
+        "tapToPresentationCompleted": 41.79262499928882,
+        "domReceiptToReady": 3528.8188333324797,
+        "loadReceiptToReady": 3466.7178333329502
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 778,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3388,
+        "responseEndMilliseconds": [
+          27
+        ],
+        "resourceCount": 60,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 1,
+      "nativeTapToReadyMilliseconds": 3909.2916666668316,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.2175416652316926,
+        "presentToLoader": 9.995208334657946,
+        "loaderToLoadReturned": 26.29249999881722,
+        "loadReturnedToDocumentStartReceipt": 633.9762500010693,
+        "documentStartReceiptToReady": 3236.8101666670555,
+        "loadReturnedToReady": 3870.7864166681247,
+        "tapToPresentationCompleted": 39.03899999932037,
+        "domReceiptToReady": 3156.976125001165,
+        "loadReceiptToReady": 3106.2438333337923
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 571,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3246,
+        "responseEndMilliseconds": [
+          4
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 2,
+      "nativeTapToReadyMilliseconds": 4657.83250000095,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.4728333337407093,
+        "presentToLoader": 11.953625000387547,
+        "loaderToLoadReturned": 29.126041667041136,
+        "loadReturnedToDocumentStartReceipt": 1376.8700000000536,
+        "documentStartReceiptToReady": 3237.409999999727,
+        "loadReturnedToReady": 4614.279999999781,
+        "tapToPresentationCompleted": 44.16300000048068,
+        "domReceiptToReady": 3152.2734999998647,
+        "loadReceiptToReady": 3111.9132500007254
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 566,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3246,
+        "responseEndMilliseconds": [
+          5
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 3,
+      "nativeTapToReadyMilliseconds": 3954.7771666675544,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.5330000007670606,
+        "presentToLoader": 10.55958333381568,
+        "loaderToLoadReturned": 29.51066666537372,
+        "loadReturnedToDocumentStartReceipt": 684.4725833343546,
+        "documentStartReceiptToReady": 3227.7013333332434,
+        "loadReturnedToReady": 3912.173916667598,
+        "tapToPresentationCompleted": 43.2831250000163,
+        "domReceiptToReady": 3142.7791666665144,
+        "loadReceiptToReady": 3091.7916250000417
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 582,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3239,
+        "responseEndMilliseconds": [
+          6
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 4,
+      "nativeTapToReadyMilliseconds": 4073.5259583343577,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.7555416672839783,
+        "presentToLoader": 11.439541665822617,
+        "loaderToLoadReturned": 29.932333334727446,
+        "loadReturnedToDocumentStartReceipt": 797.1252916668163,
+        "documentStartReceiptToReady": 3232.2732499997073,
+        "loadReturnedToReady": 4029.3985416665237,
+        "tapToPresentationCompleted": 44.579375000466825,
+        "domReceiptToReady": 3137.469458333726,
+        "loadReceiptToReady": 3091.7482916665904
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 609,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3240,
+        "responseEndMilliseconds": [
+          6
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 5,
+      "nativeTapToReadyMilliseconds": 4093.590166667127,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 3.274166665505618,
+        "presentToLoader": 25.256124999941676,
+        "loaderToLoadReturned": 29.834000000846572,
+        "loadReturnedToDocumentStartReceipt": 794.8886666672479,
+        "documentStartReceiptToReady": 3240.3372083335853,
+        "loadReturnedToReady": 4035.225875000833,
+        "tapToPresentationCompleted": 59.08395833284885,
+        "domReceiptToReady": 3140.4711666673393,
+        "loadReceiptToReady": 3096.0062500016647
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 695,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3252,
+        "responseEndMilliseconds": [
+          7
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 6,
+      "nativeTapToReadyMilliseconds": 4071.2769999990996,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.6258333327859873,
+        "presentToLoader": 10.821916666827747,
+        "loaderToLoadReturned": 29.081291666443576,
+        "loadReturnedToDocumentStartReceipt": 769.8757916659815,
+        "documentStartReceiptToReady": 3258.872166667061,
+        "loadReturnedToReady": 4028.7479583330423,
+        "tapToPresentationCompleted": 43.06370833182882,
+        "domReceiptToReady": 3152.8075833339244,
+        "loadReceiptToReady": 3126.413458332536
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 580,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3270,
+        "responseEndMilliseconds": [
+          6
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 7,
+      "nativeTapToReadyMilliseconds": 3971.3396666666085,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.8290833324717823,
+        "presentToLoader": 10.150166666790028,
+        "loaderToLoadReturned": 27.934291667406796,
+        "loadReturnedToDocumentStartReceipt": 684.1226666656439,
+        "documentStartReceiptToReady": 3246.303458334296,
+        "loadReturnedToReady": 3930.42612499994,
+        "tapToPresentationCompleted": 41.387916666280944,
+        "domReceiptToReady": 3141.1827916672337,
+        "loadReceiptToReady": 3092.1187500007363
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 582,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3258,
+        "responseEndMilliseconds": [
+          7
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 8,
+      "nativeTapToReadyMilliseconds": 3990.095333332647,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.610958334116731,
+        "presentToLoader": 10.977624999213731,
+        "loaderToLoadReturned": 27.302666667310405,
+        "loadReturnedToDocumentStartReceipt": 722.3072083324951,
+        "documentStartReceiptToReady": 3226.896874999511,
+        "loadReturnedToReady": 3949.204083332006,
+        "tapToPresentationCompleted": 41.362500000104774,
+        "domReceiptToReady": 3142.9492916668096,
+        "loadReceiptToReady": 3100.6914583322214
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 506,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3235,
+        "responseEndMilliseconds": [
+          5
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 9,
+      "nativeTapToReadyMilliseconds": 3877.4507499983883,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.2367499987012707,
+        "presentToLoader": 11.608583334236755,
+        "loaderToLoadReturned": 26.380541665275814,
+        "loadReturnedToDocumentStartReceipt": 630.1055000003544,
+        "documentStartReceiptToReady": 3207.11937499982,
+        "loadReturnedToReady": 3837.2248750001745,
+        "tapToPresentationCompleted": 40.64045833183627,
+        "domReceiptToReady": 3130.0294583325012,
+        "loadReceiptToReady": 3086.898666666457
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 496,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3216,
+        "responseEndMilliseconds": [
+          4
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    },
+    {
+      "stage": "direct-mode-cold",
+      "sample": 10,
+      "nativeTapToReadyMilliseconds": 4021.1554583329416,
+      "initialDocumentPath": "/games/paper-star/local",
+      "missingNativePhases": [],
+      "phaseCounts": {
+        "tap": 1,
+        "present-entered": 1,
+        "initial-loader-entered": 1,
+        "initial-loader-prepared-after-load-call": 1,
+        "present-completed": 1,
+        "document-start-received": 1,
+        "dom-content-loaded-received": 1,
+        "window-load-received": 1,
+        "on-game-ready-received": 1
+      },
+      "nativeIntervalsMilliseconds": {
+        "tapToPresent": 2.336458332138136,
+        "presentToLoader": 11.181875001057051,
+        "loaderToLoadReturned": 27.857708333613118,
+        "loadReturnedToDocumentStartReceipt": 736.0250000001543,
+        "documentStartReceiptToReady": 3243.754416665979,
+        "loadReturnedToReady": 3979.7794166661333,
+        "tapToPresentationCompleted": 41.81354166576057,
+        "domReceiptToReady": 3158.358666667482,
+        "loadReceiptToReady": 3104.916416667038
+      },
+      "separateDocumentObservation": {
+        "renderer": {
+          "atMilliseconds": 559,
+          "phase": "countdown"
+        },
+        "engineReadyAtMilliseconds": 3252,
+        "responseEndMilliseconds": [
+          5
+        ],
+        "resourceCount": 49,
+        "mainDocumentOnly": true
+      }
+    }
+  ],
+  "clock": "Every derived interval uses Native systemUptime only; document observations are merely parallel columns",
+  "originalFailed60RetainedSHA256": "81ddb8eef26ef14a0198f755481d973c53056b7e82baa3fe695a61c686419907",
+  "acceptance3_3Complete": false,
+  "notAcceptanceReplacement": true,
+  "processPoolExperimentPerformed": false,
+  "warmupPreparedOrBlankAdded": false,
+  "cleanup": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-star-cold-phase-diagnostic/cleanup-and-restoration.json",
+    "sha256": "addf26c332bd1560a1be80938673af6d961b10069e7b59aa599bfa3f2bade10b"
+  },
+  "limits": [
+    "Additional isolatedworld document message receipts/observers add IPC/test overhead; these numbers are diagnostic, not a replacement to uninstrumented60",
+    "Legacy documentreceipt phases bind initialHome; missingphases remain missing, not relabeled as finalStar milestones",
+    "load-call-return→document-start-receipt includes unsplitWebKit/process/navigation/IPC time; it does not alone identify network, processcreation, pool or CPU causes",
+    "No native/document subtraction or total−3000ms resourcewait derivation",
+    "WKProcessPool properties are deprecated sinceiOS15 and explicitpools are not proposed as an optimization"
+  ],
+  "finding": {
+    "originalSevereColdOutliersReproduced": false,
+    "originalUninstrumentedColdP90FailureStillApplies": true,
+    "diagnosticColdLargestSample": 2,
+    "diagnosticColdLargestMilliseconds": 4657.83250000095,
+    "sameNativeClockPlacement": {
+      "tapToPresentMilliseconds": 2.4728333337407093,
+      "presentToLoaderMilliseconds": 11.953625000387547,
+      "loaderToLoadReturnMilliseconds": 29.126041667041136,
+      "loadReturnToDocumentStartReceiptMilliseconds": 1376.8700000000536,
+      "documentStartReceiptToReadyMilliseconds": 3237.409999999727
+    },
+    "interpretation": "This fixed20 locates its own mildercold maximum afterweb.load returns and before Native receives document-start. It does not locate the old6148/5813ms samples because those samephase stamps were not captured for the original60. It does not prove WKprocesscreation, network, IPC, pool, rotation or CPU causes; no passingacceptance claim."
+  },
+  "staticLogBoundary": {
+    "positiveResponses": 1232,
+    "tailUnfrozenRequests": [
+      {
+        "path": "/room/<redacted>",
+        "status": 404,
+        "classification": "Excluded dynamicroom route; never proxied/cached as static"
+      },
+      {
+        "path": "/favicon.ico",
+        "status": 404,
+        "classification": "Unfrozen favicon path"
+      }
+    ],
+    "tailRequestPositionsZeroBased": [
+      1232,
+      1233
+    ],
+    "logRequestTimesNotCaptured": true,
+    "samplingAttributionNotProven": true,
+    "noRepeatOrSilentArchiveModification": true,
+    "limit": "These two were the finalserver records before shutdown. No monotonic requeststamp permits assigning them to a specificsample or proving backgroundstartup/prefetch cause. All phasepoints remain actual receipts. Formaluninstrumented60 had2609/2609 HTTP200 and no such gap."
+  },
+  "rebuildableDiagnosticProductsReclaimed": {
+    "kind": "rebuildable-diagnostic-products-reclamation",
+    "atUTC": "2026-10-29T18:18:22.143445+00:00",
+    "deletedOnly": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-star-cold-phase-diagnostic/diagnostic-fixed20.xctestproducts",
+    "logicalBytesRemoved": 160665973,
+    "reportedAllocatedBytesRemoved": 160899072,
+    "filesystemFreeSpaceDeltaBytes": -86016,
+    "sharedAPFSExtentsOrConcurrentWorkMayAffectFreeSpaceDelta": true,
+    "originalFormalB251ProductsPreserved": true,
+    "formal60AndDiagnostic20RawXCResultExportsPreserved": true,
+    "diagnosticPatchBeforeAfterAndBuildRunReceiptPreserved": true,
+    "DDAndDependencyCachesUntouched": true,
+    "rebuildInput": "Savedfixed20 testpatch plus unchangedformalNativecode/catalog and same frozenb251 archive; mainDD can rebuild if root requests"
+  }
+}

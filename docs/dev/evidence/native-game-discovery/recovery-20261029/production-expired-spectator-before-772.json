@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-29T15:54:10.397289+00:00",
+  "productionBackendCommit": "b0f63be5b0780272d56f16d603eacb5afd2a58e8",
+  "ownedRoomLastMembersNormallyLeft": true,
+  "freshPlayerUIMessage": "房间已过期",
+  "freshSpectatorUIAccepted": true,
+  "receivedExpiredRoomSnapshot": true,
+  "expiredSnapshotMemberCount": 0,
+  "capacityWhileSpectating": {
+    "activeConnections": 1,
+    "activeOnlinePlayers": 1,
+    "activeOnlineRooms": 1
+  },
+  "normalExitSocketClosed": true,
+  "rawEvidenceStoredOutsideRepository": true,
+  "rawUIDsRoomCodesAndTokensOmitted": true
+}

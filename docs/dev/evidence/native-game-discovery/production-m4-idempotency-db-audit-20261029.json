@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "basename": "idempotency-production-db-audit.json",
+    "bytes": 2668,
+    "sha256": "27bd95be9e6c343d2de01eadfe41c9b800547ece14fe36de417c87dc236b7241"
+  },
+  "readOnly": true,
+  "successfulReadQueryCount": 2,
+  "failedParameterQueryCount": 4,
+  "projectionCorrection": "Four initial parameter/projection attempts failed without returning records; two bounded numeric-projection reads succeeded. No query scope expansion or index creation.",
+  "exactOwnedRoomAndCreator": {
+    "count": 1,
+    "totalMatches": 1,
+    "uniqueIds": 1,
+    "allExpectedID": true,
+    "allCreatorMatches": true,
+    "allCreatedWithinWindow": true,
+    "projectionHonored": true
+  },
+  "sameCreatorPreciseTimeWindow": {
+    "count": 1,
+    "totalMatches": 1,
+    "uniqueIds": 1,
+    "allExpectedID": true,
+    "allCreatorMatches": true,
+    "allCreatedWithinWindow": true,
+    "projectionHonored": true
+  },
+  "createdAtWindowWidthMs": 456251,
+  "creatorUIDSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+  "expectedRoomIDSHA256": "4faf45a64b32b04a900dbb20f333161e69ba028b8aea03f406e00d6a4796c6ce",
+  "expectedAndReturnedRoomIDMatch": true,
+  "fingerprintMatchesAcrossQueries": true,
+  "productionDBObservationPassed": true,
+  "rawResultsPersisted": false,
+  "authSessionTicketCollectionsRead": false,
+  "databaseMutations": false,
+  "indexesCreated": false,
+  "limits": [
+    "This audit reads only the expected owned creation document and the same creator's bounded creation-time window; it is not a global collection audit.",
+    "The supplied private input does not include the original idempotency key or request parameters. Root's two-POST/key/deterministic-ID evidence is separate; this audit does not independently recompute that key or parameter fingerprint.",
+    "If a query cannot execute because of index/tool support, its result is unverified; no index is created.",
+    "A creator/time-window query detects keyed creation documents for this creator in this window. It does not claim exclusion of arbitrary legacy/unkeyed documents outside the supplied operation scope."
+  ],
+  "privateInputOrQueryCopied": false
+}

@@ -1,0 +1,109 @@
+{
+  "kind": "current-objective-completion-audit",
+  "goalStatus": "active-incomplete",
+  "previousGoalTurnClassification": "progress: 3 reclamation tests, two N3 diagnostics, manual end/reopen, current candidate and docs build verified",
+  "requirements": [
+    {
+      "id": "R1",
+      "state": "local-acceptance-complete",
+      "evidence": [
+        "storage-upgrade-final-summary.json",
+        "voiceover-reduce-motion-summary.json",
+        "validation-summary.json"
+      ],
+      "scope": "Native four tabs/Workshop/legacy sources; Web M6 excluded"
+    },
+    {
+      "id": "R2",
+      "state": "local-acceptance-complete-currently-open-modes",
+      "evidence": [
+        "operable-final-test-summary.json",
+        "operable-final-native-layout.json"
+      ],
+      "remaining": "Real published online-mode end-to-end covered by R5/R6 remains incomplete"
+    },
+    {
+      "id": "R3",
+      "state": "local-data-and-generation-accepted-real-native-SSO-incomplete",
+      "evidence": [
+        "storage-upgrade-final-summary.json",
+        "cache-cold-failure-history.json"
+      ],
+      "remaining": "Actual native account/Play session on compatible deployed contract"
+    },
+    {
+      "id": "R4",
+      "state": "cache-integrity-and-lifecycle-accepted-performance-target-incomplete",
+      "evidence": [
+        "resource-fault-idb-summary.json",
+        "operable-final-metrics.json",
+        "startup-resource-phase-v3-analysis.json",
+        "startup-countdown-constraint-audit.json"
+      ],
+      "remaining": "Original30percent and full historical/multiplayer baseline remain open; actual production HTTPS contract unavailable"
+    },
+    {
+      "id": "R5",
+      "state": "source-and-local-model-covered-production-incomplete",
+      "evidence": [
+        "room-creation-idempotency-20261029.json",
+        "spectator-role-full-regression.json",
+        "production-followup-readiness.json"
+      ],
+      "remaining": "OS UL/cold link, real native SSO/two users and deployed atomic transaction"
+    },
+    {
+      "id": "R6",
+      "state": "live-retention-and-policy-accepted-full-online-recovery-incomplete",
+      "evidence": [
+        "retained-resume-final-summary.json",
+        "session-reclamation-summary.json",
+        "local-room-recovery.json"
+      ],
+      "remaining": "Actual account/authority across network loss/background/WebContent termination/app restart"
+    },
+    {
+      "id": "R7",
+      "state": "native-lobby-control-accepted-game-content-gaps-documented",
+      "evidence": [
+        "voiceover-reduce-motion-summary.json",
+        "maximum-text-final-summary.json",
+        "operable-final-native-layout.json",
+        "paper-star-frame-memory-analysis.json"
+      ],
+      "remaining": "Full game screen reader/audio/haptics and physical input not claimed. Star continuous frame and process RSS simulator diagnostic now recorded; hardware remains deferred."
+    },
+    {
+      "id": "R8",
+      "state": "candidate-and-evidence-available-complete-acceptance-not-proven",
+      "evidence": [
+        "reclamation-candidate-fingerprints.json",
+        "reclamation-simulator-audit.json",
+        "reclamation-docs-build.json",
+        "startup-gameplay-candidate-fingerprints.json",
+        "startup-gameplay-simulator-audit.json"
+      ],
+      "remaining": "Keep unverified requirements open; no production orTestFlight deployment in this goal"
+    }
+  ],
+  "explicitAdditionalDesignRequirement": {
+    "reference": "specs/native-game-discovery/design.md section7 interaction row",
+    "requirement": "Star frame time/jank/memory",
+    "priorEvidence": "Earlier retained endpoints and weak release did not cover continuous gameplay metrics.",
+    "currentAction": "Completed real native-simulator2x10second rAF/input diagnostics plus separate host/WebContent RSS; no hardware, GPU-presented FPS, exclusive-memory or leak claims.",
+    "evidence": [
+      "paper-star-frame-memory-n2.json",
+      "paper-star-frame-memory-analysis.json",
+      "paper-star-frame-memory-rss.json",
+      "paper-star-frame-memory-summary.json"
+    ]
+  },
+  "outOfScope": [
+    "production deployment",
+    "TestFlight",
+    "Web/further platforms M6"
+  ],
+  "evidencePathsVerifiedExist": true,
+  "recordedAt": "2026-10-29T06:51:51.584655+08:00",
+  "supersedes": "startup-followup-completion-audit.json: the pre-gameplay record is preserved"
+}

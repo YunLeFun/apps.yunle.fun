@@ -1,0 +1,72 @@
+{
+  "numTotalTests": 12,
+  "numPassedTests": 12,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "success": true,
+  "scope": "Restored exact 7723ae8 source, one real SDK loopback admission test file; no production credentials, rooms, or network requests",
+  "rawReportSHA256": "08861156ec97ea6ffa148adaac90e80175fa0a8d0789890a1e5e92f077f5c2bc",
+  "assertions": [
+    {
+      "name": "colyseus room admission errors rejects an unknown invitation before the SDK attempts a fake reservation WebSocket",
+      "status": "passed",
+      "durationMilliseconds": 33.62929099999997
+    },
+    {
+      "name": "colyseus room admission errors returns a non-success HTTP status for invalid invitation errors",
+      "status": "passed",
+      "durationMilliseconds": 4.926291999999876
+    },
+    {
+      "name": "colyseus room admission errors rejects the old invitation after rotate and joins the new code on the original transport",
+      "status": "passed",
+      "durationMilliseconds": 279.0373749999999
+    },
+    {
+      "name": "colyseus room admission errors rejects the old invitation after remove and joins the new code on the original transport",
+      "status": "passed",
+      "durationMilliseconds": 188.77212499999996
+    },
+    {
+      "name": "colyseus room admission errors keeps a full room intact and returns a numeric admission error",
+      "status": "passed",
+      "durationMilliseconds": 19.294666000000007
+    },
+    {
+      "name": "colyseus room admission errors rejects a member changing to spectator without removing the original member",
+      "status": "passed",
+      "durationMilliseconds": 60.03266699999995
+    },
+    {
+      "name": "colyseus room admission errors does not expose an authentication repository failure to the connecting client",
+      "status": "passed",
+      "durationMilliseconds": 7.724958000000015
+    },
+    {
+      "name": "colyseus room admission errors rejects a fresh player connection after the last member normally leaves",
+      "status": "passed",
+      "durationMilliseconds": 173.056916
+    },
+    {
+      "name": "colyseus room admission errors rejects a fresh spectator connection after the last member normally leaves",
+      "status": "passed",
+      "durationMilliseconds": 168.23029199999974
+    },
+    {
+      "name": "colyseus room admission errors allows fresh spectators in a completed game without changing membership or seats",
+      "status": "passed",
+      "durationMilliseconds": 271.68499999999995
+    },
+    {
+      "name": "colyseus room admission errors allows fresh spectators in a temporarily-offline game without changing membership or seats",
+      "status": "passed",
+      "durationMilliseconds": 268.7534999999998
+    },
+    {
+      "name": "colyseus room admission errors allows a removed member to explicitly spectate with the new valid invitation without restoring membership",
+      "status": "passed",
+      "durationMilliseconds": 170.65991600000007
+    }
+  ]
+}

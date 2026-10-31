@@ -1,0 +1,71 @@
+{
+  "devices": [
+    {
+      "architecture": "arm64",
+      "deviceId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+      "deviceName": "iPhone 18 Pro",
+      "modelName": "iPhone 18 Pro",
+      "osBuildNumber": "24A434",
+      "osVersion": "27.0",
+      "platform": "iOS Simulator"
+    }
+  ],
+  "testNodes": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "duration": "6秒",
+                  "durationInSeconds": 6.695905923843384,
+                  "name": "testCapacityEvictsPausedGameAndReopensWithStoredData()",
+                  "nodeIdentifier": "NativeGameRuntimeTests/testCapacityEvictsPausedGameAndReopensWithStoredData()",
+                  "nodeIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeTests/testCapacityEvictsPausedGameAndReopensWithStoredData",
+                  "nodeType": "Test Case",
+                  "result": "Passed"
+                },
+                {
+                  "duration": "6秒",
+                  "durationInSeconds": 6.2018139362335205,
+                  "name": "testMemoryWarningEvictsPausedGameAndReopensWithStoredData()",
+                  "nodeIdentifier": "NativeGameRuntimeTests/testMemoryWarningEvictsPausedGameAndReopensWithStoredData()",
+                  "nodeIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeTests/testMemoryWarningEvictsPausedGameAndReopensWithStoredData",
+                  "nodeType": "Test Case",
+                  "result": "Passed"
+                },
+                {
+                  "duration": "5秒",
+                  "durationInSeconds": 5.840344071388245,
+                  "name": "testMemoryWarningWithoutForegroundKeepsMostRecentPausedGame()",
+                  "nodeIdentifier": "NativeGameRuntimeTests/testMemoryWarningWithoutForegroundKeepsMostRecentPausedGame()",
+                  "nodeIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeTests/testMemoryWarningWithoutForegroundKeepsMostRecentPausedGame",
+                  "nodeType": "Test Case",
+                  "result": "Passed"
+                }
+              ],
+              "name": "NativeGameRuntimeTests",
+              "nodeIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeTests",
+              "nodeType": "Test Suite",
+              "result": "Passed"
+            }
+          ],
+          "name": "YunleFunTests",
+          "nodeIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests",
+          "nodeType": "Unit test bundle",
+          "result": "Passed"
+        }
+      ],
+      "name": "YunleFun",
+      "nodeType": "Test Plan",
+      "result": "Passed"
+    }
+  ],
+  "testPlanConfigurations": [
+    {
+      "configurationId": "1",
+      "configurationName": "Test Scheme Action"
+    }
+  ]
+}

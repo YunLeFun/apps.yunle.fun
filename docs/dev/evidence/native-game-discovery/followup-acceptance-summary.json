@@ -1,0 +1,91 @@
+{
+  "kind": "native-game-followup-acceptance",
+  "recordedAt": "2026-10-29T05:38:50.034464+08:00",
+  "overallM0ToM5Status": "incomplete",
+  "productSourceChangedByFollowup": false,
+  "accepted": {
+    "dataProtectionRegressionPassed": 82,
+    "voiceOverAndSystemReduceMotionPassed": 1,
+    "voiceOverEvents": 90,
+    "resourceFaultAndActualIndexedDBPassed": 1,
+    "retainedResumeN10Passed": 1,
+    "retainedResumeSamples": 20
+  },
+  "settingsRestored": {
+    "voiceOver": "off, original state",
+    "systemReduceMotion": "0, original state"
+  },
+  "remaining": [
+    "Native session capacity/memory-pressure focused acceptance",
+    "Common-native-clock startup phase diagnosis; 30 percent P50 target remains unmet",
+    "Full historical baseline for all specified entry/multiplayer modes",
+    "Production native real-account SSO, OS Universal Link, two real users/full interruption recovery and deployed CloudBase idempotency transaction; AASA/native manifests still404/newCORS header absent"
+  ],
+  "outOfScopeActionsPerformed": {
+    "productionDeployment": false,
+    "testflightDistribution": false,
+    "commitOrPush": false
+  },
+  "evidence": [
+    {
+      "path": "storage-upgrade-final-summary.json",
+      "sha256": "005a8d0624efc139859f77fee815044132a3308482f0f9aec98a31f7126df97f"
+    },
+    {
+      "path": "voiceover-reduce-motion-summary.json",
+      "sha256": "2437f23434bf5d453b3e2fd27a19e762a79cd9708b0ecdf0dc9bf9118c9728f7"
+    },
+    {
+      "path": "resource-fault-idb-summary.json",
+      "sha256": "f3d42c45b33c34031a86965847d10700902279a01d595ac77b1ed51da4dbac17"
+    },
+    {
+      "path": "retained-resume-final-summary.json",
+      "sha256": "a23dd50b25a95b6ce44ef7ca638657cd840873dc4887a57d364b706d4c09bd2f"
+    },
+    {
+      "path": "voiceover-reduce-motion-journey.json",
+      "sha256": "f1f23285d95005ceb5ac8c56242e116f0d36f8864cc2e28097ffb42dee53bfb6"
+    },
+    {
+      "path": "retained-resume-final-n10.json",
+      "sha256": "312f8b358179c593ae5b8fc1e65109cbc72e34cfb7857c3f254f3771dae9ee79"
+    },
+    {
+      "path": "followup-validation-history.json",
+      "sha256": "4b6f474d3bc7d2753aa473c4743fe2b28d46d11a526727b3a00fc737fe98a486"
+    },
+    {
+      "path": "production-followup-readiness.json",
+      "sha256": "36f5a1580c5494e6a2634ccfa9498b1eca8184d6cb7448cae30f9b6d8a64aa42"
+    },
+    {
+      "path": "followup-docs-build.json",
+      "sha256": "58f6a416a295c2cef78afb69d23f2e709b5e4ed388bec4f3e87372e46cbe6e38"
+    },
+    {
+      "path": "followup-candidate-fingerprints.json",
+      "sha256": "52bb88bc7a005645eaefd66c7d997c1e83266b4ff327e87b038e13d73b2a21b5"
+    },
+    {
+      "path": "storage-upgrade-cleanup-callbacks.json",
+      "sha256": "6ac3005ff4212798550becbca151f833ba44c58736de946f82cc425ea718fd6d"
+    },
+    {
+      "path": "followup-simulator-audit.json",
+      "sha256": "00ef9d9b58e4bc2531f47b1a9918b878a47516c0898d4dbc32efd3f9ce2c8da5"
+    },
+    {
+      "path": "startup-load-boundary-experiment.json",
+      "sha256": "c8003023b37dc6aa5ae7e73a4473653e7987fdee67204ebcfe0f679656d00b3f"
+    },
+    {
+      "path": "startup-load-boundary-cleanup.json",
+      "sha256": "c310a9526262ba0356226fd2c2feaead920e7bc4a986402bd1cf04980c929b14"
+    },
+    {
+      "path": "followup-mcp-products-cleanup.json",
+      "sha256": "cb3de768b47527fb04cff7c0accd015660ed3f1de90289b4e7e230666f7bdb44"
+    }
+  ]
+}

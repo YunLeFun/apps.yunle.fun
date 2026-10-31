@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "kind": "M5-test-fixture-lifecycle-final-validation",
+  "atUTC": "2026-10-29T19:57:43.248195+00:00",
+  "status": "runtime17-passed-known-fixture-cleanup-complete",
+  "functionalRuntimePassed": true,
+  "scope": "Real NativeWebRuntime and WKWebView with fixture-owned profiles and simulated origin-bound documents; no production account/room, OS-pressure or performance claim.",
+  "change": {
+    "file": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+    "beforeSHA256": "dcd09c65ffb400213fb785bbd5203da295567336171c53fc3cabb3f88cf880ab",
+    "afterSHA256": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509",
+    "testBinarySHA256": "df4a7d6af9fe2ee859e168a67809c6429f063c5ab4674b274920e2b73cf0d226",
+    "summary": [
+      "Weak records of actual browser, WebView and configured data store with fixture UUID labels.",
+      "Terminal-only stop/detach before releasing session/window owners, with autorelease boundaries and condition-based owner-release wait.",
+      "Storage preservation helper uses the actual page store and asserts the same profile ID.",
+      "Original30second removal budget and XCTest failures remain; each owned store must be absent from SDK enumeration after successful removal."
+    ],
+    "productTestAssertionsPreserved": true,
+    "productRuntimeAndControllerUnchanged": true,
+    "independentStaticReview": "no blocking findings"
+  },
+  "sourceGuards": {
+    "WebViewController.swift": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "NativeWebRuntime.swift": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20"
+  },
+  "build": {
+    "exitCode": 0,
+    "elapsedSeconds": 15.469,
+    "sameDerivedDataReused": true,
+    "newSimulatorCount": 0,
+    "frozenM3ProductsPreserved": true,
+    "testPluginCausedHostResigningOnly": true,
+    "unsignedMainPrefixSHA256": "1041495a15a998c49a704c800c96d517bfc36f6b32249a3a7c011cc386f33ab0"
+  },
+  "targetedTwo": {
+    "methods": [
+      "testCapacityEvictsPausedGameAndReopensWithStoredData",
+      "testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation"
+    ],
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "elapsedCommandSeconds": 79.155,
+    "executionCount": 1,
+    "ownedProfilesConfirmedAbsent": 9
+  },
+  "completeSeventeen": {
+    "suite": "YunleFunTests/NativeGameRuntimeTests",
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "elapsedCommandSeconds": 56.385,
+    "executionCount": 1,
+    "fixtureCloseCount": 23,
+    "ownedProfilesConfirmedAbsent": 31
+  },
+  "cleanupEvidence": {
+    "newUniqueOwnedProfilesConfirmedAbsent": 40,
+    "SDKRemovalSucceededAndEnumerationAbsenceRequired": true,
+    "weakObservation": "Browser and WebView weak records were all released before deletion; some configured store wrappers remained alive. Wrapper lifetime is diagnostic, while SDK removal and absence determine cleanup success.",
+    "limits": "The one changed-fixture2-to17 validation does not isolate causality among the small lifecycle changes or establish a blanket OS cause."
+  },
+  "originalFailedRound": {
+    "publicReceipt": "m5-runtime-b61-final-a701-validation.json",
+    "publicReceiptSHA256": "9e4714e0d14c56c66b916037f5456248c63f3009680697e8dcb57df8270cfb89",
+    "passed": 15,
+    "failed": 2,
+    "skipped": 0,
+    "elapsedCommandSeconds": 159.164,
+    "originalFailureVerdictPreserved": true,
+    "pendingCount": 0,
+    "notIncludedInNew40Cleanup": true,
+    "nextAction": "Exact2 cleanup complete; retain original15/2 failure verdict and separate maintenance receipt.",
+    "previouslyPendingProfiles": [
+      {
+        "label": "old-capacity-profile",
+        "identifierSHA256": "0d7624314edcdd3c9fabc38a8c2b62a97773286109ca33d031449b0826b4c177"
+      },
+      {
+        "label": "old-sharing-profile",
+        "identifierSHA256": "7df4a08385a667c4bd5bf74c151ea8df7768c4df840aa60438ff9e978c2b4fee"
+      }
+    ],
+    "oldFixtureProfilesPending": [],
+    "cleanupReceipt": "m5-old-two-fixture-store-cleanup.json",
+    "cleanupReceiptSHA256": "70e7183035df3e7aef81c454acea29e0a83b0d5d0e3c21eda9309d6e7aa7a7c1",
+    "separateCleanupResult": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "executionCount": 1,
+      "requested": 2,
+      "existedBefore": 2,
+      "remainingAfter": 0
+    }
+  },
+  "restoration": {
+    "finalCatalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "normalLaunchPreview": "0",
+    "fourFingerprintsMatch": true,
+    "productFiles": {
+      "YunleFun": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+      "YunleFun.debug.dylib": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+      "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+    },
+    "frozenOriginalTestBinarySHA256": "47b771779718bf2623781eb071d2279115520ac311bba93c20463b415ade5818",
+    "nativeUISnapshotCaptured": true,
+    "simulatorHandedBack": true
+  },
+  "privateEvidenceSHA256": {
+    "validation-receipt.json": "f34583c4802e7ae73c4439331af1e31f50bb16ae095eb1c6fd46a4b4e153df81",
+    "build-receipt.json": "3dca0571fd86e0d53954056cf9ac21e7c054663acff44d6c6846cdd886129610",
+    "main-signature-difference.json": "eedd54e10c4922be0bc0712bc9502d338143823bc397854e304470ac1547cd11",
+    "targeted-run-receipt.json": "dc835b650989dbbf9af6e398345a01a8d6c081ffbf0320a10b35d52288b73a45",
+    "targeted-summary.json": "32fc452b9c24f36de0ff5f4289a96263c4f6bac5d51b5f70455c427821e9cadc",
+    "targeted-lifecycle-summary.json": "3ea1edec857b306cd857a9d6ad5e39c30db531aeb978ddfa7c3cb7d782292c4f",
+    "full-run-receipt.json": "19cdbfd79bcef0ecb15654257078717acc605be2aa90becd710e1eee63ee270f",
+    "full-summary.json": "47af2a820b5f2097aad1c9efdc1b6c1435cc7890e915150b5f3d399754e45765",
+    "full-lifecycle-summary.json": "d0290cfb0781e070fe57b5a9c88b51e541fb54c6be51efc51179b63ef41ae0b8",
+    "restoration-fingerprint.json": "58bfd494a37744afa3904b59c9844c4986e179233349317092a2da9728a9466c",
+    "restoration-launch.json": "302753d6d942d47f346ce7f787e16c44f1c32390b4abc8163979f1322815e327",
+    "restoration-ui.json": "ed3c59110a1bc41113033f37894a140a60dce617b56be2a1168b6224542bb8f4"
+  },
+  "privateOwnershipAndPlanningSHA256": {
+    "owned-profile-provenance.json": "5c6faaa31aa529b8cce64f66df610dd0c409f661d39deef422039134d5ac3ab2",
+    "temporary-owned-two-only.patch": "207360092b8f919494f483cc60b7706843cb8293173c3a60db14f5a6e9caccf7",
+    "execution-plan.json": "cabb4e4395796acd89800edd8012a4f9b39caddc939cb6916fb7d6a19a82b697"
+  },
+  "limitations": [
+    "This receipt covers the fixture/runtime17 validation. Real Native journey, production reconnect and frozen performance reports retain their own evidence identities.",
+    "Original failed tests stay failed; the separate maintenance receipt now confirms both old IDs absent.",
+    "No patch application, Simulator, UI or test process was performed while preparing the pending cleanup plan."
+  ],
+  "knownFailedRoundFixtureCleanupComplete": true,
+  "cleanupCompletionAtUTC": "2026-10-30T07:47:40.906560+00:00"
+}

@@ -1,0 +1,198 @@
+{
+  "recordedAtUTC": "2026-10-29T17:32:52.239Z",
+  "offlineAt": "2026-10-29T17:29:24.179Z",
+  "networkRestoredAt": "2026-10-29T17:32:20.139Z",
+  "offlineMilliseconds": 175960,
+  "networkOverridesRestored": true,
+  "gomoku": {
+    "UI": "No more retries. Reconnection failed.",
+    "events": [],
+    "created": 28,
+    "closed": 29,
+    "truncated": false,
+    "hasMore": false
+  },
+  "flight": {
+    "UI": "No more retries. Reconnection failed.",
+    "events": [
+      {
+        "kind": "room.snapshot",
+        "sequence": 55,
+        "roomId": "room_d4c50b2ad3d03b31606bad221ac116e16ec1c4bf4982e0ac0d58fc9e61737f4c",
+        "revision": 9,
+        "status": "playing",
+        "inviteCode": "3U4C83",
+        "memberUIDHashes": [
+          "371018116b3444e0d0f4d0e491490dd553b962b1eb74a416f9381d1102f929f5",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "online": [
+          true,
+          true
+        ],
+        "seatUIDHashes": [
+          "06736b3fa902e145cd164ba2494e75a96ab3a0f5d2508224fb1ecfbab96e5e03",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "f248b2d5277a1b8832ea340da564a8410e82f72595d31b8a61c8a0afd56d9953",
+          "371018116b3444e0d0f4d0e491490dd553b962b1eb74a416f9381d1102f929f5"
+        ]
+      },
+      {
+        "kind": "game.snapshot",
+        "sequence": 56,
+        "roomId": "room_d4c50b2ad3d03b31606bad221ac116e16ec1c4bf4982e0ac0d58fc9e61737f4c",
+        "revision": 9,
+        "status": "playing",
+        "gameId": "flight-chess",
+        "gameSessionId": "game_0e6313747a234a7988f2779afbe89612",
+        "currentSeat": 0,
+        "stateSHA256": "0e720f0d88d75d250a33158daaf9fd206b3d2cf54fe9bc0113f51263055f53a5",
+        "seatUIDHashes": [
+          "06736b3fa902e145cd164ba2494e75a96ab3a0f5d2508224fb1ecfbab96e5e03",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "f248b2d5277a1b8832ea340da564a8410e82f72595d31b8a61c8a0afd56d9953",
+          "371018116b3444e0d0f4d0e491490dd553b962b1eb74a416f9381d1102f929f5"
+        ],
+        "autoplaySeats": [
+          3
+        ],
+        "flight": {
+          "phase": "awaiting-roll",
+          "rollCount": 3,
+          "moveCount": 1,
+          "turnNumber": 4
+        }
+      },
+      {
+        "kind": "other-protocol",
+        "protocolByte": 15,
+        "sequence": 57
+      }
+    ],
+    "created": 28,
+    "closed": 29,
+    "truncated": false,
+    "hasMore": false
+  },
+  "passed": false,
+  "reason": "Untranslated SDK exhausted-retry error retains old game view; explicit Chinese terminal recovery outcome missing",
+  "serverTransportProtectionSeconds": 120,
+  "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "cleanup": {
+    "networkOverridesAllRestored": true,
+    "bothBrowsersReturnedToLobby": true,
+    "extraFlightTabClosed": true,
+    "DAndEHostsNormalLeft": true,
+    "capacityAtEnd": {
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0
+    }
+  },
+  "hostAuthorityAfterWindow": {
+    "gomoku": {
+      "status": "waiting",
+      "revision": 8,
+      "members": [
+        {
+          "UIDHash": "45661e4fd366c72e53c4d5b091ce8d2f1efd8d6699273f70c8325aa42f394163",
+          "online": true
+        }
+      ],
+      "gameStatus": "won"
+    },
+    "flight-chess": {
+      "status": "playing",
+      "revision": 107,
+      "members": [
+        {
+          "UIDHash": "371018116b3444e0d0f4d0e491490dd553b962b1eb74a416f9381d1102f929f5",
+          "online": true
+        }
+      ],
+      "gameStatus": "playing"
+    }
+  },
+  "verificationLimits": [
+    "Actual browser SDK exhausted28 retries while offline; this does not claim a post-window successful reconnect handshake",
+    "Flight used the existing two-bot default in this negative case; it is excluded from Native no-bot N10",
+    "Old game view remained despite server removing the disconnected player; client terminal fix is pending"
+  ],
+  "privateEvidenceDigests": [
+    {
+      "name": "over-window-offline-start.json",
+      "bytes": 1831,
+      "sha256": "17a6010cd4403f04bcd6ab40834982ac00a1b8c1933fd33b27bdcb37c2ece4cb"
+    },
+    {
+      "name": "over-window-initial-english-terminal.json",
+      "bytes": 2636,
+      "sha256": "a138d8b7ef99b68d215fbf21c877d7547cd2699c796de7fae9f44e7b70429302"
+    },
+    {
+      "name": "over-window-gomoku-initial-english-ui.png",
+      "bytes": 55879,
+      "sha256": "75e7601ca55b072ec52c0a6baaa8357e2031500265bacbd288dc5ae56418dc80"
+    },
+    {
+      "name": "over-window-flight-initial-english-ui.png",
+      "bytes": 79457,
+      "sha256": "9d777954eca0be78ac5c778dc4352c81ba751fd2d94ee69bd0254c30ac388531"
+    },
+    {
+      "name": "network-overrides-active.json",
+      "bytes": 316,
+      "sha256": "5f485c14fc94bd57a7211a9fbcb2b80289f6dd8db90a876c67a9cb9f68dbae49"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-gomoku-playing-baseline.json",
+      "bytes": 36431,
+      "sha256": "fa669dcb7310b45c8186b4164a1587f9e6862b30795dde9d17f4a3ace5b1f557"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-gomoku-host-confirms-B-offline.json",
+      "bytes": 50761,
+      "sha256": "51ef1af0cc2c81958d108fe60336fda89d9231dae7da6e08d1663f051791160d"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-gomoku-host-after-window.json",
+      "bytes": 60170,
+      "sha256": "ce202ade76acaa564adb430adfac597d8f678d19656e30f86fcdda3b0d656202"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-gomoku-normal-left.json",
+      "bytes": 55,
+      "sha256": "202990e7b241f39f4bd6b9a84c635b3222759d2130356394ee88cf2eb9e8e29d"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-gomoku-final-event-log.json",
+      "bytes": 60637,
+      "sha256": "25a10be4f4c159af562d490ed9412b04125595a078f7b2f1cdd8da8b3ab83445"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-flight-chess-playing-baseline.json",
+      "bytes": 28949,
+      "sha256": "fb3ca9eb16f0dac3aba15f04a349f4fdb3009383c6e052bcc8a77fd28ecf738d"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-flight-chess-host-confirms-B-offline.json",
+      "bytes": 69933,
+      "sha256": "f0f22309800eaaed65d205396cbdae3d2afe1cd914bd8715e3afc563b0c6e2f3"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-flight-chess-host-after-window.json",
+      "bytes": 394230,
+      "sha256": "4c605683fb4234d86885d34acfc6dcd613efa16fd0ac2fea3d06148213c76ce0"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-flight-chess-normal-left.json",
+      "bytes": 55,
+      "sha256": "202990e7b241f39f4bd6b9a84c635b3222759d2130356394ee88cf2eb9e8e29d"
+    },
+    {
+      "name": "managed-sdk-cde/over-window-flight-chess-final-event-log.json",
+      "bytes": 415375,
+      "sha256": "f4f02424b0b409232707d2f0e00d1dcb24514bb3cc19b26a897967001428297a"
+    }
+  ]
+}

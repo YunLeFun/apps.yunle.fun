@@ -1,0 +1,13 @@
+{
+  "version": "48b468ef551a1ee6a53d9e809539fa0f219074bf3d0535ab87d03d864a8379c4",
+  "purpose": "Frozen static replay inputs for historical same-build renderer-ready measurements; not proof of R4 gameplay-operable target",
+  "owner": "native-game-discovery",
+  "fileCount": 390,
+  "sourceBytes": 16396952,
+  "archive": "/tmp/yunle-native-games.uGZuY9/retired-play-builds/48b-renderer-ready-baseline-public.tar.gz",
+  "archiveBytes": 10612837,
+  "archiveSHA256": "923ead34a804af8ab66c7e07b26577ce2ab863a5149ab49c8b8e5b3aceaed7bf",
+  "verification": "Every regular file SHA256 compared against source before removing redundant directory",
+  "recycleCondition": "After final acceptance and no outstanding need to replay historical old-ready measurement; retain sample JSON and report",
+  "netReclaimedBytes": 5784115
+}

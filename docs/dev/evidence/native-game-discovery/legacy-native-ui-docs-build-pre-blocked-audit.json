@@ -1,0 +1,21 @@
+{
+  "schema": "legacy-native-ui-docs-build-v1",
+  "status": "passed",
+  "exitCode": 0,
+  "exceptionType": null,
+  "elapsedSeconds": 5.149,
+  "command": "./node_modules/.bin/vitepress build docs --outDir <task-owned-temp>",
+  "sourceSHA256": {
+    "docs/dev/native-game-discovery-implementation.md": "4c6ed92dd9998049839a37a192d8eaa577a6f1d8af37ad37fa59d28a7c277426",
+    "specs/native-game-discovery/tasks.md": "69702f711ab7faafeba0e6802645c092bd0787c74c401384025e68c913d93d49"
+  },
+  "sourcesStableDuringBuild": true,
+  "log": "/tmp/yunle-native-games.uGZuY9/legacy-native-ui-docs-build.log",
+  "logSHA256": "3ebf659ef454dacd17e1e8e48cab31fbb623a3c899f84c3d48c0bb7512a5892e",
+  "outputPath": "/tmp/yunle-native-games.uGZuY9/legacy-native-ui-docs.2ui4p5ic",
+  "outputLogicalBytesReclaimed": 10208762,
+  "outputAllocatedBytesReclaimed": 10997760,
+  "outputAbsentAfterFinally": true,
+  "recordedAt": "2026-10-29T08:34:24.102218+08:00",
+  "scope": "Existingbinary full docsbuild+linkcheck after realoldnativeUI proof+guestsourcecaveat. No dependencyinstall/trustoverride; finallyreclaims ownoutput only."
+}

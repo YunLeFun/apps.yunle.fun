@@ -1,0 +1,171 @@
+{
+  "kind": "followup-validation-history",
+  "recordedAt": "2026-10-29T05:32:58.409807+08:00",
+  "attempts": [
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-first.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - VoiceOver activation must open the invite form"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-targeted.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - Cancel should return VoiceOver focus to its initiating control"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-focus.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - Returning must restore VoiceOver focus to 加入房间 without further navigation"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-yield.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - Returning must restore VoiceOver focus to 加入房间 without further navigation"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-toolbar.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - Returning must restore VoiceOver focus to 加入房间 without further navigation"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-activation.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - VoiceOver activation must open the invite form"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-native-context.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - VoiceOver could not reach resume-game within 60 focus movements"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-native-flow.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - VoiceOver could not reach ai-finder within 60 focus movements"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-workshop-exploration.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "failed - VoiceOver could not reach resume-game within 60 focus movements"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-reduce-motion.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "XCTAssertEqual failed: (\"Optional(\"0\")\") is not equal to (\"Optional(\"1\")\")"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/voiceover-reduce-motion-control.xcresult",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failureMessages": []
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/retained-resume-preflight.xcresult",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failureMessages": []
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/retained-resume-final.xcresult",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failureMessages": [
+        "XCTAssertEqual failed: (\"Optional(1793222261613.0)\") is not equal to (\"Optional(1793222261614.0)\")"
+      ]
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/retained-resume-document-final.xcresult",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failureMessages": []
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/resource-fault-idb.xcresult",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failureMessages": []
+    },
+    {
+      "bundle": "/tmp/yunle-native-games.uGZuY9/storage-upgrade-final.xcresult",
+      "result": "Passed",
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "failureMessages": []
+    }
+  ],
+  "decisions": [
+    "App-centered double tap did not activate the VoiceOver-focused invite; XCTest targets the identified control for double tap. Single tap selects instead of activating with VoiceOver enabled.",
+    "Exact zero-step return to invite was a stronger UX condition than R7. Original system title return was preserved after confirming one VoiceOver step reaches Join Room; all speculative product focus edits were removed byte-for-byte.",
+    "Resume spoken name is the actual game name plus retained-session description; navigation reverses once when an edge repeats; Workshop title touch exploration is explicit in the scope.",
+    "Settings exposes a labeled row and a nested actual UISwitch. Only the nested switch is touched; real global setting is asserted and original value restored.",
+    "Initial retained N10 collected 20 samples but one timeOrigin equality differed by 1ms. The failed bundle remains failed. Final replay uses exact original Document and root element references, no numeric tolerance; raw clock values remain recorded."
+  ],
+  "accepted": [
+    "voiceover-reduce-motion-control",
+    "storage-upgrade-final",
+    "resource-fault-idb",
+    "retained-resume-document-final"
+  ],
+  "productSourceChangedByFollowup": false,
+  "limitations": "Native-flow VoiceOver uses XCUI service and targeted gestures; no blind-coordinate or game-content claim. Retained resume uses real handlers with synthetic inputs in the same process; not online/OS recovery."
+}

@@ -1,0 +1,14 @@
+{
+  "report": {
+    "file": "play-7723ae8-recovery.json",
+    "sha256": "446b71c1604b5a10b317cd9ac444dc6b344c8003b6347eb419178e202c76f307"
+  },
+  "admissionSummary": {
+    "file": "play-7723ae8-admission-tests.json",
+    "sha256": "055f29adfc5d9ad451bf2a8e739d6baa68b3042b548815b21b412a581b6aa3c1"
+  },
+  "diff": {
+    "file": "play-7723ae8-vs-b0f63be.diff",
+    "sha256": "c1c971d19f75822188aa2823ef598fdbf2c686b9a5558afeb96d8477ea2af39c"
+  }
+}

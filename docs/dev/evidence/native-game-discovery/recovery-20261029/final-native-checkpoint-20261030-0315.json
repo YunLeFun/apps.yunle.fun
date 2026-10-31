@@ -1,0 +1,108 @@
+{
+  "checkpointAtUTC": "2026-10-29T19:16:27.157787+00:00",
+  "status": "in-progress",
+  "completed": false,
+  "currentLedgerSHA256": "7b265ea61c74f10ae35306e63e918fc26ac958e2770d01cfd9ef2b8a1e84309c",
+  "source": {
+    "controllerSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "runtimeSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "bundledCatalogDuringRounds": "b25149ae2fd0fe3383c4a350dbc3343294fa2f9a7c56b330ba3f972bc4846c8b"
+  },
+  "minimumDistinctSuccessfulRoomsPerGame": 10,
+  "counts": {
+    "gomoku": 4,
+    "flight-chess": 0
+  },
+  "rounds": [
+    {
+      "id": "G01",
+      "gameId": "gomoku",
+      "recovery": "actual OS cold Universal Link from Safari after Native app termination",
+      "passed": true,
+      "pendingCleanup": false,
+      "countedTowardN10": true,
+      "baselineStones": 2,
+      "recoveredStones": 2,
+      "freshActionStones": 4,
+      "sameGameSession": true,
+      "sameBaselineState": true,
+      "functionalColdUniversalLinkPassed": null,
+      "cleanupEventKinds": []
+    },
+    {
+      "id": "F01",
+      "gameId": "flight-chess",
+      "recovery": "actual OS cold Universal Link from Safari after Native app termination",
+      "passed": false,
+      "pendingCleanup": false,
+      "countedTowardN10": false,
+      "baselineStones": null,
+      "recoveredStones": null,
+      "freshActionStones": null,
+      "sameGameSession": true,
+      "sameBaselineState": false,
+      "functionalColdUniversalLinkPassed": true,
+      "cleanupEventKinds": []
+    },
+    {
+      "id": "G02",
+      "gameId": "gomoku",
+      "recovery": "Browser B short network outage via CDP; Native A remains online",
+      "passed": true,
+      "pendingCleanup": false,
+      "countedTowardN10": true,
+      "baselineStones": 2,
+      "recoveredStones": 2,
+      "freshActionStones": 4,
+      "sameGameSession": true,
+      "sameBaselineState": true,
+      "functionalColdUniversalLinkPassed": null,
+      "cleanupEventKinds": []
+    },
+    {
+      "id": "G03",
+      "gameId": "gomoku",
+      "recovery": "actual Native process termination/relaunch and persisted return-to-room",
+      "passed": true,
+      "pendingCleanup": false,
+      "countedTowardN10": true,
+      "baselineStones": 2,
+      "recoveredStones": 2,
+      "freshActionStones": 4,
+      "sameGameSession": true,
+      "sameBaselineState": true,
+      "functionalColdUniversalLinkPassed": null,
+      "cleanupEventKinds": [
+        "room.left",
+        "socket-closed"
+      ]
+    },
+    {
+      "id": "G04",
+      "gameId": "gomoku",
+      "recovery": "actual WebContent process termination and Native retry",
+      "passed": true,
+      "pendingCleanup": false,
+      "countedTowardN10": true,
+      "baselineStones": 2,
+      "recoveredStones": 2,
+      "freshActionStones": 4,
+      "sameGameSession": true,
+      "sameBaselineState": true,
+      "functionalColdUniversalLinkPassed": null,
+      "cleanupEventKinds": [
+        "room.left",
+        "socket-closed"
+      ]
+    }
+  ],
+  "historicalSummaryOnlyRoomsCounted": false,
+  "notes": [
+    "F01包含游戏超时托管，排除干净N10计数。",
+    "G03初次未核验输入值的尝试不归因产品；已记录明确输入值后的正确加入与恢复。",
+    "G04唯一可见WKWebView只读映射并成功detach，精准终止其WebContent，原生错误页仅点击一次重新加载；未注入回调或修改运行源码。",
+    "创建到观察ready含自动化与IPC等待，不作为Native首屏性能。",
+    "本快照后正进行6ff/a701资源完整版本性能测量，不改写b251冷P90失败。"
+  ]
+}

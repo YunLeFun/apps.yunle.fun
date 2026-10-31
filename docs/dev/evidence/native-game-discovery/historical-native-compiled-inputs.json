@@ -1,0 +1,72 @@
+{
+  "schema": "historical-native-compiled-inputs-v1",
+  "compiledFiles": [
+    {
+      "relativePath": "YunleFun.app/Info.plist",
+      "bytes": 1801,
+      "sha256": "edd27e3e75e6dadece1daf065c61d8f2872a64d14aafe86318041fe62e547325",
+      "identity": {
+        "CFBundleIdentifier": "fun.yunle.apps.native-legacy-01a182f1",
+        "CFBundleExecutable": "YunleFun",
+        "CFBundleName": "YunleFun",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleTypeRole": "Editor",
+            "CFBundleURLName": "yunlefun-legacy-01a182f1",
+            "CFBundleURLSchemes": [
+              "yunlefun-legacy-01a182f1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "relativePath": "YunleFun.app/YunleFun",
+      "bytes": 58512,
+      "sha256": "40b06aaf9d167d66b134d5c8578369bbaaad82d862caf39f6db65b399bc76c4a"
+    },
+    {
+      "relativePath": "YunleFun.app/YunleFun.debug.dylib",
+      "bytes": 37663584,
+      "sha256": "0ba94089be95c797e25a07192ff2eab11a7fc11639c0af8bc52843403d93d460"
+    },
+    {
+      "relativePath": "YunleFun.app/PlugIns/YunleFunTests.xctest/YunleFunTests",
+      "bytes": 13347216,
+      "sha256": "fdb08abb6b3efe15050befb97281ff9e669aa8e25b75f3f655a70dddcc71f158"
+    }
+  ],
+  "buildLogs": [
+    {
+      "path": "/tmp/yunle-native-games.uGZuY9/historical-native-initial-build.log",
+      "bytes": 562079,
+      "sha256": "d4f2bd64aa129f6920c991c0818d6d5a99c9b31a1e22cced0816be28f1861b32",
+      "buildSucceeded": true
+    },
+    {
+      "path": "/tmp/yunle-native-games.uGZuY9/historical-native-harness-build.log",
+      "bytes": 54099,
+      "sha256": "4afbc2e3ce63377454518fe0e2c11a02bf23bc7e245d4f9de0d1d8e85e2e7e08",
+      "buildSucceeded": true
+    },
+    {
+      "path": "/tmp/yunle-native-games.uGZuY9/historical-native-star-diagnostic-build.log",
+      "bytes": 51017,
+      "sha256": "067ab8ff5fc769a938272bc678248010d8c10404d36cbaed8312d35d1e27373a",
+      "buildSucceeded": true
+    },
+    {
+      "path": "/tmp/yunle-native-games.uGZuY9/historical-native-cdn-diagnostic-build.log",
+      "bytes": 51015,
+      "sha256": "287816e0a8cc09daad940eda63021f0e85156b423e5d52ed508cf776c4d9cc8a",
+      "buildSucceeded": true
+    },
+    {
+      "path": "/tmp/yunle-native-games.uGZuY9/historical-native-gomoku-n10-build.log",
+      "bytes": 52378,
+      "sha256": "fe2c51484d3ced93424685b857e9e41749eb4bae5bacc6a49cdb745c103ede5b",
+      "buildSucceeded": true
+    }
+  ],
+  "rebuild": "Debug -Onone; fixed shared simulator; reused exact main DerivedData/SourcePackages with resolved-only/no updates; build-for-testing CLI. Original snapshot source + packaging patch + append harness frozen. Rebuildable own historical DerivedData retired after exported test evidence, not main/current dependency cache."
+}

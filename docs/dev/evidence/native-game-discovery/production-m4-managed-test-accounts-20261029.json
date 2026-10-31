@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "sourceReceipt": {
+    "basename": "creation-receipt.json",
+    "bytes": 4639,
+    "sha256": "d376e7666992b82b2ae94fe810983cc2bb6228b6808588d091ab52be76cd42e6"
+  },
+  "completedAt": "2026-10-29T09:19:09.737001+00:00",
+  "method": "User-authorized existing Admin UI; create disabled, then initialize only each newly owned identity",
+  "accounts": [
+    {
+      "alias": "managed-new-01",
+      "aliasScope": "provisioning-only; not a mapping to multiplayer participant aliases",
+      "identityLabelSHA256": "c0854b8b0f692c5a01c6b18f07a06053b63235e28abe8a341f99a07e7a300bf8",
+      "uidSHA256": "45661e4fd366c72e53c4d5b091ce8d2f1efd8d6699273f70c8325aa42f394163",
+      "status": "ready",
+      "currentBalance": 0,
+      "baselineCoin": 0,
+      "membership": "no record",
+      "accountStatus": "normal",
+      "synthetic": true,
+      "roleAssignmentsAdded": false
+    },
+    {
+      "alias": "managed-new-02",
+      "aliasScope": "provisioning-only; not a mapping to multiplayer participant aliases",
+      "identityLabelSHA256": "07bd2f6e5876380cbe18c906b61878ad23e178ff4d524550e1a7cb5f6275c031",
+      "uidSHA256": "371018116b3444e0d0f4d0e491490dd553b962b1eb74a416f9381d1102f929f5",
+      "status": "ready",
+      "currentBalance": 0,
+      "baselineCoin": 0,
+      "membership": "no record",
+      "accountStatus": "normal",
+      "synthetic": true,
+      "roleAssignmentsAdded": false
+    }
+  ],
+  "ordinaryZeroBalanceAndNoMembershipVerified": true,
+  "existingThreeRegistryEntriesPreservedExactly": true,
+  "existingAccountPasswordsChanged": false,
+  "existingAccountsReset": false,
+  "coinOrMembershipEntitlementsGranted": false,
+  "SSOTargetsOrBrokerGatesChanged": false,
+  "fixedAccountLimitRaised": false,
+  "privateCredentialStorage": {
+    "registryOutsideRepository": true,
+    "fileMode": "0600",
+    "directoryMode": "0700",
+    "pendingPlaintextCopyRemoved": true,
+    "credentialsOrConfigurationCopiedToRepository": false
+  },
+  "newTermsCAPTCHAOrPrivilegeExpansionEncountered": false,
+  "ownedChromeTabClosed": true,
+  "retention": "The two owned dedicated identities remain available for controlled M4 testing; no account retirement is claimed. Retire only after explicit task-owner decision.",
+  "limits": [
+    "No separate negative Admin-access probe was performed.",
+    "This creation receipt verifies provisioning and account state; normal sign-in observations are recorded separately."
+  ],
+  "screenshots": [
+    "production-m4-managed-accounts-ready.png",
+    "production-m4-managed-account-no-membership.png"
+  ]
+}

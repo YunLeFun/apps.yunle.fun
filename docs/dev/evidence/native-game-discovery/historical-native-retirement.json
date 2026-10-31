@@ -1,0 +1,19 @@
+{
+  "schema": "historical-native-retirement-v1",
+  "bundle": "fun.yunle.apps.native-legacy-01a182f1",
+  "simulator": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "stopResult": "NSPOSIX3 found nothing to terminate after test host exited",
+  "ownedAppUninstalled": true,
+  "appDataLookupAfterExitCode": 2,
+  "appDataDirectoryAbsent": true,
+  "derivedDataRemoved": true,
+  "derivedAllocatedBytesBefore": 587235328,
+  "derivedLogicalFileBytesBefore": 570815275,
+  "appDataAllocatedBytesBefore": 1249280,
+  "appDataAllocatedBytesAfter": 0,
+  "measuredAllocatedBytesReclaimed": 588484608,
+  "mainDependencyCacheRetained": "/tmp/yunle-native-games.uGZuY9/DerivedData/SourcePackages",
+  "historicalSourceRetained": "/tmp/yunle-native-games.uGZuY9/historical-native-e68ed57d",
+  "resultsRetained": "All four xcresult bundles, exported raw JSON, full harness+packaging/source manifests, logs and public asset fingerprints kept. Rebuild old app from frozen source if needed.",
+  "scope": "Uninstalled only task-created unique legacy bundle; no current/user app, simulator device/runtime or external account altered. Allocated directory sizes, not whole-disk free-space change or keychain-removal claim. No post-removal WebKit API enumeration; fixture deletion evidence remains callbacks only."
+}

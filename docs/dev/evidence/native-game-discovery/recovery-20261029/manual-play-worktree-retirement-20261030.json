@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "manual-Play-worktree-and-generated-artifact-retirement",
+  "atUTC": "2026-10-29T20:05:44.975333+00:00",
+  "status": "removed-cleanly-by-default-git",
+  "removedScope": "/private/var/folders/tx/zs0fhdtn52l29nbtqby57qlh0000gn/T/yunle-reconnect-terminal-hge2fmmc/source",
+  "defaultGitWorktreeRemoveExitCode": 0,
+  "forceOrPruneUsed": false,
+  "head": "0e6c13711283b78f4f69b47947f556c5d3f321b4",
+  "retainedBranch": "refs/heads/codex/native-online-room-assets-20261030",
+  "stableMainCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+  "headAncestorOfStableMain": true,
+  "sourceCleanBeforeRemoval": true,
+  "nonIgnoredUntrackedFilesBefore": 0,
+  "ignoredFilesClassifiedAsRebuildable": 20761,
+  "unknownIgnoredFiles": 0,
+  "openFilesOrActiveProcessReferencesBefore": 0,
+  "retainedCommitObjectsVerified": true,
+  "otherWorktreeRegistrationsUnchanged": true,
+  "oldPrunableEntriesKept": 2,
+  "originalPlayMainHeadUnchanged": true,
+  "originalPlayDirtyStatusAndDiffUnchanged": true,
+  "persistentArchiveSHA256": "0a21ef3c62ef1d38c2eb394219f7d958cd8f881ebc4bcb1134180c10214544b7",
+  "persistentFreezeReceiptSHA256": "6bed9838f65dcbf33c75ab076876632a3031b8edc5125a1a0bad3740063f83e9",
+  "persistentArchiveAllMembersRechecked": 380,
+  "persistentPublicationEvidenceDirectories": {
+    "web-publication-0e6c137": {
+      "retained": true,
+      "fileCount": 36,
+      "extensions": {
+        ".json": 17,
+        ".body": 1,
+        ".log": 1,
+        ".png": 1,
+        ".py": 1,
+        ".cjs": 1,
+        ".css": 6,
+        ".js": 8
+      }
+    },
+    "web-publication-6ff97db": {
+      "retained": true,
+      "fileCount": 68,
+      "extensions": {
+        ".json": 18,
+        ".py": 2,
+        ".png": 1,
+        ".log": 1,
+        ".html": 3,
+        ".js": 39,
+        ".css": 4
+      }
+    },
+    "web-reconnect-terminal-fix": {
+      "retained": true,
+      "fileCount": 5,
+      "extensions": {
+        ".patch": 2,
+        ".json": 3
+      }
+    }
+  },
+  "persistentBodyIndexIndependentOfRemovedTree": true,
+  "sourceAllocatedBytesBefore": 428953600,
+  "sourceAllocatedBytesAfter": 0,
+  "sourcePathAllocatedBytesRemoved": 428953600,
+  "ownGitWorktreeMetadataAllocatedBytesBefore": 94208,
+  "ownGitWorktreeMetadataRemoved": true,
+  "ownershipOnlyParentAllocatedBytesAfter": 4096,
+  "filesystemAvailableBytesBefore": 96154456064,
+  "filesystemAvailableBytesAfter": 96232267776,
+  "filesystemAvailableDeltaBytes": 77811712,
+  "allocationCaveat": "Removedpath duallocatedbytes andobservedwhole-filesystemfree delta areseparate; APFSsharedblocks/globalconcurrentactivity preventattributing alldelta tothiscleanup.",
+  "privateCleanupReceiptSHA256": "572cc6a5f7d2cc567305e15d017c8c0254de22d04211ef6ac3c38bf4ce3b0ec9",
+  "ownershipReportRetained": true,
+  "sharedGlobalDependencyCacheDDAndOtherWorktreesTouched": false,
+  "simulatorUIAccountActions": 0
+}

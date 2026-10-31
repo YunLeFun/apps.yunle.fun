@@ -1,0 +1,58 @@
+{
+  "kind": "final-genuine-operable-comparison-summary",
+  "createdAt": "2026-10-29T04:21:35.446085+08:00",
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "sampleCount": 60,
+  "percentileDefinition": "nearest rank; for N=10 P50 is fifth and P90 ninth sorted native sample",
+  "historicalCommitBaseline": false,
+  "origin": "http://127.0.0.1:18146",
+  "results": [
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "samplesPerStage": 10,
+      "legacyP50Milliseconds": 1055.0039999652654,
+      "legacyP90Milliseconds": 1719.4494583527558,
+      "directColdP50Milliseconds": 838.2645416422747,
+      "directColdP90Milliseconds": 1423.9738750038669,
+      "preparedP50Milliseconds": 828.9277500007302,
+      "preparedP90Milliseconds": 1458.2295833388343,
+      "preparedP50ReductionPercent": 21.428947186169765,
+      "directColdP90ChangePercent": -17.184313380862992,
+      "prepared30PercentTargetMet": false,
+      "coldP90NoMoreThan10PercentRegression": true
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "samplesPerStage": 10,
+      "legacyP50Milliseconds": 4192.959999956656,
+      "legacyP90Milliseconds": 4311.312416626606,
+      "directColdP50Milliseconds": 3865.1744999806397,
+      "directColdP90Milliseconds": 3923.2552500325255,
+      "preparedP50Milliseconds": 3859.4821667065844,
+      "preparedP90Milliseconds": 3953.8312499644235,
+      "preparedP50ReductionPercent": 7.953279622355547,
+      "directColdP90ChangePercent": -9.000905735746157,
+      "prepared30PercentTargetMet": false,
+      "coldP90NoMoreThan10PercentRegression": true,
+      "genuineOperableSamples": 30,
+      "rendererObservationClock": "Separate document performance clock; not native tap clock",
+      "rendererObservationMedianMillisecondsByStage": {
+        "same-build-home-detail-mode-cold": 713.5,
+        "direct-mode-cold": 410.0,
+        "direct-mode-prepared": 365.5
+      }
+    }
+  ],
+  "engineering30PercentTargetMet": false,
+  "coldP90RegressionGateMet": true,
+  "limits": [
+    "Fresh WKWebView; only this fixture profile's HTTP memory/disk caches cleared before the tap; WebKit process and OS caches are not reset",
+    "Poll public visible links every 20 ms and click as soon as their DOM conditions pass; real SPA or full-document navigation is accepted. This is not an average human think-time model.",
+    "Native uptime tap-to-engine-ready and Web performance timing have separate clocks. Native timing includes test observer collection and automated-link polling overhead. Resource timing is main-document-only; parallel duration sums are not wall time; zero transferSize does not prove a cache hit.",
+    "Catalog and account state preloaded in fixture; UIKit animations disabled; no process/OS reset; no production network or physical-device performance claim",
+    "Three-second PaperStar gameplay countdown remains unchanged; renderer-ready is observed separately and is not engine-ready"
+  ],
+  "rawEvidence": "operable-final-n10.json"
+}

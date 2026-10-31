@@ -1,0 +1,130 @@
+{
+  "boundaries" : [
+    "Real built game and Worker ready; same named WebKit profile",
+    "Version B appends a test-only binary to exercise receipt updates, not game-build compatibility",
+    "HTTP cache API removal models reclamation; no claim of actual OS eviction",
+    "Fault server HTML CSP restricts network access to loopback; no production account or room"
+  ],
+  "diagnosticNamedStoreKeeper" : false,
+  "flowCompleted" : true,
+  "gameId" : "gomoku",
+  "kind" : "native-resource-fault-injection",
+  "modeId" : "computer",
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "steps" : [
+    {
+      "stage" : "baseline-cache-only",
+      "verification" : {
+        "allVerified" : true,
+        "batchSize" : 12,
+        "checkedCount" : 215,
+        "expectedCount" : 215,
+        "failedCount" : 0,
+        "passedCount" : 215
+      }
+    },
+    {
+      "errorReported" : true,
+      "oldReceiptRetained" : true,
+      "oldResourcesCacheOnlySHA256Verified" : true,
+      "stage" : "manifest503",
+      "storageMarkers" : {
+        "cookiePreserved" : true,
+        "indexedDBPreserved" : true,
+        "indexedDBValue" : "keep",
+        "localStoragePreserved" : true,
+        "localStorageValue" : "keep"
+      },
+      "verification" : {
+        "allVerified" : true,
+        "batchSize" : 12,
+        "checkedCount" : 215,
+        "expectedCount" : 215,
+        "failedCount" : 0,
+        "passedCount" : 215
+      }
+    },
+    {
+      "errorReported" : true,
+      "oldReceiptRetained" : true,
+      "oldResourcesCacheOnlySHA256Verified" : true,
+      "stage" : "badDigest",
+      "storageMarkers" : {
+        "cookiePreserved" : true,
+        "indexedDBPreserved" : true,
+        "indexedDBValue" : "keep",
+        "localStoragePreserved" : true,
+        "localStorageValue" : "keep"
+      },
+      "verification" : {
+        "allVerified" : true,
+        "batchSize" : 12,
+        "checkedCount" : 215,
+        "expectedCount" : 215,
+        "failedCount" : 0,
+        "passedCount" : 215
+      }
+    },
+    {
+      "oldReceiptRetained" : true,
+      "oldResourcesCacheOnlySHA256Verified" : true,
+      "progressBeforeCancel" : 0.98616521534478696,
+      "stage" : "cancel-partial-preparation",
+      "storageMarkers" : {
+        "cookiePreserved" : true,
+        "indexedDBPreserved" : true,
+        "indexedDBValue" : "keep",
+        "localStoragePreserved" : true,
+        "localStorageValue" : "keep"
+      },
+      "verification" : {
+        "allVerified" : true,
+        "batchSize" : 12,
+        "checkedCount" : 215,
+        "expectedCount" : 215,
+        "failedCount" : 0,
+        "passedCount" : 215
+      }
+    },
+    {
+      "engineReadyCount" : 1,
+      "sameWebViewAndLaunch" : true,
+      "stage" : "receipt-version-transition-with-active-game",
+      "stonesAfter" : 4,
+      "stonesBefore" : 2,
+      "storageMarkers" : {
+        "cookiePreserved" : true,
+        "indexedDBPreserved" : true,
+        "indexedDBValue" : "keep",
+        "localStoragePreserved" : true,
+        "localStorageValue" : "keep"
+      },
+      "verification" : {
+        "allVerified" : true,
+        "batchSize" : 12,
+        "checkedCount" : 216,
+        "expectedCount" : 216,
+        "failedCount" : 0,
+        "passedCount" : 216
+      },
+      "versionA" : "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856",
+      "versionB" : "afca4b442520f8606911991eb0e7ecc354eb491214f471ef45e97e66d128d9f0"
+    },
+    {
+      "assetRequests" : 42,
+      "cacheOnlyStatus" : 0,
+      "cookiePreserved" : true,
+      "freshGameEngineReady" : true,
+      "indexedDBPreserved" : true,
+      "localStoragePreserved" : true,
+      "stage" : "modeled-http-cache-reclamation",
+      "storageMarkers" : {
+        "cookiePreserved" : true,
+        "indexedDBPreserved" : true,
+        "indexedDBValue" : "keep",
+        "localStoragePreserved" : true,
+        "localStorageValue" : "keep"
+      }
+    }
+  ]
+}

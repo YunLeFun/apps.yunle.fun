@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-10-29T06:52:44.138742+08:00",
+  "status": "failed",
+  "command": [
+    "./node_modules/.bin/vitepress",
+    "build",
+    "docs",
+    "--outDir",
+    "/tmp/yunle-native-games.uGZuY9/startup-gameplay-docs-build.k14hxdvw"
+  ],
+  "outputDirectory": "/tmp/yunle-native-games.uGZuY9/startup-gameplay-docs-build.k14hxdvw",
+  "log": "/tmp/yunle-native-games.uGZuY9/startup-gameplay-docs-build-failed-jsonl.log",
+  "runtime": "Existing local binary; no install or package-manager trust override",
+  "exitCode": 1,
+  "elapsedSeconds": 3.344705708033871,
+  "outputFileBytesRemoved": 1277,
+  "outputRemoved": true,
+  "reportSHA256": "043a8d2cdd5f56289a1e2214a75f628d60d13b9198a1b04f1ed9149f6136c1a9",
+  "otherTemporaryBytecodeBytesRemoved": 6988,
+  "logSHA256": "68c6e32db8ab6da9fb3f3cd865206bb641f7498795fd2c5558773b8576aa0e32",
+  "cause": "VitePress treats .jsonl as a document link, despite raw file existing. Corrected link to lossless JSON wrapper; no ignoreDeadLinks override."
+}

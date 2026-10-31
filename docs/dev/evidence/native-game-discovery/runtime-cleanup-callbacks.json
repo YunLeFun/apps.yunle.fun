@@ -1,0 +1,103 @@
+{
+  "kind": "actual-WebKit-removal-callbacks",
+  "deadlineSeconds": 30,
+  "requiresCallbackSuccess": true,
+  "callbacks": [
+    {
+      "profileID": "18071477-40D8-403A-9D41-20FE7012A3CD",
+      "elapsedMilliseconds": 18.052083323709667,
+      "success": true
+    },
+    {
+      "profileID": "019C1247-BDFE-468F-A565-CB6DC107ADE5",
+      "elapsedMilliseconds": 12.175458308774978,
+      "success": true
+    },
+    {
+      "profileID": "4E8BC108-F188-4758-B135-545EC781F741",
+      "elapsedMilliseconds": 4.950125003233552,
+      "success": true
+    },
+    {
+      "profileID": "06DEB0A8-99C2-4EEC-AF8A-DE3DB8BF7AAA",
+      "elapsedMilliseconds": 5.734458332881331,
+      "success": true
+    },
+    {
+      "profileID": "898984CA-85FC-482E-9319-5BD4B07A9612",
+      "elapsedMilliseconds": 7.4711249908432364,
+      "success": true
+    },
+    {
+      "profileID": "AF8BC377-AC28-47E6-8DB8-FA0CD337D0FC",
+      "elapsedMilliseconds": 6.4649166306480765,
+      "success": true
+    },
+    {
+      "profileID": "0E72D4E2-291C-47CF-AAC7-E32BD56ADBC4",
+      "elapsedMilliseconds": 5.450333352200687,
+      "success": true
+    },
+    {
+      "profileID": "083F0D69-A72E-4853-950A-CBA0E83C907E",
+      "elapsedMilliseconds": 3.984416660387069,
+      "success": true
+    },
+    {
+      "profileID": "0F89FD73-D93B-47C4-AEC6-DD403CEA644F",
+      "elapsedMilliseconds": 3.504374995827675,
+      "success": true
+    },
+    {
+      "profileID": "0CB3DA0D-80E4-4C66-8D40-DD2E4AEE3424",
+      "elapsedMilliseconds": 0.047749956138432026,
+      "success": false
+    },
+    {
+      "profileID": "0CB3DA0D-80E4-4C66-8D40-DD2E4AEE3424",
+      "elapsedMilliseconds": 9.251000010408461,
+      "success": true
+    },
+    {
+      "profileID": "541588DF-70BE-4B0F-9E20-54704FCE5576",
+      "elapsedMilliseconds": 8.981041668448597,
+      "success": true
+    },
+    {
+      "profileID": "12E03446-5B6A-457A-B1B8-D006F61A648D",
+      "elapsedMilliseconds": 57.588249968830496,
+      "success": true
+    },
+    {
+      "profileID": "C2AAB3DA-C90A-4D41-8C76-484023F30A86",
+      "elapsedMilliseconds": 29.18941667303443,
+      "success": true
+    },
+    {
+      "profileID": "D8247E7E-007E-4109-8823-DC75690915D7",
+      "elapsedMilliseconds": 6.544083298649639,
+      "success": true
+    },
+    {
+      "profileID": "0F2FFA2A-6B6C-4710-961F-A5EBC8F41598",
+      "elapsedMilliseconds": 3.5539583186618984,
+      "success": true
+    },
+    {
+      "profileID": "B1210448-1D86-4F6E-BC4A-C38F0527E7D5",
+      "elapsedMilliseconds": 4.481666663195938,
+      "success": true
+    },
+    {
+      "profileID": "21C3352C-AA36-4315-B264-30E85B317420",
+      "elapsedMilliseconds": 4.8897500382736325,
+      "success": true
+    },
+    {
+      "profileID": "26C7E470-2CBE-4A08-866D-AC0424E8B540",
+      "elapsedMilliseconds": 3.788416681345552,
+      "success": true
+    }
+  ],
+  "note": "One initial in-use error retried; the test never converts a timeout to success"
+}

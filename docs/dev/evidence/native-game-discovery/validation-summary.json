@@ -1,0 +1,249 @@
+{
+  "updatedDate": "2026-10-29",
+  "appsBaseCommit": "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "playBaseCommit": "540e8e343cefeccd386159d9ba0e19f3b27b5952",
+  "catalogVersion": "48b468ef551a1ee6a53d9e809539fa0f219074bf3d0535ab87d03d864a8379c4",
+  "simulator": {
+    "id": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "device": "iPhone 18 Pro",
+    "os": "iOS 27.0",
+    "sdk": "iOS Simulator 27.1"
+  },
+  "runs": [
+    {
+      "name": "integrated-unit-tests",
+      "result": "Passed",
+      "totalTestCount": 72,
+      "passedTests": 72,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793202771.66,
+      "finishTime": 1793202800.145,
+      "testFailures": []
+    },
+    {
+      "name": "cache-live-enabled-tests",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793202925.267,
+      "finishTime": 1793202947.144,
+      "testFailures": []
+    },
+    {
+      "name": "native-ui-tests",
+      "result": "Passed",
+      "totalTestCount": 3,
+      "passedTests": 3,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793203112.328,
+      "finishTime": 1793203212.596,
+      "testFailures": []
+    },
+    {
+      "name": "owned-store-cleanup",
+      "result": "Failed",
+      "totalTestCount": 1,
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0,
+      "startTime": 1793205823.47,
+      "finishTime": 1793205863.726,
+      "testFailures": [
+        {
+          "failureText": "Crash: YunleFun",
+          "targetName": "YunleFunTests",
+          "testIdentifier": 1,
+          "testIdentifierString": "NativeGameRuntimeFixtureCleanupTests/testRemoveOnlyPreviouslyOwnedFixtureStores()",
+          "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeFixtureCleanupTests/testRemoveOnlyPreviouslyOwnedFixtureStores",
+          "testName": "testRemoveOnlyPreviouslyOwnedFixtureStores()"
+        }
+      ]
+    },
+    {
+      "name": "owned-store-cleanup-repaired",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793206252.721,
+      "finishTime": 1793206267.678,
+      "testFailures": []
+    },
+    {
+      "name": "runtime-repaired-tests",
+      "result": "Passed",
+      "totalTestCount": 22,
+      "passedTests": 22,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793206321.886,
+      "finishTime": 1793206346.968,
+      "testFailures": []
+    },
+    {
+      "name": "native-startup-preflight",
+      "result": "Failed",
+      "totalTestCount": 1,
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0,
+      "startTime": 1793205923.208,
+      "finishTime": 1793206032.071,
+      "testFailures": [
+        {
+          "failureText": "failed - The real native game runtime did not reach the expected state",
+          "targetName": "YunleFunTests",
+          "testIdentifier": 1,
+          "testIdentifierString": "NativeGameStartupLiveTests/testFreshRuntimeStartupBeforeAndAfterResourcePreparation()",
+          "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameStartupLiveTests/testFreshRuntimeStartupBeforeAndAfterResourcePreparation",
+          "testName": "testFreshRuntimeStartupBeforeAndAfterResourcePreparation()"
+        }
+      ]
+    },
+    {
+      "name": "paper-startup-diagnostic",
+      "result": "Failed",
+      "totalTestCount": 1,
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0,
+      "startTime": 1793206363.586,
+      "finishTime": 1793206379.992,
+      "testFailures": [
+        {
+          "failureText": "XCTAssertNil failed: \"游戏资源来源或格式不受支持，请在线开玩。\"",
+          "targetName": "YunleFunTests",
+          "testIdentifier": 1,
+          "testIdentifierString": "NativeGameStartupLiveTests/testFreshRuntimeStartupBeforeAndAfterResourcePreparation()",
+          "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameStartupLiveTests/testFreshRuntimeStartupBeforeAndAfterResourcePreparation",
+          "testName": "testFreshRuntimeStartupBeforeAndAfterResourcePreparation()"
+        }
+      ]
+    },
+    {
+      "name": "latest-native-journeys",
+      "result": "Failed",
+      "totalTestCount": 26,
+      "passedTests": 25,
+      "failedTests": 1,
+      "skippedTests": 0,
+      "startTime": 1793206677.857,
+      "finishTime": 1793206813.611,
+      "testFailures": [
+        {
+          "failureText": "Failed to failed to scroll to visible (by AX action) Button, {{-147.0, 795.0}, {98.0, 54.0}}, identifier: 'person.crop.circle', label: '我', error: Error kAXErrorFailure performing AXAction kAXScrollToVisibleAction on element AX element pid: 50923, elementOrHash.elementID: 4379046912.38. (Underlying Error: Error kAXErrorFailure performing AXAction kAXScrollToVisibleAction on element AX element pid: 50923, elementOrHash.elementID: 4379046912.38)",
+          "targetName": "YunleFunUITests",
+          "testIdentifier": 24,
+          "testIdentifierString": "NativeGamesUITests/testGuestCanCancelRoomLoginAndReturnToGames()",
+          "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunUITests/NativeGamesUITests/testGuestCanCancelRoomLoginAndReturnToGames",
+          "testName": "testGuestCanCancelRoomLoginAndReturnToGames()"
+        }
+      ]
+    },
+    {
+      "name": "room-login-ui-repaired",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793207034.325,
+      "finishTime": 1793207069.42,
+      "testFailures": []
+    },
+    {
+      "name": "final-startup-preflight",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793206885.674,
+      "finishTime": 1793206909.551,
+      "testFailures": []
+    },
+    {
+      "name": "native-startup-n10",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793206924.429,
+      "finishTime": 1793207001.369,
+      "testFailures": []
+    },
+    {
+      "name": "final-identity-regression",
+      "result": "Passed",
+      "totalTestCount": 42,
+      "passedTests": 42,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793208714.27,
+      "finishTime": 1793208808.758,
+      "testFailures": []
+    },
+    {
+      "name": "entry-comparison-preflight",
+      "result": "Failed",
+      "totalTestCount": 1,
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0,
+      "startTime": 1793207933.372,
+      "finishTime": 1793207968.875,
+      "testFailures": [
+        {
+          "failureText": "XCTAssertEqual failed: (\"1793207949731.0\") is not equal to (\"1793207948656.0\") - Legacy comparison must retain one SPA document so resource timing includes both preceding pages",
+          "targetName": "YunleFunTests",
+          "testIdentifier": 1,
+          "testIdentifierString": "NativeGameEntryComparisonLiveTests/testSameBuildLegacyEntryAgainstDirectAndPreparedStartup()",
+          "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameEntryComparisonLiveTests/testSameBuildLegacyEntryAgainstDirectAndPreparedStartup",
+          "testName": "testSameBuildLegacyEntryAgainstDirectAndPreparedStartup()"
+        }
+      ]
+    },
+    {
+      "name": "entry-comparison-preflight-repaired",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793208896.458,
+      "finishTime": 1793208926.498,
+      "testFailures": []
+    },
+    {
+      "name": "entry-comparison-n10",
+      "result": "Passed",
+      "totalTestCount": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "startTime": 1793208945.159,
+      "finishTime": 1793209064.642,
+      "testFailures": []
+    }
+  ],
+  "limitations": [
+    "Local loopback preview; no native production SSO/Universal Link end-to-end acceptance",
+    "The browser navigation comparison normalized external asset CORS; it is not raw CDN or native performance evidence",
+    "An interrupted initial runtime result is partial, not a passed xcresult",
+    "Latest native journeys had 25 passed and 1 failed; the portrait-fixed room-login case passed separately",
+    "No physical-device performance or TestFlight/production deployment",
+    "Final same-build entry comparison completed 60 genuine engine-ready samples; it is not an old-commit or public-network baseline",
+    "Short-landscape tutorial layout and full VoiceOver game acceptance remain pending"
+  ],
+  "startupN10CatalogVersion": "f72c967bbe7d994dfd3919ba912b2a8f23fab3fbfb4023d38b4367dd413154da",
+  "documentationBuild": {
+    "result": "Passed",
+    "outputReclaimedFileBytes": 20082823
+  }
+}

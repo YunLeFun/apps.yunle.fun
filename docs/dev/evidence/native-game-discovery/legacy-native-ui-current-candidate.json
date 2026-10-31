@@ -1,0 +1,46 @@
+{
+  "schema": "legacy-native-ui-followup-current-candidate-v1",
+  "bundleID": "fun.yunle.apps.native-dev",
+  "processID": 55221,
+  "previewEnvironment": {
+    "YUNLEFUN_PLAY_PREVIEW": "1"
+  },
+  "normalPreviewServerPID": 12343,
+  "normalPreviewServer": "127.0.0.1:18146 nofault/traceflags",
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "mainUI": "After legacy portal journey, existing current app relaunched preview1; Home 今天来做菜 tile observed; Games tab selected, no active game. No whole-data-equality claim.",
+  "sourceFiles": [
+    {
+      "file": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+      "bytes": 189523,
+      "sha256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c"
+    },
+    {
+      "file": "apps/ios/YunleFun/Services/NativeGameResourceCache.swift",
+      "bytes": 28150,
+      "sha256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260"
+    },
+    {
+      "file": "apps/ios/YunleFun/Services/AccountStore.swift",
+      "bytes": 17076,
+      "sha256": "df80adf44696c9026f2ccd865ee0e53b3cbfb2906562049983496aca294ffd58"
+    },
+    {
+      "file": "apps/ios/YunleFun/Features/Games/GamesView.swift",
+      "bytes": 14431,
+      "sha256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57"
+    },
+    {
+      "file": "apps/ios/YunleFun/App/YunleFunApp.swift",
+      "bytes": 8450,
+      "sha256": "1bfeec0dbea1f85b657dd7cc0f8a65af99e4c5e189aeedcffd287821d23c17f0"
+    }
+  ],
+  "appInfoSHA256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+  "executableSHA256": "b3ea32d64822acb31199ac7899aa81f3dfcde7592a92272084e36610de173fa3",
+  "debugDylibSHA256": "8554aa86f0c3dd4bf0116af150c2b518c681312dac989d7aea77126714ca95c1",
+  "screenshot": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/legacy-ui-followup-current-games.jpg",
+  "scope": "No currentproductdelta from blank experiment; restored testsource rebuiltbefore install. Source fingerprints are current observation, not proof of minimumOS/hardware or onlineSSO.",
+  "recordedAt": "2026-10-29T08:31:19.094048+08:00",
+  "currentBinaryMatchesPriorCandidateFingerprint": true
+}

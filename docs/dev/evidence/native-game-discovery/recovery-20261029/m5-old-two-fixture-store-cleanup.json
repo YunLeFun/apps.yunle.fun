@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "kind": "M5-exact-old-two-fixture-store-maintenance-cleanup",
+  "atUTC": "2026-10-30T07:47:40.906560+00:00",
+  "status": "passed-exact-owned-two-confirmed-absent",
+  "test": {
+    "identifier": "YunleFunTests/NativeGameRuntimeFixtureCleanupTests/testRemoveOnlyPreviouslyOwnedFixtureStores",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "executionCount": 1,
+    "methodSeconds": 2.629,
+    "runtimeSeventeenRepeated": false
+  },
+  "cleanup": {
+    "requested": 2,
+    "existedBefore": 2,
+    "remainingAfter": 0,
+    "actualTwoPresentStoresRemoved": true,
+    "profileIdentifierSHA256": [
+      "0d7624314edcdd3c9fabc38a8c2b62a97773286109ca33d031449b0826b4c177",
+      "7df4a08385a667c4bd5bf74c151ea8df7768c4df840aa60438ff9e978c2b4fee"
+    ],
+    "gate": "Existing iOS17+ opt-in gate temporarily narrowed to exactly these2 provenance-backed fixture UUIDs; request equality and uniqueness required.",
+    "sdkSemantics": "Enumerate before, remove only requested intersect present, enumerate after and assert requested intersection empty; no named stores reconstructed for inspection.",
+    "unrelatedStoreDeletionAttempted": false
+  },
+  "source": {
+    "beforeAndRestoredTestSHA256": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509",
+    "temporaryCleanupTestSHA256": "cd7d72899860d73c430bc365d1ac9e083f2d7e0806ce2f27a7e096bc55c42e4d",
+    "restoredBeforeTestExecution": true,
+    "temporaryHardcodedIDsRemainInSource": false,
+    "recordedSourceInventoryCount": 443,
+    "sourceInventoryBeforeEqualsAfter": true,
+    "buildInventoryChanges": [
+      "NativeGameRuntimeTests.swift temporary cleanup gate only"
+    ],
+    "assistantActualSHA256": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+    "assistantOldSHANotRequired": true,
+    "compiledCleanupUnitSHA256": "1f8c2cebb543e0f7f9f96e5a1ce82c976eef5d854c970acdf8b0fad371b83616",
+    "limitation": "Cleanup build included currentAssistant fix; this maintenance test does not verify Assistant navigation. Frozen olda701 was restored afterwards."
+  },
+  "restoration": {
+    "frozenA701Restored": true,
+    "fourFingerprintsMatch": true,
+    "normalLaunchPreview": "0",
+    "productFiles": {
+      "YunleFun": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+      "YunleFun.debug.dylib": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+      "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+    },
+    "simulatorHandedBackToRoot": true
+  },
+  "temporaryProductRetirement": {
+    "status": "archived-and-retired",
+    "archiveSHA256": "677344185e61190c3716a4c2baa2023796f6e7ac3c258c7725e7d01aeb59cd17",
+    "archiveBytes": 4475797,
+    "actualUnitSHA256": "1f8c2cebb543e0f7f9f96e5a1ce82c976eef5d854c970acdf8b0fad371b83616",
+    "productAllocatedRemovedBytes": 160919552,
+    "filesystemFreeChangeDuringDeletionBytes": -151552
+  },
+  "compactArchive": {
+    "byteCount": 4475797,
+    "memberCount": 9,
+    "sha256": "677344185e61190c3716a4c2baa2023796f6e7ac3c258c7725e7d01aeb59cd17",
+    "allMemberBytesReopenedAndVerified": true,
+    "compiledFullProductCopyAbsent": true
+  },
+  "originalFailedRound": {
+    "publicReceipt": "m5-runtime-b61-final-a701-validation.json",
+    "sha256": "9e4714e0d14c56c66b916037f5456248c63f3009680697e8dcb57df8270cfb89",
+    "passed": 15,
+    "failed": 2,
+    "skipped": 0,
+    "originalFailureVerdictPreserved": true,
+    "separateCleanupNowResolved": true
+  },
+  "privateEvidenceSHA256": {
+    "execution-receipt.json": "dfe595cc21067e8a1ecdd669c656f17d27f74cae272a2651ae28dc81599df669",
+    "test-summary.json": "d242e462ca9136c36bf3bc5dda4d8bd73666461d742c232b667e61a61740cd32",
+    "attachments/manifest.json": "33277b3360eb500f596ad3ec54cda0d4c256e5bcf1f272f3faa7d0f0de7bca52",
+    "sources-before.json": "04f2f729ecad1cca9764d234c90bd46f2e136ee327d48d73c57c7e943167f01c",
+    "sources-during-build.json": "5c16fe6e059e583f5f4c2e36a3f6be6f19c5e72b770599f2036c4d13916c6445",
+    "sources-after-build-restoration.json": "04f2f729ecad1cca9764d234c90bd46f2e136ee327d48d73c57c7e943167f01c",
+    "compiled-product-identities.json": "736d01f0001fc250ca70d83123cacf3b6bb8ed1bbf1388db7fc574795936423d",
+    "restoration-fingerprints.json": "4379ee588c502fb89fd922858e47f136ac301a7d6beb3dd913cd6d117c926866",
+    "restoration-launch.json": "db252693984ebf2925edbe75219fb6e8ade1990e1c7557d8d82c3969a2669bd8",
+    "restoration-stop.json": "7c129df385a178889f565e0a3bbe201ddc090edddf678d55af2c02247f19ae2d"
+  },
+  "privatePlanSHA256": {
+    "owned-profile-provenance.json": "5c6faaa31aa529b8cce64f66df610dd0c409f661d39deef422039134d5ac3ab2",
+    "execution-plan.json": "cabb4e4395796acd89800edd8012a4f9b39caddc939cb6916fb7d6a19a82b697",
+    "temporary-owned-two-only.patch": "207360092b8f919494f483cc60b7706843cb8293173c3a60db14f5a6e9caccf7",
+    "executed-wrapper.py": "6ea815ebebceb9a657c573cc59c184eeb10725b4e00367a02073d5dc8edeb049"
+  },
+  "limits": [
+    "This is a separate exact-owned-store maintenance acceptance, not a rerun or regrading of original15/2.",
+    "The earlier targeted2 and full17 remain their own unchanged one-pass results.",
+    "Allocated-file removal and global filesystem free change are distinct observations; no physical153MiB free-space claim.",
+    "No simulator was created or erased; only the Root-handed-off shared device was used."
+  ]
+}

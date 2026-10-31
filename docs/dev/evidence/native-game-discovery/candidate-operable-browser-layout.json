@@ -1,0 +1,1729 @@
+{
+  "kind": "Chromium actual new static output, all local requests fulfilled from this directory; not a native safe-area proof",
+  "publicDirectory": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public",
+  "completed": true,
+  "results": [
+    {
+      "mode": "tutorial",
+      "width": 874,
+      "height": 324,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "playing",
+        "nativeState": "ready"
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 89,
+        "width": 874,
+        "height": 182,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 6.390625,
+          "y": 276,
+          "width": 166.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 176.796875,
+          "y": 276,
+          "width": 166.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 349.59375,
+          "y": 276,
+          "width": 168.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 524.390625,
+          "y": 276,
+          "width": 168.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 699.1875,
+          "y": 276,
+          "width": 168.421875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 830,
+        "y": 44,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [
+        {
+          "x": 764.4375,
+          "y": 0,
+          "width": 48.78125,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 817.21875,
+          "y": 0,
+          "width": 48.78125,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "console": "none",
+      "touchPadding": {
+        "left": "6.4px",
+        "right": "6.4px",
+        "bottom": "4px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 324,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "guidePauseResumeAndSkip": true,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "local",
+      "width": 874,
+      "height": 324,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 45,
+        "width": 874,
+        "height": 226,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 6.390625,
+          "y": 276,
+          "width": 166.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 176.796875,
+          "y": 276,
+          "width": 166.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 349.59375,
+          "y": 276,
+          "width": 168.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 524.390625,
+          "y": 276,
+          "width": 168.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 699.1875,
+          "y": 276,
+          "width": 168.421875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 830,
+        "y": 0,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "6.4px",
+        "right": "6.4px",
+        "bottom": "4px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 324,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "pve",
+      "width": 874,
+      "height": 324,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 45,
+        "width": 874,
+        "height": 226,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 6.390625,
+          "y": 276,
+          "width": 166.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 176.796875,
+          "y": 276,
+          "width": 166.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 349.59375,
+          "y": 276,
+          "width": 168.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 524.390625,
+          "y": 276,
+          "width": 168.40625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 699.1875,
+          "y": 276,
+          "width": 168.421875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 830,
+        "y": 0,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "6.4px",
+        "right": "6.4px",
+        "bottom": "4px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 324,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "tutorial",
+      "width": 402,
+      "height": 320,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 89,
+        "width": 402,
+        "height": 178,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 6.390625,
+          "y": 272,
+          "width": 72,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 82.390625,
+          "y": 272,
+          "width": 72.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.796875,
+          "y": 272,
+          "width": 74,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 241.1875,
+          "y": 272,
+          "width": 74.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 321.59375,
+          "y": 272,
+          "width": 74.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 358,
+        "y": 44,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [
+        {
+          "x": 292.4375,
+          "y": 0,
+          "width": 48.78125,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 345.21875,
+          "y": 0,
+          "width": 48.78125,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "console": "none",
+      "touchPadding": {
+        "left": "6.4px",
+        "right": "6.4px",
+        "bottom": "4px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 320,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "guidePauseResumeAndSkip": true,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "local",
+      "width": 402,
+      "height": 320,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 45,
+        "width": 402,
+        "height": 222,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 6.390625,
+          "y": 272,
+          "width": 72,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 82.390625,
+          "y": 272,
+          "width": 72.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.796875,
+          "y": 272,
+          "width": 74,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 241.1875,
+          "y": 272,
+          "width": 74.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 321.59375,
+          "y": 272,
+          "width": 74.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 358,
+        "y": 0,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "6.4px",
+        "right": "6.4px",
+        "bottom": "4px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 320,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "pve",
+      "width": 402,
+      "height": 320,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 45,
+        "width": 402,
+        "height": 222,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 6.390625,
+          "y": 272,
+          "width": 72,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 82.390625,
+          "y": 272,
+          "width": 72.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.796875,
+          "y": 272,
+          "width": 74,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 241.1875,
+          "y": 272,
+          "width": 74.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 321.59375,
+          "y": 272,
+          "width": 74.015625,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 358,
+        "y": 0,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "6.4px",
+        "right": "6.4px",
+        "bottom": "4px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 320,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "tutorial",
+      "width": 874,
+      "height": 324,
+      "fontSize": 24,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 92.1875,
+        "width": 874,
+        "height": 168.234375,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 9.59375,
+          "y": 267.421875,
+          "width": 162.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 177.796875,
+          "y": 267.421875,
+          "width": 162.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 349.59375,
+          "y": 267.421875,
+          "width": 165.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 524.390625,
+          "y": 267.421875,
+          "width": 165.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 699.1875,
+          "y": 267.421875,
+          "width": 165.21875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 830,
+        "y": 45.59375,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [
+        {
+          "x": 709.625,
+          "y": 0,
+          "width": 73.1875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 788.8125,
+          "y": 0,
+          "width": 73.1875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "console": "none",
+      "touchPadding": {
+        "left": "9.6px",
+        "right": "9.6px",
+        "bottom": "6px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 324,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "guidePauseResumeAndSkip": true,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "local",
+      "width": 874,
+      "height": 324,
+      "fontSize": 24,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 48.1875,
+        "width": 874,
+        "height": 212.234375,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 9.59375,
+          "y": 267.421875,
+          "width": 162.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 177.796875,
+          "y": 267.421875,
+          "width": 162.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 349.59375,
+          "y": 267.421875,
+          "width": 165.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 524.390625,
+          "y": 267.421875,
+          "width": 165.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 699.1875,
+          "y": 267.421875,
+          "width": 165.21875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 830,
+        "y": 1.59375,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "9.6px",
+        "right": "9.6px",
+        "bottom": "6px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 324,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "pve",
+      "width": 874,
+      "height": 324,
+      "fontSize": 24,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 48.1875,
+        "width": 874,
+        "height": 212.234375,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 9.59375,
+          "y": 267.421875,
+          "width": 162.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 177.796875,
+          "y": 267.421875,
+          "width": 162.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 349.59375,
+          "y": 267.421875,
+          "width": 165.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 524.390625,
+          "y": 267.421875,
+          "width": 165.203125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 699.1875,
+          "y": 267.421875,
+          "width": 165.21875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 830,
+        "y": 1.59375,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "9.6px",
+        "right": "9.6px",
+        "bottom": "6px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 324,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "tutorial",
+      "width": 402,
+      "height": 320,
+      "fontSize": 24,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 89,
+        "width": 402,
+        "height": 167.421875,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 9.59375,
+          "y": 263.421875,
+          "width": 67.796875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 83.390625,
+          "y": 263.421875,
+          "width": 67.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.796875,
+          "y": 263.421875,
+          "width": 70.796875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 241.1875,
+          "y": 263.421875,
+          "width": 70.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 321.59375,
+          "y": 263.421875,
+          "width": 70.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 358,
+        "y": 44,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [
+        {
+          "x": 237.625,
+          "y": 0,
+          "width": 73.1875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 316.8125,
+          "y": 0,
+          "width": 73.1875,
+          "height": 44,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "console": "none",
+      "touchPadding": {
+        "left": "9.6px",
+        "right": "9.6px",
+        "bottom": "6px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 320,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "guidePauseResumeAndSkip": true,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "local",
+      "width": 402,
+      "height": 320,
+      "fontSize": 24,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 45,
+        "width": 402,
+        "height": 211.421875,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 9.59375,
+          "y": 263.421875,
+          "width": 67.796875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 83.390625,
+          "y": 263.421875,
+          "width": 67.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.796875,
+          "y": 263.421875,
+          "width": 70.796875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 241.1875,
+          "y": 263.421875,
+          "width": 70.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 321.59375,
+          "y": 263.421875,
+          "width": 70.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 358,
+        "y": 0,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "9.6px",
+        "right": "9.6px",
+        "bottom": "6px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 320,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "pve",
+      "width": 402,
+      "height": 320,
+      "fontSize": 24,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": true,
+      "ready": "ready",
+      "canvas": {
+        "x": 0,
+        "y": 45,
+        "width": 402,
+        "height": 211.421875,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 9.59375,
+          "y": 263.421875,
+          "width": 67.796875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 83.390625,
+          "y": 263.421875,
+          "width": 67.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.796875,
+          "y": 263.421875,
+          "width": 70.796875,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 241.1875,
+          "y": 263.421875,
+          "width": 70.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 321.59375,
+          "y": 263.421875,
+          "width": 70.8125,
+          "height": 50.578125,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 358,
+        "y": 0,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "none",
+      "touchPadding": {
+        "left": "9.6px",
+        "right": "9.6px",
+        "bottom": "6px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 320,
+      "errors": [],
+      "blockedExternalResourceCount": 2,
+      "compactMenuDetailsAccessible": true
+    },
+    {
+      "mode": "tutorial",
+      "width": 402,
+      "height": 874,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": false,
+      "ready": "ready",
+      "canvas": {
+        "x": 11,
+        "y": 263.21875,
+        "width": 380,
+        "height": 380,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 19.796875,
+          "y": 703.203125,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 76.59375,
+          "y": 703.203125,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 191.84375,
+          "y": 703.203125,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 247.03125,
+          "y": 703.203125,
+          "width": 59.1875,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 313.40625,
+          "y": 703.203125,
+          "width": 68.796875,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 340.609375,
+        "y": 208.484375,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [
+        {
+          "x": 292.828125,
+          "y": 104.265625,
+          "width": 86.171875,
+          "height": 47.59375,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "console": "grid",
+      "touchPadding": {
+        "left": "8.8px",
+        "right": "8.8px",
+        "bottom": "8px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 934,
+      "errors": [],
+      "blockedExternalResourceCount": 2
+    },
+    {
+      "mode": "local",
+      "width": 402,
+      "height": 874,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": false,
+      "ready": "ready",
+      "canvas": {
+        "x": 11,
+        "y": 151.046875,
+        "width": 380,
+        "height": 380,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 19.796875,
+          "y": 591.03125,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 76.59375,
+          "y": 591.03125,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 191.84375,
+          "y": 591.03125,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 247.03125,
+          "y": 591.03125,
+          "width": 59.1875,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 313.40625,
+          "y": 591.03125,
+          "width": 68.796875,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 340.609375,
+        "y": 96.3125,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "grid",
+      "touchPadding": {
+        "left": "8.8px",
+        "right": "8.8px",
+        "bottom": "8px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 874,
+      "errors": [],
+      "blockedExternalResourceCount": 2
+    },
+    {
+      "mode": "pve",
+      "width": 402,
+      "height": 874,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": false,
+      "ready": "ready",
+      "canvas": {
+        "x": 11,
+        "y": 133.453125,
+        "width": 380,
+        "height": 380,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 19.796875,
+          "y": 700.15625,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 76.59375,
+          "y": 700.15625,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 191.84375,
+          "y": 700.15625,
+          "width": 48,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 247.03125,
+          "y": 700.15625,
+          "width": 59.1875,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 313.40625,
+          "y": 700.15625,
+          "width": 68.796875,
+          "height": 48.796875,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 340.609375,
+        "y": 78.71875,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "grid",
+      "touchPadding": {
+        "left": "8.8px",
+        "right": "8.8px",
+        "bottom": "8px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 951,
+      "errors": [],
+      "blockedExternalResourceCount": 2
+    },
+    {
+      "mode": "tutorial",
+      "width": 1280,
+      "height": 800,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": false,
+      "ready": "ready",
+      "canvas": {
+        "x": 81,
+        "y": 303.28125,
+        "width": 885,
+        "height": 448.15625,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 93.796875,
+          "y": 765.234375,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 160.1875,
+          "y": 765.234375,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 951.046875,
+          "y": 765.234375,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 1019.828125,
+          "y": 765.234375,
+          "width": 72,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 1103.015625,
+          "y": 765.234375,
+          "width": 83.1875,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 1146.1875,
+        "y": 243.34375,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [
+        {
+          "x": 1080.828125,
+          "y": 125.90625,
+          "width": 102.171875,
+          "height": 47.59375,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "console": "grid",
+      "touchPadding": {
+        "left": "12.8px",
+        "right": "12.8px",
+        "bottom": "12.8px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 961,
+      "errors": [],
+      "blockedExternalResourceCount": 2
+    },
+    {
+      "mode": "local",
+      "width": 1280,
+      "height": 800,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": false,
+      "ready": "ready",
+      "canvas": {
+        "x": 81,
+        "y": 161.4375,
+        "width": 885,
+        "height": 448.15625,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 93.796875,
+          "y": 623.390625,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 160.1875,
+          "y": 623.390625,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 951.046875,
+          "y": 623.390625,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 1019.828125,
+          "y": 623.390625,
+          "width": 72,
+          "height": 51.1875,
+          "onScreen": true,
+          "hit": true
+        },
+        {
+          "x": 1103.015625,
+          "y": 623.390625,
+          "width": 83.1875,
+          "height": 51.1875,
+          "onScreen": true,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 1146.1875,
+        "y": 101.5,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "grid",
+      "touchPadding": {
+        "left": "12.8px",
+        "right": "12.8px",
+        "bottom": "12.8px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 819,
+      "errors": [],
+      "blockedExternalResourceCount": 2
+    },
+    {
+      "mode": "pve",
+      "width": 1280,
+      "height": 800,
+      "fontSize": 16,
+      "rendererObservation": {
+        "phase": "countdown",
+        "nativeState": null
+      },
+      "readyObservations": [
+        {
+          "phase": "playing",
+          "rendererReady": "true"
+        }
+      ],
+      "compact": false,
+      "ready": "ready",
+      "canvas": {
+        "x": 81,
+        "y": 256.28125,
+        "width": 885,
+        "height": 500.046875,
+        "onScreen": true,
+        "hit": true
+      },
+      "controls": [
+        {
+          "x": 93.796875,
+          "y": 770.125,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 160.1875,
+          "y": 770.125,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 951.046875,
+          "y": 770.125,
+          "width": 57.59375,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 1019.828125,
+          "y": 770.125,
+          "width": 72,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        },
+        {
+          "x": 1103.015625,
+          "y": 770.125,
+          "width": 83.1875,
+          "height": 51.1875,
+          "onScreen": false,
+          "hit": true
+        }
+      ],
+      "menu": {
+        "x": 1146.1875,
+        "y": 196.34375,
+        "width": 44,
+        "height": 44,
+        "onScreen": true,
+        "hit": true
+      },
+      "coach": [],
+      "console": "grid",
+      "touchPadding": {
+        "left": "12.8px",
+        "right": "12.8px",
+        "bottom": "12.8px"
+      },
+      "hudPadding": {
+        "left": "0px",
+        "right": "0px"
+      },
+      "scrollHeight": 966,
+      "errors": [],
+      "blockedExternalResourceCount": 2
+    }
+  ]
+}

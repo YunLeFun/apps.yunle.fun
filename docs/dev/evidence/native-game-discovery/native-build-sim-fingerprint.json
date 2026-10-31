@@ -1,0 +1,117 @@
+{
+  "kind": "read-only-existing-native-build-fingerprint",
+  "observedAt": "2026-10-29T15:14:34.887777+08:00",
+  "derivedData": "/tmp/yunle-native-games.uGZuY9/DerivedData",
+  "verdict": {
+    "buildSucceeded": true,
+    "bundledCatalogMatchesCurrentSourceBytes": true,
+    "catalogCopyRecordedInLatestBuild": true,
+    "runtimeAcceptanceVerified": false
+  },
+  "buildEvidence": {
+    "source": "Xcode LogStoreManifest primaryObservable and matching xcactivitylog",
+    "logID": "79109439-9425-4E44-855F-9C0FFDAE6294",
+    "title": "Building project YunleFun with scheme YunleFun and configuration Debug",
+    "configuration": "Debug",
+    "startedAtCST": "2026-10-29T15:07:12.195975+08:00",
+    "endedAtCST": "2026-10-29T15:07:18.915641+08:00",
+    "elapsedSeconds": 6.719666,
+    "primaryObservable": {
+      "highLevelStatus": "S",
+      "totalNumberOfAnalyzerIssues": 0,
+      "totalNumberOfErrors": 0,
+      "totalNumberOfTestFailures": 0,
+      "totalNumberOfWarnings": 0
+    },
+    "logStoreManifest": {
+      "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Logs/Build/LogStoreManifest.plist",
+      "bytes": 3164,
+      "sha256": "551667be8c39ae30d07583aa5622f958db894052a3f1d36cd5b64bd22f602415"
+    },
+    "activityLog": {
+      "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Logs/Build/79109439-9425-4E44-855F-9C0FFDAE6294.xcactivitylog",
+      "bytes": 11934,
+      "sha256": "19d9be4ac5b45b72e691596ddf146b649e2b1b57ee89deda72606dcea84c19dd"
+    },
+    "activityLogGzipDecoded": true,
+    "plainBuildSimStdoutLogLocatedInTaskRoots": false
+  },
+  "bundle": {
+    "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app",
+    "identifier": "fun.yunle.apps.native-dev",
+    "marketingVersion": "0.2.0",
+    "buildVersion": "5",
+    "platform": "iphonesimulator",
+    "sdk": "iphonesimulator27.1",
+    "xcodeBuild": "27A9275",
+    "minimumOSVersion": "16.0",
+    "architecture": "arm64",
+    "architectureEvidence": "read-only file(1) of executable and Debug dylib",
+    "files": [
+      {
+        "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app/Info.plist",
+        "bytes": 1765,
+        "sha256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5"
+      },
+      {
+        "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app/YunleFun",
+        "bytes": 58496,
+        "sha256": "6e544285d4dfccfade0143677f2471cb4f36aebc930f3e225c38a69c3bbb52f7"
+      },
+      {
+        "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app/YunleFun.debug.dylib",
+        "bytes": 40487168,
+        "sha256": "8554aa86f0c3dd4bf0116af150c2b518c681312dac989d7aea77126714ca95c1"
+      }
+    ]
+  },
+  "catalog": {
+    "catalogVersion": "9e76246e6a6234344847c3da0f663439f46b8f515a4ccad1aa81ee9ce46d44d8",
+    "schemaVersion": 1,
+    "source": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Resources/native-game-catalog-v1.json",
+      "bytes": 4561,
+      "sha256": "69124daedb8d8ec3f06e8072e60ba1201cb120af40a7fb67a880e126194b0e3a"
+    },
+    "bundled": {
+      "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app/native-game-catalog-v1.json",
+      "bytes": 4561,
+      "sha256": "69124daedb8d8ec3f06e8072e60ba1201cb120af40a7fb67a880e126194b0e3a"
+    },
+    "games": [
+      {
+        "gameId": "gomoku",
+        "resourceVersion": "ee7c45286ac80b61ce989d51e2e67ea21021aade389664e6476058d40dc91fdd"
+      },
+      {
+        "gameId": "flight-chess",
+        "resourceVersion": "e2a1011d30478c012626a94597f35f0a9c783a1ad10996bb0841efba595377fc"
+      },
+      {
+        "gameId": "paper-star",
+        "resourceVersion": "84fb19a5961193e4178133387e9230fa5f54156d1858333bc009579c1575bc18"
+      }
+    ],
+    "existingCapturedProductionCatalog": {
+      "path": "/tmp/yunle-native-production.08darurg/production-after-static/catalog.body",
+      "bytes": 4561,
+      "sha256": "69124daedb8d8ec3f06e8072e60ba1201cb120af40a7fb67a880e126194b0e3a",
+      "catalogVersion": "9e76246e6a6234344847c3da0f663439f46b8f515a4ccad1aa81ee9ce46d44d8",
+      "matchesBundledBytes": true,
+      "networkRequestedByThisAudit": false
+    }
+  },
+  "limits": [
+    "Successful build is established by the latest Xcode activity metadata, not by an independently captured process exit code.",
+    "This audit does not establish the currently installed or running app version, native login, cold invitation, or two-account recovery."
+  ],
+  "auditActions": {
+    "buildExecuted": false,
+    "simulatorStarted": false,
+    "appInstalled": false,
+    "appLaunched": false,
+    "nativeUIAccessed": false,
+    "networkAccessed": false,
+    "otherProjectsOrAccountDataRead": false
+  }
+}

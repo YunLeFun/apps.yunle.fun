@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-29T05:36:30.776194+08:00",
+  "reusedUDID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "createdThisTask": [],
+  "erasedThisTask": [],
+  "deletedThisTask": [],
+  "devices": [
+    {
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+      "isAvailable": true,
+      "state": "Booted",
+      "name": "iPhone 18 Pro",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    },
+    {
+      "udid": "738191D2-2B9B-4A64-BDB0-9C788BEABAFC",
+      "isAvailable": true,
+      "state": "Booted",
+      "name": "iPhone 15 Pro",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    },
+    {
+      "udid": "20942FE3-19B3-40F1-A34B-EF636AE02B1B",
+      "isAvailable": true,
+      "state": "Booted",
+      "name": "iPad Pro 13-inch (M5)",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    },
+    {
+      "udid": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+      "isAvailable": true,
+      "state": "Shutdown",
+      "name": "iPad Pro 11-inch (M5)",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0"
+    },
+    {
+      "udid": "BAA7646B-5019-43BA-90A2-1248C996C3E6",
+      "isAvailable": true,
+      "state": "Shutdown",
+      "name": "iPhone Duo",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-1"
+    },
+    {
+      "udid": "F69F6452-D87D-4C56-ACDE-6E3E6A144CB3",
+      "isAvailable": true,
+      "state": "Booted",
+      "name": "iPhone 16 Pro",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5"
+    }
+  ],
+  "settingsRestorationEvidence": "reduce-motion-restored-accessibility.txt; voiceover-reduce-motion-journey.json enabledAfterCleanup=false"
+}

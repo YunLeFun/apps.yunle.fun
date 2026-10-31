@@ -1,0 +1,1175 @@
+{
+  "completed" : true,
+  "expectedSamples" : 6,
+  "kind" : "gomoku-held-blank-mechanism-n3",
+  "limits" : [
+    "Preparation is common and reported once; HTTP caches are not cleared or re-downloaded between alternating cases",
+    "WebKit\/JIT\/network process state can carry over across cases; this small mechanism probe is not a 30 percent target result",
+    "Profile\/cleanup checks are experimental guards, not verification of real account-generation races",
+    "Public SDK does not guarantee that a held blank view shares a WebContent process with the fresh game",
+    "Warm creation\/wait and full start-to-genuine-ready costs use native uptime; no document\/server clock subtraction",
+    "Weak WK object release is not proof of process termination, RSS release or exclusive game memory"
+  ],
+  "normalDefinition" : "normal-without-additional-blank; not OS cold or independently reset WebKit",
+  "order" : [
+    {
+      "condition" : "normal",
+      "pair" : 1
+    },
+    {
+      "condition" : "heldBlank",
+      "pair" : 1
+    },
+    {
+      "condition" : "heldBlank",
+      "pair" : 2
+    },
+    {
+      "condition" : "normal",
+      "pair" : 2
+    },
+    {
+      "condition" : "normal",
+      "pair" : 3
+    },
+    {
+      "condition" : "heldBlank",
+      "pair" : 3
+    }
+  ],
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "resourcePreparation" : {
+    "beginUptime" : 363984.98676870833,
+    "durationMilliseconds" : 3543.2345416629687,
+    "endUptime" : 363988.53000324999,
+    "preparedOnceSharedAcrossCases" : true,
+    "version" : "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856"
+  },
+  "results" : [
+    {
+      "blank" : {
+        "blankReadyUptime" : null,
+        "closeReason" : "sample-ended",
+        "creationBeginUptime" : null,
+        "heldAfterReadyMilliseconds" : null,
+        "initializationMilliseconds" : null,
+        "invalidationReason" : null,
+        "profileMonitorMilliseconds" : 100,
+        "profileValidationCount" : 15,
+        "releasedUptime" : null,
+        "viewCreated" : false
+      },
+      "blankHeldThroughReady" : false,
+      "blankReadyProof" : null,
+      "caseBeginUptime" : 363988.53159162501,
+      "caseStartToGenuineReadyMilliseconds" : 1282.3091250029393,
+      "completed" : true,
+      "condition" : "normal",
+      "genuineReadyUptime" : 363989.81390075001,
+      "hostPID" : 48277,
+      "iteration" : 1,
+      "pair" : 1,
+      "trace" : {
+        "completed" : true,
+        "gameId" : "gomoku",
+        "launchIDHash" : "c44dd888a49a96e3",
+        "milliseconds" : {
+          "documentStartReceiptToDOMContentLoadedReceipt" : 341.42783336574212,
+          "documentStartReceiptToReady" : 457.97545835375786,
+          "DOMContentLoadedReceiptToReady" : 116.54762498801574,
+          "DOMContentLoadedReceiptToWindowLoadReceipt" : 31.759833334945142,
+          "initialLoaderToPrepared" : 67.227499966975302,
+          "preparedToDocumentStartReceipt" : 694.31704166345298,
+          "preparedToReady" : 1152.2925000172108,
+          "presentEntryToInitialLoader" : 55.504833348095417,
+          "readyMinusPresentationCompleted" : 1151.7045833170414,
+          "tapToPresentationCompleted" : 127.0457916543819,
+          "tapToPresentEntry" : 3.7255416391417384,
+          "tapToReady" : 1278.7503749714233,
+          "windowLoadReceiptToReady" : 84.787791653070599
+        },
+        "modeId" : "computer",
+        "points" : [
+          {
+            "millisecondsAfterTap" : 0,
+            "phase" : "tap",
+            "uptimeSeconds" : 363988.53515037504
+          },
+          {
+            "millisecondsAfterTap" : 3.7255416391417384,
+            "phase" : "present-entered",
+            "uptimeSeconds" : 363988.53887591668
+          },
+          {
+            "millisecondsAfterTap" : 59.230374987237155,
+            "phase" : "initial-loader-entered",
+            "uptimeSeconds" : 363988.59438075003
+          },
+          {
+            "millisecondsAfterTap" : 126.45787495421246,
+            "phase" : "initial-loader-prepared-after-load-call",
+            "uptimeSeconds" : 363988.66160825
+          },
+          {
+            "millisecondsAfterTap" : 127.0457916543819,
+            "phase" : "present-completed",
+            "uptimeSeconds" : 363988.6621961667
+          },
+          {
+            "millisecondsAfterTap" : 820.77491661766544,
+            "phase" : "document-start-received",
+            "uptimeSeconds" : 363989.35592529166
+          },
+          {
+            "millisecondsAfterTap" : 1162.2027499834076,
+            "phase" : "dom-content-loaded-received",
+            "uptimeSeconds" : 363989.69735312503
+          },
+          {
+            "millisecondsAfterTap" : 1193.9625833183527,
+            "phase" : "window-load-received",
+            "uptimeSeconds" : 363989.72911295836
+          },
+          {
+            "millisecondsAfterTap" : 1278.7503749714233,
+            "phase" : "on-game-ready-received",
+            "uptimeSeconds" : 363989.81390075001
+          }
+        ],
+        "readyResourceTimingSnapshot" : {
+          "documentPath" : "\/games\/gomoku\/computer",
+          "mainDocumentOnly" : true,
+          "navigation" : [
+            {
+              "decodedBodySizeBytes" : 50514,
+              "domContentLoadedEventEndMilliseconds" : 383,
+              "domInteractiveMilliseconds" : 67,
+              "durationMilliseconds" : 415,
+              "encodedBodySizeBytes" : 50514,
+              "loadEventEndMilliseconds" : 415,
+              "responseEndMilliseconds" : 31,
+              "transferSizeBytes" : 50814,
+              "type" : "navigate"
+            }
+          ],
+          "overflowCount" : 0,
+          "resourceCount" : 40,
+          "resourceGroups" : [
+            {
+              "count" : 29,
+              "decodedBodySizeBytes" : 69,
+              "encodedBodySizeBytes" : 69,
+              "initiatorType" : "link",
+              "resourceDurationMaxMilliseconds" : 251,
+              "resourceDurationSumMilliseconds" : 1636,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 29,
+              "transferSizeBytes" : 6969,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 2,
+              "decodedBodySizeBytes" : 1097,
+              "encodedBodySizeBytes" : 1097,
+              "initiatorType" : "other",
+              "resourceDurationMaxMilliseconds" : 10,
+              "resourceDurationSumMilliseconds" : 13,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 2,
+              "transferSizeBytes" : 1697,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 1193,
+              "encodedBodySizeBytes" : 1193,
+              "initiatorType" : "img",
+              "resourceDurationMaxMilliseconds" : 7,
+              "resourceDurationSumMilliseconds" : 7,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 1493,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 7,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "css",
+              "resourceDurationMaxMilliseconds" : 210,
+              "resourceDurationSumMilliseconds" : 529,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 7,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "fetch",
+              "resourceDurationMaxMilliseconds" : 4,
+              "resourceDurationSumMilliseconds" : 4,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            }
+          ],
+          "snapshotAtMilliseconds" : 498,
+          "timeOrigin" : 1793228953172
+        },
+        "samePreparedProfileVerified" : true,
+        "state" : {
+          "nativeGameState" : "ready",
+          "paperStarPhase" : null,
+          "path" : "\/games\/gomoku\/computer",
+          "rendererReady" : null
+        },
+        "targetPath" : "\/games\/gomoku\/computer"
+      },
+      "weakBlankObjectReleasedWithinBound" : null
+    },
+    {
+      "blank" : {
+        "blankReadyUptime" : 363990.54156666668,
+        "closeReason" : "sample-ended",
+        "creationBeginUptime" : 363989.92205500003,
+        "heldAfterReadyMilliseconds" : 1365.7745000091381,
+        "initializationMilliseconds" : 619.51166664948687,
+        "invalidationReason" : null,
+        "profileMonitorMilliseconds" : 100,
+        "profileValidationCount" : 28,
+        "releasedUptime" : 363991.90734116669,
+        "viewCreated" : true
+      },
+      "blankHeldThroughReady" : true,
+      "blankReadyProof" : {
+        "aboutBlank" : true,
+        "expectedTitle" : true,
+        "hasHostBridge" : false,
+        "ready" : true,
+        "resourceEntries" : 0
+      },
+      "caseBeginUptime" : 363989.92099875002,
+      "caseStartToGenuineReadyMilliseconds" : 1925.5862083518878,
+      "completed" : true,
+      "condition" : "heldBlank",
+      "genuineReadyUptime" : 363991.84658495837,
+      "hostPID" : 48277,
+      "iteration" : 2,
+      "pair" : 1,
+      "trace" : {
+        "completed" : true,
+        "gameId" : "gomoku",
+        "launchIDHash" : "1b14acf90b0b6f14",
+        "milliseconds" : {
+          "documentStartReceiptToDOMContentLoadedReceipt" : 81.990249978844076,
+          "documentStartReceiptToReady" : 163.08541665785015,
+          "DOMContentLoadedReceiptToReady" : 81.09516667900607,
+          "DOMContentLoadedReceiptToWindowLoadReceipt" : 23.946333327330649,
+          "initialLoaderToPrepared" : 22.848125023301691,
+          "preparedToDocumentStartReceipt" : 1102.3120416793972,
+          "preparedToReady" : 1265.3974583372474,
+          "presentEntryToInitialLoader" : 14.10941663198173,
+          "readyMinusPresentationCompleted" : 1265.0262083625421,
+          "tapToPresentationCompleted" : 39.479749975726008,
+          "tapToPresentEntry" : 2.1509583457373083,
+          "tapToReady" : 1304.5059583382681,
+          "windowLoadReceiptToReady" : 57.148833351675421
+        },
+        "modeId" : "computer",
+        "points" : [
+          {
+            "millisecondsAfterTap" : 0,
+            "phase" : "tap",
+            "uptimeSeconds" : 363990.54207900004
+          },
+          {
+            "millisecondsAfterTap" : 2.1509583457373083,
+            "phase" : "present-entered",
+            "uptimeSeconds" : 363990.54422995838
+          },
+          {
+            "millisecondsAfterTap" : 16.260374977719039,
+            "phase" : "initial-loader-entered",
+            "uptimeSeconds" : 363990.55833937501
+          },
+          {
+            "millisecondsAfterTap" : 39.10850000102073,
+            "phase" : "initial-loader-prepared-after-load-call",
+            "uptimeSeconds" : 363990.58118750004
+          },
+          {
+            "millisecondsAfterTap" : 39.479749975726008,
+            "phase" : "present-completed",
+            "uptimeSeconds" : 363990.58155875001
+          },
+          {
+            "millisecondsAfterTap" : 1141.420541680418,
+            "phase" : "document-start-received",
+            "uptimeSeconds" : 363991.68349954172
+          },
+          {
+            "millisecondsAfterTap" : 1223.410791659262,
+            "phase" : "dom-content-loaded-received",
+            "uptimeSeconds" : 363991.76548979169
+          },
+          {
+            "millisecondsAfterTap" : 1247.3571249865927,
+            "phase" : "window-load-received",
+            "uptimeSeconds" : 363991.78943612502
+          },
+          {
+            "millisecondsAfterTap" : 1304.5059583382681,
+            "phase" : "on-game-ready-received",
+            "uptimeSeconds" : 363991.84658495837
+          }
+        ],
+        "readyResourceTimingSnapshot" : {
+          "documentPath" : "\/games\/gomoku\/computer",
+          "mainDocumentOnly" : true,
+          "navigation" : [
+            {
+              "decodedBodySizeBytes" : 50514,
+              "domContentLoadedEventEndMilliseconds" : 92,
+              "domInteractiveMilliseconds" : 32,
+              "durationMilliseconds" : 116,
+              "encodedBodySizeBytes" : 50514,
+              "loadEventEndMilliseconds" : 116,
+              "responseEndMilliseconds" : 7,
+              "transferSizeBytes" : 50814,
+              "type" : "navigate"
+            }
+          ],
+          "overflowCount" : 0,
+          "resourceCount" : 40,
+          "resourceGroups" : [
+            {
+              "count" : 29,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "link",
+              "resourceDurationMaxMilliseconds" : 53,
+              "resourceDurationSumMilliseconds" : 915,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 29,
+              "transferSizeBytes" : 6900,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 2,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "other",
+              "resourceDurationMaxMilliseconds" : 53,
+              "resourceDurationSumMilliseconds" : 54,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 2,
+              "transferSizeBytes" : 600,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "img",
+              "resourceDurationMaxMilliseconds" : 52,
+              "resourceDurationSumMilliseconds" : 52,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 7,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "css",
+              "resourceDurationMaxMilliseconds" : 22,
+              "resourceDurationSumMilliseconds" : 128,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 7,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "fetch",
+              "resourceDurationMaxMilliseconds" : 5,
+              "resourceDurationSumMilliseconds" : 5,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            }
+          ],
+          "snapshotAtMilliseconds" : 173,
+          "timeOrigin" : 1793228955531
+        },
+        "samePreparedProfileVerified" : true,
+        "state" : {
+          "nativeGameState" : "ready",
+          "paperStarPhase" : null,
+          "path" : "\/games\/gomoku\/computer",
+          "rendererReady" : null
+        },
+        "targetPath" : "\/games\/gomoku\/computer"
+      },
+      "weakBlankObjectReleasedWithinBound" : true
+    },
+    {
+      "blank" : {
+        "blankReadyUptime" : 363992.57625970838,
+        "closeReason" : "sample-ended",
+        "creationBeginUptime" : 363991.9634444167,
+        "heldAfterReadyMilliseconds" : 745.59883330948651,
+        "initializationMilliseconds" : 612.81529167899862,
+        "invalidationReason" : null,
+        "profileMonitorMilliseconds" : 100,
+        "profileValidationCount" : 21,
+        "releasedUptime" : 363993.32185854169,
+        "viewCreated" : true
+      },
+      "blankHeldThroughReady" : true,
+      "blankReadyProof" : {
+        "aboutBlank" : true,
+        "expectedTitle" : true,
+        "hasHostBridge" : false,
+        "ready" : true,
+        "resourceEntries" : 0
+      },
+      "caseBeginUptime" : 363991.96214316669,
+      "caseStartToGenuineReadyMilliseconds" : 1336.357083346229,
+      "completed" : true,
+      "condition" : "heldBlank",
+      "genuineReadyUptime" : 363993.29850025004,
+      "hostPID" : 48277,
+      "iteration" : 3,
+      "pair" : 2,
+      "trace" : {
+        "completed" : true,
+        "gameId" : "gomoku",
+        "launchIDHash" : "a642e023946194ea",
+        "milliseconds" : {
+          "documentStartReceiptToDOMContentLoadedReceipt" : 79.034583352040499,
+          "documentStartReceiptToReady" : 154.49429169530049,
+          "DOMContentLoadedReceiptToReady" : 75.45970834325999,
+          "DOMContentLoadedReceiptToWindowLoadReceipt" : 22.616041649598628,
+          "initialLoaderToPrepared" : 21.68737503234297,
+          "preparedToDocumentStartReceipt" : 531.07533330330625,
+          "preparedToReady" : 685.56962499860674,
+          "presentEntryToInitialLoader" : 12.250999978277832,
+          "readyMinusPresentationCompleted" : 685.20100001478568,
+          "tapToPresentationCompleted" : 36.524375027511269,
+          "tapToPresentEntry" : 2.217375033069402,
+          "tapToReady" : 721.72537504229695,
+          "windowLoadReceiptToReady" : 52.843666693661362
+        },
+        "modeId" : "computer",
+        "points" : [
+          {
+            "millisecondsAfterTap" : 0,
+            "phase" : "tap",
+            "uptimeSeconds" : 363992.57677487499
+          },
+          {
+            "millisecondsAfterTap" : 2.217375033069402,
+            "phase" : "present-entered",
+            "uptimeSeconds" : 363992.57899225003
+          },
+          {
+            "millisecondsAfterTap" : 14.468375011347234,
+            "phase" : "initial-loader-entered",
+            "uptimeSeconds" : 363992.59124325
+          },
+          {
+            "millisecondsAfterTap" : 36.155750043690205,
+            "phase" : "initial-loader-prepared-after-load-call",
+            "uptimeSeconds" : 363992.61293062504
+          },
+          {
+            "millisecondsAfterTap" : 36.524375027511269,
+            "phase" : "present-completed",
+            "uptimeSeconds" : 363992.61329925002
+          },
+          {
+            "millisecondsAfterTap" : 567.23108334699646,
+            "phase" : "document-start-received",
+            "uptimeSeconds" : 363993.14400595834
+          },
+          {
+            "millisecondsAfterTap" : 646.26566669903696,
+            "phase" : "dom-content-loaded-received",
+            "uptimeSeconds" : 363993.22304054169
+          },
+          {
+            "millisecondsAfterTap" : 668.88170834863558,
+            "phase" : "window-load-received",
+            "uptimeSeconds" : 363993.24565658334
+          },
+          {
+            "millisecondsAfterTap" : 721.72537504229695,
+            "phase" : "on-game-ready-received",
+            "uptimeSeconds" : 363993.29850025004
+          }
+        ],
+        "readyResourceTimingSnapshot" : {
+          "documentPath" : "\/games\/gomoku\/computer",
+          "mainDocumentOnly" : true,
+          "navigation" : [
+            {
+              "decodedBodySizeBytes" : 50514,
+              "domContentLoadedEventEndMilliseconds" : 87,
+              "domInteractiveMilliseconds" : 28,
+              "durationMilliseconds" : 109,
+              "encodedBodySizeBytes" : 50514,
+              "loadEventEndMilliseconds" : 109,
+              "responseEndMilliseconds" : 4,
+              "transferSizeBytes" : 50814,
+              "type" : "navigate"
+            }
+          ],
+          "overflowCount" : 0,
+          "resourceCount" : 40,
+          "resourceGroups" : [
+            {
+              "count" : 29,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "link",
+              "resourceDurationMaxMilliseconds" : 50,
+              "resourceDurationSumMilliseconds" : 673,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 29,
+              "transferSizeBytes" : 6900,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 2,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "other",
+              "resourceDurationMaxMilliseconds" : 49,
+              "resourceDurationSumMilliseconds" : 51,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 2,
+              "transferSizeBytes" : 600,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "img",
+              "resourceDurationMaxMilliseconds" : 49,
+              "resourceDurationSumMilliseconds" : 49,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 7,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "css",
+              "resourceDurationMaxMilliseconds" : 21,
+              "resourceDurationSumMilliseconds" : 135,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 7,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "fetch",
+              "resourceDurationMaxMilliseconds" : 4,
+              "resourceDurationSumMilliseconds" : 4,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            }
+          ],
+          "snapshotAtMilliseconds" : 162,
+          "timeOrigin" : 1793228956994
+        },
+        "samePreparedProfileVerified" : true,
+        "state" : {
+          "nativeGameState" : "ready",
+          "paperStarPhase" : null,
+          "path" : "\/games\/gomoku\/computer",
+          "rendererReady" : null
+        },
+        "targetPath" : "\/games\/gomoku\/computer"
+      },
+      "weakBlankObjectReleasedWithinBound" : true
+    },
+    {
+      "blank" : {
+        "blankReadyUptime" : null,
+        "closeReason" : "sample-ended",
+        "creationBeginUptime" : null,
+        "heldAfterReadyMilliseconds" : null,
+        "initializationMilliseconds" : null,
+        "invalidationReason" : null,
+        "profileMonitorMilliseconds" : 100,
+        "profileValidationCount" : 11,
+        "releasedUptime" : null,
+        "viewCreated" : false
+      },
+      "blankHeldThroughReady" : false,
+      "blankReadyProof" : null,
+      "caseBeginUptime" : 363993.374231625,
+      "caseStartToGenuineReadyMilliseconds" : 733.82062499877065,
+      "completed" : true,
+      "condition" : "normal",
+      "genuineReadyUptime" : 363994.10805225,
+      "hostPID" : 48277,
+      "iteration" : 4,
+      "pair" : 2,
+      "trace" : {
+        "completed" : true,
+        "gameId" : "gomoku",
+        "launchIDHash" : "971f40a87e03be04",
+        "milliseconds" : {
+          "documentStartReceiptToDOMContentLoadedReceipt" : 81.663541670423001,
+          "documentStartReceiptToReady" : 151.41245833365247,
+          "DOMContentLoadedReceiptToReady" : 69.748916663229465,
+          "DOMContentLoadedReceiptToWindowLoadReceipt" : 18.206083332188427,
+          "initialLoaderToPrepared" : 21.069374983198941,
+          "preparedToDocumentStartReceipt" : 545.01958331093192,
+          "preparedToReady" : 696.43204164458439,
+          "presentEntryToInitialLoader" : 13.581666687969118,
+          "readyMinusPresentationCompleted" : 696.0683332872577,
+          "tapToPresentationCompleted" : 36.705750040709972,
+          "tapToPresentEntry" : 1.6910000122152269,
+          "tapToReady" : 732.77408332796767,
+          "windowLoadReceiptToReady" : 51.542833331041038
+        },
+        "modeId" : "computer",
+        "points" : [
+          {
+            "millisecondsAfterTap" : 0,
+            "phase" : "tap",
+            "uptimeSeconds" : 363993.37527816667
+          },
+          {
+            "millisecondsAfterTap" : 1.6910000122152269,
+            "phase" : "present-entered",
+            "uptimeSeconds" : 363993.37696916668
+          },
+          {
+            "millisecondsAfterTap" : 15.272666700184345,
+            "phase" : "initial-loader-entered",
+            "uptimeSeconds" : 363993.39055083337
+          },
+          {
+            "millisecondsAfterTap" : 36.342041683383286,
+            "phase" : "initial-loader-prepared-after-load-call",
+            "uptimeSeconds" : 363993.41162020835
+          },
+          {
+            "millisecondsAfterTap" : 36.705750040709972,
+            "phase" : "present-completed",
+            "uptimeSeconds" : 363993.41198391671
+          },
+          {
+            "millisecondsAfterTap" : 581.36162499431521,
+            "phase" : "document-start-received",
+            "uptimeSeconds" : 363993.95663979166
+          },
+          {
+            "millisecondsAfterTap" : 663.02516666473821,
+            "phase" : "dom-content-loaded-received",
+            "uptimeSeconds" : 363994.03830333333
+          },
+          {
+            "millisecondsAfterTap" : 681.23124999692664,
+            "phase" : "window-load-received",
+            "uptimeSeconds" : 363994.05650941667
+          },
+          {
+            "millisecondsAfterTap" : 732.77408332796767,
+            "phase" : "on-game-ready-received",
+            "uptimeSeconds" : 363994.10805225
+          }
+        ],
+        "readyResourceTimingSnapshot" : {
+          "documentPath" : "\/games\/gomoku\/computer",
+          "mainDocumentOnly" : true,
+          "navigation" : [
+            {
+              "decodedBodySizeBytes" : 50514,
+              "domContentLoadedEventEndMilliseconds" : 96,
+              "domInteractiveMilliseconds" : 36,
+              "durationMilliseconds" : 114,
+              "encodedBodySizeBytes" : 50514,
+              "loadEventEndMilliseconds" : 114,
+              "responseEndMilliseconds" : 11,
+              "transferSizeBytes" : 50814,
+              "type" : "navigate"
+            }
+          ],
+          "overflowCount" : 0,
+          "resourceCount" : 40,
+          "resourceGroups" : [
+            {
+              "count" : 29,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "link",
+              "resourceDurationMaxMilliseconds" : 21,
+              "resourceDurationSumMilliseconds" : 536,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 29,
+              "transferSizeBytes" : 6900,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 2,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "other",
+              "resourceDurationMaxMilliseconds" : 20,
+              "resourceDurationSumMilliseconds" : 22,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 2,
+              "transferSizeBytes" : 600,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "img",
+              "resourceDurationMaxMilliseconds" : 51,
+              "resourceDurationSumMilliseconds" : 51,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 7,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "css",
+              "resourceDurationMaxMilliseconds" : 23,
+              "resourceDurationSumMilliseconds" : 117,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 7,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "fetch",
+              "resourceDurationMaxMilliseconds" : 5,
+              "resourceDurationSumMilliseconds" : 5,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            }
+          ],
+          "snapshotAtMilliseconds" : 166,
+          "timeOrigin" : 1793228957800
+        },
+        "samePreparedProfileVerified" : true,
+        "state" : {
+          "nativeGameState" : "ready",
+          "paperStarPhase" : null,
+          "path" : "\/games\/gomoku\/computer",
+          "rendererReady" : null
+        },
+        "targetPath" : "\/games\/gomoku\/computer"
+      },
+      "weakBlankObjectReleasedWithinBound" : null
+    },
+    {
+      "blank" : {
+        "blankReadyUptime" : null,
+        "closeReason" : "sample-ended",
+        "creationBeginUptime" : null,
+        "heldAfterReadyMilliseconds" : null,
+        "initializationMilliseconds" : null,
+        "invalidationReason" : null,
+        "profileMonitorMilliseconds" : 100,
+        "profileValidationCount" : 11,
+        "releasedUptime" : null,
+        "viewCreated" : false
+      },
+      "blankHeldThroughReady" : false,
+      "blankReadyProof" : null,
+      "caseBeginUptime" : 363994.22370804171,
+      "caseStartToGenuineReadyMilliseconds" : 749.36841666931286,
+      "completed" : true,
+      "condition" : "normal",
+      "genuineReadyUptime" : 363994.97307645838,
+      "hostPID" : 48277,
+      "iteration" : 5,
+      "pair" : 3,
+      "trace" : {
+        "completed" : true,
+        "gameId" : "gomoku",
+        "launchIDHash" : "17f9c62029198328",
+        "milliseconds" : {
+          "documentStartReceiptToDOMContentLoadedReceipt" : 83.787458308506757,
+          "documentStartReceiptToReady" : 162.95766667462885,
+          "DOMContentLoadedReceiptToReady" : 79.170208366122097,
+          "DOMContentLoadedReceiptToWindowLoadReceipt" : 21.271999983582646,
+          "initialLoaderToPrepared" : 22.213749994989485,
+          "preparedToDocumentStartReceipt" : 547.05645836656913,
+          "preparedToReady" : 710.01412504119799,
+          "presentEntryToInitialLoader" : 14.179374964442104,
+          "readyMinusPresentationCompleted" : 709.60920833749697,
+          "tapToPresentationCompleted" : 38.597125036176294,
+          "tapToPresentEntry" : 1.7990833730436862,
+          "tapToReady" : 748.20633337367326,
+          "windowLoadReceiptToReady" : 57.898208382539451
+        },
+        "modeId" : "computer",
+        "points" : [
+          {
+            "millisecondsAfterTap" : 0,
+            "phase" : "tap",
+            "uptimeSeconds" : 363994.22487012501
+          },
+          {
+            "millisecondsAfterTap" : 1.7990833730436862,
+            "phase" : "present-entered",
+            "uptimeSeconds" : 363994.22666920838
+          },
+          {
+            "millisecondsAfterTap" : 15.97845833748579,
+            "phase" : "initial-loader-entered",
+            "uptimeSeconds" : 363994.24084858334
+          },
+          {
+            "millisecondsAfterTap" : 38.192208332475275,
+            "phase" : "initial-loader-prepared-after-load-call",
+            "uptimeSeconds" : 363994.26306233334
+          },
+          {
+            "millisecondsAfterTap" : 38.597125036176294,
+            "phase" : "present-completed",
+            "uptimeSeconds" : 363994.26346725004
+          },
+          {
+            "millisecondsAfterTap" : 585.24866669904441,
+            "phase" : "document-start-received",
+            "uptimeSeconds" : 363994.81011879171
+          },
+          {
+            "millisecondsAfterTap" : 669.03612500755116,
+            "phase" : "dom-content-loaded-received",
+            "uptimeSeconds" : 363994.89390625001
+          },
+          {
+            "millisecondsAfterTap" : 690.30812499113381,
+            "phase" : "window-load-received",
+            "uptimeSeconds" : 363994.91517825
+          },
+          {
+            "millisecondsAfterTap" : 748.20633337367326,
+            "phase" : "on-game-ready-received",
+            "uptimeSeconds" : 363994.97307645838
+          }
+        ],
+        "readyResourceTimingSnapshot" : {
+          "documentPath" : "\/games\/gomoku\/computer",
+          "mainDocumentOnly" : true,
+          "navigation" : [
+            {
+              "decodedBodySizeBytes" : 50514,
+              "domContentLoadedEventEndMilliseconds" : 90,
+              "domInteractiveMilliseconds" : 28,
+              "durationMilliseconds" : 111,
+              "encodedBodySizeBytes" : 50514,
+              "loadEventEndMilliseconds" : 111,
+              "responseEndMilliseconds" : 4,
+              "transferSizeBytes" : 50814,
+              "type" : "navigate"
+            }
+          ],
+          "overflowCount" : 0,
+          "resourceCount" : 40,
+          "resourceGroups" : [
+            {
+              "count" : 29,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "link",
+              "resourceDurationMaxMilliseconds" : 55,
+              "resourceDurationSumMilliseconds" : 745,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 29,
+              "transferSizeBytes" : 6900,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 2,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "other",
+              "resourceDurationMaxMilliseconds" : 55,
+              "resourceDurationSumMilliseconds" : 57,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 2,
+              "transferSizeBytes" : 600,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "img",
+              "resourceDurationMaxMilliseconds" : 54,
+              "resourceDurationSumMilliseconds" : 54,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 7,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "css",
+              "resourceDurationMaxMilliseconds" : 24,
+              "resourceDurationSumMilliseconds" : 135,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 7,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "fetch",
+              "resourceDurationMaxMilliseconds" : 4,
+              "resourceDurationSumMilliseconds" : 4,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            }
+          ],
+          "snapshotAtMilliseconds" : 169,
+          "timeOrigin" : 1793228958662
+        },
+        "samePreparedProfileVerified" : true,
+        "state" : {
+          "nativeGameState" : "ready",
+          "paperStarPhase" : null,
+          "path" : "\/games\/gomoku\/computer",
+          "rendererReady" : null
+        },
+        "targetPath" : "\/games\/gomoku\/computer"
+      },
+      "weakBlankObjectReleasedWithinBound" : null
+    },
+    {
+      "blank" : {
+        "blankReadyUptime" : 363995.72888620838,
+        "closeReason" : "sample-ended",
+        "creationBeginUptime" : 363995.07208354172,
+        "heldAfterReadyMilliseconds" : 809.16574998991564,
+        "initializationMilliseconds" : 656.8026666645892,
+        "invalidationReason" : null,
+        "profileMonitorMilliseconds" : 100,
+        "profileValidationCount" : 23,
+        "releasedUptime" : 363996.53805195837,
+        "viewCreated" : true
+      },
+      "blankHeldThroughReady" : true,
+      "blankReadyProof" : {
+        "aboutBlank" : true,
+        "expectedTitle" : true,
+        "hasHostBridge" : false,
+        "ready" : true,
+        "resourceEntries" : 0
+      },
+      "caseBeginUptime" : 363995.07095625001,
+      "caseStartToGenuineReadyMilliseconds" : 1426.4671666896902,
+      "completed" : true,
+      "condition" : "heldBlank",
+      "genuineReadyUptime" : 363996.4974234167,
+      "hostPID" : 48277,
+      "iteration" : 6,
+      "pair" : 3,
+      "trace" : {
+        "completed" : true,
+        "gameId" : "gomoku",
+        "launchIDHash" : "83c2cd84b36a86e9",
+        "milliseconds" : {
+          "documentStartReceiptToDOMContentLoadedReceipt" : 79.328249965328723,
+          "documentStartReceiptToReady" : 154.08866666257381,
+          "DOMContentLoadedReceiptToReady" : 74.760416697245091,
+          "DOMContentLoadedReceiptToWindowLoadReceipt" : 21.942041697911918,
+          "initialLoaderToPrepared" : 22.46666670544073,
+          "preparedToDocumentStartReceipt" : 580.53929166635498,
+          "preparedToReady" : 734.6279583289288,
+          "presentEntryToInitialLoader" : 9.2092083068564534,
+          "readyMinusPresentationCompleted" : 734.25149999093264,
+          "tapToPresentationCompleted" : 33.828541694674641,
+          "tapToPresentEntry" : 1.7762083443813026,
+          "tapToReady" : 768.08004168560728,
+          "windowLoadReceiptToReady" : 52.818374999333173
+        },
+        "modeId" : "computer",
+        "points" : [
+          {
+            "millisecondsAfterTap" : 0,
+            "phase" : "tap",
+            "uptimeSeconds" : 363995.72934337502
+          },
+          {
+            "millisecondsAfterTap" : 1.7762083443813026,
+            "phase" : "present-entered",
+            "uptimeSeconds" : 363995.73111958336
+          },
+          {
+            "millisecondsAfterTap" : 10.985416651237756,
+            "phase" : "initial-loader-entered",
+            "uptimeSeconds" : 363995.74032879167
+          },
+          {
+            "millisecondsAfterTap" : 33.452083356678486,
+            "phase" : "initial-loader-prepared-after-load-call",
+            "uptimeSeconds" : 363995.76279545837
+          },
+          {
+            "millisecondsAfterTap" : 33.828541694674641,
+            "phase" : "present-completed",
+            "uptimeSeconds" : 363995.76317191671
+          },
+          {
+            "millisecondsAfterTap" : 613.99137502303347,
+            "phase" : "document-start-received",
+            "uptimeSeconds" : 363996.34333475004
+          },
+          {
+            "millisecondsAfterTap" : 693.31962498836219,
+            "phase" : "dom-content-loaded-received",
+            "uptimeSeconds" : 363996.422663
+          },
+          {
+            "millisecondsAfterTap" : 715.26166668627411,
+            "phase" : "window-load-received",
+            "uptimeSeconds" : 363996.4446050417
+          },
+          {
+            "millisecondsAfterTap" : 768.08004168560728,
+            "phase" : "on-game-ready-received",
+            "uptimeSeconds" : 363996.4974234167
+          }
+        ],
+        "readyResourceTimingSnapshot" : {
+          "documentPath" : "\/games\/gomoku\/computer",
+          "mainDocumentOnly" : true,
+          "navigation" : [
+            {
+              "decodedBodySizeBytes" : 50514,
+              "domContentLoadedEventEndMilliseconds" : 86,
+              "domInteractiveMilliseconds" : 29,
+              "durationMilliseconds" : 108,
+              "encodedBodySizeBytes" : 50514,
+              "loadEventEndMilliseconds" : 108,
+              "responseEndMilliseconds" : 3,
+              "transferSizeBytes" : 50814,
+              "type" : "navigate"
+            }
+          ],
+          "overflowCount" : 0,
+          "resourceCount" : 40,
+          "resourceGroups" : [
+            {
+              "count" : 29,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "link",
+              "resourceDurationMaxMilliseconds" : 52,
+              "resourceDurationSumMilliseconds" : 638,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 29,
+              "transferSizeBytes" : 6900,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 2,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "other",
+              "resourceDurationMaxMilliseconds" : 51,
+              "resourceDurationSumMilliseconds" : 53,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 2,
+              "transferSizeBytes" : 600,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "img",
+              "resourceDurationMaxMilliseconds" : 51,
+              "resourceDurationSumMilliseconds" : 51,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            },
+            {
+              "count" : 7,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "css",
+              "resourceDurationMaxMilliseconds" : 21,
+              "resourceDurationSumMilliseconds" : 102,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 7,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 6
+            },
+            {
+              "count" : 1,
+              "decodedBodySizeBytes" : 0,
+              "encodedBodySizeBytes" : 0,
+              "initiatorType" : "fetch",
+              "resourceDurationMaxMilliseconds" : 5,
+              "resourceDurationSumMilliseconds" : 5,
+              "scope" : "same-origin",
+              "transferSizeAvailableCount" : 1,
+              "transferSizeBytes" : 300,
+              "zeroTransferSizeCount" : 0
+            }
+          ],
+          "snapshotAtMilliseconds" : 160,
+          "timeOrigin" : 1793228960195
+        },
+        "samePreparedProfileVerified" : true,
+        "state" : {
+          "nativeGameState" : "ready",
+          "paperStarPhase" : null,
+          "path" : "\/games\/gomoku\/computer",
+          "rendererReady" : null
+        },
+        "targetPath" : "\/games\/gomoku\/computer"
+      },
+      "weakBlankObjectReleasedWithinBound" : true
+    }
+  ],
+  "samplesPerCondition" : 3,
+  "scope" : "Isolated guest fixture only; a public-API blank-page mechanism experiment after explicit resource preparation. No product adoption or hidden gameplay.",
+  "UIKitAnimationsEnabledDuringFixture" : false
+}

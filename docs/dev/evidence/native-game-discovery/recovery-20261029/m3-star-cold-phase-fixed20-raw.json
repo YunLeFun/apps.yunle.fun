@@ -1,0 +1,4704 @@
+{
+  "clock" : "Every native phase uses ProcessInfo.systemUptime; document observations stay separate",
+  "completed" : true,
+  "documentPhaseScope" : "Native receipts refer to the initial Home document for legacy and StarLocal for direct; final-document renderer\/resource\/engine observations remain separately labeled",
+  "gameId" : "paper-star",
+  "kind" : "fixed20-star-cold-native-phase-diagnostic",
+  "limitations" : "Receipt stamps include IPC\/test observer delay; unloaded initial documents may lack DOM\/load receipts, which stay missing. No cross-clock subtraction or CPU\/warning causal claim.",
+  "modeId" : "local",
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "preRegisteredSampleCount" : 20,
+  "purpose" : "Locate intervals in one fixed diagnostic run; never replace\/trim the original failing N10",
+  "resourcePreparation" : false,
+  "results" : [
+    {
+      "completed" : true,
+      "resourceVersion" : "32ea539cf8b84317075f3130343b867b04032560b124b6a58918a6259707b9d9",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 564,
+                    "domInteractiveMilliseconds" : 143,
+                    "durationMilliseconds" : 668,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 668,
+                    "responseEndMilliseconds" : 8,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 85,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 88,
+                    "resourceDurationSumMilliseconds" : 2925,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 270,
+                    "resourceDurationSumMilliseconds" : 270,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 83,
+                    "resourceDurationSumMilliseconds" : 83,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 82,
+                    "resourceDurationSumMilliseconds" : 82,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 38,
+                    "resourceDurationSumMilliseconds" : 480,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 207,
+                    "resourceDurationSumMilliseconds" : 515,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 6,
+                    "decodedBodySizeBytes" : 295,
+                    "encodedBodySizeBytes" : 295,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 103,
+                    "resourceDurationSumMilliseconds" : 148,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 6,
+                    "transferSizeBytes" : 2095,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 7,
+                    "resourceDurationSumMilliseconds" : 7,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 4087,
+                "timeOrigin" : 1793296779827
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1926.7074583331123,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 693
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 2020.6492083325429,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 800
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 5349.1082500004268,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 4087
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296779827
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10141.554480250001
+            },
+            {
+              "millisecondsAfterTap" : 7.772208333335584,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10141.562252458334
+            },
+            {
+              "millisecondsAfterTap" : 149.68733333262207,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10141.704167583333
+            },
+            {
+              "millisecondsAfterTap" : 307.14833333331626,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10141.861628583334
+            },
+            {
+              "millisecondsAfterTap" : 308.00537499999336,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10141.862485625001
+            },
+            {
+              "millisecondsAfterTap" : 1255.5475416666013,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10142.810027791667
+            },
+            {
+              "millisecondsAfterTap" : 1774.0870416673715,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10143.328567291668
+            },
+            {
+              "millisecondsAfterTap" : 1878.1975833335309,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10143.432677833334
+            },
+            {
+              "millisecondsAfterTap" : 1926.7074583331123,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10143.481187708334
+            },
+            {
+              "millisecondsAfterTap" : 2020.6492083325429,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10143.575129458333
+            },
+            {
+              "millisecondsAfterTap" : 5310.0909166660131,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10146.864571166667
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 5310.0909166660131,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1926.7074583331123,
+            "modeLinkClickedMilliseconds" : 2020.6492083325429
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440218,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 85,
+            "resourceDurationSumMilliseconds" : 4510,
+            "transferSizeBytes" : 4464218,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 1416,
+            "phase" : "countdown"
+          },
+          "sample" : 1
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 198,
+                    "domInteractiveMilliseconds" : 72,
+                    "durationMilliseconds" : 239,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 239,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 84,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 49,
+                    "resourceDurationSumMilliseconds" : 1611,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 86,
+                    "resourceDurationSumMilliseconds" : 86,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 53,
+                    "resourceDurationSumMilliseconds" : 53,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 52,
+                    "resourceDurationSumMilliseconds" : 52,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 27,
+                    "resourceDurationSumMilliseconds" : 326,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 79,
+                    "resourceDurationSumMilliseconds" : 209,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 5,
+                    "decodedBodySizeBytes" : 295,
+                    "encodedBodySizeBytes" : 295,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 23,
+                    "resourceDurationSumMilliseconds" : 38,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 5,
+                    "transferSizeBytes" : 1795,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3564,
+                "timeOrigin" : 1793296785398
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1671.9708333330345,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 303
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1804.9089583328168,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 435
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4965.0109583326412,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3564
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296785398
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10146.987574750001
+            },
+            {
+              "millisecondsAfterTap" : 4.6307916654768633,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10146.992205541666
+            },
+            {
+              "millisecondsAfterTap" : 16.463874999317341,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10147.004038625
+            },
+            {
+              "millisecondsAfterTap" : 50.134208333474817,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10147.037708958334
+            },
+            {
+              "millisecondsAfterTap" : 50.5665416658303,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10147.038141291667
+            },
+            {
+              "millisecondsAfterTap" : 1356.949999999415,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10148.34452475
+            },
+            {
+              "millisecondsAfterTap" : 1547.0402083337831,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10148.534614958335
+            },
+            {
+              "millisecondsAfterTap" : 1587.6717916671623,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10148.575246541668
+            },
+            {
+              "millisecondsAfterTap" : 1671.9708333330345,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10148.659545583334
+            },
+            {
+              "millisecondsAfterTap" : 1804.9089583328168,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10148.792483708334
+            },
+            {
+              "millisecondsAfterTap" : 4912.9929583323246,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10151.900567708333
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4912.9929583323246,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1671.9708333330345,
+            "modeLinkClickedMilliseconds" : 1804.9089583328168
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440218,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 84,
+            "resourceDurationSumMilliseconds" : 2378,
+            "transferSizeBytes" : 4463918,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 823,
+            "phase" : "countdown"
+          },
+          "sample" : 2
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 187,
+                    "domInteractiveMilliseconds" : 71,
+                    "durationMilliseconds" : 254,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 254,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 83,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 49,
+                    "resourceDurationSumMilliseconds" : 1554,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 74,
+                    "resourceDurationSumMilliseconds" : 74,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 49,
+                    "resourceDurationSumMilliseconds" : 49,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 54,
+                    "resourceDurationSumMilliseconds" : 54,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 29,
+                    "resourceDurationSumMilliseconds" : 347,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 70,
+                    "resourceDurationSumMilliseconds" : 188,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 226,
+                    "encodedBodySizeBytes" : 226,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 6,
+                    "resourceDurationSumMilliseconds" : 15,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 1426,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 2,
+                    "resourceDurationSumMilliseconds" : 2,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3578,
+                "timeOrigin" : 1793296789724
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 959.04862499992305,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 314
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1095.596208333518,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 462
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4259.7774166661111,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3578
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296789724
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10152.033711041668
+            },
+            {
+              "millisecondsAfterTap" : 2.3216666668304242,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10152.036032708334
+            },
+            {
+              "millisecondsAfterTap" : 12.694749999354826,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10152.046405791667
+            },
+            {
+              "millisecondsAfterTap" : 38.178833332494833,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10152.071889875
+            },
+            {
+              "millisecondsAfterTap" : 38.615583333012182,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10152.072326625001
+            },
+            {
+              "millisecondsAfterTap" : 639.14541666599689,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10152.672856458334
+            },
+            {
+              "millisecondsAfterTap" : 815.43070833322417,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10152.849141750001
+            },
+            {
+              "millisecondsAfterTap" : 882.95587500033434,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10152.916666916668
+            },
+            {
+              "millisecondsAfterTap" : 959.04862499992305,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10152.992759666668
+            },
+            {
+              "millisecondsAfterTap" : 1095.596208333518,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10153.129307250001
+            },
+            {
+              "millisecondsAfterTap" : 4206.9753333325934,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10156.240686375
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4206.9753333325934,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 959.04862499992305,
+            "modeLinkClickedMilliseconds" : 1095.596208333518
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440149,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 83,
+            "resourceDurationSumMilliseconds" : 2283,
+            "transferSizeBytes" : 4463549,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 826,
+            "phase" : "countdown"
+          },
+          "sample" : 3
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 215,
+                    "domInteractiveMilliseconds" : 75,
+                    "durationMilliseconds" : 246,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 246,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 84,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 60,
+                    "resourceDurationSumMilliseconds" : 1918,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 92,
+                    "resourceDurationSumMilliseconds" : 92,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 64,
+                    "resourceDurationSumMilliseconds" : 64,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 64,
+                    "resourceDurationSumMilliseconds" : 64,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 27,
+                    "resourceDurationSumMilliseconds" : 375,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 77,
+                    "resourceDurationSumMilliseconds" : 208,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 5,
+                    "decodedBodySizeBytes" : 295,
+                    "encodedBodySizeBytes" : 295,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 12,
+                    "resourceDurationSumMilliseconds" : 29,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 5,
+                    "transferSizeBytes" : 1795,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 6,
+                    "resourceDurationSumMilliseconds" : 6,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3610,
+                "timeOrigin" : 1793296794238
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1114.6515833333979,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 317
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1273.4954166662646,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 473
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4448.8604166672303,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3610
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296794238
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10156.397489083334
+            },
+            {
+              "millisecondsAfterTap" : 2.3925000004965113,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10156.399881583335
+            },
+            {
+              "millisecondsAfterTap" : 12.158499999713968,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10156.409647583334
+            },
+            {
+              "millisecondsAfterTap" : 39.3202499999461,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10156.436809333334
+            },
+            {
+              "millisecondsAfterTap" : 39.874333333500545,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10156.437363416668
+            },
+            {
+              "millisecondsAfterTap" : 788.49258333320904,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10157.185981666667
+            },
+            {
+              "millisecondsAfterTap" : 993.97325000063574,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10157.391462333335
+            },
+            {
+              "millisecondsAfterTap" : 1025.3598333329137,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10157.422848916667
+            },
+            {
+              "millisecondsAfterTap" : 1114.6515833333979,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10157.512140666668
+            },
+            {
+              "millisecondsAfterTap" : 1273.4954166662646,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10157.6709845
+            },
+            {
+              "millisecondsAfterTap" : 4389.8819166661269,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10160.787371
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4389.8819166661269,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1114.6515833333979,
+            "modeLinkClickedMilliseconds" : 1273.4954166662646
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440218,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 84,
+            "resourceDurationSumMilliseconds" : 2756,
+            "transferSizeBytes" : 4463918,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 886,
+            "phase" : "countdown"
+          },
+          "sample" : 4
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 205,
+                    "domInteractiveMilliseconds" : 73,
+                    "durationMilliseconds" : 248,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 248,
+                    "responseEndMilliseconds" : 5,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 83,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 52,
+                    "resourceDurationSumMilliseconds" : 1681,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 84,
+                    "resourceDurationSumMilliseconds" : 84,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 56,
+                    "resourceDurationSumMilliseconds" : 56,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 56,
+                    "resourceDurationSumMilliseconds" : 56,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 27,
+                    "resourceDurationSumMilliseconds" : 365,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 74,
+                    "resourceDurationSumMilliseconds" : 191,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 226,
+                    "encodedBodySizeBytes" : 226,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 10,
+                    "resourceDurationSumMilliseconds" : 23,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 1426,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 4,
+                    "resourceDurationSumMilliseconds" : 4,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3586,
+                "timeOrigin" : 1793296798634
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 966.90849999868078,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 311
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1113.5823333333974,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 459
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4274.4067499988887,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3586
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296798634
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10160.937439166668
+            },
+            {
+              "millisecondsAfterTap" : 2.4542916653444991,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10160.939893458333
+            },
+            {
+              "millisecondsAfterTap" : 12.264166665772791,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10160.949703333334
+            },
+            {
+              "millisecondsAfterTap" : 39.287333333049901,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10160.976726500001
+            },
+            {
+              "millisecondsAfterTap" : 39.744499999869731,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10160.977183666668
+            },
+            {
+              "millisecondsAfterTap" : 647.71720833232393,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10161.585156375
+            },
+            {
+              "millisecondsAfterTap" : 840.74274999875342,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10161.778181916667
+            },
+            {
+              "millisecondsAfterTap" : 883.16208333344548,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10161.820601250001
+            },
+            {
+              "millisecondsAfterTap" : 966.90849999868078,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10161.904347666667
+            },
+            {
+              "millisecondsAfterTap" : 1113.5823333333974,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10162.051021500001
+            },
+            {
+              "millisecondsAfterTap" : 4221.5723749995959,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10165.159011541667
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4221.5723749995959,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 966.90849999868078,
+            "modeLinkClickedMilliseconds" : 1113.5823333333974
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440149,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 83,
+            "resourceDurationSumMilliseconds" : 2460,
+            "transferSizeBytes" : 4463549,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 820,
+            "phase" : "countdown"
+          },
+          "sample" : 5
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 2,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 192,
+                    "domInteractiveMilliseconds" : 70,
+                    "durationMilliseconds" : 255,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 255,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 52,
+                "resourceGroups" : [
+                  {
+                    "count" : 29,
+                    "decodedBodySizeBytes" : 607960,
+                    "encodedBodySizeBytes" : 607960,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 50,
+                    "resourceDurationSumMilliseconds" : 1293,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 29,
+                    "transferSizeBytes" : 616660,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 85,
+                    "resourceDurationSumMilliseconds" : 85,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 53,
+                    "resourceDurationSumMilliseconds" : 53,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 51,
+                    "resourceDurationSumMilliseconds" : 51,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 16,
+                    "decodedBodySizeBytes" : 1012000,
+                    "encodedBodySizeBytes" : 1012000,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 42,
+                    "resourceDurationSumMilliseconds" : 449,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 16,
+                    "transferSizeBytes" : 1016800,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 79,
+                    "resourceDurationSumMilliseconds" : 159,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 3
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 17,
+                    "resourceDurationSumMilliseconds" : 17,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 284,
+                "timeOrigin" : 1793296803100
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1036.9657916671713,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 284
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296803100
+            },
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 14632,
+                    "domContentLoadedEventEndMilliseconds" : 63,
+                    "domInteractiveMilliseconds" : 61,
+                    "durationMilliseconds" : 69,
+                    "encodedBodySizeBytes" : 14632,
+                    "loadEventEndMilliseconds" : 69,
+                    "responseEndMilliseconds" : 7,
+                    "transferSizeBytes" : 14932,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 66,
+                "resourceGroups" : [
+                  {
+                    "count" : 56,
+                    "decodedBodySizeBytes" : 2742520,
+                    "encodedBodySizeBytes" : 2742520,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 24,
+                    "resourceDurationSumMilliseconds" : 423,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 56,
+                    "transferSizeBytes" : 2750920,
+                    "zeroTransferSizeCount" : 28
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 10,
+                    "resourceDurationSumMilliseconds" : 10,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 157,
+                    "encodedBodySizeBytes" : 157,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 14,
+                    "resourceDurationSumMilliseconds" : 19,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 1057,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 55,
+                    "resourceDurationSumMilliseconds" : 55,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 99634,
+                    "encodedBodySizeBytes" : 99634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 18,
+                    "resourceDurationSumMilliseconds" : 18,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 99934,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3350,
+                "timeOrigin" : 1793296803392
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1254.9822083328763,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 210
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4420.9379583335249,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3350
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296803392
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10165.303042041667
+            },
+            {
+              "millisecondsAfterTap" : 2.149874999304302,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10165.305191916666
+            },
+            {
+              "millisecondsAfterTap" : 13.086958333587972,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10165.316129000001
+            },
+            {
+              "millisecondsAfterTap" : 39.952666666067671,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10165.342994708333
+            },
+            {
+              "millisecondsAfterTap" : 40.396000000328058,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10165.343438041667
+            },
+            {
+              "millisecondsAfterTap" : 743.00666666749748,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10166.046048708335
+            },
+            {
+              "millisecondsAfterTap" : 935.01574999936565,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10166.238057791667
+            },
+            {
+              "millisecondsAfterTap" : 990.33662500005448,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10166.293378666667
+            },
+            {
+              "millisecondsAfterTap" : 1036.9657916671713,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10166.340007833334
+            },
+            {
+              "millisecondsAfterTap" : 1254.9822083328763,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10166.55802425
+            },
+            {
+              "millisecondsAfterTap" : 4377.4358749997191,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10169.680477916667
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4377.4358749997191,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1036.9657916671713,
+            "modeLinkClickedMilliseconds" : 1254.9822083328763
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4464602,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 118,
+            "resourceDurationSumMilliseconds" : 2635,
+            "transferSizeBytes" : 4489202,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 586,
+            "phase" : "countdown"
+          },
+          "sample" : 6
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 2,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 194,
+                    "domInteractiveMilliseconds" : 73,
+                    "durationMilliseconds" : 277,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 277,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 52,
+                "resourceGroups" : [
+                  {
+                    "count" : 29,
+                    "decodedBodySizeBytes" : 607960,
+                    "encodedBodySizeBytes" : 607960,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 53,
+                    "resourceDurationSumMilliseconds" : 1246,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 29,
+                    "transferSizeBytes" : 616660,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 78,
+                    "resourceDurationSumMilliseconds" : 78,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 62,
+                    "resourceDurationSumMilliseconds" : 62,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 61,
+                    "resourceDurationSumMilliseconds" : 61,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 16,
+                    "decodedBodySizeBytes" : 1012000,
+                    "encodedBodySizeBytes" : 1012000,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 32,
+                    "resourceDurationSumMilliseconds" : 406,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 16,
+                    "transferSizeBytes" : 1016800,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 79,
+                    "resourceDurationSumMilliseconds" : 155,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 3
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 7,
+                    "resourceDurationSumMilliseconds" : 7,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 290,
+                "timeOrigin" : 1793296807498
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 932.25150000034773,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 290
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296807498
+            },
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 14632,
+                    "domContentLoadedEventEndMilliseconds" : 58,
+                    "domInteractiveMilliseconds" : 55,
+                    "durationMilliseconds" : 65,
+                    "encodedBodySizeBytes" : 14632,
+                    "loadEventEndMilliseconds" : 65,
+                    "responseEndMilliseconds" : 7,
+                    "transferSizeBytes" : 14932,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 60,
+                "resourceGroups" : [
+                  {
+                    "count" : 50,
+                    "decodedBodySizeBytes" : 2718067,
+                    "encodedBodySizeBytes" : 2718067,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 25,
+                    "resourceDurationSumMilliseconds" : 385,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 50,
+                    "transferSizeBytes" : 2725867,
+                    "zeroTransferSizeCount" : 24
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 10,
+                    "resourceDurationSumMilliseconds" : 10,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 157,
+                    "encodedBodySizeBytes" : 157,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 15,
+                    "resourceDurationSumMilliseconds" : 25,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 1057,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 57,
+                    "resourceDurationSumMilliseconds" : 57,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 99634,
+                    "encodedBodySizeBytes" : 99634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 17,
+                    "resourceDurationSumMilliseconds" : 17,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 99934,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 2,
+                    "resourceDurationSumMilliseconds" : 2,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3352,
+                "timeOrigin" : 1793296807794
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1145.9732083330891,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 201
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4323.0238750002172,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3352
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296807794
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10169.800483000001
+            },
+            {
+              "millisecondsAfterTap" : 2.2628333335887874,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10169.802745833334
+            },
+            {
+              "millisecondsAfterTap" : 12.376124999718741,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10169.812859125001
+            },
+            {
+              "millisecondsAfterTap" : 39.662458333623363,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10169.840145458335
+            },
+            {
+              "millisecondsAfterTap" : 40.386291666436591,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10169.840869291667
+            },
+            {
+              "millisecondsAfterTap" : 645.76183333338122,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10170.446244833334
+            },
+            {
+              "millisecondsAfterTap" : 829.93849999911617,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10170.6304215
+            },
+            {
+              "millisecondsAfterTap" : 912.957833332257,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10170.713440833333
+            },
+            {
+              "millisecondsAfterTap" : 932.25150000034773,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10170.732734500001
+            },
+            {
+              "millisecondsAfterTap" : 1145.9732083330891,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10170.946456208334
+            },
+            {
+              "millisecondsAfterTap" : 4285.1571249993867,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10174.085640125
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4285.1571249993867,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 932.25150000034773,
+            "modeLinkClickedMilliseconds" : 1145.9732083330891
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440149,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 112,
+            "resourceDurationSumMilliseconds" : 2511,
+            "transferSizeBytes" : 4464149,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 599,
+            "phase" : "countdown"
+          },
+          "sample" : 7
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 245,
+                    "domInteractiveMilliseconds" : 106,
+                    "durationMilliseconds" : 316,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 316,
+                    "responseEndMilliseconds" : 8,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 84,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 131,
+                    "resourceDurationSumMilliseconds" : 3506,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 104,
+                    "resourceDurationSumMilliseconds" : 104,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 118,
+                    "resourceDurationSumMilliseconds" : 118,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 118,
+                    "resourceDurationSumMilliseconds" : 118,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 67,
+                    "resourceDurationSumMilliseconds" : 781,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 104,
+                    "resourceDurationSumMilliseconds" : 246,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 5,
+                    "decodedBodySizeBytes" : 295,
+                    "encodedBodySizeBytes" : 295,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 9,
+                    "resourceDurationSumMilliseconds" : 31,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 5,
+                    "transferSizeBytes" : 1795,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 2,
+                    "resourceDurationSumMilliseconds" : 2,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3707,
+                "timeOrigin" : 1793296812108
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1202.3082916675776,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 385
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1293.0894583332702,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 469
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4559.2484583339683,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3707
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296812108
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10174.243205125
+            },
+            {
+              "millisecondsAfterTap" : 2.939708334452007,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10174.246144833334
+            },
+            {
+              "millisecondsAfterTap" : 15.389000000141095,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10174.258594125
+            },
+            {
+              "millisecondsAfterTap" : 44.912166667927522,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10174.288117291668
+            },
+            {
+              "millisecondsAfterTap" : 45.390875000521191,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10174.288596
+            },
+            {
+              "millisecondsAfterTap" : 815.83662500088394,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10175.059041750001
+            },
+            {
+              "millisecondsAfterTap" : 1049.751083333831,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10175.292956208334
+            },
+            {
+              "millisecondsAfterTap" : 1119.3482500002574,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10175.362553375
+            },
+            {
+              "millisecondsAfterTap" : 1202.3082916675776,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10175.445513416667
+            },
+            {
+              "millisecondsAfterTap" : 1293.0894583332702,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10175.536294583333
+            },
+            {
+              "millisecondsAfterTap" : 4510.6935000003432,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10178.753898625
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4510.6935000003432,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1202.3082916675776,
+            "modeLinkClickedMilliseconds" : 1293.0894583332702
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440218,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 84,
+            "resourceDurationSumMilliseconds" : 4906,
+            "transferSizeBytes" : 4463918,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 1046,
+            "phase" : "countdown"
+          },
+          "sample" : 8
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 201,
+                    "domInteractiveMilliseconds" : 68,
+                    "durationMilliseconds" : 256,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 256,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 83,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 47,
+                    "resourceDurationSumMilliseconds" : 1613,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 81,
+                    "resourceDurationSumMilliseconds" : 81,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 55,
+                    "resourceDurationSumMilliseconds" : 55,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 54,
+                    "resourceDurationSumMilliseconds" : 54,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 28,
+                    "resourceDurationSumMilliseconds" : 332,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 152,
+                    "resourceDurationSumMilliseconds" : 285,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 226,
+                    "encodedBodySizeBytes" : 226,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 12,
+                    "resourceDurationSumMilliseconds" : 25,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 1426,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 2,
+                    "resourceDurationSumMilliseconds" : 2,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3593,
+                "timeOrigin" : 1793296816640
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1005.6312916658499,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 303
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1158.1314583327185,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 450
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4316.719499998726,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3593
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296816640
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10178.892482500001
+            },
+            {
+              "millisecondsAfterTap" : 2.7536666657397291,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10178.895236166667
+            },
+            {
+              "millisecondsAfterTap" : 13.649791666466626,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10178.906132291668
+            },
+            {
+              "millisecondsAfterTap" : 43.587124999248772,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10178.936069625001
+            },
+            {
+              "millisecondsAfterTap" : 44.318000000203028,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10178.936800500001
+            },
+            {
+              "millisecondsAfterTap" : 696.48950000009791,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10179.588972000001
+            },
+            {
+              "millisecondsAfterTap" : 886.59279166677152,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10179.779075291668
+            },
+            {
+              "millisecondsAfterTap" : 942.36558333250287,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10179.834848083334
+            },
+            {
+              "millisecondsAfterTap" : 1005.6312916658499,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10179.898113791667
+            },
+            {
+              "millisecondsAfterTap" : 1158.1314583327185,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10180.050613958334
+            },
+            {
+              "millisecondsAfterTap" : 4279.6202083318349,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10183.172102708333
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4279.6202083318349,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1005.6312916658499,
+            "modeLinkClickedMilliseconds" : 1158.1314583327185
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440149,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 83,
+            "resourceDurationSumMilliseconds" : 2447,
+            "transferSizeBytes" : 4463549,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 807,
+            "phase" : "countdown"
+          },
+          "sample" : 9
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 2,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 222,
+                    "domInteractiveMilliseconds" : 91,
+                    "durationMilliseconds" : 284,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 284,
+                    "responseEndMilliseconds" : 7,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 52,
+                "resourceGroups" : [
+                  {
+                    "count" : 29,
+                    "decodedBodySizeBytes" : 607960,
+                    "encodedBodySizeBytes" : 607960,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 128,
+                    "resourceDurationSumMilliseconds" : 2325,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 29,
+                    "transferSizeBytes" : 616660,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 92,
+                    "resourceDurationSumMilliseconds" : 92,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 159,
+                    "resourceDurationSumMilliseconds" : 159,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 119,
+                    "resourceDurationSumMilliseconds" : 119,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 16,
+                    "decodedBodySizeBytes" : 1012000,
+                    "encodedBodySizeBytes" : 1012000,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 58,
+                    "resourceDurationSumMilliseconds" : 672,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 16,
+                    "transferSizeBytes" : 1016800,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 101,
+                    "resourceDurationSumMilliseconds" : 170,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 3
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 9,
+                    "resourceDurationSumMilliseconds" : 9,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 315,
+                "timeOrigin" : 1793296821183
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1141.5046249985608,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 315
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296821183
+            },
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 14632,
+                    "domContentLoadedEventEndMilliseconds" : 78,
+                    "domInteractiveMilliseconds" : 76,
+                    "durationMilliseconds" : 85,
+                    "encodedBodySizeBytes" : 14632,
+                    "loadEventEndMilliseconds" : 85,
+                    "responseEndMilliseconds" : 27,
+                    "transferSizeBytes" : 14932,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 60,
+                "resourceGroups" : [
+                  {
+                    "count" : 50,
+                    "decodedBodySizeBytes" : 2718067,
+                    "encodedBodySizeBytes" : 2718067,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 41,
+                    "resourceDurationSumMilliseconds" : 575,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 50,
+                    "transferSizeBytes" : 2725867,
+                    "zeroTransferSizeCount" : 24
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 23,
+                    "resourceDurationSumMilliseconds" : 23,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 157,
+                    "encodedBodySizeBytes" : 157,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 14,
+                    "resourceDurationSumMilliseconds" : 22,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 1057,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 80,
+                    "resourceDurationSumMilliseconds" : 80,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 99634,
+                    "encodedBodySizeBytes" : 99634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 41,
+                    "resourceDurationSumMilliseconds" : 41,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 99934,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3388,
+                "timeOrigin" : 1793296821546
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1428.55362499904,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 241
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4614.0124166668102,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3388
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296821546
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10183.309207458335
+            },
+            {
+              "millisecondsAfterTap" : 2.2128333330329042,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10183.311420291668
+            },
+            {
+              "millisecondsAfterTap" : 13.525791666324949,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10183.322733250001
+            },
+            {
+              "millisecondsAfterTap" : 41.336874999615247,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10183.350544333334
+            },
+            {
+              "millisecondsAfterTap" : 41.792624999288819,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10183.351000083334
+            },
+            {
+              "millisecondsAfterTap" : 823.49058333238645,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10184.132698041667
+            },
+            {
+              "millisecondsAfterTap" : 1034.3946249995497,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10184.343602083334
+            },
+            {
+              "millisecondsAfterTap" : 1096.4956249990792,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10184.405703083334
+            },
+            {
+              "millisecondsAfterTap" : 1141.5046249985608,
+              "phase" : "legacy-home-detail-click-receipt",
+              "uptimeSeconds" : 10184.450712083333
+            },
+            {
+              "millisecondsAfterTap" : 1428.55362499904,
+              "phase" : "legacy-detail-mode-click-receipt",
+              "uptimeSeconds" : 10184.737761083334
+            },
+            {
+              "millisecondsAfterTap" : 4563.2134583320294,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10187.872420916667
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4563.2134583320294,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1141.5046249985608,
+            "modeLinkClickedMilliseconds" : 1428.55362499904
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440149,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 112,
+            "resourceDurationSumMilliseconds" : 4290,
+            "transferSizeBytes" : 4464149,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 778,
+            "phase" : "countdown"
+          },
+          "sample" : 10
+        }
+      ],
+      "stage" : "same-build-home-detail-mode-cold"
+    },
+    {
+      "completed" : true,
+      "resourceVersion" : "32ea539cf8b84317075f3130343b867b04032560b124b6a58918a6259707b9d9",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 90,
+                    "domInteractiveMilliseconds" : 67,
+                    "durationMilliseconds" : 140,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 140,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 61,
+                    "resourceDurationSumMilliseconds" : 1680,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 62,
+                    "resourceDurationSumMilliseconds" : 62,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 62,
+                    "resourceDurationSumMilliseconds" : 62,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 57,
+                    "resourceDurationSumMilliseconds" : 94,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 5,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 42,
+                    "resourceDurationSumMilliseconds" : 82,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3246,
+                "timeOrigin" : 1793296825730
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 3962.0980833333306,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3246
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296825730
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10188.005804208335
+            },
+            {
+              "millisecondsAfterTap" : 2.2175416652316926,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10188.00802175
+            },
+            {
+              "millisecondsAfterTap" : 12.212749999889638,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10188.018016958335
+            },
+            {
+              "millisecondsAfterTap" : 38.505249998706859,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10188.044309458333
+            },
+            {
+              "millisecondsAfterTap" : 39.038999999320367,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10188.044843208334
+            },
+            {
+              "millisecondsAfterTap" : 672.48149999977613,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10188.678285708334
+            },
+            {
+              "millisecondsAfterTap" : 752.31554166566639,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10188.75811975
+            },
+            {
+              "millisecondsAfterTap" : 803.04783333303931,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10188.808852041668
+            },
+            {
+              "millisecondsAfterTap" : 3909.2916666668316,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10191.915095875001
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 3909.2916666668316,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 1988,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 571,
+            "phase" : "countdown"
+          },
+          "sample" : 1
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 95,
+                    "domInteractiveMilliseconds" : 72,
+                    "durationMilliseconds" : 135,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 135,
+                    "responseEndMilliseconds" : 5,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 74,
+                    "resourceDurationSumMilliseconds" : 1712,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 71,
+                    "resourceDurationSumMilliseconds" : 71,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 75,
+                    "resourceDurationSumMilliseconds" : 75,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 54,
+                    "resourceDurationSumMilliseconds" : 89,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 7,
+                    "resourceDurationSumMilliseconds" : 9,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 31,
+                    "resourceDurationSumMilliseconds" : 60,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3246,
+                "timeOrigin" : 1793296830509
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4736.0443750003469,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3246
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296830509
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10192.036055875
+            },
+            {
+              "millisecondsAfterTap" : 2.4728333337407093,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10192.038528708334
+            },
+            {
+              "millisecondsAfterTap" : 14.426458334128256,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10192.050482333334
+            },
+            {
+              "millisecondsAfterTap" : 43.552500001169392,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10192.079608375001
+            },
+            {
+              "millisecondsAfterTap" : 44.163000000480679,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10192.080218875
+            },
+            {
+              "millisecondsAfterTap" : 1420.4225000012229,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10193.456478375001
+            },
+            {
+              "millisecondsAfterTap" : 1505.5590000010852,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10193.541614875001
+            },
+            {
+              "millisecondsAfterTap" : 1545.9192500002246,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10193.581975125
+            },
+            {
+              "millisecondsAfterTap" : 4657.8325000009499,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10196.693888375001
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4657.8325000009499,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2019,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 566,
+            "phase" : "countdown"
+          },
+          "sample" : 2
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 97,
+                    "domInteractiveMilliseconds" : 73,
+                    "durationMilliseconds" : 148,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 148,
+                    "responseEndMilliseconds" : 6,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 59,
+                    "resourceDurationSumMilliseconds" : 1657,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 59,
+                    "resourceDurationSumMilliseconds" : 59,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 61,
+                    "resourceDurationSumMilliseconds" : 61,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 58,
+                    "resourceDurationSumMilliseconds" : 98,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 5,
+                    "resourceDurationSumMilliseconds" : 8,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 36,
+                    "resourceDurationSumMilliseconds" : 72,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 5,
+                    "resourceDurationSumMilliseconds" : 5,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3239,
+                "timeOrigin" : 1793296834667
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 3991.222791666587,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3239
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296834667
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10196.891363875
+            },
+            {
+              "millisecondsAfterTap" : 2.5330000007670606,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10196.893896875001
+            },
+            {
+              "millisecondsAfterTap" : 13.092583334582741,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10196.904456458335
+            },
+            {
+              "millisecondsAfterTap" : 42.603249999956461,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10196.933967125
+            },
+            {
+              "millisecondsAfterTap" : 43.283125000016298,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10196.934647
+            },
+            {
+              "millisecondsAfterTap" : 727.07583333431103,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10197.618439708334
+            },
+            {
+              "millisecondsAfterTap" : 811.99800000104005,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10197.703361875001
+            },
+            {
+              "millisecondsAfterTap" : 862.98554166751273,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10197.754349416668
+            },
+            {
+              "millisecondsAfterTap" : 3954.7771666675544,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10200.846141041668
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 3954.7771666675544,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 1960,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 582,
+            "phase" : "countdown"
+          },
+          "sample" : 3
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 105,
+                    "domInteractiveMilliseconds" : 81,
+                    "durationMilliseconds" : 151,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 151,
+                    "responseEndMilliseconds" : 6,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 64,
+                    "resourceDurationSumMilliseconds" : 1784,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 65,
+                    "resourceDurationSumMilliseconds" : 65,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 66,
+                    "resourceDurationSumMilliseconds" : 66,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 56,
+                    "resourceDurationSumMilliseconds" : 89,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 12,
+                    "resourceDurationSumMilliseconds" : 13,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 31,
+                    "resourceDurationSumMilliseconds" : 59,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 4,
+                    "resourceDurationSumMilliseconds" : 4,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3240,
+                "timeOrigin" : 1793296838862
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4102.8980416667764,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3240
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296838862
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10200.9699915
+            },
+            {
+              "millisecondsAfterTap" : 2.7555416672839783,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10200.972747041667
+            },
+            {
+              "millisecondsAfterTap" : 14.195083333106595,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10200.984186583333
+            },
+            {
+              "millisecondsAfterTap" : 44.127416667834041,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10201.014118916668
+            },
+            {
+              "millisecondsAfterTap" : 44.579375000466825,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10201.014570875001
+            },
+            {
+              "millisecondsAfterTap" : 841.25270833465038,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10201.811244208335
+            },
+            {
+              "millisecondsAfterTap" : 936.05650000063179,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10201.906048000001
+            },
+            {
+              "millisecondsAfterTap" : 981.77766666776733,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10201.951769166668
+            },
+            {
+              "millisecondsAfterTap" : 4073.5259583343577,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10205.043517458334
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4073.5259583343577,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2080,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 609,
+            "phase" : "countdown"
+          },
+          "sample" : 4
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 112,
+                    "domInteractiveMilliseconds" : 84,
+                    "durationMilliseconds" : 157,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 157,
+                    "responseEndMilliseconds" : 7,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 98,
+                    "resourceDurationSumMilliseconds" : 2139,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 89,
+                    "resourceDurationSumMilliseconds" : 89,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 96,
+                    "resourceDurationSumMilliseconds" : 96,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 60,
+                    "resourceDurationSumMilliseconds" : 98,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 11,
+                    "resourceDurationSumMilliseconds" : 13,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 42,
+                    "resourceDurationSumMilliseconds" : 82,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 16,
+                    "resourceDurationSumMilliseconds" : 16,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3252,
+                "timeOrigin" : 1793296843092
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4115.948083332114,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3252
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296843092
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10205.190141000001
+            },
+            {
+              "millisecondsAfterTap" : 3.2741666655056179,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10205.193415166666
+            },
+            {
+              "millisecondsAfterTap" : 28.530291665447294,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10205.218671291666
+            },
+            {
+              "millisecondsAfterTap" : 58.364291666293866,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10205.248505291667
+            },
+            {
+              "millisecondsAfterTap" : 59.083958332848852,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10205.249224958334
+            },
+            {
+              "millisecondsAfterTap" : 853.25295833354176,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10206.043393958334
+            },
+            {
+              "millisecondsAfterTap" : 953.11899999978777,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10206.143260000001
+            },
+            {
+              "millisecondsAfterTap" : 997.58391666546231,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10206.187724916666
+            },
+            {
+              "millisecondsAfterTap" : 4093.5901666671271,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10209.283731166668
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4093.5901666671271,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2533,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 695,
+            "phase" : "countdown"
+          },
+          "sample" : 5
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 118,
+                    "domInteractiveMilliseconds" : 75,
+                    "durationMilliseconds" : 144,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 144,
+                    "responseEndMilliseconds" : 6,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 75,
+                    "resourceDurationSumMilliseconds" : 2015,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 71,
+                    "resourceDurationSumMilliseconds" : 71,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 74,
+                    "resourceDurationSumMilliseconds" : 74,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 55,
+                    "resourceDurationSumMilliseconds" : 91,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 4,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 61,
+                    "resourceDurationSumMilliseconds" : 122,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 7,
+                    "resourceDurationSumMilliseconds" : 7,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3270,
+                "timeOrigin" : 1793296847260
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4106.7266249992826,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3270
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296847260
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10209.397756291668
+            },
+            {
+              "millisecondsAfterTap" : 2.6258333327859873,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10209.400382125001
+            },
+            {
+              "millisecondsAfterTap" : 13.447749999613734,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10209.411204041668
+            },
+            {
+              "millisecondsAfterTap" : 42.52904166605731,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10209.440285333334
+            },
+            {
+              "millisecondsAfterTap" : 43.063708331828821,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10209.44082
+            },
+            {
+              "millisecondsAfterTap" : 812.40483333203883,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10210.210161125
+            },
+            {
+              "millisecondsAfterTap" : 918.46941666517523,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10210.316225708333
+            },
+            {
+              "millisecondsAfterTap" : 944.86354166656383,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10210.342619833335
+            },
+            {
+              "millisecondsAfterTap" : 4071.2769999990996,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10213.469033291667
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4071.2769999990996,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2384,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 580,
+            "phase" : "countdown"
+          },
+          "sample" : 6
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 118,
+                    "domInteractiveMilliseconds" : 99,
+                    "durationMilliseconds" : 167,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 167,
+                    "responseEndMilliseconds" : 7,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 85,
+                    "resourceDurationSumMilliseconds" : 2050,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 84,
+                    "resourceDurationSumMilliseconds" : 84,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 83,
+                    "resourceDurationSumMilliseconds" : 83,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 65,
+                    "resourceDurationSumMilliseconds" : 101,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 6,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 42,
+                    "resourceDurationSumMilliseconds" : 77,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 6,
+                    "resourceDurationSumMilliseconds" : 6,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3258,
+                "timeOrigin" : 1793296851381
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4044.1448333331209,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3258
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296851381
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10213.607134208334
+            },
+            {
+              "millisecondsAfterTap" : 2.8290833324717823,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10213.609963291667
+            },
+            {
+              "millisecondsAfterTap" : 12.97924999926181,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10213.620113458333
+            },
+            {
+              "millisecondsAfterTap" : 40.913541666668607,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10213.648047750001
+            },
+            {
+              "millisecondsAfterTap" : 41.387916666280944,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10213.648522125
+            },
+            {
+              "millisecondsAfterTap" : 725.03620833231253,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10214.332170416666
+            },
+            {
+              "millisecondsAfterTap" : 830.15687499937485,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10214.437291083334
+            },
+            {
+              "millisecondsAfterTap" : 879.22091666587221,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10214.486355125
+            },
+            {
+              "millisecondsAfterTap" : 3971.3396666666085,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10217.578473875001
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 3971.3396666666085,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2407,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 582,
+            "phase" : "countdown"
+          },
+          "sample" : 7
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 92,
+                    "domInteractiveMilliseconds" : 69,
+                    "durationMilliseconds" : 135,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 135,
+                    "responseEndMilliseconds" : 5,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 52,
+                    "resourceDurationSumMilliseconds" : 1523,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 56,
+                    "resourceDurationSumMilliseconds" : 56,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 58,
+                    "resourceDurationSumMilliseconds" : 58,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 53,
+                    "resourceDurationSumMilliseconds" : 89,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 6,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 29,
+                    "resourceDurationSumMilliseconds" : 50,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 5,
+                    "resourceDurationSumMilliseconds" : 5,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3235,
+                "timeOrigin" : 1793296855556
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4011.7132083341858,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3235
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296855556
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10217.739959500001
+            },
+            {
+              "millisecondsAfterTap" : 2.6109583341167308,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10217.742570458335
+            },
+            {
+              "millisecondsAfterTap" : 13.588583333330462,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10217.753548083334
+            },
+            {
+              "millisecondsAfterTap" : 40.891250000640866,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10217.780850750001
+            },
+            {
+              "millisecondsAfterTap" : 41.362500000104774,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10217.781322000001
+            },
+            {
+              "millisecondsAfterTap" : 763.19845833313593,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10218.503157958334
+            },
+            {
+              "millisecondsAfterTap" : 847.1460416658374,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10218.587105541666
+            },
+            {
+              "millisecondsAfterTap" : 889.40387500042561,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10218.629363375001
+            },
+            {
+              "millisecondsAfterTap" : 3990.095333332647,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10221.730054833333
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 3990.095333332647,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 1787,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 506,
+            "phase" : "countdown"
+          },
+          "sample" : 8
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 86,
+                    "domInteractiveMilliseconds" : 63,
+                    "durationMilliseconds" : 129,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 129,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 47,
+                    "resourceDurationSumMilliseconds" : 1385,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 52,
+                    "resourceDurationSumMilliseconds" : 52,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 51,
+                    "resourceDurationSumMilliseconds" : 51,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 52,
+                    "resourceDurationSumMilliseconds" : 90,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 8,
+                    "resourceDurationSumMilliseconds" : 10,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 28,
+                    "resourceDurationSumMilliseconds" : 54,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3216,
+                "timeOrigin" : 1793296859554
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 3908.0242083327903,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3216
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296859554
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10221.831893375002
+            },
+            {
+              "millisecondsAfterTap" : 2.2367499987012707,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10221.834130125
+            },
+            {
+              "millisecondsAfterTap" : 13.845333332938026,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10221.845738708334
+            },
+            {
+              "millisecondsAfterTap" : 40.22587499821384,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10221.87211925
+            },
+            {
+              "millisecondsAfterTap" : 40.640458331836271,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10221.872533833333
+            },
+            {
+              "millisecondsAfterTap" : 670.33137499856821,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10222.50222475
+            },
+            {
+              "millisecondsAfterTap" : 747.42129166588711,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10222.579314666667
+            },
+            {
+              "millisecondsAfterTap" : 790.5520833319315,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10222.622445458333
+            },
+            {
+              "millisecondsAfterTap" : 3877.4507499983883,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10225.709344125
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 3877.4507499983883,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 1645,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 496,
+            "phase" : "countdown"
+          },
+          "sample" : 9
+        },
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documentPhaseReceiptScope" : "Initial document only; no relabeling Home milestones as final Star resource completion",
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 94,
+                    "domInteractiveMilliseconds" : 69,
+                    "durationMilliseconds" : 148,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 148,
+                    "responseEndMilliseconds" : 5,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 68,
+                    "resourceDurationSumMilliseconds" : 1860,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 72,
+                    "resourceDurationSumMilliseconds" : 72,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 74,
+                    "resourceDurationSumMilliseconds" : 74,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 64,
+                    "resourceDurationSumMilliseconds" : 109,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 5,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 62,
+                    "resourceDurationSumMilliseconds" : 123,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 3,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3252,
+                "timeOrigin" : 1793296863656
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4058.2762499998353,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3252
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793296863656
+            }
+          ],
+          "missingNativePhaseNames" : [
+
+          ],
+          "nativeAndDocumentClocksSubtracted" : false,
+          "nativePhaseInitialDocumentPath" : "\/games\/paper-star\/local",
+          "nativePhasePoints" : [
+            {
+              "millisecondsAfterTap" : 0,
+              "phase" : "tap",
+              "uptimeSeconds" : 10225.826282208334
+            },
+            {
+              "millisecondsAfterTap" : 2.336458332138136,
+              "phase" : "present-entered",
+              "uptimeSeconds" : 10225.828618666666
+            },
+            {
+              "millisecondsAfterTap" : 13.518333333195187,
+              "phase" : "initial-loader-entered",
+              "uptimeSeconds" : 10225.839800541668
+            },
+            {
+              "millisecondsAfterTap" : 41.376041666808305,
+              "phase" : "initial-loader-prepared-after-load-call",
+              "uptimeSeconds" : 10225.867658250001
+            },
+            {
+              "millisecondsAfterTap" : 41.813541665760567,
+              "phase" : "present-completed",
+              "uptimeSeconds" : 10225.86809575
+            },
+            {
+              "millisecondsAfterTap" : 777.40104166696256,
+              "phase" : "document-start-received",
+              "uptimeSeconds" : 10226.603683250001
+            },
+            {
+              "millisecondsAfterTap" : 862.79679166545975,
+              "phase" : "dom-content-loaded-received",
+              "uptimeSeconds" : 10226.689079
+            },
+            {
+              "millisecondsAfterTap" : 916.23904166590364,
+              "phase" : "window-load-received",
+              "uptimeSeconds" : 10226.74252125
+            },
+            {
+              "millisecondsAfterTap" : 4021.1554583329416,
+              "phase" : "on-game-ready-received",
+              "uptimeSeconds" : 10229.847437666667
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4021.1554583329416,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2246,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 559,
+            "phase" : "countdown"
+          },
+          "sample" : 10
+        }
+      ],
+      "stage" : "direct-mode-cold"
+    }
+  ],
+  "samplesPerStage" : 10,
+  "stages" : [
+    "same-build-home-detail-mode-cold",
+    "direct-mode-cold"
+  ],
+  "warmupOrHiddenBlank" : false
+}

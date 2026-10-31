@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-29T06:26:20.399124+08:00",
+  "simulatorID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "createdDevices": [],
+  "erasedDevices": [],
+  "deletedDevices": [],
+  "parallelTestingEnabled": false,
+  "currentDevices": {
+    "devices": {
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-0": [
+        {
+          "dataPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data",
+          "dataPathSize": 7026479104,
+          "logPath": "/Users/yunyou/Library/Logs/CoreSimulator/4502D5E9-9630-4AF0-9050-3C9109139FD0",
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+          "lastUsedAt": "2026-10-28T21:56:30Z",
+          "isAvailable": true,
+          "logPathSize": 708608,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+          "state": "Booted",
+          "name": "iPhone 18 Pro"
+        },
+        {
+          "dataPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/738191D2-2B9B-4A64-BDB0-9C788BEABAFC/data",
+          "dataPathSize": 3758329856,
+          "logPath": "/Users/yunyou/Library/Logs/CoreSimulator/738191D2-2B9B-4A64-BDB0-9C788BEABAFC",
+          "udid": "738191D2-2B9B-4A64-BDB0-9C788BEABAFC",
+          "lastUsedAt": "2026-10-28T09:21:41Z",
+          "isAvailable": true,
+          "logPathSize": 454656,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro",
+          "state": "Booted",
+          "name": "iPhone 15 Pro"
+        },
+        {
+          "dataPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/20942FE3-19B3-40F1-A34B-EF636AE02B1B/data",
+          "dataPathSize": 4681801728,
+          "logPath": "/Users/yunyou/Library/Logs/CoreSimulator/20942FE3-19B3-40F1-A34B-EF636AE02B1B",
+          "udid": "20942FE3-19B3-40F1-A34B-EF636AE02B1B",
+          "lastUsedAt": "2026-10-28T15:50:53Z",
+          "isAvailable": true,
+          "logPathSize": 389120,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M5-12GB",
+          "state": "Booted",
+          "name": "iPad Pro 13-inch (M5)"
+        },
+        {
+          "dataPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/7B3387F5-93E8-4CDF-AD40-579437A7D719/data",
+          "dataPathSize": 5809967104,
+          "logPath": "/Users/yunyou/Library/Logs/CoreSimulator/7B3387F5-93E8-4CDF-AD40-579437A7D719",
+          "udid": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+          "lastUsedAt": "2026-10-28T19:20:08Z",
+          "isAvailable": true,
+          "logPathSize": 528384,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M5-12GB",
+          "state": "Shutdown",
+          "name": "iPad Pro 11-inch (M5)"
+        }
+      ],
+      "com.apple.CoreSimulator.SimRuntime.iOS-27-1": [
+        {
+          "dataPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/BAA7646B-5019-43BA-90A2-1248C996C3E6/data",
+          "dataPathSize": 3925069824,
+          "logPath": "/Users/yunyou/Library/Logs/CoreSimulator/BAA7646B-5019-43BA-90A2-1248C996C3E6",
+          "udid": "BAA7646B-5019-43BA-90A2-1248C996C3E6",
+          "lastUsedAt": "2026-10-28T14:44:47Z",
+          "isAvailable": true,
+          "logPathSize": 536576,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-Duo",
+          "state": "Shutdown",
+          "name": "iPhone Duo"
+        }
+      ],
+      "com.apple.CoreSimulator.SimRuntime.iOS-26-5": [
+        {
+          "dataPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/F69F6452-D87D-4C56-ACDE-6E3E6A144CB3/data",
+          "dataPathSize": 3067789312,
+          "logPath": "/Users/yunyou/Library/Logs/CoreSimulator/F69F6452-D87D-4C56-ACDE-6E3E6A144CB3",
+          "udid": "F69F6452-D87D-4C56-ACDE-6E3E6A144CB3",
+          "lastUsedAt": "2026-10-28T09:25:46Z",
+          "isAvailable": true,
+          "logPathSize": 589824,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro",
+          "state": "Booted",
+          "name": "iPhone 16 Pro"
+        }
+      ]
+    }
+  },
+  "finalAppPID": 77548,
+  "finalAppScreen": "寻乐; all manually opened games ended; recent records preserved",
+  "voiceOverAndReduceMotion": "Not changed in this continuation; previous actual 0→1→0 and VoiceOver restore evidence retained",
+  "otherDevices": "Recorded only; not stopped, reset or deleted"
+}

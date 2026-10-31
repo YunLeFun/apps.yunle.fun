@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "diagnostic-N3-not-performance-acceptance",
+  "source": "startup-document-phase-n3.json",
+  "validation": "6 samples, each 9 unique native-uptime receipt points in observed order; genuine ready and same prepared profile",
+  "results": [
+    {
+      "gameId": "gomoku",
+      "sampleCount": 3,
+      "medianMilliseconds": {
+        "documentStartReceiptToDOMContentLoadedReceipt": 84.77308333385736,
+        "documentStartReceiptToReady": 161.13454167498276,
+        "DOMContentLoadedReceiptToReady": 76.3614583411254,
+        "DOMContentLoadedReceiptToWindowLoadReceipt": 10.742624988779426,
+        "initialLoaderToPrepared": 23.47983338404447,
+        "preparedToDocumentStartReceipt": 727.1842083428055,
+        "preparedToReady": 1262.7282500034198,
+        "presentEntryToInitialLoader": 8.72874999186024,
+        "readyMinusPresentationCompleted": 1262.3669166350737,
+        "tapToPresentationCompleted": 34.66350003145635,
+        "tapToPresentEntry": 2.0758333266712725,
+        "tapToReady": 1291.3428749889135,
+        "windowLoadReceiptToReady": 59.179125004448
+      }
+    },
+    {
+      "gameId": "paper-star",
+      "sampleCount": 3,
+      "medianMilliseconds": {
+        "documentStartReceiptToDOMContentLoadedReceipt": 54.96054165996611,
+        "documentStartReceiptToReady": 3174.309833382722,
+        "DOMContentLoadedReceiptToReady": 3119.5644583785906,
+        "DOMContentLoadedReceiptToWindowLoadReceipt": 0.09795837104320526,
+        "initialLoaderToPrepared": 23.180708289146423,
+        "preparedToDocumentStartReceipt": 548.3027916634455,
+        "preparedToReady": 3722.8277917020023,
+        "presentEntryToInitialLoader": 23.1578333186917,
+        "readyMinusPresentationCompleted": 3722.357499995269,
+        "tapToPresentationCompleted": 49.165750038810074,
+        "tapToPresentEntry": 2.0467083668336272,
+        "tapToReady": 3773.7432083231397,
+        "windowLoadReceiptToReady": 3102.559666673187
+      }
+    }
+  ],
+  "scope": [
+    "Diagnostic N3 is not a replacement N10 result, a hardware benchmark or a 30 percent target claim",
+    "Catalog/account fixture state is preloaded; no native SSO or production identity",
+    "Initial-loader prepared marks return after web.load on this successful fresh-game branch, not response, commit or network completion",
+    "Document stages measure native receipt, including WebKit IPC and extra script/handler observation overhead; they are not exact JavaScript execution timestamps",
+    "DOMContentLoaded or window.load may be received after genuine game ready; signed intervals are intentional",
+    "Callback scheduling, WebKit IPC, observer execution and test machinery remain included; no document clock is subtracted"
+  ]
+}

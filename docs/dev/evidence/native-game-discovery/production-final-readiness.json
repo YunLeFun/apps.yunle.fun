@@ -1,0 +1,68 @@
+{
+  "kind": "anonymous-production-readiness",
+  "checkedAt": "2026-10-29T04:12:39.813611+08:00",
+  "requests": [
+    {
+      "name": "aasa-root",
+      "url": "https://play.yunle.fun/apple-app-site-association",
+      "status": 404,
+      "contentType": "text/html"
+    },
+    {
+      "name": "aasa-well-known",
+      "url": "https://play.yunle.fun/.well-known/apple-app-site-association",
+      "status": 404,
+      "contentType": "text/html"
+    },
+    {
+      "name": "native-catalog",
+      "url": "https://play.yunle.fun/native/catalog-v1.json",
+      "status": 404,
+      "contentType": "text/html"
+    },
+    {
+      "name": "resources-gomoku",
+      "url": "https://play.yunle.fun/native/resources/gomoku-v1.json",
+      "status": 404,
+      "contentType": "text/html"
+    },
+    {
+      "name": "resources-flight-chess",
+      "url": "https://play.yunle.fun/native/resources/flight-chess-v1.json",
+      "status": 404,
+      "contentType": "text/html"
+    },
+    {
+      "name": "resources-paper-star",
+      "url": "https://play.yunle.fun/native/resources/paper-star-v1.json",
+      "status": 404,
+      "contentType": "text/html"
+    },
+    {
+      "name": "health",
+      "url": "https://api.play.yunle.fun/v1/health",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "publicHealth": {
+        "ok": true,
+        "protocolVersion": 3
+      }
+    },
+    {
+      "name": "anonymous-session",
+      "url": "https://api.play.yunle.fun/v1/session",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "name": "room-cors",
+      "url": "https://api.play.yunle.fun/v1/rooms",
+      "status": 204,
+      "contentType": null,
+      "allowOrigin": "https://play.yunle.fun",
+      "allowCredentials": "true",
+      "allowsIdempotencyHeader": false
+    }
+  ],
+  "scope": "Read-only GET and CORS preflight; normal TLS; no cookies, auth grants, room writes or deployment"
+}

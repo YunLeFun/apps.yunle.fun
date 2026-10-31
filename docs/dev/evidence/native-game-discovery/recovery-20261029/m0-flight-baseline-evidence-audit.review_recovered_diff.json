@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-readonly-M0.1-entry-and-flight-baseline-gap-audit",
+  "recordedAtUTC": "2026-10-29T19:34:23.054512+00:00",
+  "readOnly": true,
+  "newTestsBuildsNetworkAccountsSimulatorOrUI": false,
+  "inspectionScope": "Selected durable evidence, explicit脱敏wire metadata and source contract only. Not an exhaustive computer search. No credentials or configuration secrets were read; no Cookie, raw UID, raw room ID, invitationcode or connectionticket is copied into thisaudit.",
+  "references": [
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m0-flight-chess-baseline-evidence-audit.json",
+      "bytes": 4952,
+      "sha256": "b841ddb9e14b726534f8dadb0ef781aa3029d8f53ee912f0857ebad42aa0e64a"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-operable-n10.json",
+      "bytes": 400664,
+      "sha256": "f00ab2d10ea153ece4ecf3670128dcd1e5e1f63673418c1235cd08c14d28fe85"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "bytes": 25597,
+      "sha256": "2a7fc020214342220bf02a99d3b71549b854c5396504c2d34d838ea9c4b2be11"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-independent-review.json",
+      "bytes": 51253,
+      "sha256": "d7b60db8c47349b1c8fa378a82d6054c0da97b0bba0fc44bab7acf8f3e8a5f20"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/retained-resume-final-n10.json",
+      "bytes": 31042,
+      "sha256": "312f8b358179c593ae5b8fc1e65109cbc72e34cfb7857c3f254f3771dae9ee79"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/historical-native-gomoku-https-metrics.json",
+      "bytes": 29018,
+      "sha256": "1e8d5ade7c9e8664e31c2987b9c27731a781f3619b479d223817ae47e36811ef"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-browser-smoke.json",
+      "bytes": 2313,
+      "sha256": "e493cf1a402a71f447158567a4f93ed15620beb1cdd1854c3d6463f84d5506b9"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/local-room-recovery.json",
+      "bytes": 9485,
+      "sha256": "177f82369a71816b53a526a3a8a34d1a919f03e852c16451359e63abfe377b93"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/manual-native-candidate-entry.json",
+      "bytes": 2069,
+      "sha256": "e479033a174cc2ee2446188cfde1b113ebc977d7eedc8144196aaa8b1555f3fa"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+      "bytes": 8043,
+      "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/final-native-checkpoint-20261030-0315.json",
+      "bytes": 3704,
+      "sha256": "fb50e2dc83de0ebf3ec8c58b1d66ba1ee6bc745bf97ad38bc2e6c3d2f11c1f1c"
+    }
+  ],
+  "M0_1Requirement": {
+    "source": "specs/native-game-discovery/tasks.md item0.1",
+    "requiredCoverage": [
+      "gomoku/computer",
+      "flight-chess create and join",
+      "paper-star tutorial/local and currently open online modes"
+    ],
+    "requiredConditions": [
+      "source/build identity",
+      "device/runtime",
+      "network and cache condition",
+      "first open versus prepared/cache reopen versus retained/resumed session"
+    ],
+    "requiredEventDefinitions": [
+      "entry action/click",
+      "actual navigation",
+      "verified public resources ready",
+      "genuine gameplay operable",
+      "authoritative room connection ready"
+    ],
+    "doesNotExplicitlyRequire": "A rebuild of the exact old Native commit or N10 for every M0mode. M3representative performanceN10 and M4roomN10 have their own requirements."
+  },
+  "coverage": [
+    {
+      "case": "Gomoku computer + PaperStar local current same-build entry/load baseline",
+      "status": "available-for-these-two-scenes",
+      "evidence": "m3-final-a701-operable-n10.json + metrics + independentreview",
+      "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+      "webCommitAttribution": "6ff97db619b7140aa76609e5c2f2a766175fc25e fromroot productionverification, not derived fromcatalog hash",
+      "samples": 60,
+      "scenes": [
+        {
+          "gameId": "gomoku",
+          "modeId": "computer",
+          "stage": "same-build-home-detail-mode-cold",
+          "n": 10,
+          "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+        },
+        {
+          "gameId": "gomoku",
+          "modeId": "computer",
+          "stage": "direct-mode-cold",
+          "n": 10,
+          "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+        },
+        {
+          "gameId": "gomoku",
+          "modeId": "computer",
+          "stage": "direct-mode-prepared",
+          "n": 10,
+          "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+        },
+        {
+          "gameId": "paper-star",
+          "modeId": "local",
+          "stage": "same-build-home-detail-mode-cold",
+          "n": 10,
+          "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+        },
+        {
+          "gameId": "paper-star",
+          "modeId": "local",
+          "stage": "direct-mode-cold",
+          "n": 10,
+          "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+        },
+        {
+          "gameId": "paper-star",
+          "modeId": "local",
+          "stage": "direct-mode-prepared",
+          "n": 10,
+          "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+        }
+      ],
+      "proves": [
+        "Samefixedpublic build current Home→detail→mode versus direct mode/prepared path",
+        "Fixed4502/iOS27 simulator, loopbackHTTP, same namedfixtureprofile, explicitHTTPcache clearing/preparation",
+        "Real ready callback Native uptime values, actualvisible anchor observations, document resource snapshots, Star playing+renderer",
+        "Current same-build performance baseline accepted by M3, with statedautomation/poll overhead"
+      ],
+      "limits": [
+        "Not direct historical Nativecommit or productionnetwork baseline",
+        "Does not cover FlightChesscreate/join or individualStar tutorial timing",
+        "Pure complete resource-wait walltime remainsunknown and separate fromfixed3000msrule"
+      ]
+    },
+    {
+      "case": "Retained sessions G/Star",
+      "status": "available-historical-separated-scope",
+      "evidence": "retained-resume-final-n10.json",
+      "completed": true,
+      "expectedSampleCount": 20,
+      "scope": "Same local candidate and isolated fixture only; retained same-process session, not OS suspension, process eviction, app restart or online room recovery.",
+      "limit": "Keep version/fixture and timingdefinition separate froma701 new-page values; do not claim OS/App/WebContent recovery from same-document retention."
+    },
+    {
+      "case": "Exact historical Native Gomoku baseline",
+      "status": "available-optional-historical-context",
+      "evidence": "historical-native-gomoku-https-metrics.json",
+      "proves": "ActualoldNative/HTTPS visualcontrols and accepted human/AI moves under cleared/natural HTTPcache pairs",
+      "limits": "Observed productionPlay Git unknown; oldportrait/animations, different clock endpoints and interpolatedquantiles. Keep standalone and never mix a percentage witha701. No need to rebuild merely to reproduce this context."
+    },
+    {
+      "case": "FlightChess original portal browser create",
+      "status": "functional-only",
+      "evidence": "production-browser-smoke.json",
+      "accountCount": 1,
+      "roomsCreated": 1,
+      "proves": [
+        "NormalSSO",
+        "Roomcreation and actualrunning one human +3bots",
+        "Reload same room authoritativeprogression",
+        "Supportedleave cleanup"
+      ],
+      "numericClickCreateJoinReadySamplesPresent": false,
+      "twoRealHumanClients": false
+    },
+    {
+      "case": "FlightChess local transport recovery",
+      "status": "protocol-only-numerical",
+      "evidence": "local-room-recovery.json",
+      "flightRounds": 10,
+      "transport": "real Colyseus SDK and loopback HTTP/WebSocket",
+      "identityType": "SessionStore-seeded synthetic test identities; no production credentials",
+      "roomStore": "memory",
+      "numericEndpoint": "recoveryMilliseconds measures localmemory/synthetic identity transport recovery",
+      "nativeUIClickCreateJoinReadyBaseline": false
+    },
+    {
+      "case": "Current final production Native/Browser FlightF01",
+      "status": "real-functional-fragment-excluded-clean-N10",
+      "evidence": "final-native-checkpoint-20261030-0315.json",
+      "checkpointAtUTC": "2026-10-29T19:16:27.157787+00:00",
+      "functionalColdUniversalLinkPassed": true,
+      "countedTowardN10": false,
+      "numericCreateJoinReadyValuesInThatCheckpoint": false,
+      "limit": "Do not reuse this historicalcheckpoint count as current livecount or relabel timeoutautoplay fragment as clean room pass."
+    },
+    {
+      "case": "Star tutorial and unavailable online",
+      "status": "tutorial-functional-only-online-not-applicable",
+      "evidence": "manual-native-candidate-entry.json additionalJourney and currenta701 frozenmodeavailability",
+      "tutorialProves": "ActualNative tutorial renderedscene/touchcontrols/minimize; normal-text visualcheck at historical9ba",
+      "tutorialNumericTapToReadyOnFinalA701RecordedInSelectedEvidence": false,
+      "minimumIfTutorialAndLocalBothRequired": "Add one currentversion tutorial entry observation with explicitconditions and genuineoperability/renderer markers alongside remainingM5journey; do not relabel localN10 as tutorialN10 or repeat fulloffline60 merely to get tutorialentry facts.",
+      "online": "Staronline remainsdisabled; record unavailable/N/A and do not manufacture onlinebaseline."
+    }
+  ],
+  "explicitSanitizedWireInspection": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-wire-sanitized.json",
+    "sha256AtRead": "cfedd7eda7bf6787f9fcabcde8a0f5e229a79827ff83c6736b30f34a51e2873a",
+    "eventCountAtRead": 424,
+    "perEventTimingKeysFound": [],
+    "hasSequence": true,
+    "hasGlobalUpdatedAtUTC": true,
+    "conclusion": "Order/identities/roomstate proof only; neithersequence norwholefile updatedAtUTC permits reconstruction of click-to-room-ready duration."
+  },
+  "eventDefinitionMap": [
+    {
+      "event": "entry/click",
+      "existingEvidence": "M3tapped Native ProcessInfo.systemUptime immediately before runtime.open; legacy navigation receipt at actualvisible anchor call",
+      "FlightMinimum": "Record observermonotonic immediately before normalcreate/join submit, and after commandreturn, labeling automation/IPC bounds."
+    },
+    {
+      "event": "navigation",
+      "existingEvidence": "M3homeLinkClickedMilliseconds/modeLinkClickedMilliseconds fromrealvisibleanchor actions; documentpath/timeOrigin snapshots",
+      "FlightMinimum": "Record actualentry path and observed navigation transition; do not replace portal flow with a hidden API or arbitraryURL and call it an oldentry baseline."
+    },
+    {
+      "event": "resources-ready",
+      "existingEvidence": "Native preparation cacheentry version/complete byteSHA validation beforepreparedstage; resource snapshots atrealengine-ready",
+      "FlightMinimum": "Record manifestversion/preparationstatus as a separate condition ifpreparing. Do not define a dynamicroomsnapshot as a cacheable resource or infer all resourcewait fromtotal."
+    },
+    {
+      "event": "game-operable",
+      "existingEvidence": "Native firstvalidated ready transition afterrealengine readiness/renderopportunity; Star mustplaying+renderertrue",
+      "FlightMinimum": "Keep roomwaiting ready distinct from gameplaying ready; realhuman roll/move accepted byauthoritativesnapshot proves usablegame, not merely an openWS."
+    },
+    {
+      "event": "room-connection-ready",
+      "sourceContract": "Play6ff OnlineGameRoom.vue149–166: connected+room+role→room-ready; gameplaying(nonStar)→separate ready afterrAF. NativeWebRuntime.swift339–345: firstroom-ready stores ProcessInfo.uptime-startedAt and logs room-connected-ms.",
+      "FlightMinimum": "Firstconnection.ready plus correctroom.snapshot/role/member/seat observed. Include samecanonicalroom andtwohashedUIDs; elapsedNative launch→room-connected is not a createbutton-submit duration."
+    }
+  ],
+  "minimalRemainingWork": [
+    {
+      "priority": 1,
+      "case": "Flight create and join currentversion operationalbaseline",
+      "action": "Attach timingobservations to remainingRoot-owned finalFlight newroom flows. Eachclient uses itsown monotonic observerclock fromUI submit until first authoritative connection+room snapshot observed; record which milestone is measured, cache/network/build and identityconditions. Save exactnumerical values, rawobservations and exposedAPI/IPC/poll overheadlimits.",
+      "count": "M0doesnot byitself demand another60benchmark or ten repeatspercachephase; existingremainingM4N10 can provide repeatedoperationalbaselines. Report whatever count wasactuallycaptured, avoid inventing missing first/final samples.",
+      "prohibition": "Do not subtract Nativeuptime, browser/CDPtimestamp or servermonotonic acrossclocks. Cuaarrival elapsed is an observationbound including IPC, not Nativefirstframe or pure networking."
+    },
+    {
+      "priority": 2,
+      "case": "Explicit first/cache/recovery classification",
+      "action": "For actual capturedFlightpaths label coldnewview versus retained/resumed versus naturallycached freshpage. Ifcacheclear/preparationdidnot occur, say natural/unknowncache; do not silentlymark cold. Keep existingM3cold/prepared andretained historical evidence separate."
+    },
+    {
+      "priority": 3,
+      "case": "Star tutorial coverage check",
+      "action": "For literal tutorial+local scope, record finalcurrent tutorial entry/realrenderer/operability in upcomingM5normalNativejourney; retain oldtutorialvisualevidence as history. No extra oldNativebuild or fullN10 required by0.1 alone."
+    }
+  ],
+  "completionConclusion": {
+    "M0_1Complete": false,
+    "why": "The two measuredoffline scenes have sufficient currententry/load baselines, but inspected durableFlight evidence lacks version-bound realUI create/join→room-ready numeric events. Tutorial coverageisfunctionalhistory, not currenttutorialtiming. Sources and eventdefinitions can be reused; missing fields must be captured rather than retroactively inferred.",
+    "oldNativeRebuildRequiredByInspectedM0_1Text": false,
+    "noExpansionToHistoricalNativePerformanceGate": true,
+    "notAClaimAboutCurrentRootLiveN10Count": true
+  },
+  "currentBundledCatalogAvailabilityRead": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Resources/native-game-catalog-v1.json",
+    "sha256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+    "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "starModes": [
+      {
+        "id": "tutorial",
+        "available": true
+      },
+      {
+        "id": "pve",
+        "available": true
+      },
+      {
+        "id": "local",
+        "available": true
+      },
+      {
+        "id": "online",
+        "available": false
+      }
+    ]
+  }
+}

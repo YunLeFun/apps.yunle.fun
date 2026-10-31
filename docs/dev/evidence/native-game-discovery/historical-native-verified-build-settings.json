@@ -1,0 +1,16 @@
+{
+  "kind": "verified-archived-project-debug-settings",
+  "targets": [
+    {
+      "target": "YunleFun",
+      "configuration": "Debug",
+      "bundleID": "fun.yunle.apps.native-legacy-01a182f1",
+      "appGroup": "group.fun.yunle.apps.native-legacy-01a182f1",
+      "optimization": "-Onone",
+      "activeCompilationConditions": "DEBUG",
+      "codeSignEntitlements": "YunleFun/YunleFun.entitlements"
+    }
+  ],
+  "source": "/tmp/yunle-native-games.uGZuY9/historical-native-build-settings.json",
+  "builtOrInstalled": false
+}

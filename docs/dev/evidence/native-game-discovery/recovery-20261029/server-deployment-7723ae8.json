@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 1,
+  "kind": "production-server-deployment-and-anonymous-http-boundaries",
+  "recordedAtUTC": "2026-10-29T16:32:08.067963+00:00",
+  "status": "deployed-finalized-and-independently-read-back",
+  "sourceCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "imageTag": "yunlefun/play-game-server:native-7723ae8",
+  "imageId": "sha256:8daa1ef469dfde828441150ecec98944789e0bb6693c1d4925ef1f3b007849c8",
+  "imageIdKind": "oci-index",
+  "imageIndexDigest": "sha256:8daa1ef469dfde828441150ecec98944789e0bb6693c1d4925ef1f3b007849c8",
+  "platformManifestDigest": "sha256:cf8329f39db0f793b06a3c7aae3b4a621945e893cd27c094204e91e2564a441d",
+  "imageConfigDigest": "sha256:8f0fe1fbeeeb2527f9c1d5c1e24fd7f8dee502b486b5f0908ea53ec8c39a5503",
+  "layoutIndexJSONSHA256": "bf1f6be2da0b73a57a491f5175169d5b5dbd347897110715377f91e9fb6aca38",
+  "runningContainerIdSHA256": "3f8ba56787679b9686fba24cd85aef14d094fba088b25e79369a569528061801",
+  "timing": {
+    "loadInspectV2": {
+      "timezone": "Asia/Shanghai",
+      "startedAt": "2026-10-30 00:23:03",
+      "finishedAt": "2026-10-30 00:23:10",
+      "exitCode": 0
+    },
+    "deploy": {
+      "timezone": "Asia/Shanghai",
+      "startedAt": "2026-10-30 00:25:02",
+      "finishedAt": "2026-10-30 00:25:13",
+      "exitCode": 0
+    },
+    "finalize": {
+      "timezone": "Asia/Shanghai",
+      "startedAt": "2026-10-30 00:26:26",
+      "finishedAt": "2026-10-30 00:26:32",
+      "exitCode": 0
+    }
+  },
+  "frozenInputs": {
+    "sourceArchiveSHA256": "6c9007df6625d44c60eedf48fffcbde55069941175691f5731d4d63cd6f3b3a7",
+    "sourceArchiveBytes": 505301,
+    "imageArchiveSHA256": "decf0ccbfae546c84c25cb96d2b99a2d2c785336c154ff33369e5569c36aaa9a",
+    "imageArchiveBytes": 94920746,
+    "releaseHelperSHA256": "5ca6943cac894335517d6fc9453e94d431f4920ddba0e02b3029d8218df19f3a",
+    "finalizeHelperSHA256": "016d6ec70e04e0d11d0c135d1cbfc5bd2b263f228fed04d86d3936a21834cd30"
+  },
+  "releaseScope": {
+    "singleExistingServiceImageOnly": true,
+    "existingComposeMetadataAndRuntimeFilesPreserved": true,
+    "configuredEnvironmentPreserved": true,
+    "existingReleaseGatesPreserved": true,
+    "addedReleaseGates": {},
+    "gitMainPushedByThisOperation": false,
+    "webDeploymentChangedByThisOperation": false,
+    "otherServiceDeploymentsPerformed": false
+  },
+  "preflight": {
+    "frozenOldContainerAndImageMatched": true,
+    "frozenOldManifestMatched": true,
+    "matchingTargetComposeMaintenanceProcesses": 0,
+    "activeConnections": 0,
+    "activeOnlinePlayers": 0,
+    "activeOnlineRooms": 0,
+    "fourExactUploadHashesAndRoot0600Verified": true
+  },
+  "archiveValidation": {
+    "blobCount": 17,
+    "layerCount": 11,
+    "allBlobDigestsVerified": true,
+    "allLayerDigestsVerified": true,
+    "actualUncompressedLayerTarDiffIDsVerified": true,
+    "ociIndexAndPlatformAndConfigBoundSeparately": true,
+    "candidateArchiveLoadedInFirstContentAuditAttempt": true,
+    "successfulV2ReusedExactAlreadyLoadedCandidate": true,
+    "successfulV2RepeatedDockerLoad": false,
+    "rollbackRestoreLoadTestPerformed": false
+  },
+  "isolatedContentAudit": {
+    "platform": "linux",
+    "architecture": "x64",
+    "node": "v22.23.4",
+    "uid": 1000,
+    "network": "none",
+    "readOnlyRoot": true,
+    "mounts": [],
+    "publishedPorts": {},
+    "capDrop": [
+      "ALL"
+    ],
+    "kernelNoNewPrivs": 1,
+    "ownedAuditContainerRemoved": true
+  },
+  "independentReadback": {
+    "atUTC": "2026-10-29T16:28:41.992726+00:00",
+    "runningHealthy": true,
+    "imageRevisionLabelMatched": true,
+    "actualRunningContainerCompiledSHA256": {
+      "colyseus/server.js": "5ec0e4e0b33fcbd991ca9c5efb4fbe71828f1d533509900b90192918eb3e9497",
+      "colyseus/play-room.js": "9aa28f32df203f5172135782d11d7f631e0c9f9b2791d977612b07b14c30bd10",
+      "index.js": "f352f4f4481499ed02dba76adab845bbdafa0c80717394159db400f396c22a12"
+    },
+    "manifestBeforeSHA256": "682f771f793b3d5809c0755dba3214fc64bd6cb06349610fdb30e8a4062fcec9",
+    "manifestAfterSHA256": "808a84970d2d0cf690259062fd3be7d1b198f570fa15e19959d90cf9e7f84ef3",
+    "existingReleaseGatesMatched": true,
+    "capacityObserved": {
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0
+    },
+    "ownedInspectionContainersRemaining": 0,
+    "runtimeEnvironmentReadByThisIndependentCheck": false
+  },
+  "recoveryArchives": [
+    {
+      "revision": "55fe0e7",
+      "kind": "source",
+      "name": "source-native-55fe0e7.tar.gz",
+      "bytes": 426215,
+      "sha256": "541d8209bd71ae5a52d6df17fa1b89107b03a8bc966a3f0943cc94686249c037",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "55fe0e7",
+      "kind": "image",
+      "name": "image-native-55fe0e7-amd64.tar.gz",
+      "bytes": 94921383,
+      "sha256": "436a7f4e9dfa5fffae084e9c90e0f151f12f4d6648c2d3b0b2e15fdc0480b923",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "36dacef",
+      "kind": "source",
+      "name": "source-native-36dacef.tar.gz",
+      "bytes": 504196,
+      "sha256": "b46de5b9b5921bfbebb1e5bdd9c32fc541438e6726ab92064e9dc92aab7a98fb",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "36dacef",
+      "kind": "image",
+      "name": "image-native-36dacef-amd64.tar.gz",
+      "bytes": 94943748,
+      "sha256": "c9a08855f7fe43d9cf28b12a23eaf2e30ab994e2457ef5770f1bc669c73a1f1f",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "b0f63be",
+      "kind": "source",
+      "name": "source-native-b0f63be.tar.gz",
+      "bytes": 504510,
+      "sha256": "c12b0b426dcf752a3d884a77d73ac1c595b65924e60015060f769d3e9f71e713",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "b0f63be",
+      "kind": "image",
+      "name": "image-native-b0f63be-amd64.tar.gz",
+      "bytes": 94945141,
+      "sha256": "c35c22dcfcd03983cb3919b7c31650af05ff23c97653a2b8b4c656710145b2e4",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "7723ae8",
+      "kind": "source",
+      "name": "source-native-7723ae8.tar.gz",
+      "bytes": 505301,
+      "sha256": "6c9007df6625d44c60eedf48fffcbde55069941175691f5731d4d63cd6f3b3a7",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    },
+    {
+      "revision": "7723ae8",
+      "kind": "image",
+      "name": "image-native-7723ae8-amd64.tar.gz",
+      "bytes": 94920746,
+      "sha256": "decf0ccbfae546c84c25cb96d2b99a2d2c785336c154ff33369e5569c36aaa9a",
+      "matchesRetainedManifest": true,
+      "restoreLoadTestPerformed": false
+    }
+  ],
+  "anonymousHTTP": {
+    "uniqueCasesVerified": 8,
+    "uniqueCasesPassed": 8,
+    "initialRunPassed": 7,
+    "initialRunTotal": 8,
+    "initialFailure": {
+      "case": "evil-anonymous-session-get",
+      "errorType": "URLError",
+      "HTTPResponseObserved": false,
+      "underlyingTransportReasonNotCaptured": true
+    },
+    "focusedRetryCount": 1,
+    "focusedRetryStatus": 401,
+    "totalHTTPRequests": 9,
+    "normalTLSAndRedirectPolicyUnchanged": true,
+    "cookiesOrCredentialsSent": false,
+    "roomCreationSucceeded": false,
+    "initialRunRewrittenAsAllGreen": false,
+    "cases": [
+      {
+        "name": "trusted-anonymous-room-post",
+        "method": "POST",
+        "path": "/v1/rooms",
+        "origin": "https://play.yunle.fun",
+        "status": 401,
+        "headers": {
+          "access-control-allow-origin": "https://play.yunle.fun",
+          "access-control-allow-credentials": "true",
+          "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Request-Id, Idempotency-Key",
+          "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
+          "vary": "Origin"
+        },
+        "code": "AUTH_REQUIRED",
+        "bodyBytes": 140,
+        "bodySHA256": "ba415f3ab884b96434e3ba6e76b1b0b11f3436f5db6a25abd268ec7c81aaa5f9",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      },
+      {
+        "name": "evil-anonymous-room-post",
+        "method": "POST",
+        "path": "/v1/rooms",
+        "origin": "https://play.yunle.fun.evil.example",
+        "status": 403,
+        "headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-credentials": null,
+          "access-control-allow-headers": null,
+          "access-control-allow-methods": null,
+          "vary": "Origin"
+        },
+        "code": "ORIGIN_NOT_ALLOWED",
+        "bodyBytes": 136,
+        "bodySHA256": "da8977596d4bae3b3b88a06ade94ea2cc9cfe6b7186267818339582e45057b35",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      },
+      {
+        "name": "evil-anonymous-session-get",
+        "method": "GET",
+        "path": "/v1/session",
+        "origin": "https://play.yunle.fun.evil.example",
+        "status": 401,
+        "headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-credentials": null,
+          "access-control-allow-headers": null,
+          "access-control-allow-methods": null,
+          "vary": "Origin"
+        },
+        "code": "AUTH_REQUIRED",
+        "bodyBytes": 140,
+        "bodySHA256": "39046ba9547647c538ee03ff57666a52a56fc14522c2ad5c564395babeeba755",
+        "passed": true,
+        "verifiedFrom": "one-focused-normal-TLS-retry"
+      },
+      {
+        "name": "no-origin-health-get",
+        "method": "GET",
+        "path": "/v1/health",
+        "origin": null,
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-credentials": null,
+          "access-control-allow-headers": null,
+          "access-control-allow-methods": null,
+          "vary": "Origin"
+        },
+        "code": null,
+        "bodyBytes": 982,
+        "bodySHA256": "7d119481d93cb95ccff74adff3b4ab4a7d53c46644efa11699ecf835860e6564",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      },
+      {
+        "name": "trusted-room-preflight",
+        "method": "OPTIONS",
+        "path": "/v1/rooms",
+        "origin": "https://play.yunle.fun",
+        "status": 204,
+        "headers": {
+          "access-control-allow-origin": "https://play.yunle.fun",
+          "access-control-allow-credentials": "true",
+          "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Request-Id, Idempotency-Key",
+          "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
+          "vary": "Origin"
+        },
+        "code": null,
+        "bodyBytes": 0,
+        "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      },
+      {
+        "name": "evil-room-preflight",
+        "method": "OPTIONS",
+        "path": "/v1/rooms",
+        "origin": "https://play.yunle.fun.evil.example",
+        "status": 204,
+        "headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-credentials": null,
+          "access-control-allow-headers": null,
+          "access-control-allow-methods": null,
+          "vary": "Origin"
+        },
+        "code": null,
+        "bodyBytes": 0,
+        "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      },
+      {
+        "name": "no-origin-room-preflight",
+        "method": "OPTIONS",
+        "path": "/v1/rooms",
+        "origin": null,
+        "status": 204,
+        "headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-credentials": null,
+          "access-control-allow-headers": null,
+          "access-control-allow-methods": null,
+          "vary": "Origin"
+        },
+        "code": null,
+        "bodyBytes": 0,
+        "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      },
+      {
+        "name": "trusted-matchmaking-preflight",
+        "method": "OPTIONS",
+        "path": "/matchmake/joinOrCreate/play_room",
+        "origin": "https://play.yunle.fun",
+        "status": 204,
+        "headers": {
+          "access-control-allow-origin": "https://play.yunle.fun",
+          "access-control-allow-credentials": "true",
+          "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Request-Id, Idempotency-Key",
+          "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
+          "vary": "Origin"
+        },
+        "code": null,
+        "bodyBytes": 0,
+        "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "passed": true,
+        "verifiedFrom": "initial-eight-case-run"
+      }
+    ]
+  },
+  "preservedIntermediateFailures": [
+    {
+      "stage": "first-loader-before-Docker-load",
+      "reason": "Four uploaded root-owned regular files had0644 mode; strict0600 check rejected before image load",
+      "resolution": "After exact hashes, sizes, parent owner marker and held inode verification, only these four files were tightened to0600; ownership and contents unchanged",
+      "originalFailureRetained": true
+    },
+    {
+      "stage": "first-post-permission-content-audit",
+      "reason": "Docker returned securityOpt bare no-new-privileges; initial checker expected colon-true form",
+      "actualObservedSecurityOpt": [
+        "no-new-privileges"
+      ],
+      "probeStarted": false,
+      "probeCleaned": true,
+      "resolution": "Separate v2 accepts only the two exact Docker true representations and additionally requires kernel NoNewPrivs1; all other isolation checks and Docker flags unchanged",
+      "originalLoaderRetained": true,
+      "originalFailureRetained": true
+    },
+    {
+      "stage": "anonymous-http-first-run",
+      "reason": "One URLError before an HTTP response, seven other cases passed",
+      "resolution": "One focused same-URL/header normal-TLS retry passed; initial7of8 retained",
+      "originalFailureRetained": true
+    }
+  ],
+  "verificationLimits": {
+    "fullServer269TestSuiteRerunByThisDeployment": false,
+    "nativeAcceptanceClaimedByThisReport": false,
+    "expiredSpectatorProductionUIRetestIncluded": false,
+    "productionSLAClaimed": false,
+    "rollbackRestoreActuallyPerformed": false,
+    "proofScope": "Frozen server deployment, actual live compiled-file identity, retained recovery archive hashes, and anonymous HTTP boundaries"
+  },
+  "privateEvidenceDigests": [
+    {
+      "name": "remote-load-inspect-7723ae8.py",
+      "bytes": 20468,
+      "sha256": "fa5042f1b55b2671f3351062ba0fa68a3e5ecf50bee0dc7e35f9259265c5880c",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "remote-load-inspect-7723ae8.v2.py",
+      "bytes": 20713,
+      "sha256": "69fdf68ffaa085d30208d563644cec152a5c547733ec77534251811e6131cec6",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "remote-load-inspect-7723ae8.v2.diff",
+      "bytes": 2992,
+      "sha256": "035e5c6232e0bc88e8e47127309606e9e715c6b6ed74d1e060ba9c7c911cc467",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "remote-load-inspect-execution-failed-001.json",
+      "bytes": 1198,
+      "sha256": "2f1ffc00c6b67549c9ffb83fbf04e0ad5567d20ba68212937a489a9a11fa02a8",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "remote-load-inspect-ui-failed-001.txt",
+      "bytes": 665,
+      "sha256": "bae4a2a507998fee72e1b9a16c6366a28307b05c50c27640748dcda3a74868c7",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "load-inspect-ui-after-permissions.txt",
+      "bytes": 567,
+      "sha256": "ea456034b931d12a5e7fddcbeb923c6309f5b9168690960dc01a4a1958fed014",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "upload-metadata-before-permissions.json",
+      "bytes": 2750,
+      "sha256": "30dceb7a660e80ea4a06a2df961510478374e8a60974956db9606cbdad58572a",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "upload-permissions-tightened.json",
+      "bytes": 2210,
+      "sha256": "47b1271d73a20cd87895f7d19aaf7f5024ca60f3bdb66552e3aa348cfd449f9b",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "isolation-prestart-probe.json",
+      "bytes": 1965,
+      "sha256": "aa139f48b5bddd6bb04a8229a587009b963766d049ba5d87062775b19af2975e",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "remote-load-inspect-v2-result.json",
+      "bytes": 4768,
+      "sha256": "94afa80d171d3a6b36c660a0a0e9fa3b7c755ab9f0915112e2513dee6e12076e",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "backend-deployed-7723ae8.json",
+      "bytes": 2223,
+      "sha256": "783c31d9235845a8c1c960c59b5a2d310dd4cad5e5006341037bcc5b21b0b585",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "backend-finalized-7723ae8.json",
+      "bytes": 1972,
+      "sha256": "db3c09c49bf18eb1215f764f783e92bf7ab27d808a31fc3412f07c08c059b128",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "independent-postdeploy-readback.json",
+      "bytes": 5177,
+      "sha256": "f8a29f45249a99229f49a1e21e276714f3d059ab56a267ddd3bfcdd68ed17dfa",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "postdeploy-anonymous-http-7723ae8.json",
+      "bytes": 6687,
+      "sha256": "28a8f8343e1eaab9da1e88f496feb95aa9a96ddbfabbae16d4ef004ce6921876",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "postdeploy-anonymous-evil-session-single-retry.json",
+      "bytes": 1227,
+      "sha256": "0d9674dd85708e7f71e23948293bbb579024618d88d78f635b8133106798a68f",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "postdeploy-anonymous-http-composite-7723ae8.json",
+      "bytes": 8074,
+      "sha256": "3bdb38e4cfe4a0b9e23857c5e3790ead2cf7fe423d5e7d92eba48a259c6dcf91",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "backend-deployed-7723ae8-success.png",
+      "bytes": 176654,
+      "sha256": "f7e1e79c4483a3e76db8b6c03a0d8081bdbd8e8d5db8f3908209b9c19db2a76a",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "backend-finalized-7723ae8-success.png",
+      "bytes": 177305,
+      "sha256": "7b912d802739c8d903ea057836ec1915eb770e4c1e59fd7d2282c0e39d40ee51",
+      "retainedInPrivateTaskEvidence": true
+    },
+    {
+      "name": "independent-postdeploy-readback-success.png",
+      "bytes": 183058,
+      "sha256": "98672c82d6ffac83f37d0bdfba0886679292eb4c6a1d72041d0b03b8eb9f48c1",
+      "retainedInPrivateTaskEvidence": true
+    }
+  ]
+}

@@ -1,0 +1,3694 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-F07-normal-native-app-restart-recovery-review",
+  "atUTC": "2026-10-30T09:19:26.112222+00:00",
+  "reviewActions": {
+    "UI": 0,
+    "network": 0,
+    "rooms": 0,
+    "tests": 0,
+    "productSourceEdits": 0,
+    "ledgerEdits": 0
+  },
+  "roundId": "F07",
+  "gameId": "flight-chess",
+  "recoveryReviewPassed": true,
+  "eligibleForRootRoundCount": true,
+  "countDecision": "Root owns the ledger pass/count decision. This review does not alter it or complete N10.",
+  "ledgerStateAtReview": {
+    "passed": false,
+    "pendingCleanup": false,
+    "sha256AtRead": "ed48029d8fc988666ab2b30da9f1d8b4950b5d723f7ebc6b3821504302a7de58"
+  },
+  "identity": {
+    "oldNativePID": 72102,
+    "newNativePID": 77260,
+    "bundleId": "fun.yunle.apps.native-dev",
+    "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+    "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+    "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+    "orderedSeatUIDHashesThroughConfirmedPost": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+      "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+      "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+      "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+    ],
+    "NativeASeat": 2,
+    "BrowserBSeat": 0,
+    "onlySeats0And2Active": true
+  },
+  "normalProductBinding": {
+    "sourceSHA256": {
+      "AssistantView.swift": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+      "Runtime": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+      "Controller": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+      "runtimeTests": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509"
+    },
+    "productSHA256": {
+      "YunleFun": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+      "YunleFun.debug.dylib": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+      "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+    },
+    "preview": 0,
+    "limit": "Normal Assistant53059 candidate with Runtimeb61/Controllere6d unchanged. Restart did not install or rebuild a product."
+  },
+  "actualProcessRestart": {
+    "rootObservedToolResultTranscription": {
+      "kind": "root-transcription-of-observed-purpose-built-tool-results",
+      "scope": "F07 real App restart",
+      "source": "Current conversation functions.exec output; tools called sequentially",
+      "stop": {
+        "tool": "mcp__xcodebuildmcp__stop_app_sim",
+        "arguments": {},
+        "schema": "xcodebuildmcp.output.stop-result",
+        "schemaVersion": "2",
+        "didError": false,
+        "status": "SUCCEEDED",
+        "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+        "bundleId": "fun.yunle.apps.native-dev"
+      },
+      "launch": {
+        "tool": "mcp__xcodebuildmcp__launch_app_sim",
+        "arguments": {
+          "env": {
+            "YUNLEFUN_PLAY_PREVIEW": "0"
+          }
+        },
+        "schema": "xcodebuildmcp.output.launch-result",
+        "schemaVersion": "2",
+        "didError": false,
+        "status": "SUCCEEDED",
+        "processId": 77260,
+        "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+        "bundleId": "fun.yunle.apps.native-dev",
+        "runtimeLogPath": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/fun.yunle.apps.native-dev_2026-10-30T09-10-36-630Z_helperpid77244_ownerpid19899_9dd72c07.log",
+        "osLogPath": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/fun.yunle.apps.native-dev_oslog_2026-10-30T09-10-40-505Z_helperpid77444_ownerpid19899_a5c31e51.log"
+      },
+      "exactStopAndLaunchDurationMilliseconds": null,
+      "notClaimed": "No invented exact timing or original raw MCP transport archive"
+    },
+    "receiptSHA256": "87e767bad992469f6cce725e358da9dd4883cfd861f9e4589e0c5eaca8976f5a",
+    "interpretation": "Successful dedicated stop then successful normal launch with new PID. Raw MCP transport archive was not saved; this is explicitly Root transcription of observed structured results.",
+    "runtimeLogCorroboration": "The referenced new runtime log includes an actual YunleFun[77260] process line; it is not used to invent stop/launch timestamps or exact duration.",
+    "exactRestartDurationMilliseconds": null
+  },
+  "savedReturnAndAuthority": {
+    "visualReviewPassed": true,
+    "savedEntry": "Actual native Games screen after restart shows Return last room with owned KDCQ67 and an explanation that room/seat will be rechecked.",
+    "normalContinuationTap": {
+      "point": [
+        1320,
+        459
+      ],
+      "atUTC": "2026-10-30T09:11:00.965Z",
+      "observerUptimeMilliseconds": 1109025.901709
+    },
+    "restoredVisual": "Actual returned native screen shows the same invite and running Flight board; waiting for Browser B is expected from the latest authority.",
+    "BExplicitPlayerReadySequence": 243,
+    "BOriginalSocket": "19204.663",
+    "noNewBClosedOrRoleChangedBeforeConfirmedPost": true,
+    "beforeStopGameSequence": 270,
+    "afterRestartFullGameSequence": 294,
+    "sameRoomGameAndOrderedSeats": true,
+    "latestStateNotFrozen": {
+      "beforeRevision": 9,
+      "firstReviewedRestoreRevision": 17,
+      "beforeStateSHA256": "1873bf760533c4d9c2b8519739b6e8d7fd9bc213641123cfb35e9696b5c4fcb3",
+      "restoredStateSHA256": "7d937d862cf913eb8f0affde064ec87747c7988834c970f10f1d21dfbc783aa0",
+      "stateHashesDiffer": true,
+      "requiredBehavior": "Recovery rechecks the latest authority. A time-based game need not freeze while the App is absent."
+    },
+    "NativeMemberPresence": {
+      "offlineRoomSequence": 272,
+      "offlineDeadline": "2026-10-30T09:12:36.429Z",
+      "backOnlineRoomSequence": 278,
+      "backOnlineDeadline": null,
+      "bothOnlineRoomSequence": 293
+    },
+    "presenceTimingLimit": "Observer batch arrival times and server deadline values are recorded separately; no exact disconnect/reconnect latency is derived.",
+    "publicScreenshots": {
+      "f07-restart-return-room-entry.png": {
+        "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/native-flight-f07-saved-room-20261030.png",
+        "sha256": "9ef8b6378dced81e1bf081017a9d2df4946de4779ef8e28d1845ffddc58ca3ac",
+        "bytes": 242486
+      },
+      "f07-restored-same-game.png": {
+        "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/native-flight-f07-restored-game-20261030.png",
+        "sha256": "23686f3cedf968c3c28097a8519e9074b1372f3c2c26e1d7f5ee68781f2c151a",
+        "bytes": 286371
+      }
+    }
+  },
+  "manualInputProof": {
+    "preRestartBothHumansAccepted": true,
+    "postRestartBothHumansAccepted": true,
+    "postManualGateSequence": 354,
+    "postManualGateAutoplaySeats": [],
+    "postManualWindowSequences": [
+      354,
+      356,
+      360
+    ],
+    "postManualWindowNoAutoplay": true,
+    "actions": [
+      {
+        "phase": "pre",
+        "actor": "B",
+        "seat": 0,
+        "action": "roll",
+        "preSnapshotSequence": 258,
+        "freshReadCursorBeforeClick": 260,
+        "readCursorEvidence": "saved F07-real-action read completed between this action startedAtUTC and beforeClickAtUTC; not a missing copied primitive floor",
+        "acceptedSnapshotSequence": 263,
+        "preRevision": 6,
+        "acceptedRevision": 7,
+        "rollCounts": [
+          0,
+          1
+        ],
+        "moveCounts": [
+          0,
+          0
+        ],
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 5,
+          "forfeited": false
+        },
+        "beforeClickAtUTC": "2026-10-30T09:10:29.886Z",
+        "confirmedAtUTC": "2026-10-30T09:10:30.519Z"
+      },
+      {
+        "phase": "pre",
+        "actor": "B",
+        "seat": 0,
+        "action": "move",
+        "preSnapshotSequence": 263,
+        "freshReadCursorBeforeClick": 264,
+        "readCursorEvidence": "saved F07-real-action read completed between this action startedAtUTC and beforeClickAtUTC; not a missing copied primitive floor",
+        "acceptedSnapshotSequence": 267,
+        "preRevision": 7,
+        "acceptedRevision": 8,
+        "rollCounts": [
+          1,
+          1
+        ],
+        "moveCounts": [
+          0,
+          1
+        ],
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 3,
+          "die": 5,
+          "from": -1,
+          "to": 0,
+          "kind": "takeoff",
+          "captured": []
+        },
+        "beforeClickAtUTC": "2026-10-30T09:10:30.577Z",
+        "confirmedAtUTC": "2026-10-30T09:10:31.477Z"
+      },
+      {
+        "phase": "pre",
+        "actor": "A",
+        "seat": 2,
+        "action": "roll",
+        "preSnapshotSequence": 267,
+        "freshReadCursorBeforeClick": 268,
+        "readCursorEvidence": "saved F07-real-action read completed between this action startedAtUTC and beforeClickAtUTC; not a missing copied primitive floor",
+        "acceptedSnapshotSequence": 270,
+        "preRevision": 8,
+        "acceptedRevision": 9,
+        "rollCounts": [
+          1,
+          2
+        ],
+        "moveCounts": [
+          1,
+          1
+        ],
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 2,
+          "forfeited": false
+        },
+        "beforeClickAtUTC": "2026-10-30T09:10:31.535Z",
+        "confirmedAtUTC": "2026-10-30T09:10:32.549Z"
+      },
+      {
+        "phase": "post-after-normal-autoplay-cancel",
+        "actor": "A",
+        "seat": 2,
+        "action": "roll",
+        "preSnapshotSequence": 354,
+        "freshReadCursorBeforeClick": 354,
+        "readCursorEvidence": "saved F07-real-action read completed between this action startedAtUTC and beforeClickAtUTC; not a missing copied primitive floor",
+        "acceptedSnapshotSequence": 356,
+        "preRevision": 33,
+        "acceptedRevision": 34,
+        "rollCounts": [
+          14,
+          15
+        ],
+        "moveCounts": [
+          8,
+          8
+        ],
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 3,
+          "forfeited": false
+        },
+        "beforeClickAtUTC": "2026-10-30T09:13:59.278Z",
+        "confirmedAtUTC": "2026-10-30T09:14:00.321Z"
+      },
+      {
+        "phase": "post-after-normal-autoplay-cancel",
+        "actor": "B",
+        "seat": 0,
+        "action": "roll",
+        "preSnapshotSequence": 356,
+        "freshReadCursorBeforeClick": 357,
+        "readCursorEvidence": "saved F07-real-action read completed between this action startedAtUTC and beforeClickAtUTC; not a missing copied primitive floor",
+        "acceptedSnapshotSequence": 360,
+        "preRevision": 34,
+        "acceptedRevision": 35,
+        "rollCounts": [
+          15,
+          16
+        ],
+        "moveCounts": [
+          8,
+          8
+        ],
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 5,
+          "forfeited": false
+        },
+        "beforeClickAtUTC": "2026-10-30T09:14:00.434Z",
+        "confirmedAtUTC": "2026-10-30T09:14:01.199Z"
+      }
+    ],
+    "freshCursorReads": [
+      {
+        "stage": "F07-real-action",
+        "afterSequence": 260,
+        "cursor": 260,
+        "eventCount": 0,
+        "hasMore": false,
+        "truncated": false,
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1079173.653042,
+          "readCompletedUptimeMilliseconds": 1079226.932667,
+          "completedAtUTC": "2026-10-30T09:10:29.885Z"
+        }
+      },
+      {
+        "stage": "F07-real-action",
+        "afterSequence": 264,
+        "cursor": 264,
+        "eventCount": 0,
+        "hasMore": false,
+        "truncated": false,
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1079860.58675,
+          "readCompletedUptimeMilliseconds": 1079917.487417,
+          "completedAtUTC": "2026-10-30T09:10:30.576Z"
+        }
+      },
+      {
+        "stage": "F07-real-action",
+        "afterSequence": 268,
+        "cursor": 268,
+        "eventCount": 0,
+        "hasMore": false,
+        "truncated": false,
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1080818.80375,
+          "readCompletedUptimeMilliseconds": 1080874.911292,
+          "completedAtUTC": "2026-10-30T09:10:31.533Z"
+        }
+      },
+      {
+        "stage": "F07-real-action",
+        "afterSequence": 354,
+        "cursor": 354,
+        "eventCount": 0,
+        "hasMore": false,
+        "truncated": false,
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288558.459792,
+          "readCompletedUptimeMilliseconds": 1288612.689042,
+          "completedAtUTC": "2026-10-30T09:13:59.276Z"
+        }
+      },
+      {
+        "stage": "F07-real-action",
+        "afterSequence": 357,
+        "cursor": 357,
+        "eventCount": 0,
+        "hasMore": false,
+        "truncated": false,
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1289713.944584,
+          "readCompletedUptimeMilliseconds": 1289767.646,
+          "completedAtUTC": "2026-10-30T09:14:00.431Z"
+        }
+      }
+    ],
+    "source": "Saved explicit normal UI action callbacks plus independent same-socket V3 game snapshots/counters/lastAction; no injected room/game commands."
+  },
+  "allEarlierPostAttemptsPreserved": {
+    "first": {
+      "artifact": "refused-post-1",
+      "reason": "autoplay-already-active",
+      "dispatched": false,
+      "bothHumansAccepted": false,
+      "gameSequence": 304,
+      "autoplaySeats": [
+        2
+      ]
+    },
+    "second": {
+      "artifact": "refused-post-2",
+      "reason": "autoplay-remains",
+      "dispatchFieldPresent": false,
+      "bothHumansAccepted": false,
+      "gameSequence": 330,
+      "autoplaySeats": [
+        0
+      ],
+      "limit": "Guard summary contains no accepted action; no implicit dispatch success is invented."
+    },
+    "third": {
+      "artifact": "confirmed-post-3",
+      "normalCancelAttempts": [
+        {
+          "atUTC": "2026-10-30T09:13:58.432Z",
+          "revisionBefore": 32
+        },
+        {
+          "atUTC": "2026-10-30T09:13:58.999Z",
+          "revisionBefore": 32
+        }
+      ],
+      "gateSequence": 354,
+      "autoplaySeats": [],
+      "freshAcceptedPostSequences": [
+        356,
+        360
+      ]
+    }
+  },
+  "automaticProgressDisclosure": {
+    "longRestartAndOperatorWaitAllowedServerDeadlinesToAdvance": true,
+    "allUnattributedChangesBetweenPreAndManualGateExcludedFromHumanInputs": true,
+    "automaticIntervalSummary": [
+      {
+        "sequence": 273,
+        "revision": 10,
+        "observedAtUTC": "2026-10-30T09:11:00.963Z",
+        "autoplaySeats": [],
+        "rollCount": 2,
+        "moveCount": 1,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 2,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 276,
+        "revision": 11,
+        "observedAtUTC": "2026-10-30T09:11:00.963Z",
+        "autoplaySeats": [],
+        "rollCount": 3,
+        "moveCount": 1,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 6,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 279,
+        "revision": 12,
+        "observedAtUTC": "2026-10-30T09:11:14.877Z",
+        "autoplaySeats": [],
+        "rollCount": 3,
+        "moveCount": 1,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 6,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 282,
+        "revision": 13,
+        "observedAtUTC": "2026-10-30T09:11:47.981Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 3,
+        "moveCount": 2,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 0,
+          "die": 6,
+          "from": -1,
+          "to": 0,
+          "kind": "takeoff",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 285,
+        "revision": 14,
+        "observedAtUTC": "2026-10-30T09:11:47.981Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 4,
+        "moveCount": 2,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 3,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 288,
+        "revision": 15,
+        "observedAtUTC": "2026-10-30T09:11:47.981Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 4,
+        "moveCount": 3,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 0,
+          "die": 3,
+          "from": 0,
+          "to": 3,
+          "kind": "advance",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 291,
+        "revision": 16,
+        "observedAtUTC": "2026-10-30T09:11:47.981Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 5,
+        "moveCount": 3,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 1,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 294,
+        "revision": 17,
+        "observedAtUTC": "2026-10-30T09:11:47.981Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 6,
+        "moveCount": 3,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 2,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 297,
+        "revision": 18,
+        "observedAtUTC": "2026-10-30T09:12:13.894Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 6,
+        "moveCount": 4,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 0,
+          "die": 2,
+          "from": 3,
+          "to": 5,
+          "kind": "advance",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 300,
+        "revision": 19,
+        "observedAtUTC": "2026-10-30T09:12:13.894Z",
+        "autoplaySeats": [
+          0,
+          2
+        ],
+        "rollCount": 7,
+        "moveCount": 4,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 1,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 304,
+        "revision": 20,
+        "observedAtUTC": "2026-10-30T09:12:13.894Z",
+        "autoplaySeats": [
+          2
+        ],
+        "rollCount": 7,
+        "moveCount": 4,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 1,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 307,
+        "revision": 21,
+        "observedAtUTC": "2026-10-30T09:13:16.704Z",
+        "autoplaySeats": [
+          2
+        ],
+        "rollCount": 8,
+        "moveCount": 4,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 2,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 310,
+        "revision": 22,
+        "observedAtUTC": "2026-10-30T09:13:16.704Z",
+        "autoplaySeats": [
+          2,
+          0
+        ],
+        "rollCount": 8,
+        "moveCount": 5,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 0,
+          "die": 2,
+          "from": 5,
+          "to": 7,
+          "kind": "advance",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 313,
+        "revision": 23,
+        "observedAtUTC": "2026-10-30T09:13:16.704Z",
+        "autoplaySeats": [
+          2,
+          0
+        ],
+        "rollCount": 9,
+        "moveCount": 5,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 1,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 316,
+        "revision": 24,
+        "observedAtUTC": "2026-10-30T09:13:16.704Z",
+        "autoplaySeats": [
+          2,
+          0
+        ],
+        "rollCount": 10,
+        "moveCount": 5,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 4,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 319,
+        "revision": 25,
+        "observedAtUTC": "2026-10-30T09:13:16.704Z",
+        "autoplaySeats": [
+          2,
+          0
+        ],
+        "rollCount": 10,
+        "moveCount": 6,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 3,
+          "die": 4,
+          "from": 0,
+          "to": 8,
+          "kind": "jump",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 322,
+        "revision": 26,
+        "observedAtUTC": "2026-10-30T09:13:16.704Z",
+        "autoplaySeats": [
+          2,
+          0
+        ],
+        "rollCount": 11,
+        "moveCount": 6,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 3,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 326,
+        "revision": 27,
+        "observedAtUTC": "2026-10-30T09:13:18.928Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 11,
+        "moveCount": 6,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 3,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 330,
+        "revision": 27,
+        "observedAtUTC": "2026-10-30T09:13:18.928Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 11,
+        "moveCount": 6,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 3,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 333,
+        "revision": 28,
+        "observedAtUTC": "2026-10-30T09:13:33.203Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 12,
+        "moveCount": 6,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 5,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 336,
+        "revision": 29,
+        "observedAtUTC": "2026-10-30T09:13:33.203Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 12,
+        "moveCount": 7,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 0,
+          "die": 5,
+          "from": 7,
+          "to": 16,
+          "kind": "jump",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 339,
+        "revision": 30,
+        "observedAtUTC": "2026-10-30T09:13:58.046Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 13,
+        "moveCount": 7,
+        "lastAction": {
+          "type": "roll",
+          "seat": 2,
+          "die": 2,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 342,
+        "revision": 31,
+        "observedAtUTC": "2026-10-30T09:13:58.046Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 14,
+        "moveCount": 7,
+        "lastAction": {
+          "type": "roll",
+          "seat": 0,
+          "die": 1,
+          "forfeited": false
+        },
+        "claimedHumanInput": false
+      },
+      {
+        "sequence": 345,
+        "revision": 32,
+        "observedAtUTC": "2026-10-30T09:13:58.046Z",
+        "autoplaySeats": [
+          0
+        ],
+        "rollCount": 14,
+        "moveCount": 8,
+        "lastAction": {
+          "type": "move",
+          "seat": 0,
+          "planeIndex": 0,
+          "die": 1,
+          "from": 16,
+          "to": 17,
+          "kind": "advance",
+          "captured": []
+        },
+        "claimedHumanInput": false
+      }
+    ],
+    "noClaimWholeRoomLifetimeWasManual": true,
+    "noInvariantThatTurnOrPiecesRemainUnchangedDuringAbsence": true
+  },
+  "cleanup": {
+    "pendingCleanup": false,
+    "NativeLeave": "Root normal Native leave action recorded; server room368 contains B only. No separate Native room.left frame is archived.",
+    "NativeAbsentRoomSnapshotSequence": 368,
+    "BExplicitRoomLeftSequence": 373,
+    "BLeftReason": "left",
+    "BSocketClosedSequence": 376,
+    "adminOrDatabaseDeleteClaim": false
+  },
+  "inlineSanitizedAuthorityEvidence": {
+    "reason": "Essential evidence frozen here because the original live wire/ledger can continue growing. No raw CDP/auth frames copied.",
+    "events": [
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 236,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-cdp-lifecycle",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 949990.432625,
+          "readCompletedUptimeMilliseconds": 950012.935125,
+          "completedAtUTC": "2026-10-30T09:08:20.671Z"
+        },
+        "kind": "socket-created"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 243,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 951003.736959,
+          "readCompletedUptimeMilliseconds": 951014.692459,
+          "completedAtUTC": "2026-10-30T09:08:21.673Z"
+        },
+        "kind": "connection.ready",
+        "role": "player"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 244,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 951003.736959,
+          "readCompletedUptimeMilliseconds": 951014.692459,
+          "completedAtUTC": "2026-10-30T09:08:21.673Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 1,
+        "status": "waiting",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "memberCount": 1,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "none"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 248,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 954054.77775,
+          "readCompletedUptimeMilliseconds": 954065.339084,
+          "completedAtUTC": "2026-10-30T09:08:24.723Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 2,
+        "status": "waiting",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "memberCount": 1,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "none"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 250,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 981554.445167,
+          "readCompletedUptimeMilliseconds": 981577.620209,
+          "completedAtUTC": "2026-10-30T09:08:52.236Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 4,
+        "status": "waiting",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "none"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 254,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1034822.522875,
+          "readCompletedUptimeMilliseconds": 1034849.552709,
+          "completedAtUTC": "2026-10-30T09:09:45.508Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 5,
+        "status": "waiting",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "none"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 256,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1071083.923917,
+          "readCompletedUptimeMilliseconds": 1071111.190792,
+          "completedAtUTC": "2026-10-30T09:10:21.769Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 6,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 258,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1071083.923917,
+          "readCompletedUptimeMilliseconds": 1071111.190792,
+          "completedAtUTC": "2026-10-30T09:10:21.769Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 6,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 262,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1079843.391167,
+          "readCompletedUptimeMilliseconds": 1079858.6685,
+          "completedAtUTC": "2026-10-30T09:10:30.517Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 7,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 263,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1079843.391167,
+          "readCompletedUptimeMilliseconds": 1079858.6685,
+          "completedAtUTC": "2026-10-30T09:10:30.517Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 7,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 266,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1080794.145792,
+          "readCompletedUptimeMilliseconds": 1080816.894834,
+          "completedAtUTC": "2026-10-30T09:10:31.475Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 8,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 267,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1080794.145792,
+          "readCompletedUptimeMilliseconds": 1080816.894834,
+          "completedAtUTC": "2026-10-30T09:10:31.475Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 8,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 269,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1081749.302959,
+          "readCompletedUptimeMilliseconds": 1081799.048375,
+          "completedAtUTC": "2026-10-30T09:10:32.457Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 9,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 270,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1081876.519709,
+          "readCompletedUptimeMilliseconds": 1081889.207792,
+          "completedAtUTC": "2026-10-30T09:10:32.547Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 9,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 272,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1110268.837625,
+          "readCompletedUptimeMilliseconds": 1110301.65975,
+          "completedAtUTC": "2026-10-30T09:11:00.963Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 10,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 273,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1110268.837625,
+          "readCompletedUptimeMilliseconds": 1110301.65975,
+          "completedAtUTC": "2026-10-30T09:11:00.963Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 10,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 275,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1110268.837625,
+          "readCompletedUptimeMilliseconds": 1110301.65975,
+          "completedAtUTC": "2026-10-30T09:11:00.963Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 11,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 276,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1110268.837625,
+          "readCompletedUptimeMilliseconds": 1110301.65975,
+          "completedAtUTC": "2026-10-30T09:11:00.963Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 11,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 278,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1124186.882042,
+          "readCompletedUptimeMilliseconds": 1124214.050709,
+          "completedAtUTC": "2026-10-30T09:11:14.877Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 12,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 279,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1124186.882042,
+          "readCompletedUptimeMilliseconds": 1124214.050709,
+          "completedAtUTC": "2026-10-30T09:11:14.877Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 12,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 281,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 13,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 282,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 13,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 284,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 14,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 285,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 14,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 287,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 15,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 288,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 15,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 290,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 16,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 291,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 16,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 293,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 17,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 294,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 17,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 296,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 18,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 297,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 18,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 299,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 19,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 300,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 19,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 303,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 20,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 304,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 20,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 306,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 21,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 307,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 21,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 309,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 22,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 310,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 22,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 312,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 23,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 313,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 23,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 315,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 24,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 316,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 24,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 318,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 25,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 319,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 25,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 321,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 26,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 322,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1246014.962375,
+          "readCompletedUptimeMilliseconds": 1246040.596834,
+          "completedAtUTC": "2026-10-30T09:13:16.704Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 26,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 325,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1248252.269167,
+          "readCompletedUptimeMilliseconds": 1248264.9095,
+          "completedAtUTC": "2026-10-30T09:13:18.928Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 27,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 326,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1248252.269167,
+          "readCompletedUptimeMilliseconds": 1248264.9095,
+          "completedAtUTC": "2026-10-30T09:13:18.928Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 27,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 329,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1248252.269167,
+          "readCompletedUptimeMilliseconds": 1248264.9095,
+          "completedAtUTC": "2026-10-30T09:13:18.928Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 27,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 330,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1248252.269167,
+          "readCompletedUptimeMilliseconds": 1248264.9095,
+          "completedAtUTC": "2026-10-30T09:13:18.928Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 27,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 332,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1262528.284834,
+          "readCompletedUptimeMilliseconds": 1262539.970209,
+          "completedAtUTC": "2026-10-30T09:13:33.203Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 28,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 333,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1262528.284834,
+          "readCompletedUptimeMilliseconds": 1262539.970209,
+          "completedAtUTC": "2026-10-30T09:13:33.203Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 28,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 335,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1262528.284834,
+          "readCompletedUptimeMilliseconds": 1262539.970209,
+          "completedAtUTC": "2026-10-30T09:13:33.203Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 29,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 336,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1262528.284834,
+          "readCompletedUptimeMilliseconds": 1262539.970209,
+          "completedAtUTC": "2026-10-30T09:13:33.203Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 29,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 338,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1287357.962167,
+          "readCompletedUptimeMilliseconds": 1287382.889709,
+          "completedAtUTC": "2026-10-30T09:13:58.046Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 30,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 339,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1287357.962167,
+          "readCompletedUptimeMilliseconds": 1287382.889709,
+          "completedAtUTC": "2026-10-30T09:13:58.046Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 30,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 341,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1287357.962167,
+          "readCompletedUptimeMilliseconds": 1287382.889709,
+          "completedAtUTC": "2026-10-30T09:13:58.046Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 31,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 342,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1287357.962167,
+          "readCompletedUptimeMilliseconds": 1287382.889709,
+          "completedAtUTC": "2026-10-30T09:13:58.046Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 31,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 344,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1287357.962167,
+          "readCompletedUptimeMilliseconds": 1287382.889709,
+          "completedAtUTC": "2026-10-30T09:13:58.046Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 32,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 345,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1287357.962167,
+          "readCompletedUptimeMilliseconds": 1287382.889709,
+          "completedAtUTC": "2026-10-30T09:13:58.046Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 32,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 349,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288436.351667,
+          "readCompletedUptimeMilliseconds": 1288447.762459,
+          "completedAtUTC": "2026-10-30T09:13:59.111Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 33,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 350,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288436.351667,
+          "readCompletedUptimeMilliseconds": 1288447.762459,
+          "completedAtUTC": "2026-10-30T09:13:59.111Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 33,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 353,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288436.351667,
+          "readCompletedUptimeMilliseconds": 1288447.762459,
+          "completedAtUTC": "2026-10-30T09:13:59.111Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 33,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 354,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288436.351667,
+          "readCompletedUptimeMilliseconds": 1288447.762459,
+          "completedAtUTC": "2026-10-30T09:13:59.111Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 33,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 355,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1289640.122,
+          "readCompletedUptimeMilliseconds": 1289653.294917,
+          "completedAtUTC": "2026-10-30T09:14:00.317Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 34,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 356,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1289640.122,
+          "readCompletedUptimeMilliseconds": 1289653.294917,
+          "completedAtUTC": "2026-10-30T09:14:00.317Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 34,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 359,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1290510.9485,
+          "readCompletedUptimeMilliseconds": 1290533.038417,
+          "completedAtUTC": "2026-10-30T09:14:01.196Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 35,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 360,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1290510.9485,
+          "readCompletedUptimeMilliseconds": 1290533.038417,
+          "completedAtUTC": "2026-10-30T09:14:01.196Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 35,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 362,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1345545.399334,
+          "readCompletedUptimeMilliseconds": 1345575.069709,
+          "completedAtUTC": "2026-10-30T09:14:56.239Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 36,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 363,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1345545.399334,
+          "readCompletedUptimeMilliseconds": 1345575.069709,
+          "completedAtUTC": "2026-10-30T09:14:56.239Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 36,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 365,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1345545.399334,
+          "readCompletedUptimeMilliseconds": 1345575.069709,
+          "completedAtUTC": "2026-10-30T09:14:56.239Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 37,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "memberCount": 2,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 366,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1345545.399334,
+          "readCompletedUptimeMilliseconds": 1345575.069709,
+          "completedAtUTC": "2026-10-30T09:14:56.239Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 37,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 368,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1348813.621292,
+          "readCompletedUptimeMilliseconds": 1348825.271709,
+          "completedAtUTC": "2026-10-30T09:14:59.489Z"
+        },
+        "kind": "room.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "revision": 38,
+        "status": "playing",
+        "memberUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "memberCount": 1,
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSession": "present"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 370,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1348813.621292,
+          "readCompletedUptimeMilliseconds": 1348825.271709,
+          "completedAtUTC": "2026-10-30T09:14:59.489Z"
+        },
+        "kind": "game.snapshot",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "revision": 38,
+        "gameId": "flight-chess"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 373,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1348813.621292,
+          "readCompletedUptimeMilliseconds": 1348825.271709,
+          "completedAtUTC": "2026-10-30T09:14:59.489Z"
+        },
+        "kind": "room.left",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "reason": "left"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 376,
+        "requestId": "19204.663",
+        "protocolEvidence": "raw-cdp-lifecycle",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1348813.621292,
+          "readCompletedUptimeMilliseconds": 1348825.271709,
+          "completedAtUTC": "2026-10-30T09:14:59.489Z"
+        },
+        "kind": "socket-closed"
+      }
+    ],
+    "selectedStates": [
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 258,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1071083.923917,
+          "readCompletedUptimeMilliseconds": 1071111.190792,
+          "completedAtUTC": "2026-10-30T09:10:21.769Z"
+        },
+        "type": "game.snapshot",
+        "revision": 6,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:10:36.292Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 0,
+          "moveCount": 0,
+          "turnNumber": 1,
+          "lastAction": null
+        },
+        "stateSHA256": "fe75792442e042a503cee0755d39ed49ce1de921181472b4f6f95e7f06181bb0"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 263,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1079843.391167,
+          "readCompletedUptimeMilliseconds": 1079858.6685,
+          "completedAtUTC": "2026-10-30T09:10:30.517Z"
+        },
+        "type": "game.snapshot",
+        "revision": 7,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:10:50.185Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-move",
+          "die": 5,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 1,
+          "moveCount": 0,
+          "turnNumber": 1,
+          "lastAction": {
+            "type": "roll",
+            "seat": 0,
+            "die": 5,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "cecf4c3fa8648b6ef645986ae7098714ae3eb572d2ffbab358a159c4183c2f26"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 267,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1080794.145792,
+          "readCompletedUptimeMilliseconds": 1080816.894834,
+          "completedAtUTC": "2026-10-30T09:10:31.475Z"
+        },
+        "type": "game.snapshot",
+        "revision": 8,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 2,
+        "turnDeadline": "2026-10-30T09:10:46.017Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              0
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 2,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 1,
+          "moveCount": 1,
+          "turnNumber": 2,
+          "lastAction": {
+            "type": "move",
+            "seat": 0,
+            "planeIndex": 3,
+            "die": 5,
+            "from": -1,
+            "to": 0,
+            "kind": "takeoff",
+            "captured": []
+          }
+        },
+        "stateSHA256": "acc8fb1488df1e9c78047bf73b3eb9d4d6b084fb9efe2c007d2eeacd4db6d2f3"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 270,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1081876.519709,
+          "readCompletedUptimeMilliseconds": 1081889.207792,
+          "completedAtUTC": "2026-10-30T09:10:32.547Z"
+        },
+        "type": "game.snapshot",
+        "revision": 9,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:10:47.110Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              0
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 2,
+          "moveCount": 1,
+          "turnNumber": 3,
+          "lastAction": {
+            "type": "roll",
+            "seat": 2,
+            "die": 2,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "1873bf760533c4d9c2b8519739b6e8d7fd9bc213641123cfb35e9696b5c4fcb3"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 272,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1110268.837625,
+          "readCompletedUptimeMilliseconds": 1110301.65975,
+          "completedAtUTC": "2026-10-30T09:11:00.963Z"
+        },
+        "type": "room.snapshot",
+        "status": "playing",
+        "revision": 10,
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "nextSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "members": [
+          {
+            "uidSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+            "ready": false,
+            "online": true,
+            "disconnectDeadline": null
+          },
+          {
+            "uidSHA256": "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+            "ready": false,
+            "online": false,
+            "disconnectDeadline": "2026-10-30T09:12:36.429Z"
+          }
+        ]
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 278,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1124186.882042,
+          "readCompletedUptimeMilliseconds": 1124214.050709,
+          "completedAtUTC": "2026-10-30T09:11:14.877Z"
+        },
+        "type": "room.snapshot",
+        "status": "playing",
+        "revision": 12,
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "nextSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "members": [
+          {
+            "uidSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+            "ready": false,
+            "online": true,
+            "disconnectDeadline": null
+          },
+          {
+            "uidSHA256": "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+            "ready": false,
+            "online": true,
+            "disconnectDeadline": null
+          }
+        ]
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 293,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "type": "room.snapshot",
+        "status": "playing",
+        "revision": 17,
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "nextSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "members": [
+          {
+            "uidSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+            "ready": false,
+            "online": true,
+            "disconnectDeadline": null
+          },
+          {
+            "uidSHA256": "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+            "ready": false,
+            "online": true,
+            "disconnectDeadline": null
+          }
+        ]
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 294,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1157283.919375,
+          "readCompletedUptimeMilliseconds": 1157317.538459,
+          "completedAtUTC": "2026-10-30T09:11:47.981Z"
+        },
+        "type": "game.snapshot",
+        "revision": 17,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:11:45.761Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [
+          0
+        ],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              3,
+              -1,
+              -1,
+              0
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-move",
+          "die": 2,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 6,
+          "moveCount": 3,
+          "turnNumber": 5,
+          "lastAction": {
+            "type": "roll",
+            "seat": 0,
+            "die": 2,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "7d937d862cf913eb8f0affde064ec87747c7988834c970f10f1d21dfbc783aa0"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 304,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1183219.001,
+          "readCompletedUptimeMilliseconds": 1183230.402875,
+          "completedAtUTC": "2026-10-30T09:12:13.894Z"
+        },
+        "type": "game.snapshot",
+        "revision": 20,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:12:28.068Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [
+          2
+        ],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              5,
+              -1,
+              -1,
+              0
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 7,
+          "moveCount": 4,
+          "turnNumber": 7,
+          "lastAction": {
+            "type": "roll",
+            "seat": 2,
+            "die": 1,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "a5c6dd1bd48aaa085427d65ef3ad052e139d93562f9b6b9bf7df9232144c238d"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 330,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1248252.269167,
+          "readCompletedUptimeMilliseconds": 1248264.9095,
+          "completedAtUTC": "2026-10-30T09:13:18.928Z"
+        },
+        "type": "game.snapshot",
+        "revision": 27,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:13:15.770Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [
+          0
+        ],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              7,
+              -1,
+              -1,
+              8
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 11,
+          "moveCount": 6,
+          "turnNumber": 11,
+          "lastAction": {
+            "type": "roll",
+            "seat": 2,
+            "die": 3,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "31d94e62b4e1fe20b351542d8eabd370ea64bb444381b3f5d968cfd393ec4fb4"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 350,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288436.351667,
+          "readCompletedUptimeMilliseconds": 1288447.762459,
+          "completedAtUTC": "2026-10-30T09:13:59.111Z"
+        },
+        "type": "game.snapshot",
+        "revision": 33,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 2,
+        "turnDeadline": "2026-10-30T09:14:05.779Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              17,
+              -1,
+              -1,
+              8
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 2,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 14,
+          "moveCount": 8,
+          "turnNumber": 14,
+          "lastAction": {
+            "type": "move",
+            "seat": 0,
+            "planeIndex": 0,
+            "die": 1,
+            "from": 16,
+            "to": 17,
+            "kind": "advance",
+            "captured": []
+          }
+        },
+        "stateSHA256": "ea60ee07a4c0ca44b7e57dfb6c389a5311fbdef0ceab3ff2335763da2a793820"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 354,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1288436.351667,
+          "readCompletedUptimeMilliseconds": 1288447.762459,
+          "completedAtUTC": "2026-10-30T09:13:59.111Z"
+        },
+        "type": "game.snapshot",
+        "revision": 33,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 2,
+        "turnDeadline": "2026-10-30T09:14:05.779Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              17,
+              -1,
+              -1,
+              8
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 2,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 14,
+          "moveCount": 8,
+          "turnNumber": 14,
+          "lastAction": {
+            "type": "move",
+            "seat": 0,
+            "planeIndex": 0,
+            "die": 1,
+            "from": 16,
+            "to": 17,
+            "kind": "advance",
+            "captured": []
+          }
+        },
+        "stateSHA256": "ea60ee07a4c0ca44b7e57dfb6c389a5311fbdef0ceab3ff2335763da2a793820"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 356,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1289640.122,
+          "readCompletedUptimeMilliseconds": 1289653.294917,
+          "completedAtUTC": "2026-10-30T09:14:00.317Z"
+        },
+        "type": "game.snapshot",
+        "revision": 34,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:14:14.927Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              17,
+              -1,
+              -1,
+              8
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 15,
+          "moveCount": 8,
+          "turnNumber": 15,
+          "lastAction": {
+            "type": "roll",
+            "seat": 2,
+            "die": 3,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "cf149b85d9bb60f1064c1a79d131d48c827043d7c38b3ac11e73e384cd3ac50a"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 360,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1290510.9485,
+          "readCompletedUptimeMilliseconds": 1290533.038417,
+          "completedAtUTC": "2026-10-30T09:14:01.196Z"
+        },
+        "type": "game.snapshot",
+        "revision": 35,
+        "gameId": "flight-chess",
+        "status": "playing",
+        "currentSeat": 0,
+        "turnDeadline": "2026-10-30T09:14:20.760Z",
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "gameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "seatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            true,
+            false,
+            true,
+            false
+          ],
+          "planes": [
+            [
+              17,
+              -1,
+              -1,
+              8
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 0,
+          "phase": "awaiting-move",
+          "die": 5,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "rollCount": 16,
+          "moveCount": 8,
+          "turnNumber": 15,
+          "lastAction": {
+            "type": "roll",
+            "seat": 0,
+            "die": 5,
+            "forfeited": false
+          }
+        },
+        "stateSHA256": "5d401cd28bdcc938549d0b4e8b74c6f0e563fb925833da21242595809183c43f"
+      },
+      {
+        "streamId": "btab10-foreground-20261030",
+        "sequence": 368,
+        "requestId": "19204.663",
+        "observation": {
+          "clockId": "cua-foreground-20261030-1793350929873",
+          "readStartedUptimeMilliseconds": 1348813.621292,
+          "readCompletedUptimeMilliseconds": 1348825.271709,
+          "completedAtUTC": "2026-10-30T09:14:59.489Z"
+        },
+        "type": "room.snapshot",
+        "status": "playing",
+        "revision": 38,
+        "roomIdSHA256": "1fcd4e4e905b6a7961c78666e19094cf04e4ce8e2b0a4aa181314c11fb673ba8",
+        "inviteCodeSHA256": "71ea878c2c1e451e12fd5d5443af56d797216f8acd9f75d4fcdc3e2686b0d7d0",
+        "selectedGame": {
+          "gameId": "flight-chess",
+          "rulesetId": "classic-4",
+          "rulesetVersion": 1
+        },
+        "activeGameSessionIdSHA256": "8ed75c88de2167c465d9b0b3f540c8921e2218aaa6b5a182b11d23acb371a871",
+        "nextSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "e9bb3f4cd14195867db12292a5457db87f36f29134bc2554afc93df0483e39c3",
+          "f248b2d5277a1b8832ea340da564a8410e82f72595d31b8a61c8a0afd56d9953",
+          "120444b08906bcf6dddddf657ad4bf7b7cc7e66e108da6fa5d8f277d17eabbdd"
+        ],
+        "members": [
+          {
+            "uidSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+            "ready": false,
+            "online": true,
+            "disconnectDeadline": null
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceLimits": [
+    "One real App process restart and continuation flow; not a universal iOS background/relaunch SLA or a timing optimization claim.",
+    "B stayed on an explicit player socket, while Native A was stopped/relaunched and then reauthorized/rejoined through its saved reference; actual post Native input proves current operability.",
+    "Earlier return-full-state294 already had B autoplay. Its automatic progression is not credited as human input; only the later manual gate354 plus accepted actions356/360 establish post-restart human control.",
+    "The file named f07-post-restart-real-inputs.png shows device time17:12, before the final17:14 accepted-input attempt. It is retained as an earlier-state screenshot and is not used to prove the final post actions.",
+    "Live cache state is natural/unknown; normal saved profile was not cleared.",
+    "No assumption of new/same WebView identity is required or invented for the restarted App.",
+    "Stop/launch record is explicitly a Root transcription, not a preserved original MCP transport; exact timing stays null.",
+    "F04 remains excluded because it lacks the required verified post inputs; F07 positive evidence does not relabel F04.",
+    "Mutable wire/log/ledger hashes are read-time identities; essential authority chain is included inline."
+  ],
+  "references": {
+    "pre": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-before-app-restart.json",
+      "sha256AtRead": "a9bf47ed931b615161bf608145908f27e78b5308f347299751ee004adc0b8a28",
+      "bytesAtRead": 13846
+    },
+    "refused-post-1": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-post-restart.json",
+      "sha256AtRead": "b6429b5ecef736bbe3740c02795cf89873617520540d49190fc414b7c5ed4414",
+      "bytesAtRead": 4134
+    },
+    "refused-post-2": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-post-restart-manual.json",
+      "sha256AtRead": "e6d79ba19da2e9e3159f00bff9667edea6602db68061d8186324bcc4024def1f",
+      "bytesAtRead": 2423
+    },
+    "confirmed-post-3": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-manual-third-attempt.json",
+      "sha256AtRead": "7f05bb10ec7cbd5eb8a8c6e19e7b179e60f6831900db43c760dbb11f9cba5fb7",
+      "bytesAtRead": 10279
+    },
+    "stop-launch-root-transcription": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-mcp-stop-launch-root-receipt.json",
+      "sha256AtRead": "87e767bad992469f6cce725e358da9dd4883cfd861f9e4589e0c5eaca8976f5a",
+      "bytesAtRead": 1468
+    },
+    "saved-entry-image": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-restart-return-room-entry.png",
+      "sha256AtRead": "9ef8b6378dced81e1bf081017a9d2df4946de4779ef8e28d1845ffddc58ca3ac",
+      "bytesAtRead": 242486
+    },
+    "restored-image": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-restored-same-game.png",
+      "sha256AtRead": "23686f3cedf968c3c28097a8519e9074b1372f3c2c26e1d7f5ee68781f2c151a",
+      "bytesAtRead": 286371
+    },
+    "earlier-named-post-image": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f07-post-restart-real-inputs.png",
+      "sha256AtRead": "1946dd4c6604b8000e90c8d09a26c7f9d6ffb3681cdfb267f5b090ac2d582a21",
+      "bytesAtRead": 287265
+    },
+    "wire-live-file": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/wire-observations.json",
+      "sha256AtRead": "71a8656212bde089717927068aa1b26649600d1cbeba669e74fd10fb1c05f867",
+      "bytesAtRead": 355534,
+      "mutableContinuationFile": true
+    },
+    "ledger-live-file": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+      "sha256AtRead": "ed48029d8fc988666ab2b30da9f1d8b4950b5d723f7ebc6b3821504302a7de58",
+      "bytesAtRead": 965003,
+      "mutableContinuationFile": true
+    },
+    "runtimeLogPath": {
+      "path": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/fun.yunle.apps.native-dev_2026-10-30T09-10-36-630Z_helperpid77244_ownerpid19899_9dd72c07.log",
+      "sha256AtRead": "76a1a83f5d92c6df0df3c354de3aaa0b6ae3cb60e460fc0aea7c95684461e7f8",
+      "bytesAtRead": 951,
+      "mayContinueGrowing": true
+    },
+    "osLogPath": {
+      "path": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/fun.yunle.apps.native-dev_oslog_2026-10-30T09-10-40-505Z_helperpid77444_ownerpid19899_a5c31e51.log",
+      "sha256AtRead": "ff34ef155af7fc46c2f774aaa7b9b12e7363ef48b927c71e009b483896629557",
+      "bytesAtRead": 116,
+      "mayContinueGrowing": true
+    }
+  }
+}

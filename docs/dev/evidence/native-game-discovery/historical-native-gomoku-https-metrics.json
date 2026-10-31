@@ -1,0 +1,983 @@
+{
+  "schema": "historical-native-gomoku-https-metrics-v1",
+  "method": "Linear interpolated quantiles at (N-1)*q; only completed non-prime rows. All original rows retained. Native-open to DOM receipt; control state not engine-ready, actual black tests input acceptance, white includes think delay. Old portrait/animations; production Play Git unknown; never compare percent to current9ba loopback. Cleared is memory/disk HTTP cache removal callback, not OS cold or a zero-cache guarantee. Natural follows paired cleared trial and may have browser reuse. ResourceTiming completed document entries omit pending/worker details; cache reuse not proved by transfer zero alone. The raw cookiesLocalStorageIndexedDBPreserved field records types excluded from removal, not actual marker readback. Fixed-order pairs do not isolate retained DNS/TLS or WebKit process effects.",
+  "testPassed": 1,
+  "testFailed": 0,
+  "complete": true,
+  "rows": 21,
+  "primeRows": 1,
+  "conditions": {
+    "http-cache-cleared": {
+      "successful": 10,
+      "metrics": {
+        "home-observed": {
+          "N": 10,
+          "P50ms": 2100.3292499808595,
+          "P90ms": 2292.4309458292555,
+          "minMS": 1747.9297916288488,
+          "maxMS": 2437.0747083448805,
+          "rawMS": [
+            2242.339875025209,
+            2130.542083294131,
+            1917.236374982167,
+            1747.9297916288488,
+            2144.965208368376,
+            2276.3594166608527,
+            2437.0747083448805,
+            2040.39679170819,
+            1995.8839582977816,
+            2070.116416667588
+          ]
+        },
+        "detail-observed": {
+          "N": 10,
+          "P50ms": 2635.243229160551,
+          "P90ms": 2967.636112537002,
+          "minMS": 2435.676249966491,
+          "maxMS": 3059.7862499998882,
+          "rawMS": [
+            3059.7862499998882,
+            2727.914499992039,
+            2558.8512499816716,
+            2435.676249966491,
+            2675.7648333441466,
+            2796.801874996163,
+            2957.3972083744593,
+            2560.880958335474,
+            2540.198458300438,
+            2594.7216249769554
+          ]
+        },
+        "gomoku-controls-observed-not-worker-proof": {
+          "N": 10,
+          "P50ms": 3249.042791663669,
+          "P90ms": 3503.924158355221,
+          "minMS": 2958.6472916416824,
+          "maxMS": 3653.3938333159313,
+          "rawMS": [
+            3653.3938333159313,
+            3474.0342916338705,
+            3150.58120834874,
+            2958.6472916416824,
+            3288.1896666949615,
+            3333.5814166930504,
+            3487.31641669292,
+            3155.4063750081696,
+            3209.8959166323766,
+            3192.656833329238
+          ]
+        },
+        "gomoku-actual-human-black-observed": {
+          "N": 10,
+          "P50ms": 3388.4643541823607,
+          "P90ms": 3631.700833333889,
+          "minMS": 3108.9705833001062,
+          "maxMS": 3778.8422083249316,
+          "rawMS": [
+            3778.8422083249316,
+            3600.668083294295,
+            3299.923458311241,
+            3108.9705833001062,
+            3439.1225416911766,
+            3481.3344166614115,
+            3615.3517916682176,
+            3283.267833350692,
+            3337.806166673545,
+            3323.4471666510217
+          ]
+        },
+        "gomoku-actual-computer-white-observed": {
+          "N": 10,
+          "P50ms": 3701.5778541681357,
+          "P90ms": 3944.189237500541,
+          "minMS": 3422.3932916647755,
+          "maxMS": 4090.886500023771,
+          "rawMS": [
+            4090.886500023771,
+            3909.5629999646917,
+            3617.263833351899,
+            3422.3932916647755,
+            3750.3525416832417,
+            3792.513374995906,
+            3927.8895416646264,
+            3599.1927916766144,
+            3652.8031666530296,
+            3641.6922083008103
+          ]
+        }
+      },
+      "passiveCompletedResources": [
+        {
+          "iteration": 1,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 582,
+            "domInteractive": 434,
+            "duration": 1561,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1561,
+            "requestStart": 5,
+            "responseEnd": 122,
+            "responseStart": 122,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273095,
+            "sameOrigin": 84,
+            "transferSize": 1298295,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 2,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 612,
+            "domInteractive": 455,
+            "duration": 1532,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1532,
+            "requestStart": 4,
+            "responseEnd": 178,
+            "responseStart": 178,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 89,
+            "count": 89,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688303,
+            "encodedBodySize": 1273002,
+            "sameOrigin": 82,
+            "transferSize": 1297602,
+            "types": {
+              "css": 19,
+              "fetch": 15,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 3,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 782,
+            "domInteractive": 770,
+            "duration": 1796,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1796,
+            "requestStart": 4,
+            "responseEnd": 293,
+            "responseStart": 293,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 86,
+            "count": 86,
+            "crossOrigin": 7,
+            "decodedBodySize": 1677743,
+            "encodedBodySize": 1269014,
+            "sameOrigin": 79,
+            "transferSize": 1292714,
+            "types": {
+              "css": 19,
+              "fetch": 14,
+              "img": 3,
+              "link": 48,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 4,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 536,
+            "domInteractive": 528,
+            "duration": 1579,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1579,
+            "requestStart": 5,
+            "responseEnd": 122,
+            "responseStart": 122,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 90,
+            "count": 90,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273071,
+            "sameOrigin": 83,
+            "transferSize": 1297971,
+            "types": {
+              "css": 19,
+              "fetch": 16,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 5,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 744,
+            "domInteractive": 393,
+            "duration": 1922,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1922,
+            "requestStart": 5,
+            "responseEnd": 122,
+            "responseStart": 122,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 90,
+            "count": 90,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273071,
+            "sameOrigin": 83,
+            "transferSize": 1297971,
+            "types": {
+              "css": 19,
+              "fetch": 16,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 6,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 760,
+            "domInteractive": 686,
+            "duration": 1422,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1422,
+            "requestStart": 5,
+            "responseEnd": 125,
+            "responseStart": 125,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 88,
+            "count": 88,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688234,
+            "encodedBodySize": 1272933,
+            "sameOrigin": 81,
+            "transferSize": 1297233,
+            "types": {
+              "css": 19,
+              "fetch": 14,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 7,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 866,
+            "domInteractive": 808,
+            "duration": 2141,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 2141,
+            "requestStart": 5,
+            "responseEnd": 428,
+            "responseStart": 427,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273071,
+            "sameOrigin": 84,
+            "transferSize": 1298271,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 8,
+          "navigation": {
+            "connectEnd": 4,
+            "connectStart": 4,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 4,
+            "domainLookupStart": 4,
+            "domContentLoadedEventEnd": 702,
+            "domInteractive": 521,
+            "duration": 1744,
+            "encodedBodySize": 6633,
+            "fetchStart": 4,
+            "loadEventEnd": 1744,
+            "requestStart": 8,
+            "responseEnd": 126,
+            "responseStart": 126,
+            "secureConnectionStart": 4,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273071,
+            "sameOrigin": 84,
+            "transferSize": 1298271,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 9,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 407,
+            "domInteractive": 332,
+            "duration": 1367,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1367,
+            "requestStart": 5,
+            "responseEnd": 99,
+            "responseStart": 85,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 90,
+            "count": 90,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273071,
+            "sameOrigin": 83,
+            "transferSize": 1297971,
+            "types": {
+              "css": 19,
+              "fetch": 16,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 10,
+          "navigation": {
+            "connectEnd": 1,
+            "connectStart": 1,
+            "decodedBodySize": 22944,
+            "domainLookupEnd": 1,
+            "domainLookupStart": 1,
+            "domContentLoadedEventEnd": 750,
+            "domInteractive": 628,
+            "duration": 1421,
+            "encodedBodySize": 6633,
+            "fetchStart": 1,
+            "loadEventEnd": 1421,
+            "requestStart": 4,
+            "responseEnd": 131,
+            "responseStart": 131,
+            "secureConnectionStart": 1,
+            "startTime": 0,
+            "transferSize": 6933
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 1688372,
+            "encodedBodySize": 1273071,
+            "sameOrigin": 84,
+            "transferSize": 1298271,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        }
+      ]
+    },
+    "natural-cache-fresh-view": {
+      "successful": 10,
+      "metrics": {
+        "home-observed": {
+          "N": 10,
+          "P50ms": 1226.4779583201744,
+          "P90ms": 1303.4507000003941,
+          "minMS": 1032.7335416805,
+          "maxMS": 1315.9129999694414,
+          "rawMS": [
+            1197.286874987185,
+            1302.0660000038333,
+            1261.582208389882,
+            1315.9129999694414,
+            1222.710374975577,
+            1156.4418749767356,
+            1251.185291679576,
+            1230.2455416647717,
+            1057.36504169181,
+            1032.7335416805
+          ]
+        },
+        "detail-observed": {
+          "N": 10,
+          "P50ms": 1785.7753333519213,
+          "P90ms": 1864.1385458526202,
+          "minMS": 1579.4014583807439,
+          "maxMS": 1916.9513333472423,
+          "rawMS": [
+            1731.4081250224262,
+            1823.9070833660662,
+            1858.2704583532177,
+            1916.9513333472423,
+            1816.7713333386928,
+            1682.1735416306183,
+            1849.6065000072122,
+            1754.7793333651498,
+            1579.4014583807439,
+            1634.9536666530184
+          ]
+        },
+        "gomoku-controls-observed-not-worker-proof": {
+          "N": 10,
+          "P50ms": 2423.4362708230037,
+          "P90ms": 2583.0904000089504,
+          "minMS": 2178.1325833289884,
+          "maxMS": 2722.2077500191517,
+          "rawMS": [
+            2332.119708356913,
+            2427.1322499844246,
+            2457.6110833440907,
+            2722.2077500191517,
+            2419.740291661583,
+            2567.6329166744836,
+            2373.320583370514,
+            2504.2157500283793,
+            2178.1325833289884,
+            2224.8049166519195
+          ]
+        },
+        "gomoku-actual-human-black-observed": {
+          "N": 10,
+          "P50ms": 2465.6807291612495,
+          "P90ms": 2626.0009749792516,
+          "minMS": 2220.8063333528116,
+          "maxMS": 2765.3215000173077,
+          "rawMS": [
+            2372.9952499852516,
+            2469.2499166703783,
+            2500.8712083799765,
+            2765.3215000173077,
+            2462.1115416521206,
+            2610.52091664169,
+            2416.058625036385,
+            2545.7188333384693,
+            2220.8063333528116,
+            2266.578666632995
+          ]
+        },
+        "gomoku-actual-computer-white-observed": {
+          "N": 10,
+          "P50ms": 2706.974770844681,
+          "P90ms": 3053.1976833648514,
+          "minMS": 2465.564666665159,
+          "maxMS": 3231.6048333304934,
+          "rawMS": [
+            2612.3391250148416,
+            2711.170624999795,
+            3033.3746667020023,
+            3231.6048333304934,
+            2702.7789166895673,
+            2856.4078333438374,
+            2655.2127083414234,
+            2785.3759583085775,
+            2465.564666665159,
+            2504.113208327908
+          ]
+        }
+      },
+      "passiveCompletedResources": [
+        {
+          "iteration": 1,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 342,
+            "domInteractive": 335,
+            "duration": 531,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 531,
+            "requestStart": 0,
+            "responseEnd": 199,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 138,
+            "encodedBodySize": 138,
+            "sameOrigin": 84,
+            "transferSize": 19638,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 2,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 354,
+            "domInteractive": 347,
+            "duration": 468,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 468,
+            "requestStart": 0,
+            "responseEnd": 153,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 87,
+            "count": 87,
+            "crossOrigin": 7,
+            "decodedBodySize": 138,
+            "encodedBodySize": 138,
+            "sameOrigin": 80,
+            "transferSize": 18438,
+            "types": {
+              "css": 19,
+              "fetch": 16,
+              "img": 3,
+              "link": 47,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 3,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 361,
+            "domInteractive": 355,
+            "duration": 725,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 725,
+            "requestStart": 0,
+            "responseEnd": 192,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 13179,
+            "encodedBodySize": 5299,
+            "sameOrigin": 84,
+            "transferSize": 24799,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 4,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 461,
+            "domInteractive": 455,
+            "duration": 692,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 692,
+            "requestStart": 0,
+            "responseEnd": 325,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 2550,
+            "encodedBodySize": 1242,
+            "sameOrigin": 84,
+            "transferSize": 20742,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 5,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 321,
+            "domInteractive": 314,
+            "duration": 541,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 541,
+            "requestStart": 0,
+            "responseEnd": 149,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 138,
+            "encodedBodySize": 138,
+            "sameOrigin": 84,
+            "transferSize": 19638,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 6,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 318,
+            "domInteractive": 311,
+            "duration": 665,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 665,
+            "requestStart": 0,
+            "responseEnd": 202,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 276,
+            "encodedBodySize": 276,
+            "sameOrigin": 84,
+            "transferSize": 19776,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 7,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 399,
+            "domInteractive": 393,
+            "duration": 982,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 982,
+            "requestStart": 0,
+            "responseEnd": 222,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 138,
+            "encodedBodySize": 138,
+            "sameOrigin": 84,
+            "transferSize": 19638,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 8,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 389,
+            "domInteractive": 383,
+            "duration": 724,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 724,
+            "requestStart": 0,
+            "responseEnd": 220,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 85,
+            "count": 85,
+            "crossOrigin": 6,
+            "decodedBodySize": 69,
+            "encodedBodySize": 69,
+            "sameOrigin": 79,
+            "transferSize": 18069,
+            "types": {
+              "css": 19,
+              "fetch": 13,
+              "img": 3,
+              "link": 48,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 9,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 258,
+            "domInteractive": 251,
+            "duration": 509,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 509,
+            "requestStart": 0,
+            "responseEnd": 112,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 138,
+            "encodedBodySize": 138,
+            "sameOrigin": 84,
+            "transferSize": 19638,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        },
+        {
+          "iteration": 10,
+          "navigation": {
+            "connectEnd": 0,
+            "connectStart": 0,
+            "decodedBodySize": 0,
+            "domainLookupEnd": 0,
+            "domainLookupStart": 0,
+            "domContentLoadedEventEnd": 236,
+            "domInteractive": 231,
+            "duration": 444,
+            "encodedBodySize": 0,
+            "fetchStart": 0,
+            "loadEventEnd": 444,
+            "requestStart": 0,
+            "responseEnd": 102,
+            "responseStart": 0,
+            "secureConnectionStart": 0,
+            "startTime": 0,
+            "transferSize": 300
+          },
+          "resourceSummary": {
+            "completed": 91,
+            "count": 91,
+            "crossOrigin": 7,
+            "decodedBodySize": 138,
+            "encodedBodySize": 138,
+            "sameOrigin": 84,
+            "transferSize": 19638,
+            "types": {
+              "css": 19,
+              "fetch": 17,
+              "img": 3,
+              "link": 50,
+              "other": 2
+            }
+          }
+        }
+      ]
+    }
+  },
+  "cleanup": {
+    "failedProfileIDs": [],
+    "identityCleanupFinished": true,
+    "ownedProfileIDs": [
+      "1761EA05-8D93-473C-A2BA-FE942742833A"
+    ]
+  },
+  "rawSHA256": "7977d86cad8b046b2e3e76ea35fd0ffb8bf970e6bb3234c4e18b0c2d5291df3e"
+}

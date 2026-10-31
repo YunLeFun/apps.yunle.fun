@@ -1,0 +1,65 @@
+{
+  "schema": "native-guest-authorization-source-audit-v1",
+  "recordedAt": "2026-10-29T08:33:23.843026+08:00",
+  "motivation": "ActualoldordinaryPlayportal displayednative login; usercancelledwith emptyfields andhomepagewasvisible. This is distinct from newnative modequery launch.",
+  "observedOldPortal": "legacy-native-real-catalog-ui-journey.json",
+  "currentSourceFindings": [
+    "Validnative launch suppresses SiteHeader through default.vue conditional; Gomoku computerpage doesnot call usePlaySession. SSOcallback plugin no callbackreturns beforebootstrap.",
+    "AppRootView onlybegins nativegame login for requiresLogin modes; roomintentrequireslogin.",
+    "If PlayrunRefresh executes, it requests hostbootstrap; NativeAuthorizationBroker resolves guest by showing login; no generalnoninteractiveguest branch."
+  ],
+  "candidateConfigurationBoundary": "Actual9ba staticcandidate has multiplayerEnabledfalse and emptyCloudBaseEnv/accesskey. SiteHeader refresh also gates on configurationError. Previewno-prompt doesnotprove zero hostauthorize underfullyenabled validSSOconfiguration.",
+  "conclusion": "No proven currentvalidnativeofflineGomoku automaticlogin regression; oldordinaryPortal prompt aloneisnot that evidence. Sourceguards are intendedpaths, not fullconfiguration rendering proof. Require compatible realfullconfiguration/deployedidentitysetup for acceptance, do notinventmockcredential values or alterauthscope/ready toclaimpass.",
+  "sources": [
+    {
+      "root": "/Users/yunyou/repos/github.com/YunLeFun/play",
+      "file": "apps/web/app/layouts/default.vue",
+      "sha256": "bec7c00e35e27c9833a4c21f8e0d971d8739fd38c8b5741dbe3cfb72e6b92e10"
+    },
+    {
+      "root": "/Users/yunyou/repos/github.com/YunLeFun/play",
+      "file": "apps/web/app/components/SiteHeader.vue",
+      "sha256": "dfb0262481eab66d631ce6c206ab37bf852623e922f4f55b2189e447637af198"
+    },
+    {
+      "root": "/Users/yunyou/repos/github.com/YunLeFun/play",
+      "file": "apps/web/app/composables/usePlaySession.ts",
+      "sha256": "c9321163fc2336f16827a2bd5bbfe1658d28d44813fb265422318e5cf7625bab"
+    },
+    {
+      "root": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun",
+      "file": "apps/ios/YunleFun/App/AppRootView.swift",
+      "sha256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4"
+    },
+    {
+      "root": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun",
+      "file": "apps/ios/YunleFun/WebRuntime/NativeAuthorizationBroker.swift",
+      "sha256": "b2907d8f6d327979eef2c85885ee94c875ac942b169f3d2ed7429d61a8bf7765"
+    },
+    {
+      "root": "/Users/yunyou/repos/github.com/YunLeFun/play",
+      "file": "apps/web/app/plugins/sso.client.ts",
+      "sha256": "473b0794ef6d3c33bf422284f88355f1f4f0e4ce13a92b04f6855d505f0b88f9"
+    }
+  ],
+  "scope": "Read-onlysource+existingactualcandidateconfigaudit. No new runtimeauth/credentials/test/productiondeployment or productchange.",
+  "candidateHTMLFingerprint": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/games/gomoku/computer/index.html",
+    "sha256": "d32b8bdec29079ea7615ab9e957772eafa797f4d6306597d57ed2b63d6dcfee1",
+    "safeConfigurationSummary": {
+      "multiplayerEnabled": {
+        "boolean": false,
+        "emptyString": false
+      },
+      "cloudbaseEnvId": {
+        "boolean": null,
+        "emptyString": true
+      },
+      "cloudbaseAccessKey": {
+        "boolean": null,
+        "emptyString": true
+      }
+    },
+    "scope": "Boolean/empty summaries only; no published key values or credentials captured."
+  }
+}

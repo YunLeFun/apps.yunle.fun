@@ -1,0 +1,29 @@
+{
+  "schema": "legacy-native-public-play-detail-lookup-v1",
+  "checkedAt": "2026-10-29T08:23:09.837507+08:00",
+  "URL": "https://apps.yunle.fun/api/apps/public/play",
+  "status": 200,
+  "responseSHA256": "e146d41167cdddfe4f86f3aa2e52e70dbf59d63a59346c2239ece25a320f06ec",
+  "bytes": 767,
+  "publicPlayEntry": {
+    "_id": "app_55d184f8cda84547a18e41848faf0084",
+    "name": "云乐坊间",
+    "websiteUrl": "https://play.yunle.fun/",
+    "marketShortName": "play",
+    "category": "游戏",
+    "tags": [
+      "小游戏",
+      "单人",
+      "同屏",
+      "联机"
+    ],
+    "isPublic": true,
+    "audience": "public",
+    "isUnavailable": null,
+    "accessMode": "public",
+    "coinCost": null,
+    "requiresMembership": null,
+    "status": "approved"
+  },
+  "scope": "Only actual public Play portal entry; normalanonymousTLS GET. Confirms real catalogue id/URL/access fields for UI selection, not native journey or login success. No roomcreation/purchase/accountmutation."
+}

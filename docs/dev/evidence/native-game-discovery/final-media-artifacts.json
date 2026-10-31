@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-10-29T04:24:32.622853+08:00",
+  "scope": "Original captured screenshots; no synthetic composition",
+  "artifacts": [
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-games-candidate.jpg",
+      "bytes": 38844,
+      "sha256": "f7546d9ff8769f4ab522197893a7ab1931e7ea2be27093e07cd34d0e9f6a9662"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-paper-star-candidate.jpg",
+      "bytes": 38069,
+      "sha256": "9aef2d1b4b90c16f5f213892be022b2789d946bdf6e3285f80947020317d1da5"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-paper-star-tutorial-final.png",
+      "bytes": 4014927,
+      "sha256": "7dcfed2a1fd07093650957a9d2fc59b7618ca866524ce0295ca6c10ccab0faff"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-paper-star-local-final.png",
+      "bytes": 3426054,
+      "sha256": "05c14b064492f4aa77b1e282ae5668a7242b8a77abefe401c20e770da459d75a"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-paper-star-pve-final.png",
+      "bytes": 3228195,
+      "sha256": "88d28b597107b5a8e236ca5449674c1cbed0b2063e10fe00f0082aaf07627892"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-games-maximum-text-final.png",
+      "bytes": 820003,
+      "sha256": "c417c11c4179a494fcd640c8f8fd172058144e541d014513573706bcb222f89e"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-workshop-maximum-text-final.png",
+      "bytes": 348630,
+      "sha256": "1223762ae70ad27becac77d78ba9adf1531e031dbdbce66eb7bba1509cda032b"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/production-test-room-left.jpg",
+      "bytes": 38911,
+      "sha256": "058380f537d30255e33149d4d7734a4d12795322bf9985b13e9e81a9f53eab93"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-29",
+  "device": "iPhone 18 Pro / iOS 27.0 Simulator",
+  "build": "Debug native-dev; explicit fixed loopback preview",
+  "dynamicTypeLaunchArgument": "UICTContentSizeCategoryAccessibilityXXXL",
+  "game": "paper-star",
+  "mode": "tutorial",
+  "checks": [
+    {
+      "step": "Stop only owned preview server and open native tutorial",
+      "result": "Native loading-failure overlay; NSURLErrorDomain -1004"
+    },
+    {
+      "step": "Landscape large text error overlay scroll",
+      "result": "Retry and Return to Games become visible/hittable; native accessibility identifiers games.loading-retry / games.loading-close"
+    },
+    {
+      "step": "Restore same public server and tap native Retry",
+      "result": "Overlay removed, real tutorial page rendered, native engine-ready observed"
+    }
+  ],
+  "readyEvidence": {
+    "source": "Simulator unified log, processIdentifier 37201, subsystem fun.yunle.apps, category cache-launch",
+    "time": "2026-10-29 01:42:11.041 CST",
+    "game": "paper-star",
+    "mode": "tutorial",
+    "elapsedMilliseconds": 39675.560042,
+    "note": "Includes intentional server outage and manual waiting; not a startup performance sample"
+  },
+  "limitations": [
+    "No production or account login",
+    "The short landscape tutorial leaves much of the scene below its stacked header/guide/HUD; layout review remains pending",
+    "Web game accessibility nodes were not exposed by this UI automation snapshot; full VoiceOver acceptance remains pending"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "historical-native-followup-summary-v1",
+  "goalStatus": "active-incomplete",
+  "classification": "meaningful-progress",
+  "noProgressConsecutiveGoalTurns": 0,
+  "priorSummary": "startup-gameplay-acceptance-summary.json",
+  "blankExperiment": {
+    "passedTest": 1,
+    "samples": 6,
+    "adopted": false,
+    "analysis": "blank-warmup-phase-analysis.json",
+    "restoredTestSHA256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c"
+  },
+  "historicalTests": {
+    "passed": 1,
+    "failed": 3,
+    "skipped": 0,
+    "evidenceIndex": "historical-native-evidence-index.json",
+    "gomokuMeasuredRows": 20,
+    "excludedPrime": 1,
+    "fullHistoricalBaselineComplete": false
+  },
+  "analysis": "historical-native-analysis.json",
+  "metrics": "historical-native-gomoku-https-metrics.json",
+  "inputs": "historical-native-harness-inputs.json",
+  "compiledInputs": "historical-native-compiled-inputs.json",
+  "candidate": "historical-native-current-candidate.json",
+  "retirement": "historical-native-retirement.json",
+  "simulatorAudit": "historical-native-simulator-audit.json",
+  "completionAudit": "historical-native-completion-audit.json",
+  "docsBuild": "historical-native-docs-build.json",
+  "remaining": [
+    "M0.1 fullbaselineincludingStarrealoperableandmultiplayer",
+    "M3.3 original30percenttarget/source-networkmatchedcomparison",
+    "M4 realnativeSSO/OSUniversalLink/tworealusers/deployedauthority and interruptionrecovery",
+    "M5.1 allrequiredrealjourneys"
+  ],
+  "userCountdownChoice": "No response; preserved3secrule and originaltarget",
+  "productionWritesOrDeployment": false,
+  "TestFlight": false,
+  "commitsPushPR": false
+}

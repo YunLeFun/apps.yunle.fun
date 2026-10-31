@@ -1,0 +1,45 @@
+{
+  "kind": "retained-failed-and-diagnostic-attempts",
+  "attempts": [
+    {
+      "result": "build failed, repaired",
+      "reason": "MainActor access in async teardown required explicit hop",
+      "log": "operable-final-build.log"
+    },
+    {
+      "result": "failed",
+      "bundle": "resource-fault-final.xcresult",
+      "reason": "Actual Nuxt basename started with hyphen; native resource path rule rejected manifest. Early cleanup also crashed WebKit before initialization."
+    },
+    {
+      "result": "6 passed, 1 failed",
+      "bundle": "resource-fault-policy-retry.xcresult",
+      "reason": "Full real flow reached end but additional cache-only assertions failed; flowCompleted did not imply test success."
+    },
+    {
+      "result": "83 passed, 1 failed",
+      "bundle": "restore-cache-acceptance.xcresult",
+      "reason": "Structured bounded probe confirmed missing cache entries before fault injection; old lifecycle released named store."
+    },
+    {
+      "result": "diagnostic, not accepted",
+      "bundle": "cache-store-keeper-diagnostic.xcresult",
+      "reason": "Extra store owner made baseline215/215, but game presentation timed out. Not used as acceptance."
+    },
+    {
+      "result": "12 passed, 2 failed",
+      "bundle": "runtime-ui-final.xcresult",
+      "reason": "All four UI journeys passed; two runtime test cleanup failures retained."
+    },
+    {
+      "result": "9 passed, 1 failed",
+      "bundle": "runtime-final-cleanup-retry.xcresult",
+      "reason": "Test-only removal callback deadline expired with no live fixture owners; preserved exact ownership."
+    }
+  ],
+  "acceptedFollowUps": [
+    "cache-cold-final-regression.xcresult:92 passed,9 expected origin skips",
+    "runtime-final-callback-acceptance.xcresult:10 passed,0 skips"
+  ],
+  "rawBundlesRoot": "/tmp/yunle-native-games.uGZuY9"
+}

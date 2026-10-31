@@ -1,0 +1,71 @@
+{
+  "kind": "native-game-session-reclamation-cleanup",
+  "recordedAt": "2026-10-29T06:09:17.864081+08:00",
+  "passedCases": 3,
+  "failedCases": 0,
+  "skippedCases": 0,
+  "events": [
+    {
+      "fixtureStoreID": "F39846F5-5309-45DC-802F-B2BDE5569E0A",
+      "elapsedMilliseconds": 4.756791691761464,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "2994A26A-B27D-4CAD-8BDD-A7F3FACB9EB6",
+      "elapsedMilliseconds": 2.977625001221895,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "02FA7156-264C-4A52-A50C-0AED63F9D05E",
+      "elapsedMilliseconds": 0.07987499702721834,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "02FA7156-264C-4A52-A50C-0AED63F9D05E",
+      "elapsedMilliseconds": 206.60437498008832,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "D5544CF4-C00A-4F4E-BBD6-7B1F615AC2A6",
+      "elapsedMilliseconds": 163.08887500781566,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "4F3548D3-5613-4DD9-A72B-90FC6EEC801A",
+      "elapsedMilliseconds": 39.602916629519314,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "BC37EABE-338F-40EA-8169-15B3B25758E1",
+      "elapsedMilliseconds": 0.04175002686679363,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "BC37EABE-338F-40EA-8169-15B3B25758E1",
+      "elapsedMilliseconds": 0.19516667816787958,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "BC37EABE-338F-40EA-8169-15B3B25758E1",
+      "elapsedMilliseconds": 1153.537416656036,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "B249014B-005E-48C4-BCEA-F38C2CED4939",
+      "elapsedMilliseconds": 0.042916624806821346,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "B249014B-005E-48C4-BCEA-F38C2CED4939",
+      "elapsedMilliseconds": 0.06624998059123755,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "B249014B-005E-48C4-BCEA-F38C2CED4939",
+      "elapsedMilliseconds": 88.9740833081305,
+      "success": true
+    }
+  ],
+  "uniqueOwnedStores": 7,
+  "scope": "Only this isolated fixture UUIDs; no source user data, simulated OS warning only, no device creation/reset"
+}

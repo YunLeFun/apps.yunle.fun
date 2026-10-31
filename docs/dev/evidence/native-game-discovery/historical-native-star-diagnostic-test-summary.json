@@ -1,0 +1,46 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+        "deviceName": "iPhone 18 Pro",
+        "modelName": "iPhone 18 Pro",
+        "osBuildNumber": "24A434",
+        "osVersion": "27.0",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 1,
+      "passedTests": 0,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "YunleFun · Built with macOS 26.6.2",
+  "expectedFailures": 0,
+  "failedTests": 1,
+  "finishTime": 1793231166.127,
+  "passedTests": 0,
+  "result": "Failed",
+  "runtimeWarnings": [],
+  "skippedTests": 0,
+  "startTime": 1793231105.738,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "failed - Legacy HTTPS preflight failed for paper-star/local: LegacyHTTPSPreflight code 20; see partial attachment",
+      "targetName": "YunleFunTests",
+      "testIdentifier": 1,
+      "testIdentifierString": "NativeLegacyHTTPSBaselineTests/testOfflineEntryPreflight()",
+      "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeLegacyHTTPSBaselineTests/testOfflineEntryPreflight",
+      "testName": "testOfflineEntryPreflight()"
+    }
+  ],
+  "title": "Test - YunleFun",
+  "topInsights": [],
+  "totalTestCount": 1
+}

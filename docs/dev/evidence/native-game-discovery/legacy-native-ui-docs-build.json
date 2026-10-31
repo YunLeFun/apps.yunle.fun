@@ -1,0 +1,22 @@
+{
+  "schema": "legacy-native-ui-docs-build-v1",
+  "status": "passed",
+  "exitCode": 0,
+  "exceptionType": null,
+  "elapsedSeconds": 5.01,
+  "command": "./node_modules/.bin/vitepress build docs --outDir <task-owned-temp>",
+  "sourceSHA256": {
+    "docs/dev/native-game-discovery-implementation.md": "535e2158694a95e4f0debd490687045fc6ab1effa64baff9df07981f5ddfc0ae",
+    "specs/native-game-discovery/tasks.md": "d34e5710439b59db600478f8f5717f3bfbc5d7845cc705e570b3fb25dc567269"
+  },
+  "sourcesStableDuringBuild": true,
+  "log": "/tmp/yunle-native-games.uGZuY9/legacy-native-ui-docs-build-final.log",
+  "logSHA256": "aec7dd7d13de5e583c57c31997b2789e4afb3a2f68c0417ebc83b5d2cc7e2ec1",
+  "previousPassingBuild": "legacy-native-ui-docs-build-pre-blocked-audit.json",
+  "outputPath": "/tmp/yunle-native-games.uGZuY9/legacy-ui-final-docs.d7q_zi55",
+  "outputLogicalBytesReclaimed": 10209694,
+  "outputAllocatedBytesReclaimed": 10997760,
+  "outputAbsentAfterFinally": true,
+  "recordedAt": "2026-10-29T08:38:54.606833+08:00",
+  "scope": "Final docs/linkbuild with realUI/guestconfiguration caveat/repeatedenvironmentaudit. Existinginstalledbinary/no trustoverride; finallyreclaims ownoutput."
+}

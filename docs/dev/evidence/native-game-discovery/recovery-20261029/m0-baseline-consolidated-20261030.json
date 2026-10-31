@@ -1,0 +1,745 @@
+{
+  "schemaVersion": 1,
+  "kind": "M0-baseline-consolidation-for-root-review",
+  "atUTC": "2026-10-30T08:55:44.749445+00:00",
+  "newMeasurementBuildTestNetworkUIOrCredentialReads": false,
+  "writesThisAction": [
+    "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-baseline-consolidated-20261030.json"
+  ],
+  "taskCheckboxesChanged": false,
+  "specInterpretation": {
+    "reference": "tasks item0.1 and design section7; requirements R4/R5/R8",
+    "verbatimTask0_1": [
+      "覆盖五子棋电脑对手、飞行棋创房及加入、星纸教程／本地与已开放联机模式，固定源码版本、设备、网络和缓存状态。",
+      "记录点击、导航、资源就绪、可操作和房间连接就绪的事件定义；区分首次打开、缓存后重开及会话恢复。"
+    ],
+    "minimumMapping": "Record the named flows with their actual conditions and event endpoints; keep first/current-install order, controlled cold/prepared, natural-cache navigation and retained-session recovery distinct.",
+    "notAddedByThisConsolidation": [
+      "No rebuild of historical Native required by item0.1 itself",
+      "No new all-games × all-modes × all-cache-conditions N10 matrix",
+      "M3 representative-scene N10 and M4 two-game room N10 remain their separate gates",
+      "No Star online baseline while that mode is disabled",
+      "No full8-step Star tutorial completion requirement introduced by item0.1 or5.1"
+    ],
+    "conditionsAreDescribedNotNormalized": "Unknown live cache state remains unknown; uncontrolled network/CPU conditions are not relabeled as a controlled experiment. Historical and final builds stay in separate rows."
+  },
+  "device": {
+    "simulatorUDID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "model": "iPhone 18 Pro",
+    "iOS": "27.0",
+    "hardwarePerformanceClaim": false
+  },
+  "sourceAndBuildBindings": {
+    "a701FixedPerformance": {
+      "evidence": [
+        "m3_freeze",
+        "m3_metrics",
+        "m3_restoration"
+      ],
+      "webCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+      "attributionBasis": "Root verified production deployment source; publicbody hashes frozen independently",
+      "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+      "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87",
+      "catalogBodySHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+      "archiveSHA256": "0a21ef3c62ef1d38c2eb394219f7d958cd8f881ebc4bcb1134180c10214544b7",
+      "nativeSelectedSourceSHA256": {
+        "apps/mobile/ios/App/App/WebViewController.swift": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+        "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+        "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "dcd09c65ffb400213fb785bbd5203da295567336171c53fc3cabb3f88cf880ab"
+      },
+      "nativeProductSHA256": {
+        "YunleFun": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+        "YunleFun.debug.dylib": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+        "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+        "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+      },
+      "nativeTestBinarySHA256": "47b771779718bf2623781eb071d2279115520ac311bba93c20463b415ade5818",
+      "notHistoricalNativeCommitBaseline": true
+    },
+    "normalA701Tutorial": {
+      "evidence": [
+        "star_journey",
+        "star_native_log",
+        "ai_fix_and_star_log_supplement",
+        "m3_restoration"
+      ],
+      "normalHostPID": 42494,
+      "preview": 0,
+      "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+      "runtimeSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+      "controllerSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+      "nativeProductIdentity": "Frozen final a701 normal product; AI fix was not installed for this tutorial. See a701 fixed product fingerprints and original normalHostPID supplement.",
+      "webGitAndBuildAttribution": "Production metadata/catalog known from surrounding verified release; no separate per-tutorial script-network trace was captured."
+    },
+    "normalFlightAfterAIFix": {
+      "evidence": [
+        "ai_fix_and_star_log_supplement",
+        "f03_baseline",
+        "f05_recovery",
+        "f05_public_readback"
+      ],
+      "normalHostPID": 72102,
+      "preview": 0,
+      "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+      "sourceSHA256": {
+        "AssistantView.swift": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+        "Runtime": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+        "Controller": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+        "runtimeTests": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509"
+      },
+      "nativeProductSHA256": {
+        "YunleFun": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+        "YunleFun.debug.dylib": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+        "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+        "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+      },
+      "changeScope": "Assistant53059 navigation only; Runtimeb61 and Controllere6d unchanged. These are distinct native product bytes from frozen M3; M3 samples are not relabeled.",
+      "webBuildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87",
+      "webEntry": "/_nuxt/Dw_sPZRE.js"
+    },
+    "historicalRetainedSession": {
+      "evidence": [
+        "retained_raw",
+        "retained_test_summary",
+        "retained_context_source_fingerprints",
+        "retained_context_metrics"
+      ],
+      "catalogVersionContext": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+      "selectedProductSourceContext": [
+        {
+          "repo": "apps",
+          "path": "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift",
+          "sha256": "d90fb618a50eac189bbe7ddfab748a33e5de3f17a62e0850421273545182b3ae",
+          "baselineSHA256": "d90fb618a50eac189bbe7ddfab748a33e5de3f17a62e0850421273545182b3ae",
+          "matchesPreviousCandidateSource": true
+        },
+        {
+          "repo": "apps",
+          "path": "apps/ios/YunleFun/Services/NativeGameResourceCache.swift",
+          "sha256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+          "baselineSHA256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+          "matchesPreviousCandidateSource": true
+        },
+        {
+          "repo": "apps",
+          "path": "apps/ios/YunleFun/Features/Games/GamesView.swift",
+          "sha256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+          "baselineSHA256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+          "matchesPreviousCandidateSource": true
+        }
+      ],
+      "exactMeasuredExecutableSHA256": null,
+      "bindingLimit": "Raw retained attachment does not embed the exact test executable or Git commit. Retained scope is attributed to the historical9ba local candidate by the contemporary implementation record and contextual source fingerprints. The later candidate executable fingerprint is explicitly a different rebuild and is not assigned to the retained run.",
+      "currentA701PerformanceClaim": false
+    }
+  },
+  "eventDefinitions": [
+    {
+      "event": "Native launch/tap",
+      "definition": "Native ProcessInfo.systemUptime immediately before runtime.openGame/openGameRoom or resumeGame, not model/tool request arrival. Public native logger elapsed is measured within that same uptime clock.",
+      "evidence": [
+        "m3_raw",
+        "retained_raw",
+        "star_native_log",
+        "f03_native_log"
+      ]
+    },
+    {
+      "event": "Legacy navigation",
+      "definition": "Real visible home/detail/mode link activation, with20ms test polling for M3. Document path/timeOrigin observations describe the actual SPA/full-document journey.",
+      "evidence": [
+        "m3_raw"
+      ]
+    },
+    {
+      "event": "Verified public resources prepared",
+      "definition": "Current manifest version and full required byte/digest verification in the selected WebKit store before the prepared stage. This does not cache account/ticket/room state.",
+      "evidence": [
+        "m3_raw",
+        "m3_freeze",
+        "m3_review"
+      ]
+    },
+    {
+      "event": "Resource/renderer observations",
+      "definition": "Per-document performance entries and renderer snapshots. Main-document completed-request coverage only; no complete worker/pending/all-network wall-time claimed. Do not sum parallel resource durations or subtract3000ms from total to invent resource wait.",
+      "evidence": [
+        "m3_raw",
+        "m3_metrics"
+      ]
+    },
+    {
+      "event": "Game operable",
+      "definition": "Validated genuine ready from initialized gameplay with a render opportunity. Star countdown completion plus playing and renderer ready; accepted inputs are an additional behavioral check.",
+      "evidence": [
+        "m3_raw",
+        "star_native_log",
+        "star_step5",
+        "f05_raw_batch"
+      ]
+    },
+    {
+      "event": "Authoritative room ready",
+      "definition": "Play connected state plus actual room snapshot and resolved player/spectator role before room-ready publication. Native logs first validated room-ready elapsed; observer membership gate requires matching fresh player connection.ready and room.snapshot. Waiting lobby readiness is separate from playing-ready.",
+      "evidence": [
+        "f03_baseline",
+        "f03_join_raw",
+        "f03_native_log",
+        "f05_recovery",
+        "old_m0_audit"
+      ]
+    },
+    {
+      "event": "Retained-session usable frame/input",
+      "definition": "Native uptime starts immediately before public runtime.resumeGame. The first endpoint is a native visible presentation plus two real Web requestAnimationFrames and current operable DOM state. The second endpoint additionally confirms an actual test input changed game state.",
+      "evidence": [
+        "retained_raw"
+      ]
+    },
+    {
+      "event": "Root observer upper bound",
+      "definition": "Monotonic root observer before actual UI submit to first read that contains the required authority facts. UI IPC, polling, keyboard routing and operator gaps may be included; never subtract it from Native/Web/server clock.",
+      "evidence": [
+        "f03_creation_raw",
+        "f03_join_raw",
+        "f05_recovery"
+      ]
+    }
+  ],
+  "baselineRows": [
+    {
+      "id": "G-computer-and-Star-local-fixed-entry-load",
+      "coverage": "gomoku/computer and paper-star/local",
+      "evidence": [
+        "m3_raw",
+        "m3_metrics",
+        "m3_freeze",
+        "m3_review"
+      ],
+      "binding": "a701FixedPerformance",
+      "network": "Task-owned loopbackHTTP127.0.0.1:18146 serving frozen production public bytes; fixture identity/catalog preloaded, UIKit animations disabled. Not public network or physical-device performance.",
+      "conditions": {
+        "cold": "Fresh WKWebView; only this fixture profile's HTTP memory/disk caches cleared before the tap; WebKit process and OS caches are not reset",
+        "prepared": "End the preceding session, clear the same profile's HTTP caches, prepare and verify its current manifest, then open fresh WebViews without clearing the prepared cache",
+        "navigation": "Poll public visible links every 20 ms and click as soon as their DOM conditions pass; real SPA or full-document navigation is accepted. This is not an average human think-time model."
+      },
+      "firstOpenMeaning": "Controlled fresh-WebView/cache condition per sample, not first-ever install or OS/WebKit-process cold start.",
+      "groups": [
+        {
+          "gameId": "gomoku",
+          "modeId": "computer",
+          "stage": "same-build-home-detail-mode-cold",
+          "n": 10,
+          "p50Milliseconds": 1118.3716666655528,
+          "p90Milliseconds": 1867.586708334784,
+          "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+        },
+        {
+          "gameId": "gomoku",
+          "modeId": "computer",
+          "stage": "direct-mode-cold",
+          "n": 10,
+          "p50Milliseconds": 881.2414166677627,
+          "p90Milliseconds": 1531.8459583340882,
+          "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+        },
+        {
+          "gameId": "gomoku",
+          "modeId": "computer",
+          "stage": "direct-mode-prepared",
+          "n": 10,
+          "p50Milliseconds": 833.7102916666481,
+          "p90Milliseconds": 1451.3396250004007,
+          "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+        },
+        {
+          "gameId": "paper-star",
+          "modeId": "local",
+          "stage": "same-build-home-detail-mode-cold",
+          "n": 10,
+          "p50Milliseconds": 4268.493291667255,
+          "p90Milliseconds": 4403.839500000686,
+          "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+        },
+        {
+          "gameId": "paper-star",
+          "modeId": "local",
+          "stage": "direct-mode-cold",
+          "n": 10,
+          "p50Milliseconds": 3909.455708333553,
+          "p90Milliseconds": 4096.255791666408,
+          "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+        },
+        {
+          "gameId": "paper-star",
+          "modeId": "local",
+          "stage": "direct-mode-prepared",
+          "n": 10,
+          "p50Milliseconds": 3889.9272916660266,
+          "p90Milliseconds": 4012.5060833324824,
+          "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+        }
+      ],
+      "formalSampleCount": 60,
+      "resampling": false,
+      "retainedSessionClaim": false,
+      "countdownMilliseconds": 3000,
+      "coverageLimit": "These two representative scenes provide controlled cold/prepared comparisons. They are not Flight creation/join or Star tutorial N10."
+    },
+    {
+      "id": "historical-retained-live-session",
+      "coverage": "gomoku/local and paper-star/local",
+      "evidence": [
+        "retained_raw",
+        "retained_test_summary",
+        "retained_context_source_fingerprints",
+        "retained_context_metrics"
+      ],
+      "binding": "historicalRetainedSession",
+      "network": "http://127.0.0.1:18146",
+      "cacheCondition": "No cache clearing; same retained original document, WebView, named store and launch. This is in-process retention, not a cache-hit claim.",
+      "retainedDefinition": "Actual minimize toolbar action and completed dismissal; same live WebView, named profile and launch ID, plus strict JavaScript identity with the retained original document and documentElement objects and random in-memory marker. No cache clearing, manufactured lifecycle event or new ready callback.",
+      "clock": "Native uptime starts immediately before public runtime.resumeGame. The first endpoint is a native visible presentation plus two real Web requestAnimationFrames and current operable DOM state. The second endpoint additionally confirms an actual test input changed game state.",
+      "observationOverhead": "The native presentation/DOM observers poll at 50 ms, async JavaScript completion at 20 ms; UIKit animations are disabled by the existing isolated fixture. Endpoints are observed upper bounds, not touch-hardware latency.",
+      "results": [
+        {
+          "acceptedInputP50Milliseconds": 116.81220831815153,
+          "acceptedInputP90Milliseconds": 140.7643749844283,
+          "completed": true,
+          "gameId": "gomoku",
+          "modeId": "local",
+          "visibleOperableFrameP50Milliseconds": 94.57641665358096,
+          "visibleOperableFrameP90Milliseconds": 116.40950001310557
+        },
+        {
+          "acceptedInputP50Milliseconds": 368.97104169474915,
+          "acceptedInputP90Milliseconds": 395.4748749965802,
+          "completed": true,
+          "gameId": "paper-star",
+          "modeId": "local",
+          "visibleOperableFrameP50Milliseconds": 94.84366665128618,
+          "visibleOperableFrameP90Milliseconds": 193.12279165023938
+        }
+      ],
+      "sampleCount": 20,
+      "testSummary": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "inputScope": "DOM click accepts a Gomoku local move; actual page keyboard handlers accept Space fire in PaperStar local. These are synthetic test inputs through real game handlers, not physical-touch or VoiceOver claims.",
+      "scope": "Same local candidate and isolated fixture only; retained same-process session, not OS suspension, process eviction, app restart or online room recovery.",
+      "notClaimed": [
+        "Currenta701 retained-session performance",
+        "Gomoku computer-mode retention measured by this local-mode fixture",
+        "OS background continuity",
+        "App restart",
+        "WebContent eviction",
+        "Production online-room recovery"
+      ]
+    },
+    {
+      "id": "Star-current-normal-tutorial",
+      "coverage": "paper-star/tutorial",
+      "evidence": [
+        "star_journey",
+        "star_raw_journey",
+        "star_native_log",
+        "star_rendered",
+        "star_step5",
+        "ai_fix_and_star_log_supplement"
+      ],
+      "binding": "normalA701Tutorial",
+      "network": "Normal productionHTTPS in native WKWebView; no task preview origin.",
+      "cacheCondition": "Natural/unknown; no cache clearing or controlled resource preparation recorded for this journey.",
+      "viewArrangement": "Normal selected tutorial entry; no new/same WebView identity proof is claimed.",
+      "entryObservedAtUTC": "2026-10-30T07:36:04.404Z",
+      "nativeLaunchToReadyMilliseconds": 8400.483583,
+      "nativeLogAtLocal": "2026-10-30 15:36:13.180",
+      "rootObserverFields": {
+        "clock": "Root Cua observer, separate from Native uptime",
+        "launchUptimeMs": 297315.448917,
+        "firstAXObservationUptimeMs": 300361.973167,
+        "firstAX": "10% progress, not ready"
+      },
+      "rendererAndCountdown": "Screenshot showed rendered gameplay after preserved3s rule, with countdown2 observed earlier. No separate complete renderer latency measured.",
+      "realInputs": [
+        "left hold450ms",
+        "right hold450ms",
+        "boost hold450ms",
+        "fire hold1200ms",
+        "ability press200ms"
+      ],
+      "verifiedProgress": [
+        "steering→2/8",
+        "boost→3/8",
+        "continuous fire→4/8",
+        "ability→5/8"
+      ],
+      "sampleCount": 1,
+      "fullTutorialCompleted": false,
+      "notN10": true,
+      "limits": [
+        "8400.483583ms is the normal native launch-to-genuine-ready sample, not network-only latency",
+        "Do not combine root observer and Native clocks or subtract3s",
+        "Later6/8 observation is not attributed to a new manual input"
+      ]
+    },
+    {
+      "id": "Flight-F03-first-observed-after-current-install",
+      "coverage": "flight-chess ordinary legacy portal creation and Native code join",
+      "evidence": [
+        "f03_baseline",
+        "f03_creation_raw",
+        "f03_join_raw",
+        "f03_native_log"
+      ],
+      "binding": "normalFlightAfterAIFix",
+      "network": "Normal productionHTTPS/Colyseus; independent existing A native and B browser identities.",
+      "cacheCondition": "Natural/unknown; profile not cleared. Browser already had a normal session. No controlled HTTP cache state or cache-hit proof.",
+      "viewArrangement": "Normal current candidate arrangement; no new/same WebView identity proof asserted.",
+      "firstMeaning": "First real Native Play room observed in this current installation sequence, according to root action order; not first ever, not a pristine profile, and not a controlled cold start.",
+      "createObserverUpperBoundMilliseconds": 2639.839208999998,
+      "createInviteUIUpperBoundMilliseconds": 1461.668874999974,
+      "nativeLaunchToRoomConnectedMilliseconds": 23993.902083,
+      "joinObserverUpperBoundMilliseconds": 41100.41075000004,
+      "observerLimits": "Includes initial bounded polling and later screenshot/operator gap; not isolated join latency.",
+      "playingReadyMilliseconds": 167830.794667,
+      "playingReadyLimit": "Includes waiting for both players ready; not loading latency or a performance comparison.",
+      "roomUsability": "Actual visible waiting room/role/seats were verified. Manual movement and recovery were not cleanly verified in this round.",
+      "sampleCount": 1,
+      "countedTowardM4N10": false,
+      "outcome": "Aborted/excluded due driver/operator turn timeouts and autoplay; normal cleanup retained. The creation and room-ready measurements remain individually scoped observations."
+    },
+    {
+      "id": "Flight-F05-later-normal-navigation-and-recovery",
+      "coverage": "flight-chess ordinary creation, code join, accepted human inputs and short transport recovery",
+      "evidence": [
+        "f05_recovery",
+        "f05_raw_summary",
+        "f05_raw_batch",
+        "f05_public_readback"
+      ],
+      "binding": "normalFlightAfterAIFix",
+      "network": "Normal productionHTTPS/Colyseus; actual Browser B was scopedoffline then restored; NativeA remained active.",
+      "cacheCondition": "Natural/unknown. Later in the normal session sequence; no clear/prepare/cache-hit verification. It is not controlled warm-cache.",
+      "viewArrangement": "Later normal navigation; whether Native reused or created a WebView for the join is not established by this evidence.",
+      "createInviteUIUpperBoundMilliseconds": 1210.285750000272,
+      "createAuthorityUpperBoundMilliseconds": 2323.3656660001725,
+      "joinObserverUpperBoundMilliseconds": 14592.881708000321,
+      "joinObserverLimit": "Same observer continuous block includes UI/IPC/keyboard-routing reset/polling; separate from Native clock.",
+      "nativeLaunchToRoomConnectedMilliseconds": null,
+      "nativeJoinTimingLimit": "No Native stopwatch value is backfilled from root observer time in this consolidation.",
+      "realUsability": [
+        "Native A roll5 and plane3 takeoff -1→0 before recovery",
+        "Native A roll5 and plane3 real movement 0→5 after recovery",
+        "Browser B accepted actual roll before and after recovery"
+      ],
+      "recovery": {
+        "playerReadyAndFullSameRoomSnapshot": true,
+        "sameGameOrderedSeatsAndState": true,
+        "offlineObservationUpperBoundMilliseconds": 2032.413750000298,
+        "offlineUpperBoundIsNotReconnectLatency": true,
+        "manualInputsAcceptedBeforeAndAfter": true
+      },
+      "sampleCount": 1,
+      "countedTowardM4N10": true,
+      "normalCleanupConfirmed": true,
+      "collectorLimit": "Saved global CDP history reports truncation without a phase timestamp. Required F05 positive connection/room/game/action/leave chain is present and independently checked; no claim of complete or zero-loss all-history capture.",
+      "notAProductionSLA": true
+    },
+    {
+      "id": "Star-online-disabled",
+      "coverage": "paper-star/online",
+      "status": "not-applicable-while-disabled",
+      "evidence": [
+        "m3_freeze",
+        "star_journey",
+        "f05_public_readback"
+      ],
+      "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+      "baselineFabricated": false,
+      "requiredAction": "Retain the unavailable explanation and do not manufacture an online timing or room."
+    }
+  ],
+  "cacheAndSessionClassification": {
+    "controlledColdAndPrepared": "Only the explicitly controlled M3 raw rows carry those labels.",
+    "normalCurrentLiveJourneys": "F03, F04/F05 order and Star tutorial never prove controlled warm/cold merely by chronology; their HTTP cache state is natural/unknown.",
+    "retainedHistorical": "Explicit same-original-document retention evidence is separate from fresh navigation and transport reconnection.",
+    "classificationCoverage": "First/fresh cold condition, prepared/cache reopening, natural later navigation and retained recovery are recorded without claiming a full per-mode Cartesian matrix.",
+    "doesNotClaim": "No fresh/same WebView label for liveFlight or tutorial without direct identity evidence."
+  },
+  "historicalFailuresAndLimits": [
+    {
+      "evidence": [
+        "b251_failed_raw",
+        "b251_failed_metrics",
+        "b251_log_correction"
+      ],
+      "fact": "b251 formal60 remained a failed performance gate: Star coldP90 regressed28.145368073176613%; latera701 passing data do not rewrite it.",
+      "logBoundary": "2609 is only parseable singleJSON records in that formal bytewindow; concurrent concatenation/blank/errors mean it is not a complete response count or proof of zero server exceptions."
+    },
+    {
+      "evidence": [
+        "retained_context_metrics"
+      ],
+      "fact": "Initial uniform30% goal was not met by historical9ba measurements; user later retained3s countdown and adjusted target. That decision is not retroactive performance evidence."
+    },
+    {
+      "evidence": [
+        "historical_gomoku_https",
+        "historical_star_failure"
+      ],
+      "fact": "Exact old Native Gomoku HTTPS cold/natural-cache observations are separate historical context; observed productionPlay Git was unknown, and necessary Star texture CORS/renderer failed. No percentage is calculated across those builds or against a701 loopback."
+    },
+    {
+      "evidence": [
+        "f03_baseline",
+        "f05_recovery"
+      ],
+      "fact": "F01–F04 remain excluded from clean finalM4N10. F05 is one valid round, not ten; creation/join observations are not P50/P90 or a productionSLA."
+    },
+    {
+      "evidence": [
+        "m3_raw",
+        "star_journey"
+      ],
+      "fact": "Complete resource-wait walltime remains unknown. Design section7 explicitly permits separate limited main-document/resource/renderer observations without adding all-worker/all-network experiments as this round gate."
+    }
+  ],
+  "minimalClauseMappingForRootReview": [
+    {
+      "clause": "0.1 named game/mode coverage",
+      "support": [
+        "G-computer-and-Star-local-fixed-entry-load",
+        "Star-current-normal-tutorial",
+        "Flight-F03-first-observed-after-current-install",
+        "Flight-F05-later-normal-navigation-and-recovery",
+        "Star-online-disabled"
+      ],
+      "assessment": "Recorded with explicit source/device/network/cache and functional endpoints; no additional tutorial/Flight offline load matrix is required by item0.1 alone."
+    },
+    {
+      "clause": "0.1 click/navigation/resource-ready/operable/room-connected event definitions",
+      "support": [
+        "eventDefinitions",
+        "m3_raw",
+        "star_native_log",
+        "f03_native_log",
+        "f05_raw_batch"
+      ],
+      "assessment": "Definitions and concrete observations exist. Unsupported complete resource-wait and game-playing preparation time are explicitly separated."
+    },
+    {
+      "clause": "0.1 distinguish first open, cache reopen and session recovery",
+      "support": [
+        "cacheAndSessionClassification",
+        "G-computer-and-Star-local-fixed-entry-load",
+        "historical-retained-live-session",
+        "Flight-F05-later-normal-navigation-and-recovery"
+      ],
+      "assessment": "Categories can be reviewed from version-separated data; no assertion all categories were remeasured on one finalbinary or under controlled production cache/network."
+    }
+  ],
+  "reviewConclusion": {
+    "status": "Consolidated baseline scope is ready for root requirement-by-requirement review; this file does not check0.1 or declare whole goal complete.",
+    "newMeasurementRequiredByThisReadOnlyConsolidation": false,
+    "remainingM4N10Unaffected": true,
+    "remainingM5HomeExistingGameJourneyUnaffected": true,
+    "rootDecisionNeeded": "Confirm that the version-separated, explicitly limited baseline coverage satisfies item0.1 as written; if any stricter same-final-build retention measurement is desired, identify it as an additional review choice rather than relabel existing data."
+  },
+  "references": {
+    "tasks": {
+      "path": "specs/native-game-discovery/tasks.md",
+      "sha256": "851a55094f7e03a8f7b35875926a9d3a990cf1b81d5198c33573ced791176dd5",
+      "bytes": 19101,
+      "location": "repository"
+    },
+    "design": {
+      "path": "specs/native-game-discovery/design.md",
+      "sha256": "ec3964382bfa600441a73c10beef22996fceef886c4f5d33748b7e78f3b8b9b0",
+      "bytes": 17743,
+      "location": "repository"
+    },
+    "requirements": {
+      "path": "specs/native-game-discovery/requirements.md",
+      "sha256": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+      "bytes": 11310,
+      "location": "repository"
+    },
+    "m3_raw": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-operable-n10.json",
+      "sha256": "f00ab2d10ea153ece4ecf3670128dcd1e5e1f63673418c1235cd08c14d28fe85",
+      "bytes": 400664,
+      "location": "repository"
+    },
+    "m3_metrics": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "sha256": "2a7fc020214342220bf02a99d3b71549b854c5396504c2d34d838ea9c4b2be11",
+      "bytes": 25597,
+      "location": "repository"
+    },
+    "m3_freeze": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-freeze.json",
+      "sha256": "7abf6baf7f698124b4311bd56f5bc5556b256c7d7d39fb60e4e98cfda5430e16",
+      "bytes": 5688,
+      "location": "repository"
+    },
+    "m3_review": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-independent-review.json",
+      "sha256": "d7b60db8c47349b1c8fa378a82d6054c0da97b0bba0fc44bab7acf8f3e8a5f20",
+      "bytes": 51253,
+      "location": "repository"
+    },
+    "m3_restoration": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-restoration.json",
+      "sha256": "ffd3f8c88a9992bc9e67284f6b271478ec5a0fe9782ef946db4f812fbc7d5489",
+      "bytes": 1883,
+      "location": "repository"
+    },
+    "retained_raw": {
+      "path": "docs/dev/evidence/native-game-discovery/retained-resume-final-n10.json",
+      "sha256": "312f8b358179c593ae5b8fc1e65109cbc72e34cfb7857c3f254f3771dae9ee79",
+      "bytes": 31042,
+      "location": "repository"
+    },
+    "retained_test_summary": {
+      "path": "docs/dev/evidence/native-game-discovery/retained-resume-final-summary.json",
+      "sha256": "a23dd50b25a95b6ce44ef7ca638657cd840873dc4887a57d364b706d4c09bd2f",
+      "bytes": 999,
+      "location": "repository"
+    },
+    "retained_context_source_fingerprints": {
+      "path": "docs/dev/evidence/native-game-discovery/reclamation-candidate-fingerprints.json",
+      "sha256": "c70708970c48e001394aa83ae5923570bd4f4372b308d000757d4c818d183d69",
+      "bytes": 6936,
+      "location": "repository"
+    },
+    "retained_context_metrics": {
+      "path": "docs/dev/evidence/native-game-discovery/operable-final-metrics.json",
+      "sha256": "ae3c229bd7fb2e628ea3427f336384bfa83a6c06109ca8fcbf3d05351a3efd5a",
+      "bytes": 3038,
+      "location": "repository"
+    },
+    "star_journey": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-unlocked-real-journey-20261030.json",
+      "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833",
+      "bytes": 5220,
+      "location": "repository"
+    },
+    "ai_fix_and_star_log_supplement": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-ai-card-navigation-fix-validation.json",
+      "sha256": "378a5db476712242870590d802d23f6d709e7f2734a0847f38cdb2abe4e134aa",
+      "bytes": 6360,
+      "location": "repository"
+    },
+    "f03_baseline": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f03-native-room-baseline-and-cleanup-20261030.json",
+      "sha256": "8d8b7bb03d682404c772083c0c7702fcc013a2d7ca72a8068f543d1ed250aa13",
+      "bytes": 5733,
+      "location": "repository"
+    },
+    "f05_recovery": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f05-first-valid-native-flight-recovery-20261030.json",
+      "sha256": "775a780c110f4cd3a86262b44d85c05de9375b524a34c2bae4239e766a58438f",
+      "bytes": 37638,
+      "location": "repository"
+    },
+    "b251_failed_raw": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-operable-n10.json",
+      "sha256": "81ddb8eef26ef14a0198f755481d973c53056b7e82baa3fe695a61c686419907",
+      "bytes": 382982,
+      "location": "repository"
+    },
+    "b251_failed_metrics": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-metrics.json",
+      "sha256": "26f69c47fe30e69e914e11bd89663318bcbd7a086b7e94686ba1db5106c104e4",
+      "bytes": 24514,
+      "location": "repository"
+    },
+    "b251_log_correction": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-star-cold-audit.json",
+      "sha256": "8dd7148d3d0b73973253c5fd29a4bc64297235d78e0d216b4b5bb894a4769244",
+      "bytes": 92061,
+      "location": "repository"
+    },
+    "historical_gomoku_https": {
+      "path": "docs/dev/evidence/native-game-discovery/historical-native-gomoku-https-metrics.json",
+      "sha256": "1e8d5ade7c9e8664e31c2987b9c27731a781f3619b479d223817ae47e36811ef",
+      "bytes": 29018,
+      "location": "repository"
+    },
+    "historical_star_failure": {
+      "path": "docs/dev/evidence/native-game-discovery/historical-native-analysis.json",
+      "sha256": "129476cb0e3bc6a4060fd8f95d445bf5f95381e60c7c3a993b3d1eb128f1bb22",
+      "bytes": 4409,
+      "location": "repository"
+    },
+    "old_m0_audit": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-flight-baseline-evidence-audit.review_recovered_diff.json",
+      "sha256": "e6131222b6affaf439e260ad3b8023299f9196b3c2fa82be06a5beebf1038604",
+      "bytes": 16217,
+      "location": "repository"
+    },
+    "star_native_log": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/unlocked-20261030-m5-navigation/star-tutorial-native-ready.oslog.txt",
+      "sha256": "fbff38bd483e6a2ed26fd3438b9aa11e635066b5db82220ca1d17bce7707228e",
+      "bytes": 219,
+      "location": "private-local-evidence"
+    },
+    "star_raw_journey": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/unlocked-20261030-m5-navigation/journey-receipt.json",
+      "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833",
+      "bytes": 5220,
+      "location": "private-local-evidence"
+    },
+    "star_rendered": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/unlocked-20261030-m5-navigation/star-tutorial-rendered.png",
+      "sha256": "cf732cf05c7008c54e98c2a05165f439e8859ecff42f2a0f33a40f7c0352e816",
+      "bytes": 244401,
+      "location": "private-local-evidence"
+    },
+    "star_step5": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/unlocked-20261030-m5-navigation/star-tutorial-step5-real-ability.png",
+      "sha256": "9702938f21f99152c225c9f752182ce83cbc3384a73cd0acb54964c397ed8485",
+      "bytes": 244009,
+      "location": "private-local-evidence"
+    },
+    "f03_creation_raw": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/unlocked-20261030/f03-creation.json",
+      "sha256": "465fd196304fa4ad1b29b08a025c7000c2d3eb4331d30cd8785e200393c2c304",
+      "bytes": 7143,
+      "location": "private-local-evidence"
+    },
+    "f03_join_raw": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/unlocked-20261030/f03-native-join.json",
+      "sha256": "828390bd157bda00f13f4cd337f30ed18e4d4e92583a4792952aedd6f66d7ea1",
+      "bytes": 3803,
+      "location": "private-local-evidence"
+    },
+    "f03_native_log": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/unlocked-20261030/f03-native-ready.oslog.txt",
+      "sha256": "1bfd406381c693cf77371b1c387ab4a270cefc82a62a3b552ad2b9f556a9ecb2",
+      "bytes": 334,
+      "location": "private-local-evidence"
+    },
+    "f05_raw_summary": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/unlocked-20261030/f05-summary.json",
+      "sha256": "775a780c110f4cd3a86262b44d85c05de9375b524a34c2bae4239e766a58438f",
+      "bytes": 37638,
+      "location": "private-local-evidence"
+    },
+    "f05_raw_batch": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/unlocked-20261030/f05-contiguous-batch.json",
+      "sha256": "25c652f15c37cc8fd3c37dcb0e7f8edfafd53622f02bc26d0efbcd1cf449765f",
+      "bytes": 30875,
+      "location": "private-local-evidence"
+    },
+    "f05_public_readback": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/unlocked-20261030/current-public-metadata-after-f05.json",
+      "sha256": "a9a3eb72cb3301272513a113cf68fa5596f9f8134f024c85eb632fb1fe156837",
+      "bytes": 692,
+      "location": "private-local-evidence"
+    }
+  }
+}

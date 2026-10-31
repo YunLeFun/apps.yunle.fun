@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "kind": "M5-assistant-card-navigation-readonly-scope-audit",
+  "atUTC": "2026-10-29T19:49:10.771684+00:00",
+  "reportedObservation": {
+    "source": "RootnormalUI observation; thisagentdidnotreplay",
+    "normalPID": 77321,
+    "authenticatedMemberReplyCompleted": true,
+    "cardCount": 6,
+    "publicApplication": "GoFarAway",
+    "AXAndPhysicalPressHadNoObservedNavigation": true,
+    "noPromptAccountUIDOrReplyContentsCopied": true
+  },
+  "agentActions": {
+    "sourceAndSavedLogsReadOnly": true,
+    "simulatorUIAccountActions": 0,
+    "debuggerAttach": false,
+    "sourceEdits": 0,
+    "builds": 0,
+    "newReproductionLoopExecuted": false
+  },
+  "confirmedSourceFacts": [
+    {
+      "location": "AssistantView.swift:412-437",
+      "fact": "Only a successfully resolved publicCloudApplication renders NavigationLink(value:app); unresolvedcard becomes unavailablelabel."
+    },
+    {
+      "location": "CloudApplication.swift:3",
+      "fact": "CloudApplication is Hashable; value type matches registered destination."
+    },
+    {
+      "location": "AppRootView.swift:141-145",
+      "fact": "Workshop uses explicitNavigationPath and registers CloudApplication\u2192ApplicationDetailView on its rootCatalogView, outside List/Lazycardcontent."
+    },
+    {
+      "location": "CatalogView.swift:67,118",
+      "fact": "Workshop assistantshortcut pushes a viewdestination; theassistantcard then requests a valuedestination."
+    },
+    {
+      "location": "AssistantView.swift:417-434",
+      "fact": "Cardlink has no disabledmodifier; siblingopen/getbutton has separateaction. Membership checks do not disable thisdetailNavigationLink."
+    },
+    {
+      "location": "AssistantView.swift:30-59,105,562,624",
+      "fact": "Mainassistantcontent has no nestedNavigationStack; stacks belong to sheets/history. Scrollgesture is simultaneous. No provenfull-screenhitinterceptor was found."
+    },
+    {
+      "location": "ApplicationDetailView.swift:18-24",
+      "fact": "Resolved publiccard has no workshop/owner IDs, so detailcontent is not waiting on a workshopidentity permission gate."
+    }
+  ],
+  "migrationComparison": {
+    "assistantSourceDiffFromHEADEmpty": true,
+    "workshopRegistrationBlockIdenticalToHEAD": true,
+    "newCatalogAssistantEntryDoesNotProveDestinationWasRemoved": true
+  },
+  "existingLogAudit": {
+    "MCPWorkspaceLogFilesScanned": 249,
+    "filesContainingPID77321": 0,
+    "filesContainingMatchingNavigationWarnings": 0,
+    "hostUnifiedLogPID77321Last25MinutesMatchingEvents": 0,
+    "hostUnifiedLogProcessYunleFunLast35MinutesMatchingEvents": 0,
+    "filters": [
+      "navigationDestination",
+      "NavigationLink",
+      "navigationpath"
+    ],
+    "coverageLimit": "Hostpersistedunifiedlog andexistingMCPfile search only. Currentnormalapp was not captured in theseMCPfiles; liveSimulatorSwiftUIstderr/navigationwarnings may be absent from thisstore. Zero matches doesnot establish nowarning at tap."
+  },
+  "officialNavigationSemantics": {
+    "source": "https://developer.apple.com/documentation/swiftui/understanding-the-navigation-stack",
+    "observedOfficialMarkdownRead": true,
+    "summary": "Viewdestinations are opaque to the boundpath; when a later valuedestination is pushed, SwiftUI removes the viewdestinations before showing the value destination. Therefore mixedlinks can affect backstack behavior, but are not aloneproof that a tap does nothing."
+  },
+  "conclusion": {
+    "confirmedMissingDestination": false,
+    "confirmedProductBugCause": false,
+    "scope": "No static type/registration/disabled/permissionwait explanation is established. Runtime delivery, pathmutation anddestinationpresentation are still unobserved for thispress; no sourcefix justified solelyby thisaudit."
+  },
+  "minimumNextDiscriminatingObservations": [
+    {
+      "action": "Reuse alreadycompletedreply, no newAIrequest; compare normalCatalog sameapp valueLink with assistantcardlink.",
+      "distinguishes": "RootCloudApplication registration works vs generalroot routefailure."
+    },
+    {
+      "action": "If existinghome.assistant entry is available, compare samecompletedreply/card fromHome implicitstack andWorkshop explicitpath stack.",
+      "distinguishes": "Workshopentrance/path-specific behavior vs sharedcard/hitdelivery issue."
+    },
+    {
+      "action": "On one controllednormalpress collect currentNavigationLink activation/pathcount/detailtitle or a scoped immediateSwiftUInavigationwarning; preserve returntoassistant expectation.",
+      "distinguishes": "Tap notactivated, pathchanged thenreverted, andmatchingdestination failure. Thisauditdoesnot authorize debugger/UIactions by thisagent."
+    }
+  ],
+  "regressionSeamCaution": {
+    "file": "apps/ios/YunleFunTests/AssistantVisualTests.swift:67",
+    "fact": "Currentvisualfixture hostsNavigationStack{AssistantView()} withoutproductionCloudApplication destinationregistration; amissingdestination warning there alonewouldbe a fixturedefect, notproof ofthisnormalAppsymptom. Preserve productionrootregistration plusCatalog\u2192Assistant structure in anyfutureregression."
+  },
+  "sourceFingerprints": {
+    "apps/ios/YunleFun/Features/Assistant/AssistantView.swift": "0081c2544fe6998e1a71fe33df17ea6277880adf98fa1c7c6151865d6aca8a83",
+    "apps/ios/YunleFun/Features/Catalog/CatalogView.swift": "41ad6ad4f4dec54685b075f3ba85189580e1d0706b844a362687bdbdc4555f7d",
+    "apps/ios/YunleFun/App/AppRootView.swift": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+    "apps/ios/YunleFun/Models/CloudApplication.swift": "44c4dc79688754828f6716791bb28688f72a537e0af326f713ead805af53a27e",
+    "apps/ios/YunleFun/Models/Assistant.swift": "71b091a967b9fe7ae9434c920f4ae069e5fc32d66294fb5068f4d2ca2af068a6",
+    "apps/ios/YunleFun/DesignSystem/ApplicationIcon.swift": "fe3a3cc05f1f6a86ccb87ad7d9bab4c80ae4fd193752004fd89b6293fd2403a0"
+  },
+  "independentReadOnlyReview": "Secondagent reached same no-confirmed-static-cause conclusion; it performed noSim/UI/sourcechanges.",
+  "completionPolicy": "Do not mark AIcarddetailjourney passed or write a productfix claim from source-onlyreasoning. Root retains observed failure until actualnavigation is verified."
+}

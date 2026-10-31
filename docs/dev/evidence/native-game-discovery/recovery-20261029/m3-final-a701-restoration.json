@@ -1,0 +1,47 @@
+{
+  "kind": "final-a701-M3-M5-normal-native-restoration",
+  "atUTC": "2026-10-29T19:28:13.328137+00:00",
+  "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "normalNativePID": 77321,
+  "normalPreviewExplicitZero": true,
+  "normalXCTestInjectionPresent": false,
+  "files": {
+    "YunleFun": {
+      "productSHA256": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+      "installedSHA256": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+      "sameBytes": true
+    },
+    "YunleFun.debug.dylib": {
+      "productSHA256": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+      "installedSHA256": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+      "sameBytes": true
+    },
+    "Info.plist": {
+      "productSHA256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "installedSHA256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "sameBytes": true
+    },
+    "native-game-catalog-v1.json": {
+      "productSHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+      "installedSHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+      "sameBytes": true
+    }
+  },
+  "sourceGuardsUnchanged": true,
+  "ownedServerPID": 46301,
+  "port18146Free": true,
+  "ownedServerExtractionRemoved": true,
+  "otherSimulatorsOperated": 0,
+  "newSimulatorsCreated": 0,
+  "M3FormalSampleCount": 60,
+  "M3PassedCurrentStandard": true,
+  "M5Runtime": {
+    "passed": 15,
+    "failed": 2,
+    "skipped": 0,
+    "notComplete": true
+  },
+  "fixtureCleanupFailuresPreservedForDiagnosis": 2,
+  "fixtureCleanupClaimedComplete": false,
+  "retention": "Keep finalfrozen archive/receipt, raw60/xcresult andnecessaryfinalproducts. Testfailure ownership attachments preserved; no sharedDD, userdata, simulator orglobalcleanup."
+}

@@ -1,0 +1,88 @@
+{
+  "classification": "local-role-boundary-regression-no-production-room-access",
+  "completedAt": "2026-10-28T18:30:24.771192+00:00",
+  "sourceFiles": [
+    {
+      "path": "apps/game-server/src/colyseus/play-room.ts",
+      "sha256": "13da2d0b8ec83ecbc41f8cc84e7ee8e08e5b46ea45b45fe966e82635013692ef"
+    },
+    {
+      "path": "apps/game-server/test/colyseus-play-room.test.ts",
+      "sha256": "adb7b93648eecffaae3aab775b78d6db725f6be77813aa67ef2e5ef6fa4fc0bd"
+    },
+    {
+      "path": "apps/web/app/composables/useOnlineRoom.ts",
+      "sha256": "755bc4a4e9de8e86dad757ce592ea692fbee3de62ce3e5e6ec11fcc6cc9a6fe5"
+    },
+    {
+      "path": "apps/web/app/components/online/OnlineGameRoom.vue",
+      "sha256": "5b10f1ce312c1532a6fb5b841b0d6bbfeee04ab0322cd8fd38f7a66dff0d9a19"
+    },
+    {
+      "path": "apps/web/test/online-room-role.test.ts",
+      "sha256": "4535fc7c4ff6cfc11b35e7003ddb7c66338443945fbc14c3e9734e5074722473"
+    }
+  ],
+  "behavior": {
+    "server": "Existing room member requesting spectator is explicitly rejected; existing player membership/seat/presence is not changed",
+    "client": "mySeat and commands require authoritative player connection and player request; controls filter spectator role; mismatching connection.ready closes only this new transport and ignores late snapshots",
+    "compatibility": "New client also fails closed against an old server returning player for explicit spectator request"
+  },
+  "validation": [
+    {
+      "check": "real loopback Colyseus spectator/reconnect tests",
+      "passed": 4,
+      "failed": 0,
+      "skippedByNameFilter": 27,
+      "notes": [
+        "Same-UID spectator is rejected and original player sync remains player; member/game/presence unchanged",
+        "Different UID spectator receives spectator role and cannot command",
+        "Spectator capability and capacity behavior retained",
+        "Player reconnect and new-ticket reload remain player without duplicate room membership"
+      ]
+    },
+    {
+      "check": "useOnlineRoom reactive composable tests with real authoritative flight snapshots and mock transport",
+      "passed": 3,
+      "failed": 0,
+      "notes": [
+        "A spectator whose UID appears in game.seats receives no seat/control permission",
+        "Legacy server role mismatch disconnects and cannot apply late snapshots",
+        "Unconfirmed connection cannot send; authoritative player confirmation restores controls"
+      ]
+    },
+    {
+      "check": "server tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "check": "Web vue-tsc --noEmit",
+      "result": "passed"
+    },
+    {
+      "check": "ESLint limited to five listed files",
+      "result": "passed"
+    },
+    {
+      "check": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "initialHarnessFailure": {
+    "result": "corrected",
+    "reason": "Direct TestServer initially omitted Room.ext runtime augmentation required by existing waitForMessage assertions",
+    "change": "Import only testing/Room.ext; keep isolated loopback port and avoid testing boot CLI dotenv loader"
+  },
+  "limitations": [
+    "No production room requests or role changes",
+    "No production cookies/credentials read",
+    "This report does not assert backend deployment or browser UI acceptance",
+    "Remaining 27 Colyseus tests were not rerun in this targeted execution",
+    "No simulator/build/preview-server replacement performed by this agent"
+  ],
+  "cleanup": {
+    "loopbackServer": "test shutdown hooks completed; runner process exited",
+    "temporaryBuildDirectoriesCreated": 0,
+    "productionRoomsCreated": 0
+  }
+}

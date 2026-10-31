@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-31",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Validate the opt-in iOS native game interaction policy",
+  "platform": {
+    "runtime": "iOS 27.0",
+    "device": "iPad Pro 11-inch (M5)",
+    "udid": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+    "reused": true,
+    "createdSimulators": 0,
+    "parallelTesting": false
+  },
+  "behavior": [
+    "Disable WKWebView edge bouncing and link previews for native game sessions",
+    "Disable text selection/callouts on non-editable game content and dragging of links/images",
+    "Preserve page scrolling, input/textarea/contenteditable text editing and selection",
+    "Reapply policy to new documents and frames in the game WebView"
+  ],
+  "build": {
+    "status": "SUCCEEDED",
+    "target": "iOS Simulator",
+    "notes": "Standalone Debug build and final test-product build succeeded; existing warnings outside this change remain"
+  },
+  "validation": {
+    "summary": {
+      "status": "SUCCEEDED",
+      "durationMs": 273645,
+      "counts": {
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      },
+      "target": "simulator"
+    },
+    "testCases": [
+      {
+        "suite": "NativeGameRuntimeTests",
+        "test": "testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext",
+        "status": "passed",
+        "durationMs": 6597
+      },
+      {
+        "suite": "NativeWebNavigationTests",
+        "test": "testGameInteractionPolicyPreservesScrollingAndEditingAcrossNavigation",
+        "status": "passed",
+        "durationMs": 1182
+      },
+      {
+        "suite": "NativeWebNavigationTests",
+        "test": "testOrdinaryWebApplicationKeepsBrowserInteractions",
+        "status": "passed",
+        "durationMs": 6375
+      }
+    ],
+    "scope": "Actual WKWebView with controlled HTML documents and native runtime game-session reuse. Verifies computed policies, programmatic page scrolling, text insertion and selection. No physical-device long-press or live production-game gesture verification."
+  },
+  "priorAttempts": [
+    {
+      "status": "TOOL_TIMEOUT",
+      "details": "The initial test operation timed out after 300 seconds during app installation; its owned xcodebuild test process was stopped."
+    },
+    {
+      "status": "FAILED",
+      "counts": {
+        "passed": 2,
+        "failed": 1,
+        "skipped": 0
+      },
+      "details": "The first executed run measured scrollY immediately after input focus/blur and observed 0. The final helper measures scrolling before keyboard focus changes to independently verify scrolling and editing; product code was unchanged."
+    }
+  ],
+  "sources": {
+    "bounces": "https://developer.apple.com/documentation/uikit/uiscrollview/bounces",
+    "touchCallout": "https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariCSSRef/Articles/StandardCSSProperties.html",
+    "linkPreview": "https://webkit.org/blog/7016/ios-10-link-preview-api-in-wkwebview/"
+  },
+  "sourceSHA256": {
+    "apps/mobile/ios/App/App/WebViewController.swift": "1b266d0b43bced6d2d89039289dde780a35960bc670bb94ae06a6b2ca6545280",
+    "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "5076b789dbbedc11e68d957f61c672d1ebb927cce686f948c35e1580e7e0a7a7",
+    "apps/ios/YunleFunTests/NativeWebNavigationTests.swift": "61163b46fbfbe9191c6c64ea0b349a21ca9244326f9bd9277594f8468dc16f61",
+    "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "5b7ae5071ad7f42ea848b29d5e76e7fc76f179706b63d48256b03a3b18881b04"
+  },
+  "xcresultSummary": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+          "deviceName": "iPad Pro 11-inch (M5)",
+          "modelName": "iPad Pro 11-inch (M5)",
+          "osBuildNumber": "24A434",
+          "osVersion": "27.0",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 3,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "YunleFun · Built with macOS 26.6.2",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1793384783.754,
+    "passedTests": 3,
+    "result": "Passed",
+    "runtimeWarnings": [],
+    "skippedTests": 0,
+    "startTime": 1793384525.63,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - YunleFun",
+    "topInsights": [],
+    "totalTestCount": 3
+  },
+  "simulatorRestoredToShutdown": true,
+  "finalSimulatorState": "Shutdown",
+  "cleanup": {
+    "removedRebuildableAllocatedKiB": 1008912,
+    "remainingTaskArtifacts": 0,
+    "observedAvailableBytesDelta": 861253632,
+    "note": "Removed only task-owned DerivedData, controlled-document results and exported test products after retaining source hashes and the native xcresult summary. Shared dependencies, project build caches and simulator app data were preserved. Available-space delta is a concurrent filesystem snapshot, not an attribution of physical bytes freed."
+  }
+}

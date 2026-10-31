@@ -1,0 +1,258 @@
+{
+  "recordedAtUTC": "2026-10-29T17:21:45.660833+00:00",
+  "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "nativeWebViewSourceSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+  "roomId": "room_610c15e8ebe01f656b8348ba8edaf1840dcb9eed57f33c088fa3434b93d7a49d",
+  "accounts": "C/D/E official SSO and independent Play Cookie SDK clients; B real browser; A normal Native app",
+  "externalSpectator": {
+    "role": "spectator",
+    "membersBefore": 2,
+    "membersAfter": 2,
+    "revisionBefore": 3,
+    "revisionAfter": 3,
+    "noMemberOrSeatAllocated": true,
+    "independentHostSyncConfirmed": true
+  },
+  "waitingSeatRotation": {
+    "beforeSeatUIDHashes": [
+      "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909",
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "after": {
+      "kind": "room.snapshot",
+      "roomId": "room_610c15e8ebe01f656b8348ba8edaf1840dcb9eed57f33c088fa3434b93d7a49d",
+      "revision": 6,
+      "status": "waiting",
+      "sequence": 3293,
+      "requestId": "37559.2276",
+      "inviteCode": "PSP5AT",
+      "selectedGame": {
+        "gameId": "gomoku",
+        "rulesetId": "freestyle-15",
+        "rulesetVersion": 1
+      },
+      "memberUIDHashes": [
+        "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909",
+        "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+        "45661e4fd366c72e53c4d5b091ce8d2f1efd8d6699273f70c8325aa42f394163"
+      ],
+      "memberCount": 3,
+      "seatUIDHashes": [
+        "45661e4fd366c72e53c4d5b091ce8d2f1efd8d6699273f70c8325aa42f394163",
+        "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909"
+      ],
+      "online": [
+        true,
+        true,
+        true
+      ]
+    },
+    "externalSpectatorExcludedFromSeats": true
+  },
+  "standardRoomFull": {
+    "recordedAtUTC": "2026-10-29T17:15:52.233Z",
+    "room": {
+      "kind": "room.snapshot",
+      "roomId": "room_610c15e8ebe01f656b8348ba8edaf1840dcb9eed57f33c088fa3434b93d7a49d",
+      "revision": 8,
+      "status": "waiting",
+      "sequence": 3301,
+      "requestId": "37559.2276",
+      "inviteCode": "PSP5AT",
+      "selectedGame": {
+        "gameId": "gomoku",
+        "rulesetId": "freestyle-15",
+        "rulesetVersion": 1
+      },
+      "memberUIDHashes": [
+        "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909",
+        "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+        "45661e4fd366c72e53c4d5b091ce8d2f1efd8d6699273f70c8325aa42f394163",
+        "371018116b3444e0d0f4d0e491490dd553b962b1eb74a416f9381d1102f929f5"
+      ],
+      "memberCount": 4,
+      "seatUIDHashes": [
+        "45661e4fd366c72e53c4d5b091ce8d2f1efd8d6699273f70c8325aa42f394163",
+        "20b7361a61aa81c1398af06cfdec79b589f5157f5a70be83c11ee14b0579c909"
+      ],
+      "online": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "nativeAccountAUIDHash": "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+    "nativeUI": "房间已有4名成员",
+    "AIsMember": false
+  },
+  "offlineRemovedReconnect": {
+    "initial": {
+      "offlineAt": "2026-10-29T17:16:20.564Z",
+      "networkRestoredAt": "2026-10-29T17:16:45.195Z",
+      "terminalObservedAt": "2026-10-29T17:17:26.612Z",
+      "frames": [
+        {
+          "kind": "ERROR",
+          "code": 525,
+          "message": "你已被移出房间，请返回游戏大厅",
+          "sequence": 3352
+        }
+      ],
+      "socketCreatedCount": 9,
+      "socketClosedCount": 10,
+      "hasMore": false,
+      "truncated": false,
+      "UI": "你已被移出房间",
+      "alert": "你已被移出房间，请返回游戏大厅",
+      "networkOverrideRestored": true
+    },
+    "stopObservation": {
+      "recordedAtUTC": "2026-10-29T17:19:57.300Z",
+      "observationMilliseconds": 150688,
+      "webSocketsCreated": 0,
+      "frames": [],
+      "truncated": false,
+      "hasMore": false,
+      "headings": [
+        "你已被移出房间"
+      ],
+      "networkOverrideRestored": true
+    },
+    "returnedToLobbyUsingVisibleLink": true
+  },
+  "normalCleanup": {
+    "E": true,
+    "D": true,
+    "C": true,
+    "B": "already removed and terminal socket closed",
+    "A": "fifth admission rejected; never a member"
+  },
+  "finalHealthObservation": {
+    "atUTC": "2026-10-29T17:21:45.662951+00:00",
+    "status": 200,
+    "ok": true,
+    "capacity": {
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0
+    }
+  },
+  "verificationLimits": [
+    "One controlled production room, no production SLA",
+    "This covers offline removal within transport protection, not beyond-window valid-game recovery",
+    "No final Native N10 round is claimed by this boundary-only room"
+  ],
+  "privateEvidenceDigests": [
+    {
+      "name": "role-boundary-two-member-baseline.json",
+      "bytes": 733,
+      "sha256": "e9dbf44e1201628687dcf4b96dab7cb528422310b4bc47d4e8abdf9b613dada8"
+    },
+    {
+      "name": "role-boundary-after-seat-rotation.json",
+      "bytes": 815,
+      "sha256": "9afef817cdbd1c49034eb71c0d0d2ccc4b7f7ed0a3ae501bb4273c60e9efff0c"
+    },
+    {
+      "name": "role-boundary-after-seat-rotation-ui.png",
+      "bytes": 65652,
+      "sha256": "9a764099318d0f99e7f28a10b554e3ebfb929a5616affa303f3cc1ccc2d986fe"
+    },
+    {
+      "name": "full-four-native-fifth-rejected.png",
+      "bytes": 210462,
+      "sha256": "de466bb4ac0568040054f90a29cc8399e3235e16540ffdd2c7872ca4c75dc9df"
+    },
+    {
+      "name": "full-four-native-fifth-rejected-authority.json",
+      "bytes": 1175,
+      "sha256": "1f972b76129c4a3add358ecbbf7c0ec944cbd4cf974f074ad7e43ffad2b59454"
+    },
+    {
+      "name": "offline-removed-reconnect-525-initial.json",
+      "bytes": 534,
+      "sha256": "70f0a303198a8c06ee5d9298a055332c621825640fa4fcb6c983831f1bb1815f"
+    },
+    {
+      "name": "offline-removed-reconnect-525-ui.png",
+      "bytes": 34428,
+      "sha256": "1a75ab5788c2c83e3c53c6b0d18811ced0ea362c7c350d04e3215bd35342eb9f"
+    },
+    {
+      "name": "offline-removed-reconnect-stop-observation.json",
+      "bytes": 254,
+      "sha256": "48885623b4e663b5e117a0fa7358e5bdaed85cf231ed5909829243cd53124304"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-created-C.json",
+      "bytes": 975,
+      "sha256": "3a10155335120c09d23db1d4439d82f92c750aad65ef77b64d22a5897b6ab5eb"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-host-C-joined.json",
+      "bytes": 991,
+      "sha256": "c903d4ae14d357bf55c95031dc5fa8db1a436cf9fc6a4b7448fbd0589e577f2a"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-E-nonmember-spectator.json",
+      "bytes": 1269,
+      "sha256": "5743e4c29a9fcf9e8d2b87e9bb7d7ed96065ce417d0f4b4a120760a51a9817db"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-C-authority-with-external-E.json",
+      "bytes": 6346,
+      "sha256": "e04f1b3f32d992b3362e136b4406c388a17effbf94cc4f4331a2734f091d194c"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-D-member-joined.json",
+      "bytes": 1520,
+      "sha256": "454fb3cb78834f18094e6fd3749e4252e736e2b839a61c73553aa8d0ef9a7a94"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-C-rotate-players-command.json",
+      "bytes": 3264,
+      "sha256": "5a063370bdafbec5b2999e2f1ba6cd41ccabe02b162ec96d9df09317b234443b"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-external-E-left.json",
+      "bytes": 55,
+      "sha256": "202990e7b241f39f4bd6b9a84c635b3222759d2130356394ee88cf2eb9e8e29d"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-E-explicitly-member-full-four.json",
+      "bytes": 1787,
+      "sha256": "76fc3f3035ca0ed51b9424ae50f5e4b5709e85fb00de661daa5425a32c20a804"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-C-after-B-offline-observation.json",
+      "bytes": 19073,
+      "sha256": "52dcfbe3ec29d8097d49860d9d0f3bcad1940ed9dfcfe33e36f5bbb01d581a49"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-C-removed-offline-B.json",
+      "bytes": 3287,
+      "sha256": "22cd7857a421ea87a98706368542b60734524c4f9a005a455d7fc4627a04b42c"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-C-final-event-log.json",
+      "bytes": 26258,
+      "sha256": "0d2f8b195c7f614aa98abd9d55156618003df65ff4c9b227051670543f3a32ea"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-host-C-normal-left.json",
+      "bytes": 55,
+      "sha256": "202990e7b241f39f4bd6b9a84c635b3222759d2130356394ee88cf2eb9e8e29d"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-D-normal-left.json",
+      "bytes": 55,
+      "sha256": "202990e7b241f39f4bd6b9a84c635b3222759d2130356394ee88cf2eb9e8e29d"
+    },
+    {
+      "name": "managed-sdk-cde/boundary-E-normal-left.json",
+      "bytes": 55,
+      "sha256": "202990e7b241f39f4bd6b9a84c635b3222759d2130356394ee88cf2eb9e8e29d"
+    }
+  ]
+}

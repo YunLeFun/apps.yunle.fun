@@ -1,0 +1,59 @@
+{
+  "recordedAtUTC": "2026-10-29T16:16:39.862935+00:00",
+  "candidateWebViewSHA256": "03da939929a57c642cd98cb71e57032aa4a2a7a5c4e20c135ca348ec5fe2dba8",
+  "runtimeSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+  "productionWebAndBackendCommit": "b0f63be5b0780272d56f16d603eacb5afd2a58e8",
+  "catalogVersion": "9263452a8a0666c437d926ee09476d0a700e58cd3dffbacd6a2f73b46cb966a6",
+  "actualFirstRetryPass": false,
+  "firstRetryEmptyDOM": true,
+  "secondMenuReloadRecovered": true,
+  "sameRoomSessionSeatsRetained": true,
+  "baselineStones": 2,
+  "afterRecoveryBothFreshMovesStones": 4,
+  "bothNormalLeave": true,
+  "browserRoomLeftThenSocketClosed": true,
+  "countsAsFinalN10": false,
+  "simpleLoopbackUnitTests": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "limit": "did not reproduce actual Nuxt empty DOM; not proof of production fix"
+  },
+  "privateEvidence": [
+    {
+      "name": "fixed-visible-wk-mapping.json",
+      "bytes": 1030,
+      "sha256": "a8a13654ca39a5a0cd1fcbaa73bac5032c3e79d16cf0ad69ede5dcb2f1a343c8"
+    },
+    {
+      "name": "fixed-real-webcontent-sigkill.json",
+      "bytes": 393,
+      "sha256": "0aa5513fdbe8df54e07a85435a4aedad4f0c574899b87170befa3c38eecf147b"
+    },
+    {
+      "name": "fixed-retry-baseline.json",
+      "bytes": 578,
+      "sha256": "a53284e0389894bc0cbeeb20bc4cd60fa7176747de998e0523ada965a4917d4d"
+    },
+    {
+      "name": "fixed-first-retry-elements.txt",
+      "bytes": 72,
+      "sha256": "0f5ca65e1fa4ad1db0d5f103c3d40f8b7b1eacae09f83f359cccc13e213071fa"
+    },
+    {
+      "name": "fixed-first-retry-blank-native.png",
+      "bytes": 188277,
+      "sha256": "6cfbde95cd3ea0ab34a147bf8ecefd126c769f69f2f0900453f3125ab4975716"
+    },
+    {
+      "name": "fixed-retry-production-result.json",
+      "bytes": 1603,
+      "sha256": "0484de34fbbaae61922e96280fefb47030518890738c68a6244bd326c124a61a"
+    },
+    {
+      "name": "fixed-retry-second-menu-recovered.png",
+      "bytes": 276386,
+      "sha256": "f52373555ee00f87a18312e9f7a4f726124315e74832c353caf7ee424c507e35"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "kind": "F02-owned-test-membership-cleanup-sanitized-summary",
+  "atUTC": "2026-10-29T20:26:56.360361+00:00",
+  "operationReceiptSHA256": "704cb5e2ee6aa4f3831b7aaa6cdbe344c2556c5c2ecd7740069348fe4cf06856",
+  "preflightSHA256": "0a5eb91885e45f04c382823cac11313d1c3bd392754ace28510d10116ce8911d",
+  "workerSourceSHA256": "152ec60921b116381171815f47777d9805481763100e73c309c983356f1cceee",
+  "originalCDEFileUnchangedSHA256": "bc1dc48e3d7846471367da99c9fbb45e6aaba013f02a6b3dc94bccdf6be3ba79",
+  "identityVerifiedSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+  "roomIdentitySHA256": "9a6a8ff8149a6464e2faeed148a35e4b79cd371889f892a7bd071a1719eb669f",
+  "normalDirectHTTPNetworkSHA256": "884399eef725594851195b3fdc932dcab924583b2f7e816f7d687b50a1b860b9",
+  "directHTTPCount": 8,
+  "directHTTPStatusCounts": {
+    "200": 8
+  },
+  "exactBAndRoomGatesPassed": true,
+  "oneMemberBNoGameSession": true,
+  "joinedRevision": 4,
+  "normalRoomLeaveCommands": 1,
+  "authoritativeRoomLeftReason": "left",
+  "transportClosedCode": 4000,
+  "ownHostAndAdoptedProofTokensRevokedBeforeReady": true,
+  "ownPlaySessionRevokedAfterLeave": true,
+  "workerExited": true,
+  "socketAndShortDirectoryRemoved": true,
+  "credentialsOrCookiesPersisted": false,
+  "onlyPrivateControlAndEvidenceRemains": true,
+  "privateModes": {
+    "directory": "0700",
+    "files": "0600"
+  },
+  "noGlobalLogoutAdminNewIdentityPrivilegeMembershipCoinOrPurchase": true,
+  "originalBrowserBNativeAOrCDELoginPreservationNotRuntimeTested": true,
+  "normalNetworkCoverage": "DirectjsonRequest HTTP status/endpoint metadata andSDK SSO exchange diagnostics plusauthoritativeSDK events; not a fullpackettrace of internalSDK authrequests. Noheaders/bodies/tokens recorded in network log.",
+  "F02SuccessfulN10": false,
+  "status": "completed",
+  "label": "F02",
+  "sourceSpectatorAuditSHA256": "c6d0d267f87db89e70060cd37a5bd2a7e984a3f0d84f76c1febae498dd15c685",
+  "cleanupReceiptSHA256": "a988dc1abc4f252353e3f0926ae0ec993cc4435ea92277d07cd664fe61783a22",
+  "authScopeAudit": {
+    "SDK": "@cloudbase/js-sdk3.6.4",
+    "sourceMapSHA256": "c52effe824b760c6f9c2990649dbbb0b7d8098b4acf4d9499eae694cf5e67829",
+    "sdkSignOut": "/v1/revoke body token=current adopted accessToken; no revokeAllDevices",
+    "hostSignOut": "Authorization=only captured new hostToken; official endpoint token-corresponding refresh/access invalidation",
+    "officialSource": "https://docs.cloudbase.net/http-api/auth/auth-sign-out",
+    "independentlyReviewedAndRootGateAccepted": true,
+    "crossExistingSessionLoginPreservationNotRuntimeTested": true
+  },
+  "limits": [
+    "Serverroom.left reasonleft confirms B membership departure andSDK transportclosed; no postleave room.snapshot status is fabricated.",
+    "Only the exactsole-B waitingroom was joined/left; nootherroom ormember cleanup requested.",
+    "ExistingBrowserB/NativeA loginpreservation was not remeasured; source/officialtoken-local API contract supported isolation.",
+    "F02 remains excludedfromsuccessfulN10 regardless of maintenancecleanup."
+  ],
+  "normalAuthentication": {
+    "succeeded": true,
+    "existingDedicatedAccountAlias": "B",
+    "registeredAccountID": "production-standard",
+    "hostUIDEqualsPlayVerifiedUID": true,
+    "exactExpectedIdentitySHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+    "CloudBasePasswordAndRegisteredSSOBootstrapFlowReused": true,
+    "ownHostAndAdoptedProofTokensRevokedBeforeReady": true,
+    "ownPlaySessionRevokedAfterLeave": true
+  },
+  "architectureScope": {
+    "independentSingleAliasWorker": true,
+    "memoryOnlyAuthStorage": true,
+    "privateUnixControlSocket": true,
+    "credentialArgumentsOrDiskTokenCookiePersistence": false,
+    "originalCDEFileSessionAndControlUsed": false,
+    "browserCookiesOrNativeUIUsed": false,
+    "newIdentityAdminPermissionMembershipCoinPurchaseActions": 0,
+    "originalBrowserBNativeASessionPreservationNotRuntimeMeasured": true
+  }
+}

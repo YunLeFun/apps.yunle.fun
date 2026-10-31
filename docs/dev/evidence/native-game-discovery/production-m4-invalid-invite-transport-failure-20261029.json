@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "basename": "old-invite-http200-business-error-proof.json",
+    "bytes": 360,
+    "sha256": "c7ee49ecd45e9dfc5b1f919dd787fd5a412018dec69d339d4e962e8016153100"
+  },
+  "atUTC": "2026-10-29T09:40:38.232Z",
+  "matchmakeHTTPStatus": 200,
+  "bodyKeys": [
+    "code",
+    "error"
+  ],
+  "businessCode": "INVALID_INVITE_CODE",
+  "serverMessage": "邀请码不存在或已失效",
+  "attemptedWebSocketCount": 1,
+  "errorUI": "seat reservation expired.",
+  "requestScope": "Normal join UI using the invalidated code of an owned, now-cleaned room; no code or link retained here",
+  "result": "failed",
+  "cause": "The SDK accepted HTTP 200 as a seat-reservation response although its body contained only the business error, then attempted a WebSocket and displayed seat reservation expired.",
+  "checkpointResolution": "Server-side numeric Colyseus admission-error mapping is in progress; this checkpoint contains no claim that production was fixed.",
+  "productionBackendCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6"
+}

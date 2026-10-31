@@ -1,0 +1,19 @@
+{
+  "schema": "legacy-native-ui-final-verification-v1",
+  "recordedAt": "2026-10-29T08:39:45.218521+08:00",
+  "actualPublicMountedPortalID": "app_55d184f8cda84547a18e41848faf0084",
+  "normalDetailTrialGuestCancelHomeAndEnd": true,
+  "screenshotHashesVerified": 4,
+  "mainCandidatePID": 55221,
+  "normalPreviewPID": 12343,
+  "sourceProductDelta": false,
+  "sourceReportSHA256": "535e2158694a95e4f0debd490687045fc6ab1effa64baff9df07981f5ddfc0ae",
+  "documentationBuildPassed": true,
+  "oldOwnedAppAndUIBuildAbsent": true,
+  "reclaimedUIAllocatedBytes": 498475008,
+  "scopeExpandedOrTargetsRelaxed": false,
+  "goalComplete": false,
+  "blockerEligibilityAudit": "goal-blocked-eligibility-audit.json",
+  "priorConsecutiveGoalTurnsVerified": 3,
+  "goalStatusUpdatePending": "blocked; final verification complete, no further known independent local action"
+}

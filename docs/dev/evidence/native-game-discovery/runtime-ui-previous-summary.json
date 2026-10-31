@@ -1,0 +1,54 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+        "deviceName": "iPhone 18 Pro",
+        "modelName": "iPhone 18 Pro",
+        "osBuildNumber": "24A434",
+        "osVersion": "27.0",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 2,
+      "passedTests": 12,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "YunleFun · Built with macOS 26.6.2",
+  "expectedFailures": 0,
+  "failedTests": 2,
+  "finishTime": 1793215646.976,
+  "passedTests": 12,
+  "result": "Failed",
+  "runtimeWarnings": [],
+  "skippedTests": 0,
+  "startTime": 1793215353.551,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "failed - Could not initialize WebKit for fixture cleanup: Error Domain=NativeGameFixtureCleanup Code=2 \"The no-network WebKit cleanup keeper did not initialize\" UserInfo={NSLocalizedDescription=The no-network WebKit cleanup keeper did not initialize}",
+      "targetName": "YunleFunTests",
+      "testIdentifier": 4,
+      "testIdentifierString": "NativeGameRuntimeTests/testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext()",
+      "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeTests/testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext",
+      "testName": "testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext()"
+    },
+    {
+      "failureText": "failed - Fixture WebKit profile cleanup failed: 60B29606-157D-4890-9D1E-EE892D1D86D5: Error Domain=WKWebSiteDataStore Code=1 \"Data store is in use (by network process)\" UserInfo={NSLocalizedDescription=Data store is in use (by network process)}",
+      "targetName": "YunleFunTests",
+      "testIdentifier": 5,
+      "testIdentifierString": "NativeGameRuntimeTests/testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation()",
+      "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunTests/NativeGameRuntimeTests/testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation",
+      "testName": "testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation()"
+    }
+  ],
+  "title": "Test - YunleFun",
+  "topInsights": [],
+  "totalTestCount": 14
+}

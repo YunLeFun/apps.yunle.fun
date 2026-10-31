@@ -1,0 +1,1186 @@
+{
+  "cleanup" : {
+    "failedProfileIDs" : [
+
+    ],
+    "identityCleanupFinished" : true,
+    "ownedProfileIDs" : [
+      "B9AF0B2C-6199-4037-AF3A-22AF2C72F5FF"
+    ]
+  },
+  "completed" : false,
+  "DOMReferencePlayGit" : "540e8e343cefeccd386159d9ba0e19f3b27b5952",
+  "events" : [
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : null,
+        "boardVisibleFraction" : 0,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : null,
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 1,
+          "connectStart" : 1,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 1,
+          "domainLookupStart" : 1,
+          "domContentLoadedEventEnd" : 560,
+          "domInteractive" : 314,
+          "duration" : 0,
+          "encodedBodySize" : 6633,
+          "fetchStart" : 1,
+          "loadEventEnd" : 0,
+          "requestStart" : 5,
+          "responseEnd" : 84,
+          "responseStart" : 84,
+          "secureConnectionStart" : 1,
+          "startTime" : 0,
+          "transferSize" : 6933
+        },
+        "path" : "\/",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "interactive",
+        "resourceSummary" : {
+          "completed" : 47,
+          "count" : 47,
+          "crossOrigin" : 4,
+          "decodedBodySize" : 1365083,
+          "encodedBodySize" : 994534,
+          "sameOrigin" : 43,
+          "transferSize" : 1007434,
+          "types" : {
+            "css" : 16,
+            "fetch" : 1,
+            "img" : 2,
+            "link" : 27,
+            "other" : 1
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 2023.7050416762941,
+      "phase" : "home-observed",
+      "receiptUptime" : 366152.45225533337
+    },
+    {
+      "document" : {
+        "before" : {
+          "height" : 44,
+          "width" : 97.03125,
+          "x" : 29.390625,
+          "y" : 1855.53125
+        },
+        "beforeFraction" : 0,
+        "requested" : true,
+        "scrollX" : 0,
+        "scrollY" : 0
+      },
+      "elapsedFromOpenMS" : 2068.0966249783523,
+      "phase" : "public-link-scroll-requested",
+      "receiptUptime" : 366152.49664691667
+    },
+    {
+      "document" : {
+        "fraction" : 1,
+        "rect" : {
+          "height" : 44,
+          "width" : 97.03125,
+          "x" : 29.390625,
+          "y" : 356.53125
+        },
+        "scrollX" : 0,
+        "scrollY" : 1499,
+        "viewport" : {
+          "height" : 758,
+          "width" : 402
+        },
+        "visible" : true
+      },
+      "elapsedFromOpenMS" : 2601.5735416440293,
+      "phase" : "public-link-scroll-settled",
+      "receiptUptime" : 366153.03012383333
+    },
+    {
+      "document" : {
+        "clickedPath" : "\/games\/paper-star"
+      },
+      "elapsedFromOpenMS" : 2635.6849583098665,
+      "phase" : "public-link-click",
+      "receiptUptime" : 366153.06423525
+    },
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : null,
+        "boardVisibleFraction" : 0,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : null,
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 1,
+          "connectStart" : 1,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 1,
+          "domainLookupStart" : 1,
+          "domContentLoadedEventEnd" : 560,
+          "domInteractive" : 314,
+          "duration" : 965,
+          "encodedBodySize" : 6633,
+          "fetchStart" : 1,
+          "loadEventEnd" : 965,
+          "requestStart" : 5,
+          "responseEnd" : 84,
+          "responseStart" : 84,
+          "secureConnectionStart" : 1,
+          "startTime" : 0,
+          "transferSize" : 6933
+        },
+        "path" : "\/games\/paper-star",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "complete",
+        "resourceSummary" : {
+          "completed" : 66,
+          "count" : 66,
+          "crossOrigin" : 6,
+          "decodedBodySize" : 1648159,
+          "encodedBodySize" : 1254627,
+          "sameOrigin" : 60,
+          "transferSize" : 1272627,
+          "types" : {
+            "css" : 19,
+            "fetch" : 7,
+            "img" : 3,
+            "link" : 36,
+            "other" : 1
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 2656.0033750138246,
+      "phase" : "detail-observed",
+      "receiptUptime" : 366153.0845536667
+    },
+    {
+      "document" : {
+        "before" : {
+          "height" : 47.578125,
+          "width" : 103.375,
+          "x" : 75.890625,
+          "y" : -918.078125
+        },
+        "beforeFraction" : 0,
+        "requested" : true,
+        "scrollX" : 0,
+        "scrollY" : 1499
+      },
+      "elapsedFromOpenMS" : 2678.2511666533537,
+      "phase" : "public-link-scroll-requested",
+      "receiptUptime" : 366153.10680145834
+    },
+    {
+      "document" : {
+        "fraction" : 1,
+        "rect" : {
+          "height" : 47.578125,
+          "width" : 103.375,
+          "x" : 75.890625,
+          "y" : 354.921875
+        },
+        "scrollX" : 0,
+        "scrollY" : 226,
+        "viewport" : {
+          "height" : 758,
+          "width" : 402
+        },
+        "visible" : true
+      },
+      "elapsedFromOpenMS" : 3208.1309166387655,
+      "phase" : "public-link-scroll-settled",
+      "receiptUptime" : 366153.63668120833
+    },
+    {
+      "document" : {
+        "clickedPath" : "\/games\/paper-star\/local"
+      },
+      "elapsedFromOpenMS" : 3230.0602916511707,
+      "phase" : "public-link-click",
+      "receiptUptime" : 366153.65861058334
+    }
+  ],
+  "failure" : {
+    "code" : 20,
+    "domain" : "LegacyHTTPSPreflight"
+  },
+  "failureDiagnostics" : {
+    "available" : true,
+    "canvasCount" : 1,
+    "canvases" : [
+      {
+        "class" : "",
+        "clientHeight" : 380,
+        "clientWidth" : 380,
+        "display" : "block",
+        "height" : 570,
+        "opacity" : "1",
+        "parents" : [
+          {
+            "class" : "paper-star-canvas",
+            "tag" : "DIV"
+          },
+          {
+            "class" : "paper-star-stage",
+            "tag" : "DIV"
+          },
+          {
+            "class" : "paper-star-layout",
+            "tag" : "DIV"
+          }
+        ],
+        "rect" : {
+          "height" : 380,
+          "width" : 380,
+          "x" : 11,
+          "y" : 223.046875
+        },
+        "tag" : "CANVAS",
+        "visibility" : "visible",
+        "visible" : true,
+        "visibleFraction" : 1,
+        "width" : 570
+      }
+    ],
+    "canvasRecordsTruncated" : false,
+    "diagnosticScope" : "Passive DOM and completed ResourceTiming only; no getContext, storage, API URLs, query, headers or credential reads. Missing old selector is not proof of renderer success or failure.",
+    "hasFocus" : false,
+    "knownCanvasMountCount" : 1,
+    "knownCanvasMounts" : [
+      {
+        "class" : "paper-star-canvas",
+        "clientHeight" : 380,
+        "clientWidth" : 380,
+        "display" : "block",
+        "height" : null,
+        "opacity" : "0",
+        "parents" : [
+          {
+            "class" : "paper-star-stage",
+            "tag" : "DIV"
+          },
+          {
+            "class" : "paper-star-layout",
+            "tag" : "DIV"
+          },
+          {
+            "class" : "paper-star-shell",
+            "tag" : "SECTION"
+          }
+        ],
+        "rect" : {
+          "height" : 380,
+          "width" : 380,
+          "x" : 11,
+          "y" : 223.046875
+        },
+        "tag" : "DIV",
+        "visibility" : "visible",
+        "visible" : false,
+        "visibleFraction" : 1,
+        "width" : null
+      }
+    ],
+    "loadingAlertCount" : 1,
+    "loadingAlertNodes" : [
+      {
+        "class" : "paper-star-loading",
+        "clientHeight" : 380,
+        "clientWidth" : 380,
+        "display" : "grid",
+        "height" : null,
+        "opacity" : "1",
+        "parents" : [
+          {
+            "class" : "paper-star-stage",
+            "tag" : "DIV"
+          },
+          {
+            "class" : "paper-star-layout",
+            "tag" : "DIV"
+          },
+          {
+            "class" : "paper-star-shell",
+            "tag" : "SECTION"
+          }
+        ],
+        "rect" : {
+          "height" : 380,
+          "width" : 380,
+          "x" : 11,
+          "y" : 223.046875
+        },
+        "tag" : "DIV",
+        "visibility" : "visible",
+        "visible" : true,
+        "visibleFraction" : 1,
+        "width" : null
+      }
+    ],
+    "loadingAlertText" : "[Loader.load] Failed to load https:\/\/assets.play.yunle.fun\/games\/paper-star\/runtime\/v2\/world-sprites.png\nTypeError: Load failed",
+    "path" : "\/games\/paper-star\/local",
+    "publicAssetEntryCount" : 78,
+    "publicAssets" : [
+      {
+        "decodedBodySize" : 207603,
+        "duration" : 96,
+        "encodedBodySize" : 78780,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/entry.De0aDEhQ.css",
+        "responseEnd" : 209,
+        "transferSize" : 79080
+      },
+      {
+        "decodedBodySize" : 6963,
+        "duration" : 170,
+        "encodedBodySize" : 1839,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/SiteHeader.CwyRSe5U.css",
+        "responseEnd" : 284,
+        "transferSize" : 2139
+      },
+      {
+        "decodedBodySize" : 974,
+        "duration" : 196,
+        "encodedBodySize" : 417,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/GameIcon.BxZK6n9J.css",
+        "responseEnd" : 311,
+        "transferSize" : 717
+      },
+      {
+        "decodedBodySize" : 4931,
+        "duration" : 174,
+        "encodedBodySize" : 1209,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/OnlineRoomLauncher.DSpIsi7F.css",
+        "responseEnd" : 291,
+        "transferSize" : 1509
+      },
+      {
+        "decodedBodySize" : 1094,
+        "duration" : 185,
+        "encodedBodySize" : 431,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/GameCard.CZXPbqCW.css",
+        "responseEnd" : 303,
+        "transferSize" : 731
+      },
+      {
+        "decodedBodySize" : 107507,
+        "duration" : 160,
+        "encodedBodySize" : 39556,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/APS4UzHN.js",
+        "responseEnd" : 280,
+        "transferSize" : 39856
+      },
+      {
+        "decodedBodySize" : 95295,
+        "duration" : 212,
+        "encodedBodySize" : 37739,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/Ct685yqi.js",
+        "responseEnd" : 334,
+        "transferSize" : 38039
+      },
+      {
+        "decodedBodySize" : 49990,
+        "duration" : 217,
+        "encodedBodySize" : 19498,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DOXvFw7V.js",
+        "responseEnd" : 339,
+        "transferSize" : 19798
+      },
+      {
+        "decodedBodySize" : 734,
+        "duration" : 249,
+        "encodedBodySize" : 498,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/UilXiocG.js",
+        "responseEnd" : 372,
+        "transferSize" : 798
+      },
+      {
+        "decodedBodySize" : 45755,
+        "duration" : 260,
+        "encodedBodySize" : 15078,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DgGVtWcw.js",
+        "responseEnd" : 383,
+        "transferSize" : 15378
+      },
+      {
+        "decodedBodySize" : 9871,
+        "duration" : 265,
+        "encodedBodySize" : 4336,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/D5G_ZRdy.js",
+        "responseEnd" : 389,
+        "transferSize" : 4636
+      },
+      {
+        "decodedBodySize" : 726,
+        "duration" : 247,
+        "encodedBodySize" : 416,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/XKyaHtl9.js",
+        "responseEnd" : 372,
+        "transferSize" : 716
+      },
+      {
+        "decodedBodySize" : 2079,
+        "duration" : 276,
+        "encodedBodySize" : 1005,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DpBg-IzR.js",
+        "responseEnd" : 401,
+        "transferSize" : 1305
+      },
+      {
+        "decodedBodySize" : 23830,
+        "duration" : 274,
+        "encodedBodySize" : 7619,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DLXoydia.js",
+        "responseEnd" : 400,
+        "transferSize" : 7919
+      },
+      {
+        "decodedBodySize" : 807,
+        "duration" : 295,
+        "encodedBodySize" : 457,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/D7PgycaD.js",
+        "responseEnd" : 421,
+        "transferSize" : 757
+      },
+      {
+        "decodedBodySize" : 971,
+        "duration" : 306,
+        "encodedBodySize" : 525,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BeY0ERTn.js",
+        "responseEnd" : 433,
+        "transferSize" : 825
+      },
+      {
+        "decodedBodySize" : 564,
+        "duration" : 314,
+        "encodedBodySize" : 387,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/6lh1UHFo.js",
+        "responseEnd" : 441,
+        "transferSize" : 687
+      },
+      {
+        "decodedBodySize" : 9107,
+        "duration" : 346,
+        "encodedBodySize" : 3217,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/2amcSrUj.js",
+        "responseEnd" : 474,
+        "transferSize" : 3517
+      },
+      {
+        "decodedBodySize" : 8779,
+        "duration" : 318,
+        "encodedBodySize" : 4197,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DncREKyF.js",
+        "responseEnd" : 447,
+        "transferSize" : 4497
+      },
+      {
+        "decodedBodySize" : 554,
+        "duration" : 344,
+        "encodedBodySize" : 339,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CukjjN6W.js",
+        "responseEnd" : 473,
+        "transferSize" : 639
+      },
+      {
+        "decodedBodySize" : 7976,
+        "duration" : 343,
+        "encodedBodySize" : 3364,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/B7_fxva5.js",
+        "responseEnd" : 473,
+        "transferSize" : 3664
+      },
+      {
+        "decodedBodySize" : 865,
+        "duration" : 373,
+        "encodedBodySize" : 444,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/Bk5av5ml.js",
+        "responseEnd" : 503,
+        "transferSize" : 744
+      },
+      {
+        "decodedBodySize" : 900,
+        "duration" : 364,
+        "encodedBodySize" : 343,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/rg2IlEl2.js",
+        "responseEnd" : 495,
+        "transferSize" : 643
+      },
+      {
+        "decodedBodySize" : 1836,
+        "duration" : 358,
+        "encodedBodySize" : 994,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/8-GlxPTt.js",
+        "responseEnd" : 490,
+        "transferSize" : 1294
+      },
+      {
+        "decodedBodySize" : 4119,
+        "duration" : 396,
+        "encodedBodySize" : 1411,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BIcCf0Qr.js",
+        "responseEnd" : 529,
+        "transferSize" : 1711
+      },
+      {
+        "decodedBodySize" : 257,
+        "duration" : 397,
+        "encodedBodySize" : 153,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/Cu88cMMO.js",
+        "responseEnd" : 530,
+        "transferSize" : 453
+      },
+      {
+        "decodedBodySize" : 14192,
+        "duration" : 189,
+        "encodedBodySize" : 14192,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-latin-400-normal.Dfvj30mx.woff2",
+        "responseEnd" : 530,
+        "transferSize" : 14492
+      },
+      {
+        "decodedBodySize" : 19496,
+        "duration" : 202,
+        "encodedBodySize" : 19496,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/baloo-2-latin-600-normal.tIfxVoAe.woff2",
+        "responseEnd" : 543,
+        "transferSize" : 19796
+      },
+      {
+        "decodedBodySize" : 66716,
+        "duration" : 84,
+        "encodedBodySize" : 66716,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-116-400-normal.CXn3vBOH.woff2",
+        "responseEnd" : 632,
+        "transferSize" : 67016
+      },
+      {
+        "decodedBodySize" : 66232,
+        "duration" : 54,
+        "encodedBodySize" : 66232,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-117-400-normal.BcPiCdVh.woff2",
+        "responseEnd" : 603,
+        "transferSize" : 66532
+      },
+      {
+        "decodedBodySize" : 77596,
+        "duration" : 120,
+        "encodedBodySize" : 77596,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-109-400-normal.CXVtW-03.woff2",
+        "responseEnd" : 671,
+        "transferSize" : 77896
+      },
+      {
+        "decodedBodySize" : 57808,
+        "duration" : 52,
+        "encodedBodySize" : 57808,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-118-400-normal.CHJLQXg3.woff2",
+        "responseEnd" : 605,
+        "transferSize" : 58108
+      },
+      {
+        "decodedBodySize" : 74364,
+        "duration" : 183,
+        "encodedBodySize" : 74364,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-114-400-normal.DBPTJKwx.woff2",
+        "responseEnd" : 738,
+        "transferSize" : 74664
+      },
+      {
+        "decodedBodySize" : 13824,
+        "duration" : 184,
+        "encodedBodySize" : 13824,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-119-400-normal.Dj9GTZQJ.woff2",
+        "responseEnd" : 740,
+        "transferSize" : 14124
+      },
+      {
+        "decodedBodySize" : 71552,
+        "duration" : 266,
+        "encodedBodySize" : 71552,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-115-400-normal.DK_ZRlHB.woff2",
+        "responseEnd" : 823,
+        "transferSize" : 71852
+      },
+      {
+        "decodedBodySize" : 75744,
+        "duration" : 239,
+        "encodedBodySize" : 75744,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-113-400-normal.BOCbdsmb.woff2",
+        "responseEnd" : 797,
+        "transferSize" : 76044
+      },
+      {
+        "decodedBodySize" : 76380,
+        "duration" : 220,
+        "encodedBodySize" : 76380,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-112-400-normal.MW59beLe.woff2",
+        "responseEnd" : 779,
+        "transferSize" : 76680
+      },
+      {
+        "decodedBodySize" : 80212,
+        "duration" : 355,
+        "encodedBodySize" : 80212,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-105-400-normal.DLPLdckt.woff2",
+        "responseEnd" : 914,
+        "transferSize" : 80512
+      },
+      {
+        "decodedBodySize" : 81528,
+        "duration" : 359,
+        "encodedBodySize" : 81528,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-111-400-normal.bW_Dvck6.woff2",
+        "responseEnd" : 920,
+        "transferSize" : 81828
+      },
+      {
+        "decodedBodySize" : 75700,
+        "duration" : 300,
+        "encodedBodySize" : 75700,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-100-400-normal.CvTOPfbh.woff2",
+        "responseEnd" : 862,
+        "transferSize" : 76000
+      },
+      {
+        "decodedBodySize" : 78964,
+        "duration" : 327,
+        "encodedBodySize" : 78964,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-107-400-normal.CEfc5jUg.woff2",
+        "responseEnd" : 889,
+        "transferSize" : 79264
+      },
+      {
+        "decodedBodySize" : 81692,
+        "duration" : 388,
+        "encodedBodySize" : 81692,
+        "initiatorType" : "css",
+        "path" : "\/_nuxt\/zcool-xiaowei-108-400-normal.Btwdtkzu.woff2",
+        "responseEnd" : 951,
+        "transferSize" : 81992
+      },
+      {
+        "decodedBodySize" : 20595,
+        "duration" : 61,
+        "encodedBodySize" : 7624,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/C9TFTTf6.js",
+        "responseEnd" : 1055,
+        "transferSize" : 7924
+      },
+      {
+        "decodedBodySize" : 3858,
+        "duration" : 60,
+        "encodedBodySize" : 1077,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/games.BtYzn7QJ.css",
+        "responseEnd" : 1055,
+        "transferSize" : 1377
+      },
+      {
+        "decodedBodySize" : 2949,
+        "duration" : 69,
+        "encodedBodySize" : 1678,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/ERxazwhk.js",
+        "responseEnd" : 1218,
+        "transferSize" : 1978
+      },
+      {
+        "decodedBodySize" : 1897,
+        "duration" : 61,
+        "encodedBodySize" : 1062,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BC7YqmI6.js",
+        "responseEnd" : 1211,
+        "transferSize" : 1362
+      },
+      {
+        "decodedBodySize" : 865,
+        "duration" : 68,
+        "encodedBodySize" : 388,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/GameDetailShell.MUyrJKNj.css",
+        "responseEnd" : 1219,
+        "transferSize" : 688
+      },
+      {
+        "decodedBodySize" : 1921,
+        "duration" : 65,
+        "encodedBodySize" : 742,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/pachinko.DgjkMQ6x.css",
+        "responseEnd" : 1217,
+        "transferSize" : 1042
+      },
+      {
+        "decodedBodySize" : 5067,
+        "duration" : 48,
+        "encodedBodySize" : 2850,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/Ck5P3Zup.js",
+        "responseEnd" : 1279,
+        "transferSize" : 3150
+      },
+      {
+        "decodedBodySize" : 1772,
+        "duration" : 49,
+        "encodedBodySize" : 687,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/paper-star.CgUe11ro.css",
+        "responseEnd" : 1281,
+        "transferSize" : 987
+      },
+      {
+        "decodedBodySize" : 513,
+        "duration" : 51,
+        "encodedBodySize" : 346,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/D59HUySn.js",
+        "responseEnd" : 1283,
+        "transferSize" : 646
+      },
+      {
+        "decodedBodySize" : 9540,
+        "duration" : 58,
+        "encodedBodySize" : 4693,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/H0eUhoPM.js",
+        "responseEnd" : 1857,
+        "transferSize" : 4993
+      },
+      {
+        "decodedBodySize" : 72322,
+        "duration" : 56,
+        "encodedBodySize" : 24561,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DRT5lYWc.js",
+        "responseEnd" : 1857,
+        "transferSize" : 24861
+      },
+      {
+        "decodedBodySize" : 66,
+        "duration" : 132,
+        "encodedBodySize" : 66,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/C1Oaqhb-.js",
+        "responseEnd" : 1935,
+        "transferSize" : 366
+      },
+      {
+        "decodedBodySize" : 1690645,
+        "duration" : 313,
+        "encodedBodySize" : 592914,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CvuXq5qe.js",
+        "responseEnd" : 2118,
+        "transferSize" : 593214
+      },
+      {
+        "decodedBodySize" : 316,
+        "duration" : 108,
+        "encodedBodySize" : 231,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CbmKdKGb.js",
+        "responseEnd" : 1914,
+        "transferSize" : 531
+      },
+      {
+        "decodedBodySize" : 1275,
+        "duration" : 60,
+        "encodedBodySize" : 559,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BiPcD9Yy.js",
+        "responseEnd" : 1867,
+        "transferSize" : 859
+      },
+      {
+        "decodedBodySize" : 23490,
+        "duration" : 97,
+        "encodedBodySize" : 5144,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/PaperStarArena.C1lyJJWB.css",
+        "responseEnd" : 1904,
+        "transferSize" : 5444
+      },
+      {
+        "decodedBodySize" : 4852,
+        "duration" : 96,
+        "encodedBodySize" : 1326,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/tutorial.CfKWKR8d.css",
+        "responseEnd" : 1904,
+        "transferSize" : 1626
+      },
+      {
+        "decodedBodySize" : 22899,
+        "duration" : 105,
+        "encodedBodySize" : 9028,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/cZ9Wndwk.js",
+        "responseEnd" : 1914,
+        "transferSize" : 9328
+      },
+      {
+        "decodedBodySize" : 1169,
+        "duration" : 157,
+        "encodedBodySize" : 480,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DCvDFPLa.js",
+        "responseEnd" : 1966,
+        "transferSize" : 780
+      },
+      {
+        "decodedBodySize" : 4852,
+        "duration" : 149,
+        "encodedBodySize" : 1326,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/pve.BDNfY2Gq.css",
+        "responseEnd" : 1959,
+        "transferSize" : 1626
+      },
+      {
+        "decodedBodySize" : 2841,
+        "duration" : 152,
+        "encodedBodySize" : 1531,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CDrL04cU.js",
+        "responseEnd" : 1962,
+        "transferSize" : 1831
+      },
+      {
+        "decodedBodySize" : 1047,
+        "duration" : 165,
+        "encodedBodySize" : 461,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/local.5uooVU3_.css",
+        "responseEnd" : 1976,
+        "transferSize" : 761
+      },
+      {
+        "decodedBodySize" : 4232,
+        "duration" : 76,
+        "encodedBodySize" : 2341,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BEdeqlOv.js",
+        "responseEnd" : 2321,
+        "transferSize" : 2641
+      },
+      {
+        "decodedBodySize" : 637684,
+        "duration" : 85,
+        "encodedBodySize" : 175735,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DQcyMjPh.js",
+        "responseEnd" : 2340,
+        "transferSize" : 176035
+      },
+      {
+        "decodedBodySize" : 70931,
+        "duration" : 59,
+        "encodedBodySize" : 23503,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/0L7RI5TM.js",
+        "responseEnd" : 2316,
+        "transferSize" : 23803
+      },
+      {
+        "decodedBodySize" : 42179,
+        "duration" : 84,
+        "encodedBodySize" : 12549,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/cvBDkCnH.js",
+        "responseEnd" : 2342,
+        "transferSize" : 12849
+      },
+      {
+        "decodedBodySize" : 1090,
+        "duration" : 63,
+        "encodedBodySize" : 550,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CebyNykH.js",
+        "responseEnd" : 2323,
+        "transferSize" : 850
+      },
+      {
+        "decodedBodySize" : 6002,
+        "duration" : 80,
+        "encodedBodySize" : 2057,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BZ0XMILC.js",
+        "responseEnd" : 2340,
+        "transferSize" : 2357
+      },
+      {
+        "decodedBodySize" : 333,
+        "duration" : 114,
+        "encodedBodySize" : 242,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/BCMTV_Fy.js",
+        "responseEnd" : 2375,
+        "transferSize" : 542
+      },
+      {
+        "decodedBodySize" : 62143,
+        "duration" : 115,
+        "encodedBodySize" : 21304,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CssV4GHK.js",
+        "responseEnd" : 2376,
+        "transferSize" : 21604
+      },
+      {
+        "decodedBodySize" : 19740,
+        "duration" : 125,
+        "encodedBodySize" : 6564,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DIH2twDg.js",
+        "responseEnd" : 2387,
+        "transferSize" : 6864
+      },
+      {
+        "decodedBodySize" : 59340,
+        "duration" : 126,
+        "encodedBodySize" : 17122,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CjhJu0eH.js",
+        "responseEnd" : 2389,
+        "transferSize" : 17422
+      },
+      {
+        "decodedBodySize" : 11317,
+        "duration" : 134,
+        "encodedBodySize" : 2992,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/CU6mpDrh.js",
+        "responseEnd" : 2397,
+        "transferSize" : 3292
+      },
+      {
+        "decodedBodySize" : 41,
+        "duration" : 50,
+        "encodedBodySize" : 41,
+        "initiatorType" : "script",
+        "path" : "\/_nuxt\/DXsVSwH5.js",
+        "responseEnd" : 2478,
+        "transferSize" : 341
+      },
+      {
+        "decodedBodySize" : 275,
+        "duration" : 45,
+        "encodedBodySize" : 183,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/DiZxOk12.js",
+        "responseEnd" : 2525,
+        "transferSize" : 483
+      },
+      {
+        "decodedBodySize" : 140,
+        "duration" : 46,
+        "encodedBodySize" : 140,
+        "initiatorType" : "link",
+        "path" : "\/_nuxt\/Bx0ybnfH.js",
+        "responseEnd" : 2527,
+        "transferSize" : 440
+      }
+    ],
+    "publicAssetsTruncated" : false,
+    "readyState" : "complete",
+    "visible" : true
+  },
+  "game" : "paper-star",
+  "lastObservationOnFailure" : {
+    "appReady" : true,
+    "black" : 0,
+    "board" : null,
+    "boardVisibleFraction" : 0,
+    "canvas" : null,
+    "canvasPixels" : null,
+    "canvasReady" : false,
+    "canvasVisibleFraction" : 0,
+    "cell" : null,
+    "fireSequence" : -1,
+    "gomokuAnyEmptyCellEnabled" : false,
+    "gomokuCellEnabled" : false,
+    "hasFocus" : false,
+    "navigation" : {
+      "connectEnd" : 1,
+      "connectStart" : 1,
+      "decodedBodySize" : 22944,
+      "domainLookupEnd" : 1,
+      "domainLookupStart" : 1,
+      "domContentLoadedEventEnd" : 560,
+      "domInteractive" : 314,
+      "duration" : 965,
+      "encodedBodySize" : 6633,
+      "fetchStart" : 1,
+      "loadEventEnd" : 965,
+      "requestStart" : 5,
+      "responseEnd" : 84,
+      "responseStart" : 84,
+      "secureConnectionStart" : 1,
+      "startTime" : 0,
+      "transferSize" : 6933
+    },
+    "path" : "\/games\/paper-star\/local",
+    "phase" : "playing",
+    "publicOrigin" : true,
+    "readyState" : "complete",
+    "resourceSummary" : {
+      "completed" : 101,
+      "count" : 101,
+      "crossOrigin" : 8,
+      "decodedBodySize" : 4399284,
+      "encodedBodySize" : 2162634,
+      "sameOrigin" : 93,
+      "transferSize" : 2190534,
+      "types" : {
+        "css" : 20,
+        "fetch" : 14,
+        "img" : 3,
+        "link" : 62,
+        "other" : 1,
+        "script" : 1
+      }
+    },
+    "tick" : 1346,
+    "viewport" : {
+      "devicePixelRatio" : 3,
+      "height" : 758,
+      "visual" : {
+        "height" : 758,
+        "offsetLeft" : 0,
+        "offsetTop" : 0,
+        "scale" : 1,
+        "width" : 402
+      },
+      "width" : 402
+    },
+    "visible" : true,
+    "white" : 0
+  },
+  "mode" : "local",
+  "nativeCommit" : "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "nativePresentation" : {
+    "animationsEnabled" : true,
+    "deviceOrientationRaw" : 1,
+    "interfaceOrientationRaw" : 1,
+    "visibleIntersection" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "webAttachedToFixtureWindow" : true,
+    "webInWindow" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "window" : {
+      "height" : 874,
+      "width" : 402,
+      "x" : 0,
+      "y" : 0
+    },
+    "windowHidden" : false
+  },
+  "openUptime" : 366150.42855029169,
+  "productionPlayGit" : "unknown",
+  "sampleCount" : 1,
+  "schema" : "legacy-native-https-preflight-v1",
+  "scope" : "Old runtime.open homepage and original loader; rendered Home -> detail -> offline mode links. Synthetic public DOM click\/keyboard input. DOM receipt upper bounds, not native-ready or engine-ready. Separate native uptime and document performance clocks; no cross-clock subtraction. Production Git unknown; no current-loopback speed comparison. Resource entries are passive completed-buffer observations, excluding pending\/Worker timelines. Computer response includes gameplay think delay. Default interface direction and animation settings retained. Rendered links\/canvas may scrollIntoView normally; scrolling and settling remain inside open-to-observation uptime. Canvas visibility fraction is observed, with no 95 percent canvas threshold."
+}

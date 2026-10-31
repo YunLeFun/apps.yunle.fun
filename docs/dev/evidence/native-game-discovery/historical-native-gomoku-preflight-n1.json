@@ -1,0 +1,545 @@
+{
+  "cleanup" : {
+    "failedProfileIDs" : [
+
+    ],
+    "identityCleanupFinished" : true,
+    "ownedProfileIDs" : [
+      "0EE32B60-0911-44DC-B6AA-27954049EDB1"
+    ]
+  },
+  "completed" : true,
+  "DOMReferencePlayGit" : "540e8e343cefeccd386159d9ba0e19f3b27b5952",
+  "events" : [
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : null,
+        "boardVisibleFraction" : 0,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : null,
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 5,
+          "connectStart" : 5,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 5,
+          "domainLookupStart" : 5,
+          "domContentLoadedEventEnd" : 766,
+          "domInteractive" : 477,
+          "duration" : 0,
+          "encodedBodySize" : 6653,
+          "fetchStart" : 5,
+          "loadEventEnd" : 0,
+          "requestStart" : 19,
+          "responseEnd" : 115,
+          "responseStart" : 93,
+          "secureConnectionStart" : 5,
+          "startTime" : 0,
+          "transferSize" : 6953
+        },
+        "path" : "\/",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "interactive",
+        "resourceSummary" : {
+          "completed" : 48,
+          "count" : 48,
+          "crossOrigin" : 4,
+          "decodedBodySize" : 1606225,
+          "encodedBodySize" : 1237075,
+          "sameOrigin" : 44,
+          "transferSize" : 1250275,
+          "types" : {
+            "css" : 19,
+            "fetch" : 1,
+            "img" : 1,
+            "link" : 27
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 3599.682500003837,
+      "phase" : "home-observed",
+      "receiptUptime" : 365722.94319250004
+    },
+    {
+      "document" : {
+        "before" : {
+          "height" : 44,
+          "width" : 97.03125,
+          "x" : 29.390625,
+          "y" : 2683.46875
+        },
+        "beforeFraction" : 0,
+        "requested" : true,
+        "scrollX" : 0,
+        "scrollY" : 0
+      },
+      "elapsedFromOpenMS" : 3620.9055833169259,
+      "phase" : "public-link-scroll-requested",
+      "receiptUptime" : 365722.96441558335
+    },
+    {
+      "document" : {
+        "fraction" : 1,
+        "rect" : {
+          "height" : 44,
+          "width" : 97.03125,
+          "x" : 29.390625,
+          "y" : 357.46875
+        },
+        "scrollX" : 0,
+        "scrollY" : 2326,
+        "viewport" : {
+          "height" : 758,
+          "width" : 402
+        },
+        "visible" : true
+      },
+      "elapsedFromOpenMS" : 4175.3536249743775,
+      "phase" : "public-link-scroll-settled",
+      "receiptUptime" : 365723.51886362501
+    },
+    {
+      "document" : {
+        "clickedPath" : "\/games\/gomoku"
+      },
+      "elapsedFromOpenMS" : 4197.464166674763,
+      "phase" : "public-link-click",
+      "receiptUptime" : 365723.54097416671
+    },
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : null,
+        "boardVisibleFraction" : 0,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : null,
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 5,
+          "connectStart" : 5,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 5,
+          "domainLookupStart" : 5,
+          "domContentLoadedEventEnd" : 766,
+          "domInteractive" : 477,
+          "duration" : 2307,
+          "encodedBodySize" : 6653,
+          "fetchStart" : 5,
+          "loadEventEnd" : 2307,
+          "requestStart" : 19,
+          "responseEnd" : 115,
+          "responseStart" : 93,
+          "secureConnectionStart" : 5,
+          "startTime" : 0,
+          "transferSize" : 6953
+        },
+        "path" : "\/games\/gomoku",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "complete",
+        "resourceSummary" : {
+          "completed" : 68,
+          "count" : 68,
+          "crossOrigin" : 6,
+          "decodedBodySize" : 1655497,
+          "encodedBodySize" : 1257974,
+          "sameOrigin" : 62,
+          "transferSize" : 1276574,
+          "types" : {
+            "css" : 19,
+            "fetch" : 8,
+            "img" : 3,
+            "link" : 37,
+            "other" : 1
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 4298.2889999984764,
+      "phase" : "detail-observed",
+      "receiptUptime" : 365723.64179900003
+    },
+    {
+      "document" : {
+        "before" : {
+          "height" : 47.578125,
+          "width" : 103.375,
+          "x" : 91.21875,
+          "y" : -797.359375
+        },
+        "beforeFraction" : 0,
+        "requested" : true,
+        "scrollX" : 0,
+        "scrollY" : 1251
+      },
+      "elapsedFromOpenMS" : 4320.5588333075866,
+      "phase" : "public-link-scroll-requested",
+      "receiptUptime" : 365723.66406883334
+    },
+    {
+      "document" : {
+        "fraction" : 1,
+        "rect" : {
+          "height" : 47.578125,
+          "width" : 103.375,
+          "x" : 91.21875,
+          "y" : 354.640625
+        },
+        "scrollX" : 0,
+        "scrollY" : 99,
+        "viewport" : {
+          "height" : 758,
+          "width" : 402
+        },
+        "visible" : true
+      },
+      "elapsedFromOpenMS" : 4852.2282083285972,
+      "phase" : "public-link-scroll-settled",
+      "receiptUptime" : 365724.19573820836
+    },
+    {
+      "document" : {
+        "clickedPath" : "\/games\/gomoku\/computer"
+      },
+      "elapsedFromOpenMS" : 4873.7663750071079,
+      "phase" : "public-link-click",
+      "receiptUptime" : 365724.21727637504
+    },
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 0,
+        "board" : {
+          "height" : 373.5625,
+          "width" : 373.5625,
+          "x" : 8.1875,
+          "y" : 140.296875
+        },
+        "boardVisibleFraction" : 1,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : {
+          "height" : 23.875,
+          "width" : 23.875,
+          "x" : 183.03125,
+          "y" : 315.140625
+        },
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : true,
+        "gomokuCellEnabled" : true,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 5,
+          "connectStart" : 5,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 5,
+          "domainLookupStart" : 5,
+          "domContentLoadedEventEnd" : 766,
+          "domInteractive" : 477,
+          "duration" : 2307,
+          "encodedBodySize" : 6653,
+          "fetchStart" : 5,
+          "loadEventEnd" : 2307,
+          "requestStart" : 19,
+          "responseEnd" : 115,
+          "responseStart" : 93,
+          "secureConnectionStart" : 5,
+          "startTime" : 0,
+          "transferSize" : 6953
+        },
+        "path" : "\/games\/gomoku\/computer",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "complete",
+        "resourceSummary" : {
+          "completed" : 84,
+          "count" : 84,
+          "crossOrigin" : 7,
+          "decodedBodySize" : 1680864,
+          "encodedBodySize" : 1270278,
+          "sameOrigin" : 77,
+          "transferSize" : 1293378,
+          "types" : {
+            "css" : 19,
+            "fetch" : 13,
+            "img" : 3,
+            "link" : 48,
+            "other" : 1
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 4894.1837916499935,
+      "phase" : "gomoku-controls-observed-not-worker-proof",
+      "receiptUptime" : 365724.23769379169
+    },
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 1,
+        "board" : {
+          "height" : 373.5625,
+          "width" : 373.5625,
+          "x" : 8.1875,
+          "y" : 213.296875
+        },
+        "boardVisibleFraction" : 1,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : {
+          "height" : 23.875,
+          "width" : 23.875,
+          "x" : 183.03125,
+          "y" : 388.140625
+        },
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : false,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 5,
+          "connectStart" : 5,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 5,
+          "domainLookupStart" : 5,
+          "domContentLoadedEventEnd" : 766,
+          "domInteractive" : 477,
+          "duration" : 2307,
+          "encodedBodySize" : 6653,
+          "fetchStart" : 5,
+          "loadEventEnd" : 2307,
+          "requestStart" : 19,
+          "responseEnd" : 115,
+          "responseStart" : 93,
+          "secureConnectionStart" : 5,
+          "startTime" : 0,
+          "transferSize" : 6953
+        },
+        "path" : "\/games\/gomoku\/computer",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "complete",
+        "resourceSummary" : {
+          "completed" : 86,
+          "count" : 86,
+          "crossOrigin" : 7,
+          "decodedBodySize" : 1683364,
+          "encodedBodySize" : 1271482,
+          "sameOrigin" : 79,
+          "transferSize" : 1295182,
+          "types" : {
+            "css" : 19,
+            "fetch" : 14,
+            "img" : 3,
+            "link" : 48,
+            "other" : 2
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 0
+      },
+      "elapsedFromOpenMS" : 5129.6272083418444,
+      "phase" : "gomoku-actual-human-black-observed",
+      "receiptUptime" : 365724.47313720838
+    },
+    {
+      "document" : {
+        "appReady" : true,
+        "black" : 1,
+        "board" : {
+          "height" : 373.5625,
+          "width" : 373.5625,
+          "x" : 8.1875,
+          "y" : 239.296875
+        },
+        "boardVisibleFraction" : 1,
+        "canvas" : null,
+        "canvasPixels" : null,
+        "canvasReady" : false,
+        "canvasVisibleFraction" : 0,
+        "cell" : {
+          "height" : 23.875,
+          "width" : 23.875,
+          "x" : 183.03125,
+          "y" : 414.140625
+        },
+        "fireSequence" : -1,
+        "gomokuAnyEmptyCellEnabled" : true,
+        "gomokuCellEnabled" : false,
+        "hasFocus" : false,
+        "navigation" : {
+          "connectEnd" : 5,
+          "connectStart" : 5,
+          "decodedBodySize" : 22944,
+          "domainLookupEnd" : 5,
+          "domainLookupStart" : 5,
+          "domContentLoadedEventEnd" : 766,
+          "domInteractive" : 477,
+          "duration" : 2307,
+          "encodedBodySize" : 6653,
+          "fetchStart" : 5,
+          "loadEventEnd" : 2307,
+          "requestStart" : 19,
+          "responseEnd" : 115,
+          "responseStart" : 93,
+          "secureConnectionStart" : 5,
+          "startTime" : 0,
+          "transferSize" : 6953
+        },
+        "path" : "\/games\/gomoku\/computer",
+        "phase" : null,
+        "publicOrigin" : true,
+        "readyState" : "complete",
+        "resourceSummary" : {
+          "completed" : 87,
+          "count" : 87,
+          "crossOrigin" : 7,
+          "decodedBodySize" : 1683364,
+          "encodedBodySize" : 1271482,
+          "sameOrigin" : 80,
+          "transferSize" : 1295482,
+          "types" : {
+            "css" : 19,
+            "fetch" : 15,
+            "img" : 3,
+            "link" : 48,
+            "other" : 2
+          }
+        },
+        "tick" : -1,
+        "viewport" : {
+          "devicePixelRatio" : 3,
+          "height" : 758,
+          "visual" : {
+            "height" : 758,
+            "offsetLeft" : 0,
+            "offsetTop" : 0,
+            "scale" : 1,
+            "width" : 402
+          },
+          "width" : 402
+        },
+        "visible" : true,
+        "white" : 1
+      },
+      "elapsedFromOpenMS" : 5441.8264583218843,
+      "phase" : "gomoku-actual-computer-white-observed",
+      "receiptUptime" : 365724.78533645836
+    }
+  ],
+  "failure" : {
+
+  },
+  "game" : "gomoku",
+  "lastObservationOnFailure" : {
+
+  },
+  "mode" : "computer",
+  "nativeCommit" : "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "nativePresentation" : {
+    "animationsEnabled" : true,
+    "deviceOrientationRaw" : 1,
+    "interfaceOrientationRaw" : 1,
+    "visibleIntersection" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "webAttachedToFixtureWindow" : true,
+    "webInWindow" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "window" : {
+      "height" : 874,
+      "width" : 402,
+      "x" : 0,
+      "y" : 0
+    },
+    "windowHidden" : false
+  },
+  "openUptime" : 365719.34351000004,
+  "productionPlayGit" : "unknown",
+  "sampleCount" : 1,
+  "schema" : "legacy-native-https-preflight-v1",
+  "scope" : "Old runtime.open homepage and original loader; rendered Home -> detail -> offline mode links. Synthetic public DOM click\/keyboard input. DOM receipt upper bounds, not native-ready or engine-ready. Separate native uptime and document performance clocks; no cross-clock subtraction. Production Git unknown; no current-loopback speed comparison. Resource entries are passive completed-buffer observations, excluding pending\/Worker timelines. Computer response includes gameplay think delay. Default interface direction and animation settings retained. Rendered links\/canvas may scrollIntoView normally; scrolling and settling remain inside open-to-observation uptime. Canvas visibility fraction is observed, with no 95 percent canvas threshold."
+}

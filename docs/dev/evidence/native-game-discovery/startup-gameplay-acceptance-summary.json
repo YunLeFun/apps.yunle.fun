@@ -1,0 +1,117 @@
+{
+  "kind": "startup-gameplay-continuation-acceptance-summary",
+  "recordedAt": "2026-10-29T06:55:02.327354+08:00",
+  "supersedesLatestStatusOf": "reclamation-acceptance-summary.json; historical evidence preserved",
+  "goalStatus": "active-incomplete",
+  "previousGoalTurnClassification": "progress",
+  "thisGoalTurnClassification": "progress: same-run3-clock startup correlation and previously missing Star continuous gameplay/RSS records completed",
+  "productSourceChangedInContinuation": false,
+  "acceptedDiagnostics": {
+    "sameRunStartupCorrelationTestPassed": 1,
+    "startupSamplesWithUniquelyMatchedHTML": 6,
+    "foregroundFrameTestPassed": 1,
+    "foregroundRounds": 2,
+    "untruncatedRAfIntervals": 1219,
+    "hostRSSGameWindowSamples": 39,
+    "webContentRSSGameWindowSamples": 39
+  },
+  "originalAcceptanceUnchanged": {
+    "newStartP50TargetImprovement": 0.3,
+    "gomokuObservedImprovement": 0.214,
+    "paperStarObservedImprovement": 0.08,
+    "completed": false
+  },
+  "userDecisionPending": "Keep the existing3second local-game opening and separately assess loading, or permit a local-opening UX change. No answer is not approval. Original rule/metric remains.",
+  "productionReadiness": "06:43 anonymous current normal-TLS check unchanged: AASA/native JSON404; new Idempotency-Key CORS absent; no production writes/deployment",
+  "remaining": [
+    "Original startup30percent improvement and full specified historical/multiplayer baseline",
+    "Real native account/Play SSO, OS Universal Link cold invite, two real users/full interruption recovery, deployed atomic CloudBase operation"
+  ],
+  "candidate": {
+    "pid": 25932,
+    "simulatorID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "screen": "寻乐",
+    "normalPreviewServerPID": 12343,
+    "traceOrFaultEnabled": false
+  },
+  "outOfScopeActionsPerformed": {
+    "productionDeployment": false,
+    "testflight": false,
+    "commitOrPush": false
+  },
+  "evidence": [
+    {
+      "path": "startup-resource-phase-v3.json",
+      "sha256": "8c708d72dd1598d19edd317e94c6f3a2bb468eef8b0a800ebe1c01049a81723e"
+    },
+    {
+      "path": "startup-resource-phase-v3-summary.json",
+      "sha256": "4c0321bfa7b931c0f348a7eee20bafb0c1663567257ce6c60141e062566880be"
+    },
+    {
+      "path": "startup-resource-phase-v3-analysis.json",
+      "sha256": "c40356306f9e0b1b6390a2eb07871f432d903dc9ed7402fcf5323b64ead096f0"
+    },
+    {
+      "path": "startup-request-trace-v3.jsonl",
+      "sha256": "8848d1bc3801cf5796ea188eb1400cbc93d585a14aae633e6f58f3091a0717d2"
+    },
+    {
+      "path": "startup-request-trace-fixture.json",
+      "sha256": "262b550b08a552716200570ef54a7caba67f36aa53e87b9a85a1f48271ba21ed"
+    },
+    {
+      "path": "startup-countdown-constraint-audit.json",
+      "sha256": "6a2e9555b7345b61ae4edfb6b4a3235d6fe196630a5bf550df475413493978c6"
+    },
+    {
+      "path": "paper-star-frame-memory-n2.json",
+      "sha256": "e04214f95ef9b0f055094b69b492627dacad1ac4b5c6a63bcf7d513e1ebb01b7"
+    },
+    {
+      "path": "paper-star-frame-memory-rss.json",
+      "sha256": "3e0b3991b779f4671e923749d95f8cf89f523dbc9426f9369f11850521fd6b30"
+    },
+    {
+      "path": "paper-star-frame-memory-summary.json",
+      "sha256": "8667345c851f798024c8e12bf39d4d3ea8cb865c315b0618cf587dc4e77e59f5"
+    },
+    {
+      "path": "paper-star-frame-memory-analysis.json",
+      "sha256": "058fc107224bb30ce3d5161c62e625d33b2ee03e82836dd86dede5f9919779ba"
+    },
+    {
+      "path": "paper-star-frame-memory-inputs.json",
+      "sha256": "032655391862c38076a50c0a453cd8629d0f0ce128215c68278a7001cf3d28ba"
+    },
+    {
+      "path": "production-startup-followup-readiness.json",
+      "sha256": "5b0627e2fe441234e0d1dd18541fb01d08fdd62512c231e8c5b747db85600882"
+    },
+    {
+      "path": "startup-gameplay-candidate-fingerprints.json",
+      "sha256": "a7c1e46c1abc823fe48d20b2f423b970eae6057b069205dec2f0f40c82cc8c3c"
+    },
+    {
+      "path": "startup-gameplay-simulator-audit.json",
+      "sha256": "62cc797317a913002e4e38cbc44303d9e1ece3a544958437c15f1062bd6f14eb"
+    },
+    {
+      "path": "startup-gameplay-completion-audit.json",
+      "sha256": "0a2731481bf08972aaf29f2b015bd7da0f7d41159b32f743e3c6c6997c266663"
+    },
+    {
+      "path": "startup-gameplay-docs-build.json",
+      "sha256": "858fc3e487a6e333d9ece3b456eb0cde748a8490df13b3778ad9bc00eace283b"
+    },
+    {
+      "path": "startup-request-trace-v3.json",
+      "sha256": "e2d99439e419e9f07d33a35fda1aead655201eadbb8e910ea1e3fe790ccc62cf"
+    },
+    {
+      "path": "startup-gameplay-docs-build-failed-jsonl.json",
+      "sha256": "fc704c189b9ac2e9453f5466c3ea8d47465aed5fc34d52abd06ceb77454c3ed2"
+    }
+  ],
+  "docsBuild": "passed"
+}

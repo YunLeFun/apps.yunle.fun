@@ -1,0 +1,460 @@
+{
+  "completed" : true,
+  "enabledAfterCleanup" : false,
+  "events" : [
+    {
+      "action" : "current",
+      "phase" : "read-mode",
+      "utterance" : "云乐坊 Native 寻乐 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "read-mode",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "read-mode",
+      "utterance" : "玩法 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "read-mode",
+      "utterance" : "搜索游戏或玩法 搜索栏 轻点两下来编辑。"
+    },
+    {
+      "action" : "next",
+      "phase" : "read-mode",
+      "utterance" : "最近玩过 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "read-mode",
+      "utterance" : "五子棋 、 电脑对手 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "join-room",
+      "utterance" : "五子棋 、 电脑对手 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "join-room",
+      "utterance" : "最近玩过 标题"
+    },
+    {
+      "action" : "previous",
+      "phase" : "join-room",
+      "utterance" : "搜索游戏或玩法 搜索栏 轻点两下来编辑。"
+    },
+    {
+      "action" : "previous",
+      "phase" : "join-room",
+      "utterance" : "玩法 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "join-room",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "room-input",
+      "utterance" : "取消 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "room-input",
+      "utterance" : "加入房间 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "room-input",
+      "utterance" : "六位房间号或邀请链接 文本栏 轻点两下来编辑。"
+    },
+    {
+      "action" : "current",
+      "phase" : "submit-invalid-room",
+      "utterance" : "D"
+    },
+    {
+      "action" : "next",
+      "phase" : "submit-invalid-room",
+      "utterance" : "进入方式 、 加入对局 按钮 弹出式按钮 轻点两下来激活选择器"
+    },
+    {
+      "action" : "next",
+      "phase" : "submit-invalid-room",
+      "utterance" : "键盘已显示"
+    },
+    {
+      "action" : "next",
+      "phase" : "submit-invalid-room",
+      "utterance" : "继续 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "read-room-error",
+      "utterance" : "继续 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "read-room-error",
+      "utterance" : "请输入六位房间号或有效的云乐坊间邀请链接。"
+    },
+    {
+      "action" : "current",
+      "phase" : "cancel-room",
+      "utterance" : "请输入六位房间号或有效的云乐坊间邀请链接。"
+    },
+    {
+      "action" : "previous",
+      "phase" : "cancel-room",
+      "utterance" : "邀请链接会保留其中指定的进入方式。进入后会确认房间是否可用，联机需要登录。"
+    },
+    {
+      "action" : "previous",
+      "phase" : "cancel-room",
+      "utterance" : "进入方式 、 加入对局 按钮 弹出式按钮 轻点两下来激活选择器"
+    },
+    {
+      "action" : "previous",
+      "phase" : "cancel-room",
+      "utterance" : "文本栏 正在编辑 BAD 逐字朗读 插入点在结尾 使用转子访问“拼写错误的字词”"
+    },
+    {
+      "action" : "previous",
+      "phase" : "cancel-room",
+      "utterance" : "加入房间 标题"
+    },
+    {
+      "action" : "previous",
+      "phase" : "cancel-room",
+      "utterance" : "取消 按钮"
+    },
+    {
+      "action" : "current-without-navigation",
+      "phase" : "invite-return-focus",
+      "utterance" : "寻乐 标题"
+    },
+    {
+      "action" : "next-from-returned-header",
+      "phase" : "invite-return-focus",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "launch-computer-mode",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "launch-computer-mode",
+      "utterance" : "玩法 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "launch-computer-mode",
+      "utterance" : "搜索游戏或玩法 搜索栏 轻点两下来编辑。"
+    },
+    {
+      "action" : "next",
+      "phase" : "launch-computer-mode",
+      "utterance" : "最近玩过 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "launch-computer-mode",
+      "utterance" : "五子棋 、 电脑对手 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "minimize-game",
+      "utterance" : "五子棋 、 电脑对手 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "minimize-game",
+      "utterance" : "五子棋 、 电脑对手 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "minimize-game",
+      "utterance" : "收起应用 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "resume-game",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "resume-game",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "resume-game",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "resume-game",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "reverse-at-screen-edge",
+      "phase" : "resume-game",
+      "utterance" : "加入房间 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "resume-game",
+      "utterance" : "玩法 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "resume-game",
+      "utterance" : "寻乐 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "resume-game",
+      "utterance" : "搜索游戏或玩法 搜索栏 轻点两下来编辑。"
+    },
+    {
+      "action" : "next",
+      "phase" : "resume-game",
+      "utterance" : "继续游戏 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "resume-game",
+      "utterance" : "五子棋 、 恢复正在运行的游戏 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "minimize-resumed-game",
+      "utterance" : "收起应用 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "workshop-tab",
+      "utterance" : "五子棋 、 恢复正在运行的游戏 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "最近玩过 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "五子棋 、 电脑对手 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "星纸 、 互动教程 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "精选游戏 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "五子棋"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "1–2 人"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "五子棋，电脑对手 按钮 直接进入这个玩法。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "五子棋，同屏双人 按钮 直接进入这个玩法。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "五子棋，邀请联机 变暗 按钮 当前客户端暂未提供这个玩法，可在 Play 中查看。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "在 Play 查看玩法 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "游戏资源 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "飞行棋"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "1–4 人"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "掷骰起飞、跳跃撞机，可单人挑战三个机器人，也支持好友邀请联机。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "飞行棋，好友或机器人 变暗 按钮 当前客户端暂未提供这个玩法，可在 Play 中查看。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "当前客户端暂未提供这些玩法，可在 Play 中查看游戏。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "在 Play 查看玩法 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "游戏资源 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "星纸"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "1–4 人"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "持续滑翔、转向加速与反弹射击；既可在星域竞技，也可与 1–4 名队员合作挑战五阶段 NPC 与黑洞 Boss。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "星纸，互动教程 按钮 直接进入这个玩法。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "星纸，单人远征 按钮 直接进入这个玩法。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "星纸，自由练习 按钮 直接进入这个玩法。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "星纸，邀请联机 变暗 按钮 当前客户端暂未提供这个玩法，可在 Play 中查看。"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "在 Play 查看玩法 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "游戏资源 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "标签页栏 云居 标签 4之1"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "已选定 寻乐 标签 4之2"
+    },
+    {
+      "action" : "next",
+      "phase" : "workshop-tab",
+      "utterance" : "工坊 标签 4之3"
+    },
+    {
+      "action" : "single-tap-visible-heading",
+      "phase" : "workshop-touch-exploration",
+      "utterance" : "工坊 标题"
+    },
+    {
+      "action" : "current",
+      "phase" : "ai-finder",
+      "utterance" : "工坊 标题"
+    },
+    {
+      "action" : "next",
+      "phase" : "ai-finder",
+      "utterance" : "扫描工坊二维码 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "ai-finder",
+      "utterance" : "分类 按钮"
+    },
+    {
+      "action" : "next",
+      "phase" : "ai-finder",
+      "utterance" : "搜索应用、用途或作者 搜索栏 轻点两下来编辑。"
+    },
+    {
+      "action" : "next",
+      "phase" : "ai-finder",
+      "utterance" : "AI 找应用 按钮"
+    },
+    {
+      "action" : "current",
+      "phase" : "assistant-back",
+      "utterance" : "想找什么应用？ 标题"
+    },
+    {
+      "action" : "previous",
+      "phase" : "assistant-back",
+      "utterance" : "新对话 变暗 按钮"
+    },
+    {
+      "action" : "previous",
+      "phase" : "assistant-back",
+      "utterance" : "AI 助手 标题"
+    },
+    {
+      "action" : "previous",
+      "phase" : "assistant-back",
+      "utterance" : "工坊 返回按钮"
+    },
+    {
+      "action" : "current-without-navigation",
+      "phase" : "assistant-return-focus",
+      "utterance" : "AI 找应用 按钮"
+    }
+  ],
+  "kind" : "native-voiceover-navigation",
+  "originallyEnabled" : false,
+  "reduceMotionEnabled" : true,
+  "scope" : "Actual XCUIVoiceOverService focus\/speech with XCTest double-tap directed at the identified control; input text is injected into the VoiceOver-selected field; this does not test blind gesture placement, production identity, or game-content screen-reader support"
+}

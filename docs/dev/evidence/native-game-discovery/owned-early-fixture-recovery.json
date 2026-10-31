@@ -1,0 +1,11 @@
+{
+  "purpose": "Recover only fixture residue after early invalidResource failure and WebKit uninitialized removal crash",
+  "storeID": "1987226B-D9D7-40DE-B0DD-DCF1F9B316A7",
+  "registryPath": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Data/Application/1AF92D48-BEF2-435E-B6FC-CCF3CB2E69A2/tmp/native-game-runtime-7236DBED-22D5-4887-A1EE-F1BC3F1C9B7F/profiles.json",
+  "registrySHA256": "cdf4f1a939ce72a21b950784e34a350692e273192c0defaa5f283fca0c609898",
+  "allowedCleanupTest": "NativeGameRuntimeFixtureCleanupTests/testRemoveOnlyPreviouslyOwnedFixtureStores",
+  "cleanupStatus": "Allowlisted WebKit store confirmed absent by existing API evidence; exact SHA-matched owned filesystem residue removed in current reinstalled container",
+  "filesystemReclaimedBytes": 1165,
+  "absenceProof": "/tmp/yunle-native-games.uGZuY9/restore-cache-acceptance-attachments/2247996B-F975-4672-956A-40ED9F010E6D.txt",
+  "checkedAt": "2026-10-29T04:22:11.973328+08:00"
+}

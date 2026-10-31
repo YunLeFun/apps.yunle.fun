@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-b61-dcd09-runtime17-one-execution",
+  "atUTC": "2026-10-29T19:28:10.935032+00:00",
+  "passed": false,
+  "XCTest": {
+    "passed": 15,
+    "failed": 2,
+    "skipped": 0,
+    "total": 17,
+    "elapsedCommandSeconds": 159.164,
+    "testExecutionInvocationCount": 1,
+    "retryEnabled": false
+  },
+  "methods": [
+    {
+      "name": "testCapacityEvictsPausedGameAndReopensWithStoredData",
+      "status": "failed",
+      "seconds": 28.503
+    },
+    {
+      "name": "testClosedAndFailedRoomsReenterWithNewLaunchWhileKeepingProfileAndStorage",
+      "status": "passed",
+      "seconds": 11.511
+    },
+    {
+      "name": "testClosedOrUnconfirmedFailedRoomOpensDifferentInviteAfterMinimize",
+      "status": "passed",
+      "seconds": 3.338
+    },
+    {
+      "name": "testClosedRoomFromLegacyGameProfileKeepsThatProfileOnReentry",
+      "status": "passed",
+      "seconds": 1.651
+    },
+    {
+      "name": "testConnectingWaitingAndCompletedRoomsKeepTheirLiveSession",
+      "status": "passed",
+      "seconds": 0.854
+    },
+    {
+      "name": "testDifferentInviteDoesNotInheritLegacySingleGameProfile",
+      "status": "passed",
+      "seconds": 13.745
+    },
+    {
+      "name": "testDifferentInvitePreservesLiveAndRecoverableRoomSessions",
+      "status": "passed",
+      "seconds": 4.39
+    },
+    {
+      "name": "testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext",
+      "status": "passed",
+      "seconds": 0.787
+    },
+    {
+      "name": "testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation",
+      "status": "failed",
+      "seconds": 52.956
+    },
+    {
+      "name": "testFailedRoomBeforeFirstConfirmationCanBeOpenedAgain",
+      "status": "passed",
+      "seconds": 1.583
+    },
+    {
+      "name": "testFixtureCleanupBeforeOpeningFirstGamePage",
+      "status": "passed",
+      "seconds": 0.123
+    },
+    {
+      "name": "testMarketDatabaseIdentityAndCanonicalGameSlugReuseOneSession",
+      "status": "passed",
+      "seconds": 0.746
+    },
+    {
+      "name": "testMemoryWarningEvictsPausedGameAndReopensWithStoredData",
+      "status": "passed",
+      "seconds": 10.473
+    },
+    {
+      "name": "testMemoryWarningWithoutForegroundKeepsMostRecentPausedGame",
+      "status": "passed",
+      "seconds": 10.577
+    },
+    {
+      "name": "testRealWebKitMessageChecksOriginAndOperationBeforeRecordingReadyOnce",
+      "status": "passed",
+      "seconds": 3.964
+    },
+    {
+      "name": "testRoomInviteDoesNotReplaceOrdinaryPlayPage",
+      "status": "passed",
+      "seconds": 1.783
+    },
+    {
+      "name": "testRoomSentinelResolvesTheReportedGameAndResumesWithoutDuplicateSession",
+      "status": "passed",
+      "seconds": 0.792
+    }
+  ],
+  "failureEntries": [
+    {
+      "test": "NativeGameRuntimeTests/testCapacityEvictsPausedGameAndReopensWithStoredData()",
+      "reportedFailure": "Fixture WebKit profile cleanup: Data store is in use (by network process); livefixtureowners=[]",
+      "sourceFile": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+      "sourceLine": 2362
+    },
+    {
+      "test": "NativeGameRuntimeTests/testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation()",
+      "reportedFailure": "Fixture WebKit profile cleanup: Data store is in use (by network process); livefixtureowners=[]",
+      "sourceFile": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+      "sourceLine": 2362
+    }
+  ],
+  "failureScope": "Both reported failures are fixture WebKit namedstore teardown; no complete17green claim andno rerun performed. This does not change the independently completed priorM3 measurements.",
+  "sourceUnchanged": true,
+  "productsUnchanged": true,
+  "sourceGuards": {
+    "apps/mobile/ios/App/App/WebViewController.swift": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "dcd09c65ffb400213fb785bbd5203da295567336171c53fc3cabb3f88cf880ab"
+  },
+  "productFiles": {
+    "YunleFun": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+    "YunleFun.debug.dylib": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+    "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+    "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+    "PlugIns/YunleFunTests.xctest/YunleFunTests": "47b771779718bf2623781eb071d2279115520ac311bba93c20463b415ade5818"
+  },
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "runReceiptSHA256": "06b87a9e4201df21df7a5ff3bd89a6b19b8ff2bd2354bd9dc7c0bfe304181baf",
+  "testSummarySHA256": "b1ed275c845c4564d854aaec9366da4ebbbf61700acce0b427df2d90dab6d9e2",
+  "privateXCResultRetained": true,
+  "fixtureCleanupOwnershipAttachmentsPreserved": 2,
+  "fixtureDirectoryAndProfileCleanupUnresolved": true,
+  "priorCLIRejectedBeforeTests": {
+    "exitCode": 64,
+    "testsStarted": 0,
+    "error": "-test-iterations1 is invalid in currentXcode; removedflag means defaultsingleexecution, not retry of failedtests"
+  },
+  "nextAction": "Review preserved fixtureownership andteardown failure separately; do notmarkcurrent17 orwholeM5 green."
+}

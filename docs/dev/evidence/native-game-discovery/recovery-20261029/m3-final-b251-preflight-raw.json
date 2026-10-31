@@ -1,0 +1,1034 @@
+{
+  "coldDefinition" : "Fresh WKWebView; only this fixture profile's HTTP memory\/disk caches cleared before the tap; WebKit process and OS caches are not reset",
+  "completed" : true,
+  "expectedSampleCount" : 6,
+  "games" : [
+    "gomoku",
+    "paper-star"
+  ],
+  "historicalCommitBaseline" : false,
+  "kind" : "same-build-entry-comparison-preflight",
+  "legacyAutomationPollMilliseconds" : 20,
+  "navigationModel" : "Poll public visible links every 20 ms and click as soon as their DOM conditions pass; real SPA or full-document navigation is accepted. This is not an average human think-time model.",
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "preparedDefinition" : "End the preceding session, clear the same profile's HTTP caches, prepare and verify its current manifest, then open fresh WebViews without clearing the prepared cache",
+  "resourceCoverage" : "Each departing document is frozen immediately before its actual link click, plus the final genuine engine-ready snapshot. Retain the latest snapshot per timeOrigin to avoid SPA double counting. Requests still pending at a cutoff or completing between click and unload may be absent; this is not complete network-path coverage.",
+  "results" : [
+    {
+      "completed" : true,
+      "gameId" : "gomoku",
+      "modeId" : "computer",
+      "p50Milliseconds" : 2498.5032916665659,
+      "p90Milliseconds" : 2498.5032916665659,
+      "resourceVersion" : "841defb83b8ebdb8efbfbedc3395c92ce620c198d75f5350c5262fd7433a06cd",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 2,
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 768,
+                    "domInteractiveMilliseconds" : 175,
+                    "durationMilliseconds" : 0,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 0,
+                    "responseEndMilliseconds" : 37,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 50,
+                "resourceGroups" : [
+                  {
+                    "count" : 29,
+                    "decodedBodySizeBytes" : 607960,
+                    "encodedBodySizeBytes" : 607960,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 74,
+                    "resourceDurationSumMilliseconds" : 1999,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 29,
+                    "transferSizeBytes" : 616660,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 545,
+                    "resourceDurationSumMilliseconds" : 545,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 75,
+                    "resourceDurationSumMilliseconds" : 75,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 75,
+                    "resourceDurationSumMilliseconds" : 75,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 16,
+                    "decodedBodySizeBytes" : 1012000,
+                    "encodedBodySizeBytes" : 1012000,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 37,
+                    "resourceDurationSumMilliseconds" : 442,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 16,
+                    "transferSizeBytes" : 1016800,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 407,
+                    "resourceDurationSumMilliseconds" : 407,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 13,
+                    "resourceDurationSumMilliseconds" : 13,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 844,
+                "timeOrigin" : 1793295296832
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 2202.040374999342,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 844
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295296832
+            },
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/gomoku\/computer",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 13380,
+                    "domContentLoadedEventEndMilliseconds" : 42,
+                    "domInteractiveMilliseconds" : 39,
+                    "durationMilliseconds" : 48,
+                    "encodedBodySizeBytes" : 13380,
+                    "loadEventEndMilliseconds" : 48,
+                    "responseEndMilliseconds" : 12,
+                    "transferSizeBytes" : 13680,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 56,
+                "resourceGroups" : [
+                  {
+                    "count" : 34,
+                    "decodedBodySizeBytes" : 21532,
+                    "encodedBodySizeBytes" : 21532,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 17,
+                    "resourceDurationSumMilliseconds" : 140,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 34,
+                    "transferSizeBytes" : 24832,
+                    "zeroTransferSizeCount" : 23
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 2449,
+                    "encodedBodySizeBytes" : 2449,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 9,
+                    "resourceDurationSumMilliseconds" : 13,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 3049,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 16,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 0,
+                    "resourceDurationSumMilliseconds" : 0,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 16,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 16
+                  },
+                  {
+                    "count" : 3,
+                    "decodedBodySizeBytes" : 69,
+                    "encodedBodySizeBytes" : 69,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 9,
+                    "resourceDurationSumMilliseconds" : 20,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 3,
+                    "transferSizeBytes" : 969,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 230,
+                "timeOrigin" : 1793295297754
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/gomoku",
+                  "nativeObservedMilliseconds" : 2414.7591666660446,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 130
+                },
+                {
+                  "documentPath" : "\/games\/gomoku\/computer",
+                  "nativeObservedMilliseconds" : 2539.5262083329726,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 230
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295297754
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 2498.5032916665659,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 2202.040374999342,
+            "modeLinkClickedMilliseconds" : 2414.7591666660446
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 1646300,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 106,
+            "resourceDurationSumMilliseconds" : 3729,
+            "transferSizeBytes" : 1665500,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : null,
+          "rendererReady" : null,
+          "rendererReadyObservation" : null,
+          "sample" : 1
+        }
+      ],
+      "stage" : "same-build-home-detail-mode-cold"
+    },
+    {
+      "completed" : true,
+      "gameId" : "gomoku",
+      "modeId" : "computer",
+      "p50Milliseconds" : 876.44145833291986,
+      "p90Milliseconds" : 876.44145833291986,
+      "resourceVersion" : "841defb83b8ebdb8efbfbedc3395c92ce620c198d75f5350c5262fd7433a06cd",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/gomoku\/computer",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 51624,
+                    "domContentLoadedEventEndMilliseconds" : 133,
+                    "domInteractiveMilliseconds" : 60,
+                    "durationMilliseconds" : 158,
+                    "encodedBodySizeBytes" : 51624,
+                    "loadEventEndMilliseconds" : 158,
+                    "responseEndMilliseconds" : 4,
+                    "transferSizeBytes" : 51924,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 39,
+                "resourceGroups" : [
+                  {
+                    "count" : 28,
+                    "decodedBodySizeBytes" : 593336,
+                    "encodedBodySizeBytes" : 593336,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 41,
+                    "resourceDurationSumMilliseconds" : 1039,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 28,
+                    "transferSizeBytes" : 601736,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 43,
+                    "resourceDurationSumMilliseconds" : 49,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 1697,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 43,
+                    "resourceDurationSumMilliseconds" : 43,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 7,
+                    "decodedBodySizeBytes" : 373592,
+                    "encodedBodySizeBytes" : 373592,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 10,
+                    "resourceDurationSumMilliseconds" : 59,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 7,
+                    "transferSizeBytes" : 375692,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 4,
+                    "resourceDurationSumMilliseconds" : 4,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 239,
+                "timeOrigin" : 1793295298738
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/gomoku\/computer",
+                  "nativeObservedMilliseconds" : 911.61629166526836,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 239
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295298738
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 876.44145833291986,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 969218,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 39,
+            "resourceDurationSumMilliseconds" : 1194,
+            "transferSizeBytes" : 980918,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : null,
+          "rendererReady" : null,
+          "rendererReadyObservation" : null,
+          "sample" : 1
+        }
+      ],
+      "stage" : "direct-mode-cold"
+    },
+    {
+      "completed" : true,
+      "gameId" : "gomoku",
+      "modeId" : "computer",
+      "p50Milliseconds" : 915.83420833376294,
+      "p90Milliseconds" : 915.83420833376294,
+      "resourceVersion" : "841defb83b8ebdb8efbfbedc3395c92ce620c198d75f5350c5262fd7433a06cd",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/gomoku\/computer",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 51624,
+                    "domContentLoadedEventEndMilliseconds" : 112,
+                    "domInteractiveMilliseconds" : 39,
+                    "durationMilliseconds" : 124,
+                    "encodedBodySizeBytes" : 51624,
+                    "loadEventEndMilliseconds" : 124,
+                    "responseEndMilliseconds" : 5,
+                    "transferSizeBytes" : 51924,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 39,
+                "resourceGroups" : [
+                  {
+                    "count" : 28,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 67,
+                    "resourceDurationSumMilliseconds" : 1509,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 28,
+                    "transferSizeBytes" : 6600,
+                    "zeroTransferSizeCount" : 6
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 67,
+                    "resourceDurationSumMilliseconds" : 70,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 600,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 66,
+                    "resourceDurationSumMilliseconds" : 66,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 7,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 27,
+                    "resourceDurationSumMilliseconds" : 130,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 7,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 6
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 19,
+                    "resourceDurationSumMilliseconds" : 19,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 198,
+                "timeOrigin" : 1793295302167
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/gomoku\/computer",
+                  "nativeObservedMilliseconds" : 955.25170833388984,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 198
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295302167
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 915.83420833376294,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 0,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 39,
+            "resourceDurationSumMilliseconds" : 1794,
+            "transferSizeBytes" : 8100,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : null,
+          "rendererReady" : null,
+          "rendererReadyObservation" : null,
+          "sample" : 1
+        }
+      ],
+      "stage" : "direct-mode-prepared"
+    },
+    {
+      "completed" : true,
+      "gameId" : "paper-star",
+      "modeId" : "local",
+      "p50Milliseconds" : 4493.306083333664,
+      "p90Milliseconds" : 4493.306083333664,
+      "resourceVersion" : "32ea539cf8b84317075f3130343b867b04032560b124b6a58918a6259707b9d9",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 23113,
+                    "domContentLoadedEventEndMilliseconds" : 221,
+                    "domInteractiveMilliseconds" : 83,
+                    "durationMilliseconds" : 304,
+                    "encodedBodySizeBytes" : 23113,
+                    "loadEventEndMilliseconds" : 304,
+                    "responseEndMilliseconds" : 8,
+                    "transferSizeBytes" : 23413,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 84,
+                "resourceGroups" : [
+                  {
+                    "count" : 54,
+                    "decodedBodySizeBytes" : 3325958,
+                    "encodedBodySizeBytes" : 3325958,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 79,
+                    "resourceDurationSumMilliseconds" : 2129,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 54,
+                    "transferSizeBytes" : 3342158,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 80,
+                    "resourceDurationSumMilliseconds" : 80,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 77,
+                    "resourceDurationSumMilliseconds" : 77,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 81,
+                    "resourceDurationSumMilliseconds" : 81,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 17,
+                    "decodedBodySizeBytes" : 1111634,
+                    "encodedBodySizeBytes" : 1111634,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 83,
+                    "resourceDurationSumMilliseconds" : 854,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 17,
+                    "transferSizeBytes" : 1116734,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 4,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 334,
+                    "resourceDurationSumMilliseconds" : 573,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 4,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 4
+                  },
+                  {
+                    "count" : 5,
+                    "decodedBodySizeBytes" : 295,
+                    "encodedBodySizeBytes" : 295,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 14,
+                    "resourceDurationSumMilliseconds" : 37,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 5,
+                    "transferSizeBytes" : 1795,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 5,
+                    "resourceDurationSumMilliseconds" : 5,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3819,
+                "timeOrigin" : 1793295303215
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/",
+                  "nativeObservedMilliseconds" : 1045.7289166661212,
+                  "phase" : "before-home-to-detail-click",
+                  "snapshotAtMilliseconds" : 370
+                },
+                {
+                  "documentPath" : "\/games\/paper-star",
+                  "nativeObservedMilliseconds" : 1197.1310833341704,
+                  "phase" : "before-detail-to-mode-click",
+                  "snapshotAtMilliseconds" : 507
+                },
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4523.2336250010121,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3819
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295303215
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4493.306083333664,
+          "navigationPhases" : {
+            "homeLinkClickedMilliseconds" : 1045.7289166661212,
+            "modeLinkClickedMilliseconds" : 1197.1310833341704
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 4440218,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 84,
+            "resourceDurationSumMilliseconds" : 3836,
+            "transferSizeBytes" : 4463918,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 1331,
+            "phase" : "countdown"
+          },
+          "sample" : 1
+        }
+      ],
+      "stage" : "same-build-home-detail-mode-cold"
+    },
+    {
+      "completed" : true,
+      "gameId" : "paper-star",
+      "modeId" : "local",
+      "p50Milliseconds" : 7987.4581250005576,
+      "p90Milliseconds" : 7987.4581250005576,
+      "resourceVersion" : "32ea539cf8b84317075f3130343b867b04032560b124b6a58918a6259707b9d9",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 103,
+                    "domInteractiveMilliseconds" : 81,
+                    "durationMilliseconds" : 149,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 149,
+                    "responseEndMilliseconds" : 13,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 3281792,
+                    "encodedBodySizeBytes" : 3281792,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 70,
+                    "resourceDurationSumMilliseconds" : 1726,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 3293792,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 56,
+                    "resourceDurationSumMilliseconds" : 56,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 56,
+                    "resourceDurationSumMilliseconds" : 56,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 51,
+                    "resourceDurationSumMilliseconds" : 89,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 3,
+                    "resourceDurationSumMilliseconds" : 6,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 119130,
+                    "encodedBodySizeBytes" : 119130,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 70,
+                    "resourceDurationSumMilliseconds" : 130,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 119730,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 41,
+                    "encodedBodySizeBytes" : 41,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 2,
+                    "resourceDurationSumMilliseconds" : 2,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 341,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3238,
+                "timeOrigin" : 1793295311915
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 8015.913791667117,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3238
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295311915
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 7987.4581250005576,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 3403341,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 2065,
+            "transferSizeBytes" : 3417441,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 565,
+            "phase" : "countdown"
+          },
+          "sample" : 1
+        }
+      ],
+      "stage" : "direct-mode-cold"
+    },
+    {
+      "completed" : true,
+      "gameId" : "paper-star",
+      "modeId" : "local",
+      "p50Milliseconds" : 4033.7567083333852,
+      "p90Milliseconds" : 4033.7567083333852,
+      "resourceVersion" : "32ea539cf8b84317075f3130343b867b04032560b124b6a58918a6259707b9d9",
+      "samples" : [
+        {
+          "completeNetworkPathCoverage" : false,
+          "documentCount" : 1,
+          "documents" : [
+            {
+              "latestSnapshot" : {
+                "documentPath" : "\/games\/paper-star\/local",
+                "mainDocumentOnly" : true,
+                "navigation" : [
+                  {
+                    "decodedBodySizeBytes" : 8360,
+                    "domContentLoadedEventEndMilliseconds" : 72,
+                    "domInteractiveMilliseconds" : 49,
+                    "durationMilliseconds" : 116,
+                    "encodedBodySizeBytes" : 8360,
+                    "loadEventEndMilliseconds" : 116,
+                    "responseEndMilliseconds" : 7,
+                    "transferSizeBytes" : 8660,
+                    "type" : "navigate"
+                  }
+                ],
+                "overflowCount" : 0,
+                "resourceCount" : 49,
+                "resourceGroups" : [
+                  {
+                    "count" : 40,
+                    "decodedBodySizeBytes" : 69,
+                    "encodedBodySizeBytes" : 69,
+                    "initiatorType" : "link",
+                    "resourceDurationMaxMilliseconds" : 49,
+                    "resourceDurationSumMilliseconds" : 1283,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 40,
+                    "transferSizeBytes" : 9069,
+                    "zeroTransferSizeCount" : 10
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1097,
+                    "encodedBodySizeBytes" : 1097,
+                    "initiatorType" : "other",
+                    "resourceDurationMaxMilliseconds" : 19,
+                    "resourceDurationSumMilliseconds" : 19,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1397,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 1193,
+                    "encodedBodySizeBytes" : 1193,
+                    "initiatorType" : "img",
+                    "resourceDurationMaxMilliseconds" : 21,
+                    "resourceDurationSumMilliseconds" : 21,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 1493,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 43,
+                    "resourceDurationSumMilliseconds" : 78,
+                    "scope" : "cross-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 0,
+                    "zeroTransferSizeCount" : 2
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 88,
+                    "encodedBodySizeBytes" : 88,
+                    "initiatorType" : "fetch",
+                    "resourceDurationMaxMilliseconds" : 4,
+                    "resourceDurationSumMilliseconds" : 7,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 688,
+                    "zeroTransferSizeCount" : 0
+                  },
+                  {
+                    "count" : 2,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "css",
+                    "resourceDurationMaxMilliseconds" : 16,
+                    "resourceDurationSumMilliseconds" : 29,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 2,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 1
+                  },
+                  {
+                    "count" : 1,
+                    "decodedBodySizeBytes" : 0,
+                    "encodedBodySizeBytes" : 0,
+                    "initiatorType" : "script",
+                    "resourceDurationMaxMilliseconds" : 34,
+                    "resourceDurationSumMilliseconds" : 34,
+                    "scope" : "same-origin",
+                    "transferSizeAvailableCount" : 1,
+                    "transferSizeBytes" : 300,
+                    "zeroTransferSizeCount" : 0
+                  }
+                ],
+                "snapshotAtMilliseconds" : 3227,
+                "timeOrigin" : 1793295319371
+              },
+              "observations" : [
+                {
+                  "documentPath" : "\/games\/paper-star\/local",
+                  "nativeObservedMilliseconds" : 4066.6551249996701,
+                  "phase" : "actual-engine-ready",
+                  "snapshotAtMilliseconds" : 3227
+                }
+              ],
+              "requestsPendingAfterCutoffNotObserved" : true,
+              "timeOrigin" : 1793295319371
+            }
+          ],
+          "nativeTapToReadyMilliseconds" : 4033.7567083333852,
+          "navigationPhases" : {
+
+          },
+          "observedResourcesAcrossDocuments" : {
+            "documentNavigationEntriesReportedSeparately" : true,
+            "encodedBodySizeBytes" : 2447,
+            "latestSnapshotPerDocumentOnly" : true,
+            "parallelDurationSumIsNotWallTime" : true,
+            "resourceCount" : 49,
+            "resourceDurationSumMilliseconds" : 1471,
+            "transferSizeBytes" : 13247,
+            "zeroTransferDoesNotProveCacheHit" : true
+          },
+          "paperStarPhase" : "playing",
+          "rendererReady" : "true",
+          "rendererReadyObservation" : {
+            "atMilliseconds" : 543,
+            "phase" : "countdown"
+          },
+          "sample" : 1
+        }
+      ],
+      "stage" : "direct-mode-prepared"
+    }
+  ],
+  "sameNamedProfileAcrossStagesAndGames" : true,
+  "samplesPerStage" : 1,
+  "scope" : "Current identical public build; automated Home → detail → mode versus direct mode, with and without verified resource preparation",
+  "timingNotes" : "Native uptime tap-to-engine-ready and Web performance timing have separate clocks. Native timing includes test observer collection and automated-link polling overhead. Resource timing is main-document-only; parallel duration sums are not wall time; zero transferSize does not prove a cache hit."
+}

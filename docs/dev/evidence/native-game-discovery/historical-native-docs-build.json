@@ -1,0 +1,20 @@
+{
+  "schema": "historical-native-docs-build-v1",
+  "status": "passed",
+  "exitCode": 0,
+  "elapsedSeconds": 5.865,
+  "command": "./node_modules/.bin/vitepress build docs --outDir <task-owned-temp>",
+  "sourceSHA256": {
+    "docs/dev/native-game-discovery-implementation.md": "36d0a34647e523d5f56c389163171085d37a47f2b2d8d41a5aed4dd2627ea2e7",
+    "specs/native-game-discovery/tasks.md": "aaa7e9acbf97aed17e4775591d7d51f0d16397ebcc6ee5d01f926ff8351b93ce"
+  },
+  "sourcesStableDuringBuild": true,
+  "log": "/tmp/yunle-native-games.uGZuY9/historical-native-docs-build.log",
+  "logSHA256": "22d44b3126dfc8c60d47f5b78a7caa5fc038f8cc1301f3e1ffebc900bd55bebc",
+  "outputPath": "/tmp/yunle-native-games.uGZuY9/historical-native-docs.2i6n4v64",
+  "outputLogicalBytesReclaimed": 10195495,
+  "outputAllocatedBytesReclaimed": 10981376,
+  "outputAbsentAfterFinally": true,
+  "recordedAt": "2026-10-29T08:18:56.702679+08:00",
+  "scope": "Existing installed binary, full documentation link/buildcheck. No dependency installation/trustoverride. Output reclaimed in finally; source/results/current main dependencies preserved."
+}

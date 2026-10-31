@@ -534,7 +534,7 @@ private final class HomeStateFixture {
             iconHosts = Set(urls.compactMap(\.host))
             for host in iconHosts { IconHTTPProtocol.register(host, fixture) }
             let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [IconHTTPProtocol.self]
-            iconPipeline = ApplicationImagePipeline(session: URLSession(configuration: config))
+            iconPipeline = ApplicationImagePipeline(session: URLSession(configuration: config), cacheDirectory: nil)
             for asset in assets {
                 let candidate = ApplicationIconCandidate(url: URL(string: asset.url)!, role: asset.role, revision: asset.revision)
                 _ = try await iconPipeline.load([candidate], pixelSize: Int(HomeGridMetrics.iconSize * UIScreen.main.scale))

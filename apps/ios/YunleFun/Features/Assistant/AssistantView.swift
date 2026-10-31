@@ -414,7 +414,10 @@ private struct AssistantReply: View {
             let layout = dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(spacing: 12))
             layout {
-                NavigationLink(value: app) {
+                // The assistant is a view destination; keep card details on that same visible stack.
+                NavigationLink {
+                    ApplicationDetailView(application: app)
+                } label: {
                     VStack(alignment: .leading, spacing: 6) {
                         ApplicationRow(application: app)
                         if let reason = card.reason {

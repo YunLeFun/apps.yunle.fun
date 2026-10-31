@@ -48,6 +48,11 @@ struct WebAppMenuPage {
     let isCurrent: () -> Bool
 }
 
+struct WebGameInteractionSettings: Codable, Equatable {
+    var allowsPageBounce = false
+    var allowsLongPress = false
+}
+
 /// 自定义网页容器，按 displayMode 分两种形态：
 /// 沉浸式 = 无导航栏，网页全屏平铺，右上角悬浮小程序风格胶囊（更多 | 关闭），
 /// 可后退时左上角出现悬浮返回键（官方应用声明专属）；
@@ -86,6 +91,40 @@ class WebViewController: UIViewController {
     var onDetail: ((String) -> Void)?
     /// 可信页面请求宿主代为签发一次性 SSO code；宿主不会向页面暴露自身 token。
     var onAuthorizationRequest: ((String, String, [String: Any]) -> Void)?
+    /// Optional narrow lifecycle channel for the native game host. The host
+    /// binds each message to its own launch ID, game, mode and account boundary.
+    var onGameLifecycleMessage: (([String: Any], URL) -> Void)?
+    var onGameNavigationFailure: (() -> Void)?
+    var publicLinkURL: ((URL) -> URL?)?
+    var showsApplicationDetails = true
+    private var gameLoadingFailureView: UIView?
+    var gameLifecycleOrigin: URL?
+    var preferredGameOrientation: String?
+    /// Set before loading the view for native game sessions; editable fields retain text interaction.
+    var usesGameInteractionPolicy = false
+    var gameInteractionSettings = WebGameInteractionSettings() {
+        didSet {
+            guard oldValue != gameInteractionSettings, usesGameInteractionPolicy,
+                  isViewLoaded, let webView else { return }
+            applyGameInteractionSettings()
+            installGameInteractionScript(webView.configuration.userContentController)
+            webView.evaluateJavaScript(gameInteractionScript, completionHandler: nil)
+        }
+    }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        switch preferredGameOrientation {
+        case "portrait": return .portrait
+        case "landscape": return .landscape
+        default: return super.supportedInterfaceOrientations
+        }
+    }
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        switch preferredGameOrientation {
+        case "portrait": return .portrait
+        case "landscape": return .landscapeRight
+        default: return super.preferredInterfaceOrientationForPresentation
+        }
+    }
     /// Native hosts provide first-party screens without loading a web shell.
     var localPageFactory: ((String, String, String?) -> UIViewController)?
     var localMenuPageFactory: ((URL?, @escaping (WebAppMenuAction) -> Void) -> WebAppMenuPage?)?
@@ -245,6 +284,7 @@ class WebViewController: UIViewController {
         webView.underPageBackgroundColor = .systemBackground
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.allowsBackForwardNavigationGestures = true
+        applyGameInteractionSettings()
         webView.navigationDelegate = self
         webView.uiDelegate = self
         view.addSubview(webView)
@@ -314,7 +354,7 @@ class WebViewController: UIViewController {
         more.accessibilityLabel = "更多操作"
         more.accessibilityIdentifier = "runtime.more"
         navigationItem.rightBarButtonItem = more
-        if !isDetailSheet, appInfo != nil {
+        if !isDetailSheet, appInfo != nil, showsApplicationDetails {
             navigationItem.titleMenuProvider = { [weak self] _ in
                 UIMenu(children: [UIAction(title: "应用详情", image: UIImage(systemName: "info.circle")) { [weak self] _ in
                     self?.titleTapped()
@@ -380,7 +420,7 @@ class WebViewController: UIViewController {
         ])
 
         // 应用容器（非详情 sheet）：点标题进站内详情页
-        if !isDetailSheet, appInfo != nil {
+        if !isDetailSheet, appInfo != nil, showsApplicationDetails {
             label.isUserInteractionEnabled = true
             label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(titleTapped)))
         }
@@ -389,15 +429,203 @@ class WebViewController: UIViewController {
         titleLabel = label
     }
 
+    private func applyGameInteractionSettings() {
+        guard usesGameInteractionPolicy else { return }
+        webView.scrollView.bounces = gameInteractionSettings.allowsPageBounce
+        webView.scrollView.alwaysBounceVertical = false
+        webView.scrollView.alwaysBounceHorizontal = false
+        webView.allowsLinkPreview = gameInteractionSettings.allowsLongPress
+    }
+
+    private static let gameInteractionScriptMarker = "/* yunle-game-interactions */"
+
+    private var gameInteractionScript: String {
+        """
+        \(Self.gameInteractionScriptMarker)
+        (() => {
+          const settings = {allowsPageBounce: \(gameInteractionSettings.allowsPageBounce), allowsLongPress: \(gameInteractionSettings.allowsLongPress)};
+          if (window.__ylfApplyGameInteractions) {
+            window.__ylfApplyGameInteractions(settings);
+            return;
+          }
+          const apply = value => {
+            if (!document.documentElement) return;
+            const id = 'ylf-native-game-interactions';
+            let style = document.getElementById(id);
+            let css = value.allowsPageBounce ? '' : 'html, body { overscroll-behavior: none !important; }';
+            if (!value.allowsLongPress) css += `
+              * {
+                -webkit-user-select: none !important;
+                user-select: none !important;
+                -webkit-touch-callout: none !important;
+              }
+              a, img { -webkit-user-drag: none !important; }
+              input, textarea,
+              [contenteditable]:not([contenteditable="false"]),
+              [contenteditable]:not([contenteditable="false"]) * {
+                -webkit-user-select: text !important;
+                user-select: text !important;
+                -webkit-touch-callout: default !important;
+              }
+            `;
+            if (css) {
+              if (!style) {
+                style = document.createElement('style');
+                style.id = id;
+                (document.head || document.documentElement).appendChild(style);
+              }
+              style.textContent = css;
+            } else if (style) style.remove();
+            for (let i = 0; i < window.frames.length; i++) {
+              window.frames[i].postMessage({type: 'ylf-game-interactions', settings: value}, '*');
+            }
+          };
+          window.__ylfApplyGameInteractions = apply;
+          window.addEventListener('message', event => {
+            if (event.source !== window.parent || !event.data || event.data.type !== 'ylf-game-interactions') return;
+            const value = event.data.settings;
+            if (value && typeof value.allowsPageBounce === 'boolean' && typeof value.allowsLongPress === 'boolean') apply(value);
+          });
+          apply(settings);
+        })();
+        """
+    }
+
+    private func installGameInteractionScript(_ controller: WKUserContentController) {
+        // Replace only our policy script, preserving the host bridge and lifecycle scripts.
+        let retained = controller.userScripts.filter { !$0.source.hasPrefix(Self.gameInteractionScriptMarker) }
+        controller.removeAllUserScripts()
+        retained.forEach { controller.addUserScript($0) }
+        controller.addUserScript(WKUserScript(source: gameInteractionScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+    }
+
     /// 注入给页面的宿主 JSAPI（window.ylf）。
     /// 传输层只有一条 invoke(method, params) -> Promise 通道（基于 WKScriptMessageHandlerWithReply，
     /// 原生 replyHandler 直接驱动 Promise resolve/reject），具名方法都是其上的薄糖衣；
     /// 后续新增能力只需在 handleJSAPI 加 case，无需改传输层。
     private func setupJSBridge(_ controller: WKUserContentController) {
+        if usesGameInteractionPolicy {
+            installGameInteractionScript(controller)
+        }
         controller.addScriptMessageHandler(
             WeakScriptMessageHandler(delegate: self), contentWorld: .page, name: "ylf")
         controller.addUserScript(WKUserScript(
             source: YunleHostBridgeScript.source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        if onGameLifecycleMessage != nil {
+            #if DEBUG
+            if gameLifecycleOrigin?.absoluteString == "http://127.0.0.1:18146/" {
+                controller.addUserScript(WKUserScript(source: "window.__ylfGameHostPreviewOrigin='http://127.0.0.1:18146';",
+                                                      injectionTime: .atDocumentStart, forMainFrameOnly: true))
+            }
+            #endif
+            controller.add(GameLifecycleMessageHandler { [weak self] message in
+                guard let self, message.webView === self.webView, message.frameInfo.isMainFrame,
+                      let body = message.body as? [String: Any],
+                      JSONSerialization.isValidJSONObject(body),
+                      let data = try? JSONSerialization.data(withJSONObject: body), data.count <= 8192 else { return }
+                let origin = message.frameInfo.securityOrigin
+                let expected = self.gameLifecycleOrigin ?? URL(string: "https://play.yunle.fun/")!
+                var allowed = expected.absoluteString == "https://play.yunle.fun/"
+                #if DEBUG
+                allowed = allowed || expected.absoluteString == "http://127.0.0.1:18146/"
+                #endif
+                let expectedPort = expected.port ?? (expected.scheme == "https" ? 443 : 80)
+                guard allowed, origin.protocol == expected.scheme, origin.host.lowercased() == expected.host,
+                      origin.port == expectedPort || (origin.port == 0 && expected.port == nil),
+                      let source = message.frameInfo.request.url,
+                      source.scheme == expected.scheme, source.host?.lowercased() == expected.host,
+                      (source.port ?? (source.scheme == "https" ? 443 : 80)) == expectedPort,
+                      source.user == nil, source.password == nil else { return }
+                self.onGameLifecycleMessage?(body, source)
+            }, name: "ylfGameLifecycle")
+        }
+    }
+
+    private func showGameLoadingFailure() {
+        guard onGameLifecycleMessage != nil, gameLoadingFailureView == nil else { return }
+        onGameNavigationFailure?()
+        let overlay = UIView()
+        overlay.backgroundColor = .systemBackground
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        overlay.accessibilityIdentifier = "games.loading-failure"
+        let title = UILabel()
+        title.text = "游戏暂时无法加载"
+        title.font = .preferredFont(forTextStyle: .headline)
+        title.adjustsFontForContentSizeCategory = true
+        title.numberOfLines = 0
+        let message = UILabel()
+        message.text = "请检查网络后重试，也可以返回寻乐选择其他游戏。"
+        message.font = .preferredFont(forTextStyle: .body)
+        message.adjustsFontForContentSizeCategory = true
+        message.textColor = .secondaryLabel
+        message.numberOfLines = 0
+        let retry = UIButton(type: .system, primaryAction: UIAction(title: "重新加载") { [weak self] _ in
+            guard let self else { return }
+            self.hideGameLoadingFailure()
+            // A terminated process may clear url while retaining the current
+            // SPA history item. Recover that destination with a fresh document;
+            // a cached error response can otherwise finish as an empty page.
+            if let url = self.webView.url ?? self.webView.backForwardList.currentItem?.url ?? self.url {
+                self.webView.load(URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData))
+            }
+        })
+        retry.accessibilityIdentifier = "games.loading-retry"
+        let close = UIButton(type: .system, primaryAction: UIAction(title: "返回寻乐") { [weak self] _ in self?.closeTapped() })
+        close.accessibilityIdentifier = "games.loading-close"
+        for button in [retry, close] {
+            button.titleLabel?.font = .preferredFont(forTextStyle: .body)
+            button.titleLabel?.adjustsFontForContentSizeCategory = true
+        }
+        let stack = UIStackView(arrangedSubviews: [title, message, retry, close])
+        stack.axis = .vertical
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.alwaysBounceVertical = true
+        let content = UIView()
+        content.translatesAutoresizingMaskIntoConstraints = false
+        overlay.addSubview(scroll)
+        scroll.addSubview(content)
+        content.addSubview(stack)
+        view.addSubview(overlay)
+        let fittingHeight = content.heightAnchor.constraint(equalTo: scroll.frameLayoutGuide.heightAnchor)
+        fittingHeight.priority = .defaultLow
+        let fittingWidth = stack.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -48)
+        fittingWidth.priority = .defaultHigh
+        NSLayoutConstraint.activate([
+            overlay.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            overlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            overlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scroll.topAnchor.constraint(equalTo: overlay.topAnchor),
+            scroll.bottomAnchor.constraint(equalTo: overlay.bottomAnchor),
+            scroll.leadingAnchor.constraint(equalTo: overlay.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: overlay.trailingAnchor),
+            content.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
+            content.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
+            content.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
+            content.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
+            content.widthAnchor.constraint(equalTo: scroll.frameLayoutGuide.widthAnchor),
+            content.heightAnchor.constraint(greaterThanOrEqualTo: scroll.frameLayoutGuide.heightAnchor),
+            fittingHeight, fittingWidth,
+            stack.centerXAnchor.constraint(equalTo: content.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: content.centerYAnchor),
+            stack.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: content.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -24),
+            stack.topAnchor.constraint(greaterThanOrEqualTo: content.topAnchor, constant: 24),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: content.bottomAnchor, constant: -24),
+            retry.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            close.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        ])
+        gameLoadingFailureView = overlay
+        UIAccessibility.post(notification: .screenChanged, argument: title)
+    }
+
+    private func hideGameLoadingFailure() {
+        gameLoadingFailureView?.removeFromSuperview()
+        gameLoadingFailureView = nil
     }
 
     private func handleScroll(_ scrollView: UIScrollView) {
@@ -792,6 +1020,7 @@ class WebViewController: UIViewController {
 
     /// 点击标题栏应用名 → 打开站内详情页 sheet（不滚到评价区）
     @objc private func titleTapped() {
+        guard showsApplicationDetails else { return }
         presentAppDetail(scrollToReviews: false)
     }
 
@@ -799,7 +1028,7 @@ class WebViewController: UIViewController {
     /// 下滑 dismiss 即回到应用。sheet 使用独立 Capacitor Bridge，不改动底层主壳路由，
     /// 也不进插件层云应用会话池，dismiss 即释放。
     private func presentAppDetail(scrollToReviews: Bool) {
-        guard let info = appInfo else { return }
+        guard showsApplicationDetails, let info = appInfo else { return }
         let key = info.slug.isEmpty ? info.id : info.slug
         guard !key.isEmpty else { return }
         let pathAllowed = CharacterSet.urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#%"))
@@ -881,7 +1110,7 @@ class WebViewController: UIViewController {
         }
         let sheet = AppInfoSheetController()
         sheet.appInfo = appInfo
-        sheet.currentURL = webView.url ?? url
+        sheet.currentURL = currentPublicURL
         sheet.onShare = { [weak self] in self?.shareCurrent() }
         sheet.onOpenSafari = { [weak self] in
             if let u = self?.webView.url ?? self?.url {
@@ -894,7 +1123,7 @@ class WebViewController: UIViewController {
         sheet.onReload = { [weak self] in self?.webView.reload() }
         sheet.onClose = { [weak self] in self?.closeTapped() }
         // 详情页 sheet 内不再显示「查看详情」评分行（避免循环再弹详情）
-        sheet.showRatingRow = !isDetailSheet
+        sheet.showRatingRow = !isDetailSheet && showsApplicationDetails
         // 评分行点击：收起 more 面板后，把站内详情页以 sheet 盖在应用之上（定位到评价区）
         sheet.onDetail = { [weak self] in
             self?.presentAppDetail(scrollToReviews: true)
@@ -930,9 +1159,9 @@ class WebViewController: UIViewController {
                   self.presentedViewController == nil else { return }
             switch action {
             case .share: self.shareCurrent()
-            case .copyLink: UIPasteboard.general.string = (self.webView.url ?? self.url)?.absoluteString
+            case .copyLink: UIPasteboard.general.string = self.currentPublicURL?.absoluteString
             case .openBrowser:
-                if let url = self.webView.url ?? self.url { UIApplication.shared.open(url) }
+                if let url = self.currentPublicURL { UIApplication.shared.open(url) }
             case .reload: self.webView.reload()
             case .end: self.closeTapped()
             }
@@ -940,7 +1169,7 @@ class WebViewController: UIViewController {
     }
 
     private func shareCurrent() {
-        guard let u = webView.url ?? url else { return }
+        guard let u = currentPublicURL else { return }
         var items: [Any] = []
         if let name = appInfo?.name, !name.isEmpty {
             items.append("\(name) - 云乐坊")
@@ -952,6 +1181,12 @@ class WebViewController: UIViewController {
             popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
         }
         present(av, animated: true)
+    }
+
+    private var currentPublicURL: URL? {
+        guard let current = webView?.url ?? url else { return nil }
+        if let publicLinkURL { return publicLinkURL(current) }
+        return current
     }
 
     deinit {
@@ -1643,10 +1878,25 @@ private class WeakScriptMessageHandler: NSObject, WKScriptMessageHandlerWithRepl
     }
 }
 
+private final class GameLifecycleMessageHandler: NSObject, WKScriptMessageHandler {
+    private let receive: (WKScriptMessage) -> Void
+    init(receive: @escaping (WKScriptMessage) -> Void) { self.receive = receive }
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        receive(message)
+    }
+}
+
 // MARK: - WKNavigationDelegate
 
 extension WebViewController: WKNavigationDelegate {
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        guard onGameLifecycleMessage != nil else { return }
+        progressView.isHidden = true
+        showGameLoadingFailure()
+    }
+
     func webView(_ webView: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
+        hideGameLoadingFailure()
         progressView.isHidden = false
         progressView.setProgress(0, animated: false)
     }
@@ -1663,12 +1913,22 @@ extension WebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFail _: WKNavigation!, withError error: Error) {
         progressView.isHidden = true
-        if (error as NSError).code != NSURLErrorCancelled { retryInitialContent(webView) }
+        logGameNavigationFailure(error)
+        if (error as NSError).code != NSURLErrorCancelled { retryInitialContent(webView); showGameLoadingFailure() }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation _: WKNavigation!, withError error: Error) {
         progressView.isHidden = true
-        if (error as NSError).code != NSURLErrorCancelled { retryInitialContent(webView) }
+        logGameNavigationFailure(error)
+        if (error as NSError).code != NSURLErrorCancelled { retryInitialContent(webView); showGameLoadingFailure() }
+    }
+
+    private func logGameNavigationFailure(_ error: Error) {
+        #if DEBUG
+        guard onGameLifecycleMessage != nil, (error as NSError).code != NSURLErrorCancelled else { return }
+        let failure = error as NSError
+        NSLog("Native game navigation failed: %@ %ld", failure.domain, failure.code)
+        #endif
     }
 
     private func retryInitialContent(_ webView: WKWebView) {

@@ -6,18 +6,37 @@ struct AppRootView: View {
     @StateObject private var feedbackLogin = FeedbackLoginCoordinator()
     @StateObject private var crossAppAuthorization = CrossAppAuthorizationCoordinator()
     @StateObject private var screenshotFeedback = ScreenshotFeedbackCoordinator()
+    @StateObject private var gameLogin = NativeGameLoginCoordinator()
+    @State private var deferredGameLaunch = NativeGameDeferredLaunchCoordinator()
+    @State private var awaitingGamePresentationDismissal = false
+    @State private var gameResourcePreparation: NativeGameResourcePreparation?
     @AppStorage(ScreenshotFeedbackPromptState.preferenceKey) private var screenshotFeedbackEnabled = true
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var runtime: NativeWebRuntime
     @EnvironmentObject private var accounts: AccountStore
     @EnvironmentObject private var diagnostics: DiagnosticLogStore
+    @EnvironmentObject private var games: NativeGameCatalogStore
+    @EnvironmentObject private var gameHistory: NativeGameHistoryStore
+    @EnvironmentObject private var gameRooms: NativeGameRoomStore
+    @EnvironmentObject private var gameResources: NativeGameResourceCache
 
     var body: some View {
         tabs
             .environment(\.screenshotFeedbackCoordinator, screenshotFeedback)
             .environment(\.requestFeedbackLogin, { text in
                 feedbackLogin.begin(text: text, origin: accountBoundary, isRestoring: accounts.isRestoring)
+            })
+            .background(EmptyView().sheet(item: Binding(get: { gameLogin.login }, set: { if $0 == nil { gameLogin.presentationEnded() } }),
+                                         onDismiss: finishGameLogin) { intent in
+                LoginView(continuationMessage: "登录后返回所选游戏或房间，进入时会再次确认玩法和席位。",
+                          continuation: intent.continuation,
+                          onCommitted: { proof in
+                    gameLogin.committed(proof, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                        proofIsCurrent: accounts.isCurrent(proof))
+                }, onCancelled: { gameLogin.cancel() })
+                .environmentObject(accounts)
+                .onAppear { gameLogin.didPresent(intent.id) }
             })
             .background(RuntimePresentationAnchor(runtime: runtime, catalog: catalog, library: library).frame(width: 0, height: 0))
             .background(ScreenshotFeedbackAnchor(coordinator: screenshotFeedback, enabled: screenshotFeedbackEnabled,
@@ -35,6 +54,10 @@ struct AppRootView: View {
             .sheet(item: $runtime.unavailableApplication) { application in
                 ApplicationUnavailableView(application: application).environmentObject(library)
             }
+            .sheet(item: $gameResourcePreparation) { selection in
+                NativeGameResourcesView(selection: selection, cache: gameResources)
+                    .environmentObject(accounts)
+            }
             .background(EmptyView().alert(item: $crossAppAuthorization.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             })
@@ -45,6 +68,8 @@ struct AppRootView: View {
                     selectedTab = .me
                 }
                 screenshotFeedback.loginDidDismiss()
+                awaitingGamePresentationDismissal = false
+                drainDeferredGameLaunch()
             }) { intent in
                 LoginView(continuationMessage: "登录后返回反馈与建议，并保留问题描述。上传前仍需重新预览并确认。",
                           continuation: intent.continuation,
@@ -59,22 +84,34 @@ struct AppRootView: View {
                 screenshotFeedback.discard()
                 screenshotFeedback.cancelPendingLogin()
                 updateFeedbackIdentity()
+                updateGameIdentity()
+                gameResources.cancel()
+                gameResourcePreparation = nil
             }
-            .onChange(of: accounts.selectionOperationGeneration) { _ in updateFeedbackIdentity() }
+            .onChange(of: accounts.selectionOperationGeneration) { _ in updateFeedbackIdentity(); updateGameIdentity() }
+            .onChange(of: games.catalog?.catalogVersion) { _ in runtime.updateGameCatalog(games.games) }
+            .onChange(of: accounts.isRestoring) { _ in drainDeferredGameLaunch() }
+            .onChange(of: accounts.initialRestorePhase) { _ in drainDeferredGameLaunch() }
+            .onChange(of: catalog.isLoading) { _ in drainDeferredGameLaunch() }
+            .task {
+                runtime.updateGameCatalog(games.games)
+                await games.load()
+                runtime.updateGameCatalog(games.games)
+            }
     }
 
     @ViewBuilder private var tabs: some View {
         if #available(iOS 18, *) {
             TabView(selection: $selectedTab) {
                 Tab("云居", systemImage: "house", value: AppTab.home) { home }
-                Tab("寻乐", systemImage: "safari", value: AppTab.discovery) { discovery }
+                Tab("寻乐", systemImage: "gamecontroller", value: AppTab.discovery) { discovery }
                 Tab("工坊", systemImage: "square.grid.2x2", value: AppTab.workshop) { workshop }
                 Tab("我", systemImage: "person.crop.circle", value: AppTab.me) { me }
             }
         } else {
             TabView(selection: $selectedTab) {
                 home.tabItem { Label("云居", systemImage: "house") }.tag(AppTab.home)
-                discovery.tabItem { Label("寻乐", systemImage: "safari") }.tag(AppTab.discovery)
+                discovery.tabItem { Label("寻乐", systemImage: "gamecontroller") }.tag(AppTab.discovery)
                 workshop.tabItem { Label("工坊", systemImage: "square.grid.2x2") }.tag(AppTab.workshop)
                 me.tabItem { Label("我", systemImage: "person.crop.circle") }.tag(AppTab.me)
             }
@@ -90,7 +127,13 @@ struct AppRootView: View {
     }
     private var discovery: some View {
         NavigationStack {
-            DiscoveryView()
+            GamesView(store: games, history: gameHistory,
+                      open: { game, mode in requestGameLaunch(.game(game, mode)) },
+                      resume: { runtime.resumeGame($0, catalog: catalog, library: library) },
+                      runningGameIDs: runtime.runningGameIDs,
+                      onRoom: { requestGameLaunch(.room($0)) }, continuationRoom: gameRooms.continuation,
+                      fallback: { runtime.openGameFallback($0, catalog: catalog, library: library) },
+                      prepareResources: prepareGameResources)
                 .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
         }
     }
@@ -107,13 +150,121 @@ struct AppRootView: View {
             screenshotFeedback.cancelPendingLogin()
             return
         }
+        if let room = NativeGameRoomIntent.parse(url) {
+            screenshotFeedback.cancelPendingLogin()
+            selectedTab = .discovery
+            requestGameLaunch(.room(room))
+            return
+        }
+        if let parts = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           NativeGame.publicHTTPS(url), parts.host?.lowercased() == "play.yunle.fun", parts.query == nil, parts.fragment == nil {
+            let segments = parts.percentEncodedPath.split(separator: "/")
+            if segments.count == 2 || segments.count == 3, segments.first == "games",
+               let game = games.game(id: String(segments[1])) {
+                selectedTab = .discovery
+                screenshotFeedback.cancelPendingLogin()
+                if segments.count == 3, let mode = game.mode(id: String(segments[2])) {
+                    requestGameLaunch(.game(game, mode))
+                }
+                return
+            }
+        }
         // Authentication callbacks belong to ASWebAuthenticationSession, never
         // to the navigation parser. No raw callback URL is stored or logged.
         guard let destination = NativeLink.destination(url) else { return }
+        deferredGameLaunch.cancel()
+        gameLogin.cancel()
         screenshotFeedback.cancelPendingLogin()
         feedbackLogin.cancel()
         selectedTab = .workshop
         workshopPath.append(destination)
+    }
+
+    private func requestGameLaunch(_ action: NativeGameLaunchIntent) {
+        if case .game(let selected, let selectedMode) = action,
+           games.game(id: selected.gameId)?.mode(id: selectedMode.id)?.available != true {
+            runtime.issue = RuntimeIssue(title: "这个玩法暂未开放", message: "请刷新游戏列表，或在 Play 中查看当前可用玩法。")
+            return
+        }
+        if feedbackLogin.login != nil || gameLogin.login != nil {
+            deferGameLaunch(action)
+            awaitingGamePresentationDismissal = true
+            feedbackLogin.cancel()
+            gameLogin.cancel()
+            return
+        }
+        if awaitingGamePresentationDismissal {
+            deferGameLaunch(action)
+            return
+        }
+        if accountRestorationInProgress || NativeGameDeferredLaunchCoordinator.waitsForCatalog(
+            hasPlay: catalog.application(id: "play") != nil, isLoading: catalog.isLoading) {
+            deferGameLaunch(action)
+            return
+        }
+        deferredGameLaunch.cancel()
+        let needsLogin: Bool
+        switch action { case .game(_, let mode): needsLogin = mode.requiresLogin; case .room: needsLogin = true }
+        if needsLogin, accounts.user == nil {
+            gameLogin.begin(action, origin: accountBoundary, isRestoring: accountRestorationInProgress)
+            return
+        }
+        if needsLogin, accounts.user?.isUsable != true {
+            runtime.issue = RuntimeIssue(title: "暂时无法进入联机", message: "请先在“我”中确认当前账号状态。")
+            return
+        }
+        performGameLaunch(action)
+    }
+
+    private func deferGameLaunch(_ action: NativeGameLaunchIntent) {
+        deferredGameLaunch.enqueue(action, boundary: accountBoundary,
+            selectionGeneration: accounts.selectionOperationGeneration, isRestoring: accountRestorationInProgress)
+    }
+
+    private func drainDeferredGameLaunch() {
+        switch deferredGameLaunch.take(current: accountBoundary, selectionGeneration: accounts.selectionOperationGeneration,
+                                      isRestoring: accountRestorationInProgress,
+                                      awaitingPresentationDismissal: awaitingGamePresentationDismissal,
+                                      hasPlay: catalog.application(id: "play") != nil, catalogIsLoading: catalog.isLoading) {
+        case .waiting: break
+        case .discarded:
+            runtime.issue = RuntimeIssue(title: "请重新打开游戏", message: "等待期间账号状态发生了变化，请再次选择游戏或打开邀请链接。")
+        case .launch(let action): requestGameLaunch(action)
+        }
+    }
+
+    private func performGameLaunch(_ action: NativeGameLaunchIntent) {
+        switch action {
+        case .game(let selected, let selectedMode):
+            guard let game = games.game(id: selected.gameId), let mode = game.mode(id: selectedMode.id) else { return }
+            runtime.openGame(game, mode: mode, catalog: catalog, library: library)
+        case .room(let room): runtime.openGameRoom(room, catalog: catalog, library: library)
+        }
+    }
+
+    private func finishGameLogin() {
+        awaitingGamePresentationDismissal = false
+        let proof = gameLogin.success
+        if let action = gameLogin.consume(current: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                          proofIsCurrent: proof.map(accounts.isCurrent) ?? false) {
+            performGameLaunch(action)
+        }
+        drainDeferredGameLaunch()
+    }
+
+    private func updateGameIdentity() {
+        gameLogin.identityChanged(to: accountBoundary, isUsable: accounts.user?.isUsable == true,
+                                  proofIsCurrent: gameLogin.success.map(accounts.isCurrent) ?? false)
+        drainDeferredGameLaunch()
+    }
+
+    private func prepareGameResources(_ game: NativeGame) {
+        do {
+            let profile = try runtime.gameResourceProfile(for: game, catalog: catalog)
+            gameResourcePreparation = NativeGameResourcePreparation(game: game, profileID: profile, boundary: accountBoundary)
+        } catch {
+            runtime.issue = RuntimeIssue(title: "暂时无法准备资源", message: error.localizedDescription)
+        }
     }
     private var me: some View {
         let stackBoundary = accountBoundary
@@ -137,6 +288,7 @@ struct AppRootView: View {
     private var accountBoundary: AccountRequestBoundary {
         .init(uid: accounts.user?.id, generation: accounts.identityGeneration)
     }
+    private var accountRestorationInProgress: Bool { accounts.isRestoring || accounts.isInitialRestorePending }
     private var continuationIsCurrent: Bool { feedbackLogin.success.map { accounts.isCurrent($0) } ?? false }
     private func updateFeedbackIdentity() {
         feedbackLogin.identityChanged(to: accountBoundary, isUsable: accounts.user?.isUsable == true,

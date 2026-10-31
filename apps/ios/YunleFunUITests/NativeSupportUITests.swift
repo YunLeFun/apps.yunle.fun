@@ -66,7 +66,7 @@ final class NativeSupportUITests: XCTestCase {
         reveal(runtime, in: app); runtime.tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "在云居的“正在运行”中恢复会话")).firstMatch.exists)
         capture(app, "native-help-runtime")
-        let discover = app.buttons["help.guide.discover"]
+        let discover = app.buttons["help.guide.games"]
         reveal(discover, in: app, upward: false); discover.tap()
         let discovery = app.buttons["help.guide.discovery"]; reveal(discovery, in: app); discovery.tap()
         XCTAssertTrue(app.tabBars.buttons["寻乐"].isSelected)

@@ -3,9 +3,17 @@ import SwiftUI
 struct NativeApplicationMenuView: View {
     let application: CloudApplication
     let currentURL: URL?
+    let hasMarketEntry: Bool
+    let isGame: Bool
     let perform: (WebAppMenuAction) -> Void
     @EnvironmentObject private var runtime: NativeWebRuntime
     @Environment(\.dismiss) private var dismiss
+
+    init(application: CloudApplication, currentURL: URL?, hasMarketEntry: Bool = true, isGame: Bool = false,
+         perform: @escaping (WebAppMenuAction) -> Void) {
+        self.application = application; self.currentURL = currentURL
+        self.hasMarketEntry = hasMarketEntry; self.isGame = isGame; self.perform = perform
+    }
 
     var body: some View {
         NavigationStack {
@@ -23,13 +31,15 @@ struct NativeApplicationMenuView: View {
                     }
                     .padding(.vertical, 4)
                     .accessibilityElement(children: .combine)
-                    NavigationLink {
-                        ApplicationDetailView(application: application)
-                    } label: { Label("应用详情", systemImage: "info.circle") }
-                    if application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
+                    if hasMarketEntry {
                         NavigationLink {
-                            ApplicationReviewsView(application: application)
-                        } label: { Label("评分与评价", systemImage: "star.bubble") }
+                            ApplicationDetailView(application: application)
+                        } label: { Label("应用详情", systemImage: "info.circle") }
+                        if application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
+                            NavigationLink {
+                                ApplicationReviewsView(application: application)
+                            } label: { Label("评分与评价", systemImage: "star.bubble") }
+                        }
                     }
                     if let login = (application.personalMarketOwnerLogin ?? application.ownerLogin)?.nilIfEmpty {
                         NavigationLink {
@@ -45,11 +55,22 @@ struct NativeApplicationMenuView: View {
                     Button { perform(.copyLink) } label: { Label("复制链接", systemImage: "link") }
                     Button { perform(.openBrowser) } label: { Label("在浏览器中打开", systemImage: "safari") }
                     Button { perform(.reload) } label: { Label("重新载入", systemImage: "arrow.clockwise") }
-                    NavigationLink {
-                        ApplicationCacheView(application: application, store: runtime.applicationCache)
-                    } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
-                    .accessibilityIdentifier("runtime.menu.cache")
-                    ApplicationCacheUpdateNotice(application: application, store: runtime.applicationCache)
+                    if !isGame {
+                        NavigationLink {
+                            ApplicationCacheView(application: application, store: runtime.applicationCache)
+                        } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
+                        .accessibilityIdentifier("runtime.menu.cache")
+                        ApplicationCacheUpdateNotice(application: application, store: runtime.applicationCache)
+                    }
+                }
+                if isGame {
+                    Section {
+                        Toggle("页面回弹", isOn: gameInteractionBinding(\.allowsPageBounce))
+                            .accessibilityIdentifier("runtime.menu.game-page-bounce")
+                        Toggle("长按选中与预览", isOn: gameInteractionBinding(\.allowsLongPress))
+                            .accessibilityIdentifier("runtime.menu.game-long-press")
+                    } header: { Text("游戏网页交互") }
+                    footer: { Text("默认关闭以减少游戏操作干扰。长按开关包含文字选中、链接预览和图片拖动。设置对当前游戏立即生效并自动保存，输入框仍可编辑。") }
                 }
                 Section {
                     Button(role: .destructive) { perform(.end) } label: { Label("结束", systemImage: "xmark.circle") }
@@ -69,6 +90,14 @@ struct NativeApplicationMenuView: View {
         var origin = URLComponents()
         origin.scheme = scheme; origin.host = host; origin.port = url.port
         return origin.string
+    }
+
+    private func gameInteractionBinding(_ keyPath: WritableKeyPath<WebGameInteractionSettings, Bool>) -> Binding<Bool> {
+        Binding(get: { runtime.gameInteractionSettings(for: application.id)[keyPath: keyPath] }, set: { value in
+            var settings = runtime.gameInteractionSettings(for: application.id)
+            settings[keyPath: keyPath] = value
+            runtime.setGameInteractionSettings(settings, for: application.id)
+        })
     }
 }
 

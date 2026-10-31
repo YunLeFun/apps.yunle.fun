@@ -11,7 +11,7 @@ export default defineConfig({
 
     nav: [
       { text: '指南', link: '/guide/getting-started', activeMatch: '/guide/' },
-      { text: '产品设计', link: '/design/', activeMatch: '/design/' },
+      { text: '产品设计', link: '/product/', activeMatch: '/product/' },
       { text: 'UI 设计', link: '/ui/', activeMatch: '/ui/' },
       { text: '数据库', link: '/database/', activeMatch: '/database/' },
       { text: '开发笔记', link: '/dev/', activeMatch: '/dev/' },
@@ -33,6 +33,7 @@ export default defineConfig({
           { text: '什么是云乐坊', link: '/product/' },
           { text: '核心概念', link: '/product/concepts' },
           { text: 'Tab 页架构', link: '/product/tabs-architecture' },
+          { text: '寻乐游戏与工坊合并计划', link: '/product/native-game-discovery' },
           { text: '云居 - Home Screen', link: '/product/home' },
           { text: '寻乐 - Discovery', link: '/product/discovery' },
           { text: '工坊 - Workshop', link: '/product/workshop' },
@@ -55,7 +56,7 @@ export default defineConfig({
           { text: '概览', link: '/database/' },
           { text: 'apps 集合', link: '/database/apps' },
           { text: 'featured_apps 集合', link: '/database/featured-apps' },
-          { text: 'user_desktops 集合', link: '/database/user-desktops' },
+          { text: 'user_home_screens 集合', link: '/database/user-home-screens' },
           { text: 'weekly_charts 集合', link: '/database/weekly-charts' },
         ],
       },

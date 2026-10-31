@@ -12,6 +12,10 @@ struct YunleFunApp: App {
     @StateObject private var assistant: AssistantStore
     @StateObject private var assistantRollout = AssistantRolloutStore()
     @StateObject private var diagnostics: DiagnosticLogStore
+    @StateObject private var games = NativeGameCatalogStore()
+    @StateObject private var gameResources = NativeGameResourceCache()
+    @StateObject private var gameHistory: NativeGameHistoryStore
+    @StateObject private var gameRooms: NativeGameRoomStore
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance = AppAppearance.system
 
@@ -19,6 +23,18 @@ struct YunleFunApp: App {
         let catalog = CatalogStore()
         let library = HomeLibrary()
         let runtime = NativeWebRuntime()
+        let gameHistory = NativeGameHistoryStore()
+        let gameRooms = NativeGameRoomStore()
+        gameHistory.activate(accountID: nil)
+        gameRooms.activate(accountID: nil)
+        _gameHistory = StateObject(wrappedValue: gameHistory)
+        _gameRooms = StateObject(wrappedValue: gameRooms)
+        runtime.onGameReady = { gameID, modeID, accountID in
+            gameHistory.recordReady(gameID: gameID, modeID: modeID, accountID: accountID)
+        }
+        runtime.onGameRoomConfirmed = { gameID, room, accountID in
+            gameRooms.confirmed(gameID: gameID, room: room, accountID: accountID)
+        }
         let diagnostics = DiagnosticLogStore()
         diagnostics.record(.info, message: "app.launched")
         _diagnostics = StateObject(wrappedValue: diagnostics)
@@ -30,12 +46,15 @@ struct YunleFunApp: App {
                                     identityDidChange: { id in
             diagnostics.activateAccount(id)
             diagnostics.record(.info, message: "account.scope.activated")
+            gameHistory.activate(accountID: id)
+            gameRooms.activate(accountID: id)
             runtime.resetIdentity(to: id)
             library.activateAccount(id)
             library.updateCatalog(catalog.applications, markingMissingPublicAppsUnavailable: catalog.successfulLoadID != nil)
             do { try SharedFeedbackHistory().activate(userID: id, channel: .current) }
             catch { diagnostics.record(.error, message: "feedback.share.storage.unavailable") }
         })
+        accounts.prepareInitialRestore()
         _catalog = StateObject(wrappedValue: catalog)
         _accounts = StateObject(wrappedValue: accounts)
         runtime.configureAuthorization(accounts: accounts)
@@ -66,11 +85,15 @@ struct YunleFunApp: App {
                 .environmentObject(assistant)
                 .environmentObject(assistantRollout)
                 .environmentObject(diagnostics)
+                .environmentObject(games)
+                .environmentObject(gameHistory)
+                .environmentObject(gameRooms)
+                .environmentObject(gameResources)
                 .preferredColorScheme(appearance.colorScheme)
                 .task { await catalog.load() }
                 .task {
-                    await accounts.restore()
-                    guard !Task.isCancelled, !accounts.isRestoring else { return }
+                    await accounts.consumeInitialRestore()
+                    guard !Task.isCancelled, !accounts.isRestoring, !accounts.isInitialRestorePending else { return }
                     do { try SharedFeedbackHistory().activate(userID: accounts.user?.id, channel: .current) }
                     catch { diagnostics.record(.error, message: "feedback.share.storage.unavailable") }
                 }

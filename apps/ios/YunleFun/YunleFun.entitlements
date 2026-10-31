@@ -6,6 +6,7 @@
     <key>com.apple.developer.associated-domains</key>
     <array>
         <string>applinks:apps.yunle.fun</string>
+        <string>applinks:play.yunle.fun</string>
         <string>applinks:www.yunle.fun</string>
         <string>webcredentials:www.yunle.fun</string>
     </array>

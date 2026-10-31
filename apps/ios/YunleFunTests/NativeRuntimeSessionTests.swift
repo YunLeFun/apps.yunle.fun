@@ -8,7 +8,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     /// Uses real NativeWebRuntime / WKWebView storage. Synthetic host IDs and
     /// a reserved origin keep this independent of accounts, SSO and the network.
     func testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts() async throws {
-        let fixture = try await Fixture()
+        let fixture = try await Fixture(test: self)
         defer { fixture.close() }
         let accountA = "storage-fixture-a-" + UUID().uuidString
         let accountB = "storage-fixture-b-" + UUID().uuidString
@@ -101,11 +101,11 @@ final class NativeRuntimeSessionTests: XCTestCase {
 
     func testRecoveryRejectsGuestAndIdentityChangesIncludingReturnToSameAccount() async throws {
         guard #available(iOS 17, *) else { throw XCTSkip("Named profile recovery requires iOS 17") }
-        let guest = try await Fixture()
+        let guest = try await Fixture(test: self)
         XCTAssertThrowsError(try guest.runtime.profileRecovery(for: guest.application))
         guest.close()
         let accounts = try await recoveryAccounts()
-        let fixture = try await Fixture(accounts: accounts); defer { fixture.close() }
+        let fixture = try await Fixture(test: self, accounts: accounts); defer { fixture.close() }
         let repo = WebProfileRepository(fileURL: fixture.directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture")
         let guestStore = try repo.select(.guest, application: fixture.application)
         _ = try repo.bindGuestContinuation(guestStore, to: "a")
@@ -122,7 +122,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     func testConfirmedRecoveryClosesCurrentPageAndReopensTheSelectedStore() async throws {
         guard #available(iOS 17, *) else { throw XCTSkip("Named profile recovery requires iOS 17") }
         let accounts = try await recoveryAccounts()
-        let fixture = try await Fixture(accounts: accounts); defer { fixture.close() }
+        let fixture = try await Fixture(test: self, accounts: accounts); defer { fixture.close() }
         let repo = WebProfileRepository(fileURL: fixture.directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture")
         let guest = try repo.select(.guest, application: fixture.application)
         _ = try repo.bindGuestContinuation(guest, to: "a")
@@ -152,7 +152,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
 
     func testCorruptOwnershipMetadataCannotFallBackToTheLegacySharedStore() async throws {
         guard #available(iOS 17, *) else { throw XCTSkip("Named WebKit store integration requires iOS 17") }
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         fixture.runtime.end(fixture.application)
         try await fixture.waitForDismissal()
         let file = fixture.directory.appendingPathComponent("profiles.json")
@@ -166,7 +166,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testIdentityResetRemovesSessionAndNestedFirstPartySheets() async throws {
-        let fixture = try await Fixture()
+        let fixture = try await Fixture(test: self)
         defer { fixture.close() }
         try await fixture.presentNestedSheets()
         fixture.runtime.resetIdentity(to: "another-fixture-account")
@@ -178,7 +178,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testEndingApplicationClosesNestedSheetsAndKeepsHomeEntry() async throws {
-        let fixture = try await Fixture()
+        let fixture = try await Fixture(test: self)
         defer { fixture.close() }
         try await fixture.presentNestedSheets()
         fixture.runtime.end(fixture.application)
@@ -190,7 +190,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testSwitchFromDetailsUsesOneRootAndRestoresSameBrowser() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         let first = fixture.browser
         try await fixture.presentNestedSheets()
         let second = fixture.app("second")
@@ -206,7 +206,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testLatestOpenWinsDuringAnimatedSwitch() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         UIView.setAnimationsEnabled(true)
         let second = fixture.app("second"), latest = fixture.app("latest")
         fixture.runtime.open(second, catalog: fixture.catalog, library: fixture.library)
@@ -218,7 +218,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testIdentityResetCancelsQueuedOpenAndLateMinimizeCallback() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         let lateMinimize = try XCTUnwrap(fixture.browser.onMinimize)
         UIView.setAnimationsEnabled(true)
         let second = fixture.app("second")
@@ -236,7 +236,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testCloseCallbackClosesWholeApplicationFromNestedSheet() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         try await fixture.presentNestedSheets()
         _ = fixture.browser.perform(NSSelectorFromString("closeTapped"))
         XCTAssertFalse(fixture.runtime.contains(fixture.application))
@@ -246,7 +246,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testOldCloseCallbackCannotEndReplacementSession() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         let old = fixture.browser
         let lateClose = try XCTUnwrap(old?.onClose)
         fixture.runtime.end(fixture.application)
@@ -260,7 +260,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testMinimizeClosesNestedSheetsAndRestoresSameBrowser() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         let original = fixture.browser
         try await fixture.presentNestedSheets()
         _ = fixture.browser.perform(NSSelectorFromString("minimizeTapped"))
@@ -275,7 +275,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testChangedLaunchURLReplacesSessionAndClosesDetails() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         let original = fixture.browser
         try await fixture.presentNestedSheets()
         var changed = fixture.application
@@ -293,7 +293,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
                                         accessMode: "public", trustedHosts: ["unreviewed.invalid"], audience: "public", isPublic: true,
                                         personalMarketOwnerLogin: "Author")
         let service = RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]))
-        let fixture = try await Fixture(personalMarketService: service); defer { fixture.close() }
+        let fixture = try await Fixture(test: self, personalMarketService: service); defer { fixture.close() }
         let marketBrowser = fixture.browser
         fixture.runtime.open(personal, catalog: fixture.catalog, library: fixture.library)
         try await fixture.waitForSource(personal.runtimeScope)
@@ -313,7 +313,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let personal = CloudApplication(id: "personal-fixture", name: "作者版本", websiteUrl: "https://runtime.invalid/personal",
                                         accessMode: "public", audience: "public", isPublic: true, personalMarketOwnerLogin: "Author")
         let gate = RuntimePersonalReadGate()
-        let fixture = try await Fixture(personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
+        let fixture = try await Fixture(test: self, personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
         defer { fixture.close() }
         fixture.runtime.open(personal, catalog: fixture.catalog, library: fixture.library)
         await fulfillment(of: [gate.entered], timeout: 3)
@@ -329,7 +329,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testIdentitySwitchDismissesTheUnavailableApplication() async throws {
-        let fixture = try await Fixture()
+        let fixture = try await Fixture(test: self)
         defer { fixture.close() }
         fixture.runtime.open(CloudApplication(id: "removed", name: "旧账号应用", isUnavailable: true), catalog: fixture.catalog, library: fixture.library)
         XCTAssertNotNil(fixture.runtime.unavailableApplication)
@@ -341,7 +341,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let personal = CloudApplication(id: "personal-fixture", name: "作者版本", websiteUrl: "https://runtime.invalid/personal",
                                         accessMode: "public", audience: "public", isPublic: true, personalMarketOwnerLogin: "Author")
         let gate = RuntimePersonalReadGate()
-        let fixture = try await Fixture(personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
+        let fixture = try await Fixture(test: self, personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
         defer { fixture.close() }
         fixture.runtime.open(personal, catalog: fixture.catalog, library: fixture.library)
         await fulfillment(of: [gate.entered], timeout: 3)
@@ -359,7 +359,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let personal = CloudApplication(id: "personal-fixture", name: "作者版本", websiteUrl: "https://runtime.invalid/personal",
                                         accessMode: "public", audience: "public", isPublic: true, personalMarketOwnerLogin: "Author")
         let gate = RuntimePersonalReadGate()
-        let fixture = try await Fixture(personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
+        let fixture = try await Fixture(test: self, personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
         defer { fixture.close() }
         let log = BillingLog()
         let service = BillingServiceFixture(log: log, verifyFailure: false, accountGate: nil, verifyGate: nil)
@@ -387,7 +387,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let personal = CloudApplication(id: "session-fixture", name: "作者版本", websiteUrl: "https://runtime.invalid/personal",
                                         accessMode: "public", audience: "public", isPublic: true, personalMarketOwnerLogin: "Author")
         let gate = RuntimePersonalReadGate()
-        let fixture = try await Fixture(personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
+        let fixture = try await Fixture(test: self, personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
         defer { fixture.close() }
         fixture.runtime.open(personal, catalog: fixture.catalog, library: fixture.library)
         await fulfillment(of: [gate.entered], timeout: 3)
@@ -404,7 +404,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let personal = CloudApplication(id: "personal-fixture", name: "作者版本", websiteUrl: "https://runtime.invalid/personal",
                                         accessMode: "public", audience: "public", isPublic: true, personalMarketOwnerLogin: "Author")
         let gate = RuntimePersonalReadGate()
-        let fixture = try await Fixture(personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
+        let fixture = try await Fixture(test: self, personalMarketService: RuntimePersonalMarketService(value: DeveloperProfile(ownerLogin: "Author", items: [personal]), gate: gate))
         defer { fixture.close() }
         fixture.runtime.open(personal, catalog: fixture.catalog, library: fixture.library)
         await fulfillment(of: [gate.entered], timeout: 3)
@@ -417,7 +417,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
     }
 
     func testDetachedAnchorCannotPresentIntoPreviouslyCachedWindow() async throws {
-        let fixture = try await Fixture(); defer { fixture.close() }
+        let fixture = try await Fixture(test: self); defer { fixture.close() }
         let detached = UIViewController()
         fixture.runtime.anchor = detached
         let second = fixture.app("second")
@@ -442,12 +442,18 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let library: HomeLibrary
         let catalog: CatalogStore
         let animationsWereEnabled: Bool
+        private let ownership: StorageFixtureOwnership
+        private var observedBrowsers: [BrowserReference] = []
+        private var released = false
         private(set) var browser: WebViewController!
 
-        init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), accounts: AccountStore? = nil) async throws {
+        init(test: XCTestCase, personalMarketService: DeveloperProfileServing = DeveloperProfileService(), accounts: AccountStore? = nil) async throws {
             self.accounts = accounts ?? AccountStore(session: AccountSession(vault: BillingMemoryVault()))
+            let ownership = StorageFixtureOwnership(directory: directory, label: "native-runtime-session")
+            self.ownership = ownership
             runtime = NativeWebRuntime(personalMarketService: personalMarketService,
-                webProfiles: WebProfileRepository(fileURL: directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture"))
+                webProfiles: WebProfileRepository(fileURL: directory.appendingPathComponent("profiles.json"), namespace: "runtime-fixture",
+                    write: { data, url in try ownership.writeProfiles(data, to: url) }))
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
             previous = scene.windows.first(where: \.isKeyWindow)
             window = UIWindow(windowScene: scene)
@@ -459,6 +465,9 @@ final class NativeRuntimeSessionTests: XCTestCase {
             runtime.configureAuthorization(accounts: self.accounts)
             window.rootViewController = root; window.makeKeyAndVisible()
             runtime.anchor = root
+            // Run after the test's async frame releases local browser references.
+            // Register before the first open so initialization failures are owned.
+            test.addTeardownBlock { [self] in await cleanup() }
             for _ in 0..<100 where root.presentedViewController == nil {
                 runtime.open(application, catalog: catalog, library: library)
                 try await Task.sleep(nanoseconds: 50_000_000)
@@ -509,6 +518,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
                    browser.appInfo?.id == application.id, browser.url == application.launchURL,
                    !browser.isPreparingInitialContent,
                    !navigation.isBeingPresented, !navigation.isBeingDismissed, browser.viewIfLoaded?.window != nil {
+                    try track(browser)
                     browser.view.subviews.compactMap { $0 as? WKWebView }.first?.stopLoading()
                     return browser
                 }
@@ -528,11 +538,43 @@ final class NativeRuntimeSessionTests: XCTestCase {
         }
 
         func close() {
+            guard !released else { return }
+            released = true
+            for reference in observedBrowsers {
+                reference.browser?.viewIfLoaded?.subviews.compactMap { $0 as? WKWebView }.forEach {
+                    $0.stopLoading(); $0.removeFromSuperview()
+                }
+            }
             runtime.resetIdentity()
+            browser = nil
             root.dismiss(animated: false)
             window.isHidden = true; window.rootViewController = nil; previous?.makeKey()
             UIView.setAnimationsEnabled(animationsWereEnabled)
-            try? FileManager.default.removeItem(at: directory)
+        }
+
+        private func cleanup() async {
+            close()
+            for _ in 0..<100 where runtime.isIdentityCleanupPending || root.presentedViewController != nil {
+                try? await Task.sleep(nanoseconds: 50_000_000)
+            }
+            await Task.yield()
+            await ownership.cleanup()
+        }
+
+        private func track(_ browser: WebViewController) throws {
+            if !observedBrowsers.contains(where: { $0.browser === browser }) {
+                observedBrowsers.append(BrowserReference(browser))
+            }
+            if #available(iOS 17, *),
+               let web = browser.viewIfLoaded?.subviews.compactMap({ $0 as? WKWebView }).first,
+               let identifier = web.configuration.websiteDataStore.identifier {
+                try ownership.record(identifier)
+            }
+        }
+
+        private final class BrowserReference {
+            weak var browser: WebViewController?
+            init(_ browser: WebViewController) { self.browser = browser }
         }
     }
 }

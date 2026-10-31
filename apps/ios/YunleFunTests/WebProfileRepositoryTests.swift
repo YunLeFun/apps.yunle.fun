@@ -7,7 +7,7 @@ import XCTest
 final class WebProfileRepositoryTests: XCTestCase {
     private var directory: URL!
     private var pages: [WKWebView] = []
-    private var stores: Set<UUID> = []
+    private var ownership: StorageFixtureOwnership!
     private var window: UIWindow?
     private weak var previousWindow: UIWindow?
     private var file: URL { directory.appendingPathComponent("profiles.json") }
@@ -16,38 +16,17 @@ final class WebProfileRepositoryTests: XCTestCase {
     }
     override func setUp() async throws {
         directory = FileManager.default.temporaryDirectory.appendingPathComponent("WebProfiles-" + UUID().uuidString)
+        ownership = StorageFixtureOwnership(directory: directory, label: "web-profile-repository")
     }
     override func tearDown() async throws {
-        defer {
-            pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }; pages.removeAll()
-            stores.removeAll()
-            window?.isHidden = true; window?.rootViewController = nil; window = nil
-            previousWindow?.makeKey()
-            try? FileManager.default.removeItem(at: directory)
-        }
-        // Delete exactly the fixture's three values while its pages are alive.
-        // Whole-store removal returned InvalidTransition on iOS 27; clearing
-        // every WebKit data type subsequently took 88 seconds in one test.
-        if #available(iOS 17, *) {
-            for id in stores {
-                let web = try XCTUnwrap(pages.first { $0.configuration.websiteDataStore.identifier == id })
-                let cleared = try await WebStoragePageFixture.evaluate(in: web, script: """
-                const key = 'profile_test_draft';
-                localStorage.removeItem(key);
-                document.cookie = key + '=; Max-Age=0; path=/; Secure; SameSite=Lax';
-                await new Promise((resolve, reject) => {
-                  const timer = setTimeout(() => reject(new Error('cleanup timeout')), 5000);
-                  const r = indexedDB.deleteDatabase(key);
-                  r.onsuccess = () => { clearTimeout(timer); resolve(); };
-                  r.onerror = () => { clearTimeout(timer); reject(new Error('cleanup')); };
-                });
-                const databases = await indexedDB.databases();
-                return localStorage.getItem(key) === null && !document.cookie.split('; ').some(x => x.startsWith(key + '=')) &&
-                  !databases.some(x => x.name === key);
-                """) as? Bool
-                XCTAssertEqual(cleared, true, "All fixture identity and draft values must be deleted")
-            }
-        }
+        // The test method's local references have left their async frame.
+        // Release the remaining WebViews before requesting whole-store removal.
+        pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }
+        pages.removeAll()
+        window?.isHidden = true; window?.rootViewController = nil; window = nil
+        previousWindow?.makeKey()
+        await Task.yield()
+        await ownership.cleanup()
     }
     private func repository(namespace: String = "provider-a") -> WebProfileRepository {
         WebProfileRepository(fileURL: file, namespace: namespace)
@@ -303,6 +282,8 @@ final class WebProfileRepositoryTests: XCTestCase {
 
     @available(iOS 17, *)
     private func page(_ selected: WebProfileRepository.Selection) async throws -> WKWebView {
+        // Record ownership before creating the store, including navigation failures.
+        try ownership.record(selected.identifier)
         let config = WKWebViewConfiguration()
         // Previously visited pages remain alive for exact fixture cleanup.
         config.preferences.inactiveSchedulingPolicy = .none
@@ -322,9 +303,6 @@ final class WebProfileRepositoryTests: XCTestCase {
         web.frame = host.bounds; web.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         host.addSubview(web)
         try await WebStoragePageFixture.load(in: web, origin: URL(string: "https://profiles.invalid/")!, title: "profile-probe")
-        // A page that never committed cannot contain fixture values. Do not
-        // mask its navigation failure by running storage cleanup on about:blank.
-        stores.insert(selected.identifier)
         return web
     }
 
@@ -356,4 +334,157 @@ final class WebProfileRepositoryTests: XCTestCase {
     }
 
     private enum FixtureFailure: Error { case write }
+}
+
+/// Shared only by the two storage regression fixtures. Never discovers cleanup
+/// targets by enumerating unrelated stores; every target is recorded at creation.
+@MainActor
+final class StorageFixtureOwnership {
+    let directory: URL
+    private let label: String
+    private var identifiers = Set<UUID>()
+    private var cleaned = false
+
+    init(directory: URL, label: String) {
+        self.directory = directory
+        self.label = label
+    }
+
+    func record(_ identifier: UUID) throws {
+        guard identifiers.insert(identifier).inserted else { return }
+        try persist()
+    }
+
+    /// A runtime can create its profile before presenting a browser. Observe the
+    /// fixture's own repository writes so an early presentation failure is owned.
+    func writeProfiles(_ data: Data, to url: URL) throws {
+        struct Profiles: Decodable {
+            let active: [String: UUID]
+            let retained: [String: [UUID]]
+        }
+        let profiles = try JSONDecoder().decode(Profiles.self, from: data)
+        for identifier in Array(profiles.active.values) + profiles.retained.values.flatMap({ $0 }) {
+            try record(identifier)
+        }
+        try data.write(to: url, options: [.atomic, .completeFileProtectionUnlessOpen])
+    }
+
+    func cleanup() async {
+        guard !cleaned else { return }
+        cleaned = true
+        var failures: [String] = []
+        if #available(iOS 17, *), !identifiers.isEmpty {
+            do {
+                let keeper = try await StorageFixtureStoreCleanup.initializedKeeper()
+                defer { keeper.stopLoading() }
+                // Repository metadata may name a store before WebKit creates it.
+                // An API-confirmed absent owned ID needs no removal request.
+                let existing = try await StorageFixtureStoreCleanup.identifiers()
+                for identifier in existing.intersection(identifiers).sorted(by: { $0.uuidString < $1.uuidString }) {
+                    do { try await StorageFixtureStoreCleanup.remove(identifier) }
+                    catch { failures.append("\(identifier.uuidString): \(error)") }
+                }
+                let remaining = try await StorageFixtureStoreCleanup.identifiers().intersection(identifiers)
+                if !remaining.isEmpty {
+                    failures.append("Owned stores still exist: \(remaining.map(\.uuidString).sorted().joined(separator: ","))")
+                }
+            } catch { failures.append("WebKit cleanup initialization/enumeration: \(error)") }
+        }
+        if failures.isEmpty {
+            do {
+                if FileManager.default.fileExists(atPath: directory.path) {
+                    try FileManager.default.removeItem(at: directory)
+                }
+            } catch { failures.append("Owned directory removal: \(error)") }
+        }
+        guard !failures.isEmpty else { return }
+        // Keep both the repository and the independent UUID list until a later
+        // allowlisted recovery confirms deletion. A timeout is never success.
+        try? persist()
+        XCTContext.runActivity(named: "Preserved \(label) fixture ownership") { activity in
+            let attachment = XCTAttachment(string: "label=\(label)\ndirectory=\(directory.path)\nprofiles=\(identifiers.map(\.uuidString).sorted().joined(separator: ","))\nfailures=\(failures.joined(separator: "\n"))")
+            attachment.name = "\(label)-cleanup-ownership"
+            attachment.lifetime = .keepAlways
+            activity.add(attachment)
+        }
+        XCTFail("\(label) fixture cleanup failed; ownership preserved: \(failures.joined(separator: "; "))")
+    }
+
+    private func persist() throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let data = try JSONSerialization.data(withJSONObject: [
+            "kind": "owned-storage-regression-fixture", "label": label,
+            "directory": directory.path, "profiles": identifiers.map(\.uuidString).sorted()
+        ], options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: directory.appendingPathComponent("fixture-store-ownership.json"),
+                       options: [.atomic, .completeFileProtectionUnlessOpen])
+    }
+}
+
+@available(iOS 17, *)
+@MainActor
+private enum StorageFixtureStoreCleanup {
+    private static var initializationKeeper: WKWebView?
+
+    static func initializedKeeper() async throws -> WKWebView {
+        if let initializationKeeper { return initializationKeeper }
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .nonPersistent()
+        let keeper = WKWebView(frame: CGRect(x: 0, y: 0, width: 1, height: 1), configuration: configuration)
+        // Fixed HTML with no external resources initializes WebKit without any
+        // network request or named profile before the identifier APIs are used.
+        try await WebStoragePageFixture.load(in: keeper, origin: URL(string: "https://storage-cleanup.invalid/")!,
+                                             title: "Storage fixture cleanup keeper")
+        initializationKeeper = keeper
+        return keeper
+    }
+
+    static func remove(_ identifier: UUID) async throws {
+        var lastFailure: Error = URLError(.unknown)
+        let deadline = Date().addingTimeInterval(30)
+        for seconds in [0, 1, 2, 4, 8, 8] {
+            guard deadline.timeIntervalSinceNow > Double(seconds) else { break }
+            if seconds > 0 { try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000) }
+            do {
+                try await removeOnce(identifier, timeout: deadline.timeIntervalSinceNow)
+                return
+            } catch {
+                lastFailure = error
+                if (error as? URLError)?.code == .timedOut { throw error }
+            }
+        }
+        throw lastFailure
+    }
+
+    static func identifiers() async throws -> Set<UUID> {
+        let completion = StorageFixtureCleanupCallback<[UUID]>()
+        WKWebsiteDataStore.fetchAllDataStoreIdentifiers { completion.value = $0 }
+        let deadline = Date().addingTimeInterval(4)
+        while Date() < deadline {
+            if let result = completion.value { return Set(result) }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        throw URLError(.timedOut)
+    }
+
+    private static func removeOnce(_ identifier: UUID, timeout: TimeInterval) async throws {
+        let completion = StorageFixtureCleanupCallback<Result<Void, Error>>()
+        let started = ProcessInfo.processInfo.systemUptime
+        WKWebsiteDataStore.remove(forIdentifier: identifier) { error in
+            completion.value = error.map(Result.failure) ?? .success(())
+            let elapsed = (ProcessInfo.processInfo.systemUptime - started) * 1000
+            print("STORAGE_FIXTURE_STORE_REMOVAL id=\(identifier.uuidString) elapsed-ms=\(elapsed) success=\(error == nil)")
+        }
+        let deadline = Date().addingTimeInterval(max(0, timeout))
+        while Date() < deadline {
+            if let result = completion.value { return try result.get() }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        throw URLError(.timedOut)
+    }
+}
+
+@MainActor
+private final class StorageFixtureCleanupCallback<Value> {
+    var value: Value?
 }

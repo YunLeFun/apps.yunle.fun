@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "generatedAt": "2026-10-29T18:52:01.283Z",
+  "games": [
+    {
+      "gameId": "gomoku",
+      "appId": "gomoku",
+      "name": "五子棋",
+      "description": "十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。",
+      "fallbackURL": "https://play.yunle.fun/games/gomoku",
+      "iconURL": null,
+      "type": "board",
+      "lifecycle": "playable",
+      "players": {
+        "min": 1,
+        "max": 2
+      },
+      "launchModes": [
+        {
+          "id": "computer",
+          "title": "电脑对手",
+          "requiresLogin": false,
+          "requiresNetwork": false,
+          "launchURL": "https://play.yunle.fun/games/gomoku/computer",
+          "orientation": "system",
+          "available": true
+        },
+        {
+          "id": "local",
+          "title": "同屏双人",
+          "requiresLogin": false,
+          "requiresNetwork": false,
+          "launchURL": "https://play.yunle.fun/games/gomoku/local",
+          "orientation": "system",
+          "available": true
+        },
+        {
+          "id": "online",
+          "title": "邀请联机",
+          "requiresLogin": true,
+          "requiresNetwork": true,
+          "launchURL": "https://play.yunle.fun/games/gomoku/online",
+          "orientation": "system",
+          "available": true
+        }
+      ],
+      "resourceManifestURL": "https://play.yunle.fun/native/resources/gomoku-v1.json",
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+    },
+    {
+      "gameId": "flight-chess",
+      "appId": "flight-chess",
+      "name": "飞行棋",
+      "description": "掷骰起飞、跳跃撞机，可单人挑战三个机器人，也支持好友邀请联机。",
+      "fallbackURL": "https://play.yunle.fun/games/flight-chess",
+      "iconURL": null,
+      "type": "board",
+      "lifecycle": "beta",
+      "players": {
+        "min": 1,
+        "max": 4
+      },
+      "launchModes": [
+        {
+          "id": "online",
+          "title": "好友或机器人",
+          "requiresLogin": true,
+          "requiresNetwork": true,
+          "launchURL": "https://play.yunle.fun/games/flight-chess/online",
+          "orientation": "system",
+          "available": true
+        }
+      ],
+      "resourceManifestURL": "https://play.yunle.fun/native/resources/flight-chess-v1.json",
+      "resourceVersion": "77c1c8290fb05d82fd47d7fbb82f22932d2f0bc2d11625f57acfb388bb02044f"
+    },
+    {
+      "gameId": "paper-star",
+      "appId": "paper-star",
+      "name": "星纸",
+      "description": "持续滑翔、转向加速与反弹射击；既可在星域竞技，也可与 1–4 名队员合作挑战五阶段 NPC 与黑洞 Boss。",
+      "fallbackURL": "https://play.yunle.fun/games/paper-star",
+      "iconURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/icon.png",
+      "type": "arcade",
+      "lifecycle": "beta",
+      "players": {
+        "min": 1,
+        "max": 4
+      },
+      "launchModes": [
+        {
+          "id": "tutorial",
+          "title": "互动教程",
+          "requiresLogin": false,
+          "requiresNetwork": false,
+          "launchURL": "https://play.yunle.fun/games/paper-star/tutorial",
+          "orientation": "landscape",
+          "available": true
+        },
+        {
+          "id": "pve",
+          "title": "单人远征",
+          "requiresLogin": false,
+          "requiresNetwork": false,
+          "launchURL": "https://play.yunle.fun/games/paper-star/pve",
+          "orientation": "landscape",
+          "available": true
+        },
+        {
+          "id": "local",
+          "title": "自由练习",
+          "requiresLogin": false,
+          "requiresNetwork": false,
+          "launchURL": "https://play.yunle.fun/games/paper-star/local",
+          "orientation": "landscape",
+          "available": true
+        },
+        {
+          "id": "online",
+          "title": "邀请联机",
+          "requiresLogin": true,
+          "requiresNetwork": true,
+          "launchURL": "https://play.yunle.fun/games/paper-star/online",
+          "orientation": "landscape",
+          "available": false,
+          "unavailableReason": "星纸联机仍在灰度准备中"
+        }
+      ],
+      "resourceManifestURL": "https://play.yunle.fun/native/resources/paper-star-v1.json",
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+    }
+  ]
+}

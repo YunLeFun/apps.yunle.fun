@@ -38,6 +38,11 @@ struct ApplicationIconImage<Fallback: View>: View {
     @State private var finishedKey: Request?
     private struct Request: Hashable { let candidates: [ApplicationIconCandidate]; let pixels: Int }
     private var key: Request { Request(candidates: candidates, pixels: pixelSize) }
+    private var displayedIcon: LoadedApplicationIcon? {
+        if let loaded, loadedKey == key { return loaded }
+        if let loaded, candidates.contains(where: { $0.url == loaded.candidate.url && $0.role == loaded.candidate.role }) { return loaded }
+        return pipeline.cachedIcon(candidates, pixelSize: pixelSize)
+    }
     private var placeholderFill: Color {
         #if os(macOS)
         Color(nsColor: .quaternaryLabelColor)
@@ -47,7 +52,7 @@ struct ApplicationIconImage<Fallback: View>: View {
     }
     var body: some View {
         Group {
-            if let loaded, loadedKey == key {
+            if let loaded = displayedIcon {
                 Image(decorative: loaded.bitmap.image, scale: 1)
                     .resizable().scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -61,9 +66,14 @@ struct ApplicationIconImage<Fallback: View>: View {
         }
         .task(id: key) {
             let request = key
-            loaded = nil; loadedKey = nil; finishedKey = nil
+            // SwiftUI restarts this task on reappearance, even for the same key.
+            // Keep already displayed artwork while resolving the current request.
             let started = Date()
             do {
+                if let cached = try await pipeline.cachedIconFromDisk(request.candidates, pixelSize: request.pixels) {
+                    try Task.checkCancellation()
+                    loaded = cached; loadedKey = request
+                }
                 let value = try await pipeline.load(request.candidates, pixelSize: request.pixels)
                 try Task.checkCancellation()
                 // Memory-cache hits swap instantly so revisited screens don't
@@ -74,7 +84,8 @@ struct ApplicationIconImage<Fallback: View>: View {
             } catch is CancellationError { return }
             catch {
                 guard !Task.isCancelled else { return }
-                loaded = nil; loadedKey = request; finishedKey = request
+                if loadedKey != request { loaded = nil; loadedKey = request }
+                finishedKey = request
             }
         }
     }

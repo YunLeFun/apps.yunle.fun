@@ -110,6 +110,27 @@ final class ApplicationIconTests: XCTestCase {
         XCTAssertNil(fixture.requests.first?.value(forHTTPHeaderField: "Cookie"))
     }
 
+    @MainActor
+    func testRecreatedIconRendersCachedArtworkBeforeItsLoadingTaskRuns() async throws {
+        let fixture = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = [ApplicationIconCandidate(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon)]
+        _ = try await pipeline.load(candidates, pixelSize: 128)
+
+        // ImageRenderer does not run .task: each render is the first frame of
+        // a newly created icon, as when returning to a recreated home screen.
+        for _ in 0..<3 {
+            let renderer = ImageRenderer(content: ApplicationIconImage(candidates: candidates, pixelSize: 128, pipeline: pipeline) {
+                Color.blue
+            }.frame(width: 48, height: 48))
+            let image = try XCTUnwrap(renderer.cgImage)
+            let center = try pixel(image, x: image.width / 2, y: image.height / 2)
+            XCTAssertGreaterThan(center[0], 240, "A warm icon must draw its artwork on the first frame, without showing loading")
+            XCTAssertLessThan(center[2], 20)
+        }
+        XCTAssertEqual(fixture.requests.count, 1)
+    }
+
     func testInvalidPrimaryFallsBackToMarkAndFailuresDoNotSpin() async throws {
         let fixture = IconHTTPFixture(replies: ["/bad.svg": (200, Data("not an image".utf8), nil), "/mark.svg": (200, iconTestSVG, nil)])
         let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
@@ -117,7 +138,23 @@ final class ApplicationIconTests: XCTestCase {
                           ApplicationIconCandidate(url: URL(string: "https://\(host)/mark.svg")!, role: .mark)]
         let loaded = try await pipeline.load(candidates, pixelSize: 128)
         XCTAssertEqual(loaded.candidate.role, .mark)
+        XCTAssertEqual(pipeline.cachedIcon(candidates, pixelSize: 128)?.candidate.role, .mark)
         _ = try await pipeline.load(candidates, pixelSize: 128)
+        XCTAssertEqual(fixture.requests.count, 2)
+    }
+
+    func testImmediateCacheLookupUsesTheSamePixelSizeLimitsAsLoading() async throws {
+        let fixture = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (pipeline, host) = iconPipeline(fixture); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = [ApplicationIconCandidate(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon)]
+        XCTAssertNil(pipeline.cachedIcon(candidates, pixelSize: 16))
+        _ = try await pipeline.load(candidates, pixelSize: 16)
+        XCTAssertEqual(pipeline.cachedIcon(candidates, pixelSize: 16)?.bitmap.image.width, 64)
+        XCTAssertNotNil(pipeline.cachedIcon(candidates, pixelSize: 64))
+        XCTAssertNil(pipeline.cachedIcon(candidates, pixelSize: 128))
+        _ = try await pipeline.load(candidates, pixelSize: 2048)
+        XCTAssertEqual(pipeline.cachedIcon(candidates, pixelSize: 2048)?.bitmap.image.width, 1024)
+        XCTAssertNotNil(pipeline.cachedIcon(candidates, pixelSize: 1024))
         XCTAssertEqual(fixture.requests.count, 2)
     }
 
@@ -160,13 +197,212 @@ final class ApplicationIconTests: XCTestCase {
         let old = ApplicationIconCandidate(url: url, role: .appIcon, revision: "revision-1")
         let new = ApplicationIconCandidate(url: url, role: .appIcon, revision: "revision-2")
         _ = try await pipeline.load([old], pixelSize: 128)
+        XCTAssertNotNil(pipeline.cachedIcon([old], pixelSize: 128))
+        XCTAssertNil(pipeline.cachedIcon([new], pixelSize: 128), "First-frame rendering must not reuse a previous manifest revision")
         _ = try await pipeline.load([old], pixelSize: 128)
         XCTAssertEqual(fixture.requests.count, 1)
         _ = try await pipeline.load([new], pixelSize: 128)
         XCTAssertEqual(fixture.requests.count, 2, "A new manifest revision must not reuse pixels from the previous revision")
     }
 
+    func testDiskCacheReopensOfflineAndReusesSourceAcrossSizes() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = [ApplicationIconCandidate(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon, revision: "v1")]
+        _ = try await writer.load(candidates, pixelSize: 128)
+        let offline = IconHTTPFixture(replies: [:])
+        let (reopened, _) = iconPipeline(offline, cacheDirectory: directory, host: host)
+        XCTAssertNil(reopened.cachedIcon(candidates, pixelSize: 64), "A new pipeline has no decoded memory cache")
+        let cached = try await reopened.cachedIconFromDisk(candidates, pixelSize: 64)
+        XCTAssertEqual(cached?.bitmap.image.width, 64)
+        let loaded = try await reopened.load(candidates, pixelSize: 256)
+        XCTAssertEqual(loaded.bitmap.image.width, 256)
+        XCTAssertEqual(first.requests.count, 1)
+        XCTAssertTrue(offline.requests.isEmpty, "Unchanged versioned artwork must reopen without network access")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: directory.path).count, 1)
+    }
+
+    func testUnversionedDiskCacheRevalidatesWithHTTPValidators() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let modified = "Wed, 21 Oct 2015 07:28:00 GMT"
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)], headers: ["ETag": "\"icon-v1\"", "Last-Modified": modified])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = [ApplicationIconCandidate(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon)]
+        _ = try await writer.load(candidates, pixelSize: 128)
+        let unchanged = IconHTTPFixture(replies: ["/icon.svg": (304, Data(), nil)])
+        let (reopened, _) = iconPipeline(unchanged, cacheDirectory: directory, host: host)
+        let cached = try await reopened.cachedIconFromDisk(candidates, pixelSize: 128)
+        XCTAssertNotNil(cached)
+        XCTAssertTrue(unchanged.requests.isEmpty, "Local artwork must be available before checking for updates")
+        let loaded = try await reopened.load(candidates, pixelSize: 128)
+        XCTAssertEqual(loaded.bitmap.image.width, 128)
+        XCTAssertEqual(unchanged.requests.count, 1)
+        XCTAssertEqual(unchanged.requests.first?.value(forHTTPHeaderField: "If-None-Match"), "\"icon-v1\"")
+        XCTAssertEqual(unchanged.requests.first?.value(forHTTPHeaderField: "If-Modified-Since"), modified)
+        _ = try await reopened.load(candidates, pixelSize: 128)
+        XCTAssertEqual(unchanged.requests.count, 1, "A revalidated image is fresh in memory")
+    }
+
+    func testUnversionedChangedResponseReplacesDiskArtwork() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let modified = "Wed, 21 Oct 2015 07:28:00 GMT"
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)], headers: ["Last-Modified": modified])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = [ApplicationIconCandidate(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon)]
+        _ = try await writer.load(candidates, pixelSize: 128)
+        let changedSVG = Data(String(decoding: iconTestSVG, as: UTF8.self).replacingOccurrences(of: "#ff6600", with: "#0000ff").utf8)
+        let changed = IconHTTPFixture(replies: ["/icon.svg": (200, changedSVG, nil)], headers: ["ETag": "\"new\""])
+        let (reopened, _) = iconPipeline(changed, cacheDirectory: directory, host: host)
+        let cached = try await reopened.cachedIconFromDisk(candidates, pixelSize: 128)
+        XCTAssertLessThan(try pixel(XCTUnwrap(cached).bitmap.image, x: 64, y: 64)[2], 20)
+        let updated = try await reopened.load(candidates, pixelSize: 128)
+        XCTAssertGreaterThan(try pixel(updated.bitmap.image, x: 64, y: 64)[2], 240)
+        XCTAssertNil(changed.requests.first?.value(forHTTPHeaderField: "If-None-Match"))
+        XCTAssertEqual(changed.requests.first?.value(forHTTPHeaderField: "If-Modified-Since"), modified)
+        let (nextLaunch, _) = iconPipeline(IconHTTPFixture(replies: [:]), cacheDirectory: directory, host: host)
+        let persisted = try await nextLaunch.cachedIconFromDisk(candidates, pixelSize: 128)
+        XCTAssertGreaterThan(try pixel(XCTUnwrap(persisted).bitmap.image, x: 64, y: 64)[2], 240)
+    }
+
+    func testNewRevisionDisplaysOldDiskImageThenAtomicallyReplacesIt() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)], headers: ["ETag": "\"old\""])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let url = URL(string: "https://\(host)/icon.svg")!
+        let old = ApplicationIconCandidate(url: url, role: .appIcon, revision: "v1")
+        let new = ApplicationIconCandidate(url: url, role: .appIcon, revision: "v2")
+        _ = try await writer.load([old], pixelSize: 128)
+        let updatedSVG = Data(String(decoding: iconTestSVG, as: UTF8.self).replacingOccurrences(of: "#ff6600", with: "#0000ff").utf8)
+        let changed = IconHTTPFixture(replies: ["/icon.svg": (200, updatedSVG, nil)])
+        let (reopened, _) = iconPipeline(changed, cacheDirectory: directory, host: host)
+        let cached = try await reopened.cachedIconFromDisk([new], pixelSize: 128)
+        XCTAssertEqual(cached?.candidate.revision, "v1")
+        XCTAssertNil(reopened.cachedIcon([new], pixelSize: 128), "Stale display data must not satisfy a new revision")
+        let updated = try await reopened.load([new], pixelSize: 128)
+        XCTAssertGreaterThan(try pixel(updated.bitmap.image, x: 64, y: 64)[2], 240)
+        XCTAssertEqual(changed.requests.count, 1)
+        XCTAssertNil(changed.requests.first?.value(forHTTPHeaderField: "If-None-Match"), "A manifest revision change requires fresh bytes")
+        let offline = IconHTTPFixture(replies: [:])
+        let (nextLaunch, _) = iconPipeline(offline, cacheDirectory: directory, host: host)
+        let persisted = try await nextLaunch.load([new], pixelSize: 128)
+        XCTAssertGreaterThan(try pixel(persisted.bitmap.image, x: 64, y: 64)[2], 240)
+        XCTAssertTrue(offline.requests.isEmpty)
+    }
+
+    func testFailedRefreshPreservesLastValidDiskImage() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let url = URL(string: "https://\(host)/icon.svg")!
+        let old = ApplicationIconCandidate(url: url, role: .appIcon, revision: "v1")
+        let new = ApplicationIconCandidate(url: url, role: .appIcon, revision: "v2")
+        _ = try await writer.load([old], pixelSize: 128)
+        for reply in [(503, Data(), nil as Int?), (200, Data("broken image".utf8), nil as Int?)] {
+            let failed = IconHTTPFixture(replies: ["/icon.svg": reply])
+            let (reopened, _) = iconPipeline(failed, cacheDirectory: directory, host: host)
+            let before = try await reopened.cachedIconFromDisk([new], pixelSize: 128)
+            XCTAssertEqual(before?.candidate.revision, "v1")
+            do { _ = try await reopened.load([new], pixelSize: 128); XCTFail("The new revision is not available") }
+            catch { XCTAssertEqual(failed.requests.count, 1) }
+            let after = try await reopened.cachedIconFromDisk([new], pixelSize: 128)
+            XCTAssertEqual(after?.candidate.revision, "v1", "Failed HTTP or decoding must not overwrite the previous image")
+        }
+    }
+
+    func testCorruptDiskEntryIsDiscardedAndDownloadedAgain() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let candidates = [ApplicationIconCandidate(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon, revision: "v1")]
+        _ = try await writer.load(candidates, pixelSize: 128)
+        let file = try XCTUnwrap(FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil).first)
+        try Data("damaged cache".utf8).write(to: file)
+        let recovered = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (reopened, _) = iconPipeline(recovered, cacheDirectory: directory, host: host)
+        let cached = try await reopened.cachedIconFromDisk(candidates, pixelSize: 128)
+        XCTAssertNil(cached)
+        _ = try await reopened.load(candidates, pixelSize: 128)
+        XCTAssertEqual(recovered.requests.count, 1)
+        let cache = ApplicationImageDiskCache(directory: directory)
+        await cache.store(.init(url: candidates[0].url.absoluteString, revision: "v1", eTag: nil, lastModified: nil,
+                                data: Data("invalid cached image".utf8)), for: candidates[0].url)
+        let (invalidImage, _) = iconPipeline(recovered, cacheDirectory: directory, host: host)
+        _ = try await invalidImage.load(candidates, pixelSize: 128)
+        XCTAssertEqual(recovered.requests.count, 2, "Malformed image data inside a valid cache envelope also needs recovery")
+    }
+
+    func testDiskCacheEvictsLeastRecentlyUsedEntriesAndHonorsByteBudget() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = ApplicationImageDiskCache(directory: directory, byteLimit: 4096, countLimit: 2)
+        let urls = (0..<3).map { URL(string: "https://cache.test/\($0).svg")! }
+        for index in 0..<2 {
+            await cache.store(.init(url: urls[index].absoluteString, revision: "v1", eTag: nil, lastModified: nil, data: iconTestSVG), for: urls[index])
+            let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            for file in files { try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: Double(index + 1))], ofItemAtPath: file.path) }
+        }
+        _ = await cache.entry(for: urls[0])
+        await cache.store(.init(url: urls[2].absoluteString, revision: "v1", eTag: nil, lastModified: nil, data: iconTestSVG), for: urls[2])
+        let retained = await cache.entry(for: urls[0]), evicted = await cache.entry(for: urls[1]), newest = await cache.entry(for: urls[2])
+        XCTAssertNotNil(retained); XCTAssertNil(evicted); XCTAssertNotNil(newest)
+        let encoder = PropertyListEncoder(); encoder.outputFormat = .binary
+        let entry = ApplicationImageDiskCache.Entry(url: urls[0].absoluteString, revision: nil, eTag: nil, lastModified: nil, data: iconTestSVG)
+        let byteLimit = try encoder.encode(entry).count * 2
+        let small = ApplicationImageDiskCache(directory: directory.appendingPathComponent("small"), byteLimit: byteLimit, countLimit: 256)
+        for url in urls { await small.store(.init(url: url.absoluteString, revision: nil, eTag: nil, lastModified: nil, data: iconTestSVG), for: url) }
+        let files = try FileManager.default.contentsOfDirectory(at: directory.appendingPathComponent("small"), includingPropertiesForKeys: [.fileSizeKey])
+        let bytes = try files.reduce(0) { try $0 + ($1.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) }
+        XCTAssertLessThanOrEqual(bytes, byteLimit)
+        XCTAssertLessThan(files.count, 3)
+    }
+
+    func testUnwritableDiskCacheDoesNotPreventLoadingArtwork() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let blocked = directory.appendingPathComponent("blocked")
+        try Data("preserve".utf8).write(to: blocked)
+        let fixture = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (pipeline, host) = iconPipeline(fixture, cacheDirectory: blocked); defer { IconHTTPProtocol.unregister(host) }
+        let loaded = try await pipeline.load([.init(url: URL(string: "https://\(host)/icon.svg")!, role: .appIcon)], pixelSize: 128)
+        XCTAssertEqual(loaded.bitmap.image.width, 128)
+        XCTAssertEqual(try Data(contentsOf: blocked), Data("preserve".utf8))
+    }
+
+    private func iconCacheDirectory() throws -> URL {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("icon-cache-tests-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }
+
     #if os(iOS)
+    @MainActor
+    func testIconViewKeepsDiskArtworkWhenNewRevisionRefreshFails() async throws {
+        let directory = try iconCacheDirectory(); defer { try? FileManager.default.removeItem(at: directory) }
+        let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
+        let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
+        let url = URL(string: "https://\(host)/icon.svg")!
+        _ = try await writer.load([.init(url: url, role: .appIcon, revision: "v1")], pixelSize: 128)
+        let failed = IconHTTPFixture(replies: ["/icon.svg": (503, Data(), nil)])
+        let (reopened, _) = iconPipeline(failed, cacheDirectory: directory, host: host)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene); window.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
+        let content = ApplicationIconImage(candidates: [.init(url: url, role: .appIcon, revision: "v2")], pixelSize: 128, pipeline: reopened) {
+            Color.blue
+        }.frame(width: 100, height: 100)
+        let controller = UIHostingController(rootView: content)
+        window.rootViewController = controller; window.makeKeyAndVisible()
+        try await Task.sleep(nanoseconds: 300_000_000)
+        controller.view.layoutIfNeeded()
+        let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
+            controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        }
+        let cg = try XCTUnwrap(image.cgImage), center = try pixel(cg, x: cg.width / 2, y: cg.height / 2)
+        XCTAssertGreaterThan(center[0], 240, "The view must retain locally loaded artwork after a failed update")
+        XCTAssertLessThan(center[2], 20)
+        XCTAssertEqual(failed.requests.count, 1)
+    }
+
     @MainActor
     func testIconLightAndDarkRenderFixtures() async throws {
         let darkSVG = Data(##"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#4f46e5"/><circle cx="50" cy="50" r="25" fill="#fbbf24"/></svg>"##.utf8)
@@ -272,20 +508,20 @@ final class ApplicationIconTests: XCTestCase {
 }
 
 let iconTestSVG = Data(##"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#ff6600"/></svg>"##.utf8)
-private func iconPipeline(_ fixture: IconHTTPFixture) -> (ApplicationImagePipeline, String) {
-    let host = UUID().uuidString.lowercased() + ".icons.test"
+private func iconPipeline(_ fixture: IconHTTPFixture, cacheDirectory: URL? = nil, host: String = UUID().uuidString.lowercased() + ".icons.test") -> (ApplicationImagePipeline, String) {
     IconHTTPProtocol.register(host, fixture)
     let config = URLSessionConfiguration.ephemeral
     config.protocolClasses = [IconHTTPProtocol.self]
     config.httpCookieStorage = nil; config.urlCredentialStorage = nil; config.urlCache = nil
-    return (ApplicationImagePipeline(session: URLSession(configuration: config)), host)
+    return (ApplicationImagePipeline(session: URLSession(configuration: config), cacheDirectory: cacheDirectory), host)
 }
 final class IconHTTPFixture: @unchecked Sendable {
     let replies: [String: (Int, Data, Int?)]
+    let headers: [String: String]
     private let lock = NSLock()
     private var captured: [URLRequest] = []
     var requests: [URLRequest] { lock.lock(); defer { lock.unlock() }; return captured }
-    init(replies: [String: (Int, Data, Int?)]) { self.replies = replies }
+    init(replies: [String: (Int, Data, Int?)], headers: [String: String] = [:]) { self.replies = replies; self.headers = headers }
     func response(_ request: URLRequest) -> (Int, Data, Int?) {
         lock.lock(); defer { lock.unlock() }; captured.append(request)
         return replies[request.url!.path] ?? (404, Data(), nil)
@@ -302,8 +538,10 @@ final class IconHTTPProtocol: URLProtocol {
         Self.lock.lock(); let fixture = Self.fixtures[request.url!.host!]; Self.lock.unlock()
         guard let fixture else { client?.urlProtocol(self, didFailWithError: URLError(.badURL)); return }
         let (status, data, size) = fixture.response(request)
+        var headers = fixture.headers
+        headers["Content-Length"] = String(size ?? data.count)
         client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil,
-            headerFields: ["Content-Length": String(size ?? data.count)])!, cacheStoragePolicy: .notAllowed)
+            headerFields: headers)!, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data); client?.urlProtocolDidFinishLoading(self)
     }
     override func stopLoading() {}

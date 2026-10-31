@@ -444,6 +444,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
         let animationsWereEnabled: Bool
         private let ownership: StorageFixtureOwnership
         private var observedBrowsers: [BrowserReference] = []
+        private var observedPages: [PageReference] = []
         private var released = false
         private(set) var browser: WebViewController!
 
@@ -554,27 +555,53 @@ final class NativeRuntimeSessionTests: XCTestCase {
 
         private func cleanup() async {
             close()
-            for _ in 0..<100 where runtime.isIdentityCleanupPending || root.presentedViewController != nil {
+            // Require actual runtime owners to be gone before deferring stores.
+            for _ in 0..<100 {
+                let released = autoreleasepool {
+                    !runtime.isIdentityCleanupPending && root.presentedViewController == nil &&
+                    !observedBrowsers.contains { $0.browser != nil } &&
+                    !observedPages.contains { $0.page != nil }
+                }
+                if released { break }
                 try? await Task.sleep(nanoseconds: 50_000_000)
             }
             await Task.yield()
-            await ownership.cleanup()
+            let state = autoreleasepool {
+                (identityFinished: !runtime.isIdentityCleanupPending,
+                 presentationDismissed: root.presentedViewController == nil,
+                 browsersReleased: !observedBrowsers.contains { $0.browser != nil },
+                 pagesReleased: !observedPages.contains { $0.page != nil })
+            }
+            XCTAssertTrue(state.identityFinished, "Identity cleanup must finish before fixture storage is released")
+            XCTAssertTrue(state.presentationDismissed, "The fixture must dismiss its runtime presentation")
+            XCTAssertTrue(state.browsersReleased, "Fixture browser owners must be released before deferring storage cleanup")
+            XCTAssertTrue(state.pagesReleased, "Actual fixture WebViews must be released before deferring storage cleanup")
+            await ownership.cleanup(ownersReleased: state.identityFinished && state.presentationDismissed &&
+                                    state.browsersReleased && state.pagesReleased)
         }
 
         private func track(_ browser: WebViewController) throws {
             if !observedBrowsers.contains(where: { $0.browser === browser }) {
                 observedBrowsers.append(BrowserReference(browser))
             }
-            if #available(iOS 17, *),
-               let web = browser.viewIfLoaded?.subviews.compactMap({ $0 as? WKWebView }).first,
-               let identifier = web.configuration.websiteDataStore.identifier {
-                try ownership.record(identifier)
+            for web in browser.viewIfLoaded?.subviews.compactMap({ $0 as? WKWebView }) ?? [] {
+                if !observedPages.contains(where: { $0.page === web }) {
+                    observedPages.append(PageReference(web))
+                }
+                if #available(iOS 17, *), let identifier = web.configuration.websiteDataStore.identifier {
+                    try ownership.record(identifier)
+                }
             }
         }
 
         private final class BrowserReference {
             weak var browser: WebViewController?
             init(_ browser: WebViewController) { self.browser = browser }
+        }
+
+        private final class PageReference {
+            weak var page: WKWebView?
+            init(_ page: WKWebView) { self.page = page }
         }
     }
 }

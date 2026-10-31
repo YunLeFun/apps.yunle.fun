@@ -7,6 +7,7 @@ import XCTest
 final class WebProfileRepositoryTests: XCTestCase {
     private var directory: URL!
     private var pages: [WKWebView] = []
+    private var observedPages: [PageReference] = []
     private var ownership: StorageFixtureOwnership!
     private var window: UIWindow?
     private weak var previousWindow: UIWindow?
@@ -21,12 +22,25 @@ final class WebProfileRepositoryTests: XCTestCase {
     override func tearDown() async throws {
         // The test method's local references have left their async frame.
         // Release the remaining WebViews before requesting whole-store removal.
-        pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }
-        pages.removeAll()
-        window?.isHidden = true; window?.rootViewController = nil; window = nil
+        weak var releasedWindow = window
+        autoreleasepool {
+            pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }
+            pages.removeAll()
+            window?.isHidden = true; window?.rootViewController = nil; window = nil
+        }
         previousWindow?.makeKey()
         await Task.yield()
-        await ownership.cleanup()
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            if autoreleasepool(invoking: { observedPages.allSatisfy { $0.page == nil } }) { break }
+            do { try await Task.sleep(nanoseconds: 50_000_000) }
+            catch { break }
+        }
+        let pagesReleased = autoreleasepool { observedPages.allSatisfy { $0.page == nil } }
+        let windowDetached = releasedWindow?.isHidden != false && releasedWindow?.rootViewController == nil
+        XCTAssertTrue(pagesReleased, "The fixture's actual WebViews must be released before storage cleanup")
+        XCTAssertTrue(windowDetached, "The fixture window must be hidden and detached")
+        await ownership.cleanup(ownersReleased: pagesReleased && windowDetached)
     }
     private func repository(namespace: String = "provider-a") -> WebProfileRepository {
         WebProfileRepository(fileURL: file, namespace: namespace)
@@ -290,6 +304,7 @@ final class WebProfileRepositoryTests: XCTestCase {
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: selected.identifier)
         let web = WKWebView(frame: .zero, configuration: config)
         pages.append(web)
+        observedPages.append(PageReference(web))
         if window == nil {
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
             previousWindow = scene.windows.first(where: \.isKeyWindow)
@@ -333,6 +348,11 @@ final class WebProfileRepositoryTests: XCTestCase {
         """, arguments: ["value": value as Any? ?? NSNull()]) as? [String: String] ?? [:]
     }
 
+    private final class PageReference {
+        weak var page: WKWebView?
+        init(_ page: WKWebView) { self.page = page }
+    }
+
     private enum FixtureFailure: Error { case write }
 }
 
@@ -369,11 +389,20 @@ final class StorageFixtureOwnership {
         try data.write(to: url, options: [.atomic, .completeFileProtectionUnlessOpen])
     }
 
-    func cleanup() async {
+    func cleanup(ownersReleased: Bool) async {
         guard !cleaned else { return }
         cleaned = true
         var failures: [String] = []
-        if #available(iOS 17, *), !identifiers.isEmpty {
+        if !ownersReleased { failures.append("Fixture page owners have not been released") }
+        if failures.isEmpty, !identifiers.isEmpty,
+           ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
+            do {
+                try persist()
+                try NativeGameRuntimeDeferredCleanup.record(identifiers, directory: directory, defaults: nil,
+                    namespace: storageNamespace())
+                return
+            } catch { failures.append("Deferred fixture ownership: \(error)") }
+        } else if failures.isEmpty, #available(iOS 17, *), !identifiers.isEmpty {
             do {
                 let keeper = try await StorageFixtureStoreCleanup.initializedKeeper()
                 defer { keeper.stopLoading() }
@@ -411,13 +440,34 @@ final class StorageFixtureOwnership {
     }
 
     private func persist() throws {
+        let namespace = try storageNamespace()
+        try NativeGameRuntimeDeferredCleanup.validateDirectoryName(directory.lastPathComponent, namespace: namespace)
+        let manager = FileManager.default
+        let root = manager.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
+        guard directory.standardizedFileURL.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path == root.path,
+              directory.resolvingSymlinksInPath().standardizedFileURL.path == root.appendingPathComponent(directory.lastPathComponent).standardizedFileURL.path,
+              (try? manager.destinationOfSymbolicLink(atPath: directory.path)) == nil else {
+            throw NSError(domain: "StorageFixtureOwnership", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unscoped storage fixture directory"])
+        }
+        let runID: UUID?
+        if ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
+            let url = try NativeGameRuntimeDeferredCleanup.ledgerURL()
+            runID = try XCTUnwrap(UUID(uuidString: url.deletingPathExtension().lastPathComponent))
+        } else { runID = nil }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let data = try JSONSerialization.data(withJSONObject: [
-            "kind": "owned-storage-regression-fixture", "label": label,
-            "directory": directory.path, "profiles": identifiers.map(\.uuidString).sorted()
-        ], options: [.prettyPrinted, .sortedKeys])
-        try data.write(to: directory.appendingPathComponent("fixture-store-ownership.json"),
+        let marker = NativeGameRuntimeDeferredCleanup.StorageMarker(kind: NativeGameRuntimeDeferredCleanup.storageMarkerKind,
+            namespace: namespace, directory: directory.lastPathComponent, runID: runID,
+            processID: ProcessInfo.processInfo.processIdentifier, profiles: identifiers.sorted { $0.uuidString < $1.uuidString })
+        let data = try JSONEncoder().encode(marker)
+        try data.write(to: directory.appendingPathComponent(NativeGameRuntimeDeferredCleanup.storageMarkerName),
                        options: [.atomic, .completeFileProtectionUnlessOpen])
+    }
+
+    private func storageNamespace() throws -> NativeGameRuntimeDeferredCleanup.Namespace {
+        guard let namespace = NativeGameRuntimeDeferredCleanup.Namespace(rawValue: label), namespace != .nativeGameRuntime else {
+            throw NSError(domain: "StorageFixtureOwnership", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown storage fixture namespace"])
+        }
+        return namespace
     }
 }
 

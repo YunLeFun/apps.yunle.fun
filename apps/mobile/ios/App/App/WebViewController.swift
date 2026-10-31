@@ -188,6 +188,8 @@ class WebViewController: UIViewController {
     private var nativeBackItem: UIBarButtonItem?
     private var nativeMinimizeItem: UIBarButtonItem?
     private var nativeFloatingControls: WebChromeControlContainer?
+    private var gameControls: GameChromeCapsule?
+    private var gameURLObservation: NSKeyValueObservation?
     /// 页面通过 JSAPI 主动隐藏了胶囊（每次主文档导航重置；仅沉浸模式可触发）
     private var capsuleHiddenByPage = false
     /// 标题栏配色：套用应用主题色时为 true（前景转白/黑、状态栏与发丝线适配）
@@ -314,6 +316,12 @@ class WebViewController: UIViewController {
                 self?.updateHistoryControls()
             }
         }
+        if usesSystemTitleBar {
+            // Play can enter or leave a game with pushState in the same WebView.
+            gameURLObservation = webView.observe(\.url, options: .new) { [weak self] _, _ in
+                DispatchQueue.main.async { self?.applyBarButtonStyles() }
+            }
+        }
 
         if displayMode == .immersive {
             // 滚动方向感知：下滑浏览内容时胶囊滑出屏幕，上滑或回到顶部时恢复（标题栏模式顶栏固定不隐藏）
@@ -367,6 +375,7 @@ class WebViewController: UIViewController {
 
     private func updateHistoryControls() {
         let canGoBack = webView?.canGoBack == true
+        gameControls?.backButton.isHidden = !canGoBack
         backButton?.isHidden = !canGoBack || (usesSystemTitleBar && titleBarVisible)
         if usesSystemTitleBar {
             navigationItem.leftBarButtonItems = (canGoBack ? [nativeBackItem, nativeMinimizeItem] : [nativeMinimizeItem]).compactMap { $0 }
@@ -786,15 +795,51 @@ class WebViewController: UIViewController {
     /// 悬浮态（沉浸模式，或标题栏 hideTitleBar 收起后）转暗色半透明圆钮，保证任意网页配色上可读
     private func applyBarButtonStyles() {
         if usesSystemTitleBar {
-            nativeFloatingControls?.isHidden = titleBarVisible
-            nativeFloatingControls?.accessibilityElementsHidden = titleBarVisible
-            nativeFloatingControls?.isUserInteractionEnabled = !titleBarVisible
+            let gameID = Self.playGameID(at: webView?.url)
+            let showsGameCapsule = !titleBarVisible && (usesGameInteractionPolicy || gameID != nil)
+            if showsGameCapsule, gameControls == nil { installGameControls() }
+            gameControls?.isHidden = !showsGameCapsule
+            nativeFloatingControls?.isHidden = titleBarVisible || showsGameCapsule
+            nativeFloatingControls?.accessibilityElementsHidden = titleBarVisible || showsGameCapsule
+            nativeFloatingControls?.isUserInteractionEnabled = !titleBarVisible && !showsGameCapsule
             minimizeButton?.isHidden = titleBarVisible
             menuButton?.isHidden = titleBarVisible
+            // The cabinet is always dark; its published CSS selects the top scrim
+            // using prefers-color-scheme. Match WebKit and the system glyphs while
+            // playing, without changing the appearance of the menu or other games.
+            let cabinet = showsGameCapsule && gameID == "pachinko"
+            let appearance: UIUserInterfaceStyle = cabinet ? .dark : .unspecified
+            if webView?.overrideUserInterfaceStyle != appearance { webView?.overrideUserInterfaceStyle = appearance }
+            let style: UIStatusBarStyle = cabinet ? .lightContent : .default
+            if statusBarStyle != style {
+                statusBarStyle = style
+                setNeedsStatusBarAppearanceUpdate()
+                navigationController?.setNeedsStatusBarAppearanceUpdate()
+            }
             updateHistoryControls()
             return
         }
         [backButton, minimizeButton, menuButton].compactMap { $0 }.forEach(styleBarButton)
+    }
+
+    private static func playGameID(at url: URL?) -> String? {
+        guard let url, url.scheme == "https", url.host?.lowercased() == "play.yunle.fun",
+              url.port == nil || url.port == 443 else { return nil }
+        let path = url.pathComponents
+        return path.count >= 3 && path[1] == "games" ? path[2] : nil
+    }
+
+    private func installGameControls() {
+        let game = GameChromeCapsule()
+        game.backButton.addTarget(self, action: #selector(goBackTapped), for: .touchUpInside)
+        game.moreButton.addTarget(self, action: #selector(moreTapped), for: .touchUpInside)
+        game.minimizeButton.addTarget(self, action: #selector(minimizeTapped), for: .touchUpInside)
+        view.addSubview(game)
+        gameControls = game
+        NSLayoutConstraint.activate([
+            game.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            game.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -12),
+        ])
     }
 
     private func styleBarButton(_ button: UIButton) {
@@ -1806,7 +1851,9 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     /// 标题栏模式下胶囊位于视口上方（y 为负），页面按矩形避让自然判定无重叠
     private func capsuleRectInPage() -> [String: CGFloat] {
         if usesSystemTitleBar {
-            let control = titleBarVisible ? navigationController?.navigationBar : rightControl
+            let control: UIView? = titleBarVisible ? navigationController?.navigationBar
+                : (gameControls?.isHidden == false ? gameControls : rightControl)
+            view.layoutIfNeeded()
             let rect = control.map { $0.convert($0.bounds, to: webView) } ?? .zero
             return ["x": rect.minX, "y": rect.minY, "width": rect.width, "height": rect.height]
         }
@@ -1820,6 +1867,57 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     private static let authorizationTimeoutSeconds: TimeInterval = 30
     private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
     private static let externalAuthorizationTimeoutSeconds: TimeInterval = 5 * 60
+}
+
+/// A single low-profile material surface; each symbol keeps its own 44pt target.
+private final class GameChromeCapsule: UIView {
+    let backButton = UIButton(type: .system)
+    let moreButton = UIButton(type: .system)
+    let minimizeButton = UIButton(type: .system)
+
+    init() {
+        super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
+        accessibilityIdentifier = "runtime.game-controls"
+        let material = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterialDark))
+        material.translatesAutoresizingMaskIntoConstraints = false
+        material.isUserInteractionEnabled = false
+        material.layer.cornerRadius = 16
+        material.layer.cornerCurve = .continuous
+        material.clipsToBounds = true
+        addSubview(material)
+        let stack = UIStackView(arrangedSubviews: [backButton, moreButton, minimizeButton])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        let divider = UIView()
+        divider.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.isUserInteractionEnabled = false
+        addSubview(divider)
+        for (button, icon, label, id) in [(backButton, "chevron.left", "返回网页", "runtime.back"),
+                                         (moreButton, "ellipsis", "更多操作", "runtime.more"),
+                                         (minimizeButton, "chevron.down", "收起应用", "runtime.minimize")] {
+            button.setImage(UIImage(systemName: icon, withConfiguration: UIImage.SymbolConfiguration(pointSize: 15, weight: .semibold)), for: .normal)
+            button.tintColor = .white
+            button.accessibilityLabel = label
+            button.accessibilityIdentifier = id
+            let width = button.widthAnchor.constraint(equalToConstant: 44)
+            // The stack collapses the optional history button when hidden.
+            if button === backButton { width.priority = .defaultHigh }
+            width.isActive = true
+        }
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: 44),
+            material.leadingAnchor.constraint(equalTo: leadingAnchor), material.trailingAnchor.constraint(equalTo: trailingAnchor),
+            material.centerYAnchor.constraint(equalTo: centerYAnchor), material.heightAnchor.constraint(equalToConstant: 32),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor), stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor), stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            divider.centerXAnchor.constraint(equalTo: minimizeButton.leadingAnchor), divider.centerYAnchor.constraint(equalTo: centerYAnchor),
+            divider.widthAnchor.constraint(equalToConstant: 0.5), divider.heightAnchor.constraint(equalToConstant: 14),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 /// Groups native floating buttons without intercepting touches on the page between them.

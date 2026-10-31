@@ -184,21 +184,31 @@ struct GamesView: View {
 
     private func gameCard(_ game: NativeGame) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 14) {
-                ApplicationIcon(application: game.iconApplication, size: 56)
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(game.name).font(.headline)
-                    if let players = game.players { Label(players.label, systemImage: "person.2").font(.caption).foregroundStyle(.secondary) }
+            if isBrowsing, let cover = GameCover(game.gameId) {
+                cover.header(for: game, showsArt: !dynamicTypeSize.isAccessibilitySize)
+            } else {
+                HStack(alignment: .top, spacing: 14) {
+                    gameIcon(game, size: 48)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(game.name).font(.headline)
+                        if let players = game.players { Label(players.label, systemImage: "person.2").font(.caption).foregroundStyle(.secondary) }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
             Text(game.description).font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 180 : 112), alignment: .leading)], alignment: .leading, spacing: 10) {
                 ForEach(game.launchModes) { mode in
-                    Button { open(game, mode) } label: {
-                        Text(mode.title).font(.subheadline).frame(maxWidth: .infinity).fixedSize(horizontal: false, vertical: true)
+                    let launch = Button { open(game, mode) } label: {
+                        Text(mode.title).font(.subheadline).frame(maxWidth: .infinity, minHeight: 32).fixedSize(horizontal: false, vertical: true)
                     }
-                    .buttonStyle(.bordered)
+                    Group {
+                        if mode.id == game.availableModes.first?.id {
+                            launch.buttonStyle(.borderedProminent)
+                        } else {
+                            launch.buttonStyle(.bordered)
+                        }
+                    }
                     .disabled(accounts.isRestoring || !game.isPlayable || !mode.available)
                     .accessibilityLabel("\(game.name)，\(mode.title)")
                     .accessibilityHint(mode.available ? (mode.requiresLogin ? "联网玩法，进入时确认登录。" : "直接进入这个玩法。") : "当前客户端暂未提供这个玩法，可在 Play 中查看。")
@@ -227,7 +237,7 @@ struct GamesView: View {
 
     private func gameSummary(_ game: NativeGame, subtitle: String, systemImage: String) -> some View {
         HStack(spacing: 12) {
-            ApplicationIcon(application: game.iconApplication, size: 44)
+            gameIcon(game, size: 44)
             VStack(alignment: .leading, spacing: 4) {
                 Text(game.name).foregroundStyle(Color.primary)
                 Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
@@ -238,6 +248,16 @@ struct GamesView: View {
         .contentShape(Rectangle())
     }
 
+    @ViewBuilder private func gameIcon(_ game: NativeGame, size: CGFloat) -> some View {
+        if game.iconURL == nil, let cover = GameCover(game.gameId) {
+            Image(cover.asset).resizable().scaledToFill().frame(width: size, height: size)
+                .background(cover.color).clipShape(RoundedRectangle(cornerRadius: size * 0.22))
+                .accessibilityHidden(true)
+        } else {
+            ApplicationIcon(application: game.iconApplication, size: size)
+        }
+    }
+
     private func continueRequestedRoom() {
         let intent = pendingRoom
         let identity = pendingRoomIdentity
@@ -245,6 +265,46 @@ struct GamesView: View {
         pendingRoomIdentity = nil
         guard let intent, identity == accounts.identityGeneration else { return }
         onRoom(intent)
+    }
+}
+
+private enum GameCover: String {
+    case gomoku, flight = "flight-chess", star = "paper-star"
+
+    init?(_ gameID: String) { self.init(rawValue: gameID) }
+    var asset: String {
+        switch self {
+        case .gomoku: return "GameCoverGomoku"
+        case .flight: return "GameCoverFlight"
+        case .star: return "GameCoverPaperStar"
+        }
+    }
+    var color: Color {
+        switch self {
+        case .gomoku: return Color(red: 0.12, green: 0.26, blue: 0.24)
+        case .flight: return Color(red: 0.10, green: 0.31, blue: 0.40)
+        case .star: return Color(red: 0.18, green: 0.17, blue: 0.34)
+        }
+    }
+
+    func header(for game: NativeGame, showsArt: Bool) -> some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(game.name).font(.title3.bold())
+                if let players = game.players { Label(players.label, systemImage: "person.2").font(.subheadline) }
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(14)
+            .layoutPriority(1)
+            Spacer(minLength: 0)
+            if showsArt {
+                Image(asset).resizable().scaledToFit().frame(maxWidth: 136)
+                    .accessibilityHidden(true)
+            }
+        }
+        .foregroundStyle(.white)
+        .background(LinearGradient(colors: [color, color, color.opacity(0.88)], startPoint: .leading, endPoint: .trailing))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

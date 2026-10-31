@@ -146,6 +146,36 @@ final class NativeWebNavigationTests: XCTestCase {
         XCTAssertFalse(fixture.browser.navigationItem.leftBarButtonItems?.contains { $0.accessibilityLabel == "返回网页" } ?? false)
     }
 
+    func testImmersivePlayCapsuleTracksRouteHistoryAndRestoresAppearance() async throws {
+        let cabinet = try XCTUnwrap(URL(string: "https://play.yunle.fun/games/pachinko/local"))
+        let fixture = try await Fixture(baseURL: cabinet)
+        defer { fixture.close() }
+        let env = try await fixture.environment(after: "await window.ylf.hideTitleBar();")
+        let view = try XCTUnwrap(fixture.browser.view)
+        let capsule = try XCTUnwrap(view.subviews.first { $0.accessibilityIdentifier == "runtime.game-controls" })
+        XCTAssertFalse(capsule.isHidden)
+        XCTAssertGreaterThan(capsule.frame.minX, view.bounds.midX)
+        let rect = try XCTUnwrap(env["capsuleRect"] as? [String: CGFloat])
+        XCTAssertEqual(try XCTUnwrap(rect["width"]), 88, accuracy: 1)
+        XCTAssertEqual(try XCTUnwrap(rect["height"]), 44, accuracy: 1)
+        let left = try XCTUnwrap(view.hitTest(CGPoint(x: view.safeAreaInsets.left + 22, y: capsule.frame.midY), with: nil))
+        XCTAssertTrue(left.isDescendant(of: fixture.webView) || left === fixture.webView)
+        XCTAssertEqual(fixture.browser.preferredStatusBarStyle, .lightContent)
+        let darkPage = try await fixture.webView.evaluateJavaScript("matchMedia('(prefers-color-scheme:dark)').matches")
+        XCTAssertEqual(darkPage as? Bool, true)
+
+        _ = try await fixture.webView.evaluateJavaScript("history.pushState({}, '', '/games/gomoku/local')")
+        let historyReady = NSPredicate { _, _ in
+            fixture.browser.preferredStatusBarStyle == .default
+        }
+        await fulfillment(of: [XCTNSPredicateExpectation(predicate: historyReady, object: nil)], timeout: 5)
+        XCTAssertFalse(capsule.isHidden)
+        XCTAssertEqual(fixture.webView.overrideUserInterfaceStyle, .unspecified)
+        let restored = try await fixture.environment(after: "await window.ylf.showTitleBar();")
+        XCTAssertEqual(restored["titleBarVisible"] as? Bool, true)
+        XCTAssertTrue(capsule.isHidden)
+    }
+
     func testDarkNavigationWithLongTitleAndAccessibilityTraits() async throws {
         let fixture = try await Fixture(dark: true)
         defer { fixture.close() }
@@ -339,7 +369,7 @@ final class NativeWebNavigationTests: XCTestCase {
         let navigation: UINavigationController
         let webView: WKWebView
 
-        init(dark: Bool = false, gameInteractions: Bool = false) async throws {
+        init(dark: Bool = false, gameInteractions: Bool = false, baseURL: URL? = nil) async throws {
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
             previous = scene.windows.first(where: \.isKeyWindow)
             window = UIWindow(windowScene: scene)
@@ -353,13 +383,17 @@ final class NativeWebNavigationTests: XCTestCase {
             window.rootViewController = root; window.makeKeyAndVisible()
             root.present(navigation, animated: false)
             webView = try XCTUnwrap(Self.findWebView(in: browser.view))
-            try await load(title: "first")
+            try await load(title: "first", baseURL: baseURL)
         }
 
-        func load(title: String) async throws {
+        func load(title: String, baseURL: URL? = nil) async throws {
             let html = "<html><head><meta charset='utf-8'><title>\(title)</title><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='background:#dceeff'><h1>原生导航验证</h1><button>网页仍可交互</button></body></html>"
-            let dataURL = "data:text/html;base64," + Data(html.utf8).base64EncodedString()
-            webView.load(URLRequest(url: try XCTUnwrap(URL(string: dataURL))))
+            if let baseURL {
+                webView.loadHTMLString(html, baseURL: baseURL)
+            } else {
+                let dataURL = "data:text/html;base64," + Data(html.utf8).base64EncodedString()
+                webView.load(URLRequest(url: try XCTUnwrap(URL(string: dataURL))))
+            }
             try await waitForTitle(title)
         }
 

@@ -41,8 +41,18 @@ final class NativeGameRuntimeTests: XCTestCase {
         let profile = try fixture.runtime.gameResourceProfile(for: fixture.game("gomoku"), catalog: fixture.catalog)
         fixture.track(profile)
         await fixture.close()
-        let remaining = try await NativeGameRuntimeStoreCleanup.identifiers()
-        XCTAssertFalse(remaining.contains(profile), "An early manifest failure must leave no fixture profile")
+        if ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
+            let url = try NativeGameRuntimeDeferredCleanup.ledgerURL()
+            let ledger = try JSONDecoder().decode(NativeGameRuntimeDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
+            let entry = try XCTUnwrap(ledger.entries.first { $0.identifier == profile })
+            XCTAssertEqual(entry.directory, fixture.directory.lastPathComponent)
+            XCTAssertEqual(entry.defaults, fixture.defaultsName)
+            XCTAssertEqual(entry.processID, ProcessInfo.processInfo.processIdentifier)
+            XCTAssertNil(ledger.verifiedByProcessID, "Collection cannot claim that SDK removal already succeeded")
+        } else {
+            let remaining = try await NativeGameRuntimeStoreCleanup.identifiers()
+            XCTAssertFalse(remaining.contains(profile), "An early manifest failure must leave no fixture profile")
+        }
     }
 
     func testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext() async throws {

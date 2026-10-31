@@ -42,8 +42,8 @@ final class NativeGameRuntimeTests: XCTestCase {
         fixture.track(profile)
         await fixture.close()
         if ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
-            let url = try NativeGameRuntimeDeferredCleanup.ledgerURL()
-            let ledger = try JSONDecoder().decode(NativeGameRuntimeDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
+            let url = try NativeFixtureDeferredCleanup.ledgerURL()
+            let ledger = try JSONDecoder().decode(NativeFixtureDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
             let entry = try XCTUnwrap(ledger.entries.first { $0.identifier == profile })
             XCTAssertEqual(entry.directory, fixture.directory.lastPathComponent)
             XCTAssertEqual(entry.defaults, fixture.defaultsName)
@@ -694,13 +694,13 @@ final class NativeGameRuntimeTests: XCTestCase {
 @MainActor
 final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     func testDeferredCleanupRejectsItsOriginalProcessBeforeTouchingWebKit() async throws {
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: UUID(),
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(),
             directory: "native-game-runtime-" + UUID().uuidString,
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
-        let ledger = NativeGameRuntimeDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
+        let ledger = NativeFixtureDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
         var touchedSDK = false
         do {
-            _ = try await NativeGameRuntimeDeferredCleanup.verify(ledger, processID: 42,
+            _ = try await NativeFixtureDeferredCleanup.verify(ledger, processID: 42,
                 remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
             XCTFail("Cleanup must cross the app process boundary")
         } catch {
@@ -710,13 +710,13 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
 
     func testDeferredCleanupCannotVerifyAStillEnumeratedStore() async throws {
         let id = UUID()
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: id,
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: id,
             directory: "native-game-runtime-" + UUID().uuidString,
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
-        let ledger = NativeGameRuntimeDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
+        let ledger = NativeFixtureDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
         var removed: [UUID] = []
         do {
-            _ = try await NativeGameRuntimeDeferredCleanup.verify(ledger, processID: 43,
+            _ = try await NativeFixtureDeferredCleanup.verify(ledger, processID: 43,
                 remove: { removed.append($0) }, inventory: { [id] })
             XCTFail("An SDK callback cannot replace the identifier-absence postcondition")
         } catch { XCTAssertEqual(removed, [id]) }
@@ -725,12 +725,12 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
 
     func testDeferredCleanupKeepsUnrelatedStores() async throws {
         let id = UUID(), unrelated = UUID()
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: id,
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: id,
             directory: "native-game-runtime-" + UUID().uuidString,
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
-        let ledger = NativeGameRuntimeDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
+        let ledger = NativeFixtureDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
         var current: Set<UUID> = [id, unrelated]
-        let verified = try await NativeGameRuntimeDeferredCleanup.verify(ledger, processID: 43,
+        let verified = try await NativeFixtureDeferredCleanup.verify(ledger, processID: 43,
             remove: { XCTAssertEqual($0, id); current.remove($0) }, inventory: { current })
         XCTAssertEqual(current, [unrelated])
         XCTAssertEqual(verified.remainingIdentifiers, [])
@@ -738,13 +738,39 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     }
 
     func testDeferredCleanupRejectsAnUnscopedDirectoryBeforeTouchingWebKit() async throws {
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: UUID(), directory: "../another-app",
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: "../another-app",
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
         var touchedSDK = false
         do {
-            _ = try await NativeGameRuntimeDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
+            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
                 remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
             XCTFail("Cleanup must reject paths outside its exact fixture namespace")
+        } catch { XCTAssertFalse(touchedSDK) }
+    }
+
+    func testDeferredCleanupAcceptsScopedStorageFixturesWithoutInventingDefaults() async throws {
+        let entries = ["native-runtime-session-", "WebProfiles-"].map {
+            NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: $0 + UUID().uuidString,
+                                               defaults: nil, processID: 42)
+        }
+        let unrelated = UUID()
+        var current = Set(entries.map(\.identifier)).union([unrelated])
+        let verified = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: entries), processID: 43,
+            remove: { current.remove($0) }, inventory: { current })
+        XCTAssertEqual(current, [unrelated])
+        XCTAssertEqual(verified.remainingIdentifiers, [])
+        XCTAssertTrue(verified.entries.allSatisfy { $0.defaults == nil })
+    }
+
+    func testDeferredCleanupRejectsDefaultsOutsideTheGameFixtureNamespace() async throws {
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(),
+            directory: "native-runtime-session-" + UUID().uuidString,
+            defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
+        var touchedSDK = false
+        do {
+            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
+                remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
+            XCTFail("A storage-only fixture must not request removal of a defaults domain")
         } catch { XCTAssertFalse(touchedSDK) }
     }
 
@@ -753,8 +779,8 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
             throw XCTSkip("The CI harness invokes cleanup in a separate app process")
         }
         guard #available(iOS 17, *) else { return XCTFail("Named stores require iOS 17") }
-        let url = try NativeGameRuntimeDeferredCleanup.ledgerURL()
-        let ledger = try JSONDecoder().decode(NativeGameRuntimeDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
+        let url = try NativeFixtureDeferredCleanup.ledgerURL()
+        let ledger = try JSONDecoder().decode(NativeFixtureDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
         guard ledger.runID.uuidString == url.deletingPathExtension().lastPathComponent else {
             return XCTFail("The cleanup ledger must belong to this exact run")
         }
@@ -762,12 +788,12 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
         // rendered page. Do not start WebContent/GPU just to delete old stores.
         let initializationStore = WKWebsiteDataStore.default()
         defer { withExtendedLifetime(initializationStore) {} }
-        let verified = try await NativeGameRuntimeDeferredCleanup.verify(ledger,
+        let verified = try await NativeFixtureDeferredCleanup.verify(ledger,
             processID: ProcessInfo.processInfo.processIdentifier,
             remove: { try await NativeGameRuntimeStoreCleanup.remove($0) },
             inventory: { try await NativeGameRuntimeStoreCleanup.identifiers() })
         for entry in ledger.entries {
-            UserDefaults.standard.removePersistentDomain(forName: entry.defaults)
+            if let defaults = entry.defaults { UserDefaults.standard.removePersistentDomain(forName: defaults) }
             let directory = FileManager.default.temporaryDirectory.appendingPathComponent(entry.directory)
             if FileManager.default.fileExists(atPath: directory.path) {
                 try FileManager.default.removeItem(at: directory)
@@ -2599,7 +2625,7 @@ private final class NativeGameRuntimeFixture {
                 // a fresh app process, using this exact fixture ownership ledger.
                 XCTAssertFalse(profileObservations.contains { $0.browser != nil || $0.page != nil },
                                "Live fixture pages cannot be deferred as framework-only ownership")
-                try NativeGameRuntimeDeferredCleanup.record(profileIDs, directory: directory, defaults: defaultsName)
+                try NativeFixtureDeferredCleanup.record(profileIDs, directory: directory, defaults: defaultsName)
             } catch {
                 cleanupFailed = true
                 XCTFail("Could not persist fixture cleanup ownership: \(error)")
@@ -2748,87 +2774,6 @@ private final class NativeGameRuntimeCallback<Value> {
     var value: Value?
 }
 
-@MainActor
-private enum NativeGameRuntimeDeferredCleanup {
-    struct Entry: Codable, Equatable {
-        let identifier: UUID
-        // Xcode can relocate the sandbox when reinstalling the test host.
-        // Retain only a validated fixture name, relative to the current tmp.
-        let directory: String
-        let defaults: String
-        let processID: Int32
-    }
-    struct Ledger: Codable {
-        let runID: UUID
-        var entries: [Entry]
-        var verifiedByProcessID: Int32?
-        var remainingIdentifiers: [UUID]?
-    }
-
-    static func ledgerURL() throws -> URL {
-        let env = ProcessInfo.processInfo.environment
-        guard let raw = env["YUNLEFUN_FIXTURE_CLEANUP_RUN"], let run = UUID(uuidString: raw),
-              let owned = env["YUNLEFUN_FIXTURE_SIMULATOR"], !owned.isEmpty,
-              owned == env["SIMULATOR_UDID"] else {
-            throw failure("Cleanup requires a run UUID and the exact owned simulator")
-        }
-        return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("NativeGameFixtureCleanup").appendingPathComponent(run.uuidString + ".json")
-    }
-
-    static func validate(_ entry: Entry) throws {
-        let prefix = "native-game-runtime-"
-        guard entry.directory == URL(fileURLWithPath: entry.directory).lastPathComponent,
-              entry.directory.hasPrefix(prefix),
-              UUID(uuidString: String(entry.directory.dropFirst(prefix.count))) != nil,
-              entry.defaults.hasPrefix(prefix),
-              UUID(uuidString: String(entry.defaults.dropFirst(prefix.count))) != nil,
-              entry.processID > 0 else { throw failure("Unrecognized fixture ownership") }
-    }
-
-    static func record(_ identifiers: Set<UUID>, directory: URL, defaults: String) throws {
-        let url = try ledgerURL()
-        let run = try XCTUnwrap(UUID(uuidString: url.deletingPathExtension().lastPathComponent))
-        var ledger = FileManager.default.fileExists(atPath: url.path)
-            ? try JSONDecoder().decode(Ledger.self, from: Data(contentsOf: url))
-            : Ledger(runID: run, entries: [])
-        guard ledger.runID == run, ledger.verifiedByProcessID == nil else { throw failure("Invalid or already verified run") }
-        for id in identifiers {
-            let entry = Entry(identifier: id, directory: directory.lastPathComponent, defaults: defaults,
-                              processID: ProcessInfo.processInfo.processIdentifier)
-            try validate(entry)
-            if let previous = ledger.entries.first(where: { $0.identifier == id }) {
-                guard previous == entry else { throw failure("A store cannot belong to two fixtures") }
-            } else { ledger.entries.append(entry) }
-        }
-        ledger.entries.sort { $0.identifier.uuidString < $1.identifier.uuidString }
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try JSONEncoder().encode(ledger).write(to: url, options: .atomic)
-    }
-
-    static func verify(_ ledger: Ledger, processID: Int32,
-                       remove: (UUID) async throws -> Void,
-                       inventory: () async throws -> Set<UUID>) async throws -> Ledger {
-        guard !ledger.entries.isEmpty, ledger.entries.allSatisfy({ $0.processID != processID }),
-              Set(ledger.entries.map(\.identifier)).count == ledger.entries.count else {
-            throw failure("Verification requires unique owned stores from an earlier app process")
-        }
-        for entry in ledger.entries { try validate(entry) }
-        let requested = Set(ledger.entries.map(\.identifier))
-        let before = try await inventory()
-        for id in requested.intersection(before).sorted(by: { $0.uuidString < $1.uuidString }) { try await remove(id) }
-        let remaining = requested.intersection(try await inventory())
-        guard remaining.isEmpty else { throw failure("Owned fixture stores remain in the SDK inventory") }
-        var verified = ledger
-        verified.verifiedByProcessID = processID
-        verified.remainingIdentifiers = []
-        return verified
-    }
-
-    private static func failure(_ message: String) -> NSError {
-        NSError(domain: "NativeGameDeferredCleanup", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
-    }
-}
 
 private struct NativeGameLegacyEntry {
     let gameID: String

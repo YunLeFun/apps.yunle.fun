@@ -432,7 +432,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
 
     @MainActor
     private final class Fixture {
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("native-runtime-session-" + UUID().uuidString)
         let root = UIViewController()
         let runtime: NativeWebRuntime
         let accounts: AccountStore
@@ -568,6 +568,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
             if #available(iOS 17, *),
                let web = browser.viewIfLoaded?.subviews.compactMap({ $0 as? WKWebView }).first,
                let identifier = web.configuration.websiteDataStore.identifier {
+                ownership.observe(web)
                 try ownership.record(identifier)
             }
         }

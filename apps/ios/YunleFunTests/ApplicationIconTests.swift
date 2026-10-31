@@ -380,39 +380,61 @@ final class ApplicationIconTests: XCTestCase {
         let first = IconHTTPFixture(replies: ["/icon.svg": (200, iconTestSVG, nil)])
         let (writer, host) = iconPipeline(first, cacheDirectory: directory); defer { IconHTTPProtocol.unregister(host) }
         let url = URL(string: "https://\(host)/icon.svg")!
-        _ = try await writer.load([.init(url: url, role: .appIcon, revision: "v1")], pixelSize: 128)
+        let original = try await writer.load([.init(url: url, role: .appIcon, revision: "v1")], pixelSize: 128)
         let failed = IconHTTPFixture(replies: ["/icon.svg": (503, Data(), nil)])
         let (reopened, _) = iconPipeline(failed, cacheDirectory: directory, host: host)
+        let candidates = [ApplicationIconCandidate(url: url, role: .appIcon, revision: "v2")]
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let previous = scene.windows.first(where: \.isKeyWindow)
-        let window = UIWindow(windowScene: scene); window.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
-        let content = ApplicationIconImage(candidates: [.init(url: url, role: .appIcon, revision: "v2")], pixelSize: 128, pipeline: reopened) {
-            Color.blue
-        }.frame(width: 100, height: 100)
+        let animationsWereEnabled = UIView.areAnimationsEnabled
+        UIView.setAnimationsEnabled(false)
+        let window = UIWindow(windowScene: scene); window.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+        defer {
+            window.isHidden = true; window.rootViewController = nil; previous?.makeKey()
+            UIView.setAnimationsEnabled(animationsWereEnabled)
+        }
+        // Compare the retained artwork with the same bitmap rendered in the
+        // same window. Absolute RGB values can vary with the renderer profile.
+        let content = HStack(spacing: 0) {
+            Image(decorative: original.bitmap.image, scale: 1).resizable().scaledToFit()
+                .modifier(ApplicationIconAvailabilityStyle(isUnavailable: false))
+                .frame(width: 100, height: 100)
+            ApplicationIconImage(candidates: candidates, pixelSize: 128, pipeline: reopened) {
+                Color.blue.onAppear { XCTFail("A failed refresh must never replace disk artwork with the fallback") }
+            }.frame(width: 100, height: 100)
+        }.frame(width: 200, height: 100).transaction { $0.disablesAnimations = true }
         let controller = UIHostingController(rootView: content)
         window.rootViewController = controller; window.makeKeyAndVisible()
         let deadline = Date().addingTimeInterval(10)
-        var observedCenter: [UInt8]?
-        // Disk decoding and SwiftUI's task can start later on a busy runner.
-        // Require the failed refresh to finish and the real artwork to render.
-        while Date() < deadline {
-            if failed.completedResponseCount > 0 {
-                controller.view.layoutIfNeeded()
-                let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
-                    controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
-                }
-                let cg = try XCTUnwrap(image.cgImage)
-                let center = try pixel(cg, x: cg.width / 2, y: cg.height / 2)
-                observedCenter = center
-                if center[0] > 240 && center[2] < 20 { break }
-            }
-            try await Task.sleep(nanoseconds: 50_000_000)
+        while failed.completedResponseCount == 0 && Date() < deadline {
+            try await Task.sleep(nanoseconds: 10_000_000)
         }
         XCTAssertEqual(failed.completedResponseCount, 1, "The actual 503 refresh must finish before checking retained artwork")
-        let center = try XCTUnwrap(observedCenter, "The view must render after the failed refresh within ten seconds")
-        XCTAssertGreaterThan(center[0], 240, "The view must retain locally loaded artwork after a failed update")
-        XCTAssertLessThan(center[2], 20)
+        // Join the real refresh; the assertion must run after the 503, not just
+        // during the disk-first frame. The failed request is coalesced/backed off.
+        do { _ = try await reopened.load(candidates, pixelSize: 128); XCTFail("The refresh must fail") }
+        catch { XCTAssertTrue(error is ApplicationImageError) }
+        await Task.yield()
+        var expected: [UInt8] = [], actual: [UInt8] = []
+        repeat {
+            controller.view.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: controller.view.bounds).image { _ in
+                controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+            }
+            let cg = try XCTUnwrap(image.cgImage)
+            expected = try pixel(cg, x: cg.width / 4, y: cg.height / 2)
+            actual = try pixel(cg, x: cg.width * 3 / 4, y: cg.height / 2)
+            if expected[0] > 200 && expected[2] < 30
+                && zip(expected, actual).allSatisfy({ abs(Int($0) - Int($1)) <= 2 }) { break }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        } while Date() < deadline
+        XCTAssertGreaterThan(expected[0], 200, "The reference must contain the orange fixture")
+        XCTAssertLessThan(expected[2], 30)
+        for channel in 0..<4 {
+            XCTAssertLessThanOrEqual(abs(Int(actual[channel]) - Int(expected[channel])), 2,
+                                     "The view must retain the same disk artwork after a failed update (channel \(channel))")
+        }
+        XCTAssertEqual(failed.completedResponseCount, 1)
         XCTAssertEqual(failed.requests.count, 1)
     }
 

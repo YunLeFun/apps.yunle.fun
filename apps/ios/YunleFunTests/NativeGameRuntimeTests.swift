@@ -748,14 +748,116 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
         } catch { XCTAssertFalse(touchedSDK) }
     }
 
-    func testDeferredCleanupAcceptsScopedStorageFixturesWithoutInventingDefaults() async throws {
-        let entries = ["native-runtime-session-", "WebProfiles-"].map {
-            NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: $0 + UUID().uuidString,
-                                               defaults: nil, processID: 42)
+    func testDeferredStorageCleanupRejectsMissingOrMismatchedOwnershipBeforeSDK() async throws {
+        let fixture = try deferredStorageFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let markerURL = fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName)
+        for mismatch in ["missing", "kind", "namespace", "directory", "run", "process", "profiles", "defaults"] {
+            if mismatch != "missing" {
+                let marker = NativeFixtureDeferredCleanup.StorageMarker(
+                    kind: mismatch == "kind" ? "unrelated" : fixture.marker.kind,
+                    namespace: mismatch == "namespace" ? .webProfileRepository : fixture.marker.namespace,
+                    directory: mismatch == "directory" ? UUID().uuidString : fixture.marker.directory,
+                    runID: mismatch == "run" ? UUID() : fixture.marker.runID,
+                    processID: mismatch == "process" ? 2 : fixture.marker.processID,
+                    profiles: mismatch == "profiles" ? [fixture.entry.identifier, UUID()] : fixture.marker.profiles)
+                try JSONEncoder().encode(marker).write(to: markerURL)
+            }
+            let entry = NativeFixtureDeferredCleanup.Entry(identifier: fixture.entry.identifier,
+                directory: fixture.entry.directory, defaults: mismatch == "defaults" ? "native-game-runtime-" + UUID().uuidString : nil,
+                processID: fixture.entry.processID, namespace: fixture.entry.namespace)
+            let game = NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: "native-game-runtime-" + UUID().uuidString,
+                defaults: "native-game-runtime-" + UUID().uuidString, processID: 1)
+            var touchedSDK = false
+            do {
+                _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [game, entry]), processID: 43,
+                    remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
+                XCTFail("Invalid storage ownership must fail before any SDK operation: " + mismatch)
+            } catch { XCTAssertFalse(touchedSDK, mismatch) }
         }
+    }
+
+    func testDeferredStorageCleanupRejectsDirectoryAndMarkerSymlinksBeforeSDK() async throws {
+        for link in ["directory", "marker"] {
+            let fixture = try deferredStorageFixture()
+            let target = FileManager.default.temporaryDirectory.appendingPathComponent("storage-link-test-" + UUID().uuidString)
+            try FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)
+            defer {
+                try? FileManager.default.removeItem(at: fixture.directory)
+                try? FileManager.default.removeItem(at: target)
+            }
+            let bytes = try JSONEncoder().encode(fixture.marker)
+            let targetMarker = target.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName)
+            try bytes.write(to: targetMarker)
+            if link == "directory" {
+                try FileManager.default.removeItem(at: fixture.directory)
+                try FileManager.default.createSymbolicLink(at: fixture.directory, withDestinationURL: target)
+            } else {
+                try FileManager.default.createSymbolicLink(at: fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName),
+                                                         withDestinationURL: targetMarker)
+            }
+            var touchedSDK = false
+            do {
+                _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [fixture.entry]), processID: 43,
+                    remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
+                XCTFail("A symlink cannot grant fixture ownership: " + link)
+            } catch { XCTAssertFalse(touchedSDK, link) }
+            XCTAssertEqual(try Data(contentsOf: targetMarker), bytes)
+        }
+    }
+
+    func testDeferredStorageCleanupKeepsUnregisteredStoresAndRechecksDirectoryMarker() async throws {
+        let fixture = try deferredStorageFixture(namespace: .webProfileRepository)
+        let unrelated = FileManager.default.temporaryDirectory.appendingPathComponent("WebProfiles-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: unrelated, withIntermediateDirectories: true)
+        defer {
+            try? FileManager.default.removeItem(at: fixture.directory)
+            try? FileManager.default.removeItem(at: unrelated)
+        }
+        let sentinel = unrelated.appendingPathComponent("preserve.txt"), bytes = Data("unrelated fixture".utf8)
+        try bytes.write(to: sentinel)
+        let markerURL = fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName)
+        let marker = try JSONEncoder().encode(fixture.marker)
+        try marker.write(to: markerURL)
+        let unregistered = UUID()
+        var current: Set<UUID> = [fixture.entry.identifier, unregistered]
+        let verified = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [fixture.entry]),
+            processID: ProcessInfo.processInfo.processIdentifier,
+            remove: { XCTAssertEqual($0, fixture.entry.identifier); current.remove($0) }, inventory: { current })
+        XCTAssertEqual(current, [unregistered])
+        try Data("changed ownership".utf8).write(to: markerURL)
+        XCTAssertThrowsError(try NativeFixtureDeferredCleanup.removeOwnedDirectories(verified))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.directory.path))
+        try marker.write(to: markerURL)
+        try NativeFixtureDeferredCleanup.removeOwnedDirectories(verified)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fixture.directory.path))
+        XCTAssertEqual(try Data(contentsOf: sentinel), bytes)
+    }
+
+    private func deferredStorageFixture(namespace: NativeFixtureDeferredCleanup.Namespace = .nativeRuntimeSession, runID: UUID = UUID()) throws
+        -> (directory: URL, entry: NativeFixtureDeferredCleanup.Entry, marker: NativeFixtureDeferredCleanup.StorageMarker, runID: UUID) {
+        let name = (namespace == .webProfileRepository ? "WebProfiles-" : "native-runtime-session-") + UUID().uuidString
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: name, defaults: nil, processID: 1, namespace: namespace)
+        let marker = NativeFixtureDeferredCleanup.StorageMarker(kind: NativeFixtureDeferredCleanup.storageMarkerKind,
+            namespace: namespace, directory: name, runID: runID, processID: entry.processID, profiles: [entry.identifier])
+        return (directory, entry, marker, runID)
+    }
+
+    func testDeferredCleanupAcceptsScopedStorageFixturesWithoutInventingDefaults() async throws {
+        let runID = UUID()
+        let fixtures = try [NativeFixtureDeferredCleanup.Namespace.nativeRuntimeSession, .webProfileRepository].map {
+            try deferredStorageFixture(namespace: $0, runID: runID)
+        }
+        defer { fixtures.forEach { try? FileManager.default.removeItem(at: $0.directory) } }
+        for fixture in fixtures {
+            try JSONEncoder().encode(fixture.marker).write(to: fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName))
+        }
+        let entries = fixtures.map(\.entry)
         let unrelated = UUID()
         var current = Set(entries.map(\.identifier)).union([unrelated])
-        let verified = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: entries), processID: 43,
+        let verified = try await NativeFixtureDeferredCleanup.verify(.init(runID: runID, entries: entries), processID: 43,
             remove: { current.remove($0) }, inventory: { current })
         XCTAssertEqual(current, [unrelated])
         XCTAssertEqual(verified.remainingIdentifiers, [])
@@ -763,12 +865,15 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     }
 
     func testDeferredCleanupRejectsDefaultsOutsideTheGameFixtureNamespace() async throws {
-        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(),
-            directory: "native-runtime-session-" + UUID().uuidString,
-            defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
+        let fixture = try deferredStorageFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        try JSONEncoder().encode(fixture.marker).write(to: fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName))
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: fixture.entry.identifier,
+            directory: fixture.entry.directory, defaults: "native-game-runtime-" + UUID().uuidString,
+            processID: fixture.entry.processID, namespace: fixture.entry.namespace)
         var touchedSDK = false
         do {
-            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
+            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [entry]), processID: 43,
                 remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
             XCTFail("A storage-only fixture must not request removal of a defaults domain")
         } catch { XCTAssertFalse(touchedSDK) }
@@ -792,13 +897,7 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
             processID: ProcessInfo.processInfo.processIdentifier,
             remove: { try await NativeGameRuntimeStoreCleanup.remove($0) },
             inventory: { try await NativeGameRuntimeStoreCleanup.identifiers() })
-        for entry in ledger.entries {
-            if let defaults = entry.defaults { UserDefaults.standard.removePersistentDomain(forName: defaults) }
-            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(entry.directory)
-            if FileManager.default.fileExists(atPath: directory.path) {
-                try FileManager.default.removeItem(at: directory)
-            }
-        }
+        try NativeFixtureDeferredCleanup.removeOwnedDirectories(verified)
         try JSONEncoder().encode(verified).write(to: url, options: .atomic)
         XCTAssertEqual(verified.remainingIdentifiers, [])
         print("NATIVE_GAME_FRESH_PROCESS_CLEANUP verified=\(verified.entries.count) process=\(verified.verifiedByProcessID!) remaining=0")
@@ -2773,7 +2872,6 @@ private enum NativeGameRuntimeStoreCleanup {
 private final class NativeGameRuntimeCallback<Value> {
     var value: Value?
 }
-
 
 private struct NativeGameLegacyEntry {
     let gameID: String

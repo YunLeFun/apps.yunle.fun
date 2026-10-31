@@ -405,9 +405,11 @@ final class ApplicationIconTests: XCTestCase {
         }.frame(width: 200, height: 100).transaction { $0.disablesAnimations = true }
         let controller = UIHostingController(rootView: content)
         window.rootViewController = controller; window.makeKeyAndVisible()
-        let deadline = Date().addingTimeInterval(5)
-        while failed.requests.isEmpty && Date() < deadline { try await Task.sleep(nanoseconds: 10_000_000) }
-        XCTAssertEqual(failed.requests.count, 1, "The view must attempt the new revision")
+        let deadline = Date().addingTimeInterval(10)
+        while failed.completedResponseCount == 0 && Date() < deadline {
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        XCTAssertEqual(failed.completedResponseCount, 1, "The actual 503 refresh must finish before checking retained artwork")
         // Join the real refresh; the assertion must run after the 503, not just
         // during the disk-first frame. The failed request is coalesced/backed off.
         do { _ = try await reopened.load(candidates, pixelSize: 128); XCTFail("The refresh must fail") }
@@ -422,7 +424,8 @@ final class ApplicationIconTests: XCTestCase {
             let cg = try XCTUnwrap(image.cgImage)
             expected = try pixel(cg, x: cg.width / 4, y: cg.height / 2)
             actual = try pixel(cg, x: cg.width * 3 / 4, y: cg.height / 2)
-            if zip(expected, actual).allSatisfy({ abs(Int($0) - Int($1)) <= 2 }) { break }
+            if expected[0] > 200 && expected[2] < 30
+                && zip(expected, actual).allSatisfy({ abs(Int($0) - Int($1)) <= 2 }) { break }
             try await Task.sleep(nanoseconds: 10_000_000)
         } while Date() < deadline
         XCTAssertGreaterThan(expected[0], 200, "The reference must contain the orange fixture")
@@ -431,6 +434,7 @@ final class ApplicationIconTests: XCTestCase {
             XCTAssertLessThanOrEqual(abs(Int(actual[channel]) - Int(expected[channel])), 2,
                                      "The view must retain the same disk artwork after a failed update (channel \(channel))")
         }
+        XCTAssertEqual(failed.completedResponseCount, 1)
         XCTAssertEqual(failed.requests.count, 1)
     }
 
@@ -551,12 +555,15 @@ final class IconHTTPFixture: @unchecked Sendable {
     let headers: [String: String]
     private let lock = NSLock()
     private var captured: [URLRequest] = []
+    private var completedResponses = 0
     var requests: [URLRequest] { lock.lock(); defer { lock.unlock() }; return captured }
+    var completedResponseCount: Int { lock.lock(); defer { lock.unlock() }; return completedResponses }
     init(replies: [String: (Int, Data, Int?)], headers: [String: String] = [:]) { self.replies = replies; self.headers = headers }
     func response(_ request: URLRequest) -> (Int, Data, Int?) {
         lock.lock(); defer { lock.unlock() }; captured.append(request)
         return replies[request.url!.path] ?? (404, Data(), nil)
     }
+    func responseDidFinish() { lock.lock(); defer { lock.unlock() }; completedResponses += 1 }
 }
 final class IconHTTPProtocol: URLProtocol {
     private static let lock = NSLock()
@@ -574,6 +581,7 @@ final class IconHTTPProtocol: URLProtocol {
         client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil,
             headerFields: headers)!, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: data); client?.urlProtocolDidFinishLoading(self)
+        fixture.responseDidFinish()
     }
     override func stopLoading() {}
 }

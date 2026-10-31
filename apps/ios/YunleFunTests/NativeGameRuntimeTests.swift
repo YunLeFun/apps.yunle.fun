@@ -865,12 +865,15 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     }
 
     func testDeferredCleanupRejectsDefaultsOutsideTheGameFixtureNamespace() async throws {
-        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(),
-            directory: "native-runtime-session-" + UUID().uuidString,
-            defaults: "native-game-runtime-" + UUID().uuidString, processID: 42, namespace: .nativeRuntimeSession)
+        let fixture = try deferredStorageFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        try JSONEncoder().encode(fixture.marker).write(to: fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName))
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: fixture.entry.identifier,
+            directory: fixture.entry.directory, defaults: "native-game-runtime-" + UUID().uuidString,
+            processID: fixture.entry.processID, namespace: fixture.entry.namespace)
         var touchedSDK = false
         do {
-            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
+            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [entry]), processID: 43,
                 remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
             XCTFail("A storage-only fixture must not request removal of a defaults domain")
         } catch { XCTAssertFalse(touchedSDK) }

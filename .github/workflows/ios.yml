@@ -44,6 +44,7 @@ jobs:
           xcodebuild -showsdks
           mkdir -p "$YLF_CI_OUTPUT"
           echo "YLF_CI_OUTPUT=$YLF_CI_OUTPUT" >> "$GITHUB_ENV"
+          echo "YLF_FIXTURE_RUN=$(python3 -c 'import uuid; print(str(uuid.uuid4()).upper())')" >> "$GITHUB_ENV"
           xcodebuild -resolvePackageDependencies \
             -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
             -onlyUsePackageVersionsFromResolvedFile \
@@ -71,6 +72,9 @@ jobs:
       - name: Native unit, integration and guest UI tests
         env:
           YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+          TEST_RUNNER_YUNLEFUN_FIXTURE_CLEANUP_RUN: ${{ env.YLF_FIXTURE_RUN }}
+          TEST_RUNNER_YUNLEFUN_FIXTURE_CLEANUP_PHASE: collect
+          TEST_RUNNER_YUNLEFUN_FIXTURE_SIMULATOR: ${{ steps.simulator.outputs.id }}
         run: |
           set -o pipefail
           xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
@@ -84,6 +88,50 @@ jobs:
             -maximum-test-execution-time-allowance 180 \
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
             2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
+
+      - name: Verify fixture storage cleanup in a fresh app process
+        if: always() && steps.simulator.outputs.id != ''
+        env:
+          YLF_CI_SIMULATOR: ${{ steps.simulator.outputs.id }}
+          TEST_RUNNER_YUNLEFUN_FIXTURE_CLEANUP_RUN: ${{ env.YLF_FIXTURE_RUN }}
+          TEST_RUNNER_YUNLEFUN_FIXTURE_CLEANUP_PHASE: verify
+          TEST_RUNNER_YUNLEFUN_FIXTURE_SIMULATOR: ${{ steps.simulator.outputs.id }}
+        run: |
+          set -euo pipefail
+          xcodebuild -project apps/ios/YunleFun.xcodeproj -scheme YunleFun \
+            -configuration Debug -destination "platform=iOS Simulator,id=$YLF_CI_SIMULATOR" \
+            -derivedDataPath "$YLF_CI_OUTPUT/debug" \
+            -clonedSourcePackagesDirPath "$YLF_CI_OUTPUT/packages" \
+            -disableAutomaticPackageResolution -onlyUsePackageVersionsFromResolvedFile \
+            -resultBundlePath "$YLF_CI_OUTPUT/fixture-cleanup.xcresult" \
+            -only-testing:YunleFunTests/NativeGameRuntimeFixtureCleanupTests/testRemoveDeferredFixtureStoresInFreshProcess \
+            -collect-test-diagnostics never -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
+            -maximum-test-execution-time-allowance 180 \
+            CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test-without-building \
+            2>&1 | tee "$YLF_CI_OUTPUT/fixture-cleanup.log"
+          container="$(xcrun simctl get_app_container "$YLF_CI_SIMULATOR" fun.yunle.apps.native-dev data)"
+          export YLF_FIXTURE_CONTAINER="$container"
+          export YLF_FIXTURE_LEDGER="$container/Library/Application Support/NativeGameFixtureCleanup/$YLF_FIXTURE_RUN.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+
+          file = Path(os.environ["YLF_FIXTURE_LEDGER"])
+          ledger = json.loads(file.read_text())
+          assert ledger["runID"] == os.environ["YLF_FIXTURE_RUN"]
+          assert ledger["entries"] and ledger["remainingIdentifiers"] == []
+          verifier = ledger["verifiedByProcessID"]
+          assert verifier > 0 and all(entry["processID"] != verifier for entry in ledger["entries"])
+          root = Path(os.environ["YLF_FIXTURE_CONTAINER"]) / "tmp"
+          assert all(not (root / entry["directory"]).exists() for entry in ledger["entries"])
+          output = Path(os.environ["YLF_CI_OUTPUT"]) / "test-report"
+          output.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(file, output / "fixture-cleanup.json")
+          print(f"Verified {len(ledger['entries'])} owned stores absent after app process transition")
+          PY
 
       - name: Export structured test results
         if: always() && steps.simulator.outputs.id != ''
@@ -110,6 +158,9 @@ jobs:
 
           directory = Path(os.environ["YLF_CI_OUTPUT"]) / "test-report"
           files = [directory / name for name in ["summary.json", "tests.json"]]
+          cleanup = directory / "fixture-cleanup.json"
+          if cleanup.exists():
+              files.append(cleanup)
           for file in files:
               json.loads(file.read_text())
           receipt = {
@@ -117,6 +168,7 @@ jobs:
               "checkout": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "runID": os.environ["GITHUB_RUN_ID"],
               "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "fixtureCleanupVerified": cleanup.exists(),
               "sha256": {file.name: hashlib.sha256(file.read_bytes()).hexdigest() for file in files},
           }
           (directory / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
@@ -151,6 +203,7 @@ jobs:
           path: |
             ${{ runner.temp }}/yunlefun-ios-ci/*.log
             ${{ runner.temp }}/yunlefun-ios-ci/native-tests.xcresult
+            ${{ runner.temp }}/yunlefun-ios-ci/fixture-cleanup.xcresult
           if-no-files-found: ignore
           retention-days: 3
 

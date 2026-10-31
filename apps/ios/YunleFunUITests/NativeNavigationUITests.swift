@@ -2,6 +2,11 @@ import XCTest
 
 @MainActor
 final class NativeNavigationUITests: XCTestCase {
+    private func navigationApplication() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchEnvironment["YUNLEFUN_UI_DISABLE_ANIMATIONS"] = "1"
+        return app
+    }
     func testGuestCanDismissPhoneKeyboardAtStandardTextSize() {
         checkLoginKeyboardDismissal(large: false)
     }
@@ -124,7 +129,7 @@ final class NativeNavigationUITests: XCTestCase {
 
     private func openPasswordLogin() throws -> XCUIApplication {
         continueAfterFailure = false
-        let app = XCUIApplication()
+        let app = navigationApplication()
         // A prior journey may have launched at an accessibility text size, where the
         // login method uses a menu. Relaunch with an explicit standard size for this journey.
         app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
@@ -163,7 +168,7 @@ final class NativeNavigationUITests: XCTestCase {
 
     private func checkLoginKeyboardDismissal(large: Bool, passwordMethod: Bool = false) {
         continueAfterFailure = false
-        let app = XCUIApplication()
+        let app = navigationApplication()
         app.launchArguments = ["-UIPreferredContentSizeCategoryName",
                                large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
         app.launch()
@@ -285,7 +290,7 @@ final class NativeNavigationUITests: XCTestCase {
 
     func testGuestCanUseHomeOptionsAtLargestTextSize() {
         continueAfterFailure = false
-        let app = XCUIApplication()
+        let app = navigationApplication()
         app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["云居"].waitForExistence(timeout: 10))
@@ -309,7 +314,7 @@ final class NativeNavigationUITests: XCTestCase {
 
     func testGuestCanReadEmptyHomeBackupsAndReturn() {
         continueAfterFailure = false
-        let app = XCUIApplication(); app.launch()
+        let app = navigationApplication(); app.launch()
         XCTAssertTrue(app.tabBars.buttons["云居"].waitForExistence(timeout: 10))
         let installed = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开")).allElementsBoundByIndex.map(\.label)
         app.tabBars.buttons["我"].tap(); app.buttons["设置"].tap(); app.buttons["云居备份"].tap()
@@ -322,7 +327,7 @@ final class NativeNavigationUITests: XCTestCase {
 
     func testGuestCanReadLegacyImportEmptyStateAndReturn() {
         continueAfterFailure = false
-        let app = XCUIApplication(); app.launch()
+        let app = navigationApplication(); app.launch()
         XCTAssertTrue(app.tabBars.buttons["云居"].waitForExistence(timeout: 10))
         let installed = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "打开")).allElementsBoundByIndex.map(\.label)
         app.tabBars.buttons["我"].tap(); app.buttons["设置"].tap()
@@ -358,7 +363,7 @@ final class NativeNavigationUITests: XCTestCase {
 
     func testGuestCanReachSyncSettingsAndCancelNativeLogin() {
         continueAfterFailure = false
-        let app = XCUIApplication()
+        let app = navigationApplication()
         app.launch()
         let me = app.tabBars.buttons["我"]
         XCTAssertTrue(me.waitForExistence(timeout: 10))

@@ -166,7 +166,7 @@ private final class SupportViewFixture {
         let deadline = Date().addingTimeInterval(scrollToFind ? 30 : 10)
         let fromBottom = startAt == .bottom
         var image: UIImage?, lines: [String] = []
-        var scan: [String] = []
+        var scan = ["sceneOrientation=\(window.windowScene?.interfaceOrientation.rawValue ?? -1) window=\(window.frame) safeArea=\(window.safeAreaInsets) viewSafeArea=\(controller.view.safeAreaInsets) margins=\(controller.view.layoutMargins)"]
         var sample = 0, candidateScreenshots = 0
         if scrollToFind, startAt == .contacts {
             // This standard-channel guest fixture has no shared receipts. Its
@@ -242,7 +242,7 @@ private final class SupportViewFixture {
             let visible = Self.normalized(lines.joined())
             let geometry: String
             if let scroll = scrollView(in: view) {
-                geometry = "scroll=\(String(reflecting: type(of: scroll))) offset=\(scroll.contentOffset) viewport=\(scroll.bounds.size) contentSize=\(scroll.contentSize) adjustedInset=\(scroll.adjustedContentInset)"
+                geometry = "scroll=\(String(reflecting: type(of: scroll))) offset=\(scroll.contentOffset) viewport=\(scroll.bounds.size) contentSize=\(scroll.contentSize) adjustedInset=\(scroll.adjustedContentInset) safeArea=\(scroll.safeAreaInsets) margins=\(scroll.layoutMargins)"
             } else { geometry = "No native scroll view; viewport=\(view.bounds.size)" }
             scan.append("Sample \(sample): \(geometry)\n" + lines.joined(separator: "\n"))
             if fromBottom, candidateScreenshots < 8,

@@ -102,11 +102,16 @@ final class NativeGameRuntimeTests: XCTestCase {
 
     func testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation() async throws {
         let fixture = try await makeFixture()
+        let scene = try XCTUnwrap(fixture.window.windowScene)
+        let orientation = scene.interfaceOrientation
         try await exercisePlayProfileIsolation(fixture)
         // Finish the async frame that owns every browser before teardown asks
         // WebKit to delete the fixture's named website data stores.
         await fixture.endAll()
         await Task.yield()
+        await fixture.close()
+        XCTAssertEqual(scene.interfaceOrientation, orientation,
+                       "Closing a landscape game fixture must restore the scene used by later portrait rendering tests")
     }
 
     private func exercisePlayProfileIsolation(_ fixture: NativeGameRuntimeFixture) async throws {
@@ -678,6 +683,33 @@ final class NativeGameRuntimeTests: XCTestCase {
 /// No other identifier can enter this cleanup.
 @MainActor
 final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
+    func testRemovalWaitsForSDKInventoryAfterCompletion() async throws {
+        guard #available(iOS 17, *) else { throw XCTSkip("Named stores require iOS 17") }
+        let identifier = UUID()
+        var removals = 0, inventories = 0
+        try await NativeGameRuntimeStoreCleanup.remove(identifier, timeout: 1,
+            removeStore: { actual, _ in XCTAssertEqual(actual, identifier); removals += 1 },
+            listStores: { _ in
+                inventories += 1
+                return inventories < 3 ? [identifier] : []
+            })
+        XCTAssertEqual(removals, 1, "A successful SDK removal must not be resubmitted while its inventory settles")
+        XCTAssertEqual(inventories, 3, "The callback alone does not prove the store is absent")
+    }
+
+    func testRemovalFailsWhenSDKInventoryNeverDropsIdentifier() async throws {
+        guard #available(iOS 17, *) else { throw XCTSkip("Named stores require iOS 17") }
+        let identifier = UUID()
+        do {
+            try await NativeGameRuntimeStoreCleanup.remove(identifier, timeout: 0.15,
+                removeStore: { _, _ in }, listStores: { _ in [identifier] })
+            XCTFail("A still-enumerated fixture store must fail cleanup")
+        } catch {
+            XCTAssertEqual((error as NSError).domain, "NativeGameFixtureCleanup")
+            XCTAssertEqual((error as NSError).code, 3)
+        }
+    }
+
     func testRemoveOnlyPreviouslyOwnedFixtureStores() async throws {
         guard #available(iOS 17, *),
               ProcessInfo.processInfo.environment["YUNLEFUN_NATIVE_GAME_FIXTURE_CLEANUP"] == "1" else {
@@ -2248,6 +2280,7 @@ private final class NativeGameRuntimeFixture {
     let root = NativeGameRuntimeHostController()
     let window: UIWindow
     let previous: UIWindow?
+    private let previousOrientation: UIInterfaceOrientation
     private let animationsWereEnabled: Bool
     private var profileIDs = Set<UUID>()
     private var profileObservations: [NativeGameRuntimeProfileObservation] = []
@@ -2265,6 +2298,7 @@ private final class NativeGameRuntimeFixture {
         library = HomeLibrary(directory: directory.appendingPathComponent("home"))
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         previous = scene.windows.first(where: \.isKeyWindow)
+        previousOrientation = scene.interfaceOrientation
         window = UIWindow(windowScene: scene)
         animationsWereEnabled = UIView.areAnimationsEnabled
         UIView.setAnimationsEnabled(false)
@@ -2428,6 +2462,25 @@ private final class NativeGameRuntimeFixture {
             previous?.makeKey()
             UIView.setAnimationsEnabled(animationsWereEnabled)
         }
+        // Full-screen games rotate the shared scene even when their window is
+        // released. Restore its entry orientation before a later 320pt portrait
+        // rendering fixture can inherit landscape notch insets.
+        if let scene = window.windowScene, previousOrientation != .unknown {
+            // iPad windowing can reject programmatic rotations even when the
+            // scene never rotated. Its already-restored orientation still gets
+            // the same postcondition assertion as a rotated iPhone scene.
+            if scene.interfaceOrientation != previousOrientation {
+                let mask = UIInterfaceOrientationMask(rawValue: 1 << previousOrientation.rawValue)
+                var geometryError: Error?
+                previous?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { geometryError = $0 }
+                do {
+                    try await wait(seconds: 5) { geometryError != nil || scene.interfaceOrientation == self.previousOrientation }
+                    if let geometryError { throw geometryError }
+                } catch { XCTFail("Fixture scene orientation restoration failed: \(error)") }
+            }
+            XCTAssertEqual(scene.interfaceOrientation, previousOrientation)
+        }
         await Task.yield()
         observe("after-terminal-release")
         // Wait for a concrete owner-release condition, not a fixed cleanup delay.
@@ -2520,16 +2573,30 @@ private enum NativeGameRuntimeStoreCleanup {
 
     /// Waiting asynchronously lets UIKit autoreleases and the network process
     /// release their references. A missing API callback cannot stall XCTest.
-    static func remove(_ identifier: UUID) async throws {
+    static func remove(_ identifier: UUID, timeout: TimeInterval = 30,
+                       removeStore: ((UUID, TimeInterval) async throws -> Void)? = nil,
+                       listStores: ((TimeInterval) async throws -> Set<UUID>)? = nil) async throws {
         var lastFailure: Error = URLError(.unknown)
-        let deadline = Date().addingTimeInterval(30)
+        let deadline = Date().addingTimeInterval(timeout)
         for seconds in [0, 1, 2, 4, 8, 8] {
             let remaining = deadline.timeIntervalSinceNow
             guard remaining > Double(seconds) else { break }
             if seconds > 0 { try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000) }
             do {
-                try await removeOnce(identifier, timeout: deadline.timeIntervalSinceNow)
-                return
+                if let removeStore { try await removeStore(identifier, deadline.timeIntervalSinceNow) }
+                else { try await removeOnce(identifier, timeout: deadline.timeIntervalSinceNow) }
+                // WebKit can acknowledge removal before its identifier inventory
+                // reflects it. Confirm absence within the same 30-second budget.
+                while Date() < deadline {
+                    let remaining = min(4, deadline.timeIntervalSinceNow)
+                    let inventory: Set<UUID>
+                    if let listStores { inventory = try await listStores(remaining) }
+                    else { inventory = try await identifiers(timeout: remaining) }
+                    if !inventory.contains(identifier) { return }
+                    try await Task.sleep(nanoseconds: 50_000_000)
+                }
+                throw NSError(domain: "NativeGameFixtureCleanup", code: 3,
+                              userInfo: [NSLocalizedDescriptionKey: "Removed fixture profile is still enumerated by WebKit"])
             } catch {
                 lastFailure = error
                 if (error as? URLError)?.code == .timedOut { throw error }
@@ -2538,10 +2605,10 @@ private enum NativeGameRuntimeStoreCleanup {
         throw lastFailure
     }
 
-    static func identifiers() async throws -> Set<UUID> {
+    static func identifiers(timeout: TimeInterval = 4) async throws -> Set<UUID> {
         let result = NativeGameRuntimeCallback<[UUID]>()
         WKWebsiteDataStore.fetchAllDataStoreIdentifiers { identifiers in result.value = identifiers }
-        let deadline = Date().addingTimeInterval(4)
+        let deadline = Date().addingTimeInterval(max(0, timeout))
         while Date() < deadline {
             if let identifiers = result.value { return Set(identifiers) }
             try await Task.sleep(nanoseconds: 50_000_000)

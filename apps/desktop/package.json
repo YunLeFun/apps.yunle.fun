@@ -67,7 +67,7 @@
     "@yunlefun/ui": "0.0.6",
     "electron": "44.9.1",
     "eslint": "^10.13.0",
-    "nuxt": "4.6.2",
+    "nuxt": "4.6.3",
     "typescript": "5.9.3",
     "vite": "8.3.5",
     "vite-electron": "npm:vite@8.3.5",

@@ -5,7 +5,6 @@ auditConfig:
   # 仅接受已回移安全补丁但上游尚未发布修复版的精确告警（详见安全文档）
   ignoreGhsas:
     - GHSA-gcqx-w48m-w2h4 # deepmerge 无已发布修复；CJS/UMD/源码均阻止原型键并覆盖恶意与合法输入
-    - GHSA-86w9-cpqp-85rv # node-forge 无已发布修复；回移上游 RSA 验签补丁并验证
     - GHSA-p6mc-m468-83gw # lodash.set 无上游补丁；本仓库应用等价原型污染防护补丁
 
 trustPolicy: no-downgrade
@@ -38,10 +37,11 @@ overrides:
   esbuild@>=0.27.3 <0.28.1: ^0.28.1 # Windows 开发服务器任意文件读取
   fast-uri: ^3.1.8 # 路径穿越 / host 混淆（unocss webpack > ajv）
   flatted: ^3.4.2 # 原型污染 / DoS（eslint flat-cache）
-  follow-redirects: ^1.16.1 # 跨域 header 泄露（axios）
+  follow-redirects: ^1.16.2 # 跨域 header 泄露（axios）
   form-data@>=3.0.0 <3.0.5: ^3.0.5 # multipart 字段名 CRLF 注入（腾讯云 SDK）
   form-data@>=4.0.0 <4.0.6: ^4.0.6 # multipart 字段名 CRLF 注入（CloudBase / Ionic）
   get-uri@6.0.5>basic-ftp: 6.2.3 # FTP 响应 header 注入；保留 Client API 并限制跨 host 传输
+  glob@>=9.0.0 <14.0.2: ^14.0.3 # AbortSignal 取消后立即结束遍历
   h3@>=1.0.0 <1.15.11: ^1.15.11 # 仅修复 H3 1；保留 devframe 所需的 H3 2
   immutable: ^5.1.8 # trie 溢出 / 哈希碰撞 DoS（sass）
   ip-address: ^10.7.4 # Address6 XSS（@nuxtjs/ionic > socks）
@@ -52,6 +52,8 @@ overrides:
   linkify-it: ^5.0.2 # mailto 校验器二次复杂度 DoS（Markdown 渲染链）
   lodash: ^4.18.1 # 代码注入 / 原型污染（@cloudbase/js-sdk，运行时）
   lodash.unset@>=4.0.0 <4.18.0: ^4.18.0 # 原型污染（CloudBase database）
+  minimatch@<11.0.1: ^11.0.3 # 修复 globParts 放大；旧 CJS 消费者由兼容补丁保留可调用入口
+  node-forge: ^1.4.1 # 使用上游正式安全版本，移除临时 RSA 补丁
   picomatch@<2.3.2: ^2.3.2 # ReDoS（workbox 链）
   picomatch@>=4.0.0 <4.0.5: ^4.0.5 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
   postcss: ^8.5.18 # source map 路径穿越 / CSS stringify XSS（vite）
@@ -77,11 +79,12 @@ overrides:
   ws: ^8.21.0 # 未初始化内存泄露（@cloudbase/js-sdk，运行时）
   yaml: ^2.9.0 # 栈溢出（@antfu/eslint-config > eslint-plugin-pnpm）
 patchedDependencies:
+  '@electron/asar@3.4.1': patches/@electron__asar@3.4.1.patch
   appdmg@0.6.6: patches/appdmg@0.6.6.patch
   cordova-plugin-wechat@3.1.0: patches/cordova-plugin-wechat@3.1.0.patch
   deepmerge@4.3.1: patches/deepmerge@4.3.1.patch
+  glob@7.2.3: patches/glob@7.2.3.patch
   lodash.set@4.3.2: patches/lodash.set@4.3.2.patch
-  node-forge@1.4.0: patches/node-forge@1.4.0.patch
 allowBuilds:
   '@parcel/watcher': true
   core-js: true

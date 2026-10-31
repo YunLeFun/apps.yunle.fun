@@ -42,8 +42,8 @@ final class NativeGameRuntimeTests: XCTestCase {
         fixture.track(profile)
         await fixture.close()
         if ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
-            let url = try NativeGameRuntimeDeferredCleanup.ledgerURL()
-            let ledger = try JSONDecoder().decode(NativeGameRuntimeDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
+            let url = try NativeFixtureDeferredCleanup.ledgerURL()
+            let ledger = try JSONDecoder().decode(NativeFixtureDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
             let entry = try XCTUnwrap(ledger.entries.first { $0.identifier == profile })
             XCTAssertEqual(entry.directory, fixture.directory.lastPathComponent)
             XCTAssertEqual(entry.defaults, fixture.defaultsName)
@@ -694,13 +694,13 @@ final class NativeGameRuntimeTests: XCTestCase {
 @MainActor
 final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     func testDeferredCleanupRejectsItsOriginalProcessBeforeTouchingWebKit() async throws {
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: UUID(),
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(),
             directory: "native-game-runtime-" + UUID().uuidString,
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
-        let ledger = NativeGameRuntimeDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
+        let ledger = NativeFixtureDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
         var touchedSDK = false
         do {
-            _ = try await NativeGameRuntimeDeferredCleanup.verify(ledger, processID: 42,
+            _ = try await NativeFixtureDeferredCleanup.verify(ledger, processID: 42,
                 remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
             XCTFail("Cleanup must cross the app process boundary")
         } catch {
@@ -710,13 +710,13 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
 
     func testDeferredCleanupCannotVerifyAStillEnumeratedStore() async throws {
         let id = UUID()
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: id,
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: id,
             directory: "native-game-runtime-" + UUID().uuidString,
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
-        let ledger = NativeGameRuntimeDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
+        let ledger = NativeFixtureDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
         var removed: [UUID] = []
         do {
-            _ = try await NativeGameRuntimeDeferredCleanup.verify(ledger, processID: 43,
+            _ = try await NativeFixtureDeferredCleanup.verify(ledger, processID: 43,
                 remove: { removed.append($0) }, inventory: { [id] })
             XCTFail("An SDK callback cannot replace the identifier-absence postcondition")
         } catch { XCTAssertEqual(removed, [id]) }
@@ -725,12 +725,12 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
 
     func testDeferredCleanupKeepsUnrelatedStores() async throws {
         let id = UUID(), unrelated = UUID()
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: id,
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: id,
             directory: "native-game-runtime-" + UUID().uuidString,
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
-        let ledger = NativeGameRuntimeDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
+        let ledger = NativeFixtureDeferredCleanup.Ledger(runID: UUID(), entries: [entry])
         var current: Set<UUID> = [id, unrelated]
-        let verified = try await NativeGameRuntimeDeferredCleanup.verify(ledger, processID: 43,
+        let verified = try await NativeFixtureDeferredCleanup.verify(ledger, processID: 43,
             remove: { XCTAssertEqual($0, id); current.remove($0) }, inventory: { current })
         XCTAssertEqual(current, [unrelated])
         XCTAssertEqual(verified.remainingIdentifiers, [])
@@ -738,11 +738,11 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     }
 
     func testDeferredCleanupRejectsAnUnscopedDirectoryBeforeTouchingWebKit() async throws {
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: UUID(), directory: "../another-app",
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: "../another-app",
             defaults: "native-game-runtime-" + UUID().uuidString, processID: 42)
         var touchedSDK = false
         do {
-            _ = try await NativeGameRuntimeDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
+            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
                 remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
             XCTFail("Cleanup must reject paths outside its exact fixture namespace")
         } catch { XCTAssertFalse(touchedSDK) }
@@ -751,10 +751,10 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
     func testDeferredStorageCleanupRejectsMissingOrMismatchedOwnershipBeforeSDK() async throws {
         let fixture = try deferredStorageFixture()
         defer { try? FileManager.default.removeItem(at: fixture.directory) }
-        let markerURL = fixture.directory.appendingPathComponent(NativeGameRuntimeDeferredCleanup.storageMarkerName)
+        let markerURL = fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName)
         for mismatch in ["missing", "kind", "namespace", "directory", "run", "process", "profiles", "defaults"] {
             if mismatch != "missing" {
-                let marker = NativeGameRuntimeDeferredCleanup.StorageMarker(
+                let marker = NativeFixtureDeferredCleanup.StorageMarker(
                     kind: mismatch == "kind" ? "unrelated" : fixture.marker.kind,
                     namespace: mismatch == "namespace" ? .webProfileRepository : fixture.marker.namespace,
                     directory: mismatch == "directory" ? UUID().uuidString : fixture.marker.directory,
@@ -763,14 +763,14 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
                     profiles: mismatch == "profiles" ? [fixture.entry.identifier, UUID()] : fixture.marker.profiles)
                 try JSONEncoder().encode(marker).write(to: markerURL)
             }
-            let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: fixture.entry.identifier,
+            let entry = NativeFixtureDeferredCleanup.Entry(identifier: fixture.entry.identifier,
                 directory: fixture.entry.directory, defaults: mismatch == "defaults" ? "native-game-runtime-" + UUID().uuidString : nil,
                 processID: fixture.entry.processID, namespace: fixture.entry.namespace)
-            let game = NativeGameRuntimeDeferredCleanup.Entry(identifier: UUID(), directory: "native-game-runtime-" + UUID().uuidString,
+            let game = NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: "native-game-runtime-" + UUID().uuidString,
                 defaults: "native-game-runtime-" + UUID().uuidString, processID: 1)
             var touchedSDK = false
             do {
-                _ = try await NativeGameRuntimeDeferredCleanup.verify(.init(runID: fixture.runID, entries: [game, entry]), processID: 43,
+                _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [game, entry]), processID: 43,
                     remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
                 XCTFail("Invalid storage ownership must fail before any SDK operation: " + mismatch)
             } catch { XCTAssertFalse(touchedSDK, mismatch) }
@@ -787,18 +787,18 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
                 try? FileManager.default.removeItem(at: target)
             }
             let bytes = try JSONEncoder().encode(fixture.marker)
-            let targetMarker = target.appendingPathComponent(NativeGameRuntimeDeferredCleanup.storageMarkerName)
+            let targetMarker = target.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName)
             try bytes.write(to: targetMarker)
             if link == "directory" {
                 try FileManager.default.removeItem(at: fixture.directory)
                 try FileManager.default.createSymbolicLink(at: fixture.directory, withDestinationURL: target)
             } else {
-                try FileManager.default.createSymbolicLink(at: fixture.directory.appendingPathComponent(NativeGameRuntimeDeferredCleanup.storageMarkerName),
+                try FileManager.default.createSymbolicLink(at: fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName),
                                                          withDestinationURL: targetMarker)
             }
             var touchedSDK = false
             do {
-                _ = try await NativeGameRuntimeDeferredCleanup.verify(.init(runID: fixture.runID, entries: [fixture.entry]), processID: 43,
+                _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [fixture.entry]), processID: 43,
                     remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
                 XCTFail("A symlink cannot grant fixture ownership: " + link)
             } catch { XCTAssertFalse(touchedSDK, link) }
@@ -816,34 +816,64 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
         }
         let sentinel = unrelated.appendingPathComponent("preserve.txt"), bytes = Data("unrelated fixture".utf8)
         try bytes.write(to: sentinel)
-        let markerURL = fixture.directory.appendingPathComponent(NativeGameRuntimeDeferredCleanup.storageMarkerName)
+        let markerURL = fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName)
         let marker = try JSONEncoder().encode(fixture.marker)
         try marker.write(to: markerURL)
         let unregistered = UUID()
         var current: Set<UUID> = [fixture.entry.identifier, unregistered]
-        let verified = try await NativeGameRuntimeDeferredCleanup.verify(.init(runID: fixture.runID, entries: [fixture.entry]),
+        let verified = try await NativeFixtureDeferredCleanup.verify(.init(runID: fixture.runID, entries: [fixture.entry]),
             processID: ProcessInfo.processInfo.processIdentifier,
             remove: { XCTAssertEqual($0, fixture.entry.identifier); current.remove($0) }, inventory: { current })
         XCTAssertEqual(current, [unregistered])
         try Data("changed ownership".utf8).write(to: markerURL)
-        XCTAssertThrowsError(try NativeGameRuntimeDeferredCleanup.removeOwnedDirectories(verified))
+        XCTAssertThrowsError(try NativeFixtureDeferredCleanup.removeOwnedDirectories(verified))
         XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.directory.path))
         try marker.write(to: markerURL)
-        try NativeGameRuntimeDeferredCleanup.removeOwnedDirectories(verified)
+        try NativeFixtureDeferredCleanup.removeOwnedDirectories(verified)
         XCTAssertFalse(FileManager.default.fileExists(atPath: fixture.directory.path))
         XCTAssertEqual(try Data(contentsOf: sentinel), bytes)
     }
 
-    private func deferredStorageFixture(namespace: NativeGameRuntimeDeferredCleanup.Namespace = .nativeRuntimeSession) throws
-        -> (directory: URL, entry: NativeGameRuntimeDeferredCleanup.Entry, marker: NativeGameRuntimeDeferredCleanup.StorageMarker, runID: UUID) {
-        let name = (namespace == .webProfileRepository ? "WebProfiles-" : "") + UUID().uuidString
+    private func deferredStorageFixture(namespace: NativeFixtureDeferredCleanup.Namespace = .nativeRuntimeSession, runID: UUID = UUID()) throws
+        -> (directory: URL, entry: NativeFixtureDeferredCleanup.Entry, marker: NativeFixtureDeferredCleanup.StorageMarker, runID: UUID) {
+        let name = (namespace == .webProfileRepository ? "WebProfiles-" : "native-runtime-session-") + UUID().uuidString
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(name)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let entry = NativeGameRuntimeDeferredCleanup.Entry(identifier: UUID(), directory: name, defaults: nil, processID: 1, namespace: namespace)
-        let runID = UUID()
-        let marker = NativeGameRuntimeDeferredCleanup.StorageMarker(kind: NativeGameRuntimeDeferredCleanup.storageMarkerKind,
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(), directory: name, defaults: nil, processID: 1, namespace: namespace)
+        let marker = NativeFixtureDeferredCleanup.StorageMarker(kind: NativeFixtureDeferredCleanup.storageMarkerKind,
             namespace: namespace, directory: name, runID: runID, processID: entry.processID, profiles: [entry.identifier])
         return (directory, entry, marker, runID)
+    }
+
+    func testDeferredCleanupAcceptsScopedStorageFixturesWithoutInventingDefaults() async throws {
+        let runID = UUID()
+        let fixtures = try [NativeFixtureDeferredCleanup.Namespace.nativeRuntimeSession, .webProfileRepository].map {
+            try deferredStorageFixture(namespace: $0, runID: runID)
+        }
+        defer { fixtures.forEach { try? FileManager.default.removeItem(at: $0.directory) } }
+        for fixture in fixtures {
+            try JSONEncoder().encode(fixture.marker).write(to: fixture.directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName))
+        }
+        let entries = fixtures.map(\.entry)
+        let unrelated = UUID()
+        var current = Set(entries.map(\.identifier)).union([unrelated])
+        let verified = try await NativeFixtureDeferredCleanup.verify(.init(runID: runID, entries: entries), processID: 43,
+            remove: { current.remove($0) }, inventory: { current })
+        XCTAssertEqual(current, [unrelated])
+        XCTAssertEqual(verified.remainingIdentifiers, [])
+        XCTAssertTrue(verified.entries.allSatisfy { $0.defaults == nil })
+    }
+
+    func testDeferredCleanupRejectsDefaultsOutsideTheGameFixtureNamespace() async throws {
+        let entry = NativeFixtureDeferredCleanup.Entry(identifier: UUID(),
+            directory: "native-runtime-session-" + UUID().uuidString,
+            defaults: "native-game-runtime-" + UUID().uuidString, processID: 42, namespace: .nativeRuntimeSession)
+        var touchedSDK = false
+        do {
+            _ = try await NativeFixtureDeferredCleanup.verify(.init(runID: UUID(), entries: [entry]), processID: 43,
+                remove: { _ in touchedSDK = true }, inventory: { touchedSDK = true; return [] })
+            XCTFail("A storage-only fixture must not request removal of a defaults domain")
+        } catch { XCTAssertFalse(touchedSDK) }
     }
 
     func testRemoveDeferredFixtureStoresInFreshProcess() async throws {
@@ -851,8 +881,8 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
             throw XCTSkip("The CI harness invokes cleanup in a separate app process")
         }
         guard #available(iOS 17, *) else { return XCTFail("Named stores require iOS 17") }
-        let url = try NativeGameRuntimeDeferredCleanup.ledgerURL()
-        let ledger = try JSONDecoder().decode(NativeGameRuntimeDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
+        let url = try NativeFixtureDeferredCleanup.ledgerURL()
+        let ledger = try JSONDecoder().decode(NativeFixtureDeferredCleanup.Ledger.self, from: Data(contentsOf: url))
         guard ledger.runID.uuidString == url.deletingPathExtension().lastPathComponent else {
             return XCTFail("The cleanup ledger must belong to this exact run")
         }
@@ -860,11 +890,11 @@ final class NativeGameRuntimeFixtureCleanupTests: XCTestCase {
         // rendered page. Do not start WebContent/GPU just to delete old stores.
         let initializationStore = WKWebsiteDataStore.default()
         defer { withExtendedLifetime(initializationStore) {} }
-        let verified = try await NativeGameRuntimeDeferredCleanup.verify(ledger,
+        let verified = try await NativeFixtureDeferredCleanup.verify(ledger,
             processID: ProcessInfo.processInfo.processIdentifier,
             remove: { try await NativeGameRuntimeStoreCleanup.remove($0) },
             inventory: { try await NativeGameRuntimeStoreCleanup.identifiers() })
-        try NativeGameRuntimeDeferredCleanup.removeOwnedDirectories(verified)
+        try NativeFixtureDeferredCleanup.removeOwnedDirectories(verified)
         try JSONEncoder().encode(verified).write(to: url, options: .atomic)
         XCTAssertEqual(verified.remainingIdentifiers, [])
         print("NATIVE_GAME_FRESH_PROCESS_CLEANUP verified=\(verified.entries.count) process=\(verified.verifiedByProcessID!) remaining=0")
@@ -2691,7 +2721,7 @@ private final class NativeGameRuntimeFixture {
                 // a fresh app process, using this exact fixture ownership ledger.
                 XCTAssertFalse(profileObservations.contains { $0.browser != nil || $0.page != nil },
                                "Live fixture pages cannot be deferred as framework-only ownership")
-                try NativeGameRuntimeDeferredCleanup.record(profileIDs, directory: directory, defaults: defaultsName)
+                try NativeFixtureDeferredCleanup.record(profileIDs, directory: directory, defaults: defaultsName)
             } catch {
                 cleanupFailed = true
                 XCTFail("Could not persist fixture cleanup ownership: \(error)")
@@ -2838,196 +2868,6 @@ private enum NativeGameRuntimeStoreCleanup {
 @MainActor
 private final class NativeGameRuntimeCallback<Value> {
     var value: Value?
-}
-
-@MainActor
-enum NativeGameRuntimeDeferredCleanup {
-    enum Namespace: String, Codable {
-        case nativeGameRuntime = "native-game-runtime"
-        case nativeRuntimeSession = "native-runtime-session"
-        case webProfileRepository = "web-profile-repository"
-    }
-
-    struct Entry: Codable, Equatable {
-        let identifier: UUID
-        // Xcode can relocate the sandbox when reinstalling the test host.
-        // Retain only a validated fixture name, relative to the current tmp.
-        let directory: String
-        let defaults: String?
-        let processID: Int32
-        let namespace: Namespace
-
-        init(identifier: UUID, directory: String, defaults: String?, processID: Int32,
-             namespace: Namespace = .nativeGameRuntime) {
-            self.identifier = identifier; self.directory = directory; self.defaults = defaults
-            self.processID = processID; self.namespace = namespace
-        }
-    }
-    struct Ledger: Codable {
-        let runID: UUID
-        var entries: [Entry]
-        var verifiedByProcessID: Int32?
-        var remainingIdentifiers: [UUID]?
-    }
-
-    struct StorageMarker: Codable {
-        let kind: String
-        let namespace: Namespace
-        let directory: String
-        let runID: UUID?
-        let processID: Int32
-        let profiles: [UUID]
-    }
-
-    static let storageMarkerName = "fixture-store-ownership.json"
-    static let storageMarkerKind = "owned-storage-regression-fixture"
-
-    static func ledgerURL() throws -> URL {
-        let env = ProcessInfo.processInfo.environment
-        guard let raw = env["YUNLEFUN_FIXTURE_CLEANUP_RUN"], let run = UUID(uuidString: raw),
-              let owned = env["YUNLEFUN_FIXTURE_SIMULATOR"], !owned.isEmpty,
-              owned == env["SIMULATOR_UDID"] else {
-            throw failure("Cleanup requires a run UUID and the exact owned simulator")
-        }
-        return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("NativeGameFixtureCleanup").appendingPathComponent(run.uuidString + ".json")
-    }
-
-    static func validateDirectoryName(_ name: String, namespace: Namespace) throws {
-        guard name == URL(fileURLWithPath: name).lastPathComponent else { throw failure("Unscoped fixture directory") }
-        let prefix: String
-        switch namespace {
-        case .nativeGameRuntime: prefix = "native-game-runtime-"
-        case .nativeRuntimeSession: prefix = ""
-        case .webProfileRepository: prefix = "WebProfiles-"
-        }
-        guard name.hasPrefix(prefix), UUID(uuidString: String(name.dropFirst(prefix.count))) != nil else {
-            throw failure("Directory does not match its fixture namespace")
-        }
-    }
-
-    private static func validate(_ entry: Entry) throws {
-        try validateDirectoryName(entry.directory, namespace: entry.namespace)
-        guard entry.processID > 0 else { throw failure("Invalid fixture process") }
-        if entry.namespace == .nativeGameRuntime {
-            let prefix = "native-game-runtime-"
-            guard let defaults = entry.defaults, defaults.hasPrefix(prefix),
-                  UUID(uuidString: String(defaults.dropFirst(prefix.count))) != nil else {
-                throw failure("Unrecognized game fixture defaults")
-            }
-        } else if entry.defaults != nil { throw failure("Storage fixtures do not own a defaults domain") }
-    }
-
-    private static func directoryURL(_ entry: Entry) throws -> URL {
-        try validate(entry)
-        let manager = FileManager.default
-        let root = manager.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
-        let directory = root.appendingPathComponent(entry.directory, isDirectory: true)
-        guard directory.deletingLastPathComponent().standardizedFileURL.path == root.path,
-              directory.resolvingSymlinksInPath().standardizedFileURL.path == directory.standardizedFileURL.path,
-              (try? manager.destinationOfSymbolicLink(atPath: directory.path)) == nil else {
-            throw failure("Fixture directory must be a direct, non-symlink temporary child")
-        }
-        if let attributes = try? manager.attributesOfItem(atPath: directory.path),
-           attributes[.type] as? FileAttributeType != .typeDirectory {
-            throw failure("Fixture path is not a directory")
-        }
-        return directory
-    }
-
-    private static func validateOwnership(_ ledger: Ledger) throws -> [URL] {
-        for entry in ledger.entries { try validate(entry) }
-        var directories: [URL] = []
-        for group in Dictionary(grouping: ledger.entries, by: \.directory).values {
-            guard let first = group.first,
-                  group.allSatisfy({ $0.namespace == first.namespace && $0.processID == first.processID && $0.defaults == first.defaults }) else {
-                throw failure("A directory cannot belong to multiple fixture owners")
-            }
-            let directory = try directoryURL(first)
-            if first.namespace != .nativeGameRuntime {
-                let markerURL = directory.appendingPathComponent(storageMarkerName)
-                let attributes = try FileManager.default.attributesOfItem(atPath: markerURL.path)
-                guard attributes[.type] as? FileAttributeType == .typeRegular,
-                      ((attributes[.size] as? NSNumber)?.intValue ?? Int.max) < 1_000_000,
-                      markerURL.resolvingSymlinksInPath().standardizedFileURL.path == markerURL.standardizedFileURL.path else {
-                    throw failure("Storage fixture marker must be a bounded regular file")
-                }
-                let marker = try JSONDecoder().decode(StorageMarker.self, from: Data(contentsOf: markerURL))
-                guard marker.kind == storageMarkerKind, marker.namespace == first.namespace,
-                      marker.directory == first.directory, marker.runID == ledger.runID, marker.processID == first.processID,
-                      Set(marker.profiles).count == marker.profiles.count,
-                      Set(marker.profiles) == Set(group.map(\.identifier)) else {
-                    throw failure("Storage fixture marker does not bind this exact run and UUID set")
-                }
-            }
-            directories.append(directory)
-        }
-        return directories
-    }
-
-    static func record(_ identifiers: Set<UUID>, directory: URL, defaults: String?, namespace: Namespace = .nativeGameRuntime) throws {
-        let url = try ledgerURL()
-        guard let run = UUID(uuidString: url.deletingPathExtension().lastPathComponent) else { throw failure("Invalid cleanup run") }
-        let root = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
-        guard directory.standardizedFileURL.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path == root.path else {
-            throw failure("Only this app's temporary fixture directory can be recorded")
-        }
-        var ledger = FileManager.default.fileExists(atPath: url.path)
-            ? try JSONDecoder().decode(Ledger.self, from: Data(contentsOf: url))
-            : Ledger(runID: run, entries: [])
-        guard ledger.runID == run, ledger.verifiedByProcessID == nil else { throw failure("Invalid or already verified run") }
-        for id in identifiers {
-            let entry = Entry(identifier: id, directory: directory.lastPathComponent, defaults: defaults,
-                              processID: ProcessInfo.processInfo.processIdentifier, namespace: namespace)
-            try validate(entry)
-            if let previous = ledger.entries.first(where: { $0.identifier == id }) {
-                guard previous == entry else { throw failure("A store cannot belong to two fixtures") }
-            } else { ledger.entries.append(entry) }
-        }
-        _ = try validateOwnership(ledger)
-        ledger.entries.sort { $0.identifier.uuidString < $1.identifier.uuidString }
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try JSONEncoder().encode(ledger).write(to: url, options: .atomic)
-    }
-
-    static func verify(_ ledger: Ledger, processID: Int32,
-                       remove: (UUID) async throws -> Void,
-                       inventory: () async throws -> Set<UUID>) async throws -> Ledger {
-        guard ledger.verifiedByProcessID == nil, ledger.remainingIdentifiers == nil,
-              !ledger.entries.isEmpty, ledger.entries.allSatisfy({ $0.processID != processID }),
-              Set(ledger.entries.map(\.identifier)).count == ledger.entries.count else {
-            throw failure("Verification requires unique owned stores from an earlier app process")
-        }
-        // Validate every namespace and marker before even enumerating WebKit.
-        _ = try validateOwnership(ledger)
-        let requested = Set(ledger.entries.map(\.identifier))
-        let before = try await inventory()
-        for id in requested.intersection(before).sorted(by: { $0.uuidString < $1.uuidString }) { try await remove(id) }
-        let remaining = requested.intersection(try await inventory())
-        guard remaining.isEmpty else { throw failure("Owned fixture stores remain in the SDK inventory") }
-        var verified = ledger
-        verified.verifiedByProcessID = processID
-        verified.remainingIdentifiers = []
-        return verified
-    }
-
-    static func removeOwnedDirectories(_ ledger: Ledger) throws {
-        guard ledger.verifiedByProcessID == ProcessInfo.processInfo.processIdentifier,
-              ledger.remainingIdentifiers == [] else { throw failure("SDK verification must precede directory removal") }
-        // Revalidate all marker bindings before any filesystem deletion.
-        let directories = try validateOwnership(ledger)
-        for defaults in Set(ledger.entries.compactMap(\.defaults)) {
-            UserDefaults.standard.removePersistentDomain(forName: defaults)
-        }
-        for directory in directories {
-            if FileManager.default.fileExists(atPath: directory.path) { try FileManager.default.removeItem(at: directory) }
-            guard !FileManager.default.fileExists(atPath: directory.path) else { throw failure("Owned fixture directory remains") }
-        }
-    }
-
-    private static func failure(_ message: String) -> NSError {
-        NSError(domain: "NativeGameDeferredCleanup", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
-    }
 }
 
 private struct NativeGameLegacyEntry {

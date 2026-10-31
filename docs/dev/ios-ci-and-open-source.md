@@ -553,3 +553,8 @@ collect 模式下，“首次打开前退出”的用例检查存储已写入本
 全部归属检查通过后才允许 SDK 删除。真实页面、浏览器和身份清理终态仍在原测试进程检查；
 本地未启用 collect 时保留即时清理。新增拒绝用例验证 namespace、目录和 marker 不符时不会调用 SDK。
 新来源的完整 CI 结果须独立核对，不沿用前一轮的清理成功结论。
+
+共享归属定义 `NativeFixtureDeferredCleanup` 位于 `WebProfileRepositoryTests.swift`；
+账号夹具目录统一为 `native-runtime-session-UUID`，与 Game 和 WebProfiles 的目录前缀分别核对。
+合并保留了两类存储均可无 defaults 清理的正向用例，以及存储夹具不得请求删除 Game defaults 的拒绝用例；
+它们同样使用完整的独立 marker 绑定，不接受仅凭目录前缀声明归属。

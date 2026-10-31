@@ -432,7 +432,7 @@ final class NativeRuntimeSessionTests: XCTestCase {
 
     @MainActor
     private final class Fixture {
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("native-runtime-session-" + UUID().uuidString)
         let root = UIViewController()
         let runtime: NativeWebRuntime
         let accounts: AccountStore

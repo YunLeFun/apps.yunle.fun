@@ -2466,15 +2466,20 @@ private final class NativeGameRuntimeFixture {
         // released. Restore its entry orientation before a later 320pt portrait
         // rendering fixture can inherit landscape notch insets.
         if let scene = window.windowScene, previousOrientation != .unknown {
-            let mask = UIInterfaceOrientationMask(rawValue: 1 << previousOrientation.rawValue)
-            var geometryError: Error?
-            previous?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
-            scene.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { geometryError = $0 }
-            do {
-                try await wait(seconds: 5) { geometryError != nil || scene.interfaceOrientation == self.previousOrientation }
-                if let geometryError { throw geometryError }
-                XCTAssertEqual(scene.interfaceOrientation, previousOrientation)
-            } catch { XCTFail("Fixture scene orientation restoration failed: \(error)") }
+            // iPad windowing can reject programmatic rotations even when the
+            // scene never rotated. Its already-restored orientation still gets
+            // the same postcondition assertion as a rotated iPhone scene.
+            if scene.interfaceOrientation != previousOrientation {
+                let mask = UIInterfaceOrientationMask(rawValue: 1 << previousOrientation.rawValue)
+                var geometryError: Error?
+                previous?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { geometryError = $0 }
+                do {
+                    try await wait(seconds: 5) { geometryError != nil || scene.interfaceOrientation == self.previousOrientation }
+                    if let geometryError { throw geometryError }
+                } catch { XCTFail("Fixture scene orientation restoration failed: \(error)") }
+            }
+            XCTAssertEqual(scene.interfaceOrientation, previousOrientation)
         }
         await Task.yield()
         observe("after-terminal-release")

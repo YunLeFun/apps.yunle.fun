@@ -6,6 +6,26 @@ import XCTest
 
 @MainActor
 final class HomeLayoutVisualTests: XCTestCase {
+    func testSharedConnectivityFailuresUseOneCompactSentence() {
+        let catalog = "无法连接工坊，请检查网络后重试。"
+        let sync = "网络暂时无法连接，更改已保存在此设备。"
+        XCTAssertTrue(HomeStatusBanner.isConnectivityFailure(catalog))
+        XCTAssertTrue(HomeStatusBanner.isConnectivityFailure(sync))
+        XCTAssertTrue(HomeStatusBanner.isConnectivityFailure("云同步暂时无法使用，更改已保存在此设备。"))
+        XCTAssertFalse(HomeStatusBanner.isConnectivityFailure("登录状态需要更新，请重新登录后同步。"))
+        XCTAssertFalse(HomeStatusBanner.isConnectivityFailure("访问有些频繁，请稍后再试。"))
+        XCTAssertFalse(HomeStatusBanner.isConnectivityFailure("无法保存云居，请检查设备存储空间后重试。"))
+        let combined = HomeStatusBanner.combinedMessage(catalog: catalog, sync: sync)
+        XCTAssertTrue(combined.contains("应用信息载入失败"))
+        XCTAssertTrue(combined.contains("网络暂时无法连接"))
+        XCTAssertTrue(combined.contains("更改已保存在此设备"))
+        XCTAssertEqual(HomeStatusBanner.catalogMessage(for: catalog), "应用信息载入失败")
+        XCTAssertEqual(HomeStatusBanner.catalogMessage(for: "访问有些频繁，请稍后再试。"), "访问有些频繁，请稍后再试。")
+        let outage = HomeStatusBanner.combinedMessage(catalog: catalog, sync: "云同步暂时无法使用，更改已保存在此设备。")
+        XCTAssertTrue(outage.contains(catalog))
+        XCTAssertTrue(outage.contains("云同步暂时无法使用，更改已保存在此设备。"))
+    }
+
     func testHomeRefreshRecoversApplicationMetadataAfterCatalogFailure() async throws {
         let configuration = HomeConfiguration(installedApps: [.init(appId: "air-conditioner")])
         let remote = RemoteHomeScreen(revision: String(repeating: "a", count: 64), configuration: configuration)

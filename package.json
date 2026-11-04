@@ -2,13 +2,12 @@
   "name": "@yunlefun/apps",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@11.13.1",
+  "packageManager": "pnpm@11.28.10",
   "scripts": {
     "build": "pnpm --dir apps/mobile run build",
     "build:edgeone": "pnpm --dir apps/mobile run build:edgeone",
     "check:edgeone-output": "pnpm --dir apps/mobile run check:edgeone-output",
     "dev": "pnpm --dir apps/mobile run dev",
-    "dev:pwa": "pnpm --dir apps/mobile run dev:pwa",
     "lint": "eslint .",
     "generate": "pnpm --dir apps/mobile run generate",
     "check:server-runtime-deps": "pnpm --dir apps/mobile run check:server-runtime-deps",
@@ -59,9 +58,8 @@
   "devDependencies": {
     "@antfu/eslint-config": "^8.3.0",
     "@cloudbase/node-sdk": "^3.18.7",
-    "@unocss/eslint-config": "^66.11.0",
-    "esbuild": "0.28.2",
-    "eslint": "^10.13.0",
+    "@unocss/eslint-config": "^66.12.0",
+    "eslint": "^10.14.0",
     "eslint-plugin-format": "^2.0.1"
   }
 }

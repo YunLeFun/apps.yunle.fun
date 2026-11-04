@@ -15,8 +15,8 @@ const asar = installerRequire('@electron/asar') as {
   createPackageWithOptions: (source: string, destination: string, options: object) => Promise<void>
   listPackage: (archive: string) => string[]
 }
-const archiveRequire = createRequire(require.resolve('archiver-utils'))
-const modernGlob = archiveRequire('glob') as { glob: (pattern: string, options: object) => Promise<string[]> }
+const tracerRequire = createRequire(require.resolve('@vercel/nft'))
+const modernGlob = tracerRequire('glob') as { glob: (pattern: string, options: object) => Promise<string[]> }
 const { Minimatch } = require('minimatch') as {
   Minimatch: new (pattern: string, options: object) => { set: unknown[] }
 }
@@ -51,7 +51,7 @@ describe('security-updated file matching consumers', () => {
     expect(await readFile(`${archive}.unpacked/nested/note.txt`, 'utf8')).toBe('unpacked content')
   })
 
-  it('preserves the modern archive consumer promise API and bounds pattern preprocessing', async () => {
+  it('preserves the Nitro file tracer promise API and bounds pattern preprocessing', async () => {
     const paths = await modernGlob.glob('**/*.txt', { cwd: join(directory, 'input'), nodir: true, dot: true })
     expect(paths.sort()).toEqual(['.hidden.txt', 'nested/note.txt'])
     const matcher = new Minimatch(Array.from({ length: 8 }).fill('**/../a/b').join('/'), {

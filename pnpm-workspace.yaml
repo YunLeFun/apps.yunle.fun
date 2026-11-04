@@ -1,3 +1,7 @@
+minimumReleaseAgeExclude:
+  - ip-address@10.7.6
+  - node-forge@1.4.3
+  - tencentcloud-sdk-nodejs-tms@4.1.339
 shamefullyHoist: true
 shellEmulator: true
 
@@ -13,7 +17,6 @@ trustPolicyExclude:
   # Forge 8 GitHub publisher uses this legacy Octokit release (2025-02-14).
   # Registry source: octokit/endpoint.js commit 599ff4f76534ea2872f40b41c4ffbbcca987d6a5.
   - '@octokit/endpoint@9.0.6'
-  - rollup@2.80.0
   - chokidar@4.0.3
 packages:
   - apps/*
@@ -23,61 +26,59 @@ overrides:
   # 安全修复与兼容覆盖（2026-10-24，详见 docs/dev/dependency-security.md）
   # 键按字母升序排列（eslint yaml/sort-keys 要求）
   '@babel/core@<=7.29.0': ^7.29.1 # 任意文件读取（workbox / Nuxt 构建链）
-  '@babel/plugin-transform-modules-systemjs': ^7.29.7 # 任意代码生成（workbox > babel）
-  '@capacitor/cli': 8.4.2 # @nuxtjs/ionic 仍声明 Capacitor 7，统一强制到 v8
-  '@capacitor/core': 8.4.2 # 避免工作区安装两份 Capacitor runtime
+  '@babel/plugin-transform-modules-systemjs': ^7.29.8 # 任意代码生成（workbox > babel）
+  '@capacitor/cli': 8.6.0 # @nuxtjs/ionic 仍声明 Capacitor 7，统一强制到 v8
+  '@capacitor/core': 8.6.0 # 避免工作区安装两份 Capacitor runtime
   '@protobufjs/utf8': ^1.1.2 # overlong UTF-8 decoding（飞书 SDK）
   '@vue/compiler-sfc': 3.5.44 # 与 Nuxt 4.6 的 Vue runtime 保持同一 patch 版本
   '@vue/server-renderer': 3.5.44 # 与根 Vue runtime 保持精确一致
   '@xmldom/xmldom': ^0.8.15 # XML 注入 / DoS（@capacitor/cli > plist）
   appdmg@0.6.6>image-size: 2.0.4 # 安全图像解析；appdmg 补丁适配异步 file API
-  axios: ^1.20.0 # SSRF / 原型污染 / MITM（tencentcloud-sdk）
+  axios: ^1.21.0 # SSRF / 原型污染 / MITM（tencentcloud-sdk）
   brace-expansion: ^5.0.12 # DoS（minimatch 链；新告警覆盖所有旧主版本）
   defu: ^6.1.7 # 原型污染（@nuxt/devtools > @nuxt/kit）
-  esbuild@>=0.27.3 <0.28.1: ^0.28.1 # Windows 开发服务器任意文件读取
-  fast-uri: ^3.1.8 # 路径穿越 / host 混淆（unocss webpack > ajv）
-  flatted: ^3.4.2 # 原型污染 / DoS（eslint flat-cache）
+  esbuild@>=0.27.3 <0.28.1: ^0.28.2 # Windows 开发服务器任意文件读取
+  fast-uri: ^3.1.9 # 路径穿越 / host 混淆（unocss webpack > ajv）
+  flatted: ^3.4.4 # 原型污染 / DoS（eslint flat-cache）
   follow-redirects: ^1.16.2 # 跨域 header 泄露（axios）
   form-data@>=3.0.0 <3.0.5: ^3.0.5 # multipart 字段名 CRLF 注入（腾讯云 SDK）
   form-data@>=4.0.0 <4.0.6: ^4.0.6 # multipart 字段名 CRLF 注入（CloudBase / Ionic）
   get-uri@6.0.5>basic-ftp: 6.2.3 # FTP 响应 header 注入；保留 Client API 并限制跨 host 传输
   glob@>=9.0.0 <14.0.2: ^14.0.3 # AbortSignal 取消后立即结束遍历
   h3@>=1.0.0 <1.15.11: ^1.15.11 # 仅修复 H3 1；保留 devframe 所需的 H3 2
-  immutable: ^5.1.8 # trie 溢出 / 哈希碰撞 DoS（sass）
-  ip-address: ^10.7.4 # Address6 XSS（@nuxtjs/ionic > socks）
+  immutable: ^5.1.9 # trie 溢出 / 哈希碰撞 DoS（sass）
+  ip-address: ^10.7.6 # Address6 XSS（@nuxtjs/ionic > socks）
   js-cookie: ^3.0.8 # 原型劫持（@vue/test-utils > js-beautify）
   js-yaml@>=4.0.0 <4.3.2: ^4.3.2 # 原型污染（eslint typegen 链）
-  katex: ^0.19.0 # 防止原型污染绕过 trust（Markdown lint 与数学渲染）
+  katex: ^0.19.1 # 防止原型污染绕过 trust（Markdown lint 与数学渲染）
   launch-editor@<=2.14.0: ^2.14.1 # Windows UNC 凭据泄露（Nuxt DevTools）
   linkify-it: ^5.0.2 # mailto 校验器二次复杂度 DoS（Markdown 渲染链）
   lodash: ^4.18.1 # 代码注入 / 原型污染（@cloudbase/js-sdk，运行时）
   lodash.unset@>=4.0.0 <4.18.0: ^4.18.0 # 原型污染（CloudBase database）
   minimatch@<11.0.1: ^11.0.3 # 修复 globParts 放大；旧 CJS 消费者由兼容补丁保留可调用入口
-  node-forge: ^1.4.1 # 使用上游正式安全版本，移除临时 RSA 补丁
+  node-forge: ^1.4.3 # 使用上游正式安全版本，移除临时 RSA 补丁
   picomatch@<2.3.2: ^2.3.2 # ReDoS（workbox 链）
-  picomatch@>=4.0.0 <4.0.5: ^4.0.5 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
-  postcss: ^8.5.18 # source map 路径穿越 / CSS stringify XSS（vite）
-  protobufjs: ^7.6.5 # critical 任意代码执行（腾讯云 SDK）
-  qs: ^6.16.0 # DoS（@nuxtjs/ionic > superagent）
+  picomatch@>=4.0.0 <4.0.5: ^4.0.7 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
+  postcss: ^8.5.32 # source map 路径穿越 / CSS stringify XSS（vite）
+  protobufjs: ^7.6.6 # critical 任意代码执行（腾讯云 SDK）
+  qs: ^6.17.1 # DoS（@nuxtjs/ionic > superagent）
   semver@<7.0.0: '>=7.7.4'
-  serialize-javascript: ^7.1.3 # RCE / 序列化脚本 XSS（webpack 链）
-  shell-quote: ^1.10.0 # 换行转义绕过 / 二次复杂度 DoS（Nuxt DevTools）
+  serialize-javascript: ^7.1.4 # RCE / 序列化脚本 XSS（webpack 链）
+  shell-quote: ^1.12.0 # 换行转义绕过 / 二次复杂度 DoS（Nuxt DevTools）
   shelljs: ^0.8.5 # 提权（cordova-plugin-wechat）
   simple-git: ^3.36.0 # RCE（@nuxt/devtools）
-  svgo: ^4.0.2 # removeScripts 绕过（Nuxt CSS 压缩链）
-  tar: ^7.5.21 # 路径穿越 / 符号链接 / 栈溢出（@capacitor/cli、node-pre-gyp）
-  tinypool@>=2.0.0 <2.1.2: ^2.1.2 # oxfmt worker options 原型污染 RCE
+  svgo: ^4.1.0 # removeScripts 绕过（Nuxt CSS 压缩链）
+  tar: ^7.5.22 # 路径穿越 / 符号链接 / 栈溢出（@capacitor/cli、node-pre-gyp）
+  tinypool@>=2.0.0 <2.1.2: ^2.2.0 # oxfmt worker options 原型污染 RCE
   tmp: ^0.2.7 # 路径穿越（@nuxtjs/ionic > inquirer）
-  undici@>=7.0.0 <7.29.1: ^7.29.1 # TLS / WebSocket / header 处理（jsdom 测试链）
-  unhead@>=2.0.0 <2.1.15: ^2.1.15 # 修复 Ionic 的旧版依赖，同时保留 Nuxt 4.6 所需的 Unhead 3
+  undici@>=7.0.0 <7.29.1: ^7.30.1 # TLS / WebSocket / header 处理（jsdom 测试链）
+  unhead@>=2.0.0 <2.1.15: ^2.1.17 # 修复 Ionic 的旧版依赖，同时保留 Nuxt 4.6 所需的 Unhead 3
   uuid@<11.1.1: ^11.1.1 # v3/v5/v6 buffer 越界（腾讯云 SDK）
-  valibot: ^1.4.2 # issue path 继承属性导致 flatten 崩溃（Nuxt ESLint）
+  valibot: ^1.5.0 # issue path 继承属性导致 flatten 崩溃（Nuxt ESLint）
   vitepress@1.6.4>vite: 6.4.5 # 稳定版 VitePress 的 plugin-vue 5 支持 Vite 6
   vue: 3.5.44 # 根应用、Nuxt 与 VitePress 统一 Vue patch 版本
-  # 3.0.0-pre1 缺少 provenance；2.5.0 的生产代码与其逐字相同，保留供应链校验。
-  workbox-build@7.4.1>@trickfilm400/rollup-plugin-off-main-thread: 2.5.0
-  ws: ^8.21.0 # 未初始化内存泄露（@cloudbase/js-sdk，运行时）
-  yaml: ^2.9.0 # 栈溢出（@antfu/eslint-config > eslint-plugin-pnpm）
+  ws: ^8.22.1 # 未初始化内存泄露（@cloudbase/js-sdk，运行时）
+  yaml: ^2.9.1 # 栈溢出（@antfu/eslint-config > eslint-plugin-pnpm）
 patchedDependencies:
   '@electron/asar@3.4.1': patches/@electron__asar@3.4.1.patch
   appdmg@0.6.6: patches/appdmg@0.6.6.patch

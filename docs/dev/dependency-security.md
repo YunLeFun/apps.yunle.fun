@@ -1,6 +1,6 @@
 # 依赖安全（pnpm audit）
 
-记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-10-31**。
+记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-11-05**。
 
 ## 现状
 
@@ -25,14 +25,14 @@ pnpm audit --json
 
 ## 修复策略
 
-1. 优先升级直接依赖及其构建工具，并同步提交 `pnpm-lock.yaml`。移动与桌面当前统一为 Nuxt `4.6.3`、
-   Vue `3.5.44` 和 Vite `8.3.5`；根构建工具使用 esbuild `0.28.2`，其余依赖在声明的 semver 范围内刷新。
+1. 优先升级直接依赖及其构建工具，并同步提交 `pnpm-lock.yaml`。移动与桌面当前统一为 Nuxt `4.6.4`、
+   Vue `3.5.44`、Vue Router `5.4.0` 和 Vite `8.3.5`；构建链继续覆盖 esbuild `0.28.2`，不再在根包重复声明。
 2. 上游依赖范围仍保留易受影响版本时，在 [`pnpm-workspace.yaml`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/pnpm-workspace.yaml)
    使用与调用方 API 兼容的安全覆盖。跨主版本覆盖需验证实际调用链，并尽量限定到对应父依赖。
 3. 上游尚无已发布修复版时，回移最小补丁并测试恶意输入与合法行为；只有此类已修复且有证据的告警才按 GHSA 精确忽略。
    上游发布修复版或移除依赖后，删除补丁和对应忽略项。
 
-本仓库使用 pnpm `11.13.1` + workspace，`overrides`、`patchedDependencies` 与安装脚本策略写在
+本仓库使用 pnpm `11.28.10` + workspace，`overrides`、`patchedDependencies` 与安装脚本策略写在
 `pnpm-workspace.yaml`。`allowBuilds` 显式放行 `@parcel/watcher`、`core-js`、`core-js-pure`、
 `electron`、`electron-winstaller`、`esbuild`、`fs-xattr`、`macos-alias`、`protobufjs`、`unrs-resolver`；
 没有通配符，新增带安装脚本的包仍需单独审查。
@@ -45,8 +45,8 @@ pnpm audit --json
 - `glob >=9 <14.0.2` 限定覆盖到 `14.0.3`，修复中止后继续遍历的问题；保留 Electron 所需的 glob 7 callback API。
   `minimatch <11.0.1` 升级到 `11.0.3`，阻断 optimizationLevel 2 的 globParts 放大。
   两个兼容补丁只适配 `glob@7.2.3` 和 `@electron/asar@3.4.1` 对 minimatch 的旧调用：使用命名导出及 Matcher.test，
-  并保留旧正则对象的路径。`glob-security-compatibility.test.ts` 从实际 Electron 和 archiver 依赖解析消费者，
-  验证 callback、同步遍历、隐藏文件、花括号、globstar、ASAR unpack/unpackDir、Promise API 和模式放大上限。
+  并保留旧正则对象的路径。`glob-security-compatibility.test.ts` 从实际 Electron 和 Nitro 文件追踪依赖解析消费者，
+  验证 callback、同步遍历、隐藏文件、花括号、globstar、ASAR unpack/unpackDir、Nitro 文件追踪的 Promise API 和模式放大上限。
 - 文档保留稳定版 VitePress `1.6.4`，只对其 Vite 覆盖到 `6.4.5`，满足 `@vitejs/plugin-vue@5` 的 peer 范围。
   原 Vite 5 的三个 GHSA 忽略项与发布信任例外已移除，无需为修复漏洞迁移到 VitePress 预发布版。
 - `get-uri@6.0.5 > basic-ftp` 限定覆盖到 `6.2.3`，保留 `Client` API；已使用本地 FTP fixture 验证连接和完整下载。
@@ -65,13 +65,31 @@ pnpm audit --json
 
 ## 发布信任策略
 
-保持 `trustPolicy: no-downgrade`。Workbox `7.4.1` 引入的
-`@trickfilm400/rollup-plugin-off-main-thread@3.0.0-pre1` 缺少 provenance，
-本轮在 Workbox 链内限定使用具备 provenance 的 `2.5.0`；已比对两者发布包中的生产代码逐字相同，未新增信任例外。
+保持 `trustPolicy: no-downgrade`。停用的 PWA 模块已移除，连同其 Workbox 构建链、
+`@trickfilm400/rollup-plugin-off-main-thread` 兼容覆盖及 `rollup@2.80.0` 发布信任例外一并清理。
 
 `@capacitor/haptics` 仍固定在 `8.0.1`：`8.0.2` 缺少前一稳定版具备的 provenance。
+`@capacitor/barcode-scanner` 保留 `3.1.0`：`3.1.3` 缺少更早发布版本具备的信任证明，不为补丁升级放宽策略。
 Vue `3.5.40` 的旧 `minimumReleaseAgeExclude` 已移除。当前仍保留的精确发布信任例外为
-`@octokit/endpoint@9.0.6`、`rollup@2.80.0` 与 `chokidar@4.0.3`；没有新增包名通配例外。
+`@octokit/endpoint@9.0.6` 与 `chokidar@4.0.3`；没有新增包名通配例外。
+
+## 2026-11-05：清理停用模块与对齐版本
+
+- Capacitor core、CLI、Android、iOS 统一到 `8.6.0`，同步 StoreKit 开发依赖、原生工程配置及 CocoaPods 锁文件。
+- Playwright 在移动和桌面统一到 `1.64.1`；Tailwind CSS 与 Vite 插件统一到 `4.3.4`。
+- 移除未启用的 `@vite-pwa/nuxt`、旧 PWA 配置与开发脚本，以及未使用的 `magicast@0.3.5` 直接声明。
+- 移除 Nuxt 已管理的 `@nuxt/devtools` 直接声明；删除停用的 Nuxt layouts 和旧底部菜单后移除 `@yunlefun/vue`。
+- 测试明确使用 `happy-dom`，移除 `jsdom` 直接声明。锁文件仍可能保留测试工具解析的可选 peer，不通过全局覆盖改写其要求。
+- `vue-tsc` 在移动和桌面精确固定为 `3.3.13`，规避 [3.3.14 的模板 URL 属性代码生成回归](https://github.com/vuejs/language-tools/issues/6322)。上游发布修复后再升级，不改写页面以绕过类型检查。
+- 保留正在使用的 Ionic、Konsta、UnoCSS 图标、扫码和原生插件，以及现有安全补丁；TypeScript、Pinia、VueUse 和 Electron 的大版本迁移另行验证。
+
+本轮锁文件包条目由 `2040` 减少到 `1813`（减少 `227`，约 `11%`），不等同于应用包体缩小相同比例。
+冻结锁文件安装、lint、两端类型检查、安全审计、742 项移动单元测试、78 项 Nuxt 测试、83 项桌面单元测试、
+5 项 Chromium 登录回归及 3 项 Electron 端到端测试均通过。移动 Web、桌面和文档构建、服务端依赖追踪检查、
+Android Debug 及旧 iOS 模拟器架构编译通过；未发布构建或修改用户的其他未提交代码。
+
+`@stencil/vue-output-target` 的 peer 范围仍声明 Vue Router 4，仓库此前已使用 Router 5；本轮没有放宽 peer 策略，
+保留该上游范围提示，并以两端类型检查和导航相关测试验证 Router `5.4.0`。
 
 ## 已补丁的精确忽略项（1 high、1 low）
 

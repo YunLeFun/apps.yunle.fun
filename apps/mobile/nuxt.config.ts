@@ -42,10 +42,8 @@ export default defineNuxtConfig({
     '@unocss/nuxt',
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
-    // '@vite-pwa/nuxt',
     '@nuxt/eslint',
     '@nuxt/icon',
-    '@yunlefun/vue/nuxt',
     'nuxt-auth-utils',
     // '@prisma/nuxt',
     '@nuxt/test-utils/module',
@@ -165,8 +163,6 @@ export default defineNuxtConfig({
       ],
     },
   },
-
-  // pwa,
 
   // prisma: {
   //   generateClient: false,

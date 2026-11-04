@@ -9,6 +9,11 @@ const nuxtProject = await defineVitestProject({
     name: 'nuxt',
     include: ['test/nuxt/*.{test,spec}.ts'],
     environment: 'nuxt',
+    environmentOptions: {
+      nuxt: {
+        domEnvironment: 'happy-dom',
+      },
+    },
     // Each worker boots Nuxt and preloads route components. Limit concurrent
     // cold starts so that resource contention does not exhaust setup hooks.
     maxWorkers: 2,

@@ -1,6 +1,6 @@
 ---
 name: ios-deploy
-description: 打包、部署或发布云乐坊原生 iOS 客户端到手机、模拟器与 TestFlight 内部测试。用于“云乐坊打包内测”“更新云乐坊 TestFlight”“装到手机”；旧 Capacitor 客户端仅在明确要求时使用。
+description: 打包、部署或发布云乐坊原生 iOS 客户端到手机、模拟器与 TestFlight 内部测试。用于“云乐坊打包内测”“更新云乐坊 TestFlight”“装到手机”；旧 Capacitor iOS 客户端已退役。
 ---
 
 # 云乐坊 iOS 部署
@@ -22,6 +22,9 @@ description: 打包、部署或发布云乐坊原生 iOS 客户端到手机、�
 
 Debug 的独立标识不迁移正式版数据。用户要求清理重复 App 时，逐个确认标识与数据，先备份，核验最终版本后才卸载重复开发版。正式版同标识更新通过 TestFlight，不先卸载。
 
-## 旧 Capacitor 客户端
+## 已退役的旧客户端
 
-只有用户明确要求维护 `apps/mobile/ios` 时，读取 `docs/dev/testflight-capacitor.md` 和对应 mobile 脚本。此时 `pnpm build`、`pnpm sync`、`pnpm build:ios` 才是该旧客户端的构建路径；不能把它作为原生版的前置步骤。Capacitor CLI 与 `devicectl` 的设备 ID 不通用。
+2026-11-05 用户确认旧 Capacitor iOS 客户端未分发，旧工程、StoreKit 桥接及构建 / 版本同步脚本已移除。
+`pnpm sync` 现在仅同步 Android；不要为原生 iOS 运行 Nuxt 构建、Capacitor 或 CocoaPods。
+历史代码见 Git 提交 `7a3a0ef` 及 `docs/dev/testflight-capacitor.md` 的退役说明，不将旧命令作为当前入口。
+共享原生代码位于 `apps/ios/YunleFun/WebRuntime`，macOS 直接引用这里的授权协议。

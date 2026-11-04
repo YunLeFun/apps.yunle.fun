@@ -52,11 +52,6 @@ targets:
     sources:
       - path: YunleFun
       - path: SharedFeedback
-      - path: ../mobile/ios/App/App/WebViewController.swift
-      - path: ../mobile/ios/App/App/HostAuthorizationProtocol.swift
-      - path: ../mobile/ios/App/App/InAppWebViewPlugin.swift
-      - path: ../mobile/ios/App/App/Assets.xcassets
-        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: fun.yunle.apps

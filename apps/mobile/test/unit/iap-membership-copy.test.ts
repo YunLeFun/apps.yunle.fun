@@ -6,7 +6,7 @@ import { PRODUCTS } from '../../scripts/create-iap-products.mjs'
 
 const ROOT = resolve(import.meta.dirname, '../..')
 const storeKit = JSON.parse(
-  readFileSync(resolve(ROOT, 'ios/App/Products.storekit'), 'utf8'),
+  readFileSync(resolve(ROOT, '../ios/StoreKitValidation/Fixtures/Products.storekit'), 'utf8'),
 )
 
 describe('app store 非续订会员商品文案', () => {

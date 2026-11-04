@@ -1,8 +1,6 @@
 import type { HostAuthorizationEvent } from '~/host-runtime'
+import { hostApplication, hostEnvironment, HostRuntime } from '~/host-runtime'
 
-import { App } from '@capacitor/app'
-import { Capacitor } from '@capacitor/core'
-import { HostRuntime } from '~/host-runtime'
 import {
   anonymizeTelemetryIdentifier,
   reportClientEvent,
@@ -36,12 +34,12 @@ function readHostname(origin: string): string {
  * access token 或 refresh token。
  */
 export default defineNuxtPlugin(() => {
-  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('HostRuntime'))
+  if (!hostEnvironment.isNative() || !hostEnvironment.hasRuntime())
     return
 
   let nativeAppVersion = ''
   let nativeBuild = ''
-  void App.getInfo().then((info) => {
+  void hostApplication.getInfo().then((info) => {
     nativeAppVersion = info.version
     nativeBuild = info.build
   }).catch(() => undefined)

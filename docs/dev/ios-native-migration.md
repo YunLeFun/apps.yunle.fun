@@ -1,5 +1,12 @@
 # iOS 原生改造 Goal
 
+## 2026-11-05 旧主壳退役
+
+用户确认旧 Capacitor iOS 客户端未分发，按未发布客户端移除旧工程、Web IAP 和 StoreKit 桥接。
+共享 WebView、授权协议与品牌资源已迁入 `apps/ios/YunleFun/WebRuntime` 和 `Resources/BrandAssets.xcassets`，macOS 改从原生 iOS 目录引用公共协议。
+旧壳正式覆盖升级不再作为本次退役前置；历史未通过项保留原结果。原生版本自身的数据迁移、支付 Sandbox 和其他长期目标继续按实际证据验收，未在此声明全部完成。
+当前代码与退役范围见[迁移记录](./capacitor-retirement.md)。
+
 ## 2026-10-26 上传前候选进度
 
 - [x] 历史提交人列表修复、严格新保存回执及 iOS 原生列表 / 编辑取消 / 预览验证。
@@ -63,19 +70,19 @@ Issue #46 原先记录“仅规划、首发平台待定”。本计划依据本�
 
 ## 当前实现与复用边界
 
-| 已核实的实现                                                                                           | 迁移处理                                                             |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `apps/mobile`：Nuxt 4 + Ionic / Konsta + Capacitor 8，兼顾 Web / iOS / Android                         | 保留现有 Web 与兼容入口，新增独立 iOS 客户端；分阶段切换             |
-| `apps/mobile/ios/App/App/AppViewController.swift`：Capacitor 主壳，详情等第一方页面仍加载 bundled Nuxt | 最终以原生路由、详情和资料页替代                                     |
-| `WebViewController.swift`：UIKit + WKWebView、菜单、JSAPI、系统认证回跳                                | 提取可复用的原生运行时，保留既有协议行为                             |
-| `InAppWebViewPlugin.swift`：授权面板、会话池、LRU、内存压力回收，同时依赖 CAPPlugin                    | 分离 Swift 服务与 Capacitor 适配层，让 SwiftUI 可直接调用            |
-| `packages/capacitor-storekit`：StoreKit 2；`useIap.ts`：服务端验单后 finish、未完成交易补单            | 提取原生 StoreKit 服务，保留商品标识、验单和权益幂等规则             |
-| `packages/app-core`：应用模型、目录转换和静态快照                                                      | 共享协议、样例和规则；Swift 使用 Codable 模型，不强行运行 TypeScript |
-| CloudBase JS SDK：登录、云居同步、推荐 / 排行、云函数调用                                              | 先梳理受支持的认证与 HTTP 接口，补齐缺失的服务端接口                 |
-| `apps/mobile/server/api`：公开目录、个人应用、工坊、评论、举报、SSO 等                                 | 优先复用；核实鉴权、错误、分页与权限契约后接入 Swift                 |
-| `account-api`、`iap-order` 等已部署云函数位于本仓库之外                                                | 列为外部接口依赖，先联调；本目标不自动包含重写外部账务服务           |
-| iOS 最低版本为 16.0，Bundle ID 为 `fun.yunle.apps`                                                     | 默认保留兼容和应用身份；提高最低版本需依据用户分布与维护成本记录决策 |
-| 本机可用 Xcode 27.0                                                                                    | 仅证明工具存在，不代表已成功构建或完成设备测试                       |
+| 已核实的实现                                                                  | 迁移处理                                                             |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `apps/mobile`：Nuxt 4 + Ionic / Konsta + Capacitor 8，现用于 Web / Android    | 保留现有 Web 与兼容入口，新增独立 iOS 客户端；分阶段切换             |
+| 旧 `AppViewController.swift`：未分发的 Capacitor 主壳已删除                   | 最终以原生路由、详情和资料页替代                                     |
+| `WebViewController.swift`：UIKit + WKWebView、菜单、JSAPI、系统认证回跳       | 提取可复用的原生运行时，保留既有协议行为                             |
+| `WebRuntime/HostWebViewSupport.swift`：共享原生支持代码，CAPPlugin 部分已删除 | 分离 Swift 服务与 Capacitor 适配层，让 SwiftUI 可直接调用            |
+| 旧 StoreKit 插件及 Web `useIap.ts` 已移除；原生使用 `NativeStoreKit`          | 提取原生 StoreKit 服务，保留商品标识、验单和权益幂等规则             |
+| `packages/app-core`：应用模型、目录转换和静态快照                             | 共享协议、样例和规则；Swift 使用 Codable 模型，不强行运行 TypeScript |
+| CloudBase JS SDK：登录、云居同步、推荐 / 排行、云函数调用                     | 先梳理受支持的认证与 HTTP 接口，补齐缺失的服务端接口                 |
+| `apps/mobile/server/api`：公开目录、个人应用、工坊、评论、举报、SSO 等        | 优先复用；核实鉴权、错误、分页与权限契约后接入 Swift                 |
+| `account-api`、`iap-order` 等已部署云函数位于本仓库之外                       | 列为外部接口依赖，先联调；本目标不自动包含重写外部账务服务           |
+| iOS 最低版本为 16.0，Bundle ID 为 `fun.yunle.apps`                            | 默认保留兼容和应用身份；提高最低版本需依据用户分布与维护成本记录决策 |
+| 本机可用 Xcode 27.0                                                           | 仅证明工具存在，不代表已成功构建或完成设备测试                       |
 
 旧发布路线图中的历史完成状态不作为本次原生迁移的验收证据；以当前代码、服务和实测为准。
 

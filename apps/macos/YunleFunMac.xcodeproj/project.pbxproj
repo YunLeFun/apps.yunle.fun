@@ -18,7 +18,6 @@
 		3381D2165D470304FBCB3970 /* PublicIconLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D90A8DAF3DA8C1991365F0 /* PublicIconLiveTests.swift */; };
 		36B675097E7FCD9504E931D7 /* MacAuthorizationUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A0915B4F5079D099354C3 /* MacAuthorizationUI.swift */; };
 		373FBE24C32A2DCE4168C9FB /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D93DB081399750E4BF4467B /* AccountStore.swift */; };
-		39A8464FFCE35DE0255A7836 /* HostAuthorizationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 766B4534512A7199251CE3BD /* HostAuthorizationProtocol.swift */; };
 		405623708CBAAAD5DA4608A5 /* MacAuthorizationPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55601DC474613B7E5BD40146 /* MacAuthorizationPage.swift */; };
 		42771750036EAFF3AFDC55A3 /* MacWebRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEBEFE6FF5213CF731121CD /* MacWebRuntime.swift */; };
 		48DC84202F38B042ED11D92F /* CloudbaseAuthServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E1EB7837FF1F440D7D50C0 /* CloudbaseAuthServiceTests.swift */; };
@@ -50,6 +49,7 @@
 		ABA37FDA36933BF6C6BB408D /* AccountInteractiveSignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CE2FCCB36E83BB5C589DF48 /* AccountInteractiveSignInTests.swift */; };
 		AE1DA649DBDD60F82E601886 /* CloudApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66260116876CDCB046B3C403 /* CloudApplication.swift */; };
 		B5BBA1B8B6B2EC252ECDA93D /* SwiftDraw-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9126AA1F7A8572D6105532A8 /* SwiftDraw-LICENSE.txt */; };
+		C24F510EB94F252885291FEA /* HostAuthorizationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3360C36C18A26E3965486C /* HostAuthorizationProtocol.swift */; };
 		C251363E4D36A74EEF4B4B5E /* SVGIconDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880E4003253930BA6D654741 /* SVGIconDecoder.swift */; };
 		C3563F0C1A2148F9B2B797F3 /* DeveloperProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F1C480B270674BD54607D3 /* DeveloperProfile.swift */; };
 		C393FBC166C596C21BF7AA0F /* WebStoragePageFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9649CB243A814D70A3E3C297 /* WebStoragePageFixture.swift */; };
@@ -107,6 +107,7 @@
 		409F1C79091234D58DFE512D /* MacManagedSSOLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacManagedSSOLiveTests.swift; sourceTree = "<group>"; };
 		4456D6932F65BD57D6609611 /* ApplicationIconSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationIconSource.swift; sourceTree = "<group>"; };
 		454C28D0EE144DC99DC02B8E /* YunleFunMacLiveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YunleFunMacLiveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A3360C36C18A26E3965486C /* HostAuthorizationProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationProtocol.swift; sourceTree = "<group>"; };
 		4D93DB081399750E4BF4467B /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
 		4FE80C1659390F7A51A8850E /* HostAuthorizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationService.swift; sourceTree = "<group>"; };
 		537119F565988AF433212F69 /* AccountSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSignIn.swift; sourceTree = "<group>"; };
@@ -120,7 +121,6 @@
 		73EA1C01471D2D74ADB4947F /* NativeAuthorizationBroker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthorizationBroker.swift; sourceTree = "<group>"; };
 		74F36B0B308D1EADB2603105 /* MacAuthorizationPageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacAuthorizationPageTests.swift; sourceTree = "<group>"; };
 		764357F14DB1FBC0BA6672D2 /* CatalogIconAssets.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogIconAssets.generated.swift; sourceTree = "<group>"; };
-		766B4534512A7199251CE3BD /* HostAuthorizationProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationProtocol.swift; sourceTree = "<group>"; };
 		78F89A44CFC09C69DDEE0325 /* FixtureHost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FixtureHost.entitlements; sourceTree = "<group>"; };
 		821D6F0397507F4F5CA8757D /* MacCatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCatalogView.swift; sourceTree = "<group>"; };
 		880E4003253930BA6D654741 /* SVGIconDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGIconDecoder.swift; sourceTree = "<group>"; };
@@ -169,6 +169,7 @@
 		08C297054A60B62F1438989D /* WebRuntime */ = {
 			isa = PBXGroup;
 			children = (
+				4A3360C36C18A26E3965486C /* HostAuthorizationProtocol.swift */,
 				73EA1C01471D2D74ADB4947F /* NativeAuthorizationBroker.swift */,
 				AB5367D874EE41E2859E40F5 /* WebProfileRepository.swift */,
 			);
@@ -231,7 +232,6 @@
 			children = (
 				17482610225560FF8F44A8E9 /* desktop */,
 				888058C89E1F93EB6D9EA527 /* ios */,
-				5C3DCC24B3F8091D33B3CD1A /* mobile */,
 			);
 			name = apps;
 			path = ..;
@@ -287,14 +287,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		5C3DCC24B3F8091D33B3CD1A /* mobile */ = {
-			isa = PBXGroup;
-			children = (
-				786D5D732837CAA37A821F00 /* ios */,
-			);
-			path = mobile;
-			sourceTree = "<group>";
-		};
 		5F4C953C3C2232C1DB68450F /* build */ = {
 			isa = PBXGroup;
 			children = (
@@ -332,14 +324,6 @@
 			path = DesignSystem;
 			sourceTree = "<group>";
 		};
-		6C8A65DE8F026EA4BA12DE64 /* App */ = {
-			isa = PBXGroup;
-			children = (
-				E9002479C55984D30E4ADCB9 /* App */,
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
 		74B3D007FCC0801032B0053D /* WebRuntime */ = {
 			isa = PBXGroup;
 			children = (
@@ -361,14 +345,6 @@
 				68C0F21E031B416011818AF7 /* ScanResult.swift */,
 			);
 			path = Models;
-			sourceTree = "<group>";
-		};
-		786D5D732837CAA37A821F00 /* ios */ = {
-			isa = PBXGroup;
-			children = (
-				6C8A65DE8F026EA4BA12DE64 /* App */,
-			);
-			path = ios;
 			sourceTree = "<group>";
 		};
 		835CFA5311BA97E6F46E0110 /* YunleFunMac */ = {
@@ -444,14 +420,6 @@
 				A79CB53CC9A823D7B816FC7A /* YunleFunMacTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		E9002479C55984D30E4ADCB9 /* App */ = {
-			isa = PBXGroup;
-			children = (
-				766B4534512A7199251CE3BD /* HostAuthorizationProtocol.swift */,
-			);
-			path = App;
 			sourceTree = "<group>";
 		};
 		F5E9D80B35941F3069C390C2 /* Catalog */ = {
@@ -630,7 +598,7 @@
 				AE1DA649DBDD60F82E601886 /* CloudApplication.swift in Sources */,
 				E7D9D0779F5F9977A53DF3C2 /* CloudbaseAuthService.swift in Sources */,
 				C3563F0C1A2148F9B2B797F3 /* DeveloperProfile.swift in Sources */,
-				39A8464FFCE35DE0255A7836 /* HostAuthorizationProtocol.swift in Sources */,
+				C24F510EB94F252885291FEA /* HostAuthorizationProtocol.swift in Sources */,
 				25C62C7B1FB9B8FDCB5A8EC7 /* HostAuthorizationService.swift in Sources */,
 				4CBBF12A22263AD00DF320BC /* KeychainAccountVault.swift in Sources */,
 				CF6EF5E35A32D55EA9C48C84 /* MacAccountView.swift in Sources */,

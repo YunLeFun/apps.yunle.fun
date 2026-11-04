@@ -61,3 +61,6 @@ apps/desktop/.media/
 
 # Production collection exports belong in private storage, outside Git.
 scripts/cloudbase-rules/*.backup-*.json
+
+# Local archives/exports from the retired, unreleased Capacitor iOS shell.
+/apps/mobile/ios/

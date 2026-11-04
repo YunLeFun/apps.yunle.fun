@@ -6,7 +6,7 @@ import process from 'node:process'
 
 // Compile and exercise the shared Foundation/Security protocol used by iOS and macOS.
 // This verifies URL/context behavior without booting a simulator or launching a login.
-const source = readFileSync(new URL('../ios/App/App/HostAuthorizationProtocol.swift', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../ios/YunleFun/WebRuntime/HostAuthorizationProtocol.swift', import.meta.url), 'utf8')
 const directory = mkdtempSync(join(tmpdir(), 'ylf-sso-swift-'))
 const path = join(directory, 'main.swift')
 const assertions = String.raw`

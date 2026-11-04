@@ -1069,9 +1069,8 @@ class WebViewController: UIViewController {
         presentAppDetail(scrollToReviews: false)
     }
 
-    /// 打开 bundled 站内应用详情页（含评分评价）为模态 sheet，盖在当前应用之上；
-    /// 下滑 dismiss 即回到应用。sheet 使用独立 Capacitor Bridge，不改动底层主壳路由，
-    /// 也不进插件层云应用会话池，dismiss 即释放。
+    /// Present native details without navigating the host or adding a cloud-app session.
+    /// Dismissing releases the page returned by the native factory.
     private func presentAppDetail(scrollToReviews: Bool) {
         guard showsApplicationDetails, let info = appInfo else { return }
         let key = info.slug.isEmpty ? info.id : info.slug
@@ -1083,13 +1082,6 @@ class WebViewController: UIViewController {
         if let factory = localPageFactory {
             detailVC = factory("/app/\(encodedKey)", "app-detail-sheet", scrollToReviews ? "reviews" : nil)
         } else {
-#if canImport(Capacitor)
-            let detailVC = AppViewController()
-            detailVC.configureLocalDetail(
-                routePath: "/app/\(encodedKey)",
-                target: scrollToReviews ? "reviews" : nil)
-            presentLocalPage(detailVC)
-#endif
             return
         }
         presentLocalPage(detailVC)
@@ -1116,11 +1108,6 @@ class WebViewController: UIViewController {
         if let factory = localPageFactory {
             profileVC = factory("/developer/\(encodedLogin)", "developer-sheet", nil)
         } else {
-#if canImport(Capacitor)
-            let profileVC = AppViewController()
-            profileVC.configureLocalPage(routePath: "/developer/\(encodedLogin)", kind: "developer-sheet")
-            presentLocalPage(profileVC)
-#endif
             return
         }
         profileVC.modalPresentationStyle = .pageSheet
@@ -1244,7 +1231,7 @@ class WebViewController: UIViewController {
             .removeScriptMessageHandler(forName: "ylf", contentWorld: .page)
     }
 
-    /// 由 Capacitor 宿主页回传一次性授权码；requestId 随机且仅在当前 WebView 生命周期有效。
+    /// Resolve the one-time authorization code only within this WebView lifetime.
     @discardableResult
     func resolveAuthorization(
         requestId: String,

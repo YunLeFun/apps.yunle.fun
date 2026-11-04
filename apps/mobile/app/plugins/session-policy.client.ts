@@ -1,9 +1,8 @@
-import { Capacitor } from '@capacitor/core'
-import { HostRuntime } from '~/host-runtime'
+import { hostEnvironment, HostRuntime } from '~/host-runtime'
 
 /** Keeps the native WebView pool aligned with membership and the persisted preference. */
 export default defineNuxtPlugin(() => {
-  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('HostRuntime'))
+  if (!hostEnvironment.isNative() || !hostEnvironment.hasRuntime())
     return
 
   const settingsStore = useSettingsStore()

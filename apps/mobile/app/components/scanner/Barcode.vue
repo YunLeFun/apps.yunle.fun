@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { Capacitor } from '@capacitor/core'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { IonButton, IonIcon, IonSpinner } from '@ionic/vue'
 import { closeOutline, flashlightOutline, imagesOutline, refreshOutline, videocamOffOutline } from 'ionicons/icons'
+import { hostEnvironment, hostHaptics, HostImpactStyle } from '~/host-runtime'
 
 const props = defineProps<{
   isVisible: boolean
@@ -40,7 +39,7 @@ let resultEmitted = false
 
 /** 启动相机 + 二维码检测，失败时进入错误状态（而非静默退出页面） */
 async function startCamera() {
-  if (Capacitor.isNativePlatform()) {
+  if (hostEnvironment.isNative()) {
     await startNativeCamera()
     return
   }
@@ -178,7 +177,7 @@ function handleDetected(content: string) {
   if (resultEmitted)
     return
   resultEmitted = true
-  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
   stopCamera()
   emit('result', content)
 }

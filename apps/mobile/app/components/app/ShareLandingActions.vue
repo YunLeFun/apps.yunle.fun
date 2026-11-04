@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Capacitor } from '@capacitor/core'
+import { hostEnvironment } from '~/host-runtime'
 
 const props = defineProps<{ appKey: string, websiteUrl?: string }>()
 const emit = defineEmits<{ online: [] }>()
 const isBrowser = shallowRef(false)
 onMounted(() => {
-  isBrowser.value = !Capacitor.isNativePlatform()
+  isBrowser.value = !hostEnvironment.isNative()
 })
 
 // A tap is intentional; never probe installation or redirect on a timer.

@@ -6,16 +6,16 @@
 [![Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/workflows/desktop.yml/badge.svg)](https://github.com/YunLeFun/apps.yunle.fun/actions/workflows/desktop.yml)
 [![License](https://img.shields.io/github/license/YunLeFun/apps.yunle.fun)](./LICENSE)
 
-本仓库使用 pnpm workspace。现有 Web、iOS 和 Android 客户端位于 `apps/mobile/`，继续提供 `apps.yunle.fun` 浏览器版本；原生 iOS 位于 `apps/ios/`，原生 macOS 位于 `apps/macos/`，Electron 桌面端位于 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
+本仓库使用 pnpm workspace。现有 Web 和 Android 客户端位于 `apps/mobile/`，继续提供 `apps.yunle.fun` 浏览器版本；原生 iOS 位于 `apps/ios/`，原生 macOS 位于 `apps/macos/`，Electron 桌面端位于 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
 
-Capacitor 当前仍用于 Android 主壳和旧 iOS 兼容工程；新的原生 iOS、原生 macOS 和 Electron 不依赖它。退役顺序与剩余调用见 [Capacitor 使用边界与退役准备](./docs/dev/capacitor-retirement.md)。
+旧 iOS 兼容工程已按未分发客户端退役；Capacitor 当前仅用于 Android 主壳。共享原生代码已迁入 `apps/ios`，原生 iOS、原生 macOS 和 Electron 不依赖 Capacitor。剩余调用与后续迁移见 [Capacitor 使用边界与退役准备](./docs/dev/capacitor-retirement.md)。
 
 ## ✨ 特性
 
 - 🏠 **云居（Home）** —— iOS 风格桌面网格，长按编辑、拖拽排序、毛玻璃 Dock
 - 🔍 **寻乐（Discovery）** —— 每日编辑推荐 + 每周热门排行
 - 🏗️ **工坊（Workshop）** —— 分类浏览、搜索、安装云应用；开发者可发布作品
-- 📱 **跨平台** —— Web + iOS / Android 原生（Capacitor），共用移动客户端
+- 📱 **跨平台** —— Web + Android（Capacitor）+ 原生 iOS / macOS + Electron
 - 🔐 **多种登录** —— 微信、手机号 OTP、邮箱、密码、GitHub（仅 Web）
 - ☁️ **云端同步** —— 桌面配置实时同步多设备
 
@@ -56,11 +56,8 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 | `pnpm test:watch`            | 单元测试 watch 模式                              |
 | `pnpm test:coverage`         | 测试覆盖率报告                                   |
 | `pnpm test:e2e`              | Playwright E2E 测试                              |
-| `pnpm dev:ios`               | Capacitor iOS 热重载                             |
-| `pnpm run:ios`               | 构建并运行 iOS 应用                              |
-| `pnpm sync`                  | 同步 web → ios/android                           |
+| `pnpm sync`                  | 同步 web → Android                               |
 | `pnpm build:android:release` | 构建并验签 Android 发布包                        |
-| `pnpm build:ios`             | 同步移动版本号并创建 iOS archive                 |
 | `pnpm release`               | 更新移动版本；发布前核对独立移动 Tag，见迁移文档 |
 
 ### macOS 原生开发
@@ -101,7 +98,7 @@ pnpm verify:desktop-launch    # 实际启动当前平台原生包
 | UI              | Ionic Vue（ios 模式） + Konsta UI                     |
 | 样式            | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS              |
 | 状态            | Pinia                                                 |
-| 移动端          | Capacitor 8（iOS / Android）                          |
+| 移动端          | Capacitor 8（仅 Android）                             |
 | 原生 macOS      | SwiftUI + AppKit + WKWebView（复用 iOS Swift 业务层） |
 | Electron 桌面端 | Electron 44.7.0 + Electron Forge 8.0.1                |
 | 后端            | Nitro Server + 腾讯 CloudBase                         |
@@ -117,7 +114,6 @@ apps/
 ├── mobile/             # Web + Ionic + Capacitor
 │   ├── app/            # Nuxt 4 页面、组件、composables、stores、plugins
 │   ├── server/         # 云端 Nitro API
-│   ├── ios/            # Capacitor iOS 工程
 │   ├── android/        # Capacitor Android 工程
 │   ├── scripts/        # 移动构建、版本同步与发布脚本
 │   ├── test/           # Vitest + Playwright

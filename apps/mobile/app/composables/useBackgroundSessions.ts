@@ -1,7 +1,6 @@
 import type { HostSession } from '~/host-runtime'
-import { Capacitor } from '@capacitor/core'
 import { openInAppBrowser } from '~/composables/useBrowser'
-import { HostRuntime } from '~/host-runtime'
+import { hostEnvironment, HostRuntime } from '~/host-runtime'
 
 /**
  * useBackgroundSessions - 后台保活会话（压后台的应用网站）
@@ -22,7 +21,7 @@ let initialized = false
 
 /** 是否运行在平台自定义容器（沉浸/标题栏）模式。 */
 function isCustomContainer(): boolean {
-  if (!import.meta.client || !Capacitor.isNativePlatform())
+  if (!import.meta.client || !hostEnvironment.isNative())
     return false
   try {
     return useSettingsStore().inAppBrowserMode !== 'system'
@@ -33,7 +32,7 @@ function isCustomContainer(): boolean {
 }
 
 async function ensureInit() {
-  if (initialized || !import.meta.client || !Capacitor.isNativePlatform())
+  if (initialized || !import.meta.client || !hostEnvironment.isNative())
     return
   initialized = true
   try {

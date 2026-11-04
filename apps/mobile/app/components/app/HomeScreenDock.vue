@@ -7,9 +7,9 @@
 import type { YlfAppInfo } from '@yunlefun/types'
 import type { UseDraggableReturn } from 'vue-draggable-plus'
 import type { InstalledApp } from '~/types/homeScreen'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { kGlass } from 'konsta/vue'
 import { VueDraggable } from 'vue-draggable-plus'
+import { hostHaptics, HostImpactStyle } from '~/host-runtime'
 
 interface Props {
   /** Dock 应用列表 */
@@ -78,11 +78,11 @@ function onDragStart() {
   if (!props.editMode) {
     homeScreenStore.enterEditMode()
   }
-  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
 }
 
 function onDragEnd() {
-  Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
+  hostHaptics.impact({ style: HostImpactStyle.Light }).catch(() => {})
   emit('update:apps', dockApps.value)
 }
 
@@ -113,7 +113,7 @@ function onPointerDown(e: PointerEvent, app: InstalledApp) {
   clearLongPressTimer()
   longPressTimer = setTimeout(() => {
     longPressTimer = null
-    Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+    hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
     const iconRect = longPressElement!.getBoundingClientRect()
     emit('longPress', longPressApp!, { x: startX, y: startY }, iconRect)
   }, LONG_PRESS_DELAY)

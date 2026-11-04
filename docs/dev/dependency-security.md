@@ -2,6 +2,8 @@
 
 记录依赖漏洞的修复策略与剩余风险。最近一次审计：**2026-11-05**。
 
+同日后续已按未分发客户端退役旧 Capacitor iOS 主壳，移除 `@capacitor/ios` 与本地 StoreKit 插件。Capacitor 8.6 现仅用于 Android；下方同步旧 iOS 锁文件的记录保留为该阶段历史验收，当前范围见[退役记录](./capacitor-retirement.md)。
+
 ## 现状
 
 本轮修复 Web CI 新报告的 19 项未处理公告，优先升级到已发布的安全版本。没有新增 GHSA 忽略项或降低审计等级。

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { AppIconStyle, InAppBrowserMode, ThemeMode } from '~/stores/settings'
-import { Capacitor } from '@capacitor/core'
 import {
   IonAlert,
 } from '@ionic/vue'
@@ -29,6 +28,7 @@ import {
   kSegmentedButton,
   kToggle,
 } from 'konsta/vue'
+import { hostEnvironment } from '~/host-runtime'
 import { APP_ICON_STYLE_OPTIONS, PREVIEW_WINDOW_SIZE_OPTIONS, SESSION_LIMIT_OPTIONS } from '~/stores/settings'
 
 const settingsStore = useSettingsStore()
@@ -49,7 +49,7 @@ function selectAppIconStyle(value: AppIconStyle) {
   settingsStore.setAppIconStyle(value)
 }
 
-const isIOS = import.meta.client && Capacitor.getPlatform() === 'ios'
+const isIOS = import.meta.client && hostEnvironment.platform() === 'ios'
 
 const selectedBrowserMode = ref<InAppBrowserMode>(settingsStore.inAppBrowserMode)
 

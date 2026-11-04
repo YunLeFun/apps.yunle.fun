@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ReviewRecord } from '~/types/review'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   IonButton,
   IonButtons,
@@ -17,6 +16,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { star, starOutline } from 'ionicons/icons'
+import { hostHaptics, HostImpactStyle } from '~/host-runtime'
 
 const props = defineProps<{
   isOpen: boolean
@@ -60,7 +60,7 @@ const canSubmit = computed(() => rating.value >= 1 && rating.value <= 5 && conte
 
 function setRating(value: number) {
   rating.value = value
-  Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
+  hostHaptics.impact({ style: HostImpactStyle.Light }).catch(() => {})
 }
 
 function submit() {

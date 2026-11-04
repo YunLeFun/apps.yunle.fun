@@ -196,9 +196,6 @@ importers:
       '@capacitor/haptics':
         specifier: 8.0.1
         version: 8.0.1(@capacitor/core@8.6.0)
-      '@capacitor/ios':
-        specifier: 8.6.0
-        version: 8.6.0(@capacitor/core@8.6.0)
       '@capacitor/keyboard':
         specifier: 8.0.6
         version: 8.0.6(@capacitor/core@8.6.0)
@@ -388,12 +385,6 @@ importers:
         version: 0.2.1
 
   packages/auth: {}
-
-  packages/capacitor-storekit:
-    devDependencies:
-      '@capacitor/core':
-        specifier: 8.6.0
-        version: 8.6.0
 
 packages:
 
@@ -764,11 +755,6 @@ packages:
 
   '@capacitor/haptics@8.0.1':
     resolution: {integrity: sha512-8v8rowLBMeb3CryqoQvXndwyUsoi4pPXf0qFw7IGA4D32Uk7+K6juN2SjRowqunoovkvvbFmU9TD7JIAz2zmFw==}
-    peerDependencies:
-      '@capacitor/core': 8.6.0
-
-  '@capacitor/ios@8.6.0':
-    resolution: {integrity: sha512-Y2PE4zoBqMrSTWoVMJmX2byBznjn6egmATzoEUJiGVbVubkNpAvkF/tl0SBKDyP67ngyedTx1tQq5IGYIhby1A==}
     peerDependencies:
       '@capacitor/core': 8.6.0
 
@@ -9288,10 +9274,6 @@ snapshots:
       tslib: 2.8.1
 
   '@capacitor/haptics@8.0.1(@capacitor/core@8.6.0)':
-    dependencies:
-      '@capacitor/core': 8.6.0
-
-  '@capacitor/ios@8.6.0(@capacitor/core@8.6.0)':
     dependencies:
       '@capacitor/core': 8.6.0
 

@@ -12,7 +12,7 @@ import {
   IonToolbar,
   onIonViewWillEnter,
 } from '@ionic/vue'
-import { formatPrice, IAP_MEMBER_PRODUCTS, PLAN_FEATURES, PLAN_NAMES, PLAN_PRICES } from '@yunlefun/types'
+import { formatPrice, PLAN_FEATURES, PLAN_NAMES, PLAN_PRICES } from '@yunlefun/types'
 import {
   checkmarkCircle,
   ribbon,
@@ -26,12 +26,10 @@ import {
 } from 'konsta/vue'
 
 const userStore = useUserStore()
-const router = useRouter()
 const { membership, isMember, refresh, reconcileOrders } = useCoin()
-const iap = useIap()
 const toast = useToast()
 
-const { channel, goMembershipPurchase } = usePaymentChannel({
+const { goMembershipPurchase } = usePaymentChannel({
   // 从 www 支付页回到 App：兜底对账 + 刷新会员状态
   onReturn: async () => {
     const { paid } = await reconcileOrders()
@@ -44,27 +42,20 @@ const { channel, goMembershipPurchase } = usePaymentChannel({
 /** 会员等级（当前仅 basic） */
 const LEVEL = 'basic'
 
-/** 套餐选项：iOS 用 App Store 本地化价（displayPrice），Web 用人民币价 */
+/** Online checkout displays the centrally defined RMB prices. */
 const cycleOptions = computed(() => {
   return (['month', 'year'] as BillingCycle[]).map((cycle) => {
-    const iapProduct = channel === 'ios-iap'
-      ? iap.findProduct(IAP_MEMBER_PRODUCTS[LEVEL][cycle])
-      : undefined
     return {
       cycle,
       label: cycle === 'month' ? '月度' : '年度',
-      priceText: iapProduct?.displayPrice ?? formatPrice(PLAN_PRICES[LEVEL][cycle]),
+      priceText: formatPrice(PLAN_PRICES[LEVEL][cycle]),
       popular: cycle === 'year',
-      note: channel === 'web-redirect' && cycle === 'year' ? '约 8.4 折' : '',
+      note: cycle === 'year' ? '约 8.4 折' : '',
     }
   })
 })
 
 const selectedCycle = ref<BillingCycle>('year')
-const restoring = ref(false)
-
-/** 当前通道下购买入口是否可用（iOS 须商品加载成功，否则整体隐藏，见审核 3.1.1） */
-const purchasable = computed(() => channel === 'web-redirect' || iap.ready.value)
 
 const memberExpireText = computed(() => formatExpireDate(membership.value?.expireAt))
 
@@ -74,59 +65,13 @@ onIonViewWillEnter(() => {
     refresh()
 })
 
-onMounted(async () => {
-  if (channel === 'ios-iap') {
-    await iap.loadProducts()
-    // 杀进程 / 入账失败的交易补单
-    const settled = await iap.processUnfinished()
-    if (settled > 0)
-      toast.showSuccess('购买已到账')
-  }
-})
-
 async function handleRefresh(event: CustomEvent) {
   await refresh()
   ;(event.target as HTMLIonRefresherElement).complete()
 }
 
-async function handlePurchase() {
-  if (channel === 'web-redirect') {
-    goMembershipPurchase()
-    return
-  }
-  if (!userStore.isLoggedIn) {
-    router.push('/login')
-    return
-  }
-  const ok = await iap.purchase(IAP_MEMBER_PRODUCTS[LEVEL][selectedCycle.value])
-  if (ok) {
-    toast.showSuccess('会员已开通')
-    iap.reset()
-  }
-  else if (iap.phase.value === 'fail') {
-    toast.showError(iap.errorMessage.value || '购买失败，请稍后重试', '')
-    iap.reset()
-  }
-}
-
-/** 恢复购买（App Store 审核要求的显式入口） */
-async function handleRestore() {
-  if (restoring.value)
-    return
-  restoring.value = true
-  try {
-    const settled = await iap.restore()
-    if (settled > 0)
-      toast.showSuccess(`已恢复 ${settled} 笔购买`)
-    else
-      toast.showInfo('未发现需要恢复的购买')
-  }
-  catch {
-    toast.showError('恢复购买失败，请稍后重试', '')
-  }
-  finally {
-    restoring.value = false
-  }
+function handlePurchase() {
+  goMembershipPurchase()
 }
 </script>
 
@@ -182,57 +127,37 @@ async function handleRestore() {
       </k-list>
 
       <!-- 套餐选择 + 购买（iOS 商品未就绪时整体隐藏，不可降级为外部支付，见审核 3.1.1） -->
-      <template v-if="purchasable">
-        <k-block-title>选择套餐</k-block-title>
-        <k-block strong inset class="plan-grid-block">
-          <div class="plan-grid">
-            <button
-              v-for="opt in cycleOptions"
-              :key="opt.cycle"
-              type="button"
-              class="plan-card"
-              :class="{ 'plan-card-selected': selectedCycle === opt.cycle }"
-              :aria-pressed="selectedCycle === opt.cycle"
-              @click="selectedCycle = opt.cycle"
-            >
-              <span v-if="opt.popular" class="plan-badge">推荐</span>
-              <div class="plan-label">
-                {{ opt.label }}
-              </div>
-              <div class="plan-price">
-                {{ opt.priceText }}
-              </div>
-              <div class="plan-note">
-                {{ opt.note || '&nbsp;' }}
-              </div>
-            </button>
-          </div>
+      <k-block-title>选择套餐</k-block-title>
+      <k-block strong inset class="plan-grid-block">
+        <div class="plan-grid">
+          <button
+            v-for="opt in cycleOptions"
+            :key="opt.cycle"
+            type="button"
+            class="plan-card"
+            :class="{ 'plan-card-selected': selectedCycle === opt.cycle }"
+            :aria-pressed="selectedCycle === opt.cycle"
+            @click="selectedCycle = opt.cycle"
+          >
+            <span v-if="opt.popular" class="plan-badge">推荐</span>
+            <div class="plan-label">
+              {{ opt.label }}
+            </div>
+            <div class="plan-price">
+              {{ opt.priceText }}
+            </div>
+            <div class="plan-note">
+              {{ opt.note || '&nbsp;' }}
+            </div>
+          </button>
+        </div>
 
-          <k-button rounded class="purchase-btn" :disabled="iap.purchasing.value" @click="handlePurchase">
-            {{ isMember ? '续费会员' : '立即开通' }}
-          </k-button>
-          <p v-if="channel === 'web-redirect'" class="purchase-hint">
-            将跳转 www.yunle.fun 完成支付，支付完成后返回本页自动到账
-          </p>
-          <div v-else class="restore-purchase">
-            <button
-              type="button"
-              class="purchase-hint restore-link"
-              :disabled="restoring"
-              :aria-busy="restoring"
-              aria-describedby="restore-purchase-tip"
-              @click="handleRestore"
-            >
-              {{ restoring ? '正在恢复…' : '恢复 App Store 购买' }}
-            </button>
-            <p id="restore-purchase-tip" class="restore-tip">
-              更换设备或重装后，可恢复当前 Apple 账户购买的会员，不会重复扣款
-            </p>
-          </div>
-        </k-block>
-      </template>
-      <k-block v-else strong inset class="text-center opacity-50">
-        会员购买即将上线
+        <k-button rounded class="purchase-btn" @click="handlePurchase">
+          {{ isMember ? '续费会员' : '立即开通' }}
+        </k-button>
+        <p class="purchase-hint">
+          将跳转 www.yunle.fun 完成支付，支付完成后返回本页自动到账
+        </p>
       </k-block>
     </IonContent>
   </IonPage>
@@ -307,11 +232,6 @@ async function handleRestore() {
 
 .plan-card:focus-visible,
 .purchase-btn:focus-visible,
-.restore-link:focus-visible {
-  outline: 2px solid var(--ion-color-primary);
-  outline-offset: 2px;
-}
-
 .plan-badge {
   position: absolute;
   top: -10px;
@@ -365,34 +285,6 @@ async function handleRestore() {
   color: var(--ion-color-medium);
   text-align: center;
   margin-top: 10px;
-}
-
-.restore-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 0;
-  background: transparent;
-  color: var(--ion-color-primary, #007aff);
-  cursor: pointer;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.restore-link:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-.restore-tip {
-  max-width: 320px;
-  margin: -2px auto 0;
-  color: var(--ion-color-medium);
-  font-size: 12px;
-  line-height: 1.45;
-  text-align: center;
 }
 
 @media (prefers-reduced-motion: reduce) {

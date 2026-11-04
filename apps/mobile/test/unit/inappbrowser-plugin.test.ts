@@ -12,7 +12,10 @@ vi.mock('@capacitor/core', () => ({ Capacitor: {
   isNativePlatform: () => h.native,
   isPluginAvailable: () => true,
 } }))
-vi.mock('../../app/host-runtime', () => ({ HostRuntime: {
+vi.mock('../../app/host-runtime', () => ({ hostEnvironment: {
+  isNative: () => h.native,
+  hasRuntime: () => true,
+}, HostRuntime: {
   addListener: vi.fn((event, handler) => { h.handlers.set(event, handler) }),
 } }))
 vi.stubGlobal('defineNuxtPlugin', (setup: () => void) => setup)

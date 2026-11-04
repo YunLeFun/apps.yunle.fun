@@ -50,7 +50,7 @@ targets:
       - path: ../ios/YunleFun/WebRuntime/WebProfileRepository.swift
       - path: ../ios/YunleFun/Services/HostAuthorizationService.swift
       - path: ../ios/YunleFun/WebRuntime/NativeAuthorizationBroker.swift
-      - path: ../mobile/ios/App/App/HostAuthorizationProtocol.swift
+      - path: ../ios/YunleFun/WebRuntime/HostAuthorizationProtocol.swift
       - path: ../desktop/build/icons/icon.icns
         buildPhase: resources
     info:

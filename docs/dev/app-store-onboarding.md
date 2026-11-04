@@ -5,7 +5,7 @@
 ## 前置条件
 
 - [ ] 已加入 [Apple Developer Program](https://developer.apple.com/programs/)（年费 $99，约 ¥698）
-- [ ] Team ID 为 `QT792GAY4C`（`apps/mobile/scripts/ios-archive.sh` / `apps/mobile/scripts/ios-testflight.sh` 的默认值，可用 `IOS_TEAM_ID` 覆盖）
+- [ ] Team ID 为 `QT792GAY4C`（`apps/ios/project.yml` / `apps/ios/ExportOptions-TestFlight.plist` 的配置值，可用 `IOS_TEAM_ID` 覆盖）
 - [ ] Bundle ID 为 `fun.yunle.apps`（Capacitor、Xcode 和导出脚本保持一致；`IOS_BUNDLE_ID` 只校验期望值）
 
 ## 步骤一：注册 Bundle ID（如未注册）

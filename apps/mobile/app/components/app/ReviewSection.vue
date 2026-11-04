@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { ReviewPublic, ReviewRecord, ReviewSummary } from '~/types/review'
-import { Haptics, NotificationType } from '@capacitor/haptics'
 import { IonButton, IonIcon, IonSpinner } from '@ionic/vue'
 import { chatbubbleEllipsesOutline, star, starOutline } from 'ionicons/icons'
+import { hostHaptics, HostNotificationType } from '~/host-runtime'
 
 const props = defineProps<{
   appKey: string
@@ -42,8 +42,8 @@ watch(summary, value => emit('summary', value), { deep: true, immediate: true })
 async function handleSubmit(input: { rating: number, title?: string, content: string }) {
   const result = await submitReview(input)
   if (result) {
-    Haptics.notification({
-      type: result.status === 'rejected' ? NotificationType.Error : NotificationType.Success,
+    hostHaptics.notification({
+      type: result.status === 'rejected' ? HostNotificationType.Error : HostNotificationType.Success,
     }).catch(() => {})
     formOpen.value = false
   }

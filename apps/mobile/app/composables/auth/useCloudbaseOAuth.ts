@@ -2,12 +2,12 @@
  * OAuth 第三方登录 / 绑定 / 解绑
  * 参考 www.yunle.fun 的 useOAuth.ts，适配全局 AppToast
  *
- * 移动端（Capacitor）使用 Browser.open() 打开授权页，
+ * 移动端（Capacitor）使用 hostBrowser.open() 打开授权页，
  * 线上 callback 通过 deeplink (yunlefun://) 把 code+state 传回 App，
  * App 内手动完成 code → provider_token → signIn 流程。
  */
-import { Capacitor } from '@capacitor/core'
 import { getErrorMessage } from '@yunlefun/auth'
+import { hostBrowser, hostEnvironment } from '~/host-runtime'
 import { useAppsAuthAcquisition } from './useAppsAcquisition'
 
 /** state 前缀，用于标识来自原生 App 的 OAuth 请求 */
@@ -22,11 +22,9 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
 
   /**
    * 移动端原生 OAuth 登录
-   * 使用 Browser.open() 打开授权页，回调通过 deeplink 返回
+   * 使用 hostBrowser.open() 打开授权页，回调通过 deeplink 返回
    */
   const loginWithOAuthNative = async (provider: 'github' | 'wx_open') => {
-    const { Browser } = await import('@capacitor/browser')
-
     // 生成带 app- 前缀的 state，让 callback 页面识别来源
     // 格式：app-{provider}_{random}（用 _ 分隔 provider 和 random，避免和 provider 名中的 - 冲突）
     const state = `${NATIVE_OAUTH_STATE_PREFIX}${provider}_${Math.random().toString(36).slice(2)}`
@@ -49,7 +47,7 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
     bindOAuthState(attempt.id, readReturnedOAuthState(data.url, state))
 
     // 用系统浏览器打开授权页（iOS: SFSafariViewController）
-    await Browser.open({ url: data.url })
+    await hostBrowser.open({ url: data.url })
   }
 
   /**
@@ -111,7 +109,7 @@ export function useCloudbaseOAuth(core: ReturnType<typeof useCloudbaseAuthCore>)
       loading.value = true
       error.value = null
 
-      if (Capacitor.isNativePlatform()) {
+      if (hostEnvironment.isNative()) {
         await loginWithOAuthNative(provider)
         // 原生模式下，loading 保持到 deeplink 回调处理完毕
         return

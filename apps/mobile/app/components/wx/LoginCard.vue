@@ -1,9 +1,9 @@
 <!-- eslint-disable no-alert -->
 <script setup lang="ts">
-import { Capacitor } from '@capacitor/core'
 import { isPlatform } from '@ionic/vue'
 import { createEmbeddedWxLogin } from '@yunlefun/auth'
 import { consola } from 'consola'
+import { hostEnvironment } from '~/host-runtime'
 
 const config = useRuntimeConfig()
 
@@ -62,7 +62,7 @@ function goToWxLogin() {
   // })
   // window.open(url, '_blank')
 
-  const isNativePlatform = Capacitor.isNativePlatform()
+  const isNativePlatform = hostEnvironment.isNative()
   consola.info('isNativePlatform', isNativePlatform)
   if (isNativePlatform) {
     // TODO

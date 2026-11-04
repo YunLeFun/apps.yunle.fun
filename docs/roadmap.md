@@ -21,7 +21,7 @@
 满足任一条件即可发版：
 
 - **仅 Web 发版**：合并到 `main` 后由 EdgeOne 自动发布；需要版本 Tag 时运行 `pnpm release`
-- **iOS TestFlight 内测**：跑 `pnpm build` + `pnpm sync` + `pnpm build:ios`，再按发布文档显式设置签名变量并运行 `apps/mobile/scripts/ios-testflight.sh`
+- **iOS TestFlight 内测**：使用 `apps/ios` 的[原生发布流程](./dev/testflight.md)，无需 Nuxt 构建或 Capacitor 同步；旧壳已按未分发客户端退役。
 - **App Store 正式上架**：等 ICP 备案 + 设计交付齐
 
 ---
@@ -68,6 +68,8 @@
 ## M2 · 补安全 / 内容审核（目标：3 天）
 
 ### P1 已完成
+
+> 本节为旧构建的历史记录。2026-11-05 用户确认旧 Capacitor 客户端未分发，历史上传记录不等同于曾向测试员开放；当前入口见原生发布流程。
 
 - [x] **Workshop 应用审核流程**
   - 数据模型新增 `status: 'pending' | 'approved' | 'rejected'`、`rejectedReason`、`reviewedAt`（[app/types/app.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/types/app.ts)）
@@ -135,7 +137,7 @@
 - [x] **bump 版本号 + iOS TestFlight 上架**
   - `package.json` version → `0.1.0`（pre-release 语义）
   - iOS `MARKETING_VERSION=0.1.0` / `CURRENT_PROJECT_VERSION=67`，与 package.json 自动对齐
-    （[`scripts/sync-ios-version.sh`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
+    （[`scripts/sync-ios-version.sh`](https://github.com/YunLeFun/apps.yunle.fun/blob/7a3a0ef/apps/mobile/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
   - git tag `v0.1.0`
   - ✅ **已成功上传 TestFlight**（build 67，Delivery UUID 5a473656-…）
   - 踩坑与完整流程见 [`docs/dev/testflight.md`](./dev/testflight.md)（关键：`uploadSymbols=false` 绕过 Xcode 26 的 Copy failed）

@@ -1,11 +1,10 @@
+import { hostEnvironment } from '~/host-runtime'
 /**
  * 登录方式开关配置
  *
  * 控制登录页面各登录方式的启用/禁用
  * 可通过修改此文件快速开关特定登录方式
  */
-
-import { Capacitor } from '@capacitor/core'
 
 export interface AuthMethodConfig {
   /** 手机号 OTP 登录 */
@@ -33,7 +32,7 @@ export interface AuthMethodConfig {
  *
  * 详见 docs/roadmap.md「iOS 端隐藏 GitHub 登录入口」。
  */
-const isNativePlatform = typeof window !== 'undefined' && Capacitor.isNativePlatform()
+const isNativePlatform = typeof window !== 'undefined' && hostEnvironment.isNative()
 
 /**
  * 基础登录方式配置（修改此处启用/禁用）

@@ -20,7 +20,7 @@ open YunleFun.xcodeproj
 
 选择 `YunleFun` Scheme 与本机可用的 iPhone / iPad 模拟器运行。Debug 使用 `fun.yunle.apps.native-dev`，可与旧版同时安装；Release 使用现有正式标识 `fun.yunle.apps`。尚未完成升级迁移和完整回归前，不将开发版本覆盖安装到正式用户设备。
 
-无需 CocoaPods、Capacitor runtime 或打包 Nuxt 来启动原生客户端。SVG 图标通过 Swift Package Manager 引入固定版本 SwiftDraw 0.29.0；首次构建需解析依赖，具体修订由 Package.resolved 锁定。当前工程直接编译兼容工程里的 `WebViewController.swift` 与原生图片 / 授权辅助代码；`CAPPlugin` 部分仅在有 Capacitor 模块的兼容工程编译。原生宿主通过页面工厂提供 SwiftUI 详情与开发者作品页。
+无需 CocoaPods、Capacitor runtime 或打包 Nuxt 来启动原生客户端。SVG 图标通过 Swift Package Manager 引入固定版本 SwiftDraw 0.29.0；首次构建需解析依赖，具体修订由 Package.resolved 锁定。共享 WebView、图片 / 授权辅助代码和品牌资源现位于 `YunleFun/WebRuntime` 与 `YunleFun/Resources/BrandAssets.xcassets`；旧 Capacitor iOS 工程与 CAPPlugin 桥接已退役。原生宿主通过页面工厂提供 SwiftUI 详情与开发者作品页。
 
 命令行编译：
 

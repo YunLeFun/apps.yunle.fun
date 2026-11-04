@@ -6,14 +6,12 @@ on:
     branches: [main]
     paths:
       - apps/ios/**
-      - apps/mobile/ios/App/App/**
       - .github/workflows/ios*.yml
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
     paths:
       - apps/ios/**
-      - apps/mobile/ios/App/App/**
       - .github/workflows/ios*.yml
 
 permissions:

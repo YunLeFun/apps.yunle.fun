@@ -8,6 +8,7 @@ struct NativeApplicationMenuView: View {
     let perform: (WebAppMenuAction) -> Void
     @EnvironmentObject private var runtime: NativeWebRuntime
     @Environment(\.dismiss) private var dismiss
+    @State private var sharing = false
 
     init(application: CloudApplication, currentURL: URL?, hasMarketEntry: Bool = true, isGame: Bool = false,
          perform: @escaping (WebAppMenuAction) -> Void) {
@@ -51,6 +52,10 @@ struct NativeApplicationMenuView: View {
                     }
                 }
                 Section {
+                    if hasMarketEntry && !isGame && application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
+                        Button { sharing = true } label: { Label("二维码分享卡片", systemImage: "qrcode") }
+                            .accessibilityIdentifier("runtime.menu.share-card")
+                    }
                     Button { perform(.share) } label: { Label("分享", systemImage: "square.and.arrow.up") }
                     Button { perform(.copyLink) } label: { Label("复制链接", systemImage: "link") }
                     Button { perform(.openBrowser) } label: { Label("在浏览器中打开", systemImage: "safari") }
@@ -82,6 +87,7 @@ struct NativeApplicationMenuView: View {
         }
         .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: application.id, runtimeScope: application.runtimeScope,
                                                        launchURL: application.launchURL, dismiss: { dismiss() }))
+        .sheet(isPresented: $sharing) { ApplicationShareView(application: application) }
     }
 
     static func originLabel(_ url: URL?) -> String? {

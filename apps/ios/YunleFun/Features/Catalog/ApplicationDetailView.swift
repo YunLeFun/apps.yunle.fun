@@ -12,6 +12,7 @@ struct ApplicationDetailView: View {
     @State private var workshopIdentity: UUID?
     /// Set when this visit added the app, so the header confirms where it went.
     @State private var addedHere = false
+    @State private var sharing = false
     private var app: CloudApplication { application.refreshingPublicMetadata(with: catalog.application(id: application.id)) }
 
     var body: some View {
@@ -113,11 +114,18 @@ struct ApplicationDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                ShareLink(item: app.shareURL) {
-                    Label(app.personalMarketOwnerLogin == nil ? "分享应用" : "分享作者主页", systemImage: "square.and.arrow.up")
+                if app.accessWorkshopID == nil && app.accessOwnerID == nil && app.personalMarketOwnerLogin == nil {
+                    Button { sharing = true } label: {
+                        Label("分享应用", systemImage: "square.and.arrow.up")
+                    }.accessibilityIdentifier("detail.share")
+                } else {
+                    ShareLink(item: app.shareURL) {
+                        Label(app.personalMarketOwnerLogin == nil ? "分享工坊" : "分享作者主页", systemImage: "square.and.arrow.up")
+                    }
                 }
             }
         }
+        .sheet(isPresented: $sharing) { ApplicationShareView(application: app) }
     }
 
     @ViewBuilder private var action: some View {

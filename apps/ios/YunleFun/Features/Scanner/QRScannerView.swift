@@ -18,6 +18,7 @@ private struct QRScannerContent: View {
     @StateObject private var model: QRScannerModel
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @EnvironmentObject private var catalog: CatalogStore
     @State private var pickingPhoto = false
     @State private var photoItem: PhotosPickerItem?
     @State private var website: ScanWebsite?
@@ -67,6 +68,7 @@ private struct QRScannerContent: View {
         }
         .sheet(item: $website) { SafariView(url: $0.url) }
         .onAppear { model.sceneIsActive(scenePhase == .active); model.appear() }
+        .task { if purpose == .general { await catalog.load() } }
         .onDisappear { model.disappear() }
         .onChange(of: scenePhase) { model.sceneIsActive($0 == .active) }
         .onChange(of: model.candidates) { if !$0.isEmpty { resultFocused = true } }
@@ -116,6 +118,11 @@ private struct QRScannerContent: View {
             VStack(alignment: .leading, spacing: 8) {
                 Label(candidate.title, systemImage: "globe").font(.headline)
                 Text(url.absoluteString).font(.footnote).textSelection(.enabled)
+                if let application = NativeLink.publicApplication(websiteURL: url, in: catalog.applications) {
+                    NavigationLink(value: NativeDestination.application(application.publicKey)) {
+                        Label("在云乐坊中查看 \(application.name)", systemImage: "square.grid.2x2")
+                    }.accessibilityIdentifier("scanner.result.application")
+                }
                 Button("使用浏览器打开") { website = ScanWebsite(url: url) }.accessibilityIdentifier("scanner.result.website")
             }
         case .text(let text):

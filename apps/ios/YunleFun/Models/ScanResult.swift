@@ -59,6 +59,17 @@ enum NativeLink {
         let market = applications.filter { $0.marketShortName?.lowercased() == key.lowercased() }
         return market.count == 1 ? market[0] : nil
     }
+    static func publicApplication(websiteURL: URL, in applications: [CloudApplication]) -> CloudApplication? {
+        // Match the entire public URL, never just its host: Play and other
+        // publishers can serve several apps on the same origin.
+        let matches = applications.filter {
+            $0.accessWorkshopID == nil && $0.accessOwnerID == nil && $0.personalMarketOwnerLogin == nil
+                && $0.isUnavailable != true && $0.isPublic != false
+                && ($0.audience == nil || $0.audience == "public")
+                && $0.shareWebsitePayload == websiteURL.absoluteString
+        }
+        return matches.count == 1 ? matches[0] : nil
+    }
 }
 enum ScanParser {
     static func parse(_ payload: String, purpose: ScanPurpose) -> ScanResult {

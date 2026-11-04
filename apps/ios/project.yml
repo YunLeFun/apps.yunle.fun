@@ -44,6 +44,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         YunleFeedbackAppGroup: $(FEEDBACK_APP_GROUP)
         NSCameraUsageDescription: 用于扫描云应用和个人工坊二维码。
+        NSPhotoLibraryAddUsageDescription: 用于将你选择的应用分享卡片存储到照片。
         CFBundleURLTypes:
           - CFBundleTypeRole: Editor
             CFBundleURLName: yunlefun

@@ -8,6 +8,8 @@
 
 本仓库使用 pnpm workspace。现有 Web、iOS 和 Android 客户端位于 `apps/mobile/`，继续提供 `apps.yunle.fun` 浏览器版本；原生 iOS 位于 `apps/ios/`，原生 macOS 位于 `apps/macos/`，Electron 桌面端位于 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
 
+Capacitor 当前仍用于 Android 主壳和旧 iOS 兼容工程；新的原生 iOS、原生 macOS 和 Electron 不依赖它。退役顺序与剩余调用见 [Capacitor 使用边界与退役准备](./docs/dev/capacitor-retirement.md)。
+
 ## ✨ 特性
 
 - 🏠 **云居（Home）** —— iOS 风格桌面网格，长按编辑、拖拽排序、毛玻璃 Dock

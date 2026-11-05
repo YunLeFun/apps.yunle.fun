@@ -85,8 +85,7 @@ struct HomeView: View {
             } else if library.snapshot.applications.isEmpty && library.snapshot.dockApplications.isEmpty {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        catalogStatus
-                        syncStatus
+                        statusNotices
                         runningApplicationsLink
                         ContentStateView(title: "把喜欢的应用带回云居", systemImage: "square.grid.2x2",
                                          message: "从工坊添加应用，下次打开更顺手。", actionTitle: "去工坊看看", action: browse)
@@ -121,21 +120,7 @@ struct HomeView: View {
             if editing && keys == ["|"] { withAnimation(Motion.fade) { editing = false } }
         }
         .haptic(.selection, trigger: pinChanges)
-        .refreshable {
-            let identity = accounts.identityGeneration
-            // State updates can replace SwiftUI's refresh action and cancel its task.
-            // Keep this explicit user request alive until the data refresh finishes.
-            await Task { @MainActor in
-                guard identity == accounts.identityGeneration, !isRefreshing else { return }
-                isRefreshing = true
-                defer { isRefreshing = false }
-                await refreshCatalog()
-                guard identity == accounts.identityGeneration else { return }
-                await sync.recheck()
-                guard identity == accounts.identityGeneration else { return }
-                await loadMembership(force: true)
-            }.value
-        }
+        .refreshable { await refreshHome() }
         .navigationTitle("云居")
         // Read membership once per identity, and again when it is unknown or stale on returning to the app.
         .task(id: "\(accounts.identityGeneration)|\(assistantRollout.rollout.audience.rawValue)") { await loadMembership() }
@@ -287,54 +272,155 @@ struct HomeView: View {
             markingMissingPublicAppsUnavailable: catalog.error == nil && catalog.successfulLoadID != nil)
     }
 
-    @ViewBuilder private var catalogStatus: some View {
-        if catalog.isLoading && (library.snapshot.applications + library.snapshot.dockApplications).contains(where: { $0.isUnavailable == true }) {
-            ProgressView("正在载入应用信息")
-                .accessibilityIdentifier("home.catalog.loading")
-        } else if let error = catalog.error {
+    /// Pull-to-refresh is the retry for a failed catalog load and a failed sync.
+    /// State updates can replace SwiftUI's refresh action and cancel its task, so
+    /// this explicit user request stays alive until the data refresh finishes.
+    private func refreshHome() async {
+        let identity = accounts.identityGeneration
+        await Task { @MainActor in
+            guard identity == accounts.identityGeneration, !isRefreshing else { return }
+            isRefreshing = true
+            defer { isRefreshing = false }
+            await refreshCatalog()
+            guard identity == accounts.identityGeneration else { return }
+            await sync.recheck()
+            guard identity == accounts.identityGeneration else { return }
+            await loadMembership(force: true)
+        }.value
+    }
+
+    /// Catalog and sync notices share a tight stack so a network failure does not
+    /// push the grids down by two multi-line cards.
+    @ViewBuilder private var statusNotices: some View {
+        if showsCatalogNotice || showsSyncNotice {
             VStack(alignment: .leading, spacing: 8) {
-                Label("应用信息载入失败", systemImage: "wifi.exclamationmark")
-                Text(error).foregroundStyle(.secondary)
-                Button("重新载入应用") { Task { await refreshCatalog() } }
-                    .buttonStyle(.bordered)
-                    .disabled(catalog.isLoading)
-                    .accessibilityIdentifier("home.catalog.retry")
+                if showsCatalogNotice { catalogStatus }
+                if showsSyncNotice { syncStatus }
             }
-            .font(.subheadline)
+        }
+    }
+
+    private var showsCatalogLoadingRow: Bool {
+        catalog.isLoading && (library.snapshot.applications + library.snapshot.dockApplications).contains { $0.isUnavailable == true }
+    }
+
+    /// Suppressed while the unavailable-app loading row is standing in for the same failure.
+    private var catalogFailureMessage: String? {
+        guard !showsCatalogLoadingRow else { return nil }
+        return catalog.error
+    }
+
+    /// User-facing sync failure. `sync.message` is what Home already shows for this phase.
+    private var syncFailureMessage: String? {
+        guard sync.isActive, case .failed = sync.phase else { return nil }
+        return sync.message
+    }
+
+    /// One strip when both failures are loss of connectivity. Other failures stay separate.
+    private var combinesOfflineFailures: Bool {
+        guard let catalogFailureMessage, let syncFailureMessage else { return false }
+        return HomeStatusBanner.isConnectivityFailure(catalogFailureMessage)
+            && HomeStatusBanner.isConnectivityFailure(syncFailureMessage)
+    }
+
+    private var showsCatalogNotice: Bool {
+        showsCatalogLoadingRow || (catalogFailureMessage != nil && !combinesOfflineFailures)
+    }
+
+    private var showsSyncNotice: Bool {
+        if combinesOfflineFailures { return true }
+        guard sync.isActive else { return false }
+        switch sync.phase {
+        case .failed, .conflict:
+            return true
+        case .idle:
+            return library.snapshot.base == nil && !library.snapshot.autoSyncEnabled
+        case .syncing:
+            return false
+        }
+    }
+
+    @ViewBuilder private var catalogStatus: some View {
+        if showsCatalogLoadingRow {
+            ProgressView("正在载入应用信息")
+                .font(.subheadline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("home.catalog.loading")
+        } else if let error = catalogFailureMessage, !combinesOfflineFailures {
+            let message = HomeStatusBanner.catalogMessage(for: error)
+            HomeStatusStrip(
+                systemImage: "wifi.exclamationmark",
+                message: message,
+                accessibilityMessage: "应用信息载入失败。\(error)。下拉可重试。",
+                refresh: refreshFromBanner
+            )
         }
     }
 
     @ViewBuilder private var syncStatus: some View {
-        if sync.isActive {
+        if combinesOfflineFailures, let catalogFailureMessage, let syncFailureMessage {
+            HomeStatusStrip(
+                systemImage: "wifi.exclamationmark",
+                message: HomeStatusBanner.combinedMessage(catalog: catalogFailureMessage, sync: syncFailureMessage),
+                accessibilityMessage: "应用信息载入失败。\(catalogFailureMessage) \(syncFailureMessage)。下拉可重试。",
+                refresh: refreshFromBanner
+            ) {
+                syncSettingsLink
+            }
+        } else if sync.isActive {
             switch sync.phase {
             case .failed:
-                VStack(alignment: .leading, spacing: 12) {
-                    Label(sync.message, systemImage: "exclamationmark.icloud")
-                        .font(.subheadline)
-                    Button("重试同步") { Task { await sync.recheck() } }
-                        .buttonStyle(.bordered)
-                        .accessibilityIdentifier("home.sync.retry")
-                    NavigationLink("云居同步") { HomeSyncSettingsView() }
+                HomeStatusStrip(
+                    systemImage: "exclamationmark.icloud",
+                    message: sync.message,
+                    accessibilityMessage: "\(sync.message) 下拉可重试。",
+                    refresh: refreshFromBanner
+                ) {
+                    syncSettingsLink
                 }
             case .conflict:
                 NavigationLink { HomeSyncSettingsView() } label: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label(sync.message, systemImage: "exclamationmark.icloud")
-                        Text("查看并选择要保留的版本").font(.subheadline)
+                    HomeStatusStrip(
+                        systemImage: "exclamationmark.icloud",
+                        message: sync.message,
+                        accessibilityMessage: "\(sync.message)。查看并选择要保留的版本。",
+                        stacksActions: true
+                    ) {
+                        Text("查看并选择要保留的版本")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.accentColor)
                     }
                 }
+                .buttonStyle(.plain)
                 .accessibilityIdentifier("home.sync.conflict")
             case .idle where library.snapshot.base == nil && !library.snapshot.autoSyncEnabled:
-                VStack(alignment: .leading, spacing: 12) {
-                    Label("尚未同步", systemImage: "icloud")
-                    Text("此设备尚未读取云端云居。").font(.subheadline).foregroundStyle(.secondary)
-                    Button("立即同步") { Task { await sync.synchronize() } }
-                        .buttonStyle(.bordered)
-                        .accessibilityIdentifier("home.sync.start")
+                HomeStatusStrip(systemImage: "icloud", message: "尚未同步，此设备尚未读取云端云居。", stacksActions: true) {
+                    syncStartButton
                 }
-            default: EmptyView()
+            default:
+                EmptyView()
             }
         }
+    }
+
+    private var refreshFromBanner: () -> Void {
+        { Task { await refreshHome() } }
+    }
+
+    private var syncStartButton: some View {
+        Button("立即同步") { Task { await sync.synchronize() } }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .buttonBorderShape(.capsule)
+            .fixedSize(horizontal: true, vertical: false)
+            .accessibilityIdentifier("home.sync.start")
+    }
+
+    private var syncSettingsLink: some View {
+        NavigationLink { HomeSyncSettingsView() } label: { Text("云居同步") }
+            .buttonStyle(.borderless)
+            .font(.subheadline.weight(.semibold))
+            .fixedSize(horizontal: true, vertical: false)
     }
 
     @ViewBuilder private var runningApplicationsLink: some View {
@@ -349,8 +435,15 @@ struct HomeView: View {
     }
 
     @ViewBuilder private var homeSections: some View {
-        catalogStatus
-        syncStatus
+        // Accessibility text uses a List. Each notice has to be its own row so
+        // the conflict link stays a real navigation row; the regular home groups
+        // them tightly inside the scroll view.
+        if dynamicTypeSize.isAccessibilitySize {
+            catalogStatus
+            syncStatus
+        } else {
+            statusNotices
+        }
         runningApplicationsLink
         // The dock leads, as a pinned shelf under the title; edit mode keeps
         // the same order so it doesn't move when jiggling starts.
@@ -597,5 +690,111 @@ private struct HomeGridWidthReader: ViewModifier {
         content
             .onAppear { into = width - 2 * HomeGridMetrics.margin }
             .onChange(of: width) { into = $0 - 2 * HomeGridMetrics.margin }
+    }
+}
+
+/// Copy for the compact Home status strips. Connectivity failures that happen
+/// together collapse to one sentence; the sync wording stays intact so the
+/// local-save reassurance is still on screen.
+enum HomeStatusBanner {
+    static func isConnectivityFailure(_ message: String) -> Bool {
+        let folded = message.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+        let markers = ["网络", "无法连接", "互联网", "暂时无法使用", "offline", "internet", "not connected", "timed out", "超时"]
+        return markers.contains { marker in
+            folded.contains(marker.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX")))
+        }
+    }
+
+    /// The title is enough when the detail only restates a network retry.
+    static func catalogMessage(for error: String) -> String {
+        isConnectivityFailure(error) ? "应用信息载入失败" : error
+    }
+
+    static func combinedMessage(catalog: String, sync syncMessage: String) -> String {
+        if syncMessage.contains("网络暂时无法连接") {
+            return "应用信息载入失败，\(syncMessage)"
+        }
+        return "应用信息载入失败。\(catalog) \(syncMessage)"
+    }
+}
+
+/// One status row. A settings link can sit beside or under the message.
+/// Pull-to-refresh retries a failed load; the message exposes that as a VoiceOver action.
+private struct HomeStatusStrip<Actions: View>: View {
+    let systemImage: String
+    let message: String
+    var accessibilityMessage: String?
+    var stacksActions = false
+    var refresh: (() -> Void)?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ViewBuilder var actions: () -> Actions
+
+    var body: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            // The list row, or the empty home's own padding, is the container.
+            row.frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            row
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+    }
+
+    @ViewBuilder private var row: some View {
+        if Actions.self == EmptyView.self {
+            messageLabel
+        } else if dynamicTypeSize.isAccessibilitySize || stacksActions {
+            VStack(alignment: .leading, spacing: 4) {
+                messageLabel
+                actions()
+            }
+        } else {
+            HStack(alignment: .center, spacing: 8) {
+                messageLabel
+                actions()
+                    .fixedSize(horizontal: true, vertical: false)
+                    .layoutPriority(1)
+            }
+        }
+    }
+
+    private var messageLabel: some View {
+        HStack(alignment: .center, spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+            messageText
+        }
+    }
+
+    private var baseText: some View {
+        Text(message)
+            .font(.subheadline)
+            .foregroundStyle(.primary)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel(accessibilityMessage ?? message)
+    }
+
+    @ViewBuilder private var messageText: some View {
+        if let refresh {
+            baseText.accessibilityAction(named: Text("刷新"), refresh)
+        } else {
+            baseText
+        }
+    }
+}
+
+extension HomeStatusStrip where Actions == EmptyView {
+    init(systemImage: String, message: String, accessibilityMessage: String? = nil, stacksActions: Bool = false, refresh: (() -> Void)? = nil) {
+        self.systemImage = systemImage
+        self.message = message
+        self.accessibilityMessage = accessibilityMessage
+        self.stacksActions = stacksActions
+        self.refresh = refresh
+        self.actions = { EmptyView() }
     }
 }

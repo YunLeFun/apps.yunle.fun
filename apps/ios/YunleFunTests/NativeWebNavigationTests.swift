@@ -22,7 +22,8 @@ final class NativeWebNavigationTests: XCTestCase {
         let scriptCount = fixture.webView.configuration.userContentController.userScripts.count
         let cases = [WebGameInteractionSettings(allowsPageBounce: true, allowsLongPress: false),
                      WebGameInteractionSettings(allowsPageBounce: false, allowsLongPress: true),
-                     WebGameInteractionSettings(allowsPageBounce: true, allowsLongPress: true),
+                     WebGameInteractionSettings(allowsDoubleTapZoom: true),
+                     WebGameInteractionSettings(allowsPageBounce: true, allowsLongPress: true, allowsDoubleTapZoom: true),
                      WebGameInteractionSettings()]
         for settings in cases {
             fixture.browser.gameInteractionSettings = settings
@@ -33,26 +34,33 @@ final class NativeWebNavigationTests: XCTestCase {
             XCTAssertEqual(state["boardCallout"] as? String, settings.allowsLongPress ? "default" : "none")
             XCTAssertEqual(state["overscroll"] as? String, settings.allowsPageBounce ? "auto" : "none")
             XCTAssertEqual(state["inputValue"] as? String, "ABC234")
-            let frameSelection = try await fixture.webView.callAsyncJavaScript("""
+            XCTAssertEqual(state["rootTouchAction"] as? String, settings.allowsDoubleTapZoom ? "auto" : "manipulation")
+            XCTAssertEqual(state["boardTouchAction"] as? String, "none", "A game can still handle its own board gestures")
+            let frameState = try await fixture.webView.callAsyncJavaScript("""
                 const frame = document.getElementById('game-policy-frame');
-                const expected = allowsLongPress ? 'text' : 'none';
-                let selection;
+                const expectedSelection = allowsLongPress ? 'text' : 'none';
+                const expectedTouch = allowsDoubleTapZoom ? 'auto' : 'manipulation';
+                let state;
                 for (let attempt = 0; attempt < 50; attempt++) {
-                  selection = frame.contentWindow.getComputedStyle(frame.contentDocument.querySelector('p')).webkitUserSelect;
-                  if (selection === expected) return selection;
+                  const win = frame.contentWindow;
+                  const doc = frame.contentDocument;
+                  state = [win.getComputedStyle(doc.querySelector('p')).webkitUserSelect,
+                           win.getComputedStyle(doc.documentElement).touchAction];
+                  if (state[0] === expectedSelection && state[1] === expectedTouch) break;
                   await new Promise(resolve => setTimeout(resolve, 20));
                 }
-                return selection;
-                """, arguments: ["allowsLongPress": settings.allowsLongPress], in: nil, contentWorld: .page)
-            XCTAssertEqual(frameSelection as? String, settings.allowsLongPress ? "text" : "none")
+                return state;
+                """, arguments: ["allowsLongPress": settings.allowsLongPress, "allowsDoubleTapZoom": settings.allowsDoubleTapZoom], in: nil, contentWorld: .page)
+            XCTAssertEqual(frameState as? [String], [settings.allowsLongPress ? "text" : "none", settings.allowsDoubleTapZoom ? "auto" : "manipulation"])
             let progress = try await fixture.webView.evaluateJavaScript("window.gameProgress")
             XCTAssertEqual(progress as? String, "still-playing")
             XCTAssertEqual(fixture.webView.configuration.userContentController.userScripts.count, scriptCount)
             _ = try await fixture.environment()
         }
-        fixture.browser.gameInteractionSettings = WebGameInteractionSettings(allowsPageBounce: true, allowsLongPress: true)
+        fixture.browser.gameInteractionSettings = WebGameInteractionSettings(allowsPageBounce: true, allowsLongPress: true, allowsDoubleTapZoom: true)
         try await fixture.load(title: "enabled")
         let enabled = try await fixture.interactionState()
+        XCTAssertEqual(enabled["rootTouchAction"] as? String, "auto")
         XCTAssertEqual(enabled["boardSelection"] as? String, "text")
         XCTAssertEqual(enabled["overscroll"] as? String, "auto")
     }
@@ -69,6 +77,7 @@ final class NativeWebNavigationTests: XCTestCase {
         for title in ["first", "second"] {
             if title != "first" { try await fixture.load(title: title) }
             let state = try await fixture.interactionState()
+            XCTAssertEqual(state["rootTouchAction"] as? String, "manipulation")
             XCTAssertEqual(state["boardSelection"] as? String, "none")
             XCTAssertEqual(state["boardCallout"] as? String, "none")
             XCTAssertEqual(state["overscroll"] as? String, "none")
@@ -87,6 +96,7 @@ final class NativeWebNavigationTests: XCTestCase {
         XCTAssertTrue(fixture.webView.scrollView.bounces)
         XCTAssertTrue(fixture.webView.allowsLinkPreview)
         let state = try await fixture.interactionState()
+        XCTAssertEqual(state["rootTouchAction"] as? String, "auto")
         XCTAssertEqual(state["boardSelection"] as? String, "text")
         XCTAssertEqual(state["boardCallout"] as? String, "default")
         XCTAssertEqual(state["overscroll"] as? String, "auto")
@@ -146,34 +156,46 @@ final class NativeWebNavigationTests: XCTestCase {
         XCTAssertFalse(fixture.browser.navigationItem.leftBarButtonItems?.contains { $0.accessibilityLabel == "返回网页" } ?? false)
     }
 
-    func testImmersivePlayCapsuleTracksRouteHistoryAndRestoresAppearance() async throws {
+    func testImmersiveGameButtonsFlankPageAndTrackHistoryAndAppearance() async throws {
         let cabinet = try XCTUnwrap(URL(string: "https://play.yunle.fun/games/pachinko/local"))
         let fixture = try await Fixture(baseURL: cabinet)
         defer { fixture.close() }
         let env = try await fixture.environment(after: "await window.ylf.hideTitleBar();")
         let view = try XCTUnwrap(fixture.browser.view)
-        let capsule = try XCTUnwrap(view.subviews.first { $0.accessibilityIdentifier == "runtime.game-controls" })
-        XCTAssertFalse(capsule.isHidden)
-        XCTAssertGreaterThan(capsule.frame.minX, view.bounds.midX)
         let rect = try XCTUnwrap(env["capsuleRect"] as? [String: CGFloat])
-        XCTAssertEqual(try XCTUnwrap(rect["width"]), 88, accuracy: 1)
+        XCTAssertEqual(try XCTUnwrap(rect["width"]), 44, accuracy: 1)
         XCTAssertEqual(try XCTUnwrap(rect["height"]), 44, accuracy: 1)
-        let left = try XCTUnwrap(view.hitTest(CGPoint(x: view.safeAreaInsets.left + 22, y: capsule.frame.midY), with: nil))
-        XCTAssertTrue(left.isDescendant(of: fixture.webView) || left === fixture.webView)
+        let moreX = try XCTUnwrap(rect["x"]) + 22
+        let y = try XCTUnwrap(rect["y"]) + 22
+        let safe = view.safeAreaLayoutGuide.layoutFrame
+        let minimizeX = safe.minX + 12 + 22
+        let backX = minimizeX + 44 + 6
+        func hit(_ x: CGFloat) -> UIView? { view.hitTest(CGPoint(x: x, y: y), with: nil) }
+        XCTAssertEqual(moreX, safe.maxX - 12 - 22, accuracy: 1)
+        XCTAssertEqual(hit(moreX)?.accessibilityIdentifier, "runtime.more")
+        XCTAssertEqual(hit(minimizeX)?.accessibilityIdentifier, "runtime.minimize")
+        XCTAssertTrue(hit(backX)?.isDescendant(of: fixture.webView) == true)
+        XCTAssertTrue(hit(safe.midX)?.isDescendant(of: fixture.webView) == true)
         XCTAssertEqual(fixture.browser.preferredStatusBarStyle, .lightContent)
         let darkPage = try await fixture.webView.evaluateJavaScript("matchMedia('(prefers-color-scheme:dark)').matches")
         XCTAssertEqual(darkPage as? Bool, true)
 
         _ = try await fixture.webView.evaluateJavaScript("history.pushState({}, '', '/games/gomoku/local')")
-        let historyReady = NSPredicate { _, _ in
-            fixture.browser.preferredStatusBarStyle == .default
-        }
-        await fulfillment(of: [XCTNSPredicateExpectation(predicate: historyReady, object: nil)], timeout: 5)
-        XCTAssertFalse(capsule.isHidden)
+        let appearanceRestored = NSPredicate { _, _ in fixture.browser.preferredStatusBarStyle == .default }
+        await fulfillment(of: [XCTNSPredicateExpectation(predicate: appearanceRestored, object: nil)], timeout: 5)
         XCTAssertEqual(fixture.webView.overrideUserInterfaceStyle, .unspecified)
+
+        // WebKit does not keep loadHTMLString in back history. Visit two real URLs.
+        try await fixture.load(title: "rules")
+        try await fixture.load(title: "board")
+        XCTAssertTrue(fixture.webView.canGoBack)
+        let back = try XCTUnwrap(hit(backX) as? UIButton)
+        XCTAssertEqual(back.accessibilityIdentifier, "runtime.back")
+        back.sendActions(for: .touchUpInside)
+        try await fixture.waitForTitle("rules")
         let restored = try await fixture.environment(after: "await window.ylf.showTitleBar();")
         XCTAssertEqual(restored["titleBarVisible"] as? Bool, true)
-        XCTAssertTrue(capsule.isHidden)
+        XCTAssertFalse(fixture.navigation.isNavigationBarHidden)
     }
 
     func testDarkNavigationWithLongTitleAndAccessibilityTraits() async throws {
@@ -418,7 +440,7 @@ final class NativeWebNavigationTests: XCTestCase {
                 const host = document.createElement('section');
                 document.getElementById('interaction-fixture')?.remove();
                 host.id = 'interaction-fixture';
-                host.innerHTML = `<div id="board" style="user-select:text;-webkit-user-select:text">棋盘文字</div>
+                host.innerHTML = `<div id="board" style="touch-action:none;user-select:text;-webkit-user-select:text">棋盘文字</div>
                   <input id="room"><textarea id="chat"></textarea>
                   <div id="editor" contenteditable="true"><span id="editor-child">昵称</span></div>
                   <img id="piece"><div style="height:300vh"></div>`;
@@ -439,6 +461,8 @@ final class NativeWebNavigationTests: XCTestCase {
                 input.blur();
                 const style = id => getComputedStyle(document.getElementById(id));
                 return {
+                  rootTouchAction: getComputedStyle(document.documentElement).touchAction,
+                  boardTouchAction: style('board').touchAction,
                   boardSelection: style('board').webkitUserSelect,
                   boardCallout: style('board').webkitTouchCallout,
                   overscroll: getComputedStyle(document.documentElement).overscrollBehaviorY,

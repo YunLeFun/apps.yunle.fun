@@ -3,6 +3,18 @@ import XCTest
 
 @MainActor
 final class NativeGameLoginCoordinatorTests: XCTestCase {
+    func testCommittedLoginReturnsToNativeCreationWithSelectedGame() {
+        let flow = NativeGameLoginCoordinator(), origin = boundary(nil), target = boundary("alice")
+        flow.begin(.createRoom(gameID: "gomoku"), origin: origin, isRestoring: false)
+        guard let intent = flow.login else { return XCTFail("Missing creation continuation") }
+        flow.didPresent(intent.id)
+        let proof = success(intent, target: target)
+        flow.committed(proof, current: target, isUsable: true, proofIsCurrent: true)
+        flow.presentationEnded()
+        XCTAssertEqual(flow.consume(current: target, isUsable: true, proofIsCurrent: true), .createRoom(gameID: "gomoku"))
+        XCTAssertNil(flow.consume(current: target, isUsable: true, proofIsCurrent: true))
+    }
+
     func testCommittedLoginPreservesExactIntentAndConsumesOnlyOnceAfterDismissal() throws {
         let flow = NativeGameLoginCoordinator(), origin = boundary(nil), target = boundary("alice")
         let intent = try begin(flow, origin: origin)

@@ -7,6 +7,27 @@ struct RuntimeIssue: Identifiable {
     let id = UUID()
     let title: String
     let message: String
+    let recovery: RuntimeSessionRecovery?
+
+    init(title: String, message: String, recovery: RuntimeSessionRecovery? = nil) {
+        self.title = title
+        self.message = message
+        self.recovery = recovery
+    }
+}
+
+struct RuntimeSessionRecovery: Equatable {
+    let applicationID: String
+    let sessionID: UUID
+    let identity: UUID
+    let title: String
+}
+
+struct NativeGameContinuation: Identifiable {
+    let application: CloudApplication
+    let gameID: String?
+    let recovery: RuntimeSessionRecovery
+    var id: String { application.id }
 }
 
 @MainActor
@@ -40,6 +61,7 @@ final class NativeWebRuntime: ObservableObject {
     weak var anchor: UIViewController?
     private weak var presentationWindow: UIWindow?
     private struct Session {
+        let id = UUID()
         let browser: WebViewController
         let presentation: UINavigationController
         var profile: WebProfileRepository.Selection?
@@ -71,10 +93,20 @@ final class NativeWebRuntime: ObservableObject {
     private let publishingService: PublishingServing
     private let launchLogger = Logger(subsystem: "fun.yunle.apps", category: "cache-launch")
     private let gameInteractionDefaults: UserDefaults
+    @Published var gameInteractionSettings: WebGameInteractionSettings {
+        didSet {
+            guard oldValue != gameInteractionSettings else { return }
+            gameInteractionSettings.save(to: gameInteractionDefaults)
+            for session in sessions.values where session.browser.usesGameInteractionPolicy {
+                session.browser.gameInteractionSettings = gameInteractionSettings
+            }
+        }
+    }
 
     init(personalMarketService: DeveloperProfileServing = DeveloperProfileService(), applicationCache: ApplicationCacheStore? = nil, webProfiles: WebProfileRepository? = nil,
          publishingService: PublishingServing = PublishingService(), gameInteractionDefaults: UserDefaults = .standard) {
         self.gameInteractionDefaults = gameInteractionDefaults
+        self.gameInteractionSettings = WebGameInteractionSettings.load(from: gameInteractionDefaults)
         self.applicationCache = applicationCache ?? ApplicationCacheStore()
         self.webProfiles = webProfiles ?? WebProfileRepository(
             fileURL: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -101,21 +133,6 @@ final class NativeWebRuntime: ObservableObject {
 
     var isIdentityCleanupPending: Bool { isClearingIdentity }
 
-    func gameInteractionSettings(for applicationID: String) -> WebGameInteractionSettings {
-        guard let data = gameInteractionDefaults.data(forKey: "native.game-interactions.v1." + applicationID),
-              let settings = try? JSONDecoder().decode(WebGameInteractionSettings.self, from: data) else {
-            return WebGameInteractionSettings()
-        }
-        return settings
-    }
-
-    func setGameInteractionSettings(_ settings: WebGameInteractionSettings, for applicationID: String) {
-        guard let data = try? JSONEncoder().encode(settings) else { return }
-        objectWillChange.send()
-        gameInteractionDefaults.set(data, forKey: "native.game-interactions.v1." + applicationID)
-        if gameContexts[applicationID] != nil { sessions[applicationID]?.browser.gameInteractionSettings = settings }
-    }
-
     func contains(_ app: CloudApplication) -> Bool { sessions[app.id] != nil }
 
     var runningGameIDs: Set<String> {
@@ -126,6 +143,42 @@ final class NativeWebRuntime: ObservableObject {
             return registeredGame(for: app)?.gameId
         }
         return Set(active + legacy)
+    }
+
+    var gameContinuations: [NativeGameContinuation] {
+        applications.compactMap { app in
+            guard sessions[app.id] != nil, app.runtimeScope == "public",
+                  let recovery = sessionRecovery(for: app.id) else { return nil }
+            let context = gameContexts[app.id]
+            guard context != nil || app.launchURL?.host?.lowercased() == "play.yunle.fun" else { return nil }
+            if let context {
+                guard context.identity == identityReset else { return nil }
+                if let status = gameSessionStatuses[context.gameID], isClosedRoom(status) { return nil }
+            }
+            return NativeGameContinuation(application: app,
+                gameID: context.flatMap(resolvedGameID) ?? registeredGame(for: app)?.gameId, recovery: recovery)
+        }
+    }
+
+    private func sessionRecovery(for applicationID: String) -> RuntimeSessionRecovery? {
+        guard let session = sessions[applicationID] else { return nil }
+        let room = session.browser.currentDocumentURL.flatMap(NativeGameLaunchURL.publicURL).flatMap(NativeGameRoomIntent.parse)
+        let title = room != nil ? "返回原来的房间" : gameContexts[applicationID] != nil ? "返回原来的游戏" : "返回云乐坊间"
+        return RuntimeSessionRecovery(applicationID: applicationID, sessionID: session.id, identity: identityReset, title: title)
+    }
+
+    func resumeSession(_ recovery: RuntimeSessionRecovery, catalog: CatalogStore, library: HomeLibrary) {
+        invalidateOpenRequest()
+        guard !isClearingIdentity, recovery.identity == identityReset,
+              let session = sessions[recovery.applicationID], session.id == recovery.sessionID,
+              let app = applications.first(where: { $0.id == recovery.applicationID }), let url = session.browser.url else {
+            issue = RuntimeIssue(title: "原来的会话已结束", message: "请从寻乐重新选择游戏或房间。")
+            return
+        }
+        issue = nil
+        // Present the retained controller using its original session key. Its
+        // current document, JavaScript state and connection are left intact.
+        present(app, url: url, catalog: catalog, library: library)
     }
 
     private func resolvedGameID(_ context: GameContext) -> String? {
@@ -155,7 +208,8 @@ final class NativeWebRuntime: ObservableObject {
               let play = catalog.application(id: "play"), play.runtimeScope == "public", play.canOpenAsGuest,
               play.launchURL?.host?.lowercased() == "play.yunle.fun" else { return }
         if let saved = sessions[play.id], saved.browser.url != url {
-            issue = RuntimeIssue(title: "云乐坊间仍在运行", message: "请先返回原来的页面，或在菜单中结束后再查看其他玩法。")
+            issue = RuntimeIssue(title: "云乐坊间仍在运行", message: "可以返回原来的页面继续，或在其菜单中结束后再查看其他玩法。",
+                                 recovery: sessionRecovery(for: play.id))
             return
         }
         // Keep the canonical market identity and metadata. Only the requested
@@ -215,19 +269,22 @@ final class NativeWebRuntime: ObservableObject {
             let applicationID = market?.id ?? game.appId
             if let active = gameContexts.first(where: { sessions[$0.key] != nil && resolvedGameID($0.value) == game.gameId }) {
                 guard active.value.modeID == mode.id else {
-                    issue = RuntimeIssue(title: "游戏仍在运行", message: "请先继续当前游戏，或在游戏菜单中结束后再切换玩法。")
+                    issue = RuntimeIssue(title: "游戏仍在运行", message: "可以返回当前游戏继续，或在游戏菜单中结束后再切换玩法。",
+                                         recovery: sessionRecovery(for: active.key))
                     return
                 }
                 resumeGame(game.gameId, catalog: catalog, library: library)
                 return
             }
             if sessions[applicationID] != nil, gameContexts[applicationID] == nil {
-                issue = RuntimeIssue(title: "游戏仍在运行", message: "原来的游戏已保留，可从“继续游戏”恢复。切换玩法前请先在游戏菜单中结束当前会话。")
+                issue = RuntimeIssue(title: "游戏仍在运行", message: "原来的游戏已保留，可以直接返回。切换玩法前请先在游戏菜单中结束当前会话。",
+                                     recovery: sessionRecovery(for: applicationID))
                 return
             }
             if let current = gameContexts[applicationID], sessions[applicationID] != nil {
                 guard current.gameID == game.gameId, current.modeID == mode.id else {
-                    issue = RuntimeIssue(title: "游戏仍在运行", message: "请先继续当前游戏，或在游戏菜单中结束后再切换玩法。")
+                    issue = RuntimeIssue(title: "游戏仍在运行", message: "可以返回当前游戏继续，或在游戏菜单中结束后再切换玩法。",
+                                         recovery: sessionRecovery(for: applicationID))
                     return
                 }
                 resumeGame(game.gameId, catalog: catalog, library: library)
@@ -267,13 +324,30 @@ final class NativeWebRuntime: ObservableObject {
 
     func resumeGame(_ gameID: String, catalog: CatalogStore, library: HomeLibrary) {
         if let entry = gameContexts.first(where: { $0.value.gameID == gameID || resolvedGameID($0.value) == gameID }),
-           sessions[entry.key] != nil, let app = applications.first(where: { $0.id == entry.key }) {
-            present(app, url: entry.value.launchURL, catalog: catalog, library: library)
+           let recovery = sessionRecovery(for: entry.key) {
+            resumeSession(recovery, catalog: catalog, library: library)
         } else if let game = registeredGames.values.first(where: { $0.gameId == gameID }),
                   let app = applications.first(where: { registeredGame(for: $0)?.gameId == game.gameId }),
-                  let browser = sessions[app.id]?.browser, let url = browser.url {
-            present(app, url: url, catalog: catalog, library: library)
+                  let recovery = sessionRecovery(for: app.id) {
+            resumeSession(recovery, catalog: catalog, library: library)
         }
+    }
+
+    func canCreateGameRoom(catalog: CatalogStore) -> Bool {
+        guard !isClearingIdentity else { issue = RuntimeIssue(title: "正在切换账号", message: "请稍后再创建房间。"); return false }
+        guard let app = catalog.application(id: "play"), app.runtimeScope == "public", app.canOpenAsGuest,
+              app.launchURL?.host?.lowercased() == "play.yunle.fun" else {
+            issue = RuntimeIssue(title: "暂时无法创建房间", message: "请先刷新工坊中的云乐坊间应用资料，再试一次。")
+            return false
+        }
+        if sessions["play"] != nil {
+            if let context = gameContexts["play"], context.gameID == "room", let status = gameSessionStatuses[context.gameID], status.launchID == context.launchID,
+               isClosedRoom(status) || (status.phase == .failed && status.room == nil) { return true }
+            issue = RuntimeIssue(title: "云乐坊间仍在运行", message: "请先返回当前房间或游戏，或在菜单中结束后再创建新房间。",
+                                 recovery: sessionRecovery(for: "play"))
+            return false
+        }
+        return true
     }
 
     func openGameRoom(_ intent: NativeGameRoomIntent, catalog: CatalogStore, library: HomeLibrary) {
@@ -282,8 +356,22 @@ final class NativeWebRuntime: ObservableObject {
             issue = RuntimeIssue(title: "正在切换账号", message: "请稍后再打开房间。")
             return
         }
+        // An ordinary Play page can navigate into a room without a native
+        // lifecycle binding. Its current URL is a navigation hint, not a seat.
+        if let retained = applications.first(where: { app in
+            guard gameContexts[app.id] == nil, app.runtimeScope == "public",
+                  app.launchURL?.host?.lowercased() == "play.yunle.fun" else { return false }
+            return sessions[app.id]?.browser.currentDocumentURL.flatMap(NativeGameLaunchURL.publicURL)
+                .flatMap(NativeGameRoomIntent.parse) == intent
+        }), let recovery = sessionRecovery(for: retained.id) {
+            resumeSession(recovery, catalog: catalog, library: library)
+            return
+        }
         let current = gameContexts.first { entry in
-            guard sessions[entry.key] != nil else { return false }
+            guard let session = sessions[entry.key], entry.value.identity == identityReset else { return false }
+            if let visibleRoom = session.browser.currentDocumentURL.flatMap(NativeGameLaunchURL.publicURL).flatMap(NativeGameRoomIntent.parse) {
+                return visibleRoom == intent
+            }
             if let room = gameSessionStatuses[entry.value.gameID]?.room {
                 return room.inviteCode == intent.inviteCode && room.role == intent.role.rawValue
             }
@@ -308,7 +396,8 @@ final class NativeWebRuntime: ObservableObject {
                   occupied.identity == identityReset,
                   let status = gameSessionStatuses[occupied.gameID], status.launchID == occupied.launchID,
                   isClosedRoom(status) || (status.phase == .failed && status.room == nil) else {
-                issue = RuntimeIssue(title: "云乐坊间仍在运行", message: "请先返回原来的游戏，或在菜单中结束后再打开其他房间。")
+                issue = RuntimeIssue(title: "云乐坊间仍在运行", message: "可以返回正在运行的房间或游戏继续，或在其菜单中结束后再打开其他房间。",
+                                     recovery: sessionRecovery(for: app.id))
                 return
             }
             // An ended or never-confirmed failed room can outlive its continue
@@ -607,7 +696,7 @@ final class NativeWebRuntime: ObservableObject {
             controller.url = url
             if gameContexts[app.id] != nil {
                 controller.usesGameInteractionPolicy = true
-                controller.gameInteractionSettings = gameInteractionSettings(for: app.id)
+                controller.gameInteractionSettings = gameInteractionSettings
                 controller.showsApplicationDetails = catalog.application(id: app.id) != nil
                 controller.publicLinkURL = { NativeGameLaunchURL.publicURL($0) ?? NativeGameLaunchURL.publicURL(url) }
                 controller.gameLifecycleOrigin = gameContexts[app.id]?.messageOrigin
@@ -876,6 +965,38 @@ final class NativeWebRuntime: ObservableObject {
         let hasForeground = sessions.values.contains { $0.presentation.presentingViewController != nil }
         let keep = hasForeground ? nil : applications.first?.id
         for app in applications where app.id != keep && sessions[app.id]?.presentation.presentingViewController == nil { end(app) }
+    }
+}
+
+private extension WebGameInteractionSettings {
+    static let defaultsKey = "native.game-interactions.v2"
+
+    func save(to defaults: UserDefaults) {
+        if let data = try? JSONEncoder().encode(self) { defaults.set(data, forKey: Self.defaultsKey) }
+    }
+
+    static func load(from defaults: UserDefaults) -> Self {
+        let decoder = JSONDecoder()
+        if let data = defaults.data(forKey: defaultsKey), let settings = try? decoder.decode(Self.self, from: data) {
+            return settings
+        }
+
+        struct LegacySettings: Decodable {
+            let allowsPageBounce: Bool
+            let allowsLongPress: Bool
+        }
+        let savedGames = defaults.dictionaryRepresentation().compactMap { key, value -> LegacySettings? in
+            guard key.hasPrefix("native.game-interactions.v1."), let data = value as? Data else { return nil }
+            return try? decoder.decode(LegacySettings.self, from: data)
+        }
+        var settings = Self()
+        // Keep each choice that agreed across saved games. Conflicts use the off default.
+        if !savedGames.isEmpty {
+            settings.allowsPageBounce = savedGames.allSatisfy(\.allowsPageBounce)
+            settings.allowsLongPress = savedGames.allSatisfy(\.allowsLongPress)
+        }
+        settings.save(to: defaults)
+        return settings
     }
 }
 

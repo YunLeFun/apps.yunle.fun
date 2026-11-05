@@ -10,6 +10,13 @@ struct AppRootView: View {
     @State private var deferredGameLaunch = NativeGameDeferredLaunchCoordinator()
     @State private var awaitingGamePresentationDismissal = false
     @State private var gameResourcePreparation: NativeGameResourcePreparation?
+    @State private var roomCreation: RoomCreationPresentation?
+    @State private var createdRoom: (NativeGameRoomIntent, AccountRequestBoundary)?
+    private struct RoomCreationPresentation: Identifiable {
+        let id = UUID()
+        let boundary: AccountRequestBoundary
+        let gameID: String?
+    }
     @AppStorage(ScreenshotFeedbackPromptState.preferenceKey) private var screenshotFeedbackEnabled = true
     @EnvironmentObject private var catalog: CatalogStore
     @EnvironmentObject private var library: HomeLibrary
@@ -29,7 +36,7 @@ struct AppRootView: View {
             })
             .background(EmptyView().sheet(item: Binding(get: { gameLogin.login }, set: { if $0 == nil { gameLogin.presentationEnded() } }),
                                          onDismiss: finishGameLogin) { intent in
-                LoginView(continuationMessage: "登录后返回所选游戏或房间，进入时会再次确认玩法和席位。",
+                LoginView(continuationMessage: "登录后继续创建房间，或返回所选游戏与房间。进入时会确认玩法和席位。",
                           continuation: intent.continuation,
                           onCommitted: { proof in
                     gameLogin.committed(proof, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
@@ -49,7 +56,13 @@ struct AppRootView: View {
                 if let url = activity.webpageURL { handleLink(url) }
             }
             .alert(item: $runtime.issue) { issue in
-                Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
+                if let recovery = issue.recovery {
+                    return Alert(title: Text(issue.title), message: Text(issue.message),
+                        primaryButton: .default(Text(recovery.title)) {
+                            runtime.resumeSession(recovery, catalog: catalog, library: library)
+                        }, secondaryButton: .cancel(Text("取消")))
+                }
+                return Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             }
             .sheet(item: $runtime.unavailableApplication) { application in
                 ApplicationUnavailableView(application: application).environmentObject(library)
@@ -57,6 +70,18 @@ struct AppRootView: View {
             .sheet(item: $gameResourcePreparation) { selection in
                 NativeGameResourcesView(selection: selection, cache: gameResources)
                     .environmentObject(accounts)
+            }
+            .sheet(item: $roomCreation, onDismiss: {
+                let result = createdRoom
+                createdRoom = nil
+                awaitingGamePresentationDismissal = false
+                if let result, result.1 == accountBoundary { requestGameLaunch(.room(result.0)) }
+                else { drainDeferredGameLaunch() }
+            }) { selection in
+                NativeRoomCreationView(accounts: accounts, games: games.games, gameID: selection.gameID) { room in
+                    guard roomCreation?.id == selection.id, selection.boundary == accountBoundary else { return }
+                    createdRoom = (room, selection.boundary)
+                }
             }
             .background(EmptyView().alert(item: $crossAppAuthorization.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
@@ -87,8 +112,13 @@ struct AppRootView: View {
                 updateGameIdentity()
                 gameResources.cancel()
                 gameResourcePreparation = nil
+                roomCreation = nil
+                createdRoom = nil
             }
-            .onChange(of: accounts.selectionOperationGeneration) { _ in updateFeedbackIdentity(); updateGameIdentity() }
+            .onChange(of: accounts.selectionOperationGeneration) { _ in
+                roomCreation = nil; createdRoom = nil
+                updateFeedbackIdentity(); updateGameIdentity()
+            }
             .onChange(of: games.catalog?.catalogVersion) { _ in runtime.updateGameCatalog(games.games) }
             .onChange(of: accounts.isRestoring) { _ in drainDeferredGameLaunch() }
             .onChange(of: accounts.initialRestorePhase) { _ in drainDeferredGameLaunch() }
@@ -129,11 +159,12 @@ struct AppRootView: View {
         NavigationStack {
             GamesView(store: games, history: gameHistory,
                       open: { game, mode in requestGameLaunch(.game(game, mode)) },
-                      resume: { runtime.resumeGame($0, catalog: catalog, library: library) },
-                      runningGameIDs: runtime.runningGameIDs,
+                      resume: { runtime.resumeSession($0, catalog: catalog, library: library) },
+                      runningSessions: runtime.gameContinuations,
                       onRoom: { requestGameLaunch(.room($0)) }, continuationRoom: gameRooms.continuation,
                       fallback: { runtime.openGameFallback($0, catalog: catalog, library: library) },
-                      prepareResources: prepareGameResources)
+                      prepareResources: prepareGameResources,
+                      createRoom: { requestGameLaunch(.createRoom(gameID: $0)) })
                 .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
         }
     }
@@ -186,11 +217,13 @@ struct AppRootView: View {
             runtime.issue = RuntimeIssue(title: "这个玩法暂未开放", message: "请刷新游戏列表，或在 Play 中查看当前可用玩法。")
             return
         }
-        if feedbackLogin.login != nil || gameLogin.login != nil {
+        if feedbackLogin.login != nil || gameLogin.login != nil || roomCreation != nil {
             deferGameLaunch(action)
             awaitingGamePresentationDismissal = true
             feedbackLogin.cancel()
             gameLogin.cancel()
+            roomCreation = nil
+            createdRoom = nil
             return
         }
         if awaitingGamePresentationDismissal {
@@ -204,7 +237,7 @@ struct AppRootView: View {
         }
         deferredGameLaunch.cancel()
         let needsLogin: Bool
-        switch action { case .game(_, let mode): needsLogin = mode.requiresLogin; case .room: needsLogin = true }
+        switch action { case .game(_, let mode): needsLogin = mode.requiresLogin; case .room, .createRoom: needsLogin = true }
         if needsLogin, accounts.user == nil {
             gameLogin.begin(action, origin: accountBoundary, isRestoring: accountRestorationInProgress)
             return
@@ -239,6 +272,9 @@ struct AppRootView: View {
             guard let game = games.game(id: selected.gameId), let mode = game.mode(id: selectedMode.id) else { return }
             runtime.openGame(game, mode: mode, catalog: catalog, library: library)
         case .room(let room): runtime.openGameRoom(room, catalog: catalog, library: library)
+        case .createRoom(let gameID):
+            guard runtime.canCreateGameRoom(catalog: catalog) else { return }
+            roomCreation = RoomCreationPresentation(boundary: accountBoundary, gameID: gameID)
         }
     }
 

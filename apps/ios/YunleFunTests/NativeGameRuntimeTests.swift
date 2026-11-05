@@ -11,28 +11,33 @@ final class NativeGameRuntimeTests: XCTestCase {
         let suite = "game-interaction-settings-" + UUID().uuidString
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
+        // Previous releases persisted only these two keys, separately for each game.
+        defaults.set(Data(#"{"allowsPageBounce":true,"allowsLongPress":true}"#.utf8), forKey: "native.game-interactions.v1.gomoku")
+        defaults.set(Data(#"{"allowsPageBounce":false,"allowsLongPress":true}"#.utf8), forKey: "native.game-interactions.v1.paper-star")
         let fixture = try await makeFixture(interactionDefaults: defaults)
-        let selected = WebGameInteractionSettings(allowsPageBounce: true, allowsLongPress: true)
+        XCTAssertEqual(fixture.runtime.gameInteractionSettings, WebGameInteractionSettings(allowsLongPress: true))
+        let selected = WebGameInteractionSettings(allowsPageBounce: true, allowsDoubleTapZoom: true)
         try await changeGameInteractionSettings(fixture, to: selected)
-        XCTAssertEqual(fixture.runtime.gameInteractionSettings(for: "paper-star"), WebGameInteractionSettings())
         await fixture.close()
 
         let restored = try await makeFixture(interactionDefaults: XCTUnwrap(UserDefaults(suiteName: suite)))
         let reopened = try await restored.open(try restored.game("gomoku"), mode: restored.mode("computer", gameID: "gomoku"))
         XCTAssertEqual(reopened.gameInteractionSettings, selected)
         XCTAssertTrue(try restored.web(reopened).scrollView.bounces)
-        XCTAssertTrue(try restored.web(reopened).allowsLinkPreview)
-        XCTAssertEqual(restored.runtime.gameInteractionSettings(for: "paper-star"), WebGameInteractionSettings())
+        XCTAssertFalse(try restored.web(reopened).allowsLinkPreview)
     }
 
     private func changeGameInteractionSettings(_ fixture: NativeGameRuntimeFixture, to settings: WebGameInteractionSettings) async throws {
-        let game = try fixture.game("gomoku"), mode = try fixture.mode("computer", gameID: "gomoku")
-        let browser = try await fixture.open(game, mode: mode)
-        XCTAssertEqual(browser.gameInteractionSettings, WebGameInteractionSettings())
-        fixture.runtime.setGameInteractionSettings(settings, for: game.appId)
-        XCTAssertEqual(browser.gameInteractionSettings, settings)
-        XCTAssertTrue(try fixture.web(browser).scrollView.bounces)
-        XCTAssertTrue(try fixture.web(browser).allowsLinkPreview)
+        let board = try await fixture.open(fixture.game("gomoku"), mode: fixture.mode("computer", gameID: "gomoku"))
+        let star = try await fixture.open(fixture.game("paper-star"), mode: fixture.mode("local", gameID: "paper-star"))
+        XCTAssertNil(board.viewIfLoaded?.window)
+        XCTAssertNotNil(star.viewIfLoaded?.window)
+        fixture.runtime.gameInteractionSettings = settings
+        for browser in [board, star] {
+            XCTAssertEqual(browser.gameInteractionSettings, settings)
+            XCTAssertTrue(try fixture.web(browser).scrollView.bounces)
+            XCTAssertFalse(try fixture.web(browser).allowsLinkPreview)
+        }
     }
 
     func testFixtureCleanupBeforeOpeningFirstGamePage() async throws {
@@ -304,12 +309,100 @@ final class NativeGameRuntimeTests: XCTestCase {
         XCTAssertEqual(fixture.runtime.issue?.title, "云乐坊间仍在运行")
         XCTAssertNil(fixture.runtime.gameSessionStatuses["room"])
         XCTAssertTrue(fixture.runtime.runningGameIDs.isEmpty)
-        fixture.runtime.issue = nil
-        fixture.runtime.open(play, catalog: fixture.catalog, library: fixture.library)
+        let recovery = try XCTUnwrap(fixture.runtime.issue?.recovery)
+        XCTAssertEqual(fixture.runtime.gameContinuations.map(\.id), [play.id], "Ordinary Play pages must remain reachable from Games")
+        fixture.runtime.resumeSession(recovery, catalog: fixture.catalog, library: fixture.library)
         let retained = try await fixture.browser(applicationID: play.id)
+        XCTAssertNil(fixture.runtime.issue)
         XCTAssertTrue(retained === browser)
         XCTAssertEqual(try fixture.profile(retained), profile)
         await fixture.endAll()
+    }
+
+    func testRecoveryCannotResumeAReplacementSessionOrCrossAnAccountBoundary() async throws {
+        let fixture = try await makeFixture()
+        try await exerciseStaleRecovery(fixture)
+        await fixture.close()
+    }
+
+    private func exerciseStaleRecovery(_ fixture: NativeGameRuntimeFixture) async throws {
+        let play = fixture.application("play")
+        fixture.runtime.open(play, catalog: fixture.catalog, library: fixture.library)
+        let original = try await fixture.browser(applicationID: play.id)
+        let recovery = try XCTUnwrap(fixture.runtime.gameContinuations.first?.recovery)
+        fixture.runtime.end(play)
+        try await fixture.wait { fixture.root.presentedViewController == nil }
+        fixture.runtime.open(play, catalog: fixture.catalog, library: fixture.library)
+        let replacement = try await fixture.browser(applicationID: play.id)
+        XCTAssertFalse(replacement === original)
+        try await minimizeRoom(replacement, fixture: fixture)
+        fixture.runtime.resumeSession(recovery, catalog: fixture.catalog, library: fixture.library)
+        XCTAssertEqual(fixture.runtime.issue?.title, "原来的会话已结束")
+        XCTAssertNil(fixture.root.presentedViewController)
+        XCTAssertEqual(fixture.runtime.applications.count, 1)
+        let current = try XCTUnwrap(fixture.runtime.gameContinuations.first?.recovery)
+        await fixture.resetIdentity("another-account")
+        fixture.runtime.resumeSession(current, catalog: fixture.catalog, library: fixture.library)
+        XCTAssertEqual(fixture.runtime.issue?.title, "原来的会话已结束")
+        XCTAssertTrue(fixture.runtime.gameContinuations.isEmpty)
+        XCTAssertNil(fixture.root.presentedViewController)
+    }
+
+    func testRoomRoleChangeOffersReturnWithoutReplacingTheSpectatorPage() async throws {
+        let fixture = try await makeFixture()
+        try await exerciseRoomRoleReturn(fixture)
+        await fixture.close()
+    }
+
+    private func exerciseRoomRoleReturn(_ fixture: NativeGameRuntimeFixture) async throws {
+        let spectator = try NativeGameRoomIntent(input: "ABC234", role: .spectator)
+        fixture.runtime.openGameRoom(spectator, catalog: fixture.catalog, library: fixture.library)
+        let browser = try await fixture.browser(applicationID: "play")
+        let status = try XCTUnwrap(fixture.runtime.gameSessionStatuses["room"])
+        try await fixture.document(browser, origin: try XCTUnwrap(browser.url))
+        try await minimizeRoom(browser, fixture: fixture)
+        fixture.runtime.openGameRoom(try NativeGameRoomIntent(input: "ABC234", role: .player), catalog: fixture.catalog, library: fixture.library)
+        let recovery = try XCTUnwrap(fixture.runtime.issue?.recovery)
+        XCTAssertEqual(recovery.title, "返回原来的房间")
+        fixture.runtime.resumeSession(recovery, catalog: fixture.catalog, library: fixture.library)
+        let retained = try await fixture.browser(applicationID: "play")
+        XCTAssertTrue(retained === browser)
+        XCTAssertEqual(fixture.runtime.gameSessionStatuses["room"]?.launchID, status.launchID)
+        XCTAssertEqual(NativeGameLaunchURL.publicURL(try XCTUnwrap(retained.currentDocumentURL)), spectator.url)
+    }
+
+    func testRoomInviteResumesCurrentPageBeforeLifecycleConfirmation() async throws {
+        for nativeGame in [false, true] {
+            let fixture = try await makeFixture()
+            try await exerciseCurrentRoomReturn(fixture, nativeGame: nativeGame)
+            await fixture.close()
+        }
+    }
+
+    private func exerciseCurrentRoomReturn(_ fixture: NativeGameRuntimeFixture, nativeGame: Bool) async throws {
+        let intent = try NativeGameRoomIntent(input: "ABC234", role: .player)
+        let applicationID = nativeGame ? "gomoku" : "play"
+        let browser: WebViewController
+        if nativeGame {
+            browser = try await fixture.open(fixture.game("gomoku"), mode: fixture.mode("online", gameID: "gomoku"))
+        } else {
+            fixture.runtime.open(fixture.application("play"), catalog: fixture.catalog, library: fixture.library)
+            browser = try await fixture.browser(applicationID: applicationID)
+        }
+        try await fixture.document(browser, origin: intent.url)
+        _ = try await fixture.web(browser).evaluateJavaScript("window.returnProgress = 'preserved'")
+        let profile = try fixture.profile(browser)
+        try await minimizeRoom(browser, fixture: fixture)
+        fixture.runtime.openGameRoom(intent, catalog: fixture.catalog, library: fixture.library)
+        XCTAssertNil(fixture.runtime.issue, "Returning to the room already visible in the retained page must not be blocked")
+        XCTAssertEqual(fixture.runtime.applications.count, 1, "A missing room event must not create another game container")
+        if fixture.runtime.issue == nil, fixture.runtime.applications.count == 1 {
+            let resumed = try await fixture.browser(applicationID: applicationID)
+            XCTAssertTrue(resumed === browser)
+            XCTAssertEqual(try fixture.profile(resumed), profile)
+            let progress = try await fixture.web(resumed).evaluateJavaScript("window.returnProgress")
+            XCTAssertEqual(progress as? String, "preserved")
+        }
     }
 
     func testDifferentInviteDoesNotInheritLegacySingleGameProfile() async throws {

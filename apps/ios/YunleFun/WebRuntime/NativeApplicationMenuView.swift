@@ -68,15 +68,6 @@ struct NativeApplicationMenuView: View {
                         ApplicationCacheUpdateNotice(application: application, store: runtime.applicationCache)
                     }
                 }
-                if isGame {
-                    Section {
-                        Toggle("页面回弹", isOn: gameInteractionBinding(\.allowsPageBounce))
-                            .accessibilityIdentifier("runtime.menu.game-page-bounce")
-                        Toggle("长按选中与预览", isOn: gameInteractionBinding(\.allowsLongPress))
-                            .accessibilityIdentifier("runtime.menu.game-long-press")
-                    } header: { Text("游戏网页交互") }
-                    footer: { Text("默认关闭以减少游戏操作干扰。长按开关包含文字选中、链接预览和图片拖动。设置对当前游戏立即生效并自动保存，输入框仍可编辑。") }
-                }
                 Section {
                     Button(role: .destructive) { perform(.end) } label: { Label("结束", systemImage: "xmark.circle") }
                 } footer: { Text("结束后会释放当前会话，再次打开将重新载入。") }
@@ -96,14 +87,6 @@ struct NativeApplicationMenuView: View {
         var origin = URLComponents()
         origin.scheme = scheme; origin.host = host; origin.port = url.port
         return origin.string
-    }
-
-    private func gameInteractionBinding(_ keyPath: WritableKeyPath<WebGameInteractionSettings, Bool>) -> Binding<Bool> {
-        Binding(get: { runtime.gameInteractionSettings(for: application.id)[keyPath: keyPath] }, set: { value in
-            var settings = runtime.gameInteractionSettings(for: application.id)
-            settings[keyPath: keyPath] = value
-            runtime.setGameInteractionSettings(settings, for: application.id)
-        })
     }
 }
 

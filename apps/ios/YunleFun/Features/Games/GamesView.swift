@@ -4,12 +4,13 @@ struct GamesView: View {
     @ObservedObject var store: NativeGameCatalogStore
     @ObservedObject var history: NativeGameHistoryStore
     let open: (NativeGame, NativeGameMode) -> Void
-    let resume: (String) -> Void
-    let runningGameIDs: Set<String>
+    let resume: (RuntimeSessionRecovery) -> Void
+    let runningSessions: [NativeGameContinuation]
     let onRoom: (NativeGameRoomIntent) -> Void
     let continuationRoom: NativeGameRoomIntent?
     var fallback: ((NativeGame) -> Void)? = nil
     var prepareResources: ((NativeGame) -> Void)? = nil
+    var createRoom: ((String?) -> Void)? = nil
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var query = ""
@@ -17,8 +18,9 @@ struct GamesView: View {
     @State private var joinSheet: JoinSheet?
     @State private var pendingRoom: NativeGameRoomIntent?
     @State private var pendingRoomIdentity: UUID?
+    @State private var pendingCreation: UUID?
 
-    private struct JoinSheet: Identifiable { let id = UUID(); let identity: UUID }
+    private struct JoinSheet: Identifiable { let id = UUID(); let identity: UUID; var publicRooms = false }
     private enum GameFilter: String, CaseIterable, Identifiable {
         case all = "全部", solo = "单人", local = "同屏", online = "联机"
         var id: Self { self }
@@ -40,7 +42,6 @@ struct GamesView: View {
                 .contains { $0.localizedStandardContains(term) })
         }
     }
-    private var runningGames: [NativeGame] { store.games.filter { runningGameIDs.contains($0.gameId) } }
     private var recentGames: [(NativeGameHistoryEntry, NativeGame, NativeGameMode)] {
         history.entries.prefix(6).compactMap { entry in
             guard let game = store.game(id: entry.gameID), let mode = game.mode(id: entry.modeID) else { return nil }
@@ -53,6 +54,7 @@ struct GamesView: View {
             catalogNotice
             if isBrowsing {
                 runningSection
+                publicRoomsSection
                 roomSection
                 recentSection
             }
@@ -62,6 +64,12 @@ struct GamesView: View {
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索游戏" : "搜索游戏或玩法"))
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                NavigationLink {
+                    GameInteractionSettingsView()
+                } label: { Label("游戏交互设置", systemImage: "gearshape") }
+                .accessibilityIdentifier("games.settings")
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { joinSheet = JoinSheet(identity: accounts.identityGeneration) } label: { Label("加入房间", systemImage: "person.2.badge.plus") }
                     .accessibilityIdentifier("games.join-room")
@@ -80,10 +88,17 @@ struct GamesView: View {
             }
         }
         .sheet(item: $joinSheet, onDismiss: continueRequestedRoom) { sheet in
-            GameRoomJoinView { intent in
-                guard sheet.identity == accounts.identityGeneration else { return }
-                pendingRoom = intent
-                pendingRoomIdentity = sheet.identity
+            if sheet.publicRooms {
+                NativePublicRoomsView(games: store.games, onCreate: {
+                    guard sheet.identity == accounts.identityGeneration else { return }
+                    pendingCreation = sheet.identity
+                }) { intent in
+                    queueRoom(intent, from: sheet)
+                }
+            } else {
+                GameRoomJoinView { intent in
+                    queueRoom(intent, from: sheet)
+                }
             }
         }
         .task(id: accounts.identityGeneration) {
@@ -93,9 +108,43 @@ struct GamesView: View {
         .onChange(of: accounts.identityGeneration) { _ in
             pendingRoom = nil
             pendingRoomIdentity = nil
+            pendingCreation = nil
             joinSheet = nil
         }
         .refreshable { await store.load(force: true) }
+    }
+
+    private var publicRoomsSection: some View {
+        Section {
+            if let createRoom {
+                Button { createRoom(nil) } label: {
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("创建房间").foregroundStyle(.primary)
+                            Text("选择游戏，设置公开或私密").font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    } icon: { Image(systemName: "plus.circle.fill") }
+                }
+                .disabled(accounts.isRestoring || accounts.isInitialRestorePending)
+                .accessibilityIdentifier("games.create-room")
+            }
+            Button { joinSheet = JoinSheet(identity: accounts.identityGeneration, publicRooms: true) } label: {
+                Label {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("公开房间").foregroundStyle(.primary)
+                        Text("看看谁正在玩，点选加入").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                } icon: { Image(systemName: "person.2.fill") }
+            }
+            .disabled(accounts.isRestoring || accounts.isInitialRestorePending)
+            .accessibilityIdentifier("games.public-rooms")
+        }
+    }
+
+    private func queueRoom(_ intent: NativeGameRoomIntent, from sheet: JoinSheet) {
+        guard sheet.identity == accounts.identityGeneration else { return }
+        pendingRoom = intent
+        pendingRoomIdentity = sheet.identity
     }
 
     @ViewBuilder private var catalogNotice: some View {
@@ -114,15 +163,24 @@ struct GamesView: View {
     }
 
     @ViewBuilder private var runningSection: some View {
-        if !runningGames.isEmpty {
+        if !runningSessions.isEmpty {
             Section("继续游戏") {
-                ForEach(runningGames) { game in
-                    Button { resume(game.gameId) } label: {
-                        gameSummary(game, subtitle: "恢复正在运行的游戏", systemImage: "play.circle.fill")
+                ForEach(runningSessions) { session in
+                    Button { resume(session.recovery) } label: {
+                        if let id = session.gameID, let game = store.game(id: id) {
+                            gameSummary(game, subtitle: "恢复正在运行的游戏", systemImage: "play.circle.fill")
+                        } else {
+                            Label {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(session.recovery.title).foregroundStyle(.primary)
+                                    Text("恢复正在运行的房间或页面").font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            } icon: { Image(systemName: "play.circle.fill") }
+                        }
                     }
                     .buttonStyle(.plain)
                     .disabled(accounts.isRestoring)
-                    .accessibilityIdentifier("games.resume.\(game.gameId)")
+                    .accessibilityIdentifier("games.resume.\(session.gameID ?? session.id)")
                 }
             }
         }
@@ -152,7 +210,7 @@ struct GamesView: View {
         if !recentGames.isEmpty {
             Section("最近玩过") {
                 ForEach(recentGames, id: \.0.id) { _, game, mode in
-                    Button { open(game, mode) } label: { gameSummary(game, subtitle: mode.title, systemImage: "clock") }
+                    Button { launchGame(game, mode: mode) } label: { gameSummary(game, subtitle: mode.title, systemImage: "clock") }
                         .buttonStyle(.plain)
                         .disabled(accounts.isRestoring || !game.isPlayable || !mode.available)
                         .accessibilityIdentifier("games.recent.\(game.gameId)")
@@ -199,7 +257,7 @@ struct GamesView: View {
             Text(game.description).font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 180 : 112), alignment: .leading)], alignment: .leading, spacing: 10) {
                 ForEach(game.launchModes) { mode in
-                    let launch = Button { open(game, mode) } label: {
+                    let launch = Button { launchGame(game, mode: mode) } label: {
                         Text(mode.title).font(.subheadline).frame(maxWidth: .infinity, minHeight: 32).fixedSize(horizontal: false, vertical: true)
                     }
                     Group {
@@ -259,12 +317,42 @@ struct GamesView: View {
     }
 
     private func continueRequestedRoom() {
+        if let identity = pendingCreation {
+            pendingCreation = nil
+            if identity == accounts.identityGeneration { createRoom?(nil) }
+            return
+        }
         let intent = pendingRoom
         let identity = pendingRoomIdentity
         pendingRoom = nil
         pendingRoomIdentity = nil
         guard let intent, identity == accounts.identityGeneration else { return }
         onRoom(intent)
+    }
+
+    private func launchGame(_ game: NativeGame, mode: NativeGameMode) {
+        if mode.id == "online", let createRoom { createRoom(game.gameId) }
+        else { open(game, mode) }
+    }
+}
+
+struct GameInteractionSettingsView: View {
+    @EnvironmentObject private var runtime: NativeWebRuntime
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("双击放大网页", isOn: $runtime.gameInteractionSettings.allowsDoubleTapZoom)
+                Toggle("长按选中与预览", isOn: $runtime.gameInteractionSettings.allowsLongPress)
+                Toggle("页面边缘回弹", isOn: $runtime.gameInteractionSettings.allowsPageBounce)
+            } header: {
+                Text("游戏网页手势")
+            } footer: {
+                Text("设置应用于本机所有寻乐对局。开启后由游戏网页决定是否支持该手势。关闭后仍可正常滚动、双指缩放和编辑输入框。")
+            }
+        }
+        .navigationTitle("游戏交互设置")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

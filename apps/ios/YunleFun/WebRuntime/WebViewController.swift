@@ -51,6 +51,7 @@ struct WebAppMenuPage {
 struct WebGameInteractionSettings: Codable, Equatable {
     var allowsPageBounce = false
     var allowsLongPress = false
+    var allowsDoubleTapZoom = false
 }
 
 /// 自定义网页容器，按 displayMode 分两种形态：
@@ -60,6 +61,8 @@ struct WebGameInteractionSettings: Codable, Equatable {
 /// 网页底部仍铺满。关闭收口在「更多」展开面板。
 class WebViewController: UIViewController {
     var url: URL?
+    /// The visible document can differ from the session's initial launch URL.
+    var currentDocumentURL: URL? { webView?.url ?? url }
     /// Optional native-host loader for explicitly downloaded public application resources.
     var initialContentLoader: ((WKWebView, URL, @escaping () -> Void) -> Void)?
     /// Presentation can finish before an asynchronous host has submitted its first navigation.
@@ -188,7 +191,6 @@ class WebViewController: UIViewController {
     private var nativeBackItem: UIBarButtonItem?
     private var nativeMinimizeItem: UIBarButtonItem?
     private var nativeFloatingControls: WebChromeControlContainer?
-    private var gameControls: GameChromeCapsule?
     private var gameURLObservation: NSKeyValueObservation?
     /// 页面通过 JSAPI 主动隐藏了胶囊（每次主文档导航重置；仅沉浸模式可触发）
     private var capsuleHiddenByPage = false
@@ -319,7 +321,7 @@ class WebViewController: UIViewController {
         if usesSystemTitleBar {
             // Play can enter or leave a game with pushState in the same WebView.
             gameURLObservation = webView.observe(\.url, options: .new) { [weak self] _, _ in
-                DispatchQueue.main.async { self?.applyBarButtonStyles() }
+                DispatchQueue.main.async { self?.updateGameAppearance() }
             }
         }
 
@@ -357,6 +359,7 @@ class WebViewController: UIViewController {
         nativeBackItem = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain,
                                         target: self, action: #selector(goBackTapped))
         nativeBackItem?.accessibilityLabel = "返回网页"
+        nativeBackItem?.accessibilityIdentifier = "runtime.back"
         let more = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), style: .plain,
                                   target: self, action: #selector(moreTapped))
         more.accessibilityLabel = "更多操作"
@@ -375,7 +378,6 @@ class WebViewController: UIViewController {
 
     private func updateHistoryControls() {
         let canGoBack = webView?.canGoBack == true
-        gameControls?.backButton.isHidden = !canGoBack
         backButton?.isHidden = !canGoBack || (usesSystemTitleBar && titleBarVisible)
         if usesSystemTitleBar {
             navigationItem.leftBarButtonItems = (canGoBack ? [nativeBackItem, nativeMinimizeItem] : [nativeMinimizeItem]).compactMap { $0 }
@@ -452,7 +454,7 @@ class WebViewController: UIViewController {
         """
         \(Self.gameInteractionScriptMarker)
         (() => {
-          const settings = {allowsPageBounce: \(gameInteractionSettings.allowsPageBounce), allowsLongPress: \(gameInteractionSettings.allowsLongPress)};
+          const settings = {allowsPageBounce: \(gameInteractionSettings.allowsPageBounce), allowsLongPress: \(gameInteractionSettings.allowsLongPress), allowsDoubleTapZoom: \(gameInteractionSettings.allowsDoubleTapZoom)};
           if (window.__ylfApplyGameInteractions) {
             window.__ylfApplyGameInteractions(settings);
             return;
@@ -462,6 +464,8 @@ class WebViewController: UIViewController {
             const id = 'ylf-native-game-interactions';
             let style = document.getElementById(id);
             let css = value.allowsPageBounce ? '' : 'html, body { overscroll-behavior: none !important; }';
+            // Limit native double-tap zoom at the root; keep game-specific gestures on the board.
+            if (!value.allowsDoubleTapZoom) css += ':where(html, body) { touch-action: manipulation; }';
             if (!value.allowsLongPress) css += `
               * {
                 -webkit-user-select: none !important;
@@ -493,7 +497,7 @@ class WebViewController: UIViewController {
           window.addEventListener('message', event => {
             if (event.source !== window.parent || !event.data || event.data.type !== 'ylf-game-interactions') return;
             const value = event.data.settings;
-            if (value && typeof value.allowsPageBounce === 'boolean' && typeof value.allowsLongPress === 'boolean') apply(value);
+            if (value && typeof value.allowsPageBounce === 'boolean' && typeof value.allowsLongPress === 'boolean' && typeof value.allowsDoubleTapZoom === 'boolean') apply(value);
           });
           apply(settings);
         })();
@@ -726,6 +730,7 @@ class WebViewController: UIViewController {
 
         backButton = makeFloatingButton(icon: "chevron.left", pointSize: 14)
         backButton.accessibilityLabel = "返回网页"
+        backButton.accessibilityIdentifier = "runtime.back"
         backButton.isHidden = true
         backButton.addTarget(self, action: #selector(goBackTapped), for: .touchUpInside)
         controls.addSubview(backButton)
@@ -734,6 +739,7 @@ class WebViewController: UIViewController {
         do {
             let mb = makeFloatingButton(icon: "chevron.down", pointSize: 15)
             mb.accessibilityLabel = "收起应用"
+            mb.accessibilityIdentifier = "runtime.minimize"
             mb.addTarget(self, action: #selector(minimizeTapped), for: .touchUpInside)
             minimizeButton = mb
             controls.addSubview(mb)
@@ -748,6 +754,8 @@ class WebViewController: UIViewController {
         progressTopConstraint = titleBar.map { progressView.topAnchor.constraint(equalTo: $0.bottomAnchor) }
             ?? progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
 
+        let leading = usesSystemTitleBar ? view.safeAreaLayoutGuide.leadingAnchor : view.leadingAnchor
+        let trailing = usesSystemTitleBar ? view.safeAreaLayoutGuide.trailingAnchor : view.trailingAnchor
         NSLayoutConstraint.activate([
             progressTopConstraint,
             progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -755,18 +763,18 @@ class WebViewController: UIViewController {
             progressView.heightAnchor.constraint(equalToConstant: 2),
 
             rightControlTopConstraint,
-            rightControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
+            rightControl.trailingAnchor.constraint(equalTo: trailing, constant: -12),
 
             backButton.centerYAnchor.constraint(equalTo: rightControl.centerYAnchor),
             backButton.widthAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
             backButton.heightAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
         ])
 
-        // 左侧布局：标题栏 = [最小化][返回]（返回随历史出现，紧跟最小化键右侧）；沉浸 = [返回] 贴最左
+        // 左侧始终可收起；有网页历史时，返回按钮出现在收起按钮旁。
         if let minimizeButton = minimizeButton {
             NSLayoutConstraint.activate([
                 minimizeButton.centerYAnchor.constraint(equalTo: rightControl.centerYAnchor),
-                minimizeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
+                minimizeButton.leadingAnchor.constraint(equalTo: leading, constant: 12),
                 minimizeButton.widthAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
                 minimizeButton.heightAnchor.constraint(equalToConstant: usesSystemTitleBar ? 44 : 32),
                 backButton.leadingAnchor.constraint(equalTo: minimizeButton.trailingAnchor, constant: 6),
@@ -791,31 +799,15 @@ class WebViewController: UIViewController {
         }
     }
 
-    /// 顶栏浮层按钮材质（返回 / 最小化 / 更多）：嵌在实体标题栏内时素色（前景色着色、无背景），
-    /// 悬浮态（沉浸模式，或标题栏 hideTitleBar 收起后）转暗色半透明圆钮，保证任意网页配色上可读
+    /// 原生宿主在系统导航栏与悬浮系统按钮之间切换；兼容容器随顶栏状态调整配色。
     private func applyBarButtonStyles() {
         if usesSystemTitleBar {
-            let gameID = Self.playGameID(at: webView?.url)
-            let showsGameCapsule = !titleBarVisible && (usesGameInteractionPolicy || gameID != nil)
-            if showsGameCapsule, gameControls == nil { installGameControls() }
-            gameControls?.isHidden = !showsGameCapsule
-            nativeFloatingControls?.isHidden = titleBarVisible || showsGameCapsule
-            nativeFloatingControls?.accessibilityElementsHidden = titleBarVisible || showsGameCapsule
-            nativeFloatingControls?.isUserInteractionEnabled = !titleBarVisible && !showsGameCapsule
+            nativeFloatingControls?.isHidden = titleBarVisible
+            nativeFloatingControls?.accessibilityElementsHidden = titleBarVisible
+            nativeFloatingControls?.isUserInteractionEnabled = !titleBarVisible
             minimizeButton?.isHidden = titleBarVisible
             menuButton?.isHidden = titleBarVisible
-            // The cabinet is always dark; its published CSS selects the top scrim
-            // using prefers-color-scheme. Match WebKit and the system glyphs while
-            // playing, without changing the appearance of the menu or other games.
-            let cabinet = showsGameCapsule && gameID == "pachinko"
-            let appearance: UIUserInterfaceStyle = cabinet ? .dark : .unspecified
-            if webView?.overrideUserInterfaceStyle != appearance { webView?.overrideUserInterfaceStyle = appearance }
-            let style: UIStatusBarStyle = cabinet ? .lightContent : .default
-            if statusBarStyle != style {
-                statusBarStyle = style
-                setNeedsStatusBarAppearanceUpdate()
-                navigationController?.setNeedsStatusBarAppearanceUpdate()
-            }
+            updateGameAppearance()
             updateHistoryControls()
             return
         }
@@ -829,17 +821,18 @@ class WebViewController: UIViewController {
         return path.count >= 3 && path[1] == "games" ? path[2] : nil
     }
 
-    private func installGameControls() {
-        let game = GameChromeCapsule()
-        game.backButton.addTarget(self, action: #selector(goBackTapped), for: .touchUpInside)
-        game.moreButton.addTarget(self, action: #selector(moreTapped), for: .touchUpInside)
-        game.minimizeButton.addTarget(self, action: #selector(minimizeTapped), for: .touchUpInside)
-        view.addSubview(game)
-        gameControls = game
-        NSLayoutConstraint.activate([
-            game.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            game.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -12),
-        ])
+    private func updateGameAppearance() {
+        // The cabinet is always dark; match its WebKit scrim, controls and status bar.
+        let cabinet = !titleBarVisible && Self.playGameID(at: webView?.url) == "pachinko"
+        let appearance: UIUserInterfaceStyle = cabinet ? .dark : .unspecified
+        if webView?.overrideUserInterfaceStyle != appearance { webView?.overrideUserInterfaceStyle = appearance }
+        if nativeFloatingControls?.overrideUserInterfaceStyle != appearance { nativeFloatingControls?.overrideUserInterfaceStyle = appearance }
+        let style: UIStatusBarStyle = cabinet ? .lightContent : .default
+        if statusBarStyle != style {
+            statusBarStyle = style
+            setNeedsStatusBarAppearanceUpdate()
+            navigationController?.setNeedsStatusBarAppearanceUpdate()
+        }
     }
 
     private func styleBarButton(_ button: UIButton) {
@@ -913,7 +906,7 @@ class WebViewController: UIViewController {
         }
     }
 
-    /// 悬浮圆形按钮（与胶囊同材质：暗色半透明，不随浅色/深色模式变化）
+    /// 原生宿主使用系统玻璃按钮；旧系统回退到自适应配色。
     private func makeFloatingButton(icon: String, pointSize: CGFloat) -> UIButton {
         if usesSystemTitleBar {
             var configuration: UIButton.Configuration
@@ -946,6 +939,7 @@ class WebViewController: UIViewController {
     private func makeMenuButton() -> UIButton {
         if usesSystemTitleBar {
             let button = makeFloatingButton(icon: "ellipsis", pointSize: 17)
+            button.accessibilityIdentifier = "runtime.more"
             button.accessibilityLabel = "更多操作"
             button.addTarget(self, action: #selector(moreTapped), for: .touchUpInside)
             return button
@@ -1838,8 +1832,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     /// 标题栏模式下胶囊位于视口上方（y 为负），页面按矩形避让自然判定无重叠
     private func capsuleRectInPage() -> [String: CGFloat] {
         if usesSystemTitleBar {
-            let control: UIView? = titleBarVisible ? navigationController?.navigationBar
-                : (gameControls?.isHidden == false ? gameControls : rightControl)
+            let control: UIView? = titleBarVisible ? navigationController?.navigationBar : rightControl
             view.layoutIfNeeded()
             let rect = control.map { $0.convert($0.bounds, to: webView) } ?? .zero
             return ["x": rect.minX, "y": rect.minY, "width": rect.width, "height": rect.height]
@@ -1854,57 +1847,6 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
     private static let authorizationTimeoutSeconds: TimeInterval = 30
     private static let authorizationConsentTimeoutSeconds: TimeInterval = 5 * 60
     private static let externalAuthorizationTimeoutSeconds: TimeInterval = 5 * 60
-}
-
-/// A single low-profile material surface; each symbol keeps its own 44pt target.
-private final class GameChromeCapsule: UIView {
-    let backButton = UIButton(type: .system)
-    let moreButton = UIButton(type: .system)
-    let minimizeButton = UIButton(type: .system)
-
-    init() {
-        super.init(frame: .zero)
-        translatesAutoresizingMaskIntoConstraints = false
-        accessibilityIdentifier = "runtime.game-controls"
-        let material = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterialDark))
-        material.translatesAutoresizingMaskIntoConstraints = false
-        material.isUserInteractionEnabled = false
-        material.layer.cornerRadius = 16
-        material.layer.cornerCurve = .continuous
-        material.clipsToBounds = true
-        addSubview(material)
-        let stack = UIStackView(arrangedSubviews: [backButton, moreButton, minimizeButton])
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
-        let divider = UIView()
-        divider.backgroundColor = UIColor.white.withAlphaComponent(0.3)
-        divider.translatesAutoresizingMaskIntoConstraints = false
-        divider.isUserInteractionEnabled = false
-        addSubview(divider)
-        for (button, icon, label, id) in [(backButton, "chevron.left", "返回网页", "runtime.back"),
-                                         (moreButton, "ellipsis", "更多操作", "runtime.more"),
-                                         (minimizeButton, "chevron.down", "收起应用", "runtime.minimize")] {
-            button.setImage(UIImage(systemName: icon, withConfiguration: UIImage.SymbolConfiguration(pointSize: 15, weight: .semibold)), for: .normal)
-            button.tintColor = .white
-            button.accessibilityLabel = label
-            button.accessibilityIdentifier = id
-            let width = button.widthAnchor.constraint(equalToConstant: 44)
-            // The stack collapses the optional history button when hidden.
-            if button === backButton { width.priority = .defaultHigh }
-            width.isActive = true
-        }
-        NSLayoutConstraint.activate([
-            heightAnchor.constraint(equalToConstant: 44),
-            material.leadingAnchor.constraint(equalTo: leadingAnchor), material.trailingAnchor.constraint(equalTo: trailingAnchor),
-            material.centerYAnchor.constraint(equalTo: centerYAnchor), material.heightAnchor.constraint(equalToConstant: 32),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor), stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.topAnchor.constraint(equalTo: topAnchor), stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-            divider.centerXAnchor.constraint(equalTo: minimizeButton.leadingAnchor), divider.centerYAnchor.constraint(equalTo: centerYAnchor),
-            divider.widthAnchor.constraint(equalToConstant: 0.5), divider.heightAnchor.constraint(equalToConstant: 14),
-        ])
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 /// Groups native floating buttons without intercepting touches on the page between them.

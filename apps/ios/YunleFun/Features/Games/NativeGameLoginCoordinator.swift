@@ -4,6 +4,7 @@ import Foundation
 enum NativeGameLaunchIntent: Equatable {
     case game(NativeGame, NativeGameMode)
     case room(NativeGameRoomIntent)
+    case createRoom(gameID: String?)
 }
 
 struct NativeGameLoginIntent: Identifiable {

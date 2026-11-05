@@ -52,6 +52,76 @@ final class NativeGamesUITests: XCTestCase {
         capture(app, "native-workshop-search")
     }
 
+    func testPublicRoomsCanBeBrowsedAndClosedWithoutChangingTheAccount() {
+        let app = XCUIApplication()
+        app.launch()
+        let tab = app.tabBars.buttons["寻乐"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10)); tab.tap()
+        let rooms = app.buttons["games.public-rooms"]
+        XCTAssertTrue(rooms.waitForExistence(timeout: 10)); rooms.tap()
+        XCTAssertTrue(app.navigationBars["公开房间"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["games.public-rooms.refresh"].exists)
+        XCTAssertTrue(app.buttons["games.public-rooms.create"].exists)
+        capture(app, "native-public-rooms")
+        app.buttons["关闭"].tap()
+        XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["games.join-room"].exists)
+    }
+
+    func testRunningGameHasAContinueEntryAndAnActionableConflictAlert() {
+        let app = XCUIApplication()
+        app.launch()
+        let tab = app.tabBars.buttons["寻乐"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10)); tab.tap()
+        XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
+        func reveal(_ identifier: String, upwards: Bool) -> XCUIElement {
+            let button = app.buttons[identifier]
+            for _ in 0..<16 {
+                if button.exists && button.isHittable { break }
+                let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: upwards ? 0.75 : 0.45))
+                let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: upwards ? 0.45 : 0.75))
+                start.press(forDuration: 0.05, thenDragTo: end)
+            }
+            XCTAssertTrue(button.exists && button.isHittable, identifier + "\n" + app.debugDescription)
+            return button
+        }
+        reveal("games.launch.gomoku.computer", upwards: true).tap()
+        let minimize = app.buttons["runtime.minimize"]
+        XCTAssertTrue(minimize.waitForExistence(timeout: 10)); minimize.tap()
+        reveal("games.resume.gomoku", upwards: false).tap()
+        XCTAssertTrue(minimize.waitForExistence(timeout: 10)); minimize.tap()
+        reveal("games.launch.gomoku.local", upwards: true).tap()
+        let alert = app.alerts["游戏仍在运行"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        capture(app, "native-running-game-return-action")
+        alert.buttons["返回原来的游戏"].tap()
+        XCTAssertTrue(minimize.waitForExistence(timeout: 10))
+        XCTAssertFalse(alert.exists)
+        minimize.tap()
+    }
+
+    func testGuestCanCancelNativeRoomCreationLogin() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10)); app.tabBars.buttons["我"].tap()
+        guard app.buttons["me.login"].waitForExistence(timeout: 5) else { throw XCTSkip("Requires a guest; preserves existing accounts") }
+        app.tabBars.buttons["寻乐"].tap()
+        let create = app.buttons["games.create-room"]
+        XCTAssertTrue(create.waitForExistence(timeout: 10)); create.tap()
+        XCTAssertTrue(app.staticTexts["login.continuation-context"].waitForExistence(timeout: 10))
+        capture(app, "native-room-creation-login")
+        app.buttons["取消"].tap()
+        XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
+        XCTAssertTrue(create.exists)
+        XCTAssertFalse(app.staticTexts["login.continuation-context"].exists)
+        app.buttons["games.public-rooms"].tap()
+        let publicCreate = app.buttons["games.public-rooms.create"]
+        XCTAssertTrue(publicCreate.waitForExistence(timeout: 5)); publicCreate.tap()
+        XCTAssertTrue(app.staticTexts["login.continuation-context"].waitForExistence(timeout: 10))
+        app.buttons["取消"].tap()
+        XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
+    }
+
     func testGuestCanCancelRoomLoginAndReturnToGames() throws {
         let app = XCUIApplication()
         app.launch()

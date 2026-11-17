@@ -1,5 +1,4 @@
 import type { CapacitorConfig } from '@capacitor/cli'
-import process from 'node:process'
 
 const ylfApp = {
   appId: 'wx925d6e320d64f30a',
@@ -7,10 +6,8 @@ const ylfApp = {
   universalLink: 'https://www.yunle.fun/app/',
 }
 
-const enableIosWebViewDebugging = process.env.YLF_IOS_WEBVIEW_DEBUG === '1'
-
 const config: CapacitorConfig = {
-  // 必须与 Xcode 工程的 PRODUCT_BUNDLE_IDENTIFIER 以及
+  // Must match the Android application identity and
   // public/.well-known/apple-app-site-association 的 appIDs 保持一致
   appId: 'fun.yunle.apps',
   appName: '云乐坊',
@@ -27,10 +24,6 @@ const config: CapacitorConfig = {
       WECHATAPPID: ylfApp.appId,
       UNIVERSALLINK: ylfApp.universalLink,
     },
-  },
-  ios: {
-    cordovaLinkerFlags: ['-ObjC', '-all_load'],
-    ...(enableIosWebViewDebugging ? { webContentsDebuggingEnabled: true } : {}),
   },
 
   plugins: {

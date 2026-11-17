@@ -1,0 +1,13 @@
+{
+  "version": "934733dcd3204b7ab118a044316d675474a294f0a55f082f9713234e6e8f4686",
+  "purpose": "Superseded short-landscape diagnostic static output; old renderer-only ready is not R4 evidence",
+  "recycleCondition": "Replaced by final 9ba true-operable N10 and native layout; no outstanding need to replay this intermediate output",
+  "preserved": "Catalog/resource manifests, build script and complete file hashes; raw measurement/layout JSON remains in repository. Historical 48b static archive is retained separately.",
+  "sourcePath": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-compact-final.behwbrp6",
+  "sourceBytes": 16558732,
+  "removedSource": true,
+  "preservedBytes": 253886,
+  "netReclaimedBytes": 16304846,
+  "evidenceDirectory": "/tmp/yunle-native-games.uGZuY9/retired-play-builds/934-superseded-diagnostic",
+  "checkedAt": "2026-10-29T04:22:11.653512+08:00"
+}

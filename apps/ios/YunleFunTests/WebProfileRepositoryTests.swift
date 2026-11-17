@@ -7,7 +7,8 @@ import XCTest
 final class WebProfileRepositoryTests: XCTestCase {
     private var directory: URL!
     private var pages: [WKWebView] = []
-    private var stores: Set<UUID> = []
+    private var observedPages: [PageReference] = []
+    private var ownership: StorageFixtureOwnership!
     private var window: UIWindow?
     private weak var previousWindow: UIWindow?
     private var file: URL { directory.appendingPathComponent("profiles.json") }
@@ -16,38 +17,30 @@ final class WebProfileRepositoryTests: XCTestCase {
     }
     override func setUp() async throws {
         directory = FileManager.default.temporaryDirectory.appendingPathComponent("WebProfiles-" + UUID().uuidString)
+        ownership = StorageFixtureOwnership(directory: directory, label: "web-profile-repository")
     }
     override func tearDown() async throws {
-        defer {
-            pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }; pages.removeAll()
-            stores.removeAll()
+        // The test method's local references have left their async frame.
+        // Release the remaining WebViews before requesting whole-store removal.
+        weak var releasedWindow = window
+        autoreleasepool {
+            pages.forEach { $0.stopLoading(); $0.removeFromSuperview() }
+            pages.removeAll()
             window?.isHidden = true; window?.rootViewController = nil; window = nil
-            previousWindow?.makeKey()
-            try? FileManager.default.removeItem(at: directory)
         }
-        // Delete exactly the fixture's three values while its pages are alive.
-        // Whole-store removal returned InvalidTransition on iOS 27; clearing
-        // every WebKit data type subsequently took 88 seconds in one test.
-        if #available(iOS 17, *) {
-            for id in stores {
-                let web = try XCTUnwrap(pages.first { $0.configuration.websiteDataStore.identifier == id })
-                let cleared = try await WebStoragePageFixture.evaluate(in: web, script: """
-                const key = 'profile_test_draft';
-                localStorage.removeItem(key);
-                document.cookie = key + '=; Max-Age=0; path=/; Secure; SameSite=Lax';
-                await new Promise((resolve, reject) => {
-                  const timer = setTimeout(() => reject(new Error('cleanup timeout')), 5000);
-                  const r = indexedDB.deleteDatabase(key);
-                  r.onsuccess = () => { clearTimeout(timer); resolve(); };
-                  r.onerror = () => { clearTimeout(timer); reject(new Error('cleanup')); };
-                });
-                const databases = await indexedDB.databases();
-                return localStorage.getItem(key) === null && !document.cookie.split('; ').some(x => x.startsWith(key + '=')) &&
-                  !databases.some(x => x.name === key);
-                """) as? Bool
-                XCTAssertEqual(cleared, true, "All fixture identity and draft values must be deleted")
-            }
+        previousWindow?.makeKey()
+        await Task.yield()
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            if autoreleasepool(invoking: { observedPages.allSatisfy { $0.page == nil } }) { break }
+            do { try await Task.sleep(nanoseconds: 50_000_000) }
+            catch { break }
         }
+        let pagesReleased = autoreleasepool { observedPages.allSatisfy { $0.page == nil } }
+        let windowDetached = releasedWindow?.isHidden != false && releasedWindow?.rootViewController == nil
+        XCTAssertTrue(pagesReleased, "The fixture's actual WebViews must be released before storage cleanup")
+        XCTAssertTrue(windowDetached, "The fixture window must be hidden and detached")
+        await ownership.cleanup(ownersReleased: pagesReleased && windowDetached)
     }
     private func repository(namespace: String = "provider-a") -> WebProfileRepository {
         WebProfileRepository(fileURL: file, namespace: namespace)
@@ -303,12 +296,15 @@ final class WebProfileRepositoryTests: XCTestCase {
 
     @available(iOS 17, *)
     private func page(_ selected: WebProfileRepository.Selection) async throws -> WKWebView {
+        // Record ownership before creating the store, including navigation failures.
+        try ownership.record(selected.identifier)
         let config = WKWebViewConfiguration()
         // Previously visited pages remain alive for exact fixture cleanup.
         config.preferences.inactiveSchedulingPolicy = .none
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: selected.identifier)
         let web = WKWebView(frame: .zero, configuration: config)
         pages.append(web)
+        observedPages.append(PageReference(web))
         if window == nil {
             let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
             previousWindow = scene.windows.first(where: \.isKeyWindow)
@@ -322,9 +318,6 @@ final class WebProfileRepositoryTests: XCTestCase {
         web.frame = host.bounds; web.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         host.addSubview(web)
         try await WebStoragePageFixture.load(in: web, origin: URL(string: "https://profiles.invalid/")!, title: "profile-probe")
-        // A page that never committed cannot contain fixture values. Do not
-        // mask its navigation failure by running storage cleanup on about:blank.
-        stores.insert(selected.identifier)
         return web
     }
 
@@ -355,5 +348,384 @@ final class WebProfileRepositoryTests: XCTestCase {
         """, arguments: ["value": value as Any? ?? NSNull()]) as? [String: String] ?? [:]
     }
 
+    private final class PageReference {
+        weak var page: WKWebView?
+        init(_ page: WKWebView) { self.page = page }
+    }
+
     private enum FixtureFailure: Error { case write }
+}
+
+/// Shared only by the two storage regression fixtures. Never discovers cleanup
+/// targets by enumerating unrelated stores; every target is recorded at creation.
+@MainActor
+final class StorageFixtureOwnership {
+    let directory: URL
+    private let label: String
+    private var identifiers = Set<UUID>()
+    private var cleaned = false
+
+    init(directory: URL, label: String) {
+        self.directory = directory
+        self.label = label
+    }
+
+    func record(_ identifier: UUID) throws {
+        guard identifiers.insert(identifier).inserted else { return }
+        try persist()
+    }
+
+    /// A runtime can create its profile before presenting a browser. Observe the
+    /// fixture's own repository writes so an early presentation failure is owned.
+    func writeProfiles(_ data: Data, to url: URL) throws {
+        struct Profiles: Decodable {
+            let active: [String: UUID]
+            let retained: [String: [UUID]]
+        }
+        let profiles = try JSONDecoder().decode(Profiles.self, from: data)
+        for identifier in Array(profiles.active.values) + profiles.retained.values.flatMap({ $0 }) {
+            try record(identifier)
+        }
+        try data.write(to: url, options: [.atomic, .completeFileProtectionUnlessOpen])
+    }
+
+    func cleanup(ownersReleased: Bool) async {
+        guard !cleaned else { return }
+        cleaned = true
+        var failures: [String] = []
+        if !ownersReleased { failures.append("Fixture page owners have not been released") }
+        if failures.isEmpty, !identifiers.isEmpty,
+           ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
+            do {
+                try persist()
+                try NativeFixtureDeferredCleanup.record(identifiers, directory: directory, defaults: nil,
+                    namespace: storageNamespace())
+                return
+            } catch { failures.append("Deferred fixture ownership: \(error)") }
+        } else if failures.isEmpty, #available(iOS 17, *), !identifiers.isEmpty {
+            do {
+                let keeper = try await StorageFixtureStoreCleanup.initializedKeeper()
+                defer { keeper.stopLoading() }
+                // Repository metadata may name a store before WebKit creates it.
+                // An API-confirmed absent owned ID needs no removal request.
+                let existing = try await StorageFixtureStoreCleanup.identifiers()
+                for identifier in existing.intersection(identifiers).sorted(by: { $0.uuidString < $1.uuidString }) {
+                    do { try await StorageFixtureStoreCleanup.remove(identifier) }
+                    catch { failures.append("\(identifier.uuidString): \(error)") }
+                }
+                let remaining = try await StorageFixtureStoreCleanup.identifiers().intersection(identifiers)
+                if !remaining.isEmpty {
+                    failures.append("Owned stores still exist: \(remaining.map(\.uuidString).sorted().joined(separator: ","))")
+                }
+            } catch { failures.append("WebKit cleanup initialization/enumeration: \(error)") }
+        }
+        if failures.isEmpty {
+            do {
+                if FileManager.default.fileExists(atPath: directory.path) {
+                    try FileManager.default.removeItem(at: directory)
+                }
+            } catch { failures.append("Owned directory removal: \(error)") }
+        }
+        guard !failures.isEmpty else { return }
+        // Keep both the repository and the independent UUID list until a later
+        // allowlisted recovery confirms deletion. A timeout is never success.
+        try? persist()
+        XCTContext.runActivity(named: "Preserved \(label) fixture ownership") { activity in
+            let attachment = XCTAttachment(string: "label=\(label)\ndirectory=\(directory.path)\nprofiles=\(identifiers.map(\.uuidString).sorted().joined(separator: ","))\nfailures=\(failures.joined(separator: "\n"))")
+            attachment.name = "\(label)-cleanup-ownership"
+            attachment.lifetime = .keepAlways
+            activity.add(attachment)
+        }
+        XCTFail("\(label) fixture cleanup failed; ownership preserved: \(failures.joined(separator: "; "))")
+    }
+
+    private func persist() throws {
+        let namespace = try storageNamespace()
+        try NativeFixtureDeferredCleanup.validateDirectoryName(directory.lastPathComponent, namespace: namespace)
+        let manager = FileManager.default
+        let root = manager.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
+        guard directory.standardizedFileURL.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path == root.path,
+              directory.resolvingSymlinksInPath().standardizedFileURL.path == root.appendingPathComponent(directory.lastPathComponent).standardizedFileURL.path,
+              (try? manager.destinationOfSymbolicLink(atPath: directory.path)) == nil else {
+            throw NSError(domain: "StorageFixtureOwnership", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unscoped storage fixture directory"])
+        }
+        let runID: UUID?
+        if ProcessInfo.processInfo.environment["YUNLEFUN_FIXTURE_CLEANUP_PHASE"] == "collect" {
+            let url = try NativeFixtureDeferredCleanup.ledgerURL()
+            runID = try XCTUnwrap(UUID(uuidString: url.deletingPathExtension().lastPathComponent))
+        } else { runID = nil }
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let marker = NativeFixtureDeferredCleanup.StorageMarker(kind: NativeFixtureDeferredCleanup.storageMarkerKind,
+            namespace: namespace, directory: directory.lastPathComponent, runID: runID,
+            processID: ProcessInfo.processInfo.processIdentifier, profiles: identifiers.sorted { $0.uuidString < $1.uuidString })
+        let data = try JSONEncoder().encode(marker)
+        try data.write(to: directory.appendingPathComponent(NativeFixtureDeferredCleanup.storageMarkerName),
+                       options: [.atomic, .completeFileProtectionUnlessOpen])
+    }
+
+    private func storageNamespace() throws -> NativeFixtureDeferredCleanup.Namespace {
+        guard let namespace = NativeFixtureDeferredCleanup.Namespace(rawValue: label), namespace != .nativeGameRuntime else {
+            throw NSError(domain: "StorageFixtureOwnership", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown storage fixture namespace"])
+        }
+        return namespace
+    }
+}
+
+@available(iOS 17, *)
+@MainActor
+private enum StorageFixtureStoreCleanup {
+    private static var initializationKeeper: WKWebView?
+
+    static func initializedKeeper() async throws -> WKWebView {
+        if let initializationKeeper { return initializationKeeper }
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .nonPersistent()
+        let keeper = WKWebView(frame: CGRect(x: 0, y: 0, width: 1, height: 1), configuration: configuration)
+        // Fixed HTML with no external resources initializes WebKit without any
+        // network request or named profile before the identifier APIs are used.
+        try await WebStoragePageFixture.load(in: keeper, origin: URL(string: "https://storage-cleanup.invalid/")!,
+                                             title: "Storage fixture cleanup keeper")
+        initializationKeeper = keeper
+        return keeper
+    }
+
+    static func remove(_ identifier: UUID) async throws {
+        var lastFailure: Error = URLError(.unknown)
+        let deadline = Date().addingTimeInterval(30)
+        for seconds in [0, 1, 2, 4, 8, 8] {
+            guard deadline.timeIntervalSinceNow > Double(seconds) else { break }
+            if seconds > 0 { try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000) }
+            do {
+                try await removeOnce(identifier, timeout: deadline.timeIntervalSinceNow)
+                return
+            } catch {
+                lastFailure = error
+                if (error as? URLError)?.code == .timedOut { throw error }
+            }
+        }
+        throw lastFailure
+    }
+
+    static func identifiers() async throws -> Set<UUID> {
+        let completion = StorageFixtureCleanupCallback<[UUID]>()
+        WKWebsiteDataStore.fetchAllDataStoreIdentifiers { completion.value = $0 }
+        let deadline = Date().addingTimeInterval(4)
+        while Date() < deadline {
+            if let result = completion.value { return Set(result) }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        throw URLError(.timedOut)
+    }
+
+    private static func removeOnce(_ identifier: UUID, timeout: TimeInterval) async throws {
+        let completion = StorageFixtureCleanupCallback<Result<Void, Error>>()
+        let started = ProcessInfo.processInfo.systemUptime
+        WKWebsiteDataStore.remove(forIdentifier: identifier) { error in
+            completion.value = error.map(Result.failure) ?? .success(())
+            let elapsed = (ProcessInfo.processInfo.systemUptime - started) * 1000
+            print("STORAGE_FIXTURE_STORE_REMOVAL id=\(identifier.uuidString) elapsed-ms=\(elapsed) success=\(error == nil)")
+        }
+        let deadline = Date().addingTimeInterval(max(0, timeout))
+        while Date() < deadline {
+            if let result = completion.value { return try result.get() }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        throw URLError(.timedOut)
+    }
+}
+
+@MainActor
+private final class StorageFixtureCleanupCallback<Value> {
+    var value: Value?
+}
+
+// Shared by game, account-session and profile-storage regression fixtures.
+@MainActor
+enum NativeFixtureDeferredCleanup {
+    enum Namespace: String, Codable {
+        case nativeGameRuntime = "native-game-runtime"
+        case nativeRuntimeSession = "native-runtime-session"
+        case webProfileRepository = "web-profile-repository"
+    }
+
+    struct Entry: Codable, Equatable {
+        let identifier: UUID
+        // Xcode can relocate the sandbox when reinstalling the test host.
+        // Retain only a validated fixture name, relative to the current tmp.
+        let directory: String
+        let defaults: String?
+        let processID: Int32
+        let namespace: Namespace
+
+        init(identifier: UUID, directory: String, defaults: String?, processID: Int32,
+             namespace: Namespace = .nativeGameRuntime) {
+            self.identifier = identifier; self.directory = directory; self.defaults = defaults
+            self.processID = processID; self.namespace = namespace
+        }
+    }
+    struct Ledger: Codable {
+        let runID: UUID
+        var entries: [Entry]
+        var verifiedByProcessID: Int32?
+        var remainingIdentifiers: [UUID]?
+    }
+
+    struct StorageMarker: Codable {
+        let kind: String
+        let namespace: Namespace
+        let directory: String
+        let runID: UUID?
+        let processID: Int32
+        let profiles: [UUID]
+    }
+
+    static let storageMarkerName = "fixture-store-ownership.json"
+    static let storageMarkerKind = "owned-storage-regression-fixture"
+
+    static func ledgerURL() throws -> URL {
+        let env = ProcessInfo.processInfo.environment
+        guard let raw = env["YUNLEFUN_FIXTURE_CLEANUP_RUN"], let run = UUID(uuidString: raw),
+              let owned = env["YUNLEFUN_FIXTURE_SIMULATOR"], !owned.isEmpty,
+              owned == env["SIMULATOR_UDID"] else {
+            throw failure("Cleanup requires a run UUID and the exact owned simulator")
+        }
+        return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("NativeGameFixtureCleanup").appendingPathComponent(run.uuidString + ".json")
+    }
+
+    static func validateDirectoryName(_ name: String, namespace: Namespace) throws {
+        guard name == URL(fileURLWithPath: name).lastPathComponent else { throw failure("Unscoped fixture directory") }
+        let prefix: String
+        switch namespace {
+        case .nativeGameRuntime: prefix = "native-game-runtime-"
+        case .nativeRuntimeSession: prefix = "native-runtime-session-"
+        case .webProfileRepository: prefix = "WebProfiles-"
+        }
+        guard name.hasPrefix(prefix), UUID(uuidString: String(name.dropFirst(prefix.count))) != nil else {
+            throw failure("Directory does not match its fixture namespace")
+        }
+    }
+
+    private static func validate(_ entry: Entry) throws {
+        try validateDirectoryName(entry.directory, namespace: entry.namespace)
+        guard entry.processID > 0 else { throw failure("Invalid fixture process") }
+        if entry.namespace == .nativeGameRuntime {
+            let prefix = "native-game-runtime-"
+            guard let defaults = entry.defaults, defaults.hasPrefix(prefix),
+                  UUID(uuidString: String(defaults.dropFirst(prefix.count))) != nil else {
+                throw failure("Unrecognized game fixture defaults")
+            }
+        } else if entry.defaults != nil { throw failure("Storage fixtures do not own a defaults domain") }
+    }
+
+    private static func directoryURL(_ entry: Entry) throws -> URL {
+        try validate(entry)
+        let manager = FileManager.default
+        let root = manager.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
+        let directory = root.appendingPathComponent(entry.directory, isDirectory: true)
+        guard directory.deletingLastPathComponent().standardizedFileURL.path == root.path,
+              directory.resolvingSymlinksInPath().standardizedFileURL.path == directory.standardizedFileURL.path,
+              (try? manager.destinationOfSymbolicLink(atPath: directory.path)) == nil else {
+            throw failure("Fixture directory must be a direct, non-symlink temporary child")
+        }
+        if let attributes = try? manager.attributesOfItem(atPath: directory.path),
+           attributes[.type] as? FileAttributeType != .typeDirectory {
+            throw failure("Fixture path is not a directory")
+        }
+        return directory
+    }
+
+    private static func validateOwnership(_ ledger: Ledger) throws -> [URL] {
+        for entry in ledger.entries { try validate(entry) }
+        var directories: [URL] = []
+        for group in Dictionary(grouping: ledger.entries, by: \.directory).values {
+            guard let first = group.first,
+                  group.allSatisfy({ $0.namespace == first.namespace && $0.processID == first.processID && $0.defaults == first.defaults }) else {
+                throw failure("A directory cannot belong to multiple fixture owners")
+            }
+            let directory = try directoryURL(first)
+            if first.namespace != .nativeGameRuntime {
+                let markerURL = directory.appendingPathComponent(storageMarkerName)
+                let attributes = try FileManager.default.attributesOfItem(atPath: markerURL.path)
+                guard attributes[.type] as? FileAttributeType == .typeRegular,
+                      ((attributes[.size] as? NSNumber)?.intValue ?? Int.max) < 1_000_000,
+                      markerURL.resolvingSymlinksInPath().standardizedFileURL.path == markerURL.standardizedFileURL.path else {
+                    throw failure("Storage fixture marker must be a bounded regular file")
+                }
+                let marker = try JSONDecoder().decode(StorageMarker.self, from: Data(contentsOf: markerURL))
+                guard marker.kind == storageMarkerKind, marker.namespace == first.namespace,
+                      marker.directory == first.directory, marker.runID == ledger.runID, marker.processID == first.processID,
+                      Set(marker.profiles).count == marker.profiles.count,
+                      Set(marker.profiles) == Set(group.map(\.identifier)) else {
+                    throw failure("Storage fixture marker does not bind this exact run and UUID set")
+                }
+            }
+            directories.append(directory)
+        }
+        return directories
+    }
+
+    static func record(_ identifiers: Set<UUID>, directory: URL, defaults: String?, namespace: Namespace = .nativeGameRuntime) throws {
+        let url = try ledgerURL()
+        guard let run = UUID(uuidString: url.deletingPathExtension().lastPathComponent) else { throw failure("Invalid cleanup run") }
+        let root = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
+        guard directory.standardizedFileURL.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path == root.path else {
+            throw failure("Only this app's temporary fixture directory can be recorded")
+        }
+        var ledger = FileManager.default.fileExists(atPath: url.path)
+            ? try JSONDecoder().decode(Ledger.self, from: Data(contentsOf: url))
+            : Ledger(runID: run, entries: [])
+        guard ledger.runID == run, ledger.verifiedByProcessID == nil else { throw failure("Invalid or already verified run") }
+        for id in identifiers {
+            let entry = Entry(identifier: id, directory: directory.lastPathComponent, defaults: defaults,
+                              processID: ProcessInfo.processInfo.processIdentifier, namespace: namespace)
+            try validate(entry)
+            if let previous = ledger.entries.first(where: { $0.identifier == id }) {
+                guard previous == entry else { throw failure("A store cannot belong to two fixtures") }
+            } else { ledger.entries.append(entry) }
+        }
+        _ = try validateOwnership(ledger)
+        ledger.entries.sort { $0.identifier.uuidString < $1.identifier.uuidString }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try JSONEncoder().encode(ledger).write(to: url, options: .atomic)
+    }
+
+    static func verify(_ ledger: Ledger, processID: Int32,
+                       remove: (UUID) async throws -> Void,
+                       inventory: () async throws -> Set<UUID>) async throws -> Ledger {
+        guard ledger.verifiedByProcessID == nil, ledger.remainingIdentifiers == nil,
+              !ledger.entries.isEmpty, ledger.entries.allSatisfy({ $0.processID != processID }),
+              Set(ledger.entries.map(\.identifier)).count == ledger.entries.count else {
+            throw failure("Verification requires unique owned stores from an earlier app process")
+        }
+        // Validate every namespace and marker before even enumerating WebKit.
+        _ = try validateOwnership(ledger)
+        let requested = Set(ledger.entries.map(\.identifier))
+        let before = try await inventory()
+        for id in requested.intersection(before).sorted(by: { $0.uuidString < $1.uuidString }) { try await remove(id) }
+        let remaining = requested.intersection(try await inventory())
+        guard remaining.isEmpty else { throw failure("Owned fixture stores remain in the SDK inventory") }
+        var verified = ledger
+        verified.verifiedByProcessID = processID
+        verified.remainingIdentifiers = []
+        return verified
+    }
+
+    static func removeOwnedDirectories(_ ledger: Ledger) throws {
+        guard ledger.verifiedByProcessID == ProcessInfo.processInfo.processIdentifier,
+              ledger.remainingIdentifiers == [] else { throw failure("SDK verification must precede directory removal") }
+        // Revalidate all marker bindings before any filesystem deletion.
+        let directories = try validateOwnership(ledger)
+        for defaults in Set(ledger.entries.compactMap(\.defaults)) {
+            UserDefaults.standard.removePersistentDomain(forName: defaults)
+        }
+        for directory in directories {
+            if FileManager.default.fileExists(atPath: directory.path) { try FileManager.default.removeItem(at: directory) }
+            guard !FileManager.default.fileExists(atPath: directory.path) else { throw failure("Owned fixture directory remains") }
+        }
+    }
+
+    private static func failure(_ message: String) -> NSError {
+        NSError(domain: "NativeGameDeferredCleanup", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+    }
 }

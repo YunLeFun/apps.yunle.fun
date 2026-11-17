@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-final-native-candidate-and-local-inventory",
+  "atUTC": "2026-10-30T10:24:48.803817+00:00",
+  "candidateMatchesExpected": true,
+  "sourceFiles": [
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift",
+      "sha256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+      "bytes": 54684,
+      "matchesExpected": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/mobile/ios/App/App/WebViewController.swift",
+      "sha256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+      "bytes": 111730,
+      "matchesExpected": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Features/Assistant/AssistantView.swift",
+      "sha256": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+      "bytes": 35088,
+      "matchesExpected": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+      "sha256": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509",
+      "bytes": 201668,
+      "matchesExpected": true
+    }
+  ],
+  "installedProductFiles": [
+    {
+      "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/YunleFun",
+      "sha256": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+      "bytes": 58496,
+      "expectedSHA256": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+      "matchesExpected": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/YunleFun.debug.dylib",
+      "sha256": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+      "bytes": 40524432,
+      "expectedSHA256": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+      "matchesExpected": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/Info.plist",
+      "sha256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "bytes": 1765,
+      "expectedSHA256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "matchesExpected": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/native-game-catalog-v1.json",
+      "sha256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+      "bytes": 4561,
+      "expectedSHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+      "matchesExpected": true
+    }
+  ],
+  "processBinding": {
+    "readOnlyCommand": "ps -p77260 -o pid=,comm=",
+    "observedPID": 77260,
+    "executable": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/YunleFun",
+    "matchesInstalledBundleContainer": true,
+    "bundleId": "fun.yunle.apps.native-dev",
+    "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "preview": "Root previously recorded normal preview0; no process environment or secret-bearing args were read by this inventory."
+  },
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "simulatorInventory": {
+    "readOnlyCommand": "xcrun simctl list devices --json",
+    "totalDevices": 6,
+    "devices": [
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+        "lastUsedAt": "2026-10-30T10:13:14Z",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro",
+        "state": "Booted",
+        "name": "iPhone 18 Pro"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "udid": "738191D2-2B9B-4A64-BDB0-9C788BEABAFC",
+        "lastUsedAt": "2026-10-30T10:13:16Z",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro",
+        "state": "Booted",
+        "name": "iPhone 15 Pro"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "udid": "20942FE3-19B3-40F1-A34B-EF636AE02B1B",
+        "lastUsedAt": "2026-10-30T10:17:58Z",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M5-12GB",
+        "state": "Shutdown",
+        "name": "iPad Pro 13-inch (M5)"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "udid": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+        "lastUsedAt": "2026-10-29T22:41:42Z",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M5-12GB",
+        "state": "Shutdown",
+        "name": "iPad Pro 11-inch (M5)"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-1",
+        "udid": "BAA7646B-5019-43BA-90A2-1248C996C3E6",
+        "lastUsedAt": "2026-10-28T14:44:47Z",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-Duo",
+        "state": "Shutdown",
+        "name": "iPhone Duo"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "udid": "F69F6452-D87D-4C56-ACDE-6E3E6A144CB3",
+        "lastUsedAt": "2026-10-29T22:46:07Z",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro",
+        "state": "Shutdown",
+        "name": "iPhone 16 Pro"
+      }
+    ],
+    "sharedPoolMapping": {
+      "path": "/Users/yunyou/Library/Developer/SimulatorMaintenance/shared-devices.json",
+      "exists": true,
+      "sha256": "f38f216c93661a7844a0bdb6548ca6ae5c1d22bbb406d689c20fccf9d0f12b47",
+      "bytes": 3220,
+      "JSONParsed": true
+    },
+    "ownershipBoundary": "Root reports iPhone15 and iPad13 were used/booted by other tasks; this read snapshot shows iPhone15 Booted and iPad13 Shutdown. This audit does not infer why another task changed state.",
+    "auditCreatedBootedShutdownErasedDeletedDevices": 0
+  },
+  "privateForegroundAndHelperDirectories": {
+    "metadataSnapshotOnly": true,
+    "directories": [
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-universal-link-helper",
+        "regularFileCount": 4,
+        "logicalFileBytes": 8474,
+        "allocatedRegularFileBytes": 20480,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-universal-link-helper/invite_page.py",
+            "bytes": 5148
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-universal-link-helper/README.md",
+            "bytes": 3312
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-universal-link-helper/allowlist",
+            "bytes": 7
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-foreground-adapter-20261030",
+        "regularFileCount": 2,
+        "logicalFileBytes": 8922,
+        "allocatedRegularFileBytes": 12288,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-foreground-adapter-20261030/run-foreground-batch.example.mjs",
+            "bytes": 5804
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-foreground-adapter-20261030/adapter-contract.txt",
+            "bytes": 3118
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-single-action-helper-20261030",
+        "regularFileCount": 6,
+        "logicalFileBytes": 42212,
+        "allocatedRegularFileBytes": 57344,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-single-action-helper-20261030/FlightChessBoard.6ff97db.source.vue",
+            "bytes": 15327
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-single-action-helper-20261030/flight-action.v2.mjs",
+            "bytes": 9737
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/flight-single-action-helper-20261030/flight-action.mjs",
+            "bytes": 9110
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030",
+        "regularFileCount": 109,
+        "logicalFileBytes": 19191127,
+        "allocatedRegularFileBytes": 19419136,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/wire-observations.json",
+            "bytes": 1257259
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/gomoku-group/wire-observations.json",
+            "bytes": 538570
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/foreground-20261030/f12-exact-cleanup/wire-observations.json",
+            "bytes": 483744
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v2-20261030",
+        "regularFileCount": 6,
+        "logicalFileBytes": 27527,
+        "allocatedRegularFileBytes": 45056,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v2-20261030/observer.mjs",
+            "bytes": 13740
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v2-20261030/validate-offline.mjs",
+            "bytes": 5362
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v2-20261030/continuity.mjs",
+            "bytes": 4945
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v3-gomoku-20261030",
+        "regularFileCount": 8,
+        "logicalFileBytes": 45001,
+        "allocatedRegularFileBytes": 61440,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v3-gomoku-20261030/observer.mjs",
+            "bytes": 15071
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v3-gomoku-20261030/gomoku-action.mjs",
+            "bytes": 9431
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-observer-v3-gomoku-20261030/definition-and-smoke-receipt.json",
+            "bytes": 7252
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/network-recovery-batch-20261030",
+        "regularFileCount": 3,
+        "logicalFileBytes": 17655,
+        "allocatedRegularFileBytes": 24576,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/network-recovery-batch-20261030/network-batch.mjs",
+            "bytes": 9307
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/network-recovery-batch-20261030/transport-notifications.mjs",
+            "bytes": 4986
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/network-recovery-batch-20261030/offline-smoke.mjs",
+            "bytes": 3362
+          }
+        ]
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/pure-round-collector-20261030",
+        "regularFileCount": 4,
+        "logicalFileBytes": 24304,
+        "allocatedRegularFileBytes": 32768,
+        "symlinksNotFollowed": 0,
+        "largestThreeFiles": [
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/pure-round-collector-20261030/round-collector.mjs",
+            "bytes": 15791
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/pure-round-collector-20261030/validate-offline.mjs",
+            "bytes": 7654
+          },
+          {
+            "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/pure-round-collector-20261030/offline-validation.json",
+            "bytes": 621
+          }
+        ]
+      }
+    ],
+    "deduplicatedAcrossSelectedRoots": {
+      "logicalRegularFileBytes": 19398061,
+      "allocatedRegularFileBytes": 19705856
+    },
+    "buildMarkersObserved": [],
+    "readRaces": [],
+    "limit": "Only eight explicit task-owned foreground/helper/observer/adapter/collector/batch directories are reported; new Play fix worktree excluded. Bytes are file metadata, not APFS volume-space delta. Live evidence can grow between the per-directory and deduplicated read.",
+    "noBuildArtifactsObservedInSelectedScope": true,
+    "excludedActiveWorktree": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/last-owner-observer-fix-20261030",
+      "reason": "New Play server fix worktree is outside foreground/helper inventory and protected from cleanup. An initial name-based metadata selection matched its observer name; only metadata was walked, with symlinks unfollowed, and no file contents opened or changes performed. Excluded from reported totals."
+    }
+  },
+  "actionsThisAudit": {
+    "builds": 0,
+    "tests17Or82": 0,
+    "UIOrNetwork": 0,
+    "simulatorMutations": 0,
+    "sourceOrInstalledProductMutations": 0,
+    "cleanupOrReclamation": 0,
+    "newOutputOnly": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/final-native-candidate-inventory-20261030.json",
+    "DerivedDataFreezeAndNewPlayWorktreeMutated": false
+  },
+  "limits": [
+    "Four source and four installed product hashes were read and compared to Root frozen normal candidate. No build was launched.",
+    "PID binding uses executable path only; no environment, process arguments, tokens, cookies, account store or credentials were read.",
+    "No global claim that no other task produced builds; no build marker was observed under the named private foreground/helper scope.",
+    "No files/directories/devices were reclaimed, and no free-space improvement is claimed.",
+    "This inventory does not mark N10, M4, M5 or the overall goal complete."
+  ]
+}

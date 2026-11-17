@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-29T15:50:09.669349+00:00",
+  "classification": "Packaged and validated candidate only; not deployed or full M4/N10 completion",
+  "candidateCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "privateReceiptSHA256": "39363c9a1bcaa93029d6de105a5e66c789789d50846a6dd7b6dfd3d9cf6f2cb9",
+  "sourceArchive": {
+    "bytes": 505301,
+    "sha256": "6c9007df6625d44c60eedf48fffcbde55069941175691f5731d4d63cd6f3b3a7",
+    "gitPaxComment": "7723ae87194def2c1aff137497456cce53ebdcc1"
+  },
+  "imageArchive": {
+    "bytes": 94920746,
+    "sha256": "decf0ccbfae546c84c25cb96d2b99a2d2c785336c154ff33369e5569c36aaa9a"
+  },
+  "imageIdentity": {
+    "dockerImageId": "sha256:8daa1ef469dfde828441150ecec98944789e0bb6693c1d4925ef1f3b007849c8",
+    "dockerImageIdKind": "image-index-digest",
+    "platformManifestDigest": "sha256:cf8329f39db0f793b06a3c7aae3b4a621945e893cd27c094204e91e2564a441d",
+    "configDigest": "sha256:8f0fe1fbeeeb2527f9c1d5c1e24fd7f8dee502b486b5f0908ea53ec8c39a5503",
+    "layoutIndexJSONSHA256": "bf1f6be2da0b73a57a491f5175169d5b5dbd347897110715377f91e9fb6aca38",
+    "architecture": "amd64",
+    "platformLayerCount": 11,
+    "verifiedBlobCount": 17,
+    "actualUncompressedLayerTarSHA256Verified": true,
+    "dockerManifestLayersMatchPlatformOrder": true
+  },
+  "compiledSHA256": {
+    "apps/game-server/dist/colyseus/server.js": "5ec0e4e0b33fcbd991ca9c5efb4fbe71828f1d533509900b90192918eb3e9497",
+    "apps/game-server/dist/colyseus/play-room.js": "9aa28f32df203f5172135782d11d7f631e0c9f9b2791d977612b07b14c30bd10",
+    "apps/game-server/dist/index.js": "f352f4f4481499ed02dba76adab845bbdafa0c80717394159db400f396c22a12"
+  },
+  "targetedRealSDKTests": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "imageSmoke": {
+    "passed": true,
+    "ordinaryHTTPCorsCases": 8,
+    "unknownInviteHttp400": true,
+    "expiredPlayerAndSpectatorRealWSRejected400WithoutSnapshot": true,
+    "validSpectatorRealWSJoinAndLeavePassed": true,
+    "network": "none",
+    "readOnlyRoot": true,
+    "uid": 1000,
+    "mounts": 0,
+    "publishedPorts": 0
+  },
+  "productionDependencies": {
+    "classification": "Actual immutable built-image content and resolution audit; not a fresh vulnerability-advisory scan",
+    "productionRootDependenciesResolved": 22,
+    "projectDevDependenciesIncluded": false,
+    "absentRootDevTools": [
+      "@colyseus/sdk",
+      "@colyseus/testing",
+      "vitest",
+      "tsx",
+      "typescript"
+    ],
+    "retainedTransitiveOptionalPeer": {
+      "package": "typescript",
+      "version": "6.0.3",
+      "consumer": "@colyseus/schema",
+      "unchangedProductionLock": true
+    },
+    "productionLockSHA256": "71dc990cba904624fcd43080ac75e79f55250ddb8c757c39a28c4435ddb1872e",
+    "productionLockMatchesPriorB0": true,
+    "globalTypeScriptAbsenceClaimed": false,
+    "newVulnerabilityAuditPerformed": false,
+    "success": true
+  },
+  "originalPlayPreserved": true,
+  "oldImagesAndHomeAssistantPreserved": true,
+  "globalDockerContextAndColimaConfigUnchanged": true,
+  "temporaryContextAndSmokeContainersRemoved": true,
+  "taskLocalBuildxRemoved": true,
+  "cleanupObservedFileSystemFreeByteDelta": 64720896,
+  "actualBuildKitBuildInvocations": 1,
+  "dockerSaveInvocations": 1,
+  "smokeHarnessFailuresPreserved": 2,
+  "full269SuiteRerun": false,
+  "pushed": false,
+  "deployed": false
+}

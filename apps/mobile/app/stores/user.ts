@@ -1,6 +1,6 @@
 import type { YlfUserInfo } from '@yunlefun/auth'
-import { Capacitor } from '@capacitor/core'
 import { acceptHMRUpdate, defineStore } from 'pinia'
+import { hostEnvironment } from '~/host-runtime'
 
 export type UserInfo = YlfUserInfo
 
@@ -22,7 +22,7 @@ export const userInfo = ref<YlfUserInfo>(JSON.parse(JSON.stringify(defaultUserIn
 export const useUserStore = defineStore('user', () => {
   // 原生壳内 origin 是 capacitor://localhost（非 HTTPS），带 Secure 标记的 cookie
   // 可能被 WebKit 拒写；且 WKWebView 对自定义 scheme 的 cookie 持久化不可靠
-  const isNativeShell = import.meta.client && Capacitor.isNativePlatform()
+  const isNativeShell = import.meta.client && hostEnvironment.isNative()
 
   // 使用 Cookie 存储 JWT token（Web 端 SSR 友好）
   const accessToken = useCookie<string>(TOKEN_KEY, {

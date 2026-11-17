@@ -1,0 +1,837 @@
+{
+  "clockObservationDefinition" : "Initial and observed performance.timeOrigin values and their raw difference are recorded only as clock observations. Document identity is proved by original object reference equality, not timestamp equality or a numerical tolerance.",
+  "completed" : true,
+  "expectedSampleCount" : 20,
+  "inputScope" : "DOM click accepts a Gomoku local move; actual page keyboard handlers accept Space fire in PaperStar local. These are synthetic test inputs through real game handlers, not physical-touch or VoiceOver claims.",
+  "kind" : "retained-resume-n10",
+  "observationOverhead" : "The native presentation\/DOM observers poll at 50 ms, async JavaScript completion at 20 ms; UIKit animations are disabled by the existing isolated fixture. Endpoints are observed upper bounds, not touch-hardware latency.",
+  "origin" : "http:\/\/127.0.0.1:18146",
+  "results" : [
+    {
+      "acceptedInputP50Milliseconds" : 116.81220831815153,
+      "acceptedInputP90Milliseconds" : 140.76437498442829,
+      "completed" : true,
+      "gameId" : "gomoku",
+      "modeId" : "local",
+      "samples" : [
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 1,
+            "beforeStones" : 0,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 209.56858334830031,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 77.028791652992368,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 1,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 0,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 618,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 2,
+            "beforeStones" : 1,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 94.940041715744883,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 72.715250018518418,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 2,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 952,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 3,
+            "beforeStones" : 2,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 137.03316665487364,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 116.31979170488194,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 3,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 2,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 1202,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 4,
+            "beforeStones" : 3,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 118.40104166185483,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 96.000750025268644,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 4,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 3,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 1452,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 5,
+            "beforeStones" : 4,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 140.76437498442829,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 118.56008332688361,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 5,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 4,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 1702,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 6,
+            "beforeStones" : 5,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 116.81220831815153,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 96.553249983116984,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 6,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 5,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 1952,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 7,
+            "beforeStones" : 6,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 136.65379164740443,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 116.40950001310557,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 7,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 6,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 2202,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 8,
+            "beforeStones" : 7,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 114.62925001978874,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 92.395499988924712,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 8,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 7,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 2452,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 9,
+            "beforeStones" : 8,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 115.14075001468882,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 92.952083330601454,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 9,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 8,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 2685,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterStones" : 10,
+            "beforeStones" : 9,
+            "kind" : "local-board-click"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222657744,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222657744
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 115.56975002167746,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 94.576416653580964,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 10,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/gomoku\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : 9,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 2918,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : null,
+            "rendererReady" : null,
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222657744,
+            "viewport" : {
+              "height" : 758,
+              "width" : 402
+            },
+            "visibilityState" : "visible"
+          }
+        }
+      ],
+      "visibleOperableFrameP50Milliseconds" : 94.576416653580964,
+      "visibleOperableFrameP90Milliseconds" : 116.40950001310557
+    },
+    {
+      "acceptedInputP50Milliseconds" : 368.97104169474915,
+      "acceptedInputP90Milliseconds" : 395.47487499658018,
+      "completed" : true,
+      "gameId" : "paper-star",
+      "modeId" : "local",
+      "samples" : [
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 0,
+            "afterTick" : 97,
+            "beforeFireSequence" : -1,
+            "beforeTick" : 96,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 97.602916648611426,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 75.982249982189387,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 1,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 3385,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 1,
+            "afterTick" : 105,
+            "beforeFireSequence" : 0,
+            "beforeTick" : 104,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 213.78925000317395,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 171.11570836277679,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 2,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 3634,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 3,
+            "afterTick" : 118,
+            "beforeFireSequence" : 1,
+            "beforeTick" : 109,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 395.47487499658018,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 97.577499982435256,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 3,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 3817,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 4,
+            "afterTick" : 127,
+            "beforeFireSequence" : 3,
+            "beforeTick" : 126,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 236.4396249759011,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 193.12279165023938,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 4,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 4367,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 6,
+            "afterTick" : 140,
+            "beforeFireSequence" : 4,
+            "beforeTick" : 131,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 371.0180833004415,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 73.517333308700472,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 5,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 4600,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 8,
+            "afterTick" : 153,
+            "beforeFireSequence" : 6,
+            "beforeTick" : 144,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 368.97104169474915,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 73.52770835859701,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 6,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 5083,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 9,
+            "afterTick" : 161,
+            "beforeFireSequence" : 8,
+            "beforeTick" : 160,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 219.49266671435907,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 198.42979172244668,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 7,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 5616,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 11,
+            "afterTick" : 174,
+            "beforeFireSequence" : 9,
+            "beforeTick" : 166,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 371.14845833275467,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 94.843666651286185,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 8,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 5851,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 13,
+            "afterTick" : 187,
+            "beforeFireSequence" : 11,
+            "beforeTick" : 178,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 372.11620836751536,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 73.764291650149971,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 9,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 6316,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 324,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        },
+        {
+          "acceptedInput" : {
+            "accepted" : true,
+            "afterFireSequence" : 15,
+            "afterTick" : 201,
+            "beforeFireSequence" : 13,
+            "beforeTick" : 192,
+            "kind" : "page-keyboard-space-fire"
+          },
+          "clockObservation" : {
+            "initialTimeOrigin" : 1793222661362,
+            "observedMinusInitialMilliseconds" : 0,
+            "observedTimeOrigin" : 1793222661362
+          },
+          "engineReadyCount" : 1,
+          "nativeTapToAcceptedInputMilliseconds" : 399.70629167510197,
+          "nativeTapToVisibleOperableFrameMilliseconds" : 102.53849998116493,
+          "sameLaunch" : true,
+          "sameNamedProfile" : true,
+          "sameWebView" : true,
+          "sample" : 10,
+          "visibleFrame" : {
+            "currentPath" : "\/games\/paper-star\/local",
+            "documentHasFocus" : false,
+            "inputCellIndex" : -1,
+            "markerMatches" : true,
+            "observedAtDocumentMilliseconds" : 6817,
+            "observedInputControlExposed" : true,
+            "operable" : true,
+            "phase" : "playing",
+            "rendererReady" : "true",
+            "sameOriginalDocument" : true,
+            "sameOriginalDocumentElement" : true,
+            "timeOrigin" : 1793222661362,
+            "viewport" : {
+              "height" : 286,
+              "width" : 874
+            },
+            "visibilityState" : "visible"
+          }
+        }
+      ],
+      "visibleOperableFrameP50Milliseconds" : 94.843666651286185,
+      "visibleOperableFrameP90Milliseconds" : 193.12279165023938
+    }
+  ],
+  "retainedDefinition" : "Actual minimize toolbar action and completed dismissal; same live WebView, named profile and launch ID, plus strict JavaScript identity with the retained original document and documentElement objects and random in-memory marker. No cache clearing, manufactured lifecycle event or new ready callback.",
+  "samplesPerScene" : 10,
+  "scope" : "Same local candidate and isolated fixture only; retained same-process session, not OS suspension, process eviction, app restart or online room recovery.",
+  "timingDefinition" : "Native uptime starts immediately before public runtime.resumeGame. The first endpoint is a native visible presentation plus two real Web requestAnimationFrames and current operable DOM state. The second endpoint additionally confirms an actual test input changed game state."
+}

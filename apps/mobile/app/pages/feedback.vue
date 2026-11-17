@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { App as CapacitorApp } from '@capacitor/app'
-import { Capacitor } from '@capacitor/core'
 import { actionSheetController, alertController } from '@ionic/vue'
 import {
   bugOutline,
@@ -19,6 +17,7 @@ import {
 } from 'konsta/vue'
 import { config } from '~/config'
 import { YLF_CONTACT } from '~/constants'
+import { hostApplication, hostEnvironment } from '~/host-runtime'
 import {
   estimateDiagnosticLogBytes,
   selectDiagnosticLogs,
@@ -87,10 +86,10 @@ const availableRangeText = computed(() => {
 })
 
 onMounted(async () => {
-  if (!Capacitor.isNativePlatform())
+  if (!hostEnvironment.isNative())
     return
   try {
-    const info = await CapacitorApp.getInfo()
+    const info = await hostApplication.getInfo()
     appVersion.value = info.version
     buildNumber.value = info.build
   }
@@ -153,7 +152,7 @@ async function uploadDiagnosticLogs() {
         client: {
           appVersion: appVersion.value,
           buildNumber: buildNumber.value,
-          platform: Capacitor.getPlatform(),
+          platform: hostEnvironment.platform(),
           route: route.path,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
           userAgent: navigator.userAgent,
@@ -194,7 +193,7 @@ async function confirmClearDiagnosticLogs() {
  * 去 App Store 评分
  */
 function goToAppStore() {
-  if (Capacitor.isNativePlatform()) {
+  if (hostEnvironment.isNative()) {
     window.open(config.appStore.url, '_system')
   }
   else {

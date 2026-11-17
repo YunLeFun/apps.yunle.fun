@@ -335,6 +335,8 @@ async function openMoreMenu() {
             </div>
           </div>
 
+          <AppShareLandingActions v-if="!isEmbedded" :app-key="appId" :website-url="displayData.websiteUrl" @online="openWebsite" />
+
           <!-- 应用信息栏 -->
           <div class="app-info-bar">
             <div class="info-item">

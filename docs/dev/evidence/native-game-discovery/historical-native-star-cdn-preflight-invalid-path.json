@@ -1,0 +1,45 @@
+{
+  "kind": "anonymous-cdn-required-png-readiness",
+  "checkedAt": "2026-10-29T07:46:45.017732+08:00",
+  "requests": [
+    {
+      "requestedURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "status": 200,
+      "responseURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "byteCount": 775328,
+      "sha256": "776670c0c426750e51242e45e4e951a5afaf1b5fc0314620e1aa434a3dbdf9c0",
+      "hasPNGSignature": true,
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "775328",
+        "content-encoding": null,
+        "access-control-allow-origin": null,
+        "access-control-allow-credentials": null,
+        "cross-origin-resource-policy": null,
+        "cache-control": null,
+        "vary": null
+      },
+      "setCookieHeaderPresent": false
+    },
+    {
+      "requestedURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes-sprites.png?webgl=1",
+      "status": 404,
+      "responseURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes-sprites.png?webgl=1",
+      "byteCount": 468,
+      "sha256": "097362d35ce3627cbc31b7c455cdbb9ea584eb78fa84889c3fa777a6fd8fa7f6",
+      "hasPNGSignature": false,
+      "headers": {
+        "content-type": "application/xml",
+        "content-length": "468",
+        "content-encoding": null,
+        "access-control-allow-origin": "*",
+        "access-control-allow-credentials": null,
+        "cross-origin-resource-policy": null,
+        "cache-control": null,
+        "vary": null
+      },
+      "setCookieHeaderPresent": false
+    }
+  ],
+  "scope": "Normal strict TLS anonymous GET with explicit public game Origin, noCookie/Auth/no room writes. Headers/body signature are network diagnostics, not an in-WebKit CORS or renderer success claim; browser failure and this client may differ. Earlier planes-sprites.png request was a diagnostic filename typo, not a required application asset. Its404 is excluded from game conclusions."
+}

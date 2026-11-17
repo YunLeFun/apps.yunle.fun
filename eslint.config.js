@@ -1,6 +1,7 @@
 // @ts-check
 import antfu from '@antfu/eslint-config'
 import nuxt from './apps/mobile/.nuxt/eslint.config.mjs'
+import { hostTransportBoundary } from './scripts/eslint/host-transport-boundary.mjs'
 
 export default nuxt(
   antfu(
@@ -15,7 +16,18 @@ export default nuxt(
     {
       // generated.ts 由 admin gen:apps-snapshot 生成，不参与 lint；
       // scripts/*iap*.mjs 为 App Store Connect 一次性运维脚本，不受应用 lint 约束
-      ignores: ['**/ios/**', '**/android/**', '**/.media/**', 'apps/macos/build/**', 'apps/macos/DerivedData/**', '.codebuddy/**/*.md', 'CODEBUDDY.md', '**/app/constants/apps/generated.ts', 'packages/app-core/src/catalog/generated.ts', 'docs/product/app-reviews-moderation.md', '**/scripts/*iap*.mjs'],
+      // 验证证据保留工具导出的原始字节和哈希，不作为手写源码格式化。
+      ignores: ['**/ios/**', '**/android/**', '**/.media/**', 'apps/macos/build/**', 'apps/macos/DerivedData/**', '.codebuddy/**/*.md', 'CODEBUDDY.md', '**/app/constants/apps/generated.ts', 'packages/app-core/src/catalog/generated.ts', 'docs/product/app-reviews-moderation.md', 'docs/dev/evidence/**', '**/scripts/*iap*.mjs'],
+    },
+    {
+      files: ['apps/mobile/app/**/*.{ts,vue}'],
+      ignores: ['apps/mobile/app/host-runtime/adapters/**'],
+      plugins: {
+        'yunlefun-host': { rules: { 'transport-boundary': hostTransportBoundary } },
+      },
+      rules: {
+        'yunlefun-host/transport-boundary': 'error',
+      },
     },
     {
       files: ['apps/desktop/**'],

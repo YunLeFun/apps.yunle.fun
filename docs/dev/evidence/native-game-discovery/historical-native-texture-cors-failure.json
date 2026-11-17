@@ -1,0 +1,145 @@
+{
+  "cleanup" : {
+    "failedProfileIDs" : [
+
+    ],
+    "identityCleanupFinished" : true,
+    "ownedProfileIDs" : [
+      "ED09EE2C-14BC-494B-8095-F7D97548A048"
+    ]
+  },
+  "diagnostic" : {
+    "assets" : [
+      {
+        "asset" : "planes",
+        "bytes" : 956518,
+        "contentType" : "image\/png",
+        "errorName" : null,
+        "publicURL" : "https:\/\/assets.play.yunle.fun\/games\/paper-star\/runtime\/v2\/planes.png?webgl=1",
+        "sha256" : "11687bec1a36d8166abaeab599daeafd4930080ef86e7b44254553f2b5ababb1",
+        "status" : 200,
+        "success" : true,
+        "type" : "cors"
+      },
+      {
+        "asset" : "world-sprites",
+        "bytes" : null,
+        "contentType" : null,
+        "errorName" : "TypeError",
+        "publicURL" : "https:\/\/assets.play.yunle.fun\/games\/paper-star\/runtime\/v2\/world-sprites.png?webgl=1",
+        "sha256" : null,
+        "status" : null,
+        "success" : false,
+        "type" : null
+      }
+    ],
+    "cache" : "reload",
+    "credentials" : "omit",
+    "cspViolations" : [
+
+    ],
+    "interpretation" : "CORS-readable bytes and SHA support only these exact public texture requests, not renderer\/game readiness; failures retain safe error name without credential or request-header inspection.",
+    "mode" : "cors",
+    "perRequestAbortMS" : 8000,
+    "redirect" : "error"
+  },
+  "home" : {
+    "appReady" : true,
+    "black" : 0,
+    "board" : null,
+    "boardVisibleFraction" : 0,
+    "canvas" : null,
+    "canvasPixels" : null,
+    "canvasReady" : false,
+    "canvasVisibleFraction" : 0,
+    "cell" : null,
+    "fireSequence" : -1,
+    "gomokuAnyEmptyCellEnabled" : false,
+    "gomokuCellEnabled" : false,
+    "hasFocus" : false,
+    "navigation" : {
+      "connectEnd" : 4,
+      "connectStart" : 4,
+      "decodedBodySize" : 22944,
+      "domainLookupEnd" : 4,
+      "domainLookupStart" : 4,
+      "domContentLoadedEventEnd" : 1372,
+      "domInteractive" : 930,
+      "duration" : 0,
+      "encodedBodySize" : 6653,
+      "fetchStart" : 4,
+      "loadEventEnd" : 0,
+      "requestStart" : 18,
+      "responseEnd" : 375,
+      "responseStart" : 348,
+      "secureConnectionStart" : 4,
+      "startTime" : 0,
+      "transferSize" : 6953
+    },
+    "path" : "\/",
+    "phase" : null,
+    "publicOrigin" : true,
+    "readyState" : "interactive",
+    "resourceSummary" : {
+      "completed" : 47,
+      "count" : 47,
+      "crossOrigin" : 4,
+      "decodedBodySize" : 1524533,
+      "encodedBodySize" : 1155383,
+      "sameOrigin" : 43,
+      "transferSize" : 1168283,
+      "types" : {
+        "css" : 18,
+        "fetch" : 1,
+        "img" : 1,
+        "link" : 27
+      }
+    },
+    "tick" : -1,
+    "viewport" : {
+      "devicePixelRatio" : 3,
+      "height" : 758,
+      "visual" : {
+        "height" : 758,
+        "offsetLeft" : 0,
+        "offsetTop" : 0,
+        "scale" : 1,
+        "width" : 402
+      },
+      "width" : 402
+    },
+    "visible" : true,
+    "white" : 0
+  },
+  "nativeCommit" : "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "nativePresentation" : {
+    "animationsEnabled" : true,
+    "deviceOrientationRaw" : 1,
+    "interfaceOrientationRaw" : 1,
+    "visibleIntersection" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "webAttachedToFixtureWindow" : true,
+    "webInWindow" : {
+      "height" : 758,
+      "width" : 402,
+      "x" : 0,
+      "y" : 116
+    },
+    "window" : {
+      "height" : 874,
+      "width" : 402,
+      "x" : 0,
+      "y" : 0
+    },
+    "windowHidden" : false
+  },
+  "openUptime" : 367012.76230933337,
+  "productionPlayGit" : "unknown",
+  "receiptUptime" : 367017.56839504169,
+  "schema" : "legacy-native-public-renderer-cors-v1",
+  "scope" : "Independent anonymous public-texture CORS diagnosis from original HTTPS homepage; does not pass game preflight. Exact live renderer texture URLs, credentials omit, redirect error, cache reload, per-request abort 8s. No CORS\/CSP\/game changes or credential\/storage reads. Native uptime and document performance clocks are not subtracted."
+}

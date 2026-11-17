@@ -1,0 +1,32 @@
+{
+  "schema": "legacy-native-public-play-catalog-lookup-v1",
+  "checkedAt": "2026-10-29T08:22:25.987794+08:00",
+  "URL": "https://apps.yunle.fun/api/apps/public",
+  "status": 200,
+  "bytes": 17313,
+  "responseSHA256": "631856b031d9e8890950d2d13e843d49068c899a362264f6605ad45e85c150a1",
+  "totalPublicItems": 25,
+  "matchingPlayItems": [
+    {
+      "marketShortName": "play",
+      "name": "云乐坊间",
+      "category": "游戏",
+      "tags": [
+        "小游戏",
+        "单人",
+        "同屏",
+        "联机"
+      ],
+      "isPublic": true,
+      "audience": "public",
+      "status": "approved",
+      "playURLFields": [
+        "websiteUrl",
+        "privacyPolicyUrl",
+        "logo"
+      ]
+    }
+  ],
+  "scope": "Actual old CatalogService production endpoint; anonymous GET/no credentials. Retain only Play URL matching fields/count/hash, not unrelated catalogue labels. No production writes. Does not prove mounted native UI journey. Old name/tag search excludes URL/id, so priorASCIIplay no-results not an appabsence finding. Retained matching items restricted to root Play portal; other Play-origin apps excluded.",
+  "excludedOtherPlayOriginApps": 2
+}

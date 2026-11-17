@@ -1,0 +1,22 @@
+{
+  "kind": "historical-native-followup-final-verification",
+  "recordedAt": "2026-10-29T08:19:53.487664+08:00",
+  "rawCopiesVerified": 5,
+  "historicalTestOutcome": "onepassedGomuN10,threefailedwhole diagnosticbundlespreserved",
+  "sourceAndMetricsIndependentAudit": "No substantive discrepancies; inherited audit timestamp corrected",
+  "docsBuild": "passed5.865sec,logical10195495B/allocated10981376B outputreclaimed",
+  "mainCandidatePID": 38099,
+  "normalPreviewPID": 12343,
+  "goalComplete": false,
+  "unmetTasks": [
+    "0.1",
+    "3.3",
+    "4.1",
+    "4.2",
+    "4.3",
+    "5.1"
+  ],
+  "productionDeployment": false,
+  "ownedLegacyAppAbsent": true,
+  "ownedHistoricalDerivedDataAbsent": true
+}

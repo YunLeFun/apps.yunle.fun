@@ -1,0 +1,409 @@
+{
+  "kind" : "native-webkit-layout",
+  "modes" : [
+    "tutorial",
+    "local",
+    "pve"
+  ],
+  "observations" : [
+    {
+      "canvas" : {
+        "bottom" : 255,
+        "disabled" : false,
+        "exposedAtCenter" : true,
+        "height" : 166,
+        "inViewport" : true,
+        "label" : "",
+        "left" : 0,
+        "right" : 874,
+        "top" : 89,
+        "width" : 874
+      },
+      "coach" : {
+        "guideVisible" : true,
+        "skipVisible" : true,
+        "target" : "1 \/ 8 · 欢迎来到纸片宇宙",
+        "targetVisible" : true
+      },
+      "coachInteraction" : {
+        "closed" : true,
+        "closeFocused" : true,
+        "controlsPaused" : true,
+        "focusReturned" : true,
+        "opened" : true,
+        "steeringRestored" : true
+      },
+      "controls" : [
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "向左转",
+          "left" : 62,
+          "right" : 206.15625,
+          "top" : 260,
+          "width" : 144.15625
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "向右转",
+          "left" : 210.15625,
+          "right" : 354.328125,
+          "top" : 260,
+          "width" : 144.171875
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "加速",
+          "left" : 360.71875,
+          "right" : 506.875,
+          "top" : 260,
+          "width" : 146.15625
+        },
+        {
+          "bottom" : 304,
+          "disabled" : true,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "折纸能量 2%",
+          "left" : 513.265625,
+          "right" : 659.4375,
+          "top" : 260,
+          "width" : 146.171875
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "发射",
+          "left" : 665.828125,
+          "right" : 812,
+          "top" : 260,
+          "width" : 146.171875
+        }
+      ],
+      "cssSafeArea" : {
+        "bottom" : "20px",
+        "left" : "62px",
+        "right" : "62px",
+        "top" : "0px"
+      },
+      "documentSize" : {
+        "height" : 324,
+        "width" : 874
+      },
+      "href" : "http:\/\/127.0.0.1:18146\/games\/paper-star\/tutorial",
+      "hudPadding" : {
+        "bottom" : "0px",
+        "left" : "62px",
+        "right" : "62px"
+      },
+      "menu" : {
+        "bottom" : 88,
+        "disabled" : false,
+        "exposedAtCenter" : true,
+        "height" : 44,
+        "inViewport" : true,
+        "label" : "打开游戏菜单",
+        "left" : 768,
+        "right" : 812,
+        "top" : 44,
+        "width" : 44
+      },
+      "mode" : "tutorial",
+      "nativeSafeArea" : {
+        "bottom" : 20,
+        "left" : 62,
+        "right" : 62,
+        "top" : 0
+      },
+      "state" : "ready",
+      "touchPadding" : {
+        "bottom" : "20px",
+        "left" : "62px",
+        "right" : "62px"
+      },
+      "viewport" : {
+        "coarsePointer" : true,
+        "height" : 324,
+        "landscape" : true,
+        "pixelRatio" : 3,
+        "width" : 874
+      }
+    },
+    {
+      "canvas" : {
+        "bottom" : 255,
+        "disabled" : false,
+        "exposedAtCenter" : true,
+        "height" : 210,
+        "inViewport" : true,
+        "label" : "",
+        "left" : 0,
+        "right" : 874,
+        "top" : 45,
+        "width" : 874
+      },
+      "coach" : {
+        "guideVisible" : false,
+        "skipVisible" : false,
+        "target" : null,
+        "targetVisible" : false
+      },
+      "controls" : [
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "向左转",
+          "left" : 62,
+          "right" : 206.15625,
+          "top" : 260,
+          "width" : 144.15625
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "向右转",
+          "left" : 210.15625,
+          "right" : 354.328125,
+          "top" : 260,
+          "width" : 144.171875
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "加速",
+          "left" : 360.71875,
+          "right" : 506.875,
+          "top" : 260,
+          "width" : 146.15625
+        },
+        {
+          "bottom" : 304,
+          "disabled" : true,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "折纸能量 2%",
+          "left" : 513.265625,
+          "right" : 659.4375,
+          "top" : 260,
+          "width" : 146.171875
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "发射",
+          "left" : 665.828125,
+          "right" : 812,
+          "top" : 260,
+          "width" : 146.171875
+        }
+      ],
+      "cssSafeArea" : {
+        "bottom" : "20px",
+        "left" : "62px",
+        "right" : "62px",
+        "top" : "0px"
+      },
+      "documentSize" : {
+        "height" : 324,
+        "width" : 874
+      },
+      "href" : "http:\/\/127.0.0.1:18146\/games\/paper-star\/local",
+      "hudPadding" : {
+        "bottom" : "0px",
+        "left" : "62px",
+        "right" : "62px"
+      },
+      "menu" : {
+        "bottom" : 44,
+        "disabled" : false,
+        "exposedAtCenter" : true,
+        "height" : 44,
+        "inViewport" : true,
+        "label" : "打开游戏菜单",
+        "left" : 768,
+        "right" : 812,
+        "top" : 0,
+        "width" : 44
+      },
+      "mode" : "local",
+      "nativeSafeArea" : {
+        "bottom" : 20,
+        "left" : 62,
+        "right" : 62,
+        "top" : 0
+      },
+      "state" : "ready",
+      "touchPadding" : {
+        "bottom" : "20px",
+        "left" : "62px",
+        "right" : "62px"
+      },
+      "viewport" : {
+        "coarsePointer" : true,
+        "height" : 324,
+        "landscape" : true,
+        "pixelRatio" : 3,
+        "width" : 874
+      }
+    },
+    {
+      "canvas" : {
+        "bottom" : 255,
+        "disabled" : false,
+        "exposedAtCenter" : true,
+        "height" : 210,
+        "inViewport" : true,
+        "label" : "",
+        "left" : 0,
+        "right" : 874,
+        "top" : 45,
+        "width" : 874
+      },
+      "coach" : {
+        "guideVisible" : false,
+        "skipVisible" : false,
+        "target" : null,
+        "targetVisible" : false
+      },
+      "controls" : [
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "向左转",
+          "left" : 62,
+          "right" : 206.15625,
+          "top" : 260,
+          "width" : 144.15625
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "向右转",
+          "left" : 210.15625,
+          "right" : 354.328125,
+          "top" : 260,
+          "width" : 144.171875
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "加速",
+          "left" : 360.71875,
+          "right" : 506.875,
+          "top" : 260,
+          "width" : 146.15625
+        },
+        {
+          "bottom" : 304,
+          "disabled" : true,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "折纸能量 4%",
+          "left" : 513.265625,
+          "right" : 659.4375,
+          "top" : 260,
+          "width" : 146.171875
+        },
+        {
+          "bottom" : 304,
+          "disabled" : false,
+          "exposedAtCenter" : true,
+          "height" : 44,
+          "inViewport" : true,
+          "label" : "发射",
+          "left" : 665.828125,
+          "right" : 812,
+          "top" : 260,
+          "width" : 146.171875
+        }
+      ],
+      "cssSafeArea" : {
+        "bottom" : "20px",
+        "left" : "62px",
+        "right" : "62px",
+        "top" : "0px"
+      },
+      "documentSize" : {
+        "height" : 324,
+        "width" : 874
+      },
+      "href" : "http:\/\/127.0.0.1:18146\/games\/paper-star\/pve",
+      "hudPadding" : {
+        "bottom" : "0px",
+        "left" : "62px",
+        "right" : "62px"
+      },
+      "menu" : {
+        "bottom" : 44,
+        "disabled" : false,
+        "exposedAtCenter" : true,
+        "height" : 44,
+        "inViewport" : true,
+        "label" : "打开游戏菜单",
+        "left" : 768,
+        "right" : 812,
+        "top" : 0,
+        "width" : 44
+      },
+      "mode" : "pve",
+      "nativeSafeArea" : {
+        "bottom" : 20,
+        "left" : 62,
+        "right" : 62,
+        "top" : 0
+      },
+      "state" : "ready",
+      "touchPadding" : {
+        "bottom" : "20px",
+        "left" : "62px",
+        "right" : "62px"
+      },
+      "viewport" : {
+        "coarsePointer" : true,
+        "height" : 324,
+        "landscape" : true,
+        "pixelRatio" : 3,
+        "width" : 874
+      }
+    }
+  ],
+  "scope" : "Actual native runtime and WebKit; engine-ready, DOM geometry, hit testing and screenshots; no production identity"
+}

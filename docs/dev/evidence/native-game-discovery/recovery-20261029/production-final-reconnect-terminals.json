@@ -1,0 +1,88 @@
+{
+  "atUTC": "2026-10-29T19:23:37.257160+00:00",
+  "status": "passed-four-terminal-branches",
+  "webSourceCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "cases": [
+    {
+      "gameId": "gomoku",
+      "branch": "SDK retries exhausted; application CloseCode.FAILED_TO_RECONNECT (4003) handler",
+      "observedChineseAlert": "连接重试已结束，请返回游戏大厅重新加入房间",
+      "stateCleared": true,
+      "returnedToLobby": true,
+      "evidence": "terminal-dom.json",
+      "codeEvidence": "Observed unique handler text plus exact source/SDK mapping; not claimed as a WebSocket ERROR 4003 frame"
+    },
+    {
+      "gameId": "flight-chess",
+      "branch": "reconnecting MATCHMAKE_EXPIRED",
+      "observedProtocolErrorCode": 524,
+      "observedChineseAlert": "重连席位已过期，请返回游戏大厅重新加入房间",
+      "stateCleared": true,
+      "returnedToLobby": true,
+      "evidence": "restored-protocol.json"
+    },
+    {
+      "gameId": "flight-chess",
+      "branch": "SDK retries exhausted; application CloseCode.FAILED_TO_RECONNECT (4003) handler",
+      "observedChineseAlert": "连接重试已结束，请返回游戏大厅重新加入房间",
+      "stateCleared": true,
+      "returnedToLobby": true,
+      "evidence": "second-pre-restoration.json",
+      "codeEvidence": "Observed unique handler text plus exact source/SDK mapping; not claimed as a WebSocket ERROR 4003 frame"
+    },
+    {
+      "gameId": "gomoku",
+      "branch": "reconnecting MATCHMAKE_EXPIRED",
+      "observedProtocolErrorCode": 524,
+      "offlineMilliseconds": 121173,
+      "observedChineseAlert": "重连席位已过期，请返回游戏大厅重新加入房间",
+      "stateCleared": true,
+      "returnedToLobby": true,
+      "evidence": "third-g-restored.json"
+    }
+  ],
+  "observationsAndLimits": [
+    "First group actual offline151196ms reached different branches for the two games; preserved as observed.",
+    "Second gomoku restored142648ms after SDK exhausted, so it does not cover524; third group fixed121000ms deadline and restore receipt121173ms followed by actual524; adjacent post-write console observation121174ms.",
+    "Flight negative boundary rooms included two server bots; no human-action or clean Native N10 claim.",
+    "One first-group E leave command returned timeout after real REVISION_CONFLICT; refreshed authority and supported leave succeeded; original failure retained.",
+    "No DOM/SDK callback injection, no reconnection setting modifications, normal TLS, scoped browser offline conditions all restored.",
+    "All owned test rooms left through supported protocol; temporary8/9 tabs closed.",
+    "Health zero is a point observation of shared production, not an SLA or global cleanup guarantee."
+  ],
+  "networkOverridesRestored": true,
+  "ownedRoomsPendingCleanup": 0,
+  "health": {
+    "status": 200,
+    "atUTC": "2026-10-29T19:22:52.837722+00:00",
+    "activeConnections": 0,
+    "activeOnlinePlayers": 0,
+    "activeOnlineRooms": 0
+  },
+  "privateEvidenceSHA256": {
+    "baseline.json": "7bc0a228b1e2e5b4d282ea6a310f1f0420133433deaea66db309c2a13ac01b09",
+    "restored-protocol.json": "5e28cbc795fea388fe5869ec959f4b8c500e2a750142ad6782fd670bb49e69b4",
+    "terminal-dom.json": "9a9d18193f1211b76341f66768ace61dd8725cec9f30a8ac0af5775d2d57725a",
+    "network-overrides.json": "e6c56186abc6d8449caf7f6610f8547846aa78bb731c1a3274f30b0baf0a4112",
+    "host-cleanup.json": "2abce3f0828bc4056292dd0d35572d4b2e0032f92fdb7933cf205923349a5af7",
+    "e-cleanup-snapshot.json": "00d73bf264314edb0999de67d8b96c23396f8111f09ac0118ff33d9a321ae149",
+    "e-cleanup-retry.json": "f242e3db63359f8477c634a2037c855f0ab40a53c423bfebfa955ce819ba6804",
+    "second-baseline.json": "0fbf8e9164c789013fb12d355ca25972ab2b0d1513bb7164430b0bb21f4fb111",
+    "second-pre-restoration.json": "6dd528a65f11fe9c6c9950d30cb4b6ad62bcd2836cf54f9676b1a3ca4887ab2a",
+    "second-g-network-restore.json": "9f1e9f74fdedaaec71b3d78b8cedd9e25922f00fbed48e64643fbd7b072e2b9e",
+    "second-f-network-restore.json": "883cc50f3cf703d327a4fd27531f54b63159da7ae7539c385737d4585ba65ab0",
+    "second-host-cleanup.json": "6ac09532d343d7c0973c21796969781421ad5fdfee95029cfc9e698e85ebade9",
+    "third-g-baseline.json": "c95eb5515330698ceb09504ee52d1655e8feca5ad755f41124815e38926e64ac",
+    "third-g-host-during-offline.json": "181c2e9a79ef5a3071dcce5d61a465addb41f42feaa68b50ffbd886085cc13be",
+    "third-g-network-restore.json": "710fee7c977c4f6e221cd6bad0d9ca99001de0b736a7074005f3bed4e73895e0",
+    "third-g-restored.json": "842bdea46cb8b4e4387e5d89a4219ae97cc94cf99f4714f8e25f01843ad41e09",
+    "third-g-host-cleanup.json": "f242e3db63359f8477c634a2037c855f0ab40a53c423bfebfa955ce819ba6804",
+    "final-health.json": "84cb107f88c063c1a14ec621482be80afe29593457614b810f5e58d9c0b91d23",
+    "g-terminal.png": "be149ec5e7d2e8c5582ff3e0bf10b69c952d6ab3437baaf5de6ed733b247f397",
+    "f-terminal.png": "ce974d93abe9b70df8839efd57bdc0f83f376520a08f81006d9f25b3629f5fdc",
+    "second-f-terminal.png": "be149ec5e7d2e8c5582ff3e0bf10b69c952d6ab3437baaf5de6ed733b247f397",
+    "third-g-terminal.png": "ce974d93abe9b70df8839efd57bdc0f83f376520a08f81006d9f25b3629f5fdc"
+  }
+}

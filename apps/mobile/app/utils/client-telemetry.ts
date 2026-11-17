@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core'
 import consola from 'consola'
+import { hostEnvironment } from '~/host-runtime'
 
 interface RumClient {
   report: (payload: Record<string, unknown>) => void
@@ -107,7 +107,7 @@ export function reportClientEvent(
   )
   const payload = {
     event: name,
-    platform: Capacitor.getPlatform(),
+    platform: hostEnvironment.platform(),
     route: typeof window === 'undefined' ? '' : window.location.pathname,
     ...normalizedContext,
   }

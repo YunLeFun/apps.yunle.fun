@@ -1,0 +1,62 @@
+{
+  "schema": "historical-native-acceptance-analysis-v1",
+  "nativeCommit": "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "productionPlayGit": "unknown",
+  "results": {
+    "combinedInitialN1": "failed1; Gomu component completed, Star did not reach renderer+playing+input proof",
+    "starOnlyDiagnostic": "failed1; known renderer parent opacity0/no is-ready, alert required world-sprites load TypeError; phaseplaying/tick independently advance",
+    "independentTextureCORS": "failed1; exact planes fetch succeeds200+SHA, exact world fetch TypeError, no CSP violation observed in this diagnostic",
+    "gomokuN10": "passed1; 21 raw rows including excludedprime, 10cleared+10natural all actualblack/white; sameownedprofile, freshWK/releases"
+  },
+  "causeAssessment": "Consistent three-layer evidence of blocked cross-origin reading of required world texture. Does not prove unique root cause or CDN-wide outage. Raw canvas own computed visibility does not include transparent ancestor; no visible/operable Star claim. Missing ACAO observed on contemporaneous ordinary200PNG request; independent Wk fetch failure does not expose status or body.",
+  "assetRequests": [
+    {
+      "requestedURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png?webgl=1",
+      "status": 200,
+      "responseURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png?webgl=1",
+      "byteCount": 956518,
+      "sha256": "11687bec1a36d8166abaeab599daeafd4930080ef86e7b44254553f2b5ababb1",
+      "hasPNGSignature": true,
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "956518",
+        "content-encoding": null,
+        "access-control-allow-origin": "*",
+        "access-control-allow-credentials": null,
+        "cross-origin-resource-policy": null,
+        "cache-control": null,
+        "vary": null
+      },
+      "setCookieHeaderPresent": false
+    },
+    {
+      "requestedURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "status": 200,
+      "responseURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "byteCount": 775328,
+      "sha256": "776670c0c426750e51242e45e4e951a5afaf1b5fc0314620e1aa434a3dbdf9c0",
+      "hasPNGSignature": true,
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "775328",
+        "content-encoding": null,
+        "access-control-allow-origin": null,
+        "access-control-allow-credentials": null,
+        "cross-origin-resource-policy": null,
+        "cache-control": null,
+        "vary": null
+      },
+      "setCookieHeaderPresent": false
+    }
+  ],
+  "sourceFixScope": "Current9ba candidate already uses same-origin content-hashed assets and genuine ready verified locally. Same PNG bytes/hash as production CDN, not a production deployment or repaired live site claim.",
+  "invalidPathProbe": "planes-sprites.png 404 was a mistyped diagnostic filename, not the real required planes.png; retained in historical-native-star-cdn-preflight-invalid-path.json and excluded from causal assessment.",
+  "performanceLimits": [
+    "Oldruntime.open to DOM receipt uses public Home->detail->mode links, synthetic DOM inputs. Does not prove current native catalogue-to-detail UI; supplementary old UI search did not find Play.",
+    "Controls are not engine/Worker-ready; actual black proves acceptedinput; white includes intentional computerthinktime. Polling/scrollsettle/animations included.",
+    "HTTPclear callbacks onlymemory/disk cache, notOS-cold; cookiesLSIDB excluded from delete types, noactualmarkerreadback in oldN10. Natural group always follows pairedcleared; process/DNS/TLS maycontinue.",
+    "Oldportrait/defaultanimationstrue, productionnetwork/unknownPlayGit vscurrent9ba loopback/animationsdisabled: no30percentcomparativeclaim. Star failed samples notperformancequantiles."
+  ],
+  "cleanup": "5 owned UUID removal callbacks completed/failedIDs[]/identity finished across runs, no subsequent WebKitAPI absence enumeration claimed. Task-created uniquelegacyapp uninstalled; only ownhistoricalDerivedData reclaimed; originalsnapshot+harness/results/logs retained.",
+  "sourceAudit": "Independent279fileSHA audit: only2recorded packagingfiles+append-onlytestharness changed; originalruntime/loader unchanged. Main current experiment227lines removed, source31549 restored."
+}

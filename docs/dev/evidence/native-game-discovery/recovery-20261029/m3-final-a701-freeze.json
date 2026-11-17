@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-a701-fixed-static-input-freeze",
+  "atUTC": "2026-10-29T19:18:35.347254+00:00",
+  "webSourceAttribution": {
+    "commit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "basis": "Root verified production deployment source; publicbody hashes frozen independently",
+    "deployedGitNotDerivedFromCatalogVersion": true
+  },
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "catalogBodySHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+  "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87",
+  "archive": {
+    "sha256": "0a21ef3c62ef1d38c2eb394219f7d958cd8f881ebc4bcb1134180c10214544b7",
+    "bytes": 10598648,
+    "memberCount": 380,
+    "allMembersReopenedAndVerified": true
+  },
+  "privateFreezeReceiptSHA256": "6bed9838f65dcbf33c75ab076876632a3031b8edc5125a1a0bad3740063f83e9",
+  "positiveFileCount": 379,
+  "positiveBytes": 16656716,
+  "gameUniqueResources": 261,
+  "gameResourceOccurrences": 687,
+  "gameManifests": [
+    {
+      "gameId": "gomoku",
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2",
+      "resourceCount": 231,
+      "totalBytes": 8564877,
+      "manifestSHA256": "f7f5f4eb6f41f003596b6919312111310954c385bdc28f6a4f715581c5f37897"
+    },
+    {
+      "gameId": "flight-chess",
+      "resourceVersion": "77c1c8290fb05d82fd47d7fbb82f22932d2f0bc2d11625f57acfb388bb02044f",
+      "resourceCount": 223,
+      "totalBytes": 8546656,
+      "manifestSHA256": "3b3bb54b0d23bd909d5c767feadf9b28ac4c77989e24dd01b441e5d1b7de6762"
+    },
+    {
+      "gameId": "paper-star",
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973",
+      "resourceCount": 233,
+      "totalBytes": 10960814,
+      "manifestSHA256": "678f6a067b63415a21d8ac8166f22b502df62f67ad5f52d1cb5d9cac759cd141"
+    }
+  ],
+  "doubleReadCount": 13,
+  "requiredDirectHTMLAssets": [
+    {
+      "route": "/games/gomoku/computer",
+      "gameId": "gomoku",
+      "requiredLinkedJSAndCSSCount": 28,
+      "allRequiredInCurrentGameManifest": true,
+      "prefetchHintsOutsideRequiredManifest": [
+        "/_nuxt/pachinko.DVzKPJda.css",
+        "/_nuxt/B_LEEkfX.js",
+        "/_nuxt/CdXs4oRW.js",
+        "/_nuxt/KEVaklP5.js",
+        "/_nuxt/error-404.DinTYhhl.css",
+        "/_nuxt/DUueCOVx.js",
+        "/_nuxt/error-500.CLoRa-Qf.css",
+        "/_nuxt/CwRby_Sl.js"
+      ]
+    },
+    {
+      "route": "/games/gomoku/local",
+      "gameId": "gomoku",
+      "requiredLinkedJSAndCSSCount": 29,
+      "allRequiredInCurrentGameManifest": true,
+      "prefetchHintsOutsideRequiredManifest": [
+        "/_nuxt/pachinko.DVzKPJda.css",
+        "/_nuxt/B_LEEkfX.js",
+        "/_nuxt/CdXs4oRW.js",
+        "/_nuxt/KEVaklP5.js",
+        "/_nuxt/error-404.DinTYhhl.css",
+        "/_nuxt/DUueCOVx.js",
+        "/_nuxt/error-500.CLoRa-Qf.css",
+        "/_nuxt/CwRby_Sl.js"
+      ]
+    },
+    {
+      "route": "/games/paper-star/local",
+      "gameId": "paper-star",
+      "requiredLinkedJSAndCSSCount": 28,
+      "allRequiredInCurrentGameManifest": true,
+      "prefetchHintsOutsideRequiredManifest": [
+        "/_nuxt/pachinko.DVzKPJda.css",
+        "/_nuxt/B_LEEkfX.js",
+        "/_nuxt/CdXs4oRW.js",
+        "/_nuxt/KEVaklP5.js",
+        "/_nuxt/error-404.DinTYhhl.css",
+        "/_nuxt/DUueCOVx.js",
+        "/_nuxt/error-500.CLoRa-Qf.css",
+        "/_nuxt/CwRby_Sl.js"
+      ]
+    }
+  ],
+  "availableOnlineRoomEntryChecks": [
+    {
+      "gameId": "gomoku",
+      "url": "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+      "sha256": "328908ddbffcc952863782ea9fc31f80946958463bc61a5756e7ae8e89224115",
+      "byteCount": 276084
+    },
+    {
+      "gameId": "flight-chess",
+      "url": "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+      "sha256": "328908ddbffcc952863782ea9fc31f80946958463bc61a5756e7ae8e89224115",
+      "byteCount": 276084
+    }
+  ],
+  "truthfulProductionNegativeResponses": [
+    {
+      "path": "/favicon.ico",
+      "status": 404,
+      "bytes": 4549,
+      "sha256": "d7b38fe5ea56986e83ae477c89860c7da51e1dbd037bfcac9885972092643138",
+      "contentType": "text/html"
+    },
+    {
+      "path": "/_nuxt/rapier_wasm2d_bg.wasm",
+      "status": 404,
+      "bytes": 4549,
+      "sha256": "d7b38fe5ea56986e83ae477c89860c7da51e1dbd037bfcac9885972092643138",
+      "contentType": "text/html"
+    },
+    {
+      "path": "/_nuxt/rapier_wasm3d_bg.wasm",
+      "status": 404,
+      "bytes": 4549,
+      "sha256": "d7b38fe5ea56986e83ae477c89860c7da51e1dbd037bfcac9885972092643138",
+      "contentType": "text/html"
+    },
+    {
+      "path": "/_nuxt/rapier_wasm3d_bg.js",
+      "status": 404,
+      "bytes": 4549,
+      "sha256": "d7b38fe5ea56986e83ae477c89860c7da51e1dbd037bfcac9885972092643138",
+      "contentType": "text/html"
+    }
+  ],
+  "staticParserDiagnostics": [],
+  "unresolvedComputedDynamicImports": [],
+  "scopeLimits": "Staticliteral imports/exports/dynamic imports, Vite literalasset arrays/mapDeps, staticasset URLliterals, CSS URLs, HTML src/modulepreload/prefetch/manifest and sameorigin gameanchor route payloads. Computed runtimeimports, worker-generated requests, externalorigins and APIs are not fabricated or claimed complete. Wait one N1 serverrequest audit before deciding final60.",
+  "nativeSamplingStatus": "N1 in progress; no finalperformancepass claimed",
+  "historicalB251FailurePreserved": true,
+  "temporaryExtractionRemoved": true,
+  "reclaimedRedundantHTTPSCacheAllocatedBytes": 4960256,
+  "privateRetention": "Keep exactarchive/receipt and finalraw/xcresult/necessary products for review and reproduction; ownserver/extraction removed after sampling; never depend on original HTTPS cache files."
+}

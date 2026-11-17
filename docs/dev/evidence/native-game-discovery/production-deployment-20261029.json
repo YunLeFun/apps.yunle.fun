@@ -1,0 +1,605 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUTC": "2026-10-29T07:27:13.873908+00:00",
+  "scope": "Final production Web cache-header deployment and anonymous HTTP/browser checkpoint; actual native account/OS-link/multiplayer acceptance remains incomplete. Initial failed cache-header evidence is retained.",
+  "backend": {
+    "sourceCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+    "releaseCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+    "deploymentObserved": true,
+    "health": {
+      "ok": true,
+      "service": "yunlefun-play-game-server",
+      "apiVersion": "v1",
+      "protocolVersion": 3,
+      "timestamp": "2026-10-29T06:44:29.798Z",
+      "roomStore": "cloudbase",
+      "multiplayerEnabled": true
+    },
+    "trustedOriginPreflightStatus": 204,
+    "trustedOriginAllowsIdempotencyKey": true,
+    "runtimeFilesUnchanged": true,
+    "configuredEnvironmentUnchanged": true,
+    "existingReleaseGatesUnchanged": true,
+    "artifactFinalization": {
+      "sourceCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+      "platformManifestDigest": "sha256:c34d1f6a47766bf2772997dd197b207f93bc5d707f5a40e3bc1498e1af3ba331",
+      "imageConfigDigest": "sha256:cc9d22e0de72be3988bf411224b66ee0cb361c7831e68603c8d411a4ebac57db",
+      "sourceSHA256": "541d8209bd71ae5a52d6df17fa1b89107b03a8bc966a3f0943cc94686249c037",
+      "imageSHA256": "436a7f4e9dfa5fffae084e9c90e0f151f12f4d6648c2d3b0b2e15fdc0480b923",
+      "gzipIntegrityVerified": true,
+      "archiveExactTagVerified": true,
+      "archivePlatformManifestVerified": true,
+      "archiveConfigDigestVerified": true,
+      "manifestBeforeSHA256": "2e11f0a4fac3bf9286ac00ffcfa1f7351ad46334d4fe5ed8a074740f9156e08e",
+      "manifestAfterSHA256": "4002b45e17ed50093958ed1733f986c4ace67e815165938cba999867a7b365f9",
+      "oldRollbackInputsRetained": true,
+      "restoreLoadTestPerformed": false,
+      "runtimeEnvironmentRead": false
+    }
+  },
+  "localE2E": {
+    "productionConfigFullRun": {
+      "counts": {
+        "total": 190,
+        "passed": 153,
+        "failed": 15,
+        "explicitSkipped": 4,
+        "serialDidNotRun": 18,
+        "retries": 0
+      },
+      "projects": [
+        {
+          "project": "chromium",
+          "total": 95,
+          "passed": 76,
+          "explicitSkipped": 1,
+          "failed": 9,
+          "serialDidNotRun": 9
+        },
+        {
+          "project": "mobile-chromium",
+          "total": 95,
+          "explicitSkipped": 3,
+          "passed": 77,
+          "failed": 6,
+          "serialDidNotRun": 9
+        }
+      ],
+      "summary": "/tmp/yunle-native-production.08darurg/independent-e2e/summary.json"
+    },
+    "originalDefaultTargetedRun": {
+      "counts": {
+        "timedOut": 3,
+        "passed": 31,
+        "failed": 2
+      },
+      "total": 36,
+      "projects": [
+        {
+          "project": "chromium",
+          "total": 18,
+          "statusCounts": {
+            "timedOut": 2,
+            "passed": 15,
+            "failed": 1
+          }
+        },
+        {
+          "project": "mobile-chromium",
+          "total": 18,
+          "statusCounts": {
+            "passed": 16,
+            "timedOut": 1,
+            "failed": 1
+          }
+        }
+      ],
+      "summary": "/tmp/yunle-native-production.08darurg/default-targeted-e2e/summary.json"
+    },
+    "oldSourceRegressionControl": {
+      "counts": {
+        "timedOut": 3,
+        "passed": 3,
+        "failed": 2
+      },
+      "total": 8,
+      "projects": [
+        {
+          "project": "chromium",
+          "total": 4,
+          "statusCounts": {
+            "timedOut": 2,
+            "passed": 1,
+            "failed": 1
+          }
+        },
+        {
+          "project": "mobile-chromium",
+          "total": 4,
+          "statusCounts": {
+            "passed": 2,
+            "timedOut": 1,
+            "failed": 1
+          }
+        }
+      ],
+      "summary": "/tmp/yunle-native-production.08darurg/d57358d-pachinko-baseline/summary.json",
+      "allEightStatusesMatchCurrentDefault": true,
+      "remainingFiveFailuresReproduced": true
+    },
+    "interpretation": "Default targeted run: 31 passed and 5 failed; exact old d57358d source control: 3 passed and the same 5 project/test failures. No new regression established within this targeted failure set; this does not mean the full 190-test suite passed.",
+    "assertionsAndTimeoutsUnchanged": true,
+    "APIAndSSONetworkDenied": true,
+    "staticCDNOnlyAllowedInDefaultAndBaseline": true,
+    "productionWritesByE2E": false
+  },
+  "remainingAcceptance": {
+    "macOSLockScreen": "User explicitly confirmed the machine is unlocked; actual native M4 acceptance is resuming and remains incomplete.",
+    "M4RealNativeSSO": "not accepted",
+    "M4OSColdStartInvite": "not accepted",
+    "M4TwoRealAccountRecovery": "not accepted",
+    "M3P50Reduction30Percent": "not achieved",
+    "M0M5OverallComplete": false,
+    "userConfirmedUnlock": true,
+    "M4Status": "in progress, not accepted"
+  },
+  "limitations": [
+    "HTTP/cache-policy checks and the anonymous in-app browser smoke do not prove native WKWebView operation, real SSO, two-account recovery or OS cold-start link delivery.",
+    "All 249 published resources pass the header-policy check; actual native cache-only preparation/recovery on this deployed build is still part of pending native acceptance.",
+    "AASA source is unchanged and the prior single Apple CDN response was reused without another GET; this is not an OS Universal Link cold-launch test.",
+    "Eight canonical mode HTML shells do not enable gated Star multiplayer.",
+    "Backend archive verification is not a restore/load exercise: restoreLoadTestPerformed=false.",
+    "The new native candidate has a successful observed build only; the running native app remains the earlier preview candidate."
+  ],
+  "rawEvidence": {
+    "privateTaskDirectory": "/tmp/yunle-native-production.08darurg",
+    "files": [
+      {
+        "path": "backend-deployed.json",
+        "sha256": "24df6b752c9847df112d50835459c5779b7bbbecd0385574fc9f458fb7156c04"
+      },
+      {
+        "path": "backend-finalization.json",
+        "sha256": "1e1ce0fec470ad73b927855e34fd022fdd17ec4041038b162d949245b873fb1e"
+      },
+      {
+        "path": "production-backend-after-http.json",
+        "sha256": "aaeae02ab22c6847b9fb8bcc8bb0f113dbf7fb4a1f6725714cf9a9d27290191f"
+      },
+      {
+        "path": "production-after-static/report.json",
+        "sha256": "ebebfa18c0dfa43a262c20817c77b87baf74d0499f8f427324ce625bc8e373a0"
+      },
+      {
+        "path": "production-after-static/summary.json",
+        "sha256": "b8d60db555a3b587b81b519e3215e28c26774e89ed0c9745386cefb31724872f"
+      },
+      {
+        "path": "standard-acceptance-followup-summary.json",
+        "sha256": "8359b3feeabc4d9fc3688cd8af3fed126815c956097269b58c7a6bd36f66a996"
+      },
+      {
+        "path": "edgeone-deployed-55fe0e7.jpg",
+        "sha256": "f95378570722a7553803f11269316fb586244cb714b1af918085da727f60112b"
+      },
+      {
+        "path": "production-after-cache-header-static/report.json",
+        "sha256": "f82dd3f5a48fe4ece007c73a770a31fcd45d007a8229c56061709c921e82bc8b"
+      },
+      {
+        "path": "production-after-cache-header-static/summary.json",
+        "sha256": "26abe50ac08aa65d071df440127a10262eb88dfc8ae53bb6eb6d7aa1ac56373b"
+      },
+      {
+        "path": "production-final-backend-readiness.json",
+        "sha256": "803bec31d4ee9f6c36836978599255cbf9597c068c1fdf032c57d70a20bcbaa7"
+      },
+      {
+        "path": "container-context-cleanup.json",
+        "sha256": "485f8ffba412ee0bec17a01bc309b17eb43dcde0f0c2d5ef0a5a6ed8532c500b"
+      },
+      {
+        "path": "production-star-browser-smoke.json",
+        "sha256": "536274fc479cbd4bdd6b80dfd06876f9bcce5de2a407178208250c0616487de0"
+      },
+      {
+        "path": "native-build-sim-fingerprint.json",
+        "sha256": "350293432be40a6887a976f299ab17eeeb349be45f95fe0bed802bbb629e04e3"
+      },
+      {
+        "path": "edgeone-deployed-db02e67.jpg",
+        "sha256": "9b8e124149855986dce18f64517e5704711159612523bd5f14f9dacca2813786"
+      },
+      {
+        "path": "production-star-steering-accepted.jpg",
+        "sha256": "36503bd35495695ad69a06f8be3e8888158c6f4b42a5268f634c66a53cc6d55b"
+      }
+    ]
+  },
+  "redaction": {
+    "publicRuntimeConfigValuesOmitted": true,
+    "publicAccessKeyOmitted": true,
+    "accountIdentifiersPasswordsCookiesTokensOmitted": true,
+    "rawLogsCopiedIntoDocumentation": false
+  },
+  "initialWebDeployment": {
+    "sourceCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+    "provider": "EdgeOne",
+    "deploymentId": "dpnex6v8yt4k",
+    "platformDeploymentSucceeded": true,
+    "deploymentUIObservation": "Root agent observed successful deployment; private screenshot SHA recorded below, pixels not copied.",
+    "httpValidationStartedAt": "2026-10-29T07:04:50.074738+00:00",
+    "httpValidationFinishedAt": "2026-10-29T07:06:50.421747+00:00",
+    "offlinePolicyEvaluationCompletedAt": "2026-10-29T07:09:14.552916+00:00",
+    "catalogVersion": "9e76246e6a6234344847c3da0f663439f46b8f515a4ccad1aa81ee9ce46d44d8",
+    "gameCount": 3,
+    "resourceOccurrences": 655,
+    "uniqueResourceURLs": 249,
+    "allResourceSHAAndBytesMatch": true,
+    "MIMEPolicyAllResourcesAccepted": true,
+    "canonicalModeHTML200Count": 8,
+    "sameOriginStarImmutableAssetCount": 3,
+    "publicRuntimeConfigAllElevenFieldsMatch": true,
+    "releaseFlags": {
+      "multiplayerEnabled": true,
+      "paperStarOnlineEnabled": false
+    },
+    "AASA": {
+      "originHTTPStatus": "200",
+      "sourceBytesMatchOrigin": true,
+      "appleCDNHTTPStatus": "200",
+      "appleCDNBytesSHA256": "32e8905346f9785c961908fd3b4fb39b7c21b7bc010f6397a988df258a145e9f",
+      "originAndAppleCDNExactBytesMatch": true,
+      "OSUniversalLinkAcceptance": false
+    },
+    "nativePublicCachePolicy": {
+      "passed": false,
+      "HTTPChecksPass": false,
+      "resourcePolicyFailureCount": 16,
+      "reason": "16 hashed Nuxt JavaScript/CSS responses use public,max-age=0,must-revalidate; positive max-age is required by the native public-resource policy. Matching bytes and SHA do not make these cache checks pass.",
+      "failures": [
+        {
+          "path": "/_nuxt/BXLud-SH.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/BcRzgwke.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/CV-MtYkS.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/DLXoydia.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/DUyyyLZA.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/N-_TojHl.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/PassAndPlayBoard.uQuaTMhe.css",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/entry.CKxwrVWR.css",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/BCMTV_Fy.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/BxXPzHjV.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/CKQO-YWn.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/CQaxaCkB.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/CebyNykH.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/DUswJwhp.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/cvBDkCnH.js",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        },
+        {
+          "path": "/_nuxt/pve.AOxRsspM.css",
+          "httpStatus": "200",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "shaMatches": true,
+          "byteCountMatches": true,
+          "nativePublicCachePolicyAccepts": false
+        }
+      ]
+    }
+  },
+  "webProductionDeployment": {
+    "sourceCommit": "db02e67b2ebdffcdf575c3cfef44b6c826147ebd",
+    "provider": "EdgeOne",
+    "deploymentId": "dpjtxqxadmgw",
+    "platformDeploymentSucceeded": true,
+    "httpValidationStartedAt": "2026-10-29T07:18:19.948851+00:00",
+    "httpValidationFinishedAt": "2026-10-29T07:18:52.737497+00:00",
+    "rawReportSHA256": "f82dd3f5a48fe4ece007c73a770a31fcd45d007a8229c56061709c921e82bc8b",
+    "catalogVersion": "9e76246e6a6234344847c3da0f663439f46b8f515a4ccad1aa81ee9ce46d44d8",
+    "catalogGeneratedAt": "2026-10-29T07:15:38.188Z",
+    "gameCount": 3,
+    "resourceOccurrences": 655,
+    "uniqueResourceURLs": 249,
+    "allResourceSHAAndBytesMatch": true,
+    "allResourceMIMEsAccepted": true,
+    "nativePublicCachePolicy": {
+      "passed": true,
+      "HTTPChecksPass": true,
+      "resourcePolicyFailureCount": 0,
+      "oneYearImmutableResourceCount": 249,
+      "cacheControlGroups": {
+        "public, max-age=31536000, immutable": 71,
+        "public,max-age=31536000,immutable": 178
+      }
+    },
+    "cacheBoundaryValidation": {
+      "passed": true,
+      "nativeJSONCount": 4,
+      "nativeJSONMaxAgeSeconds": 60,
+      "nativeJSONMustRevalidate": true,
+      "HTMLCount": 9,
+      "HTMLMaxAgeSeconds": 0,
+      "latestBuildMetadataCount": 1,
+      "latestBuildMetadataMaxAgeSeconds": 0,
+      "HTMLAndLatestBuildMetadataImmutable": false
+    },
+    "canonicalModeHTML200Count": 8,
+    "sameOriginStarImmutableAssetCount": 3,
+    "allElevenPublicRuntimeFieldsUnchanged": true,
+    "releaseFlags": {
+      "multiplayerEnabled": true,
+      "paperStarOnlineEnabled": false
+    },
+    "AASA": {
+      "sourceMatchesOrigin": true,
+      "sourceAASAUnchanged": true,
+      "reusedPriorAppleCDNResponseCount": 1,
+      "newAppleCDNGETs": 0,
+      "priorSingleAppleCDNResponseExactMatchRetained": true,
+      "OSUniversalLinkAcceptance": false
+    },
+    "backendSourceCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+    "webAndBackendUseDifferentSourceCommits": true
+  },
+  "cacheHeaderFollowup": {
+    "status": "deployed; complete anonymous byte/MIME/public-cache-policy revalidation passed",
+    "sourceCommit": "db02e67b2ebdffcdf575c3cfef44b6c826147ebd",
+    "deploymentId": "dpjtxqxadmgw",
+    "previousCheckpoint": {
+      "sourceCommit": "db02e67b2ebdffcdf575c3cfef44b6c826147ebd",
+      "changedFiles": [
+        "edgeone.json",
+        "docs/guide/deployment.md"
+      ],
+      "status": "Push/deployment in progress per root agent; new deployment and cache-policy recheck not yet recorded here.",
+      "backendRemainsAtCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+      "sameFinalCommitForWebAndBackendClaimed": false
+    },
+    "initial16FailuresRetainedInEvidence": true,
+    "initialFailureRawReportUnchanged": true,
+    "initialFailureRawReportSHA256": "ebebfa18c0dfa43a262c20817c77b87baf74d0499f8f427324ce625bc8e373a0",
+    "resolvedFailureCount": 16
+  },
+  "anonymousProductionStarBrowser": {
+    "evidence": "production-star-browser-smoke.json",
+    "screenshot": "production-star-steering-accepted.jpg",
+    "observedAt": "2026-10-29T07:19:25.845Z",
+    "client": "Isolated in-app browser guest",
+    "canvasReady": true,
+    "canvasOpacity": "1",
+    "spritesObserved": true,
+    "menuPauseResumeAccepted": true,
+    "leftRightPointerControlsAccepted": true,
+    "tutorialStep": {
+      "from": 1,
+      "to": 2
+    },
+    "loadAlerts": 0,
+    "sampledWarningsAndErrors": 0,
+    "errorCount": 0,
+    "authenticationUsed": false,
+    "productionRoomCreated": false,
+    "tutorialCompleted": false,
+    "nativeWKWebViewAcceptance": false
+  },
+  "nativeCandidate": {
+    "fingerprintEvidence": "native-build-sim-fingerprint.json",
+    "observedBuildSucceeded": true,
+    "catalogVersion": "9e76246e6a6234344847c3da0f663439f46b8f515a4ccad1aa81ee9ce46d44d8",
+    "catalogVersionMatchesCurrentProduction": true,
+    "sourceAndBundledCatalogSHA256AtBuild": "69124daedb8d8ec3f06e8072e60ba1201cb120af40a7fb67a880e126194b0e3a",
+    "currentSourceCatalogSHA256": "69124daedb8d8ec3f06e8072e60ba1201cb120af40a7fb67a880e126194b0e3a",
+    "latestProductionCatalogSHA256": "bf57867b16a633afa4d4748c33a27de8c54e787c24cbe44166ff0daee1d01ee8",
+    "latestProductionCatalogBytesMatchBuiltSnapshot": false,
+    "onlyCatalogJSONDifferenceBetweenCurrentSourceAndLatestProduction": [
+      "generatedAt"
+    ],
+    "catalogNote": "Catalog identity matches; the later Web rebuild changes generatedAt. The fingerprint proves source/bundled byte equality at its own captured build checkpoint, not equality to a later production JSON body.",
+    "newCandidateInstalled": false,
+    "newCandidateLaunched": false,
+    "currentlyRunningNative": "Earlier preview candidate remains running; no production runtime acceptance inferred from the new build.",
+    "runtimeAcceptanceVerified": false
+  },
+  "backendFinalReadiness": {
+    "observedAt": "2026-10-29T07:21:12.331125+00:00",
+    "allChecksPass": true,
+    "anonymous": true,
+    "productionWrites": false,
+    "checks": [
+      {
+        "case": "health",
+        "method": "GET",
+        "status": 200,
+        "cors": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-headers": "content-type, x-request-id, idempotency-key",
+          "access-control-allow-methods": "GET, POST, PATCH, DELETE, OPTIONS",
+          "access-control-allow-origin": "https://play.yunle.fun",
+          "access-control-max-age": "2592000",
+          "cache-control": "no-store",
+          "vary": "Origin"
+        }
+      },
+      {
+        "case": "trusted-preflight",
+        "method": "OPTIONS",
+        "status": 204,
+        "cors": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Request-Id, Idempotency-Key",
+          "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS",
+          "access-control-allow-origin": "https://play.yunle.fun",
+          "vary": "Origin"
+        }
+      },
+      {
+        "case": "untrusted-preflight",
+        "method": "OPTIONS",
+        "status": 204,
+        "cors": {
+          "vary": "Origin"
+        }
+      }
+    ],
+    "healthOK": true,
+    "capacity": {
+      "status": "ok",
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0,
+      "paperStarOnlineEnabled": false
+    }
+  },
+  "cleanup": {
+    "historicalBaseline": {
+      "reclaimedOwnedAllocatedBytes": 56356864,
+      "verifiedArchiveRetained": true,
+      "rawReportsRetained": true
+    },
+    "containerContexts": {
+      "contextsRemoved": 2,
+      "allocatedFileBytesRemoved": 3837952,
+      "preserved": [
+        "source archives",
+        "container images",
+        "release worktree and dependencies",
+        "Native DerivedData"
+      ]
+    },
+    "measurementBoundary": "Each task-owned allocated-file-byte count is separate; neither is a measurement of whole-volume free-space change."
+  },
+  "simulatorFinalInventory": {
+    "source": "Root agent final XcodeBuildMCP inventory; no direct device operation by documentation agent",
+    "devices": 6,
+    "fixedUDID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "fixedState": "Booted",
+    "createdThisRound": 0,
+    "erasedThisRound": 0,
+    "deletedThisRound": 0,
+    "otherDevicesIntervened": false
+  },
+  "durableEvidence": [
+    {
+      "path": "production-star-browser-smoke.json",
+      "bytes": 715,
+      "sha256": "536274fc479cbd4bdd6b80dfd06876f9bcce5de2a407178208250c0616487de0"
+    },
+    {
+      "path": "native-build-sim-fingerprint.json",
+      "bytes": 4864,
+      "sha256": "350293432be40a6887a976f299ab17eeeb349be45f95fe0bed802bbb629e04e3"
+    },
+    {
+      "path": "production-star-steering-accepted.jpg",
+      "bytes": 98810,
+      "sha256": "36503bd35495695ad69a06f8be3e8888158c6f4b42a5268f634c66a53cc6d55b"
+    },
+    {
+      "path": "production-edgeone-db02e67.jpg",
+      "bytes": 128080,
+      "sha256": "9b8e124149855986dce18f64517e5704711159612523bd5f14f9dacca2813786"
+    }
+  ]
+}

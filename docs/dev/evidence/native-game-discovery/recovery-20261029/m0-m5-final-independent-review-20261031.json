@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-readonly-final-frozen-candidate-closure-review",
+  "atUTC": "2026-10-31T09:28:56.853526+00:00",
+  "reviewer": "final_closure_independent_review",
+  "passed": true,
+  "blockingFindings": [],
+  "checkCount": 23,
+  "checks": [
+    {
+      "name": "downloaded-six-JSON-archive-SHA",
+      "passed": true
+    },
+    {
+      "name": "six-regular-safe-unique-archive-members",
+      "passed": true
+    },
+    {
+      "name": "six-members-match-downloaded-files-and-recorded-SHA",
+      "passed": true
+    },
+    {
+      "name": "prewindow-A-online-B-offline-waiting-owner-B",
+      "passed": true
+    },
+    {
+      "name": "exact-F12-stable-empty-persisted-terminal",
+      "passed": true
+    },
+    {
+      "name": "original-won-game-and-retention-byte-fields-preserved",
+      "passed": true
+    },
+    {
+      "name": "SDK-observation-not-UI-or-production-write",
+      "passed": true
+    },
+    {
+      "name": "ledger-original-and-closed-bytes-digests",
+      "passed": true
+    },
+    {
+      "name": "only-three-authorized-ledger-paths-changed",
+      "passed": true
+    },
+    {
+      "name": "twenty-five-rounds-twenty-distinct-valid-ten-per-game-zero-pending",
+      "passed": true
+    },
+    {
+      "name": "F12-excluded-and-original-failure-fields-unchanged",
+      "passed": true
+    },
+    {
+      "name": "final-summary-recorded-digest",
+      "passed": true
+    },
+    {
+      "name": "twenty-one-final-summary-public-reference-bytes-and-SHA",
+      "passed": true
+    },
+    {
+      "name": "deployed-image-uncommitted-tree-binding-consistent",
+      "passed": true
+    },
+    {
+      "name": "O01-changed-branch-UI-and-cancelled-same-game-evidence",
+      "passed": true
+    },
+    {
+      "name": "F12-public-receipt-preserves-exclusion-and-no-WS-ack-claim",
+      "passed": true
+    },
+    {
+      "name": "M3-fixed-evidence-and-user-adjusted-standard-preserved",
+      "passed": true
+    },
+    {
+      "name": "all-eighteen-M0-M5-tasks-checked-and-M6-three-unchecked",
+      "passed": true
+    },
+    {
+      "name": "frozen-candidate-and-concurrent-work-boundary-explicit",
+      "passed": true
+    },
+    {
+      "name": "installed-four-artifacts-independently-match-frozen-candidate",
+      "passed": true
+    },
+    {
+      "name": "source-drift-sidecar-is-observation-without-rebinding",
+      "passed": true
+    },
+    {
+      "name": "recorded-environment-and-browser-closeout-digests",
+      "passed": true
+    },
+    {
+      "name": "scoped-docs-diff-whitespace-check",
+      "passed": true
+    }
+  ],
+  "ledger": {
+    "beforeSHA256": "a18f3c515d5beb36abe582eb79036b579d4ccdc82d46515979d2135df4d12234",
+    "afterSHA256": "2e872fd632097ee6bd8873361d487d8cec89dd328d83640319f2871e0ee6e43c",
+    "onlyChangedPaths": [
+      "/completed",
+      "/rounds/21/pendingCleanup",
+      "/rounds/21/terminalCleanupVerification"
+    ],
+    "rounds": 25,
+    "validDistinctRooms": 20,
+    "validCounts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "pendingCleanup": 0,
+    "F12Passed": false,
+    "allHistoricalFieldsAndOtherRoundsPreserved": true
+  },
+  "evidenceReviewed": {
+    "actualDownloadedSixJSONAndArchive": true,
+    "nativeScreenshotsVisuallyInspected": [
+      "A online with offline owner B grace countdown at rev348",
+      "sole online owner A at rev349",
+      "actual already-left heading and safely closed text"
+    ],
+    "exactSameRoomPersistedTerminal": "expired rev352, aggregate and projected members zero, active/next seats/swap request null",
+    "originalWonGameProjectionUnchangedFromFirstAuthority": true,
+    "O01NormalUIAndSameGameCancellationReceiptReviewed": true,
+    "installedFourArtifactHashesIndependentlyRead": true,
+    "noProductionOrUIOrTestActionsPerformedByThisReviewer": true
+  },
+  "versionBoundary": {
+    "currentWholeWorkspaceValidated": false,
+    "laterConcurrentCodeTestsAssetsAndProductDocumentChangesExcluded": true,
+    "historicalFiveWebKitTestsCoverOnlyTheirRecordedVersion": true,
+    "oldTwentyRoomsAndM3NotReboundToNewBackendOrConcurrentSource": true,
+    "sourceDriftObservationSHA256": "233fb5d6f1689ccb12b50045cd3b340931f5ea054693de4b2cc2884ea11d721f",
+    "M6": "deferred",
+    "TestFlight": "not performed",
+    "hardwarePerformance": "not claimed"
+  },
+  "reviewedPublicSnapshots": [
+    {
+      "path": "docs/dev/native-game-discovery-implementation.md",
+      "bytes": 112720,
+      "sha256": "c816781c9e2ce3493473a97e2da7fa222b5e13122bafa8868b79df06ba546fcf"
+    },
+    {
+      "path": "specs/native-game-discovery/tasks.md",
+      "bytes": 23064,
+      "sha256": "760e9dfe2979d9d2fc1f7f57b85b206a155e90ead6fbdfaa91809ff7923fada3"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-m5-final-closure-20261031.json",
+      "bytes": 19432,
+      "sha256": "7698cc4d3f472094c8e90c744245a414d04bbb3c24211b8a8d1d0c552fd79d2e"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f12-cleanup-native-lifecycle-20261031.json",
+      "bytes": 4159,
+      "sha256": "eff380ba08587feb976737fc7c90a9126ea407b439e433453a0a208bcc17188b"
+    }
+  ],
+  "limits": [
+    "This is an independent evidence and consistency review, not a new production UI, performance, hardware or rollback-load test.",
+    "Normal native UI actions were executed by Root; this reviewer visually inspected the three saved screenshots and independently parsed downloaded authority results.",
+    "No independent WebSocket room.left transcript is claimed for F12. F12 remains an excluded failed recovery trial after cleanup.",
+    "Current and later concurrent workspace changes are outside the frozen candidate acceptance and require their own validation."
+  ]
+}

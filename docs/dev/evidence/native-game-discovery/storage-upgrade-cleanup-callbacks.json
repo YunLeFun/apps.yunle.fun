@@ -1,0 +1,323 @@
+{
+  "kind": "owned-storage-regression-cleanup",
+  "recordedAt": "2026-10-29T05:09:30.637753+08:00",
+  "suiteResult": "Passed",
+  "passed": 82,
+  "failed": 0,
+  "skipped": 0,
+  "callbackCount": 54,
+  "uniqueOwnedStores": 37,
+  "transientRemovalRejections": 17,
+  "finalSuccessfulRemovalByID": {
+    "013727C5-BF87-475F-A4A6-DD63F54139DB": true,
+    "0196A3A6-7E17-44B9-BC06-D7BC57181ACD": true,
+    "0942C62D-7816-4DC3-8A23-DE3A8F9D3FBB": true,
+    "0ADAAC59-B5D0-423D-9F5C-A7ECF039AB17": true,
+    "0AF0602D-5B07-4A6E-87F4-484F7C9269F3": true,
+    "0C304903-327B-41A8-B362-DFD3310CF07A": true,
+    "0CEAC9D0-36F8-4F82-A03C-7CE5FD8B4436": true,
+    "22B969EB-891F-47D3-ABBB-149C01F8178B": true,
+    "287ADED2-2C0F-4D5D-98CF-BE9759063E51": true,
+    "35589483-492B-42DB-913D-015A42775B77": true,
+    "381230C8-5C48-4F5F-97E8-101DE8B5591E": true,
+    "3A704F7F-A6EA-4679-8426-A5C7E5300C3B": true,
+    "3EF78C9D-6677-4A28-BA9D-CBD46CAA90A4": true,
+    "3FE34ECE-0B08-46E9-8BAD-727BC9C49998": true,
+    "4763270C-EAAD-4F74-BB64-E4AE9E483C7C": true,
+    "4F8685BF-D20E-4158-B123-D4560487F9D4": true,
+    "5D5B3614-0257-4B5B-95A4-3CA8D1B90317": true,
+    "5DA4165E-81BE-47E3-8B28-E2CC8C681BE1": true,
+    "5EFD0E1B-5916-4F5C-A6B0-0B09CEF3717B": true,
+    "72B0D500-0369-4CA2-9BBA-9C8FA71A950B": true,
+    "783C3666-C6A5-4C3A-8F13-F4F08CF67B94": true,
+    "7E0AFDE4-C047-45C9-A767-2D083192BD4F": true,
+    "7EAE57AA-F9F2-44A2-BF8B-3F6A12DB8202": true,
+    "9225462E-9BE0-4832-861F-3C8B266B4844": true,
+    "976355B7-423D-4B82-BC7B-6AC6DF79C892": true,
+    "9A4F444B-9246-44F3-B22D-22307CB786CE": true,
+    "A0444B8E-A794-4CEF-BAE7-797A9F1357FD": true,
+    "A528A181-5E1D-44E3-AAA0-BA0A95E2CF47": true,
+    "B8873883-DC04-4DE4-B8E6-3377CAAC8A74": true,
+    "BC1283FD-B2D1-42E9-96BE-6ACB45558E93": true,
+    "D3F20EB4-1F67-45F5-AE57-0C8C7F7DAFDA": true,
+    "E3D98073-1C97-4020-A5FD-61C4A9A46859": true,
+    "E8CF8ABA-FF78-46EE-A1AE-F5687AE43D25": true,
+    "ED7F9F5E-6D3E-4087-BDF1-4DEC382BEBAF": true,
+    "F51375E3-0BD5-411E-B6FC-8E769F781C3D": true,
+    "FB0AF149-229F-4B1B-A9DE-50A65F436BEC": true,
+    "FD356E22-872E-4DEF-87A5-283B7A808A26": true
+  },
+  "events": [
+    {
+      "fixtureStoreID": "BC1283FD-B2D1-42E9-96BE-6ACB45558E93",
+      "callbackElapsedMilliseconds": 3.8161666598170996,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "0196A3A6-7E17-44B9-BC06-D7BC57181ACD",
+      "callbackElapsedMilliseconds": 4.171499982476234,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "5DA4165E-81BE-47E3-8B28-E2CC8C681BE1",
+      "callbackElapsedMilliseconds": 4.7601250116713345,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "F51375E3-0BD5-411E-B6FC-8E769F781C3D",
+      "callbackElapsedMilliseconds": 5.207333364523947,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "E8CF8ABA-FF78-46EE-A1AE-F5687AE43D25",
+      "callbackElapsedMilliseconds": 0.09650003630667925,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "E8CF8ABA-FF78-46EE-A1AE-F5687AE43D25",
+      "callbackElapsedMilliseconds": 10.208958352450281,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "5EFD0E1B-5916-4F5C-A6B0-0B09CEF3717B",
+      "callbackElapsedMilliseconds": 0.04824995994567871,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "5EFD0E1B-5916-4F5C-A6B0-0B09CEF3717B",
+      "callbackElapsedMilliseconds": 5.307083367370069,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "B8873883-DC04-4DE4-B8E6-3377CAAC8A74",
+      "callbackElapsedMilliseconds": 0.05562498699873686,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "B8873883-DC04-4DE4-B8E6-3377CAAC8A74",
+      "callbackElapsedMilliseconds": 11.059083335567266,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "E3D98073-1C97-4020-A5FD-61C4A9A46859",
+      "callbackElapsedMilliseconds": 10.558999958448112,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "4763270C-EAAD-4F74-BB64-E4AE9E483C7C",
+      "callbackElapsedMilliseconds": 0.03466667840257287,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "4763270C-EAAD-4F74-BB64-E4AE9E483C7C",
+      "callbackElapsedMilliseconds": 14.422916632611305,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "72B0D500-0369-4CA2-9BBA-9C8FA71A950B",
+      "callbackElapsedMilliseconds": 0.05404168041422963,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "72B0D500-0369-4CA2-9BBA-9C8FA71A950B",
+      "callbackElapsedMilliseconds": 14.812500041443855,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "9225462E-9BE0-4832-861F-3C8B266B4844",
+      "callbackElapsedMilliseconds": 10.86020830553025,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "381230C8-5C48-4F5F-97E8-101DE8B5591E",
+      "callbackElapsedMilliseconds": 0.07025001104921103,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "381230C8-5C48-4F5F-97E8-101DE8B5591E",
+      "callbackElapsedMilliseconds": 7.368666643742472,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "976355B7-423D-4B82-BC7B-6AC6DF79C892",
+      "callbackElapsedMilliseconds": 6.445583363529295,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "A0444B8E-A794-4CEF-BAE7-797A9F1357FD",
+      "callbackElapsedMilliseconds": 0.06541662150993943,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "A0444B8E-A794-4CEF-BAE7-797A9F1357FD",
+      "callbackElapsedMilliseconds": 15.407083323225379,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "9A4F444B-9246-44F3-B22D-22307CB786CE",
+      "callbackElapsedMilliseconds": 0.04075001925230026,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "9A4F444B-9246-44F3-B22D-22307CB786CE",
+      "callbackElapsedMilliseconds": 11.606416665017605,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "0942C62D-7816-4DC3-8A23-DE3A8F9D3FBB",
+      "callbackElapsedMilliseconds": 4.300833330489695,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "4F8685BF-D20E-4158-B123-D4560487F9D4",
+      "callbackElapsedMilliseconds": 3.186083340551704,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "3FE34ECE-0B08-46E9-8BAD-727BC9C49998",
+      "callbackElapsedMilliseconds": 0.07129169534891844,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "3FE34ECE-0B08-46E9-8BAD-727BC9C49998",
+      "callbackElapsedMilliseconds": 14.837416703812778,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "0C304903-327B-41A8-B362-DFD3310CF07A",
+      "callbackElapsedMilliseconds": 0.056166667491197586,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "0C304903-327B-41A8-B362-DFD3310CF07A",
+      "callbackElapsedMilliseconds": 4.561708366964012,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "5D5B3614-0257-4B5B-95A4-3CA8D1B90317",
+      "callbackElapsedMilliseconds": 0.0584583031013608,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "5D5B3614-0257-4B5B-95A4-3CA8D1B90317",
+      "callbackElapsedMilliseconds": 23.194416658952832,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "A528A181-5E1D-44E3-AAA0-BA0A95E2CF47",
+      "callbackElapsedMilliseconds": 10.410708317067474,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "0AF0602D-5B07-4A6E-87F4-484F7C9269F3",
+      "callbackElapsedMilliseconds": 5.175541678909212,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "3EF78C9D-6677-4A28-BA9D-CBD46CAA90A4",
+      "callbackElapsedMilliseconds": 5.9147499850951135,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "FB0AF149-229F-4B1B-A9DE-50A65F436BEC",
+      "callbackElapsedMilliseconds": 6.317041639704257,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "287ADED2-2C0F-4D5D-98CF-BE9759063E51",
+      "callbackElapsedMilliseconds": 0.056916673202067614,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "287ADED2-2C0F-4D5D-98CF-BE9759063E51",
+      "callbackElapsedMilliseconds": 7.493833312764764,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "013727C5-BF87-475F-A4A6-DD63F54139DB",
+      "callbackElapsedMilliseconds": 0.07495837053284049,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "013727C5-BF87-475F-A4A6-DD63F54139DB",
+      "callbackElapsedMilliseconds": 13.947958359494805,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "0CEAC9D0-36F8-4F82-A03C-7CE5FD8B4436",
+      "callbackElapsedMilliseconds": 13.069458305835724,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "FD356E22-872E-4DEF-87A5-283B7A808A26",
+      "callbackElapsedMilliseconds": 0.04962499951943755,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "FD356E22-872E-4DEF-87A5-283B7A808A26",
+      "callbackElapsedMilliseconds": 3.3549999934621155,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "783C3666-C6A5-4C3A-8F13-F4F08CF67B94",
+      "callbackElapsedMilliseconds": 12.072833371348679,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "3A704F7F-A6EA-4679-8426-A5C7E5300C3B",
+      "callbackElapsedMilliseconds": 0.045666645746678114,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "3A704F7F-A6EA-4679-8426-A5C7E5300C3B",
+      "callbackElapsedMilliseconds": 11.080374999437481,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "D3F20EB4-1F67-45F5-AE57-0C8C7F7DAFDA",
+      "callbackElapsedMilliseconds": 12.719666701741517,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "22B969EB-891F-47D3-ABBB-149C01F8178B",
+      "callbackElapsedMilliseconds": 0.04845828516408801,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "22B969EB-891F-47D3-ABBB-149C01F8178B",
+      "callbackElapsedMilliseconds": 10.850083315744996,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "0ADAAC59-B5D0-423D-9F5C-A7ECF039AB17",
+      "callbackElapsedMilliseconds": 0.039208331145346165,
+      "success": false
+    },
+    {
+      "fixtureStoreID": "0ADAAC59-B5D0-423D-9F5C-A7ECF039AB17",
+      "callbackElapsedMilliseconds": 16.549458319786936,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "7E0AFDE4-C047-45C9-A767-2D083192BD4F",
+      "callbackElapsedMilliseconds": 188.64916666643694,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "ED7F9F5E-6D3E-4087-BDF1-4DEC382BEBAF",
+      "callbackElapsedMilliseconds": 36.814958381000906,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "35589483-492B-42DB-913D-015A42775B77",
+      "callbackElapsedMilliseconds": 6.670333328656852,
+      "success": true
+    },
+    {
+      "fixtureStoreID": "7EAE57AA-F9F2-44A2-BF8B-3F6A12DB8202",
+      "callbackElapsedMilliseconds": 4.739750002045184,
+      "success": true
+    }
+  ],
+  "scope": "Exact fixture UUIDs only; successful suite includes final API confirmation that owned stores are absent. No original user store cleanup; no simulator creation/reset."
+}

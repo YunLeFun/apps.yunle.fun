@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "kind": "resumed-source-and-installed-candidate-binding-audit",
+  "atUTC": "2026-10-31T07:10:15.394662+00:00",
+  "goalAchieved": false,
+  "actionsThisAudit": {
+    "readOnlyShellAndAnonymousHealth": true,
+    "buildTestsUIOrProductionMutation": false,
+    "createdBootedShutdownErasedOrDeletedSimulators": false
+  },
+  "sourceDrift": {
+    "observed": true,
+    "scope": "Additional per-game native interaction settings and associated controlled-document tests introduced by another user task after the completed nativeN10. Exact current source hashes match its5pass build/test receipt.",
+    "currentFileSHA256": {
+      "apps/mobile/ios/App/App/WebViewController.swift": "70e7468d9485a61fdcdefa86fae631633022065210e8ad37aece1c2170f51b11",
+      "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "4ccf946ccdb48f0729db87d0c187b2a3b87abe7eb9cc04bc3733cd27a45a3177",
+      "apps/ios/YunleFunTests/NativeWebNavigationTests.swift": "d89477f502a80334a20c6a964c665d43195a2ef170d75bf108a153dca343220b",
+      "apps/ios/YunleFun/WebRuntime/NativeApplicationMenuView.swift": "dbb212b2b61f4df6da8aea0be2c1aa1c224d1a5becb2d9184f014af66c9a2d75",
+      "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "a7d89ca9bb0d8a9110a9345e14674d7cb59ecb05558ae8439f0349fbf95aef6f",
+      "docs/product/native-game-discovery.md": "e5527346a47cdb5ed09a3fa24dd28a7a20a3b2dd6354fea7cb059852ac5918ca"
+    },
+    "allCurrentSourceFilesMatchInteractionSwitchesReceipt": true,
+    "relatedActualWebKitTests": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "receipt": "docs/dev/evidence/native-game-interaction-switches-20261031.json",
+      "inheritedEvidenceNotRerunByThisAudit": true
+    },
+    "sourceOwnersWorkPreserved": true,
+    "fullGameN10OrM3RelabelledCurrentSource": false,
+    "correctRuntimeFixturePath": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+    "differentSessionFixtureFileNotAComparable9efBaseline": "apps/ios/YunleFunTests/NativeRuntimeSessionTests.swift"
+  },
+  "validatedInstalledCandidate": {
+    "simulator": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+    "bundleId": "fun.yunle.apps.native-dev",
+    "files": [
+      {
+        "name": "YunleFun",
+        "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/YunleFun",
+        "bytes": 58496,
+        "sha256": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+        "matchesEarlierValidatedInstalledCandidate": true
+      },
+      {
+        "name": "YunleFun.debug.dylib",
+        "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/YunleFun.debug.dylib",
+        "bytes": 40524432,
+        "sha256": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+        "matchesEarlierValidatedInstalledCandidate": true
+      },
+      {
+        "name": "Info.plist",
+        "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/Info.plist",
+        "bytes": 1765,
+        "sha256": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+        "matchesEarlierValidatedInstalledCandidate": true
+      },
+      {
+        "name": "native-game-catalog-v1.json",
+        "path": "/Users/yunyou/Library/Developer/CoreSimulator/Devices/4502D5E9-9630-4AF0-9050-3C9109139FD0/data/Containers/Bundle/Application/828CFD99-00C1-4318-BAA9-70E53E17CDA4/YunleFun.app/native-game-catalog-v1.json",
+        "bytes": 4561,
+        "sha256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+        "matchesEarlierValidatedInstalledCandidate": true
+      }
+    ],
+    "sourceBinding": "Earlier exact Runtimeb61f/Controllere6d/Assistant5305/GameTests9ef evidence retained. Current interaction source was built/tested separately and has not overwritten this installed normal candidate.",
+    "newInteractionMenuInstallationOrManualUIProven": false
+  },
+  "publicHealthRead": {
+    "url": "https://api.play.yunle.fun/v1/health",
+    "ok": true,
+    "roomStore": "cloudbase",
+    "capacity": {
+      "status": "ok",
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0,
+      "paperStarOnlineEnabled": false
+    },
+    "releaseGateSHA256": "424b50860c9ba2f2c632af934f6c9dfeba411c4d5c55378eb5a21d36ad3ee490",
+    "doesNotProveBackendRevisionOrF12Cleanup": true
+  },
+  "acceptanceBoundary": {
+    "validRecoveryCounts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "F12ExcludedAndPendingCleanup": true,
+    "newLastOwnerFixProductionAuthorized": false,
+    "previousSpecificApprovalQuestionStillAwaitingAnswer": true,
+    "goalResumeIsNotSpecificProductionApproval": true,
+    "remaining": "Publish reviewed backend fix only after human answer; sameF12 terminal cleanup and one active-game sole-observer-owner normalUI branch validation, then final4.2/4.3/5.1 consolidation. Existing20rounds remain tied to their recorded candidate."
+  },
+  "references": [
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/final-native-candidate-inventory-20261030.json",
+      "bytes": 16905,
+      "sha256": "6a5b1c919f6427061238134bad496abe81aa582d07d6af2c0bd81783a5d50117"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-interaction-switches-20261031.json",
+      "bytes": 6135,
+      "sha256": "d547bd07ae5363fa57866e7c25ad6169b93e8f427677b969f435f5fca2fa2465"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-interactions-20261031.json",
+      "bytes": 5124,
+      "sha256": "96a04a86dff0c95c33e87e9998a9f11e421e60e90a3cef6e59357081805dc79e"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-m5-closure-audit-pending-last-owner-20261030.json",
+      "bytes": 10138,
+      "sha256": "a04fa0ad14cf6c1152e43de785c9a60c18291c335c3a8a8a5a0da8fcb34ba3a2"
+    }
+  ],
+  "limits": [
+    "This audit does not claim a fresh current-source production gameN10 or performance comparison.",
+    "Current5pass tests use realWKWebView controlled HTML/iframe/JS fixtures and runtime reuse; physical longpress and manual SwiftUI menu toggles are outside that receipt.",
+    "Independent source review confirms the changed scope; existing real5test receipt covers this local increment. No additional required regression was found. Existing source/version boundaries remain explicit."
+  ],
+  "readOnlyIndependentSourceReview": {
+    "completed": true,
+    "reviewer": "audit_resumed_source_drift",
+    "Runtime": "Removing only newly added interaction defaults/init parameter, two settings methods and controller application lines in memory reproduces exact priorb61f source hash. No prior source is overwritten.",
+    "Controller": "Compared exact retained WebViewController.final-no-diagnostics.swift e6d baseline to current70e; additions are interaction settings/script/native bounce policy, not ready/cache/room/login/retry changes.",
+    "RuntimeTests": "Compared exact9ef NativeGameRuntimeTests source/retained archive member; additions cover settings and fixture parameters. Different NativeRuntimeSessionTests was not used as the9ef baseline.",
+    "fiveTestAssertionsActuallyRead": [
+      "four settings combinations on main document and iframe",
+      "normal scrolling and editing/selection",
+      "host JS bridge preserved",
+      "user-script count stays stable",
+      "page progress marker preserved without reload",
+      "settings restoration and Home/Discovery runtime reuse"
+    ],
+    "additionalM0M5BlockerFound": false,
+    "requiresRepeatingRuntime17M3OrN10": false,
+    "historicalEvidenceRelabelledNewSource": false
+  }
+}

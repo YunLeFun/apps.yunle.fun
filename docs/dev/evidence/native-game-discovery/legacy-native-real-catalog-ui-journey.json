@@ -1,0 +1,423 @@
+{
+  "schema": "legacy-native-real-catalog-ui-journey-v1",
+  "recordedAt": "2026-10-29 00:28:31 UTC",
+  "journey": {
+    "state": "completed-portal-entry-only",
+    "actualPublicID": "app_55d184f8cda84547a18e41848faf0084",
+    "bundleID": "fun.yunle.apps.native-legacy-01a182f1",
+    "derivedData": "/tmp/yunle-native-games.uGZuY9/HistoricalNativeUIBaselineDerivedData",
+    "bundleAbsentBefore": true,
+    "scope": "Exact archived old product, public real catalog portal selection; no synthetic/mock row or directURLlaunch asUIproof",
+    "legacyPID": 48882,
+    "loginPrompt": "autoNativeLoginPromptObservedAndCancelled; no credentials/codes/grant",
+    "portalHome": "renderedaftercancel,screenshotviewed, canonicalURLmoremenuobserved",
+    "endedViaNativeMenu": true,
+    "performanceMeasured": false
+  },
+  "steps": [
+    "Normal old main launch → 工坊",
+    "分类 → 游戏",
+    "Mounted actual public Play row identifier catalog.application.app_55d184f8cda84547a18e41848faf0084",
+    "云乐坊间 detail → 试用 (did not tap 获取)",
+    "Old native runtime presented; automatic login panel appeared",
+    "Cancel native login with empty fields, no verification/auth grant",
+    "Real public Play homepage visually rendered (云上相聚/坊间开局;挑个游戏/开个房间)",
+    "More menu displays canonical https://play.yunle.fun",
+    "Native menu 结束 returns to portal detail"
+  ],
+  "snapshots": [
+    {
+      "seq": 115,
+      "screenHash": "17grazr",
+      "targets": [
+        "e29|tap|button|去工坊看看||home.empty",
+        "e39|tap|button|切换云居|我的云居|home.workspace.switch",
+        "e42|tap|button|添加应用||home.add",
+        "e45|tap|button|云居选项||home.options",
+        "e46|tap|button|||",
+        "e55|tap|tab|云居|1|",
+        "e57|tap|tab|寻乐|0|",
+        "e59|tap|tab|工坊|0|",
+        "e61|tap|tab|我|0|"
+      ],
+      "text": [
+        "e40|text|text|我的云居||",
+        "e27|text|text|把喜欢的应用带回云居||home.empty",
+        "e28|text|text|从工坊添加应用，下次打开更顺手。||home.empty"
+      ],
+      "scroll": [
+        "e21|swipe|scroll-view|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 116,
+      "screenHash": "1dhk8wv",
+      "targets": [
+        "e19|typeText|text-field||搜索应用、用途或作者|",
+        "e17|tap|button|扫描工坊二维码||catalog.scan",
+        "e18|tap|button|分类||",
+        "e35|tap|button|我的应用||",
+        "e42|tap|button|个人工坊||",
+        "e50|tap|button|打开个人工坊||",
+        "e125|tap|tab|云居|0|house",
+        "e127|tap|tab|寻乐|0|safari",
+        "e129|tap|tab|工坊|1|square.grid.2x2",
+        "e131|tap|tab|我|0|person.crop.circle"
+      ],
+      "text": [
+        "e37|text|text|我的应用||",
+        "e44|text|text|个人工坊||",
+        "e51|text|text|打开个人工坊||"
+      ],
+      "scroll": [
+        "e2|swipe|other|||",
+        "e4|swipe|other|||",
+        "e5|swipe|other|||",
+        "e6|swipe|other|||",
+        "e7|swipe|other|||",
+        "e8|swipe|other|||",
+        "e9|swipe|other|||",
+        "e10|swipe|other|||",
+        "e11|swipe|other|||",
+        "e12|swipe|other|||",
+        "e13|swipe|other|||",
+        "e14|swipe|other|||",
+        "e21|swipe|other|||",
+        "e22|swipe|other|||",
+        "e23|swipe|other|||",
+        "e24|swipe|other|||",
+        "e25|swipe|other|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 117,
+      "screenHash": "0wiotdp",
+      "targets": [
+        "e18|typeText|text-field||搜索应用、用途或作者|",
+        "e34|tap|button|我的应用||",
+        "e41|tap|button|个人工坊||",
+        "e49|tap|button|打开个人工坊||",
+        "e124|tap|tab|云居|0|house",
+        "e126|tap|tab|寻乐|0|safari",
+        "e128|tap|tab|工坊|1|square.grid.2x2",
+        "e130|tap|tab|我|0|person.crop.circle",
+        "e160|tap|button|全部||",
+        "e163|tap|button|AI||",
+        "e165|tap|button|创意设计||",
+        "e167|tap|button|开发||",
+        "e169|tap|button|效率工具||",
+        "e171|tap|button|游戏||",
+        "e173|tap|button|生活方式||",
+        "e175|tap|button|趣味娱乐||"
+      ],
+      "text": [
+        "e36|text|text|我的应用||",
+        "e43|text|text|个人工坊||",
+        "e50|text|text|打开个人工坊||"
+      ],
+      "scroll": [
+        "e2|swipe|other|||",
+        "e5|swipe|other|||",
+        "e6|swipe|other|||",
+        "e7|swipe|other|||",
+        "e8|swipe|other|||",
+        "e9|swipe|other|||",
+        "e10|swipe|other|||",
+        "e11|swipe|other|||",
+        "e12|swipe|other|||",
+        "e13|swipe|other|||",
+        "e14|swipe|other|||",
+        "e15|swipe|other|||",
+        "e20|swipe|other|||",
+        "e21|swipe|other|||",
+        "e22|swipe|other|||",
+        "e23|swipe|other|||",
+        "e24|swipe|other|||",
+        "e152|swipe|other|||",
+        "e153|swipe|other|||",
+        "e154|swipe|other|||",
+        "e155|swipe|other|||",
+        "e156|swipe|other|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 118,
+      "screenHash": "1pwv9cb",
+      "targets": [
+        "e73|tap|button|云乐坊间、云乐坊旗下的单人、同屏与好友联机小游戏合集||catalog.application.app_55d184f8cda84547a18e41848faf0084",
+        "e19|typeText|text-field||搜索应用、用途或作者|",
+        "e17|tap|button|扫描工坊二维码||catalog.scan",
+        "e18|tap|button|分类||",
+        "e35|tap|button|我的应用||",
+        "e42|tap|button|个人工坊||",
+        "e50|tap|button|打开个人工坊||",
+        "e60|tap|button|显示全部||catalog.filter.clear",
+        "e126|tap|tab|云居|0|house",
+        "e128|tap|tab|寻乐|0|safari",
+        "e130|tap|tab|工坊|1|square.grid.2x2",
+        "e132|tap|tab|我|0|person.crop.circle"
+      ],
+      "text": [
+        "e37|text|text|我的应用||",
+        "e44|text|text|个人工坊||",
+        "e51|text|text|打开个人工坊||",
+        "e74|text|text|云乐坊间、云乐坊旗下的单人、同屏与好友联机小游戏合集||",
+        "e76|text|text|云乐坊间||"
+      ],
+      "scroll": [
+        "e2|swipe|other|||",
+        "e4|swipe|other|||",
+        "e5|swipe|other|||",
+        "e6|swipe|other|||",
+        "e7|swipe|other|||",
+        "e8|swipe|other|||",
+        "e9|swipe|other|||",
+        "e10|swipe|other|||",
+        "e11|swipe|other|||",
+        "e12|swipe|other|||",
+        "e13|swipe|other|||",
+        "e14|swipe|other|||",
+        "e21|swipe|other|||",
+        "e22|swipe|other|||",
+        "e23|swipe|other|||",
+        "e24|swipe|other|||",
+        "e25|swipe|other|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 119,
+      "screenHash": "0qey5uk",
+      "targets": [
+        "e16|tap|button|工坊||BackButton",
+        "e18|tap|button|分享应用||",
+        "e36|tap|button|获取||detail.acquire",
+        "e37|tap|button|试用||detail.try",
+        "e57|tap|button|应用数据||detail.web-profiles",
+        "e64|tap|button|应用下载缓存||",
+        "e73|tap|button|评分与评价||",
+        "e105|tap|tab|云居|0|house",
+        "e107|tap|tab|寻乐|0|safari",
+        "e109|tap|tab|工坊|1|square.grid.2x2",
+        "e111|tap|tab|我|0|person.crop.circle"
+      ],
+      "text": [
+        "e34|text|text|云乐坊间||",
+        "e35|text|text|YunYouJun||",
+        "e48|text|text|云乐坊旗下的单人、同屏与好友联机小游戏合集||",
+        "e58|text|text|应用数据||",
+        "e65|text|text|应用下载缓存||",
+        "e74|text|text|评分与评价||",
+        "e84|text|text|分类、游戏||",
+        "e85|text|text|分类||",
+        "e89|text|text|开发者、YunYouJun||",
+        "e90|text|text|开发者||"
+      ],
+      "scroll": [
+        "e1|swipe|application|云乐坊旧版基线||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 120,
+      "screenHash": "0ncm6ze",
+      "targets": [
+        "e9|tap|button|云乐坊间, 操作菜单||",
+        "e8|tap|button|收起应用||runtime.minimize",
+        "e10|tap|button|更多操作||runtime.more"
+      ],
+      "text": [],
+      "scroll": [
+        "e16|swipe|scroll-view|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 121,
+      "screenHash": "0lj6o5u",
+      "targets": [
+        "e9|tap|button|云乐坊间, 操作菜单||",
+        "e72|typeText|text-field|手机号|手机号|login.phone",
+        "e77|typeText|text-field|验证码|6 位验证码|login.code",
+        "e8|tap|button|收起应用||runtime.minimize",
+        "e10|tap|button|更多操作||runtime.more",
+        "e38|tap|button|取消||",
+        "e62|tap|tab|||login.method",
+        "e63|tap|tab|手机号|1|",
+        "e64|tap|tab|邮箱|0|",
+        "e65|tap|tab|密码|0|",
+        "e73|tap|button|获取验证码||login.send-code",
+        "e87|tap|button|登录或注册||login.submit"
+      ],
+      "text": [
+        "e52|text|text|登录云乐坊||",
+        "e53|text|text|让有趣的应用，成为日常。||",
+        "e57|text|text|登录后返回云乐坊间，仍需在原生面板确认。登录本身不会自动授权。||login.authorization-context",
+        "e71|text|text|中国大陆，区号 86||",
+        "e82|text|text|未注册的手机号或邮箱将在验证后创建账号。||",
+        "e93|text|text|继续即表示你已阅读并同意服务条款和隐私政策。||"
+      ],
+      "scroll": [
+        "e15|swipe|scroll-view|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 123,
+      "screenHash": "0camtq2",
+      "targets": [
+        "e9|tap|button|云乐坊间, 操作菜单||",
+        "e8|tap|button|收起应用||runtime.minimize",
+        "e10|tap|button|更多操作||runtime.more"
+      ],
+      "text": [],
+      "scroll": [
+        "e15|swipe|scroll-view|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 124,
+      "screenHash": "0camtq2",
+      "targets": [
+        "e9|tap|button|云乐坊间, 操作菜单||",
+        "e8|tap|button|收起应用||runtime.minimize",
+        "e10|tap|button|更多操作||runtime.more"
+      ],
+      "text": [],
+      "scroll": [
+        "e15|swipe|scroll-view|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 126,
+      "screenHash": "1tiuf6e",
+      "targets": [
+        "e9|tap|button|云乐坊间, 操作菜单||",
+        "e8|tap|button|收起应用||runtime.minimize",
+        "e10|tap|button|更多操作||runtime.more",
+        "e30|tap|button|表单控制柄|已展开|",
+        "e40|tap|button|完成||",
+        "e61|tap|button|应用详情||",
+        "e69|tap|button|评分与评价||",
+        "e77|tap|button|作者、YunYouJun||runtime.menu.author",
+        "e87|tap|button|分享||",
+        "e93|tap|button|复制链接||",
+        "e100|tap|button|在浏览器中打开||",
+        "e107|tap|button|重新载入||",
+        "e114|tap|button|应用下载缓存||runtime.menu.cache",
+        "e123|tap|button|结束||"
+      ],
+      "text": [
+        "e53|text|text|云乐坊间、云乐坊旗下的单人、同屏与好友联机小游戏合集、https://play.yunle.fun||",
+        "e55|text|text|云乐坊间||",
+        "e56|text|text|云乐坊旗下的单人、同屏与好友联机小游戏合集||",
+        "e57|text|text|https://play.yunle.fun||",
+        "e62|text|text|应用详情||",
+        "e71|text|text|评分与评价||",
+        "e79|text|text|作者||",
+        "e80|text|text|YunYouJun||",
+        "e89|text|text|分享||",
+        "e94|text|text|复制链接||",
+        "e101|text|text|在浏览器中打开||",
+        "e109|text|text|重新载入||",
+        "e115|text|text|应用下载缓存||",
+        "e124|text|text|结束||",
+        "e129|text|text|结束后会释放当前会话，再次打开将重新载入。||"
+      ],
+      "scroll": [
+        "e15|swipe|scroll-view|||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    },
+    {
+      "seq": 127,
+      "screenHash": "0ek6nxi",
+      "targets": [
+        "e16|tap|button|工坊||BackButton",
+        "e18|tap|button|分享应用||",
+        "e36|tap|button|获取||detail.acquire",
+        "e37|tap|button|试用||detail.try",
+        "e57|tap|button|应用数据||detail.web-profiles",
+        "e64|tap|button|应用下载缓存||",
+        "e73|tap|button|评分与评价||",
+        "e105|tap|tab|云居|0|house",
+        "e107|tap|tab|寻乐|0|safari",
+        "e109|tap|tab|工坊|1|square.grid.2x2",
+        "e111|tap|tab|我|0|person.crop.circle"
+      ],
+      "text": [
+        "e34|text|text|云乐坊间||",
+        "e35|text|text|YunYouJun||",
+        "e48|text|text|云乐坊旗下的单人、同屏与好友联机小游戏合集||",
+        "e58|text|text|应用数据||",
+        "e65|text|text|应用下载缓存||",
+        "e74|text|text|评分与评价||",
+        "e84|text|text|分类、游戏||",
+        "e85|text|text|分类||",
+        "e89|text|text|开发者、YunYouJun||",
+        "e90|text|text|开发者||"
+      ],
+      "scroll": [
+        "e1|swipe|application|云乐坊旧版基线||"
+      ],
+      "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+    }
+  ],
+  "screenshots": [
+    {
+      "stage": "detail",
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/legacy-native-real-detail.jpg"
+    },
+    {
+      "stage": "login-prompt-empty",
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/legacy-native-empty-login-prompt.jpg"
+    },
+    {
+      "stage": "homepage-after-cancel",
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/legacy-native-real-homepage.jpg"
+    },
+    {
+      "stage": "more-menu-canonical",
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/legacy-native-canonical-menu.jpg"
+    }
+  ],
+  "build": {
+    "schema": "xcodebuildmcp.output.build-result",
+    "schemaVersion": "3",
+    "didError": false,
+    "error": null,
+    "data": {
+      "summary": {
+        "status": "SUCCEEDED",
+        "durationMs": 28993,
+        "target": "simulator"
+      },
+      "artifacts": {
+        "buildLogPath": "~/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/build_sim_2026-10-29T00-23-47-977Z_pid11957_74b21833.log"
+      },
+      "diagnostics": {
+        "warnings": [
+          {
+            "message": "converting function value of type '@MainActor () -> UIViewController?' to '() -> UIViewController?' loses global actor 'MainActor'; this is an error in the Swift 6 language mode",
+            "location": "/tmp/yunle-native-games.uGZuY9/historical-native-e68ed57d/apps/ios/YunleFun/WebRuntime/CrossAppAuthorization.swift:118"
+          },
+          {
+            "message": "converting function value of type '@MainActor (URL, @escaping @MainActor (Bool) -> Void) -> ()' to 'CrossAppAuthorizationPage.Opener' (aka '(URL, @escaping @MainActor (Bool) -> ()) -> ()') loses global actor 'MainActor'; this is an error in the Swift 6 language mode",
+            "location": "/tmp/yunle-native-games.uGZuY9/historical-native-e68ed57d/apps/ios/YunleFun/WebRuntime/CrossAppAuthorization.swift:119"
+          }
+        ],
+        "errors": []
+      }
+    },
+    "nextSteps": [
+      "Get built app path in simulator derived data: get_sim_app_path({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", scheme: \"YunleFun\", platform: \"iOS Simulator\", derivedDataPath: \"/tmp/yunle-native-games.uGZuY9/HistoricalNativeUIBaselineDerivedData\" })"
+    ]
+  },
+  "scope": "Actual current public catalogue and unmodified archived old native product, normal HTTPS. Supplementary UI functional entry evidence only: no timing, game-input, engine-ready, native login success, OS cold URL, two-user or complete M0 baseline claims. Prior ASCII search failure preserved; search excludes URL/id. Other catalogue apps not opened and labels excluded. No cloud installs, room/account/billing mutations. Temporary own bundle will be uninstalled and own UI DerivedData retired after export.",
+  "screenshotManifest": "legacy-native-real-ui-screenshots.json"
+}

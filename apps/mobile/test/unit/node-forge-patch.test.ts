@@ -32,7 +32,7 @@ function createFixtureSignature(digestInfoPrefix: string) {
   return `\x00\x01${'\xFF'.repeat(128 - digestInfo.length - 3)}\x00${digestInfo}`
 }
 
-describe('patched node-forge RSA signature verification', () => {
+describe('node-forge RSA signature verification', () => {
   it.each([
     ['with NULL parameters', '30343010060960864801650304020105000401000420'],
     ['without NULL parameters', '3032300e06096086480165030402010401000420'],

@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "classification": "redacted immutable pre-final-candidate checkpoint",
+  "source": {
+    "basename": "m4-live-checkpoint-before-final-candidate.json",
+    "bytes": 13597,
+    "sha256": "ce38b20325d35b11ac4990706437acf207b16a88db3a61e3719881e40b0b50ee"
+  },
+  "sourceCheckpointAtUTC": "2026-10-29T09:44:31.917Z",
+  "sourceEventCount": 25,
+  "production": {
+    "backendCommit": "55fe0e7d7c4c7f3c76579b1b2298eba8d37e90b6",
+    "webCommit": "db02e67b2ebdffcdf575c3cfef44b6c826147ebd",
+    "catalogVersion": "9e76246e6a6234344847c3da0f663439f46b8f515a4ccad1aa81ee9ce46d44d8"
+  },
+  "nativePreview": false,
+  "fixedSimulatorUDID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "scope": "Real production services and normal Native / isolated-browser UI on the shared iOS Simulator; early rooms are not the final fixed-candidate 20-room N10.",
+  "participants": {
+    "A": "dedicated normal native account",
+    "B": "different dedicated account in isolated browser",
+    "C": "additional dedicated native account observed removed by host",
+    "D": "additional dedicated native account",
+    "E": "additional dedicated native account"
+  },
+  "normalLogin": {
+    "nativeA": "passed; checkpoint contains native account login, Play bootstrap and later cold account restoration",
+    "browserB": "passed through normal SSO UI",
+    "nativeAdditionalAliases": [
+      "C",
+      "D",
+      "E"
+    ],
+    "additionalAliasEvidence": "Task owner phase observation supplied with this documentation task; individual C/D/E login events are not present in the immutable 25-event source checkpoint",
+    "passwordsCookiesTicketsOrRawUIDsIncluded": false
+  },
+  "verifiedJourneys": [
+    {
+      "case": "two-distinct-accounts-gameplay",
+      "roomAlias": "gomoku-live-01",
+      "result": "passed",
+      "evidence": "Server-sourced roster has two distinct members; normal UI moves from both native and browser accepted and visible on authoritative board"
+    },
+    {
+      "case": "OS-Home-and-foreground",
+      "result": "passed",
+      "sameNativeHostPID": true,
+      "previousBoardPreserved": true,
+      "freshMovesAcceptedByBothClients": true
+    },
+    {
+      "case": "cold-OS-universal-link",
+      "result": "passed",
+      "appVerifiedStoppedBeforeTap": true,
+      "actualSafariAnchorTouch": true,
+      "noProgrammaticAppLaunchAfterTap": true,
+      "accountRestored": true,
+      "sameOwnedRoomRevalidated": true,
+      "newRoomCreated": false,
+      "notFirstReadyPerformance": true,
+      "limitation": "The original native membership had expired during setup; the server transferred host and reset the waiting game. Previous four stones were not claimed preserved across that interval."
+    },
+    {
+      "case": "warm-repeated-invitation",
+      "result": "passed",
+      "sameNativeProcessAndRoom": true,
+      "rosterRemainedTwo": true,
+      "newNativeMoveAccepted": true
+    },
+    {
+      "case": "persisted-continue-after-plain-app-restart",
+      "result": "passed",
+      "noIncomingInvitation": true,
+      "entry": "Games → 返回上次房间",
+      "sameRoomAndSeatsRevalidated": true,
+      "previousTwoStonesPreserved": true,
+      "freshMovesAcceptedByBothClients": true
+    },
+    {
+      "case": "real-short-browser-network-disconnect",
+      "result": "passed",
+      "faultedAlias": "B",
+      "method": "CDP network override; actual transport closed, then a different WebSocket connected",
+      "closedSocketCount": 1,
+      "newSocketCount": 1,
+      "overrideRestored": true,
+      "previousFourStonesPreserved": true,
+      "freshMovesAcceptedByBothClients": true
+    },
+    {
+      "case": "actual-visible-native-WebContent-SIGKILL",
+      "result": "passed",
+      "onlyVisibleWKWebViewCount": 1,
+      "visibleWebContentPIDReadBeforeSignal": true,
+      "hostPIDUnchanged": true,
+      "errorUI": "游戏暂时无法加载",
+      "retryUI": "重新加载",
+      "reloadRevalidatedSameRoom": true,
+      "previousSixStonesPreserved": true,
+      "freshMovesAcceptedByBothClients": true,
+      "signalReceipt": {
+        "basename": "webcontent-actual-sigkill-receipt.json",
+        "bytes": 308,
+        "sha256": "063d47d3e12bcaee354af82bc0a87d18c88c7e78cee5c1abde94fa115e85e0ed"
+      }
+    },
+    {
+      "case": "lost-create-response-replay",
+      "result": "passed",
+      "roomAlias": "gomoku-live-02",
+      "firstPOSTStatus": 201,
+      "secondPOSTStatus": 201,
+      "firstResponseFailedAfterCommit": true,
+      "sameIdempotencyKey": true,
+      "operationKeySHA256": "a37e03d30a22b0282094430e0b4df840103442678d747e3d53f33df0fd4763e4",
+      "sameReturnedRoomID": true,
+      "deterministicRoomIDMatches": true,
+      "clientRetryUI": "重试原来的创房请求",
+      "interceptionCleared": true,
+      "readOnlyDBUniqueOwnedCreationInPreciseCreatorWindow": true,
+      "DBAudit": "production-m4-idempotency-db-audit-20261029.json"
+    },
+    {
+      "case": "member-requesting-spectator-role",
+      "result": "passed",
+      "membersUnchanged": 2,
+      "errorUI": "当前账号已是这个房间的成员，请返回玩家页面继续对局，或使用其他账号观战"
+    },
+    {
+      "case": "online-C-removed-and-invite-rotated",
+      "result": "passed",
+      "removedAlias": "C",
+      "terminalUI": "你已被移出房间 / 当前连接已安全关闭",
+      "membersAfter": 1,
+      "permanentBanClaim": false
+    }
+  ],
+  "openFailures": [
+    {
+      "case": "closed-generic-native-room-blocks-different-invite",
+      "result": "failed on production journey",
+      "errorUI": "云乐坊间仍在运行",
+      "cause": "Terminal generic Play room remained in sessions while absent from Continue; new intent matched no current context and hit occupied-Play guard",
+      "localFix": "Only recognized terminal or failed-before-first-room-confirmation generic containers may be replaced; active/recoverable/ordinary Play remains protected, same-room profile reuse remains, cross-room legacy profile is not inherited, late callbacks rejected",
+      "fourNewTestsPassed": true,
+      "installedProductionUIRetestAtCheckpoint": false,
+      "screenshot": "production-m4-closed-room-blocks-next-invite.jpg"
+    },
+    {
+      "case": "invalidated-invite-becomes-fake-reservation",
+      "result": "failed",
+      "errorUI": "seat reservation expired.",
+      "proof": "production-m4-invalid-invite-transport-failure-20261029.json",
+      "productionFixAtCheckpoint": false
+    }
+  ],
+  "ownedRoomCleanup": {
+    "ownedRooms": [
+      "gomoku-live-01",
+      "gomoku-live-02"
+    ],
+    "remainingCleanupRequired": 0,
+    "normalSupportedLeaveOrRemovalUIUsed": true,
+    "databaseDeletionUsed": false,
+    "originalRoomObjectStatusMayBeStale": "The first source room object still says awaiting cleanup; later explicit leave events at 09:04:42Z and 09:44:01Z plus cleanupRequired=false are the final checkpoint observations. This is not a global room-count audit."
+  },
+  "accountProvisioningEvidence": "production-m4-managed-test-accounts-20261029.json",
+  "nativeRegressionEvidence": "production-m4-native-regression-20261029.json",
+  "screenshots": "production-m4-screenshots-20261029.json",
+  "acceptanceStatus": {
+    "M4Complete": false,
+    "M3P50ThirtyPercentTargetMet": false,
+    "finalCandidateTwentyFreshRoomsN10Run": false,
+    "earlyRoomsCountTowardFinalCandidateN10": false,
+    "taskCheckboxesChanged": false,
+    "finalNativeCandidateInstalledAtCheckpoint": false
+  },
+  "privacy": {
+    "rawUIDsOmitted": true,
+    "passwordRegistryAndAccountConfigOmitted": true,
+    "privateDBInputAndQueryOmitted": true,
+    "cookiesTokensAndRawNetworkOmitted": true,
+    "roomIDsCodesAndLiveLinksOmitted": true
+  },
+  "limits": [
+    "This checkpoint preserves earlier failures and does not change the M3 target or M4 acceptance criteria.",
+    "Several timings are sparse UI-observation upper bounds and are not startup benchmarks.",
+    "Physical-device behavior, final-candidate N10 and remaining acceptance are not inferred from this stage."
+  ]
+}

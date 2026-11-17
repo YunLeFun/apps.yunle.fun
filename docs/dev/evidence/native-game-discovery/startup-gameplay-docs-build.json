@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-10-29T06:54:35.506721+08:00",
+  "status": "passed",
+  "command": [
+    "./node_modules/.bin/vitepress",
+    "build",
+    "docs",
+    "--outDir",
+    "/tmp/yunle-native-games.uGZuY9/startup-gameplay-docs-build-fixed.ywg1zhkw"
+  ],
+  "outputDirectory": "/tmp/yunle-native-games.uGZuY9/startup-gameplay-docs-build-fixed.ywg1zhkw",
+  "log": "/tmp/yunle-native-games.uGZuY9/startup-gameplay-docs-build.log",
+  "runtime": "Existing local binary; no install or trust override",
+  "priorFailure": "startup-gameplay-docs-build-failed-jsonl.json",
+  "exitCode": 0,
+  "elapsedSeconds": 5.336875792010687,
+  "outputFileBytesRemoved": 10155080,
+  "outputRemoved": true,
+  "reportSHA256": "6d1a9606e10157430cf1103d1c84fe02e7a2a54ffb2ef7e965411065748b5707",
+  "otherTemporaryBytecodeBytesRemoved": 6988,
+  "priorFailedOutputBytesRemoved": 1277
+}

@@ -1,6 +1,6 @@
-import { Capacitor } from '@capacitor/core'
 import Aegis from 'aegis-web-sdk'
 import consola from 'consola'
+import { hostEnvironment } from '~/host-runtime'
 import { getRumPageUrl } from '~/utils/rum'
 
 /**
@@ -43,7 +43,7 @@ export default defineNuxtPlugin(() => {
   }
 
   try {
-    const isNativePlatform = Capacitor.isNativePlatform()
+    const isNativePlatform = hostEnvironment.isNative()
     const resolvePageUrl = () => typeof window === 'undefined'
       ? 'https://apps.yunle.fun/'
       : getRumPageUrl(window.location, isNativePlatform)

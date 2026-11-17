@@ -118,6 +118,16 @@ struct CloudApplication: Codable, Identifiable, Hashable {
         return accessWorkshopID.map { CatalogService.productionOrigin.appendingPathComponent("w/\($0)") }
             ?? CatalogService.productionOrigin.appendingPathComponent("app/\(publicKey)")
     }
+    /// The QR contract uses websiteUrl verbatim, independent of launch aliases.
+    var shareWebsitePayload: String? {
+        guard let raw = websiteUrl, raw.utf8.count <= 2_048,
+              !raw.contains(where: { $0.isWhitespace }),
+              let url = URLComponents(string: raw),
+              ["https", "http"].contains(url.scheme?.lowercased() ?? ""),
+              url.host?.isEmpty == false, url.user == nil, url.password == nil,
+              url.url != nil else { return nil }
+        return raw
+    }
     /// Workshop membership is verified with the active account before launch.
     /// A login requirement is satisfied at that boundary, while other rights
     /// still need their own grant even when login_required is the first label.

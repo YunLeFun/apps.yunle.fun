@@ -1,0 +1,1413 @@
+{
+  "kind": "frozen-historical-native-source-input",
+  "createdAt": "2026-10-29T07:18:07.896825+08:00",
+  "ownerThread": "01a182f1-abfa-7290-bb5e-2f23f550dbcc",
+  "purpose": "M0.1 exact old native source + normal production HTTPS offline entry baseline; not an old-Play Git attribution or30percent comparison",
+  "gitCommit": "e68ed57d523997a1bc669a5586f925d79c352fb0",
+  "paths": [
+    "apps/ios",
+    "apps/mobile/ios/App/App"
+  ],
+  "sourceRoot": "/tmp/yunle-native-games.uGZuY9/historical-native-e68ed57d",
+  "fileCount": 279,
+  "fileBytes": 3334807,
+  "files": [
+    {
+      "path": "apps/ios/.gitignore",
+      "byteCount": 46,
+      "sha256": "47476ef424469b9aa13c0cc1f3b6f6c4598a627ebe2433bdfd2f6a856fa3f2ae"
+    },
+    {
+      "path": "apps/ios/Benchmarks/ApplicationBenchmarks.swift",
+      "byteCount": 53620,
+      "sha256": "1ebf9d5ad1503d68887c6d3effe3f0ad6bd34a02a608735e7b8b29bf60e1630a"
+    },
+    {
+      "path": "apps/ios/Benchmarks/DeveloperProfileBenchmarks.swift",
+      "byteCount": 18816,
+      "sha256": "630cf8067d8568aa4289b1d5dbc4b5cd3a453ae5c71560af6b076933ea2a2b25"
+    },
+    {
+      "path": "apps/ios/Benchmarks/FeedbackLoginBenchmarks.swift",
+      "byteCount": 27162,
+      "sha256": "68c035dfab0dfc6c765b075b2b11c9772bacf62af0d92b6589562396a7388ee6"
+    },
+    {
+      "path": "apps/ios/Benchmarks/FeedbackScreenshotUITests.swift",
+      "byteCount": 3928,
+      "sha256": "c76050d5742f81ca7d21c0c9b7625787b83da46ade4187bb3252e315df7c019a"
+    },
+    {
+      "path": "apps/ios/Benchmarks/NativeAccessibilityAudits.swift",
+      "byteCount": 13316,
+      "sha256": "1faf8df8a86f611fd4ce149dde7a4ceb72964499a1164c5e51e54d07de71fb88"
+    },
+    {
+      "path": "apps/ios/Benchmarks/NativeVoiceOverTests.swift",
+      "byteCount": 37938,
+      "sha256": "21568c4b3b8e7a091b6244621f5f95c55ac313db65acec3b31c8b42f3ada9c2a"
+    },
+    {
+      "path": "apps/ios/ExportOptions-TestFlight.plist",
+      "byteCount": 622,
+      "sha256": "953fca00c82a16dc9892e36b29b550bfc904f0e44b3625c37ff058e4602725e1"
+    },
+    {
+      "path": "apps/ios/LiveValidation/CookExternalLinkLiveTests.swift",
+      "byteCount": 9143,
+      "sha256": "a0e9769aebcfeab88fe5d9fc4409bc534353475c08563f308a56fe565558ad44"
+    },
+    {
+      "path": "apps/ios/LiveValidation/CookHostLiveTests.swift",
+      "byteCount": 16920,
+      "sha256": "1e5eeb8bf791bcde53af75ed5ab0d766de23a5bb0ffc47fd2ef9042ad7d57a30"
+    },
+    {
+      "path": "apps/ios/LiveValidation/HomeSyncLiveTests.swift",
+      "byteCount": 51642,
+      "sha256": "ab2ccf01d328fa297b23e80cde87cb95dc33c537d64d7e5832a4bfc065713212"
+    },
+    {
+      "path": "apps/ios/LiveValidation/HostAuthorizationLiveTests.swift",
+      "byteCount": 121337,
+      "sha256": "3501585465ff7a25a29c21691b57117b2732e8cf41e14a15f329006b50e67864"
+    },
+    {
+      "path": "apps/ios/LiveValidation/KeyboardLayoutDiagnostics.swift",
+      "byteCount": 5156,
+      "sha256": "8a90d3c2de957bf180c931e0bc11dc9cf6da7d58320c8970251ca2216e01aeee"
+    },
+    {
+      "path": "apps/ios/LiveValidation/ManagedAccountLiveTests.swift",
+      "byteCount": 90019,
+      "sha256": "c26239fba37b0218176c3ee1116f9dabfe535a7df6986f43069e4c950c12f170"
+    },
+    {
+      "path": "apps/ios/LiveValidation/PublicIconLiveTests.swift",
+      "byteCount": 4192,
+      "sha256": "92ba70a0906480595d54ec2f7c15786b7dbb11639a703633109eb25e816b59f0"
+    },
+    {
+      "path": "apps/ios/LiveValidation/PublishingCandidateLiveTests.swift",
+      "byteCount": 9736,
+      "sha256": "f72d40b9edfa524ead2817e5b9b3efa4e4b1ea0c26f42029574057f00b89238d"
+    },
+    {
+      "path": "apps/ios/LiveValidation/WalletPresentationLiveTests.swift",
+      "byteCount": 15763,
+      "sha256": "aef7fc47ee1ad6127ba5f626d23f11e22477abdafc560702ef7dc06f106630f1"
+    },
+    {
+      "path": "apps/ios/LiveValidation/WebProfileProcessLiveTests.swift",
+      "byteCount": 9653,
+      "sha256": "2353d9264afd36881f2a660a45a3be5c57de47e3e03b6092197d320b2e6b31e0"
+    },
+    {
+      "path": "apps/ios/LiveValidation/WebProfileRecoveryLiveTests.swift",
+      "byteCount": 8239,
+      "sha256": "634502da9ceb29104419990015e3e1de749401b7d49562b4c0f10788f884ea0b"
+    },
+    {
+      "path": "apps/ios/README.md",
+      "byteCount": 15319,
+      "sha256": "5336f0053aad2ba8ef0c8ec4407c4df9546860ab280378c72701d3100120e33d"
+    },
+    {
+      "path": "apps/ios/SharedFeedback/ScreenshotPreview.swift",
+      "byteCount": 3806,
+      "sha256": "3b77581315dee4c23248215ab00b2f4978b009f9938b143b9b2dc2dd9ae71fc6"
+    },
+    {
+      "path": "apps/ios/SharedFeedback/ShareFeedbackComposer.swift",
+      "byteCount": 6242,
+      "sha256": "5b49669ef2901c6b0293fcf6fb7a0c60056b7ff2d08214f6a70244a4e5c66e6c"
+    },
+    {
+      "path": "apps/ios/SharedFeedback/SharedFeedbackHistory.swift",
+      "byteCount": 8669,
+      "sha256": "dd7d0953beda2866ee57b4b66e288d58eb1951dbcfff4316294f7d672c8ba7ad"
+    },
+    {
+      "path": "apps/ios/SharedFeedback/SharedScreenshotImporter.swift",
+      "byteCount": 4797,
+      "sha256": "ef27caebf4a99393d4281e538cbefc41ee34215f797b28d903bbf8285458ece5"
+    },
+    {
+      "path": "apps/ios/SharedFeedback/SupportFeedbackClient.swift",
+      "byteCount": 6738,
+      "sha256": "08d566bb87407d69a89a538681c8a4ffaeb64ef20124efc797df9265a3ffd2f2"
+    },
+    {
+      "path": "apps/ios/SharedFeedback/SupportFeedbackProtocol.swift",
+      "byteCount": 3816,
+      "sha256": "1601234ffedd961f23280c7d3dd8f7c977d3c6ce92317f1a651d6b367f07da49"
+    },
+    {
+      "path": "apps/ios/StoreKitValidation/Fixtures/Products.storekit",
+      "byteCount": 2550,
+      "sha256": "08ebf7a9048b04b20318d1541d83c93c577aca5ca6d0cf37c42c5303538d5d24"
+    },
+    {
+      "path": "apps/ios/StoreKitValidation/NativeStoreKitLocalTests.swift",
+      "byteCount": 3932,
+      "sha256": "5c1bfd022ee3955bd21bd772540ed8b38101bceb6bfcbd173b6008280c8e5062"
+    },
+    {
+      "path": "apps/ios/Validation/ShareFeedback/README.md",
+      "byteCount": 7986,
+      "sha256": "be45e61292fa71f6f9fae1d5559a4d641fa3684a7826a362f1149dd0e0afd8bd"
+    },
+    {
+      "path": "apps/ios/Validation/ShareFeedback/preflight.py",
+      "byteCount": 3754,
+      "sha256": "b5bc77c308707ad1c84e12e4a23a573de3c60e96407c38dc2d9b88355ee82517"
+    },
+    {
+      "path": "apps/ios/Validation/ShareFeedback/run-ui.py",
+      "byteCount": 4371,
+      "sha256": "408eedbf34141e08b1971e2b1a053f684449710331cc3092673757f60e94f7af"
+    },
+    {
+      "path": "apps/ios/Validation/ShareFeedback/server.mjs",
+      "byteCount": 9394,
+      "sha256": "90ab2960327e2c0032d675e0c62de49d42d464646f5b497c33da8bd6c2caea29"
+    },
+    {
+      "path": "apps/ios/Validation/ShareFeedback/set-channel.py",
+      "byteCount": 1434,
+      "sha256": "97d1b54d7aeb37fe975f410652ae37a91e0574436e242b5fe933dcb119250c50"
+    },
+    {
+      "path": "apps/ios/YunleFun/App/AppRootView.swift",
+      "byteCount": 13225,
+      "sha256": "bee611315e340a33360d1d2c93b0fd2761609b6417f7a983615b22f681eaf63a"
+    },
+    {
+      "path": "apps/ios/YunleFun/App/YunleFunApp.swift",
+      "byteCount": 7197,
+      "sha256": "dd3735b32b8e8d85420eeb7885d3799f9562477af0ee6416b37b0ced58e7a821"
+    },
+    {
+      "path": "apps/ios/YunleFun/DesignSystem/ApplicationIcon.swift",
+      "byteCount": 6160,
+      "sha256": "fe3a3cc05f1f6a86ccb87ad7d9bab4c80ae4fd193752004fd89b6293fd2403a0"
+    },
+    {
+      "path": "apps/ios/YunleFun/DesignSystem/ApplicationIconImage.swift",
+      "byteCount": 4775,
+      "sha256": "e65db64bb4fcc69dbe801af4df8ce52c004afbae1547998d786c09f3b85498c3"
+    },
+    {
+      "path": "apps/ios/YunleFun/DesignSystem/ContentStateView.swift",
+      "byteCount": 3152,
+      "sha256": "d232b81470ef2758242eefb3b0c973b738d2a93de19e3d2b948716ba1aefb4a2"
+    },
+    {
+      "path": "apps/ios/YunleFun/DesignSystem/Motion.swift",
+      "byteCount": 4669,
+      "sha256": "b20e6e1f5c35892e902b9e6d6c88904c8e7977bde1e09d9275f4ebc1483b68cb"
+    },
+    {
+      "path": "apps/ios/YunleFun/DesignSystem/SettingsIcon.swift",
+      "byteCount": 1401,
+      "sha256": "05afbb42e60840e6bddded09b61161ba4d1e8a14c20c7467f4ed8174e80ae38d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Account/AccountManagementView.swift",
+      "byteCount": 6969,
+      "sha256": "809eebfc490c6ef4703014ebc14fbd546158cfdf3c9db030430eaad15bb37a62"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Account/CaptchaView.swift",
+      "byteCount": 3813,
+      "sha256": "49b80a89f571675ffaa633e7ae74625858e3294064f60e12b1472908b70d5ec9"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Account/LoginView.swift",
+      "byteCount": 22691,
+      "sha256": "58e79afc9f09f92dd1764284533894e86789f479fd52da25bff74c115c4691f1"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Assistant/AssistantComposerField.swift",
+      "byteCount": 6852,
+      "sha256": "c8a443de1f32a785c2a73feee60e4262fd2e063d9ef8f18e30311b6dd74f3db0"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Assistant/AssistantMarkdown.swift",
+      "byteCount": 3382,
+      "sha256": "4a59140f6efd7ad247df7f541d22a5812eda541f92b6a4b7165e8b56a079bbd7"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Assistant/AssistantView.swift",
+      "byteCount": 34911,
+      "sha256": "0081c2544fe6998e1a71fe33df17ea6277880adf98fa1c7c6151865d6aca8a83"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Cache/ApplicationCacheView.swift",
+      "byteCount": 18428,
+      "sha256": "e4c5e179cbe750dbf1ef8414f151178cc9b5ebaa029f91a885e6b34a9982b441"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Catalog/ApplicationAcquisitionView.swift",
+      "byteCount": 4979,
+      "sha256": "1b95c6f0513e8aa8f00269933a581076afb530f510cb7d3a1c9edb83657d9bac"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Catalog/ApplicationDetailView.swift",
+      "byteCount": 12920,
+      "sha256": "9424a0ad460917107e12d6caad8d7d1ad9afbdb26d43e322790ac79bc83fe3b1"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Catalog/ApplicationReviewsView.swift",
+      "byteCount": 15498,
+      "sha256": "b8dc0b6c24e3dc19e04bf9b7be898ed12f7e3f8e947e06d001c1f8221e1c4984"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Catalog/CatalogView.swift",
+      "byteCount": 5987,
+      "sha256": "048e4f444bbdc81bbb6878e506a8386a62aa7972809cb7d2c737400ed12fe256"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Catalog/DeveloperApplicationsView.swift",
+      "byteCount": 4492,
+      "sha256": "559b7142ca302dd83c622db625da450087fd3da4da992471c5aa53958e2c2818"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Discovery/DiscoveryView.swift",
+      "byteCount": 5617,
+      "sha256": "c43fb42a88203ff681426c2156746281b55053f35462a45ecbc16a499a7a9494"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeBackupsView.swift",
+      "byteCount": 8682,
+      "sha256": "a599c289a880ca1608ca5b8ce1d984d8346171fce818beff74ff296a1abbb781"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeEditCanvas.swift",
+      "byteCount": 33627,
+      "sha256": "20047b7fcfda4b033b7cf3557d898d90e9402ca94afebbcf6e1831f45b5991ad"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeFolderView.swift",
+      "byteCount": 8549,
+      "sha256": "3d4f09e05b35cb515ea67b1b218c2c8049e82fd9f76a4880ce10edcb35d8aa10"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeGrid.swift",
+      "byteCount": 8907,
+      "sha256": "238dfc6709f1bc3d7e78411875e85a352ebdb60302933ce76b65990cc53e10b8"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeSyncSettingsView.swift",
+      "byteCount": 5992,
+      "sha256": "181a9f7ce57ecc70ec94cc3e40ffbc72d6a9e5fbf465f9858ced73f1aead0d36"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeView.swift",
+      "byteCount": 30221,
+      "sha256": "ddc5f4857f252fcd5a77bffd2eedef962f584bcd031a27119a887107bd1d834a"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/HomeWorkspaceView.swift",
+      "byteCount": 15587,
+      "sha256": "353ff5feda56bfb2c73a651c3d87a7c630cc5ff27c4cce42ba7ef815aa92867f"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Home/LegacyMigrationView.swift",
+      "byteCount": 6516,
+      "sha256": "626fb645c4c7cc06f5830571ebf2eb9f0404b6fe7c6d1f1919910067c0568b0d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Me/MeView.swift",
+      "byteCount": 10044,
+      "sha256": "2e7ce13d79f0ecd8a31d046a8e8c9407dcd452afe6e28323984d50ecd94aa9bc"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Me/MyReportsView.swift",
+      "byteCount": 2858,
+      "sha256": "853bb50f63f4979cf57fc6cd5f4a67d0ca7cca7b9c7053674889d6ac5275a7bf"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Publishing/ApplicationEditorView.swift",
+      "byteCount": 14679,
+      "sha256": "dc0a50f8110502d943b91c62184397245b6eb6612aca76b6fe9cceed22309b02"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Publishing/MyApplicationsView.swift",
+      "byteCount": 13312,
+      "sha256": "4a59f006aa32199452fd86a23eeba94ab47710f637f2c11a25e5514225f1ec69"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Scanner/CameraPreview.swift",
+      "byteCount": 2762,
+      "sha256": "d67be48ec5a88267800d7333a4c9c373f49610f48be997f8e97ff61a1bbac61f"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Scanner/QRScannerView.swift",
+      "byteCount": 9699,
+      "sha256": "0c3bc166a6c54ecfb667d8889cfea4bdc8d9075ca74e82981650702a2e152740"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/FeedbackLoginCoordinator.swift",
+      "byteCount": 5251,
+      "sha256": "20ca4d28035cabe2a81416c4138363665ff9ccdd9242d504c30f312ff20a41c2"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/FeedbackScreenshotSection.swift",
+      "byteCount": 4056,
+      "sha256": "2eed51ada87fd6dcc7cbf281135d83127569c1870de0847f868f744c55122058"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/FeedbackView.swift",
+      "byteCount": 24516,
+      "sha256": "7bda8c2d0020f7d8bcc5424573a917f31d082b06304507ea61514bd4cb9b4281"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/HelpView.swift",
+      "byteCount": 5581,
+      "sha256": "3bd3d30e94cb48f9bb8b8754e1f2b434a02f4d57255de7d62f0e743aa7a14626"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/ScreenshotFeedbackCoordinator.swift",
+      "byteCount": 16949,
+      "sha256": "90c8e0426e18a23985d3c43b38ed54a010c31f43cca562dbcb5439a1e8b41d63"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/ScreenshotFeedbackPromptState.swift",
+      "byteCount": 2482,
+      "sha256": "6478d94aa91d1f0ab968e3d3b83380a4ce2e8621d60d024a6a95ed2b08c2b3dc"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SharedFeedbackReceiptsSection.swift",
+      "byteCount": 3365,
+      "sha256": "86b5f8b38ec15096b85278d40ea003869cc9a4b0e8a97d62ae605e12949977a8"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SupportBrowserView.swift",
+      "byteCount": 292,
+      "sha256": "b3ab0e779486830b93199024f5456591b29a58eaefc9c741af6170dc4d0e7099"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SupportCenterView.swift",
+      "byteCount": 16180,
+      "sha256": "26ca280426ac684c9a0b3329995862e614741e6ff349185dc1702a31af032af5"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SupportContactSection.swift",
+      "byteCount": 7187,
+      "sha256": "af696cf180227a37e5e0242709355fdcdd3b7051aef69dfa8152e20a0a9963b7"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SupportMailComposer.swift",
+      "byteCount": 7744,
+      "sha256": "a0f57889a636c56a5b9e1ce8d934a46515fd270e57d017c61c645f8eb08fe614"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SupportTicketView.swift",
+      "byteCount": 5824,
+      "sha256": "935b425c16b08f4e5872a1fa134c78fba8a85ff350873270f595430fed12b340"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Support/SupportWebsiteView.swift",
+      "byteCount": 1803,
+      "sha256": "7b73bce32885fb517d98a342a23aac235f4b97bbc6d0a4e5b0b6a9bd99073fe8"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Wallet/WalletView.swift",
+      "byteCount": 12603,
+      "sha256": "3dd943ed91d743b71f780702fd74eec3b5ecfdfc44739cd391468d4db9932152"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Workshops/MyWorkshopsView.swift",
+      "byteCount": 13710,
+      "sha256": "9c1dbd6ae321972be382c86a44dd30c8c92f85818f2a0bcb914f0d76745626b6"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Workshops/PublicWorkshopView.swift",
+      "byteCount": 7115,
+      "sha256": "695cade0146dfbd229dcf0042ebdaf6bfa930e7e295a108bf60474a88d0f92a7"
+    },
+    {
+      "path": "apps/ios/YunleFun/Features/Workshops/WorkshopShareView.swift",
+      "byteCount": 1901,
+      "sha256": "e44418acfd0d0cf71af58869a997b45dfbd65d3b4caa7e7b486d6a7f6f357db7"
+    },
+    {
+      "path": "apps/ios/YunleFun/Info.plist",
+      "byteCount": 1191,
+      "sha256": "519e6b890eb21afdf00f8e12d18a3301f3dcbeb294ad34fbf91dfeb97bd82b1f"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Account.swift",
+      "byteCount": 9063,
+      "sha256": "39330be6cd6c61f70168caf618ce712daa9d48d3689752175672f13e1f1fb3dc"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/AccountSignIn.swift",
+      "byteCount": 756,
+      "sha256": "3b318f72c2d98d2a2e654c5635de3418261b2b9be608f9d149d82c8f12456a7a"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Assistant.swift",
+      "byteCount": 11416,
+      "sha256": "71b091a967b9fe7ae9434c920f4ae069e5fc32d66294fb5068f4d2ca2af068a6"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/AssistantRollout.swift",
+      "byteCount": 2317,
+      "sha256": "a7f0f777d62058f097588c5265311d1e8cb24ef0dfa94e153492791ebafe3ee3"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/CloudApplication.swift",
+      "byteCount": 7488,
+      "sha256": "44c4dc79688754828f6716791bb28688f72a537e0af326f713ead805af53a27e"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Community.swift",
+      "byteCount": 6976,
+      "sha256": "1bfc766def45daa7b192afa3e34fa3b0dd41f95227040449176fb059bf435705"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/DeveloperProfile.swift",
+      "byteCount": 2809,
+      "sha256": "025091a1fb5aa630522f32e57804f9d69c8953b56594419930c525b54c9546d0"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Diagnostic.swift",
+      "byteCount": 5270,
+      "sha256": "e2508fd2d4f7468d21cb0b7dba1032a984db5c34aec0ed750e07495f1d0707b9"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/FeedbackChannel.swift",
+      "byteCount": 1070,
+      "sha256": "b489acdc42e6292cad418b7d2486afb986c1bfd8622abf41bdcc0de1e5a04140"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/FeedbackScreenshot.swift",
+      "byteCount": 3525,
+      "sha256": "c8f8c36cf836329a9a99f324d1c97c64753cc139a8d3ccab3ca20df3cef19cfa"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/HomeBackup.swift",
+      "byteCount": 3277,
+      "sha256": "6c094b07fbe861ff86ff3f5ee72739761e9dc2aed9601c5457de27e360f6e3ba"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/HomeScreen.swift",
+      "byteCount": 19450,
+      "sha256": "8d8a7d4b20ec5446023decb6f29bdbab8ce810370b3c5fa5a7db2d7752ee9968"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/LegacyLocalData.swift",
+      "byteCount": 6662,
+      "sha256": "823688871795bdb5b3bb7dc87e7c1412a35cd382ce49faaff707a9bfb1857234"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Publishing.swift",
+      "byteCount": 18948,
+      "sha256": "0e47a36a55fa0345f0321c6b59a65a5e3ba4c77388264e34c3e6e9bee05abbdc"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/ScanResult.swift",
+      "byteCount": 5705,
+      "sha256": "be011a112ee085151aecc37af0efaf55306c543a8ee71b9a66b13d78ab24350b"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/SupportCenter.swift",
+      "byteCount": 3873,
+      "sha256": "ded884abb2fc41dc25ec38313e52f334b6f86908578bb2472297bc9bb2a1729d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/SupportTicket.swift",
+      "byteCount": 1866,
+      "sha256": "e8f667b8beb99bed72feb41574d11d22cb185f3f27f97b360d2b224e7f2fbc0d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Wallet.swift",
+      "byteCount": 3814,
+      "sha256": "7764700c9bb026b083641411f97f887c0f0bdfc66f073ed799228ace27256d33"
+    },
+    {
+      "path": "apps/ios/YunleFun/Models/Workshop.swift",
+      "byteCount": 7503,
+      "sha256": "a27f134d8de706be37de18e83ffaa304b0a47259e1d481977d72d324ac307561"
+    },
+    {
+      "path": "apps/ios/YunleFun/PrivacyInfo.xcprivacy",
+      "byteCount": 5382,
+      "sha256": "7544706aeab08ae8cfd57a7d9b4c3529d084065b06c1682690e3c89eb2decef6"
+    },
+    {
+      "path": "apps/ios/YunleFun/Resources/SwiftDraw-LICENSE.txt",
+      "byteCount": 852,
+      "sha256": "0952fa14f101b00996c24fd6a678611feef5cb0902e8ce28949cea7cb0eb2aa7"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AccountRequestAccess.swift",
+      "byteCount": 2049,
+      "sha256": "182f46b8ab7a1c35dc72a13b8346eeded778cea10e9a9811f68f0f551c0a0a0d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AccountSession.swift",
+      "byteCount": 12717,
+      "sha256": "6f148ecbae05dfe7fda5918b41b42b9c0db72d178e03006a1c4d1131c83649a3"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AccountStore.swift",
+      "byteCount": 10728,
+      "sha256": "0e263a3e8926ebf5d25c3fd9f4bfb73efa470a85084912fc148ea50031cf53a8"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationAcquisition.swift",
+      "byteCount": 9024,
+      "sha256": "6c51cc94c2ec7070dcb317682b7101dd72e5341162b81eb4b587b6485dde811c"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationCacheDownloader.swift",
+      "byteCount": 9848,
+      "sha256": "6b4addaec948498c8eb9739ebd5dd50625cec4f147e2942778b907122a21a995"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationCacheNetworkMonitor.swift",
+      "byteCount": 1583,
+      "sha256": "08757c7c9f8091279b638efe3db4ee3210c353b669b765417cbb8b831aa5ea60"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationCacheRepository.swift",
+      "byteCount": 9755,
+      "sha256": "5f11ef7d0987eac14f471fa2ca140face7ce8640a552dd0692cfb71694aae697"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationCacheStore.swift",
+      "byteCount": 12618,
+      "sha256": "61235f6e7e9bf8ef5e1b39c4bd6ab7ca490dfb327c9df1dc97c8e2ba3392f4b4"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationDraftVault.swift",
+      "byteCount": 2390,
+      "sha256": "f2cd2abb8f1f5a1f4e17de2e470b10d645010e3d0d3f3ceb8d87a78d6e02b859"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationEditorModel.swift",
+      "byteCount": 6636,
+      "sha256": "5fe09ab0dd3f6e3958671270b8cee0f009a4e623eca55c862e01e25ed4d65c99"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationIconNormalizer.swift",
+      "byteCount": 4224,
+      "sha256": "de5d39f8598a41bddc43c2285b1eae49052839bb60358f709ecdb55e818e8f7d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationIconSource.swift",
+      "byteCount": 5260,
+      "sha256": "352ce7a0cc26b16ca477bf3d57e9b6f81a70bb6d429b3f2b3d4fa8bb80672abc"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationImagePipeline.swift",
+      "byteCount": 7522,
+      "sha256": "112db50b484f9eb39140ed77059c3e1a5032bf2075bd2d9ae3fa25c151a69539"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/ApplicationStaticResourceCache.swift",
+      "byteCount": 16720,
+      "sha256": "4cfaa44c7c7a16f7d213926af4ae655b96cb75d19554b22e3f9e7cc02b4f064e"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AssistantHistory.swift",
+      "byteCount": 5368,
+      "sha256": "41676452bf21ff07b7bd611fd035c49fe2ee24579011f6b1b5a90bcdc9eb6930"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AssistantRolloutStore.swift",
+      "byteCount": 3498,
+      "sha256": "36e99930b7aed23950a9ba6af4f37cae935a091cb1b34d69deff1f5b5b553b0b"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AssistantService.swift",
+      "byteCount": 5964,
+      "sha256": "c536c274613ad835b07a1431249eff769a3f0fb871e1d8da89404abb9bfe7da9"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/AssistantStore.swift",
+      "byteCount": 13045,
+      "sha256": "ed16f0a9a522657df0040df6a257565a28d893be39976aa1907b059784f31845"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CameraQRReader.swift",
+      "byteCount": 6433,
+      "sha256": "198488d2791863db6183bcff57fd214124264997c41951d1c384b6891d03ba13"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CatalogIconAssets.generated.swift",
+      "byteCount": 6686,
+      "sha256": "a238b2049bb27a467316527e7e8a4758b9679e505509521386e3a02723ff7918"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CatalogIconStore.swift",
+      "byteCount": 12510,
+      "sha256": "2be41eeb38e3721ebb7ad71ba878c1f658357d09057e8b5b92859308a7cd8053"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CatalogService.swift",
+      "byteCount": 4941,
+      "sha256": "ed2a54419fe7d44771b4a2bdec261ec0dea6f86d2f2a9f96a7f108be0c3920d5"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CatalogStore.swift",
+      "byteCount": 2694,
+      "sha256": "ac456848add9b424b98871af260f55c4b6bc2e1a94b0b34556e768020af5c0ce"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CloudbaseAuthService.swift",
+      "byteCount": 9359,
+      "sha256": "1d29577619a5ac9035f812fce6b27f02f2046ccd8b2fcb361e27122aaa19fb81"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CommunityService.swift",
+      "byteCount": 6414,
+      "sha256": "ec45edfd930a5d3084d6c3531e5e47e185b5a1846aca6189e7b17130a311ae95"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/CommunityStore.swift",
+      "byteCount": 6943,
+      "sha256": "647e97736593de523e7273a771a2373ec37a8b7c86af67b938ed80ab8c0924b7"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/DeveloperProfileService.swift",
+      "byteCount": 3651,
+      "sha256": "7288655b2708a44c4c11371d1990381b31e6ad438bef88c258df92d6e78903ab"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/DeveloperProfileStore.swift",
+      "byteCount": 1638,
+      "sha256": "863ea4fa8bfda0e0c4f1cc55cc55eebe6a54e1012d487375e3fb29615e8094ec"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/DiagnosticLogStore.swift",
+      "byteCount": 8480,
+      "sha256": "7a40f72d19c575297da5073b24f9419a385bfe1cc3522abbe4f03430126b93b8"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/DiagnosticService.swift",
+      "byteCount": 11057,
+      "sha256": "9d7775d62872a0da4bd6fb2eb90fb826aec088c113fce66bc110252476e5ac25"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/DiagnosticUploadStore.swift",
+      "byteCount": 13066,
+      "sha256": "955cbcdf1e72c28df880b1360496e5a442e0f85b10f0b01f55a06a04889eb81f"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/HomeBackupRepository.swift",
+      "byteCount": 4243,
+      "sha256": "8588aa99b1c4639d8411d40ce4b85fbb40cbdf45a2f7a896f96d20d3661b2072"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/HomeBackupStore.swift",
+      "byteCount": 6183,
+      "sha256": "2717ae4aca53314b4365eb1ba024b76a588aeef53048002abc9577ab635820ea"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/HomeLibrary.swift",
+      "byteCount": 27585,
+      "sha256": "66830006870304542a8d09e56c7d17c925ff83928eeb8fcea8016f1d5d1c3825"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/HomeSyncCoordinator.swift",
+      "byteCount": 11192,
+      "sha256": "a9c1dc40ef3ae18634efbeb319f1842ec8b482447871739561c64bbd12244aa1"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/HomeSyncService.swift",
+      "byteCount": 9459,
+      "sha256": "9d9de7a4c2c53d707d5df1f23ebe8ef31eac46c5257be0377a3cf9e5bc1ccb4d"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/HostAuthorizationService.swift",
+      "byteCount": 11929,
+      "sha256": "67f340f0cf1bebbb4e60075913fe954dc7d9aa06578e0dd2d56928cd5b59a9e5"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/KeychainAccountVault.swift",
+      "byteCount": 1916,
+      "sha256": "a613f9250c051cc2adda2442077201fdb12e08eb9fc8b7323f36358e67f4bbbf"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/LegacyImportStore.swift",
+      "byteCount": 6872,
+      "sha256": "e69eea99ebf45abf4c524397a0de1d6f9bb80aebd9f506f161de10dfe2bfbbd2"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/LegacyLocalDataReader.swift",
+      "byteCount": 5992,
+      "sha256": "5c45ac1ff133e0d36b98eead562d2316df92ef96542fb84af8091fc4c94bb008"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/NativeStoreKit.swift",
+      "byteCount": 5445,
+      "sha256": "204b1f69fcc438f0411d15009ee31e19b54f837fdb839228e283be96a9d76ada"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/PhotoQRCodeDecoder.swift",
+      "byteCount": 4039,
+      "sha256": "895c485c2ed839d75df4de467882d277e80faf1c58269569dec974236a27e304"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/PublishingService.swift",
+      "byteCount": 11219,
+      "sha256": "af3c49aa32c931be7e7c154124773a7f559e3079741127895a5e8f8b59283a3f"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/PublishingStore.swift",
+      "byteCount": 7160,
+      "sha256": "fbd81bb5c4178f19308d18f2c04e141b9bc27034eadf1bb309848959eb4de079"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/PurchaseCoordinator.swift",
+      "byteCount": 12212,
+      "sha256": "795a3f36eb7d4b10708091745b2720d54d72a55388d036669689dcab005b172a"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/PurchaseOwnershipJournal.swift",
+      "byteCount": 3794,
+      "sha256": "b5d8233143550089f0651b123267d6fc3dbd150dd6d4773c0d4620ead600119f"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/QRScannerModel.swift",
+      "byteCount": 6229,
+      "sha256": "c95b18a3b9c32b3a76116288af79de25b2c2b7e79f58f1d6af8f471643cf2d86"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/SVGIconDecoder.swift",
+      "byteCount": 6826,
+      "sha256": "6f98da3f60019ab72088e87f786a9e72f7c73dc2f8eb1e20295d5e37969b8e14"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/SupportCenterService.swift",
+      "byteCount": 12353,
+      "sha256": "b6492ca8036bf6f5dc6b3575e6da765481d82f81c2299f75c7a8af62399d3093"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/SupportCenterStore.swift",
+      "byteCount": 7438,
+      "sha256": "a8b42bca31f68e55a2ad18f704928e60b89eeed6f81a7aba070abe38aa541338"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/SupportTicketClient.swift",
+      "byteCount": 6674,
+      "sha256": "27a3c9174d018c19614c852df60eb6c505f4dae278cf1ab3d60933f0880b4f33"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/WalletService.swift",
+      "byteCount": 7273,
+      "sha256": "e786a727219035725167b09174a47ca85b74936e61d23a310edb5219639348ff"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/WalletStore.swift",
+      "byteCount": 4905,
+      "sha256": "dee7d8e4c52188cb94b299fda09bd2688b28cf72f864017aca60531214ab85de"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/WorkshopService.swift",
+      "byteCount": 9576,
+      "sha256": "6c745e785911ab391ce751394966ae9dc54618c36b568aaa99f1c77853ed941a"
+    },
+    {
+      "path": "apps/ios/YunleFun/Services/WorkshopStore.swift",
+      "byteCount": 8293,
+      "sha256": "b665f95a8035d74b425aedb4c1a4e32c44553a3dde05932b293e7eb95f8356f9"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/CrossAppAuthorization.swift",
+      "byteCount": 12270,
+      "sha256": "2389d32ce978bb6eebd8034e093a21ba606d7252ba54821911c793d50b6b32a4"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/NativeApplicationMenuView.swift",
+      "byteCount": 6156,
+      "sha256": "f5485ae6cfca2833c20ba6cac70dbda0826d8b8b5f0914f5ebef47b63a7e2c65"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/NativeAuthorizationBroker.swift",
+      "byteCount": 10668,
+      "sha256": "b2907d8f6d327979eef2c85885ee94c875ac942b169f3d2ed7429d61a8bf7765"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/NativeAuthorizationPage.swift",
+      "byteCount": 4901,
+      "sha256": "145ece8eabf36ae5808a1c2e5237c11206ecb285fb27b01fb9fc30eae8fccfc7"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift",
+      "byteCount": 33358,
+      "sha256": "9687902b65a3ea023dd69c08b2705969e919a7bb57f087823f945f718309d17f"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/WebProfileRecoveryView.swift",
+      "byteCount": 4287,
+      "sha256": "f04a578d0f3037d31be69cbcd5d8e62b044dfbed7f3a58fc722f8b8b14d4f080"
+    },
+    {
+      "path": "apps/ios/YunleFun/WebRuntime/WebProfileRepository.swift",
+      "byteCount": 9814,
+      "sha256": "a786bfaf97201cf55bf08537d449e27a89b78b4cc0f1790ac2316c2ac7076656"
+    },
+    {
+      "path": "apps/ios/YunleFun/YunleFun.entitlements",
+      "byteCount": 656,
+      "sha256": "eb5ad5b69f703fdffab56c3fd684e740eae0039b7a4759703d2e8e3dd75890e0"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/project.pbxproj",
+      "byteCount": 165217,
+      "sha256": "3dcf610e5ff80d8137fced3f06e6fe46d3e8802a12caea394178f12138081598"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "byteCount": 135,
+      "sha256": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "byteCount": 613,
+      "sha256": "9aed5a52e82b217de4f08c3db7e49b729f1058124824acda2f82c55ad33fb666"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/xcshareddata/xcschemes/YunleFun.xcscheme",
+      "byteCount": 5531,
+      "sha256": "6410cb97620740ba30ea1361c878be8acd1be2d684a8ae0bb6e713a64d3ac230"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/xcshareddata/xcschemes/YunleFunBenchmarks.xcscheme",
+      "byteCount": 4518,
+      "sha256": "6b4b4770a182e3a9965d1d85dd79b58340f26c90b0512902d7b883b0fbf19cd4"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/xcshareddata/xcschemes/YunleFunLiveValidation.xcscheme",
+      "byteCount": 4427,
+      "sha256": "82ed2cab95211fdf51de5c90494fd737d1566d876f99814b16da31f2f907cc08"
+    },
+    {
+      "path": "apps/ios/YunleFun.xcodeproj/xcshareddata/xcschemes/YunleFunStoreKitValidation.xcscheme",
+      "byteCount": 4665,
+      "sha256": "e92573792f9ef6d5bf6784b21099713726cf226ee953a38b1b63c4c776bf7c8c"
+    },
+    {
+      "path": "apps/ios/YunleFunFeedbackShare/FeedbackShareViewController.swift",
+      "byteCount": 3537,
+      "sha256": "5c0c2c20a48acaa17e8f6e0c77755999b49fe9def34acc3b6f160cc46ab4f27c"
+    },
+    {
+      "path": "apps/ios/YunleFunFeedbackShare/Info.plist",
+      "byteCount": 1374,
+      "sha256": "a66f9e0220072d213c10969e5f832bd82dd43531eb4f4a81de3c69ad867cf815"
+    },
+    {
+      "path": "apps/ios/YunleFunFeedbackShare/PrivacyInfo.xcprivacy",
+      "byteCount": 2523,
+      "sha256": "ddb26841b06b543ed74602f0f79ba23dd47bfb60eb229e119236bf0d9c9eeb2c"
+    },
+    {
+      "path": "apps/ios/YunleFunFeedbackShare/ShareFeedbackView.swift",
+      "byteCount": 8697,
+      "sha256": "4cfa8a1aa92136966ad8cf0170417d1aa5f567ba741c20db25e87db26d82c824"
+    },
+    {
+      "path": "apps/ios/YunleFunFeedbackShare/YunleFunFeedbackShare.entitlements",
+      "byteCount": 298,
+      "sha256": "2799c0fde7661970e52b0be61ad86f8b796b4093f9770b368b420a8afa966a62"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AccountInteractiveSignInTests.swift",
+      "byteCount": 41996,
+      "sha256": "58508a131381e7865e4fcea40bb67d83dae2c1dfbd068bd5d283f7d1479708bb"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AccountSessionTests.swift",
+      "byteCount": 30183,
+      "sha256": "1cffb29abd1e3404173d57fba28c096558858f41ee005d8df816159f11b5e062"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationAcquisitionTests.swift",
+      "byteCount": 8934,
+      "sha256": "6670cf65431f696c6e092b1013adc126447f1dec52c336e2c6b7b89b9525968f"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationAcquisitionVisualTests.swift",
+      "byteCount": 3897,
+      "sha256": "67c7cb2ac1e552ef29619302b61a09b5af895334225fcc6211a141a83215e9b1"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationCacheAutomaticUpdateTests.swift",
+      "byteCount": 13615,
+      "sha256": "ca2fef38b6d610aa31820f9bb92a5a0872af9d03ddb5d8e97295243c1d604561"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationCacheDownloaderTests.swift",
+      "byteCount": 10043,
+      "sha256": "fff1850edebef2cb9f0315ee308cc8c5956733e05d3b9882be2a28a7b6b4c113"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationCacheLiveTests.swift",
+      "byteCount": 5816,
+      "sha256": "f875cf9b35e4e50ee7dbbc938749b6bcfa89663acf01b9fd9147dc04a9e54b70"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationCacheRuntimeTests.swift",
+      "byteCount": 9473,
+      "sha256": "46a4d1f86d49031965c61933626528d05ab295f45cc8a58f2bcc76ff0b767233"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationCacheTests.swift",
+      "byteCount": 9898,
+      "sha256": "d6057f0d2d1ca54782c5bd62c79793b8746ab8fbcbc0e2bf882a38343f091b7b"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationCacheWebKitTests.swift",
+      "byteCount": 4392,
+      "sha256": "e4d7dbf867c2d5f3894c241f8c9905071544d0a4a70c1f3ab8466c8c5c7b1e17"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationDetailLayoutTests.swift",
+      "byteCount": 5965,
+      "sha256": "9888f490fa252d4779e2ebb55a1ae186d8e72c80443bfb5c8b1bc5a79923ad67"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationIconTests.swift",
+      "byteCount": 22668,
+      "sha256": "a322e7c116b71ee4f64410b78011ac76d7bdb37b1640480487f74e61d1a69932"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ApplicationStaticResourceCacheTests.swift",
+      "byteCount": 13985,
+      "sha256": "05e5174056f7ff31c9ce8b8749d06f497459d8a145e4422abc79c189b27741aa"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AssistantCancellationTests.swift",
+      "byteCount": 3111,
+      "sha256": "1463fe4f9dbca0fa020fb72bacdf56ae904f2c4a2fcca88ce7eaf42ab9daa1e4"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AssistantComposerFieldTests.swift",
+      "byteCount": 2649,
+      "sha256": "d1bb9160d2717010348a5d4e22bba3182d2491e12f004e6cbeb9fee6ac1f89e9"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AssistantHistoryTests.swift",
+      "byteCount": 13971,
+      "sha256": "de3debac84462666310f5908d3ca169438a58ad23d453ce1de8d40a6ea7c20a2"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AssistantRolloutTests.swift",
+      "byteCount": 3945,
+      "sha256": "f860f0f7146f0005c31a5ae30ad28192a21250c5d36d08750170a358cfb6dba6"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AssistantTests.swift",
+      "byteCount": 17141,
+      "sha256": "bc915f58182484f8fb9e057499f466f24c594dbf615d891c37353918666e903e"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/AssistantVisualTests.swift",
+      "byteCount": 9066,
+      "sha256": "06a561b9e674fb4fcb3a5d6717d14d6276e5c6eb5339dcfc9af221f0853a5757"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/BillingTestSupport.swift",
+      "byteCount": 6466,
+      "sha256": "5287b3091e119f73f8bf010d680fe407c54f6ae244b8d88ebb40d3d8c2c4cd9a"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/CatalogIconAssetsTests.swift",
+      "byteCount": 3546,
+      "sha256": "be6f79a2f3d539d39e89b70846a888918435829abf864170b7e0fbe9d04027d2"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/CatalogIconStoreTests.swift",
+      "byteCount": 17665,
+      "sha256": "3865d7e60cc77db28260acfa2c66668a1be7aefc98365beccd3989e55f711bf2"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/CatalogTests.swift",
+      "byteCount": 7180,
+      "sha256": "11d61af8e6c04da8f02912b6836902f7d8599e6f771f5c14ecd9d365cfea0ffe"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/CloudbaseAuthServiceTests.swift",
+      "byteCount": 13426,
+      "sha256": "7c92ce322d70ade7a3a4e81174136be6c0af1965c1d62683f472637b996b19d0"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/CommunityTests.swift",
+      "byteCount": 16422,
+      "sha256": "b5b0f0d497149460ad38e1ff8fc0a18c8814c178fb6b2caee74177cf6271f9da"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/CrossAppAuthorizationTests.swift",
+      "byteCount": 10632,
+      "sha256": "3a691c731e34388812a2d980b17c0bffa920b7093186a38acbf88cf7124ae6ab"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/DeveloperProfileTests.swift",
+      "byteCount": 23281,
+      "sha256": "b9bab8a6ed839405f1cdd4a45416982aa646a2b29ed33a55b5a00686e2eb3aa3"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/DiagnosticLogStoreTests.swift",
+      "byteCount": 19762,
+      "sha256": "04cfb6052202b9ec352ac38da035b44bf0e264beb3f8374fb99497baefb43f93"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/DiagnosticServiceTests.swift",
+      "byteCount": 18648,
+      "sha256": "4a8604d027e8396ef568165e144c06bfcf685ee989b0adfab07f608f6d5898b1"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/DiagnosticUploadStoreTests.swift",
+      "byteCount": 20134,
+      "sha256": "8461c02e7a1810bb0c0375291290fe92997c712bc56854c753f5f73e761a374f"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/FeedbackLoginCoordinatorTests.swift",
+      "byteCount": 11807,
+      "sha256": "ea5678448ae8b0986c0c9c0a85f4cb0751a70569c8af394498f469ce83fe5c15"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/FeedbackScreenshotTests.swift",
+      "byteCount": 3803,
+      "sha256": "3a3eebb6f94011110fffc8041d44f736977ce2ce4fdcc9b2cd8e639ac6839e70"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/Fixtures/cross-app-redirect.json",
+      "byteCount": 1756,
+      "sha256": "ff41720f4486413cd61f73a37a2b3df11d1f8a65bc8529f91b07769f7d23b313"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HomeBackupTests.swift",
+      "byteCount": 23869,
+      "sha256": "30f31bdc14c834d1824176533bdb8df1e99bfc33b7a66acce48c380cb0a2753f"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HomeLayoutVisualTests.swift",
+      "byteCount": 53328,
+      "sha256": "8b1083e4aeca5f56d7a77c73f21cf1ef46b297b4dafde177235a04d98c348218"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HomeLibraryTests.swift",
+      "byteCount": 27682,
+      "sha256": "adb3a49d94d7019498d65e5a8025d76fd5bece91de95f626637074c4c6ece099"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HomeSyncHTTPTests.swift",
+      "byteCount": 9967,
+      "sha256": "b1b94c463ef31ac59d9111d6f0d2e9cec4f9e1c4d1c1136436d72c05339f706e"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HomeSyncTests.swift",
+      "byteCount": 25688,
+      "sha256": "516f79261f7f7e12888c4a45217d1fc5bdb29e088c8dd1d8dbd0a48e0bbf1fa3"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HostAuthorizationProtocolTests.swift",
+      "byteCount": 5377,
+      "sha256": "1a7779ea3a1d35b27a49eab8895fab8295faff7f9e3d3d36d26158ee4b15473e"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HostAuthorizationServiceTests.swift",
+      "byteCount": 10525,
+      "sha256": "15a5edc0c5b28cba9797f2f3a15ab04a44aebad4e585f17e1671f8db90b062e9"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/HostIdentitySessionsTests.swift",
+      "byteCount": 5298,
+      "sha256": "12d083477b9419bd6e1ca6b11d364a0d7d2d484faab553b5c32a1f2e91171fdb"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/LegacyImportTests.swift",
+      "byteCount": 25619,
+      "sha256": "2413a9232fe9f85d7df1771844d587c0d77909269543e81b0b95f5f2e9a32836"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/NativeApplicationMenuTests.swift",
+      "byteCount": 6815,
+      "sha256": "4aebdb86e7b62542b11f9c99799ba8f9fdc5c59212d9d39ea1d78226e748c7cc"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/NativeAuthorizationBrokerTests.swift",
+      "byteCount": 11124,
+      "sha256": "4d4bf5d20ed2e6e0d8029a822c299d90140760deb064f8f32e0108478d09bf2d"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/NativeRuntimeSessionTests.swift",
+      "byteCount": 35659,
+      "sha256": "a454e21d0c1578247f395b23faf706fef145aa06483559ed90e817146a18646c"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/NativeWebNavigationTests.swift",
+      "byteCount": 8795,
+      "sha256": "1dc2af16ab5bccb9a38c865d4a3be5dd80dca66ad84704b15bcca25cefb6f5b4"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/PublishingTests.swift",
+      "byteCount": 38712,
+      "sha256": "b624b19aa66dead28b4236bde012696a55501a4a6f50375345b0c15538201704"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ScannerTests.swift",
+      "byteCount": 18292,
+      "sha256": "7c485cddacb91eafc9a085d70f3cb8b2f7c5cc57f8d6107b31508a9b421b2000"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ScreenshotFeedbackCoordinatorTests.swift",
+      "byteCount": 26068,
+      "sha256": "e850a5127e2e423973c61f7192288557d3d02c3082303ff1e6120c0b031d7e4d"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ScreenshotFeedbackPromptStateTests.swift",
+      "byteCount": 7132,
+      "sha256": "555605a4d1963132659fe63c458e804bf333e4465d448c0cd3777436945b1432"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/ShareFeedbackComposerTests.swift",
+      "byteCount": 9822,
+      "sha256": "5666a37b3fa71ba316d30de2c24af04abff29181638fbff8d1308f1b9b004cc2"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SharedFeedbackClientTests.swift",
+      "byteCount": 7941,
+      "sha256": "b64ae4f66d9c8383abbee753f2f0b3d4459515b6d8dd7ec17cc2f536076e8fdd"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SharedFeedbackHistoryTests.swift",
+      "byteCount": 6778,
+      "sha256": "8f295f5bf0d40fe60d463cc015a68a77b079348472445c7c1bd28f85b57b393c"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SharedFeedbackTestSupport.swift",
+      "byteCount": 1628,
+      "sha256": "31196288931766db2494001166c618c5e0a3f4e9ac9dfb9ca26e22f454614ca9"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SharedScreenshotImporterTests.swift",
+      "byteCount": 2798,
+      "sha256": "4496943700b85bd5d9f6952bec69c46c892bcaec5124f526e813b4de9b388c6d"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SupportCenterTests.swift",
+      "byteCount": 21477,
+      "sha256": "7dedc251f31d0e7e2b2cbfb31f6b841ce60293be3cabc7f6b01e99f25cb0e585"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SupportContactTests.swift",
+      "byteCount": 2677,
+      "sha256": "f0cb24ef3aae89e27050b293364c021c4b439bcd0c445a2c2a9eb95da2beff6e"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SupportTicketClientTests.swift",
+      "byteCount": 6916,
+      "sha256": "70e573b5b478b7309aa552efcad185ab5be535750976fa787b2bbf9392d10100"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/SupportViewTests.swift",
+      "byteCount": 18922,
+      "sha256": "62c02d64c10bd1dd706351eb87981546f57de29c4d4c15135ad3cb0950347da1"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WalletTests.swift",
+      "byteCount": 26275,
+      "sha256": "8183aebeaa711e2035ee8be61adebb05ca5338eab394e81377c28a1225d3c799"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WalletVisualFixtureTests.swift",
+      "byteCount": 3402,
+      "sha256": "0fe09ec9ddbf07d1c8b4f40278c02d7d94c7758f458a33a9361f181d6e6e5f12"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WebProfileRepositoryTests.swift",
+      "byteCount": 22496,
+      "sha256": "b82871e5c4fe3ba3b9343bf4370aead763feefa0816eb76af5f17e59d2ef9800"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WebStoragePageFixture.swift",
+      "byteCount": 3014,
+      "sha256": "c74b6cdb6abf38c4020127b84f4532601375852f46bfc1d75c8bf0a77f32b7e5"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WorkshopTests.swift",
+      "byteCount": 28718,
+      "sha256": "62da8427ac2ee38049410b6f0e0c368066d216452ae8374f36f1ea1ab4560119"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/ApplicationCacheUITests.swift",
+      "byteCount": 12221,
+      "sha256": "794636b61f4e9c86963afe080dbebbc6cf790498d205492f5946dab80b935bbe"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/AssistantComposerUITests.swift",
+      "byteCount": 5922,
+      "sha256": "e74ed486a8185e4f5391d45af56e857d1c747379892a8510cfb80f7be5c4962e"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/NativeNavigationUITests.swift",
+      "byteCount": 22031,
+      "sha256": "2b2d04ad04e48c26b51c47c3368de0ea57e071b400534be51703237f9fb37db7"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/NativeSupportUITests.swift",
+      "byteCount": 9968,
+      "sha256": "b09c7769f9fbe05771e89301ed1a5abe6bc7cfa0882b97879b0becd176981496"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/ScreenshotPreviewOrientationUITests.swift",
+      "byteCount": 7045,
+      "sha256": "1726a22acfb81861f0ebd0a947118e98319eb10b8f736324577cce9aab0c3b93"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/ShareFeedbackEndToEndUITests.swift",
+      "byteCount": 13805,
+      "sha256": "5cc03a9d2b43379fb8a9a9399fa083eb732893e178bb0648e1a802fe20bcead7"
+    },
+    {
+      "path": "apps/ios/project.yml",
+      "byteCount": 7094,
+      "sha256": "a8cbce396fe3e7d95560a9628bd3bbed9ccf89379152e2e5fef698c3afc1f0e7"
+    },
+    {
+      "path": "apps/ios/scripts/.gitignore",
+      "byteCount": 23,
+      "sha256": "6feaded4e28ea86e001a6751b4e3d960e8b7c31b9616ff9936b79297086e809b"
+    },
+    {
+      "path": "apps/ios/scripts/capture-simulator-startup.py",
+      "byteCount": 1664,
+      "sha256": "ca6a87786dac84adff2e0f5bc043f031487d4d0201986408052735d2bc7f5e6a"
+    },
+    {
+      "path": "apps/ios/scripts/probe-native-startup.py",
+      "byteCount": 7497,
+      "sha256": "aa0c44f873b17c79d5978176f301ffb13024138fffeb8740fe3786d0e32ac620"
+    },
+    {
+      "path": "apps/ios/scripts/seed-cache-ui-fixtures.py",
+      "byteCount": 3065,
+      "sha256": "7b7bf2dc5ebd1fb111898dca055cd0674978d935d27a2e3a9ca7bd0c63920a6d"
+    },
+    {
+      "path": "apps/ios/scripts/simulator_startup_diagnostics.py",
+      "byteCount": 16096,
+      "sha256": "4ab67af11c86b17b403fa550a4a9099287bc16cfd22f151d6a21694de1531186"
+    },
+    {
+      "path": "apps/ios/scripts/test-shared-feedback.py",
+      "byteCount": 2254,
+      "sha256": "5b9f06b75096a896a569bcc328f9a133132da5d26eb6ddfae42849eb26c5a940"
+    },
+    {
+      "path": "apps/ios/scripts/test_simulator_startup_diagnostics.py",
+      "byteCount": 3900,
+      "sha256": "5a88cc8e1780fd73960e8244fcfe73e38a2384ddcb37b56fdac3f96dc87bb720"
+    },
+    {
+      "path": "apps/ios/scripts/testflight.sh",
+      "byteCount": 9785,
+      "sha256": "70ab90b369559ee51ccf4d4e93aed32a07fdaf4444e15a60f73675e4a3643834"
+    },
+    {
+      "path": "apps/ios/scripts/validate-cache-ui.py",
+      "byteCount": 12083,
+      "sha256": "2344c87929884f39dad133ed5756f37f0aa8978bae70d9b8f0f73abb060acb23"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/App.entitlements",
+      "byteCount": 343,
+      "sha256": "735cce12df81f93bbfb5f471f2f9fab9ffd53c533654bc537dbd0652a457da99"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/AppDelegate.swift",
+      "byteCount": 3031,
+      "sha256": "5963d47ceba89e0d5694376ebf0bca630284db3de794bdf8666ea3093fe38a2f"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/AppViewController.swift",
+      "byteCount": 4295,
+      "sha256": "5522c94aabc64cee4ef4a031da6139b015e6f4e73539a09672b8b6ac6e347591"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png",
+      "byteCount": 27760,
+      "sha256": "65634c7b4454016785055a474dc1c19e3e54d625ac0a3c59d31dc28c7efa8be9"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "byteCount": 218,
+      "sha256": "5c09bec6eede599b14fa9e4c44b03e7febebc930615a0cd70f02981c09dfe48a"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/Contents.json",
+      "byteCount": 60,
+      "sha256": "7b225591af0371e8fea9f152cab6dd13013bf49ed2b277380503c4501698cbb7"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/Splash.imageset/Contents.json",
+      "byteCount": 901,
+      "sha256": "2ccd579fa3d33c08e68bc2847c03251852aaa6c38aa24c20a296a5e3171bf48d"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png",
+      "byteCount": 41273,
+      "sha256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-2.png",
+      "byteCount": 41273,
+      "sha256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png",
+      "byteCount": 41273,
+      "sha256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Assets.xcassets/Splash.imageset/splash-dark.png",
+      "byteCount": 30917,
+      "sha256": "e909af76a90e4d3ed725fc6a268e44cdb2db492a335541e932f56407300ba3c2"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Base.lproj/LaunchScreen.storyboard",
+      "byteCount": 1994,
+      "sha256": "87a42e842164d75f39cca56a2cf743652f4d8e858f2eba12ae21a8ddcd9a21c6"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Base.lproj/Main.storyboard",
+      "byteCount": 1037,
+      "sha256": "539ea6f519ddcf4fee1f0d40ef01ded9fb64e00568c9c7c4934bc7b166120391"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/HostAuthorizationProtocol.swift",
+      "byteCount": 11005,
+      "sha256": "6f0141a729dc2510b736096b5aab6da5e9cd5f4e9810aed6a9224ffef64a9d66"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/InAppWebViewPlugin.swift",
+      "byteCount": 57874,
+      "sha256": "6db27e92a6695cf24c458d0a365a8d99e0e463cb3765896a7d42a94724a1d743"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/Info.plist",
+      "byteCount": 2654,
+      "sha256": "303bf5143bb23c0eea11ef6825da162e2fb0635afbb4a1c04bdc187db2fbd220"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/PrivacyInfo.xcprivacy",
+      "byteCount": 4674,
+      "sha256": "986ba689ed3a67de6ac9b0f19b4ae9418df48566a519d680296e5ab6d7d52208"
+    },
+    {
+      "path": "apps/mobile/ios/App/App/WebViewController.swift",
+      "byteCount": 102028,
+      "sha256": "1dc7246a09ea328b1b829a24c44205cb5e4a2aaa53818c28ee60abeb64f6550a"
+    }
+  ],
+  "excluded": "No .git, worktree/uncommitted current changes, node_modules, build output or package checkouts copied",
+  "recycleCondition": "After verified baseline and export, retain exact Git/ref+manifest+test/build packaging patch+results; remove task-owned DerivedData/app. Keep necessary small reproduction source/archive while goal active."
+}

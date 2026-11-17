@@ -1,3 +1,4 @@
+import type { YlfAppInfo } from '@yunlefun/types'
 /**
  * useAppInteraction - 应用交互反馈 Composable
  *
@@ -20,9 +21,8 @@
  * ```
  */
 
-import type { YlfAppInfo } from '@yunlefun/types'
 import type { Ref } from 'vue'
-import { Haptics } from '@capacitor/haptics'
+import { hostHaptics } from '~/host-runtime'
 
 export interface AppInteractionOptions {
   /** 点击回调 */
@@ -94,7 +94,7 @@ function detectPerformanceLevel(): 'high' | 'medium' | 'low' {
 function triggerHaptic(pattern: number = 10) {
   if (checkHapticSupport()) {
     try {
-      Haptics.vibrate({ duration: pattern })
+      hostHaptics.vibrate({ duration: pattern })
     }
     catch (error) {
       console.warn('Haptic feedback failed:', error)

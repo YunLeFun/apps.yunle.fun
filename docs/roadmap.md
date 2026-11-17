@@ -1,5 +1,7 @@
 # 发布路线图
 
+> **2026-10-28 寻乐与工坊改造实施中**：保留四 Tab，应用推荐合并至工坊，寻乐成为原生游戏页。iOS 首批五子棋、飞行棋和星纸，分阶段完成目录 / 启动契约、页面整合、资源加速、邀请及对局恢复，Web 后续同步。状态见[专项计划](./product/native-game-discovery.md)与 `specs/native-game-discovery/tasks.md`，不沿用下文历史发布完成状态。
+
 > **2026-10-16 原生改造规划**：iOS 优先，采用 Swift / SwiftUI，云应用继续由受控 WKWebView 承载，Android 原生开发后续推进。目标、全部第一方 UI 迁移清单与验收见 [iOS 原生改造 Goal](./dev/ios-native-migration.md)。下文的历史发布完成项不代表本次原生改造已完成。
 
 > 云乐坊 1.0 上架前置工作清单。状态以本文件为准，完成项打勾即可。
@@ -19,7 +21,7 @@
 满足任一条件即可发版：
 
 - **仅 Web 发版**：合并到 `main` 后由 EdgeOne 自动发布；需要版本 Tag 时运行 `pnpm release`
-- **iOS TestFlight 内测**：跑 `pnpm build` + `pnpm sync` + `pnpm build:ios`，再按发布文档显式设置签名变量并运行 `apps/mobile/scripts/ios-testflight.sh`
+- **iOS TestFlight 内测**：使用 `apps/ios` 的[原生发布流程](./dev/testflight.md)，无需 Nuxt 构建或 Capacitor 同步；旧壳已按未分发客户端退役。
 - **App Store 正式上架**：等 ICP 备案 + 设计交付齐
 
 ---
@@ -66,6 +68,8 @@
 ## M2 · 补安全 / 内容审核（目标：3 天）
 
 ### P1 已完成
+
+> 本节为旧构建的历史记录。2026-11-05 用户确认旧 Capacitor 客户端未分发，历史上传记录不等同于曾向测试员开放；当前入口见原生发布流程。
 
 - [x] **Workshop 应用审核流程**
   - 数据模型新增 `status: 'pending' | 'approved' | 'rejected'`、`rejectedReason`、`reviewedAt`（[app/types/app.ts](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/app/types/app.ts)）
@@ -133,7 +137,7 @@
 - [x] **bump 版本号 + iOS TestFlight 上架**
   - `package.json` version → `0.1.0`（pre-release 语义）
   - iOS `MARKETING_VERSION=0.1.0` / `CURRENT_PROJECT_VERSION=67`，与 package.json 自动对齐
-    （[`scripts/sync-ios-version.sh`](https://github.com/YunLeFun/apps.yunle.fun/blob/main/apps/mobile/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
+    （[`scripts/sync-ios-version.sh`](https://github.com/YunLeFun/apps.yunle.fun/blob/7a3a0ef/apps/mobile/scripts/sync-ios-version.sh) + `scripts/ios-archive.sh`）
   - git tag `v0.1.0`
   - ✅ **已成功上传 TestFlight**（build 67，Delivery UUID 5a473656-…）
   - 踩坑与完整流程见 [`docs/dev/testflight.md`](./dev/testflight.md)（关键：`uploadSymbols=false` 绕过 Xcode 26 的 Copy failed）
@@ -191,6 +195,7 @@
 
 | 日期       | 变更                                                                                                                                                                                                    |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-28 | 新增寻乐游戏 Tab 与工坊合并计划：保留四 Tab，iOS 三款游戏优先；明确加载基线、模式启动、身份映射、资源缓存、邀请与恢复的分阶段任务，尚未实施                                                             |
 | 2026-10-16 | 新增 iOS 原生改造 Goal：明确 iOS 优先、全部第一方 UI 迁移、数据与账号兼容、分阶段实施及真实服务 / 真机验收；当前完成目标制定，尚未启动代码重写                                                          |
 | 2026-05-21 | 初始版本，基于上架前置盘点产出                                                                                                                                                                          |
 | 2026-05-22 | SIWA 改为可选 fallback，改用 iOS 端隐藏 GitHub 登录策略；隐私政策已外链可访问，降为 P2 内容核对；新增 P0 Bundle ID 不一致项                                                                             |

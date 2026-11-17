@@ -1,0 +1,137 @@
+{
+  "classification": "read-only-local-cloudbase-final-code-review",
+  "completedAtUtc": "2026-10-28T20:15:15.104588+00:00",
+  "result": "no-code-blocker-observed",
+  "blockingFindings": [],
+  "reviewedSources": [
+    {
+      "path": "apps/game-server/src/room/cloudbase-repository.ts",
+      "sha256": "8fab3117f9beddecf97daa84377de0e75418ebadfd6a12d5e0c08639ab1cb5f6"
+    },
+    {
+      "path": "apps/game-server/src/http/api.ts",
+      "sha256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee"
+    },
+    {
+      "path": "apps/game-server/src/room/service.ts",
+      "sha256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1"
+    },
+    {
+      "path": "apps/game-server/src/room/storage-schema.ts",
+      "sha256": "d204d79e4fa13cb1c9fcef4604f0d9f2998316cfd39c75b9d7c14cb3a99a9c86"
+    },
+    {
+      "path": "apps/game-server/src/room/model.ts",
+      "sha256": "da9cc9ddbbe65219f36f552c43b4e2fc2cdfcb8cf03f42808bfd80898646eb83"
+    },
+    {
+      "path": "apps/game-server/src/room/snapshots.ts",
+      "sha256": "0b15eca7e3cab5103f0b24da58905bfe562cc587cba62854368b255555d73ee8"
+    },
+    {
+      "path": "apps/game-server/src/colyseus/play-room.ts",
+      "sha256": "13da2d0b8ec83ecbc41f8cc84e7ee8e08e5b46ea45b45fe966e82635013692ef"
+    },
+    {
+      "path": "apps/game-server/src/auth/session.ts",
+      "sha256": "c3ea4a0835ee8e747192177cf99c7fed697cf8afa56f2b45b61cecfcb75e6605"
+    },
+    {
+      "path": "apps/game-server/src/auth/cloudbase-proof.ts",
+      "sha256": "35cca5925c83b4271129bc98d78a2fc81903963f435d7781ebbb00d6653642bd"
+    },
+    {
+      "path": "apps/game-server/test/room-creation-idempotency.test.ts",
+      "sha256": "1af08c71425a4aabca268fda614c67322a313f7df23ce5b1e5f325925d4efc12"
+    }
+  ],
+  "skill": {
+    "path": "/Users/yunyou/.agents/skills/cloudbase/references/cloudbase-code-review/SKILL.md",
+    "referencesRead": [
+      "references/RULES_INDEX.md",
+      "references/rules/cross-cutting/AUTH001.md",
+      "references/rules/cross-cutting/SEC001.md"
+    ],
+    "optionalLintExecuted": false,
+    "authRuleApplicability": "This backend uses its validated Play Cookie session, issued after verified SSO identity proof; the Web SDK getSession/getUser route-guard API distinction does not replace this server-side session validator."
+  },
+  "checks": [
+    {
+      "boundary": "authentication-before-idempotency",
+      "result": "pass-static",
+      "evidence": [
+        "http/api.ts:386-407 validates multiplayer gate, exact allowed Origin and Play Cookie session before reading the operation key and calling createRoom.",
+        "http/api.ts:483-489 requires sessions.validate(cookie); auth/session.ts validates hashed opaque sessions and expiry. The operation key alone grants no authority."
+      ]
+    },
+    {
+      "boundary": "creator-and-parameter-isolation",
+      "result": "pass-static",
+      "evidence": [
+        "room/service.ts:94-131 validates UUID v4, derives a stable SHA256 room ID from namespace, authenticated UID and normalized key, and stores the immutable original creator UID and canonical game/rules/version/capacity fingerprint.",
+        "Changed payload returns IDEMPOTENCY_CONFLICT; a different UID has a different room ID. Expired recorded operations return ROOM_EXPIRED rather than allocating another room."
+      ]
+    },
+    {
+      "boundary": "durable-create-and-result-recovery",
+      "result": "pass-static",
+      "evidence": [
+        "room/cloudbase-repository.ts:36-48 reads the same room document within runTransaction and refuses an existing document before writing the room and initial members in that transaction.",
+        "room/service.ts:110-125 uses the persistent room fact before its process-local in-flight Map; :186-195 re-reads authoritative storage after a create error, including a late/lost commit acknowledgement.",
+        "The process-local Map is an optimization, not the durable source of idempotency. Service recreation can recover the stored fact without a new collection."
+      ]
+    },
+    {
+      "boundary": "private-metadata-not-published",
+      "result": "pass-static",
+      "evidence": [
+        "creationRequest is only an optional private stored room field validated by storage-schema.ts:110-113.",
+        "HTTP room creation uses createRoomSnapshot; current and legacy room snapshots explicitly list public fields and omit creationRequest.",
+        "colyseus/play-room.ts:494-499 updates only roomId/revision/status/gameId in replicated state; :721-730 sends explicit room/game snapshots, not aggregate serialization."
+      ]
+    },
+    {
+      "boundary": "runtime-credential-protection-SEC001",
+      "result": "pass-static",
+      "evidence": [
+        "No full request headers, environment, context or x-cloudbase-context are returned or logged in the reviewed paths.",
+        "HTTP logs list requestId/method/path/status/errorCode/duration only; generic database failures map to a fixed INTERNAL_ERROR message. Health reports explicit flags and booleans rather than configured secrets."
+      ]
+    }
+  ],
+  "installedSdkVerification": {
+    "method": "Read installed SDK source and declarations only; no initialization or network calls.",
+    "nodeSdkVersion": "3.18.5",
+    "databaseVersion": "1.4.3",
+    "databaseRoot": "/Users/yunyou/repos/github.com/YunLeFun/play/node_modules/.pnpm/@cloudbase+database@1.4.3/node_modules/@cloudbase/database",
+    "transactionApi": "The actual Db imports transaction/index. dist/commonjs/transaction/index.js:66-76 passes the transaction to the callback, awaits commit, and returns callbackRes directly; :82-102 rolls back and throws other errors, retrying only DATABASE_TRANSACTION_CONFLICT.",
+    "getApi": "dist/commonjs/document.js:169-196 returns transaction data as one document or null; ordinary document reads return an array. firstRecord supports both shapes and treats a missing transactional document as absent.",
+    "setApi": "Document.set receives the document object directly, not a {data:...} wrapper. Its request uses merge:false, upsert:true and transactionId. Awaited SDK errors reject the transaction.",
+    "errorHandling": "The Node SDK defaults throwOnCode=true; utils and tcbapirequester convert returned service codes into thrown errors. The project does not disable this behavior.",
+    "conclusion": "Reviewed create/get/set and transaction result handling match the installed SDK. The serial adapter fixture uses the ordinary-array get shape, which the same parser supports; it is not a live transaction test."
+  },
+  "existingEvidence": {
+    "idempotencyReport": "apps/game-server/test/reports/room-creation-idempotency-20261029.json",
+    "scope": "Existing report records 55 local server regressions including seven new creation/idempotency cases; parent also reported 31 complete room tests. This review did not rerun them.",
+    "reviewedCases": [
+      "discarded successful HTTP response then retry",
+      "independent service concurrency",
+      "repository commit acknowledgement loss",
+      "service recreation over serialized room facts",
+      "different UID and changed payload conflict",
+      "expired operation refusal",
+      "repository adapter create-not-exists and snapshot privacy"
+    ]
+  },
+  "limitations": [
+    "No real CloudBase transaction, permission/ACL, index, conflict, or failure-recovery behavior was executed against a deployed environment.",
+    "Local SDK source compatibility and serial memory/adapter regressions do not constitute production CloudBase transaction acceptance.",
+    "The reviewed new source remains unpublished; no deployment or production mutation was performed.",
+    "No credentials, environment-secret files, cookies, or keychain data were inspected; no optional lint, build, simulator, installation, or SDK initialization was run."
+  ],
+  "cleanup": {
+    "processesStarted": 0,
+    "intermediateBuildDirectoriesCreated": 0,
+    "preservedArtifact": "/tmp/yunle-native-games.uGZuY9/cloudbase-final-code-review.json"
+  }
+}

@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core'
 import { NATIVE_API_BASE_URL } from '~/constants/api'
+import { hostEnvironment } from '~/host-runtime'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const userStore = useUserStore()
@@ -11,7 +11,7 @@ export default defineNuxtPlugin((nuxtApp) => {
    * dev server）不回退，仍走同源的本地 Nitro。
    */
   const isPackagedNative = typeof window !== 'undefined'
-    && Capacitor.isNativePlatform()
+    && hostEnvironment.isNative()
     && window.location.hostname === 'localhost'
   const baseURL = config.public.apiBaseUrl
     || (isPackagedNative ? NATIVE_API_BASE_URL : undefined)

@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-30T08:29:21.540295+00:00",
+  "roundId": "F04",
+  "gameId": "flight-chess",
+  "inviteCodeSHA256": "417e66db873712b55e9c00cbb08df71599d85e604ac9f4c52efc1cf373d96ae3",
+  "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+  "normalHostPID": 72102,
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "creation": {
+    "inviteUIUpperBoundMilliseconds": 699.4092079999391,
+    "authorityUpperBoundMilliseconds": 1847.0374580000062,
+    "sameSocketExplicitPlayerAndExactNewInviteSnapshot": true,
+    "limit": "One Cua same-observer upper bound including UI/IPC/polling; not isolated RTT or N10/P50/P90."
+  },
+  "join": {
+    "actualIndependentNativeAAndBrowserB": true,
+    "typedCodeAndBothPlayerSeatsVerified": true,
+    "observerUpperBoundMilliseconds": 17471.60379100009,
+    "limit": "Continuous block includes UI/IPC/keyboard routing reset/polling, not isolated network duration. Existing Native notices remain a separate clock.",
+    "nativeLogSHA256": "e2c4dd45fa1db8e7a7668623965ed8a3510e099147c3342b8142b5d6a2da388c"
+  },
+  "preRecoveryHumanActions": [
+    {
+      "ok": true,
+      "startedAtUTC": "2026-10-30T08:16:47.327Z",
+      "successfulN10Inferred": false,
+      "dispatched": true,
+      "pre": {
+        "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+        "gameSessionIdSHA256": "ea8bb354c99dd0af1128b46a9348402251370720574d9743d8ff491d2d3ec9dc",
+        "sequence": 382,
+        "revision": 6,
+        "currentSeat": 1,
+        "seatUIDHashes": [
+          "d45be4bd4086265c6d7a46305a5826d6a9ebe3c0bd5060245127eeb4e7876854",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "98703623c65cbd04082e6cc577c0d94446e052198c67e5fa2f7385bb4637a0f1",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "turnDeadline": "2026-10-30T08:17:01.918Z",
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            false,
+            true,
+            false,
+            true
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 1,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "lastAction": null,
+          "rollCount": 0,
+          "moveCount": 0,
+          "turnNumber": 1
+        }
+      },
+      "actor": "A",
+      "seat": 1,
+      "deadlineRemainingEstimateMilliseconds": 14461,
+      "action": "roll",
+      "beforeClickAtUTC": "2026-10-30T08:16:47.457Z",
+      "clickedPlaneIndex": null,
+      "afterClickAtUTC": "2026-10-30T08:16:48.409Z",
+      "reason": "authoritative-action-confirmed",
+      "post": {
+        "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+        "gameSessionIdSHA256": "ea8bb354c99dd0af1128b46a9348402251370720574d9743d8ff491d2d3ec9dc",
+        "sequence": 385,
+        "revision": 7,
+        "currentSeat": 3,
+        "seatUIDHashes": [
+          "d45be4bd4086265c6d7a46305a5826d6a9ebe3c0bd5060245127eeb4e7876854",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "98703623c65cbd04082e6cc577c0d94446e052198c67e5fa2f7385bb4637a0f1",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "turnDeadline": "2026-10-30T08:17:03.148Z",
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            false,
+            true,
+            false,
+            true
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 3,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "lastAction": {
+            "type": "roll",
+            "seat": 1,
+            "die": 1,
+            "forfeited": false
+          },
+          "rollCount": 1,
+          "moveCount": 0,
+          "turnNumber": 2
+        }
+      },
+      "confirmedAtUTC": "2026-10-30T08:16:48.587Z",
+      "inFlightActionUncertain": false
+    },
+    {
+      "ok": true,
+      "startedAtUTC": "2026-10-30T08:16:48.587Z",
+      "successfulN10Inferred": false,
+      "dispatched": true,
+      "pre": {
+        "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+        "gameSessionIdSHA256": "ea8bb354c99dd0af1128b46a9348402251370720574d9743d8ff491d2d3ec9dc",
+        "sequence": 385,
+        "revision": 7,
+        "currentSeat": 3,
+        "seatUIDHashes": [
+          "d45be4bd4086265c6d7a46305a5826d6a9ebe3c0bd5060245127eeb4e7876854",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "98703623c65cbd04082e6cc577c0d94446e052198c67e5fa2f7385bb4637a0f1",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "turnDeadline": "2026-10-30T08:17:03.148Z",
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            false,
+            true,
+            false,
+            true
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 3,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "lastAction": {
+            "type": "roll",
+            "seat": 1,
+            "die": 1,
+            "forfeited": false
+          },
+          "rollCount": 1,
+          "moveCount": 0,
+          "turnNumber": 2
+        }
+      },
+      "actor": "B",
+      "seat": 3,
+      "deadlineRemainingEstimateMilliseconds": 14445,
+      "action": "roll",
+      "beforeClickAtUTC": "2026-10-30T08:16:48.703Z",
+      "clickedPlaneIndex": null,
+      "afterClickAtUTC": "2026-10-30T08:16:48.979Z",
+      "reason": "authoritative-action-confirmed",
+      "post": {
+        "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+        "gameSessionIdSHA256": "ea8bb354c99dd0af1128b46a9348402251370720574d9743d8ff491d2d3ec9dc",
+        "sequence": 389,
+        "revision": 8,
+        "currentSeat": 1,
+        "seatUIDHashes": [
+          "d45be4bd4086265c6d7a46305a5826d6a9ebe3c0bd5060245127eeb4e7876854",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "98703623c65cbd04082e6cc577c0d94446e052198c67e5fa2f7385bb4637a0f1",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "turnDeadline": "2026-10-30T08:17:04.004Z",
+        "autoplaySeats": [],
+        "state": {
+          "activeSeats": [
+            false,
+            true,
+            false,
+            true
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 1,
+          "phase": "awaiting-roll",
+          "die": null,
+          "consecutiveSixes": 0,
+          "winner": null,
+          "lastAction": {
+            "type": "roll",
+            "seat": 3,
+            "die": 2,
+            "forfeited": false
+          },
+          "rollCount": 2,
+          "moveCount": 0,
+          "turnNumber": 3
+        }
+      },
+      "confirmedAtUTC": "2026-10-30T08:16:49.439Z",
+      "inFlightActionUncertain": false
+    }
+  ],
+  "recovery": {
+    "network": {
+      "actor": "browser B",
+      "actualOfflineUpperBoundMilliseconds": 2048.3935000002384,
+      "networkRestored": true
+    },
+    "actualOldSocketClosed": {
+      "streamId": "iab4-tab10-unlocked-20261030",
+      "sequence": 399,
+      "requestId": "19204.307",
+      "protocolEvidence": "raw-cdp-lifecycle",
+      "observation": {
+        "clockId": "cua-root-unlocked-20261030T0752",
+        "readStartedUptimeMilliseconds": 2199794.04775,
+        "readCompletedUptimeMilliseconds": 2199813.855584,
+        "completedAtUTC": "2026-10-30T08:17:33.964Z"
+      },
+      "kind": "socket-closed"
+    },
+    "newExplicitPlayerReady": {
+      "streamId": "iab4-tab10-unlocked-20261030",
+      "sequence": 425,
+      "requestId": "19204.315",
+      "protocolEvidence": "raw-application-protocol-3",
+      "observation": {
+        "clockId": "cua-root-unlocked-20261030T0752",
+        "readStartedUptimeMilliseconds": 2203719.247292,
+        "readCompletedUptimeMilliseconds": 2203730.861125,
+        "completedAtUTC": "2026-10-30T08:17:37.881Z"
+      },
+      "kind": "connection.ready",
+      "role": "player"
+    },
+    "newMatchingRoomSnapshotAfterReady": {
+      "streamId": "iab4-tab10-unlocked-20261030",
+      "sequence": 426,
+      "requestId": "19204.315",
+      "protocolEvidence": "raw-application-protocol-3",
+      "observation": {
+        "clockId": "cua-root-unlocked-20261030T0752",
+        "readStartedUptimeMilliseconds": 2203719.247292,
+        "readCompletedUptimeMilliseconds": 2203730.861125,
+        "completedAtUTC": "2026-10-30T08:17:37.881Z"
+      },
+      "kind": "room.snapshot",
+      "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+      "inviteCodeSHA256": "417e66db873712b55e9c00cbb08df71599d85e604ac9f4c52efc1cf373d96ae3",
+      "revision": 13,
+      "status": "playing",
+      "memberUIDHashes": [
+        "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+        "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+      ],
+      "memberCount": 2,
+      "selectedGame": {
+        "gameId": "flight-chess",
+        "rulesetId": "classic-4",
+        "rulesetVersion": 1
+      },
+      "activeGameSession": "present"
+    },
+    "earlierSnapshotBeforeReadyIsNotReadyProof": 423,
+    "sameGameSession": true,
+    "sameOrderedSeats": true,
+    "beforeStateSHA256": "c6c952cc33f9ee75af5d9ba853c9036b26e7d3f382f4316a34ddde08b6fe5820",
+    "afterStateSHA256": "313e2361235c82edd3d6823efb02a4189efc88b940b166611a735be0dbbb31e7",
+    "beforeAutoplaySeats": [
+      1
+    ],
+    "afterAutoplaySeats": [
+      1
+    ],
+    "limit": "Model/operator gap after genuine pre-inputs already triggered Native autoplay. Later automatic state changes are not human continuation."
+  },
+  "postRecoveryActions": [
+    {
+      "ok": false,
+      "startedAtUTC": "2026-10-30T08:17:37.884Z",
+      "successfulN10Inferred": false,
+      "dispatched": false,
+      "reason": "autoplay-already-active",
+      "pre": {
+        "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+        "gameSessionIdSHA256": "ea8bb354c99dd0af1128b46a9348402251370720574d9743d8ff491d2d3ec9dc",
+        "sequence": 427,
+        "revision": 13,
+        "currentSeat": 1,
+        "seatUIDHashes": [
+          "d45be4bd4086265c6d7a46305a5826d6a9ebe3c0bd5060245127eeb4e7876854",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "98703623c65cbd04082e6cc577c0d94446e052198c67e5fa2f7385bb4637a0f1",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "turnDeadline": "2026-10-30T08:17:34.612Z",
+        "autoplaySeats": [
+          1
+        ],
+        "state": {
+          "activeSeats": [
+            false,
+            true,
+            false,
+            true
+          ],
+          "planes": [
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              0,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "currentPlayer": 1,
+          "phase": "awaiting-move",
+          "die": 6,
+          "consecutiveSixes": 2,
+          "winner": null,
+          "lastAction": {
+            "type": "roll",
+            "seat": 1,
+            "die": 6,
+            "forfeited": false
+          },
+          "rollCount": 4,
+          "moveCount": 1,
+          "turnNumber": 3
+        }
+      }
+    }
+  ],
+  "normalCleanup": {
+    "nativeVisibleAlreadyLeft": true,
+    "browserVisibleAlreadyLeft": true,
+    "browserRoomLeft": {
+      "streamId": "iab4-tab10-unlocked-20261030",
+      "sequence": 708,
+      "requestId": "19204.315",
+      "protocolEvidence": "raw-application-protocol-3",
+      "observation": {
+        "clockId": "cua-root-unlocked-20261030T0752",
+        "readStartedUptimeMilliseconds": 2696693.246167,
+        "readCompletedUptimeMilliseconds": 2696705.606042,
+        "completedAtUTC": "2026-10-30T08:25:50.853Z"
+      },
+      "kind": "room.left",
+      "roomIdSHA256": "4efe30d8dc9d0a73421ceef2a3165673e8014fcbf309a179cf7946c6795930a0",
+      "reason": "left"
+    },
+    "browserSocketClosed": {
+      "streamId": "iab4-tab10-unlocked-20261030",
+      "sequence": 710,
+      "requestId": "19204.315",
+      "protocolEvidence": "raw-cdp-lifecycle",
+      "observation": {
+        "clockId": "cua-root-unlocked-20261030T0752",
+        "readStartedUptimeMilliseconds": 2696693.246167,
+        "readCompletedUptimeMilliseconds": 2696705.606042,
+        "completedAtUTC": "2026-10-30T08:25:50.853Z"
+      },
+      "kind": "socket-closed"
+    }
+  },
+  "outcome": {
+    "passed": false,
+    "countedTowardN10": false,
+    "pendingCleanup": false,
+    "reason": "Two pre-recovery human rolls confirmed; actual B disconnect/new player socket and same game recovered; operator gap before interruption had already enabled Native autoplay, so no post-recovery two-human confirmation and not N10",
+    "successfulCounts": {
+      "gomoku": 4,
+      "flight-chess": 0
+    }
+  },
+  "collectorQualification": "Cua exported primitive wireCursor remained103 while readLiveWire internal cursor advanced. Code/request binding is exact but some saved pre-action floors are stale. Future floors must use returned readLiveWire().cursor, never exported wireCursor. No N10 success claimed.",
+  "nextCollectorRule": "Use the cursor returned by readLiveWire, not stale exported primitive. Execute all timed game phases in one Cua invocation without model gaps.",
+  "wireEvidenceSHA256": "518be9e9270d79e86015a8a342e60b9e67738aa24d1e04d34438e0195c0bd326",
+  "ledgerSHA256": "5a0f7c47dc888a6dc0df56646346d1b712c63110f83db54d51f904d59e8ff54b",
+  "productSourceChangesInThisRound": false
+}

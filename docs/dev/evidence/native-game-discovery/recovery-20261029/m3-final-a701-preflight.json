@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-a701-N1-genuine-six-samples-preflight",
+  "atUTC": "2026-10-29T19:19:24.820174+00:00",
+  "passed": true,
+  "rawSHA256": "e1b5f7a879b7bf1a370ff4ece3842a9a7f909aaf99720c8c648829700f73c787",
+  "exactXCTestAttachmentBytes": true,
+  "sampleCount": 6,
+  "groups": [
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "same-build-home-detail-mode-cold",
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2",
+      "p50Milliseconds": 2866.467208334143,
+      "p90Milliseconds": 2866.467208334143
+    },
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "direct-mode-cold",
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2",
+      "p50Milliseconds": 1078.436416666591,
+      "p90Milliseconds": 1078.436416666591
+    },
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "direct-mode-prepared",
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2",
+      "p50Milliseconds": 1042.7536249990226,
+      "p90Milliseconds": 1042.7536249990226
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "same-build-home-detail-mode-cold",
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973",
+      "p50Milliseconds": 4776.181166667811,
+      "p90Milliseconds": 4776.181166667811
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "direct-mode-cold",
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973",
+      "p50Milliseconds": 4122.71412500013,
+      "p90Milliseconds": 4122.71412500013
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "direct-mode-prepared",
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973",
+      "p50Milliseconds": 4145.438625000679,
+      "p90Milliseconds": 4145.438625000679
+    }
+  ],
+  "XCTest": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceUnchanged": true,
+  "productsUnchanged": true,
+  "preparedCurrentManifestAssertionsPassed": true,
+  "starGenuinePlayingAndRendererTrueSamples": 3,
+  "documentResourceOverflowCount": 0,
+  "staticServerWindow": {
+    "startByte": 759,
+    "endByte": 345976,
+    "requestCount": 1136,
+    "statusCounts": {
+      "200": 1136
+    },
+    "badJSONLines": 0,
+    "unfrozenPaths": [],
+    "excludedDynamicRequests": [],
+    "knownProductionNegativeResponses": 0,
+    "allLogAtGateParsed": true
+  },
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "archiveSHA256": "0a21ef3c62ef1d38c2eb394219f7d958cd8f881ebc4bcb1134180c10214544b7",
+  "performanceAcceptanceNotInferredFromN1": true,
+  "formal60AuthorizedToStart": true
+}

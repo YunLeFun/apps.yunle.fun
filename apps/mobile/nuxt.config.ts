@@ -19,7 +19,6 @@ export default defineNuxtConfig({
 
   alias: {
     '@yunlefun/auth': path.resolve(__dirname, '../../packages/auth/src/index.ts'),
-    '@yunlefun/capacitor-storekit': path.resolve(__dirname, '../../packages/capacitor-storekit/src/index.ts'),
   },
 
   typescript: {
@@ -42,10 +41,8 @@ export default defineNuxtConfig({
     '@unocss/nuxt',
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
-    // '@vite-pwa/nuxt',
     '@nuxt/eslint',
     '@nuxt/icon',
-    '@yunlefun/vue/nuxt',
     'nuxt-auth-utils',
     // '@prisma/nuxt',
     '@nuxt/test-utils/module',
@@ -165,8 +162,6 @@ export default defineNuxtConfig({
       ],
     },
   },
-
-  // pwa,
 
   // prisma: {
   //   generateClient: false,

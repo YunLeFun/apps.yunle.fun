@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "kind": "M5-final-acceptance-checklist-nonsimulator-audit",
+  "atUTC": "2026-10-29T19:11:39.641597+00:00",
+  "actionsThisAudit": {
+    "simulator": 0,
+    "SwiftTests": 0,
+    "UIOrNativeLaunch": 0,
+    "productBuilds": 0,
+    "docsBuilds": 0,
+    "rootImplementationEdits": 0
+  },
+  "reuseWithActualScope": [
+    {
+      "evidence": "native-retry-fix-validation.json",
+      "scope": "e6d/51c final9 navigation tests; keep for manifest/Web-only updates",
+      "notClaimed": "D94 probe journey does not become finalnormalApp N10"
+    },
+    {
+      "evidence": "storage-upgrade-final-summary.json",
+      "scope": "Historical82 concrete assertions:25HomeLibrary+21NativeRuntimeSession+19LegacyImport+17WebProfile",
+      "notClaimed": "Currentb61 Runtime differs from historicald90; do not call currentwhole82 green"
+    },
+    {
+      "evidence": "ResourceCache30aa source unchanged and prior failure/cancel/IDB readback",
+      "scope": "Declaredresource integrity/fallback logic; actualfinalmanifest bytes and named-store use need finalversion binding",
+      "notClaimed": "Oldmanifest scope was not fullonline roomprecache"
+    }
+  ],
+  "finalAutomatedSimulatorChecksAfterLease": [
+    {
+      "priority": "required-if-no-later-green-receipt",
+      "selector": "YunleFunTests/NativeGameRuntimeTests",
+      "countAtAudit": 17,
+      "reason": "b61 room/session/container branches; prior17 record is14passed+3cleanupfailures, not fullgreen"
+    },
+    {
+      "priority": "targeted-account-runtime",
+      "selectors": [
+        "YunleFunTests/NativeRuntimeSessionTests/testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts",
+        "YunleFunTests/NativeRuntimeSessionTests/testConfirmedRecoveryClosesCurrentPageAndReopensTheSelectedStore",
+        "YunleFunTests/NativeRuntimeSessionTests/testIdentityResetCancelsQueuedOpenAndLateMinimizeCallback"
+      ]
+    },
+    {
+      "priority": "small-final-UI",
+      "selectors": [
+        "YunleFunUITests/NativeGamesUITests/testGamesTabShowsNativeGamesAndRejectsInvalidRoomInput",
+        "YunleFunUITests/NativeGamesUITests/testWorkshopContainsAIFinderAndSearchFocusesOnResults",
+        "YunleFunUITests/NativeSupportUITests/testHelpExplainsRuntimeAndNavigatesToDiscovery"
+      ]
+    },
+    {
+      "priority": "conditional-guest-only",
+      "selector": "YunleFunUITests/NativeGamesUITests/testGuestCanCancelRoomLoginAndReturnToGames",
+      "condition": "Only when genuinelyguest; never logout existingaccount solely to force thiscase"
+    }
+  ],
+  "reusableFocusedModelSelectorsIfRelatedConcern": [
+    "YunleFunTests/WorkshopDiscoveryTests (5)",
+    "YunleFunTests/AssistantProtocolTests/testCardsRejectAmbiguousSlugsPrivateEditionsAndWrongIDs",
+    "YunleFunTests/AssistantStoreTests/testGuestAndNonmemberNeverSendAnAgentRequest",
+    "YunleFunTests/AssistantStoreTests/testABASwitchDuringPreflightDoesNotSendOrExposeOldDraft",
+    "YunleFunTests/WorkshopStoreTests/testSavedWorkshopScopeCannotBeReplacedByPublicMarketMetadata",
+    "YunleFunTests/WorkshopStoreTests/testAccountSwitchWhileCheckingWorkshopPermissionCancelsLaunchProof",
+    "YunleFunTests/WorkshopStoreTests/testCoalescedAccountSwitchInvalidatesBothPrivateRowsAndConfirmations"
+  ],
+  "normalUIEvidenceStillNeeded": [
+    {
+      "area": "Workshop discovery/AI",
+      "journey": "Approved realitem search\u2192clear\u2192category\u2192return, honest recommendation empty-state, currentAI permission/error/return or actualsuccessful response ifavailable",
+      "boundary": "ExistingAI UI proves entry/title/return and no-matchquery hides recommendation; not successfulAI content or fullsearch/category behavior"
+    },
+    {
+      "area": "Personal workshop/Home/account",
+      "journey": "Read current owned/joined scope and Home lists/Dock/order, open anexistinginstalled game from bothorigins and confirm same correctsession/profile; A\u2192B\u2192A recoveryrefs/drafts isolated",
+      "boundary": "No installation/deletion/reordering of userdata for audit; fixture82 is not normalUI membership journey"
+    },
+    {
+      "area": "Threegames",
+      "journey": "Gomoku computer realmove+AI response; Flight normalSSO/create/join/humanroll/move/recovery; Star local preservedcountdown+realinput/tutorialprogress and closedonline state",
+      "boundary": "Twooffline M3 scenes do not completeM0allmodes/Flightor tutorial baseline"
+    },
+    {
+      "area": "Finalonline",
+      "journey": "Root owns two-distinct-account clean10newrooms/game, fourrecoveryclasses and changedterminal/role boundaries",
+      "boundary": "F01 function-only UL contaminated byautomation/autoplay is not cleanN10"
+    },
+    {
+      "area": "Help/legacy navigation",
+      "journey": "Findapps\u2192Workshop, oldapp/author/workshop links, separatefourTab backstacks",
+      "boundary": "ExistingHelp automation only checks Playgames\u2192Games"
+    }
+  ],
+  "finalDocsBuild": {
+    "status": "prepared-not-run",
+    "command": [
+      "node",
+      "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final-release-workflow/build_docs_isolated.mjs",
+      "--execute"
+    ],
+    "isolation": "Ownmkdtemp root/out/cache/temp/vite-cache, readonly shareddeps/theme/source; finally remove onlyown temp",
+    "when": "After finalM3/M4 results and documentation settle; not while root measures Nativejourneys",
+    "unchangedSharedOutputs": [
+      "docs/.vitepress/dist",
+      "docs/.vitepress/cache",
+      "apps/mobile/.nuxt",
+      "NativeDerivedData"
+    ]
+  },
+  "staticChecksReceipt": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final-release-workflow/static-checks.json",
+  "completionPolicy": "No M5checkbox advanced by thisreadonly audit. Finaltests and realjourneys retain failures/uncovered conditions; do not equate pertest duration with behaviorproof.",
+  "latestCurrentRuntimeExecution": {
+    "atUTC": "2026-10-29T19:29:23.815027+00:00",
+    "receipt": "m5-runtime-b61-final-a701-validation.json",
+    "receiptSHA256": "9e4714e0d14c56c66b916037f5456248c63f3009680697e8dcb57df8270cfb89",
+    "source": "b61f runtime / dcd09 tests / a701 bundledJSON",
+    "actualExecutionCount": 1,
+    "passed": 15,
+    "failed": 2,
+    "skipped": 0,
+    "failedMethods": [
+      "testCapacityEvictsPausedGameAndReopensWithStoredData",
+      "testExplicitPlaySharingPreservesPerGameStoresAndAccountIsolation"
+    ],
+    "reportedFailureScope": "FixtureWebKit profileteardown: datastore inuse bynetworkprocess; livefixtureowners=[]",
+    "wholeM5Complete": false,
+    "normalAppRestored": true,
+    "simulatorReturnedToRoot": true
+  }
+}

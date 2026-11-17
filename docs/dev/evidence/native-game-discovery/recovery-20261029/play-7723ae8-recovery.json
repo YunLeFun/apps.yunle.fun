@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-29T15:25:26.030182+00:00",
+  "classification": "Recovery of lost temporary Play candidate source and fresh targeted validation; not a production deployment or complete acceptance result",
+  "source": {
+    "baseCommit": "b0f63be5b0780272d56f16d603eacb5afd2a58e8",
+    "candidateCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "candidateParent": "b0f63be5b0780272d56f16d603eacb5afd2a58e8",
+    "commitSubject": "fix(server): reject expired spectator admissions",
+    "recoveredFrom": "existing original repository Git objects",
+    "workingTree": "/var/folders/tx/zs0fhdtn52l29nbtqby57qlh0000gn/T/yunle-play-recovery-7ooznfle/release-source",
+    "detached": true,
+    "clean": true,
+    "oldMissingWorktreeMetadataPruned": false,
+    "files": [
+      {
+        "path": "apps/game-server/src/colyseus/play-room.ts",
+        "sha256": "1abed466b33ef29645ac8fcbccc5d3d80c7131e94c7a83de4d437e809852cf68",
+        "matchesCommitBlob": true
+      },
+      {
+        "path": "apps/game-server/test/colyseus-room-errors.test.ts",
+        "sha256": "278e992526994019a9aa9d182a16a4a7349688bbf38b033a43782652ac2b2db0",
+        "matchesCommitBlob": true
+      }
+    ],
+    "diffFile": "play-7723ae8-vs-b0f63be.diff",
+    "diffSHA256": "c1c971d19f75822188aa2823ef598fdbf2c686b9a5558afeb96d8477ea2af39c",
+    "productChange": "Only fresh spectator admission rejects room.status === expired with RoomError ROOM_EXPIRED / Chinese expired-room message; does not alter existing room reads, player admission or reconnect paths"
+  },
+  "runtime": {
+    "node": "v24.18.0",
+    "pnpm": "10.34.8",
+    "offlineInstall": true,
+    "lockfileFrozen": true,
+    "installScriptsRun": false,
+    "downloadedPackageCount": 0,
+    "reusedPackageCount": 550,
+    "pnpmLockSHA256": "f0528326e605ea5d08ba4e3b195b7d65c943f5841b716e19cff6b1574cd4d360"
+  },
+  "validation": {
+    "targetedAdmission": {
+      "summaryFile": "play-7723ae8-admission-tests.json",
+      "summarySHA256": "055f29adfc5d9ad451bf2a8e739d6baa68b3042b548815b21b412a581b6aa3c1",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "realColyseusSDKAndLoopbackSockets": true,
+      "productionRequestsMade": false
+    },
+    "typecheck": {
+      "initialExitCode": 2,
+      "initialFailure": "Missing generated declaration outputs for competition and pictionary in a fresh worktree; original failed log retained",
+      "requiredDependencyBuildExitCode": 0,
+      "builtOnlyPackages": [
+        "@yunlefun/play-competition",
+        "@yunlefun/play-pictionary"
+      ],
+      "afterDependencyBuildExitCode": 0
+    },
+    "diffCheckExitCode": 0,
+    "full269SuiteRerun": false,
+    "historicalFullSuiteEvidenceRecovered": false,
+    "independentReadOnlyReview": {
+      "blockingFindings": [],
+      "verifiedSourceSHA256": "1abed466b33ef29645ac8fcbccc5d3d80c7131e94c7a83de4d437e809852cf68",
+      "verifiedTestSHA256": "278e992526994019a9aa9d182a16a4a7349688bbf38b033a43782652ac2b2db0"
+    },
+    "commands": [
+      {
+        "label": null,
+        "command": [
+          "pnpm",
+          "install",
+          "--offline",
+          "--frozen-lockfile",
+          "--ignore-scripts",
+          "--filter",
+          "@yunlefun/play-game-server..."
+        ],
+        "startedAtUTC": "2026-10-29T15:21:41.561709+00:00",
+        "finishedAtUTC": "2026-10-29T15:21:50.092371+00:00",
+        "exitCode": 0,
+        "logSHA256": "646676130a3709bc521d41d808c75ea3fb812fa8beb821d32f73c3fa5f6e19f2"
+      },
+      {
+        "label": "admission-tests",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@yunlefun/play-game-server",
+          "exec",
+          "vitest",
+          "run",
+          "test/colyseus-room-errors.test.ts",
+          "--reporter=json",
+          "--outputFile=/var/folders/tx/zs0fhdtn52l29nbtqby57qlh0000gn/T/yunle-play-recovery-7ooznfle/admission-tests.raw.json"
+        ],
+        "startedAtUTC": "2026-10-29T15:22:27.916050+00:00",
+        "finishedAtUTC": "2026-10-29T15:22:34.486992+00:00",
+        "exitCode": 0,
+        "logSHA256": "6aaeb0fa6848975b7218b5edccfcfa90fa25bb5391d1e7f2e68ab16213cdb500"
+      },
+      {
+        "label": "server-typecheck",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@yunlefun/play-game-server",
+          "typecheck"
+        ],
+        "startedAtUTC": "2026-10-29T15:22:27.916051+00:00",
+        "finishedAtUTC": "2026-10-29T15:22:32.226590+00:00",
+        "exitCode": 2,
+        "logSHA256": "280873126d9e13edb6d80f53073f9447a3078f1186ad502f714ee4501e551471"
+      },
+      {
+        "label": "build-required-declarations",
+        "command": [
+          "pnpm",
+          "-r",
+          "--filter",
+          "@yunlefun/play-competition",
+          "--filter",
+          "@yunlefun/play-pictionary",
+          "build"
+        ],
+        "startedAtUTC": "2026-10-29T15:23:26.809932+00:00",
+        "finishedAtUTC": "2026-10-29T15:23:28.801135+00:00",
+        "exitCode": 0,
+        "logSHA256": "358ee97c11a07d626367ad567ccf03b7edaf02c8964986b1de6803c508e87618"
+      },
+      {
+        "label": "server-typecheck-after-dependency-build",
+        "command": [
+          "pnpm",
+          "--filter",
+          "@yunlefun/play-game-server",
+          "typecheck"
+        ],
+        "startedAtUTC": "2026-10-29T15:23:28.801919+00:00",
+        "finishedAtUTC": "2026-10-29T15:23:31.983250+00:00",
+        "exitCode": 0,
+        "logSHA256": "3dee2e968ad4acc0ff0eab986f8a0bb57b0a1f51896886092e0eb6f2c51d16b0"
+      }
+    ]
+  },
+  "protectedOriginalPlay": {
+    "statusBeforeSHA256": "2d0af2037aeff6acfa20a4320803b38c00d7301f5b449e14046925aecae5c37d",
+    "statusAfterSHA256": "2d0af2037aeff6acfa20a4320803b38c00d7301f5b449e14046925aecae5c37d",
+    "trackedDiffBeforeSHA256": "4e7ea2a0d879cc4c06d2d5e6126f8ce93c7c1f0d5f0d61763b6ecf8be57dda3a",
+    "trackedDiffAfterSHA256": "4e7ea2a0d879cc4c06d2d5e6126f8ce93c7c1f0d5f0d61763b6ecf8be57dda3a",
+    "statusUnchanged": true,
+    "trackedDiffUnchanged": true
+  },
+  "docker": {
+    "readOnlyInspectedAtUTC": "2026-10-29T15:24:12.026423+00:00",
+    "currentGlobalContext": "default",
+    "contextChanged": false,
+    "colimaSocketAvailable": false,
+    "candidateImageExistenceVerified": false,
+    "candidateImageAbsenceClaimed": false,
+    "buildRestarted": false,
+    "daemonStarted": false,
+    "reason": "Docker colima socket missing; existing image and old build completion cannot be verified from that observation"
+  },
+  "boundaries": {
+    "pushed": false,
+    "deployed": false,
+    "nativeSourceChanged": false,
+    "uiActionsPerformed": false,
+    "productionCredentialsAccessed": false,
+    "realRoomReferencesPersisted": false,
+    "historicalMissingPrivateReportsRecreatedAsOriginal": false
+  },
+  "handoff": {
+    "retainedWorkingTree": "/var/folders/tx/zs0fhdtn52l29nbtqby57qlh0000gn/T/yunle-play-recovery-7ooznfle/release-source",
+    "retainedDependencyAndDeclarationOutputs": "Needed for parent candidate build; no full source-copy or Docker context created",
+    "reclaimWhen": "Parent finishes candidate packaging and preserves required source/evidence; remove this detached recovery worktree with git worktree remove only after checking for new changes",
+    "privateRecoveryMetadata": "/var/folders/tx/zs0fhdtn52l29nbtqby57qlh0000gn/T/yunle-play-recovery-7ooznfle/recovery-metadata.json"
+  }
+}

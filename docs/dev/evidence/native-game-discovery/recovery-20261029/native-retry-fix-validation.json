@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUTC": "2026-10-29T17:06:21.859834+00:00",
+  "scope": "Native failed-game document recovery; evidence snapshot at simulator handoff, not final N10 completion",
+  "fix": {
+    "location": "apps/mobile/ios/App/App/WebViewController.swift: game loading failure retry button",
+    "behavior": "Submit one document request that ignores local HTTP cache; resolve current URL, then current history item URL, then initial URL",
+    "unchanged": "Normal launch, menu reload, static resource preparation, persistent store ownership and game ready/countdown rules",
+    "automaticSecondReload": false,
+    "sourceSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "runtimeSourceSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "testSourceSHA256": "51c02dd47a6ce8796adec761792165c548b01fa9efe19bad3d61b7ed3626a09a"
+  },
+  "productionDiagnosis": {
+    "beforeFixSourceSHA256": "03da939929a57c642cd98cb71e57032aa4a2a7a5c4e20c135ca348ec5fe2dba8",
+    "diagnosticOnlySourceSHA256": "420517ff157ac7f6ab358d5c49adb467949a0a6b44f1da7c624db5dba18155a9",
+    "room": "VTQ9QA",
+    "initialDocument": {
+      "status": 404,
+      "decodedBodyBytes": 4407,
+      "bodyChildren": 4,
+      "scripts": 4
+    },
+    "firstNativeRetryAfterActualWebContentSIGKILL": {
+      "status": 404,
+      "navigationFinished": true,
+      "bodyChildren": 0,
+      "headChildren": 0,
+      "scripts": 0,
+      "nuxtRoot": false,
+      "decodedBodyBytes": 0,
+      "navigationCancelledOrFailed": false
+    },
+    "sameControllerMenuReloadControl": {
+      "status": 404,
+      "decodedBodyBytes": 4407,
+      "bodyChildren": 4,
+      "scripts": 4,
+      "sameRoomSessionAndTwoStoneState": true
+    },
+    "inference": "Fault recovery through normal local HTTP cache produced an empty document; fresh recovery requests avoided it in the production contrast. Exact WebKit, conditional-response and CDN contribution remains unproven",
+    "inspectorBoundary": "Remote Inspector may have auto-attached in these probe runs; an Inspector-closed, probe-free final production run remains separate"
+  },
+  "regressionEvidence": {
+    "spaDestination": {
+      "redObserved": true,
+      "emptyDOMRed": false,
+      "trigger": "Real loopback page pushState to a room, actual owned WebContent SIGKILL, actual native retry button",
+      "before": "/fixture",
+      "expected": "/room/retry-fixture",
+      "afterFixPassed": true,
+      "redXCResult": "test_sim_2026-10-29T16-46-22-435Z_pid99335_b5df717e.xcresult"
+    },
+    "cached404Fixture": {
+      "realHTTP404AndConditional304": true,
+      "preFixConditional304Responses": 1,
+      "emptyDOMReproduced": false,
+      "preFixContentPassed": true,
+      "meaning": "Cache revalidation, remount, storage and input contract; does not reproduce production empty HTML"
+    },
+    "candidateNavigationTests": {
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalProbeFreeNavigationTests": {
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "durationMilliseconds": 46929,
+      "xcresult": "test_sim_2026-10-29T17-00-45-973Z_pid99335_d773bdf3.xcresult"
+    }
+  },
+  "productionCandidate": {
+    "room": "D94UVS",
+    "sourceSHA256": "bcd231e40e50d19ea11cace0af3d4c25e126efed783f030c0bdb9c86b9bf80f0",
+    "diagnosticsPresent": true,
+    "firstRetryOnly": true,
+    "secondMenuReloadUsed": false,
+    "actualRecoveryRequestCachePolicy": 1,
+    "recoveredHTML": {
+      "status": 404,
+      "decodedBodyBytes": 4407,
+      "bodyChildren": 4,
+      "scripts": 4,
+      "nuxtRoot": true
+    },
+    "sameGameSessionAndSeats": true,
+    "restoredTwoStoneStateSHA256": "0b0f5c6d1e9e7d723e10f192550022e9c8e8c0fc0f76f49a3dbfd0d728a4c332",
+    "bothFreshMovesAccepted": true,
+    "finalStoneCount": 4,
+    "finalFourStoneStateSHA256": "4bf05c2c0a7314808ed8f338ed17209b14b893b0526f83a89ccaf63c0cb835b8",
+    "normalBothClientLeaveConfirmed": true,
+    "countsAsFinalN10": false,
+    "installedDebugDylibSHA256": "3a86b26b970f1d4d26c4fe8e7aa51ee410c55099275ee0c844e71e7b76aacfe0"
+  },
+  "finalBuildAndHandoff": {
+    "diagnosticRingAndDOMEvaluationRemoved": true,
+    "sourceSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "normalAppInstalledAndLaunched": true,
+    "preview": false,
+    "installedFilesMatchBuilt": true,
+    "installedDebugDylibSHA256": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+    "catalogFileSHA256": "55eef13791c2a9069b4becad8583118f89b37ec578a75e5fd82ae30de65006df",
+    "testProducts": "test_sim_2026-10-29T17-00-45-973Z_pid99335_27199010.xctestproducts",
+    "finalProductionRetestCompletedAtThisRecord": false,
+    "finalPerformanceAcceptanceCompletedAtThisRecord": false
+  },
+  "maintenance": {
+    "mcpExpressionRejected": "DAP backend does not support LLDB command evaluation",
+    "mcpFailureDidNotTriggerSIGKILL": true,
+    "fallback": "Task-owned xcrun lldb read-only visible WK mapping with finally detach; only mapped WebContent was then terminated",
+    "firstFixtureCleanupFailed": "SDK refused immediate removal because the owned named store was in use",
+    "cleanupScaffoldingCrash": "Calling SDK store removal before WebKit initialization crashed WebsiteDataStoreIO; this was a test maintenance failure, not a product recovery verdict",
+    "exactOwnedFixtureRecovery": "After WebKit initialization, enumerate and remove only C8D93A66-2C6D-496A-A985-EBFB168CA7C4 if present; subsequent cleanup completed and temporary recovery code was removed",
+    "supersededOwnedTestProductsRemoved": 5,
+    "removedAllocatedFileBytes": 804012032,
+    "observedSharedVolumeFreeDeltaBytes": 535875584,
+    "freeDeltaAffectedByConcurrentWork": true,
+    "finalTestProductsXCResultAndDerivedDataRetained": true,
+    "simulatorsCreatedErasedOrDeleted": 0
+  },
+  "privateEvidence": {
+    "root": "Acceptance/native-game-20261029/continuation-2319/native-retry-root-cause",
+    "sha256": {
+      "room-baseline-probe-003.json": "5c1f6ec6c29ee7fb5575548b602992230a3f99a3f8c71dd413a08e3df28baa9a",
+      "room-first-retry-empty-probe-003.json": "4652960f2e5839cc5c6cdfcd05ff995ac16d3dc443f404776314b64c9cef0668",
+      "room-menu-reload-restored-probe-003.json": "3027be4c55720ffeed9a271c4df7647cebd84307c770fed681d54c0676c73669",
+      "d94-first-retry-probe.json": "5ee2931e4e4afe121297cd5ce477d7d7ba70f8529baa7a16cd655b6a8904e234",
+      "cache-bypass-candidate-installed-fingerprint.json": "a1dc0c300317435ca1d131c82ba934e5998b2c92b95b5f1238032de29c543d14",
+      "final-no-probe-installed-fingerprint.json": "285f13330bc9d89e968a7f4a931fbe194a3d58db45ecc970e7587a060b2c2cd4",
+      "final-no-probe-nine-tests.json": "481f65ac7341296634884021316bcb63917803abb82c3f311fbd32a313326d61",
+      "mcp-evaluation-backend-rejection.json": "0a59b095aa10b73be6519909bb817fa1f0678c557d041cf2667284ee6030fd30",
+      "owned-old-test-products-cleanup.json": "7d7eb72871bc27cdd468b4cb0710adce4a07f3fa8cca4270a8bd5730de75a4e8",
+      "../cache-bypass-candidate-production-outcome.json": "d89bfb8415fb7ef0cce9c1c9193bd8dceaa8c00618ffb4561a472b5baf7aa170"
+    }
+  }
+}

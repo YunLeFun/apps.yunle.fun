@@ -13,6 +13,6 @@
   "dependencies": {
     "@cloudbase/node-sdk": "^3.18.7",
     "fuse.js": "^7.5.0",
-    "ws": "^8.21.0"
+    "ws": "^8.22.1"
   }
 }

@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "F12-owned-room-cleanup-confirmed-by-normal-native-lifecycle-and-readonly-authority",
+  "atUTC": "2026-10-31T09:23:36.065879+00:00",
+  "alias": "F12",
+  "cleanupConfirmed": true,
+  "pendingCleanup": false,
+  "passed": false,
+  "excludedFromValidN10": true,
+  "finishedRecoveryTrialStillExcluded": true,
+  "validN10TrialsAdded": 0,
+  "cleanupActionSource": "Native A normal player join; normal disconnect-grace lifecycle removal of offline B and owner transfer; normal final A leave. The SDK queries only observed state.",
+  "normalUIObservations": [
+    {
+      "revision": 348,
+      "observation": "A online and not ready; B offline owner with disconnect-grace countdown."
+    },
+    {
+      "revision": 349,
+      "observation": "B removed by normal lifecycle; sole A online and owner, not ready."
+    },
+    {
+      "observation": "A reached the actual already-left heading and safely-closed connection text."
+    }
+  ],
+  "honestActionRecord": {
+    "source": "Root actual normal native UI execution; intermediate ready actions were not independently captured in a WebSocket transcript.",
+    "accidentalReadyRevision": 350,
+    "cancelReadyRevision": 351,
+    "noNewGamePersisted": true,
+    "finalRetainedGameCount": 1
+  },
+  "roomIdSHA256": "514d89e4b9ddf355e5a6ca93ddda043b5cea93caa2183dbc2e0833222eff1224",
+  "cleanupAuthority": {
+    "atUTC": "2026-10-31T09:19:54.704Z",
+    "status": "expired",
+    "revision": 352,
+    "stableRoomBeforeAfter": true,
+    "aggregateMemberCount": 0,
+    "projectedMemberCount": 0,
+    "aggregateAndProjectionMemberSetsMatch": true,
+    "activeGameSessionIdNull": true,
+    "nextSeatsNull": true,
+    "seatSwapRequestedByNull": true,
+    "originalGameStatus": "won",
+    "originalGameRevision": 343,
+    "originalGameAggregateAndProjectionMatch": true,
+    "originalGameUnchangedFromInitialAuthority": true,
+    "originalGameRetentionDays": 30
+  },
+  "diagnosticBoundary": {
+    "uniqueExactInviteMappingToOwnedF12Confirmed": true,
+    "BOfflineConfirmedBeforeNativeAJoin": true,
+    "earlierTwoUserReportedLeaveAttemptsStillReturnedWaitingRev346Member1": true,
+    "earlierFailedChecksPreserved": true,
+    "causeOfEarlierHeadingReportsNotEstablished": true,
+    "processedCommandTypesAndTimestampsNotStored": true
+  },
+  "evidenceBoundary": {
+    "normalUIActionPerformedBySDKQueries": false,
+    "productionDocumentsWrittenBySDKQueries": false,
+    "separateWebSocketRoomLeftAcknowledgementCapturedForThisCleanup": false,
+    "headingScreenshotAloneDoesNotProvePersistedCleanup": true,
+    "persistedCleanupConfirmedByFinalScopedSDKRead": true,
+    "currentCheckoutSourceIdentityNotAsserted": true
+  },
+  "evidenceSHA256": {
+    "sixJSONArchive": "9e07e723edc7d9700e8d820e95419311c6b4b5f5ea5a3428fa9cc44eed3757b5",
+    "diagnosticResult": "2beb131e914fbccf1497eb7b3bffa5961f853b64a78202bd48f6f7c70a61b01c",
+    "prewindowResult": "3007da025e0ea5b9cdb1ac9e8efd1ec0a3d9f15fe2d3211b14de492f8e55da32",
+    "finalAuthorityResult": "0f8506c12c44e6cd116b9efc86f9a5edfbc00625b57a39743ef879cc327e9789",
+    "nativePrewindowScreenshot": "f11e7af51426452f356bcbf08cc14ba26298aef6667c9e1059f688be661812df",
+    "nativeOwnerTransferScreenshot": "c94d27b35dfe3e998e167b1f967d17531b58b7e25df5ed3e4e4a1f75f1a50b28",
+    "nativeLeftHeadingScreenshot": "0fc0089f0391c088a60912b480c2ef03386acd177cf7112e99c9fb8eb55c4b5f",
+    "oldFirstPostUserFailedResult": "12fb255e8a7e19750d5c739353c7266d658285b840b94d2ffff51a14fe2afaee",
+    "oldSecondPostHeadingFailedResult": "4d8241e6505b27324bde302dd216a2c66def2b2f7a51a56ae593ee1454be25be",
+    "independentPrivateReview": "6a3632b3f307d37e42e85dc95a520c731f3be0ead3ee44731da79f277f09faa2"
+  },
+  "releaseBinding": {
+    "imageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "sourceBaseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "sourceTree": "38f267f3bfaa1fe68004c957e82b4768156ad46d",
+    "sourceCommit": null,
+    "sourceTreeKind": "uncommitted-tree"
+  },
+  "scope": "Closes only owned F12 cleanup. Does not add a valid N10 trial, replace O01 regression, or independently set whole-goal completion."
+}

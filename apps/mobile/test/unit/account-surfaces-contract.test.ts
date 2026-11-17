@@ -32,7 +32,6 @@ describe('钱包与会员页面契约', () => {
 
   it.each([
     ['会员套餐', membershipPage],
-    ['云币充值包', walletPage],
   ])('%s 使用可随亮暗模式变化的表面与边线', (_name, source) => {
     expect(source).not.toContain('--ion-color-step-200')
     expect(source).toContain('color-mix(in srgb, currentColor 12%, transparent)')
@@ -59,12 +58,12 @@ describe('钱包与会员页面契约', () => {
     expect(membershipPage).toContain('.plan-card:focus-visible')
   })
 
-  it('恢复购买说明账号范围、扣款行为与执行状态', () => {
-    expect(membershipPage).toContain('恢复 App Store 购买')
-    expect(membershipPage).toContain('当前 Apple 账户')
-    expect(membershipPage).toContain('不会重复扣款')
-    expect(membershipPage).toContain(':disabled="restoring"')
-    expect(membershipPage).toContain(':aria-busy="restoring"')
+  it('web checkout preserves recharge and membership entry points', () => {
+    expect(walletPage).toContain('@click="goRecharge"')
+    expect(membershipPage).toContain('goMembershipPurchase()')
+    expect(membershipPage).toContain('将跳转 www.yunle.fun 完成支付')
+    expect(membershipPage).not.toContain('useIap')
+    expect(walletPage).not.toContain('useIap')
   })
 
   it('钱包使用 Konsta 标准导航箭头并限制余额宽度', () => {

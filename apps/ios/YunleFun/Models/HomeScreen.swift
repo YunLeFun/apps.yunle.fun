@@ -148,6 +148,13 @@ extension RemoteHomeScreen {
         }
         try validate()
     }
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(schemaVersion, forKey: .schemaVersion)
+        if let revision { try c.encode(revision, forKey: .revision) }
+        else { try c.encodeNil(forKey: .revision) }
+        try c.encode(configuration, forKey: .configuration)
+    }
 }
 struct HomeScreenWrite: Codable, Sendable {
     static let schemaVersion = 3
@@ -251,7 +258,11 @@ struct HomeLibrarySnapshot: Codable, Equatable {
         } else {
             configuration = try c.decode(HomeConfiguration.self, forKey: .configuration)
             cachedApplications = try c.decode([CloudApplication].self, forKey: .cachedApplications)
-            base = try c.decodeIfPresent(RemoteHomeScreen.self, forKey: .base)
+            if storedVersion == 3 {
+                base = try c.decodeIfPresent(StoredBase.self, forKey: .base)?.value
+            } else {
+                base = try c.decodeIfPresent(RemoteHomeScreen.self, forKey: .base)
+            }
             mutationId = try c.decode(String.self, forKey: .mutationId)
             hasPendingChanges = try c.decode(Bool.self, forKey: .hasPendingChanges)
             syncEnabled = try c.decodeIfPresent(Bool.self, forKey: .syncEnabled) ?? true
@@ -305,6 +316,38 @@ struct HomeLibrarySnapshot: Codable, Equatable {
         try c.encode(syncEnabled, forKey: .syncEnabled)
         try c.encode(autoSyncEnabled, forKey: .autoSyncEnabled)
         try c.encode(dockVisible, forKey: .dockVisible)
+    }
+
+    /// The old local writer omitted nil revisions. Recover only its complete,
+    /// default schema 3 baseline; remote responses still use the strict decoder.
+    private struct StoredBase: Decodable {
+        let value: RemoteHomeScreen
+        private struct Field: CodingKey {
+            let stringValue: String
+            var intValue: Int? { nil }
+            init(stringValue: String) { self.stringValue = stringValue }
+            init?(intValue: Int) { return nil }
+        }
+        init(from decoder: Decoder) throws {
+            let fields = try decoder.container(keyedBy: Field.self)
+            if fields.contains(Field(stringValue: "revision")) {
+                value = try RemoteHomeScreen(from: decoder)
+                return
+            }
+            guard Set(fields.allKeys.map(\.stringValue)) == ["schemaVersion", "configuration"] else { throw HomeSyncError.invalidResponse }
+            let c = try decoder.container(keyedBy: RemoteHomeScreen.CodingKeys.self)
+            guard try c.decode(Int.self, forKey: .schemaVersion) == 3 else { throw HomeSyncError.invalidResponse }
+            let content = try c.nestedContainer(keyedBy: Field.self, forKey: .configuration)
+            guard Set(content.allKeys.map(\.stringValue)) == ["installedApps", "dockApps", "recentApps", "updatedAt", "folders", "applicationSources"]
+            else { throw HomeSyncError.invalidResponse }
+            for key in content.allKeys {
+                guard try !content.decodeNil(forKey: key) else { throw HomeSyncError.invalidResponse }
+            }
+            let configuration = try c.decode(HomeConfiguration.self, forKey: .configuration)
+            guard configuration == HomeConfiguration() else { throw HomeSyncError.invalidResponse }
+            value = RemoteHomeScreen(schemaVersion: 3, revision: nil, configuration: configuration)
+            try value.validate()
+        }
     }
 }
 

@@ -1,0 +1,1864 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-M4.1-M4.2-scope-audit-and-root-closure-advice",
+  "atUTC": "2026-10-30T09:55:33.326154+00:00",
+  "actionsThisAudit": {
+    "UI": 0,
+    "network": 0,
+    "tests": 0,
+    "builds": 0,
+    "sourceEdits": 0,
+    "ledgerOrCheckboxEdits": 0,
+    "newOutputOnly": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/final-scope-audit-20261030.json"
+  },
+  "scope": "Exact4.1/4.2 and their R3/R5/R8 boundaries, with M4.3 remaining separately owned by Root; no expanded all-game/all-role/all-device failure matrix.",
+  "specification": {
+    "tasks": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/tasks.md",
+      "sha256": "2d6b6adcdf0ba2f6bde6e26b5954783da018552a82cfa987df6cb20a856608ef",
+      "locator": "M4 4.1 and4.2",
+      "observedProof": {
+        "4.1": [
+          "Unify six-character code/share link/cold and running reception; configure and verify AASA/Universal Link/browser fallback.",
+          "Retain explicit intent through login; cancel cannot submit join/create; invalid/expired invites explicit; player/spectator separate."
+        ],
+        "4.2": [
+          "Reuse Play session and one-time realtime ticket to create/join selected game; host Bearer cannot replace Play Cookie.",
+          "Prevent duplicate click/replay creation; keep UI/server consistent for release closed/full/removed/unavailable/account changes."
+        ]
+      }
+    },
+    "requirements": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/requirements.md",
+      "sha256": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+      "locator": "R3,R5,R8",
+      "observedProof": "No requirement that every negative branch run against production, nor each room repeat all four fault classes."
+    }
+  },
+  "closureAdvice": {
+    "M4.1": "recommend-close-with-layered-evidence-and-limits",
+    "M4.2": "recommend-close-with-layered-evidence-and-limits",
+    "allBranchesClaimedProduction": false,
+    "necessaryNewM41M42AcceptanceGapFound": false,
+    "reason": "Actual production main chain and business boundary authority are present. Pure parser/login-cancel/epoch/inflight/error branches have appropriate local/UI/source coverage. Explicitly preserve those labels instead of demanding unsafe or redundant production toggles/outages/forced logouts.",
+    "M4OverallComplete": false,
+    "M4.3": "Continue Root current two-account10 valid rooms per game and final review/cleanup; this audit neither counts new rounds nor completes the goal.",
+    "taskCheckboxesChanged": false
+  },
+  "items": [
+    {
+      "id": "M41-six-character-code-and-safe-link",
+      "task": "4.1",
+      "coverageClassification": "local-model-tests-plus-real-production-join",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Models/NativeGame.swift",
+          "sha256": "c39be931d5c3f4c6b08ba3774cc00898de51484730b83e82643b6f6cd6195ba1",
+          "locator": {
+            "symbolOrExactText": "struct NativeGameRoomIntent",
+            "line": 147
+          },
+          "observedProof": "Normalizes six-character code; accepts only public HTTPS play.yunle.fun /room/ABC234; strict role/query/path checks; canonical role-preserving URL."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameTests.swift",
+          "sha256": "8f5248b6cacb98d01d7674b535f7a048490a052edfcf09109ef8714be03babdb",
+          "locator": {
+            "symbolOrExactText": "func testRoomParsingPreservesSpectatorAndRejectsUntrustedInvitations",
+            "line": 78
+          },
+          "observedProof": "Explicit code/link round-trip, spectator/player distinction, rejection of external/credentials/ports/query ambiguity/encoded path/fragment."
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+          "sha256": "3d5e52f2abdda4eff5446446e38126dbb834c308c3e4ddfe551e6a1506296312",
+          "locator": "G01.startAuthority / recovered / afterFreshActions",
+          "observedProof": {
+            "memberCount": 2,
+            "baselineStones": 2,
+            "recoveredStones": 2,
+            "newAuthorityStones": 4,
+            "sameRoomAndGame": true
+          }
+        }
+      ],
+      "limits": [
+        "Strict parser tests are local, while actual production valid-code joins are independently observed. No broad arbitrary URL acceptance is inferred."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-aasa-ul-and-browser-fallback",
+      "task": "4.1",
+      "coverageClassification": "production-HTTP-and-actual-OS-flow-plus-static-entitlement",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-deployment-20261029.json",
+          "sha256": "577a2473c05bef0c0294ef5fec381065c91d815dc59825c3540c9411cf84c07e",
+          "locator": "initialWebDeployment.AASA",
+          "observedProof": {
+            "originHTTPStatus": "200",
+            "sourceBytesMatchOrigin": true,
+            "appleCDNHTTPStatus": "200",
+            "appleCDNBytesSHA256": "32e8905346f9785c961908fd3b4fb39b7c21b7bc010f6397a988df258a145e9f",
+            "originAndAppleCDNExactBytesMatch": true,
+            "OSUniversalLinkAcceptance": false
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/YunleFun.entitlements",
+          "sha256": "c2f50b2aec483e3794a95eac864084982431da2750789343509c665097a79cdd",
+          "locator": {
+            "symbolOrExactText": "applinks:play.yunle.fun",
+            "line": 9
+          },
+          "observedProof": "Play associated domain is declared."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/public/.well-known/apple-app-site-association",
+          "sha256": "32e8905346f9785c961908fd3b4fb39b7c21b7bc010f6397a988df258a145e9f",
+          "locator": "applinks.details[0]",
+          "observedProof": "Both production/native-dev appIDs match /games/* and /room/*."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "verifiedJourneys[case=cold-OS-universal-link]",
+          "observedProof": {
+            "case": "cold-OS-universal-link",
+            "result": "passed",
+            "appVerifiedStoppedBeforeTap": true,
+            "actualSafariAnchorTouch": true,
+            "noProgrammaticAppLaunchAfterTap": true,
+            "accountRestored": true,
+            "sameOwnedRoomRevalidated": true,
+            "newRoomCreated": false,
+            "notFirstReadyPerformance": true,
+            "limitation": "The original native membership had expired during setup; the server transferred host and reset the waiting game. Previous four stones were not claimed preserved across that interval."
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-rotated-old-invite-after-772.json",
+          "sha256": "c6f00079ab330678745fcdbb3691f859411a0131807ff64fc794a54dc527be76",
+          "locator": "matchmaking,errorResponse,UIChinese",
+          "observedProof": "Ordinary HTTPS browser path works and renders a meaningful invalid-code page; real Browser B uses normal Web room routes."
+        }
+      ],
+      "limits": [
+        "AASA HTTP/CDN success alone is not OS-delivery proof; the actual Safari anchor cold-launch observation is separate. No additional device/browser/installation matrix is required by4.1.",
+        "The historical public checkpoint is retained; its retired /tmp original is unavailable and was not re-created or re-read."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-cold-and-warm-repeated-invite",
+      "task": "4.1",
+      "coverageClassification": "production-observed-with-retained-authority",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "verifiedJourneys cold-OS-universal-link / warm-repeated-invitation",
+          "observedProof": [
+            {
+              "case": "cold-OS-universal-link",
+              "result": "passed",
+              "appVerifiedStoppedBeforeTap": true,
+              "actualSafariAnchorTouch": true,
+              "noProgrammaticAppLaunchAfterTap": true,
+              "accountRestored": true,
+              "sameOwnedRoomRevalidated": true,
+              "newRoomCreated": false,
+              "notFirstReadyPerformance": true,
+              "limitation": "The original native membership had expired during setup; the server transferred host and reset the waiting game. Previous four stones were not claimed preserved across that interval."
+            },
+            {
+              "case": "warm-repeated-invitation",
+              "result": "passed",
+              "sameNativeProcessAndRoom": true,
+              "rosterRemainedTwo": true,
+              "newNativeMoveAccepted": true
+            }
+          ]
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+          "sha256": "3d5e52f2abdda4eff5446446e38126dbb834c308c3e4ddfe551e6a1506296312",
+          "locator": "G01.beforeColdAtUTC,universalLinkClickAtUTC,recovered,afterFreshActions",
+          "observedProof": {
+            "beforeColdAtUTC": "2026-10-29T18:28:14.859Z",
+            "linkClickAtUTC": "2026-10-29T18:28:46.537Z",
+            "recoveredSequence": 4626,
+            "postSequence": 4633,
+            "sameGameAndSeats": true
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+          "sha256": "3d5e52f2abdda4eff5446446e38126dbb834c308c3e4ddfe551e6a1506296312",
+          "locator": "F01.functionalColdUniversalLinkPassed/count/exclusion",
+          "observedProof": {
+            "functionalColdUniversalLinkPassed": true,
+            "countedTowardN10": false,
+            "exclusion": "Automation delays caused multiple timeout/auto-play turns. Cold Universal Link, same authority and real post-recovery input are supported, but excluded from final clean N10 count."
+          }
+        }
+      ],
+      "limits": [
+        "Warm duplicate links reused same Native process/room and roster2 rather than creating a room.",
+        "Early cold setup had expired original membership, so no claim that that earlier four-stone game survived; later G01 separately preserved2stones. F01 remains excluded from clean N10."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-login-intent-and-cancellation",
+      "task": "4.1",
+      "coverageClassification": "historical-local-UI-and-model-tests-plus-current-source",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/validation-summary.json",
+          "sha256": "6f9cc40708db5c7983e6a5b74af703b968125f87a295c58995eb482f555152e9",
+          "locator": "runs latest-native-journeys / room-login-ui-repaired / final-identity-regression",
+          "observedProof": [
+            {
+              "name": "latest-native-journeys",
+              "result": "Failed",
+              "totalTestCount": 26,
+              "passedTests": 25,
+              "failedTests": 1,
+              "skippedTests": 0,
+              "startTime": 1793206677.857,
+              "finishTime": 1793206813.611,
+              "testFailures": [
+                {
+                  "failureText": "Failed to failed to scroll to visible (by AX action) Button, {{-147.0, 795.0}, {98.0, 54.0}}, identifier: 'person.crop.circle', label: '我', error: Error kAXErrorFailure performing AXAction kAXScrollToVisibleAction on element AX element pid: 50923, elementOrHash.elementID: 4379046912.38. (Underlying Error: Error kAXErrorFailure performing AXAction kAXScrollToVisibleAction on element AX element pid: 50923, elementOrHash.elementID: 4379046912.38)",
+                  "targetName": "YunleFunUITests",
+                  "testIdentifier": 24,
+                  "testIdentifierString": "NativeGamesUITests/testGuestCanCancelRoomLoginAndReturnToGames()",
+                  "testIdentifierURL": "test://com.apple.xcode/YunleFun/YunleFunUITests/NativeGamesUITests/testGuestCanCancelRoomLoginAndReturnToGames",
+                  "testName": "testGuestCanCancelRoomLoginAndReturnToGames()"
+                }
+              ]
+            },
+            {
+              "name": "room-login-ui-repaired",
+              "result": "Passed",
+              "totalTestCount": 1,
+              "passedTests": 1,
+              "failedTests": 0,
+              "skippedTests": 0,
+              "startTime": 1793207034.325,
+              "finishTime": 1793207069.42,
+              "testFailures": []
+            },
+            {
+              "name": "final-identity-regression",
+              "result": "Passed",
+              "totalTestCount": 42,
+              "passedTests": 42,
+              "failedTests": 0,
+              "skippedTests": 0,
+              "startTime": 1793208714.27,
+              "finishTime": 1793208808.758,
+              "testFailures": []
+            }
+          ]
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunUITests/NativeGamesUITests.swift",
+          "sha256": "a5f0b04f382849ee1a0cd0c94c45acadc922781a6e2fc5cb70861b5c91e4f59e",
+          "locator": {
+            "symbolOrExactText": "func testGuestCanCancelRoomLoginAndReturnToGames",
+            "line": 55
+          },
+          "observedProof": "Actual guest UI enters a room request, sees continuation context, cancels, returns to Games. It skips rather than logging out an existing user."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameLoginCoordinatorTests.swift",
+          "sha256": "797f7fbce1a5cd59b7ae170530c9a5e6f0e03367810f2193ae8da890526b3b6f",
+          "locator": {
+            "symbolOrExactText": "func testCommittedLoginPreservesExactIntentAndConsumesOnlyOnceAfterDismissal",
+            "line": 6
+          },
+          "observedProof": "Matching committed login proof consumes original action once."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameLoginCoordinatorTests.swift",
+          "sha256": "797f7fbce1a5cd59b7ae170530c9a5e6f0e03367810f2193ae8da890526b3b6f",
+          "locator": {
+            "symbolOrExactText": "func testCancelAndInteractiveDismissRejectLateSuccessAndOldIntent",
+            "line": 20
+          },
+          "observedProof": "Cancel/dismiss prevents late success or stale intent from launching."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/App/AppRootView.swift",
+          "sha256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+          "locator": {
+            "symbolOrExactText": "private func finishGameLogin",
+            "line": 245
+          },
+          "observedProof": "Only a current matching proof can call performGameLaunch; cancellation clears pending continuation."
+        }
+      ],
+      "limits": [
+        "This is not a claimed production guest-cancel E2E; earlier portal empty-login cancellation is not room-intent proof.",
+        "Cancellation is before any Play room mutation; native coordinator/UI proof is appropriate. Do not sign out an in-use production identity just to manufacture the guest branch."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-no-autocreate-and-idempotent-navigation",
+      "task": "4.1",
+      "coverageClassification": "production-invite-observation-plus-pure-parser-source",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/App/AppRootView.swift",
+          "sha256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+          "locator": {
+            "symbolOrExactText": "if let room = NativeGameRoomIntent.parse(url)",
+            "line": 153
+          },
+          "observedProof": "A room link routes to requestGameLaunch(.room), then runtime.openGameRoom; parser does not execute a create request."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "verifiedJourneys cold/warm",
+          "observedProof": {
+            "coldNewRoomCreated": false,
+            "warmRosterRemainedTwo": true,
+            "warmNewNativeMoveAccepted": true
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameDeferredLaunchTests.swift",
+          "sha256": "cd504bf5bedd8990fa8eeb47598056c835e038dc69e4873a5a2314d0864ae1fc",
+          "locator": {
+            "symbolOrExactText": "func testAccountSwitchSameUIDNewGenerationAndSelectionRoundTripCannotReplayTap",
+            "line": 40
+          },
+          "observedProof": "Deferred action tied to identity/selection generation rejects stale replay."
+        }
+      ],
+      "limits": [
+        "No requirement to press every duplicate link across every game. The parser/control path plus one real repeated invitation is the scoped acceptance."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-invalid-expired-and-rotated-old-code",
+      "task": "4.1",
+      "coverageClassification": "production-retained-HTTP-protocol-and-UI",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-rotated-old-invite-after-772.json",
+          "sha256": "c6f00079ab330678745fcdbb3691f859411a0131807ff64fc794a54dc527be76",
+          "locator": "roomBefore/roomAfter/matchmaking/errorResponse/newCodeJoinAuthority",
+          "observedProof": {
+            "sameCanonicalRoom": true,
+            "oldCodeInvalidated": true,
+            "oldCodeHTTPStatus": 400,
+            "oldCodeSocketCreatedCount": 0,
+            "oldCodeUI": "邀请码不存在或已失效",
+            "newCodeJoinAuthoritySequence": 2807,
+            "newCodeMembers": 2
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/rotated-old-code-772.json",
+          "sha256": "03df2b8f7fc7738de50a4f70532107963e0e2c4b083025251adbbc9cb8eb3779",
+          "locator": "matchmaking,errorResponse,socketCreatedCount",
+          "observedProof": {
+            "matchmaking": [
+              {
+                "path": "/matchmake/joinOrCreate/play_room",
+                "host": "api.play.yunle.fun",
+                "status": 400
+              }
+            ],
+            "errorResponse": {
+              "code": 400,
+              "error": "邀请码不存在或已失效"
+            },
+            "socketCreatedCount": 0
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/expired-production-roles-772.json",
+          "sha256": "9818d71193ad335d3f4c222d41b2977ded7cd76a0f0931a2e1f385a2a8ac645f",
+          "locator": "player,spectator",
+          "observedProof": {
+            "player": {
+              "UIChinese": "房间已过期",
+              "frames": [
+                {
+                  "kind": "ERROR",
+                  "code": 400,
+                  "message": "房间已过期",
+                  "sequence": 480
+                }
+              ],
+              "socketCreatedCount": 1,
+              "socketClosedCount": 1,
+              "hasMore": false,
+              "truncated": false
+            },
+            "spectator": {
+              "UIChinese": "房间已过期",
+              "frames": [
+                {
+                  "kind": "ERROR",
+                  "code": 400,
+                  "message": "房间已过期",
+                  "sequence": 925
+                }
+              ],
+              "socketCreatedCount": 1,
+              "socketClosedCount": 1,
+              "hasMore": false,
+              "truncated": false
+            },
+            "note": "Matchmaking returns an HTTP200 reservation; actual WebSocket ERROR protocol11 code400拒绝.400 is not an HTTP status. No JOIN_ROOM, connection.ready, room.snapshot or game.snapshot was received."
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-invalid-invite-transport-failure-20261029.json",
+          "sha256": "41a00adfc9686da56848f43406a380959a596abca8d9bea7cfdeddee4fbab4b1",
+          "locator": "result,cause,checkpointResolution",
+          "observedProof": "Historical HTTP200 business-error then fake reservation failure retained; later772 old-code400/noWS and expired-role protocol400 are the actual corrective evidence."
+        }
+      ],
+      "limits": [
+        "Expired-role ERROR400 is a WebSocket application protocol code after HTTP200 reservation, not an HTTP400 claim.",
+        "One invalidated/rotated owned code plus one expired room in both roles covers these branches; no random invitation scan is needed."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-player-and-spectator-separation",
+      "task": "4.1",
+      "coverageClassification": "production-retained-authority-plus-local-parser-tests",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "verifiedJourneys member-requesting-spectator-role",
+          "observedProof": {
+            "case": "member-requesting-spectator-role",
+            "result": "passed",
+            "membersUnchanged": 2,
+            "errorUI": "当前账号已是这个房间的成员，请返回玩家页面继续对局，或使用其他账号观战"
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/managed-sdk-cde/boundary-E-nonmember-spectator.json",
+          "sha256": "5743e4c29a9fcf9e8d2b87e9bb7d7ed96065ce417d0f4b4a120760a51a9817db",
+          "locator": "result.role,result.room.revision/memberCount",
+          "observedProof": {
+            "role": "spectator",
+            "connected": true,
+            "revision": 3,
+            "members": 2
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/managed-sdk-cde/boundary-C-authority-with-external-E.json",
+          "sha256": "e04f1b3f32d992b3362e136b4406c388a17effbf94cc4f4331a2734f091d194c",
+          "locator": "result.role/result.room",
+          "observedProof": {
+            "independentHostRole": "player",
+            "revision": 3,
+            "members": 2
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/role-boundary-after-seat-rotation.json",
+          "sha256": "9afef817cdbd1c49034eb71c0d0d2ccc4b7f7ed0a3ae501bb4273c60e9efff0c",
+          "locator": "sequence,memberCount,seatUIDHashes",
+          "observedProof": {
+            "sequence": 3293,
+            "members": 3,
+            "externalSpectatorExcludedFromSeats": true
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Models/NativeGame.swift",
+          "sha256": "c39be931d5c3f4c6b08ba3774cc00898de51484730b83e82643b6f6cd6195ba1",
+          "locator": {
+            "symbolOrExactText": "enum Role:",
+            "line": 148
+          },
+          "observedProof": "Native intent preserves spectator without coercion to player."
+        }
+      ],
+      "limits": [
+        "The external spectator boundary used an independent official-SSO Play Cookie SDK client, not a Native spectator UI matrix. Already-member spectator request was rejected without adding a seat."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M41-preserve-auth-and-existing-links",
+      "task": "4.1/R8",
+      "coverageClassification": "current-source-and-local-route-tests-with-normal-production-auth",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/App/AppRootView.swift",
+          "sha256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+          "locator": {
+            "symbolOrExactText": "if crossAppAuthorization.handle",
+            "line": 149
+          },
+          "observedProof": "Existing cross-App authorization has priority before game invitation routing; old NativeLink destination dispatch remains after strict game handling."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/ScannerTests.swift",
+          "sha256": "7c485cddacb91eafc9a085d70f3cb8b2f7c5cc57f8d6107b31508a9b421b2000",
+          "locator": {
+            "symbolOrExactText": "func testRecognizesCanonicalWorkshopAndApplicationLinksWithoutLegacySlugGuessing",
+            "line": 9
+          },
+          "observedProof": "Existing app/workshop links have strict canonical route tests."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/DeveloperProfileTests.swift",
+          "sha256": "b9bab8a6ed839405f1cdd4a45416982aa646a2b29ed33a55b5a00686e2eb3aa3",
+          "locator": {
+            "symbolOrExactText": "func testAuthorLinksUseTheSameStrictOriginAndSingleSegmentRulesAsOtherNativeRoutes",
+            "line": 204
+          },
+          "observedProof": "Author links retain strict origin/path tests."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "normalLogin",
+          "observedProof": {
+            "nativeA": "passed; checkpoint contains native account login, Play bootstrap and later cold account restoration",
+            "browserB": "passed through normal SSO UI",
+            "nativeAdditionalAliases": [
+              "C",
+              "D",
+              "E"
+            ],
+            "additionalAliasEvidence": "Task owner phase observation supplied with this documentation task; individual C/D/E login events are not present in the immutable 25-event source checkpoint",
+            "passwordsCookiesTicketsOrRawUIDsIncluded": false
+          }
+        }
+      ],
+      "limits": [
+        "No new real browser/OS matrix for every legacy route is implied. Current code retains exact prior dispatch, rather than accepting arbitrary URLs."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-normal-native-sso-play-cookie-and-ticket",
+      "task": "4.2",
+      "coverageClassification": "production-login-and-gameplay-plus-source-auth-contract",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "normalLogin / verifiedJourneys two-distinct-accounts-gameplay",
+          "observedProof": {
+            "normalLogin": {
+              "nativeA": "passed; checkpoint contains native account login, Play bootstrap and later cold account restoration",
+              "browserB": "passed through normal SSO UI",
+              "nativeAdditionalAliases": [
+                "C",
+                "D",
+                "E"
+              ],
+              "additionalAliasEvidence": "Task owner phase observation supplied with this documentation task; individual C/D/E login events are not present in the immutable 25-event source checkpoint",
+              "passwordsCookiesTicketsOrRawUIDsIncluded": false
+            },
+            "gameplay": {
+              "case": "two-distinct-accounts-gameplay",
+              "roomAlias": "gomoku-live-01",
+              "result": "passed",
+              "evidence": "Server-sourced roster has two distinct members; normal UI moves from both native and browser accepted and visible on authoritative board"
+            }
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f09-native-browser-network-recovery-20261030.json",
+          "sha256": "44dc05a0fa1c44d4d3138293d3182b135f0f53f3b69242093d89b6ee60efff67",
+          "locator": "newAuthorityRecovery,manualInputProof",
+          "observedProof": "New explicit player713/full715 then fresh A852/B856 confirmed under two distinct identities."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/utils/identity-bootstrap.ts",
+          "sha256": "908fd65abcb13fab1d737e9ed4d66c96fa0f50991d2ff35aca4f074700725d98",
+          "locator": {
+            "symbolOrExactText": "export async function exchangePlayAuthorization",
+            "line": 55
+          },
+          "observedProof": "Host one-time proof exchanged with credentials include for Play session; temporary adopted auth signs out in finally."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/src/http/api.ts",
+          "sha256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+          "locator": {
+            "symbolOrExactText": "async #requireUser",
+            "line": 483
+          },
+          "observedProof": "Play APIs validate readSessionCookie; realtime ticket endpoint requires that user and issues a one-use ticket."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Services/HostAuthorizationService.swift",
+          "sha256": "67f340f0cf1bebbb4e60075913fe954dc7d9aa06578e0dd2d56928cd5b59a9e5",
+          "locator": {
+            "symbolOrExactText": "func issue(_ request: HostSsoRequest",
+            "line": 164
+          },
+          "observedProof": "Native host Bearer is confined to SSO gateway issue, not substituted for Play Cookie."
+        }
+      ],
+      "limits": [
+        "No cookies, bearer values, auth callbacks or tickets were read for this audit. Source contract and successful production roles/gameplay support the identity chain; this is not a fresh packet inspection."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-selected-game-create-and-join-two-identities",
+      "task": "4.2",
+      "coverageClassification": "production-retained-authority-and-real-human-input",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+          "sha256": "3d5e52f2abdda4eff5446446e38126dbb834c308c3e4ddfe551e6a1506296312",
+          "locator": "G01.startAuthority/baseline/recovered",
+          "observedProof": "Gomoku selected game and two distinct member hashes, same game session and real post moves."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f05-first-valid-native-flight-recovery-20261030.json",
+          "sha256": "775a780c110f4cd3a86262b44d85c05de9375b524a34c2bae4239e766a58438f",
+          "locator": "full receipt",
+          "observedProof": "Normal first valid flight room includes selected game, two-account join, before/after real inputs, new player connection and normal leave."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f08-native-webcontent-retry-recovery-20261030.json",
+          "sha256": "401073e4d6a11ff6f67936afc1f4ace54d702be53c41a0bfee4a25410133eb93",
+          "locator": "manualInputProof",
+          "observedProof": "Same Flight game/seats and fresh A move542/B roll546 after actual Native recovery."
+        }
+      ],
+      "limits": [
+        "Room creation/join observations include automation/IPC gaps, not a first-frame or latency SLA. M4.3 repetition count remains separate."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-create-replay-idempotency",
+      "task": "4.2",
+      "coverageClassification": "production-normal-UI-replay-and-independent-production-DB-export",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "verifiedJourneys lost-create-response-replay",
+          "observedProof": {
+            "case": "lost-create-response-replay",
+            "result": "passed",
+            "roomAlias": "gomoku-live-02",
+            "firstPOSTStatus": 201,
+            "secondPOSTStatus": 201,
+            "firstResponseFailedAfterCommit": true,
+            "sameIdempotencyKey": true,
+            "operationKeySHA256": "a37e03d30a22b0282094430e0b4df840103442678d747e3d53f33df0fd4763e4",
+            "sameReturnedRoomID": true,
+            "deterministicRoomIDMatches": true,
+            "clientRetryUI": "重试原来的创房请求",
+            "interceptionCleared": true,
+            "readOnlyDBUniqueOwnedCreationInPreciseCreatorWindow": true,
+            "DBAudit": "production-m4-idempotency-db-audit-20261029.json"
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-idempotency-db-audit-20261029.json",
+          "sha256": "6d0d17ea46e6cc5252977306c8be728b2acf025c9b8ba73d78b1a28b80bc3d9b",
+          "locator": "exactOwnedRoomAndCreator/sameCreatorPreciseTimeWindow",
+          "observedProof": {
+            "exact": {
+              "count": 1,
+              "totalMatches": 1,
+              "uniqueIds": 1,
+              "allExpectedID": true,
+              "allCreatorMatches": true,
+              "allCreatedWithinWindow": true,
+              "projectionHonored": true
+            },
+            "window": {
+              "count": 1,
+              "totalMatches": 1,
+              "uniqueIds": 1,
+              "allExpectedID": true,
+              "allCreatorMatches": true,
+              "allCreatedWithinWindow": true,
+              "projectionHonored": true
+            },
+            "readOnly": true
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/room-creation-idempotency-20261029.json",
+          "sha256": "4aad2829dc95e030d87e6778e34f7dfe0d6d53276fde65b81451d8286aaa88d0",
+          "locator": "contract,validation,coverage",
+          "observedProof": "Local55 server +5 client validations cover concurrency/persistence/conflict; independent of production replay evidence."
+        }
+      ],
+      "limits": [
+        "Original /tmp checkpoint/DB inputs are retired. Immutable public exports preserve source basename/hash and detailed bounded results; this audit did not recompute the original key or query live DB.",
+        "One controlled committed-response-loss replay and precise owned creator window are proved; no all-production/global duplicate-room claim."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-repeat-click-in-flight",
+      "task": "4.2",
+      "coverageClassification": "current-static-inflight-guard-plus-local-journal-tests-and-production-replay",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/components/online/OnlineRoomLauncher.vue",
+          "sha256": "c86c3d4eb437cf289ef0dedde78c35b21ea2cac72f829960189a3da3a6d4d21d",
+          "locator": {
+            "symbolOrExactText": "async function createRoom",
+            "line": 142
+          },
+          "observedProof": "pending/session/config guards, synchronous pending=true, disabled button, retry0, confirmed result navigation and finally release pending."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/test/room-creation.test.ts",
+          "sha256": "ad1b84fa2f121082f92dbed7d8d6d8e9391045591a2f03424f813d4ffab52b09",
+          "locator": {
+            "symbolOrExactText": "describe(",
+            "line": 9
+          },
+          "observedProof": "Journal tests preserve same operation and confirmed result; service-not-configured is not a silent new attempt."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/room-creation-idempotency-20261029.json",
+          "sha256": "4aad2829dc95e030d87e6778e34f7dfe0d6d53276fde65b81451d8286aaa88d0",
+          "locator": "coverage",
+          "observedProof": "Simultaneous cross-instance service requests and lost commit acknowledgement tested locally; production response-loss replay supplies real uniqueness branch."
+        }
+      ],
+      "limits": [
+        "No real production double-click race was recorded; do not relabel source/units as a manual prod click experiment. The task does not require a new concurrency matrix."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-release-closed",
+      "task": "4.2",
+      "coverageClassification": "production-closed-flag-plus-local-guard-and-service-tests",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-deployment-20261029.json",
+          "sha256": "577a2473c05bef0c0294ef5fec381065c91d815dc59825c3540c9411cf84c07e",
+          "locator": "backendFinalReadiness.capacity",
+          "observedProof": {
+            "status": "ok",
+            "activeConnections": 0,
+            "activeOnlinePlayers": 0,
+            "activeOnlineRooms": 0,
+            "paperStarOnlineEnabled": false
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Features/Games/GamesView.swift",
+          "sha256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+          "locator": {
+            "symbolOrExactText": "!game.isPlayable || !mode.available",
+            "line": 157
+          },
+          "observedProof": "Native disables unavailable mode; AppRoot rechecks latest mode before launch."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/test/http-api.test.ts",
+          "sha256": "5d75631225854be5755accef8b23d1e51ecb6389f5bc8e6e204c956f22e791b6",
+          "locator": {
+            "symbolOrExactText": "it('fails closed when PaperStar online room creation is not released'",
+            "line": 508
+          },
+          "observedProof": "Local HTTP API test expects503 SERVICE_NOT_CONFIGURED for unavailable Star online."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/test/colyseus-play-room.test.ts",
+          "sha256": "adb7b93648eecffaae3aab775b78d6db725f6be77813aa67ef2e5ef6fa4fc0bd",
+          "locator": {
+            "symbolOrExactText": "it('rejects room joins while the multiplayer release gate is closed'",
+            "line": 739
+          },
+          "observedProof": "Local join test closes gate and restores it in finally."
+        }
+      ],
+      "limits": [
+        "Actual production release flag paperStarOnlineEnabled=false was observed; no production global gate toggle or full create-rejection UI journey is claimed. Do not change global production gates merely to fill a test matrix."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-standard-full-four-reject-fifth",
+      "task": "4.2",
+      "coverageClassification": "production-retained-five-identity-authority-and-native-result",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/full-four-native-fifth-rejected-authority.json",
+          "sha256": "1f972b76129c4a3add358ecbbf7c0ec944cbd4cf974f074ad7e43ffad2b59454",
+          "locator": "room/memberUIDHashes/nativeUI/AIsMember",
+          "observedProof": {
+            "sequence": 3301,
+            "uniqueExistingMembers": 4,
+            "nativeUI": "房间已有4名成员",
+            "fifthIsMember": false
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-role-capacity-offline-removal.json",
+          "sha256": "0d91f8d40ab1b315a0499701897a1746a348d70073f4cf5b77c5ee5b5db8cb3b",
+          "locator": "standardRoomFull,normalCleanup",
+          "observedProof": {
+            "fourMemberCount": 4,
+            "rejectedNativeAccountA": true,
+            "normalCleanup": {
+              "E": true,
+              "D": true,
+              "C": true,
+              "B": "already removed and terminal socket closed",
+              "A": "fifth admission rejected; never a member"
+            }
+          }
+        }
+      ],
+      "limits": [
+        "This is five independent controlled identities and a four-member standard room, not a two-label/browser simulation. No N10 round credit is attached to this boundary room."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-removal-and-terminal-consistency",
+      "task": "4.2",
+      "coverageClassification": "production-online-and-offline-removal",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+          "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+          "locator": "verifiedJourneys online-C-removed-and-invite-rotated",
+          "observedProof": {
+            "case": "online-C-removed-and-invite-rotated",
+            "result": "passed",
+            "removedAlias": "C",
+            "terminalUI": "你已被移出房间 / 当前连接已安全关闭",
+            "membersAfter": 1,
+            "permanentBanClaim": false
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/offline-removed-reconnect-525-initial.json",
+          "sha256": "70f0a303198a8c06ee5d9298a055332c621825640fa4fcb6c983831f1bb1815f",
+          "locator": "frames,UI,networkOverrideRestored",
+          "observedProof": {
+            "offlineAt": "2026-10-29T17:16:20.564Z",
+            "networkRestoredAt": "2026-10-29T17:16:45.195Z",
+            "terminalObservedAt": "2026-10-29T17:17:26.612Z",
+            "frames": [
+              {
+                "kind": "ERROR",
+                "code": 525,
+                "message": "你已被移出房间，请返回游戏大厅",
+                "sequence": 3352
+              }
+            ],
+            "socketCreatedCount": 9,
+            "socketClosedCount": 10,
+            "hasMore": false,
+            "truncated": false,
+            "UI": "你已被移出房间",
+            "alert": "你已被移出房间，请返回游戏大厅",
+            "networkOverrideRestored": true
+          }
+        },
+        {
+          "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/offline-removed-reconnect-stop-observation.json",
+          "sha256": "48885623b4e663b5e117a0fa7358e5bdaed85cf231ed5909829243cd53124304",
+          "locator": "webSocketsCreated,headings,observationMilliseconds",
+          "observedProof": {
+            "recordedAtUTC": "2026-10-29T17:19:57.300Z",
+            "observationMilliseconds": 150688,
+            "webSocketsCreated": 0,
+            "frames": [],
+            "truncated": false,
+            "hasMore": false,
+            "headings": [
+              "你已被移出房间"
+            ],
+            "networkOverrideRestored": true
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-role-capacity-offline-removal.json",
+          "sha256": "0d91f8d40ab1b315a0499701897a1746a348d70073f4cf5b77c5ee5b5db8cb3b",
+          "locator": "offlineRemovedReconnect.returnedToLobbyUsingVisibleLink",
+          "observedProof": true
+        }
+      ],
+      "limits": [
+        "Offline B got ERROR525 and Chinese terminal; no continuing room snapshots,150688ms observation no new socket, visible return path worked. This is a scoped removal outcome, not a permanent ban or global guarantee."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-service-unavailable",
+      "task": "4.2",
+      "coverageClassification": "local-tests-and-current-error-control-flow-only",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameTests.swift",
+          "sha256": "8f5248b6cacb98d01d7674b535f7a048490a052edfcf09109ef8714be03babdb",
+          "locator": {
+            "symbolOrExactText": "func testCatalogFailurePreservesVerifiedSnapshotAndNeverMarksItOnline",
+            "line": 97
+          },
+          "observedProof": "Injected503 catalog failure keeps verified fallback snapshot and error, never marks offline data online."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/components/online/OnlineRoomLauncher.vue",
+          "sha256": "c86c3d4eb437cf289ef0dedde78c35b21ea2cac72f829960189a3da3a6d4d21d",
+          "locator": {
+            "symbolOrExactText": "catch (cause)",
+            "line": 184
+          },
+          "observedProof": "Creation failure keeps account-bound journal, reports error, and clears pending only for current epoch."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/utils/room-creation.ts",
+          "sha256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+          "locator": {
+            "symbolOrExactText": "export function roomCreationNeedsNewAttempt",
+            "line": 25
+          },
+          "observedProof": "SERVICE_NOT_CONFIGURED and fetch errors retain original request; expired/conflict require an explicit new attempt."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/test/room-creation.test.ts",
+          "sha256": "ad1b84fa2f121082f92dbed7d8d6d8e9391045591a2f03424f813d4ffab52b09",
+          "locator": {
+            "symbolOrExactText": "expect(roomCreationNeedsNewAttempt({ data: { code: 'SERVICE_NOT_CONFIGURED' } }))",
+            "line": 56
+          },
+          "observedProof": "Local unit expectation does not silently create a new operation on unavailable service."
+        }
+      ],
+      "limits": [
+        "No actual production server503/outage UI journey was found. F08 WebContent failure and F09 client offline are not mislabeled as server unavailability.",
+        "Native catalog503 unit and Web failure/journal control flow cover their distinct branches. Intentional production service disruption is not needed for this engineering acceptance."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    },
+    {
+      "id": "M42-account-change-and-late-response",
+      "task": "4.2",
+      "coverageClassification": "production-normal-switch-isolation-plus-local-race-models-and-source",
+      "evidence": [
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-real-native-journey-checkpoint.json",
+          "sha256": "042585f858ee4fdeae0be1a937c419ea84caac1bc21946341be90220bdb0cb5e",
+          "locator": "verified A→D→A",
+          "observedProof": "Actual saved-account selection restores distinct G/F versus Star history; normal memberC native login completed real AI response."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-unlocked-real-journey-20261030.json",
+          "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833",
+          "locator": "accountIsolation",
+          "observedProof": {
+            "C": "New Star tutorial reference from actual ready local play",
+            "A": "Existing G/F references remain, no C Star reference in current Games AX; no current C running game after switch",
+            "limits": "This does not prove original version upgrade migration for arbitrary nonempty user data."
+          }
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/storage-upgrade-final-tests.json",
+          "sha256": "1d04e7b0eba2135b4e84a6c68f1a45882bb36220e2f847b600b7e6e58648ff0c",
+          "locator": "passed account/runtime methods",
+          "observedProof": "Historical executed account-scoped storage/recovery tests remain separate from real normal account switches."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameDeferredLaunchTests.swift",
+          "sha256": "cd504bf5bedd8990fa8eeb47598056c835e038dc69e4873a5a2314d0864ae1fc",
+          "locator": {
+            "symbolOrExactText": "func testAccountSwitchSameUIDNewGenerationAndSelectionRoundTripCannotReplayTap",
+            "line": 40
+          },
+          "observedProof": "Cross-account, same-UID new generation and selection round-trip reject stale actions."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameLoginCoordinatorTests.swift",
+          "sha256": "797f7fbce1a5cd59b7ae170530c9a5e6f0e03367810f2193ae8da890526b3b6f",
+          "locator": {
+            "symbolOrExactText": "func testAccountRoundTripAndExternalRestoreCannotReplayIntent",
+            "line": 87
+          },
+          "observedProof": "Login receipt from old boundary cannot replay after account switch/restore."
+        },
+        {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/components/online/OnlineRoomLauncher.vue",
+          "sha256": "c86c3d4eb437cf289ef0dedde78c35b21ea2cac72f829960189a3da3a6d4d21d",
+          "locator": {
+            "symbolOrExactText": "if (!mounted || epoch !== creationEpoch || session.user.value?.userId !== userId)",
+            "line": 179
+          },
+          "observedProof": "Committed old-account create response cannot navigate current account or confirm its newer journal."
+        }
+      ],
+      "limits": [
+        "Real A→D→A/C→A isolation is production-observed. Deliberately switching account during an in-flight create/join and delivering a held late response was not a production experiment; that race is covered by targeted models/current guards."
+      ],
+      "closeRecommendation": "recommend-close-with-stated-evidence-scope",
+      "necessaryAdditionalProductionMatrix": false
+    }
+  ],
+  "readTimeM43LedgerBoundary": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+    "sha256": "3d5e52f2abdda4eff5446446e38126dbb834c308c3e4ddfe551e6a1506296312",
+    "completedFlag": false,
+    "roundFlags": [
+      {
+        "id": "G01",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F01",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G02",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G03",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G04",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F02",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F03",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F04",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F05",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F06",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F07",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F08",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "F09",
+        "passed": true,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G05",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G06",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G07",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G08",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G09",
+        "passed": false,
+        "pendingCleanup": false
+      },
+      {
+        "id": "G10",
+        "passed": false,
+        "pendingCleanup": true
+      }
+    ],
+    "countsNotRecomputedByThisScopeAudit": true,
+    "limit": "Mutable live round flags can lag pending independent reviews or later Root decisions; no inferred10/10 or final complete claim."
+  },
+  "existingRegressionAndM5ScopeKept": {
+    "runtime17": {
+      "receipt": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-fixture-lifecycle-final-validation.json",
+        "sha256": "1b75f9dbb8b77aab0533edef820870f2cfd2f481b4004591c681289e5540d473",
+        "locator": "completeSeventeen,originalFailedRound",
+        "observedProof": "Current runtime17 passed after test-only lifecycle repair, while original15/2 remains failed and separately cleaned."
+      },
+      "actualPassed": 17,
+      "sourceRuntimeAndControllerUnchanged": true
+    },
+    "normalAI": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-ai-card-navigation-fix-validation.json",
+      "sha256": "378a5db476712242870590d802d23f6d709e7f2734a0847f38cdb2abe4e134aa",
+      "locator": "realValidation",
+      "observedProof": "Normal new build confirmed card detail immediately visible and proper two-step return; earlier failure retained."
+    },
+    "HomeAndHelp": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-home-game-and-help-journey-20261030.json",
+      "sha256": "90cb4038d8d0d63f56c4c7b181b5a6ac8ee30b75d5538b3254a8948f8b31f03a",
+      "locator": "precondition,journey,mapping",
+      "observedProof": {
+        "status": "passed-scoped-functional-journey",
+        "preconditionKind": "new-controlled-fixture-via-normal-free-acquisition",
+        "historicalUpgradeClaim": false,
+        "journeySteps": [
+          "Help → Workshop",
+          "Acquire Star through normal public detail",
+          "Home Star tile → playable free practice",
+          "Minimize → Games continue entry → resume",
+          "Actual visible boost input",
+          "Minimize → Home Star tile → open again"
+        ]
+      }
+    },
+    "historical82": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/storage-upgrade-final-tests.json",
+      "sha256": "1d04e7b0eba2135b4e84a6c68f1a45882bb36220e2f847b600b7e6e58648ff0c",
+      "locator": "all reported tests",
+      "observedProof": "Retained historical exact tests, not relabeled current whole82 fresh execution."
+    },
+    "limit": "M5 and M0 overall are not re-certified from these summaries; Root retains the final integration/repetition decision."
+  },
+  "productionVersionAndReusability": {
+    "latestProductionWebEvidence": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/web-publication-6ff97db.json",
+      "sha256": "05304f0f3650e0e05e29cf4447c93f125267ff4f93958140446d2a6cae2aa895",
+      "locator": "selectedFinalSnapshotIdentity",
+      "observedProof": {
+        "sourceCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+        "sourceTree": "875192c93e04df55fef99f86d1ebb31df6d37a90",
+        "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+        "catalogBodySHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+        "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+      }
+    },
+    "productionServerEvidence": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/server-deployment-7723ae8.json",
+      "sha256": "771ebeb8f4118235eacf301226fd42a3fe22088fd01bf83cb2f242e350100d53",
+      "locator": "sourceCommit,independentReadback.actualRunningContainerCompiledSHA256",
+      "observedProof": {
+        "sourceCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+        "actualRunningCompiledHashes": {
+          "colyseus/server.js": "5ec0e4e0b33fcbd991ca9c5efb4fbe71828f1d533509900b90192918eb3e9497",
+          "colyseus/play-room.js": "9aa28f32df203f5172135782d11d7f631e0c9f9b2791d977612b07b14c30bd10",
+          "index.js": "f352f4f4481499ed02dba76adab845bbdafa0c80717394159db400f396c22a12"
+        }
+      }
+    },
+    "normalNativeBinding": {
+      "sourceSHA256": {
+        "AssistantView.swift": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+        "Runtime": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+        "Controller": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+        "runtimeTests": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509"
+      },
+      "productSHA256": {
+        "YunleFun": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+        "YunleFun.debug.dylib": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+        "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+        "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+      },
+      "preview": 0,
+      "limit": "Root records Native77260 remained running through the WebContent-only termination; F08 pre-kill and termination metadata bind that host PID.",
+      "bindingSource": "Fingerprints inherited from separately hashed F08 receipt, with matching normal Native PID77260 and a701 catalog in F09; no rehash/build/install by this review."
+    },
+    "limits": [
+      "Historical normal55/db02 cold/warm/SSO/idempotency observations remain historical real facts. They are not re-counted as current final-candidate N10.",
+      "Later772 retained raw role/capacity/expired/rotated/removed authority binds changed admission behavior; F05–09 separately bind current normal Native recovery.",
+      "This audit uses recorded deployment identities and never claims a fresh production GET or process inspection."
+    ]
+  },
+  "retainedPrivateDigestChecks": [
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/role-boundary-two-member-baseline.json",
+      "sha256": "e9dbf44e1201628687dcf4b96dab7cb528422310b4bc47d4e8abdf9b613dada8",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/role-boundary-after-seat-rotation.json",
+      "sha256": "9afef817cdbd1c49034eb71c0d0d2ccc4b7f7ed0a3ae501bb4273c60e9efff0c",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/full-four-native-fifth-rejected-authority.json",
+      "sha256": "1f972b76129c4a3add358ecbbf7c0ec944cbd4cf974f074ad7e43ffad2b59454",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/offline-removed-reconnect-525-initial.json",
+      "sha256": "70f0a303198a8c06ee5d9298a055332c621825640fa4fcb6c983831f1bb1815f",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/offline-removed-reconnect-stop-observation.json",
+      "sha256": "48885623b4e663b5e117a0fa7358e5bdaed85cf231ed5909829243cd53124304",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/managed-sdk-cde/boundary-E-nonmember-spectator.json",
+      "sha256": "5743e4c29a9fcf9e8d2b87e9bb7d7ed96065ce417d0f4b4a120760a51a9817db",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/managed-sdk-cde/boundary-C-authority-with-external-E.json",
+      "sha256": "e04f1b3f32d992b3362e136b4406c388a17effbf94cc4f4331a2734f091d194c",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/rotated-old-code-772.json",
+      "sha256": "03df2b8f7fc7738de50a4f70532107963e0e2c4b083025251adbbc9cb8eb3779",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/rotated-new-code-fresh-native-join.json",
+      "sha256": "5a81da6a876b78a1f338c571a639041b4360ba6c0a8a4d0df6d2d6208ebecae2",
+      "matchesPublishedDigest": true
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/expired-production-roles-772.json",
+      "sha256": "9818d71193ad335d3f4c222d41b2977ded7cd76a0f0931a2e1f385a2a8ac645f",
+      "matchesPublishedDigest": true
+    }
+  ],
+  "retiredRawInputBoundary": {
+    "retiredPath": "/tmp/yunle-native-production.08darurg",
+    "existsAtAudit": false,
+    "checkpointOriginalSourceRecord": {
+      "basename": "m4-live-checkpoint-before-final-candidate.json",
+      "bytes": 13597,
+      "sha256": "ce38b20325d35b11ac4990706437acf207b16a88db3a61e3719881e40b0b50ee"
+    },
+    "meaning": "Historical public immutable export still has detailed event facts and original byte identity. Missing /tmp original was not reconstructed, re-read, or treated as newly inspected packet evidence."
+  },
+  "evidencePolicy": [
+    "Each item cites actual inspected file hash/path and concrete field/symbol/sequence; report titles alone are not acceptance proof.",
+    "No private account registry/configuration/password/Cookie/ticket/auth callback was read. Raw owner/seat identifiers seen in retained SDK room evidence are not copied to this public report.",
+    "All private source authority is task-owned, already frozen; hashes were compared against published digests where available.",
+    "Local/static/model branches remain visibly distinguished from true production flows. No blanket production SLA, static-counter invariant or all-capture-perfect assertion.",
+    "Actual remaining work is the already-specified M4.3 repetition/closure and final integrated documentation, not a new negative-case matrix."
+  ],
+  "inputs": [
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+      "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68",
+      "bytes": 8043,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-idempotency-db-audit-20261029.json",
+      "sha256": "6d0d17ea46e6cc5252977306c8be728b2acf025c9b8ba73d78b1a28b80bc3d9b",
+      "bytes": 2178,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-invalid-invite-transport-failure-20261029.json",
+      "sha256": "41a00adfc9686da56848f43406a380959a596abca8d9bea7cfdeddee4fbab4b1",
+      "bytes": 1058,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-deployment-20261029.json",
+      "sha256": "577a2473c05bef0c0294ef5fec381065c91d815dc59825c3540c9411cf84c07e",
+      "bytes": 22654,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/room-creation-idempotency-20261029.json",
+      "sha256": "4aad2829dc95e030d87e6778e34f7dfe0d6d53276fde65b81451d8286aaa88d0",
+      "bytes": 5147,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/validation-summary.json",
+      "sha256": "6f9cc40708db5c7983e6a5b74af703b968125f87a295c58995eb482f555152e9",
+      "bytes": 8993,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/storage-upgrade-final-tests.json",
+      "sha256": "1d04e7b0eba2135b4e84a6c68f1a45882bb36220e2f847b600b7e6e58648ff0c",
+      "bytes": 51881,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/legacy-native-real-catalog-ui-journey.json",
+      "sha256": "43aec48c145d7b3cb2862e4c2a18129edb78bb7d1d7837e6b8d341e23c51d184",
+      "bytes": 16563,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/spectator-role-full-regression.json",
+      "sha256": "3613114a84c6e7f96c31541e295ae5b9b7268204813204eb3e0cca4d50b4b143",
+      "bytes": 633,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-role-capacity-offline-removal.json",
+      "sha256": "0d91f8d40ab1b315a0499701897a1746a348d70073f4cf5b77c5ee5b5db8cb3b",
+      "bytes": 8824,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-rotated-old-invite-after-772.json",
+      "sha256": "c6f00079ab330678745fcdbb3691f859411a0131807ff64fc794a54dc527be76",
+      "bytes": 3364,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-expired-roles-after-772.json",
+      "sha256": "00f8713b0a295752995ba086b66adf1255a70ee39e257b6a11a119c21b82a30a",
+      "bytes": 2404,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/production-final-reconnect-terminals.json",
+      "sha256": "5b758b265cd42fa1070c5f706046556fdbdfc4d36f318cec97d81d7a0c7797a7",
+      "bytes": 5348,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/server-deployment-7723ae8.json",
+      "sha256": "771ebeb8f4118235eacf301226fd42a3fe22088fd01bf83cb2f242e350100d53",
+      "bytes": 18973,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/native-retry-fix-validation.json",
+      "sha256": "7baa8e53be2dd7b9906603713ed82d4282fe8192a19a353b6c70c373e85a74d4",
+      "bytes": 7155,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/web-publication-6ff97db.json",
+      "sha256": "05304f0f3650e0e05e29cf4447c93f125267ff4f93958140446d2a6cae2aa895",
+      "bytes": 57931,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-real-native-journey-checkpoint.json",
+      "sha256": "042585f858ee4fdeae0be1a937c419ea84caac1bc21946341be90220bdb0cb5e",
+      "bytes": 2955,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-unlocked-real-journey-20261030.json",
+      "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833",
+      "bytes": 5220,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-ai-card-navigation-fix-validation.json",
+      "sha256": "378a5db476712242870590d802d23f6d709e7f2734a0847f38cdb2abe4e134aa",
+      "bytes": 6360,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-fixture-lifecycle-final-validation.json",
+      "sha256": "1b75f9dbb8b77aab0533edef820870f2cfd2f481b4004591c681289e5540d473",
+      "bytes": 7198,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m5-home-game-and-help-journey-20261030.json",
+      "sha256": "90cb4038d8d0d63f56c4c7b181b5a6ac8ee30b75d5538b3254a8948f8b31f03a",
+      "bytes": 9435,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m0-baseline-consolidated-20261030.json",
+      "sha256": "702ba8a03a6f43f2ff524d40f7ccded4d13364aade79a5ee5dc102cdec22d77e",
+      "bytes": 38102,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f05-first-valid-native-flight-recovery-20261030.json",
+      "sha256": "775a780c110f4cd3a86262b44d85c05de9375b524a34c2bae4239e766a58438f",
+      "bytes": 37638,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f06-native-foreground-recovery-20261030.json",
+      "sha256": "28152c1d071de3450804dee02caefd10a3995f4981550ac9c01a5c25a041dd35",
+      "bytes": 48603,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f07-native-app-restart-recovery-20261030.json",
+      "sha256": "3712553aa549d16302136db78b3b3c254a6b37b7524617e83d44c4074e5248e7",
+      "bytes": 134130,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f08-native-webcontent-retry-recovery-20261030.json",
+      "sha256": "401073e4d6a11ff6f67936afc1f4ace54d702be53c41a0bfee4a25410133eb93",
+      "bytes": 247586,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/f09-native-browser-network-recovery-20261030.json",
+      "sha256": "44dc05a0fa1c44d4d3138293d3182b135f0f53f3b69242093d89b6ee60efff67",
+      "bytes": 187258,
+      "kind": "public-existing-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/role-boundary-two-member-baseline.json",
+      "sha256": "e9dbf44e1201628687dcf4b96dab7cb528422310b4bc47d4e8abdf9b613dada8",
+      "bytes": 733,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/role-boundary-after-seat-rotation.json",
+      "sha256": "9afef817cdbd1c49034eb71c0d0d2ccc4b7f7ed0a3ae501bb4273c60e9efff0c",
+      "bytes": 815,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/full-four-native-fifth-rejected-authority.json",
+      "sha256": "1f972b76129c4a3add358ecbbf7c0ec944cbd4cf974f074ad7e43ffad2b59454",
+      "bytes": 1175,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/offline-removed-reconnect-525-initial.json",
+      "sha256": "70f0a303198a8c06ee5d9298a055332c621825640fa4fcb6c983831f1bb1815f",
+      "bytes": 534,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/offline-removed-reconnect-stop-observation.json",
+      "sha256": "48885623b4e663b5e117a0fa7358e5bdaed85cf231ed5909829243cd53124304",
+      "bytes": 254,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/expired-production-roles-772.json",
+      "sha256": "9818d71193ad335d3f4c222d41b2977ded7cd76a0f0931a2e1f385a2a8ac645f",
+      "bytes": 1059,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/rotated-old-code-772.json",
+      "sha256": "03df2b8f7fc7738de50a4f70532107963e0e2c4b083025251adbbc9cb8eb3779",
+      "bytes": 1876,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/rotated-new-code-fresh-native-join.json",
+      "sha256": "5a81da6a876b78a1f338c571a639041b4360ba6c0a8a4d0df6d2d6208ebecae2",
+      "bytes": 733,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/managed-sdk-cde/boundary-E-nonmember-spectator.json",
+      "sha256": "5743e4c29a9fcf9e8d2b87e9bb7d7ed96065ce417d0f4b4a120760a51a9817db",
+      "bytes": 1269,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/managed-sdk-cde/boundary-C-authority-with-external-E.json",
+      "sha256": "e04f1b3f32d992b3362e136b4406c388a17effbf94cc4f4331a2734f091d194c",
+      "bytes": 6346,
+      "kind": "private-retained-room-evidence",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger.json",
+      "sha256": "3d5e52f2abdda4eff5446446e38126dbb834c308c3e4ddfe551e6a1506296312",
+      "bytes": 2536769,
+      "kind": "private-live-ledger",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/tasks.md",
+      "sha256": "2d6b6adcdf0ba2f6bde6e26b5954783da018552a82cfa987df6cb20a856608ef",
+      "bytes": 20297,
+      "kind": "specification-or-historical-document",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/requirements.md",
+      "sha256": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+      "bytes": 11310,
+      "kind": "specification-or-historical-document",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/design.md",
+      "sha256": "ec3964382bfa600441a73c10beef22996fceef886c4f5d33748b7e78f3b8b9b0",
+      "bytes": 17743,
+      "kind": "specification-or-historical-document",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/native-game-discovery-implementation.md",
+      "sha256": "753bfeb5bba8387368fbf7034737f446b2513216caf769c51987d1be4c21145c",
+      "bytes": 103167,
+      "kind": "specification-or-historical-document",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": true
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Models/NativeGame.swift",
+      "sha256": "c39be931d5c3f4c6b08ba3774cc00898de51484730b83e82643b6f6cd6195ba1",
+      "bytes": 9908,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/App/AppRootView.swift",
+      "sha256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+      "bytes": 21617,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Features/Games/NativeGameLoginCoordinator.swift",
+      "sha256": "510f060cdd37c779c77478f15352fb846bf3f8146189af3980d0250a4d26c3ff",
+      "bytes": 4842,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Features/Games/GamesView.swift",
+      "sha256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+      "bytes": 14431,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Models/ScanResult.swift",
+      "sha256": "be011a112ee085151aecc37af0efaf55306c543a8ee71b9a66b13d78ab24350b",
+      "bytes": 5705,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/YunleFun.entitlements",
+      "sha256": "c2f50b2aec483e3794a95eac864084982431da2750789343509c665097a79cdd",
+      "bytes": 705,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Services/HostAuthorizationService.swift",
+      "sha256": "67f340f0cf1bebbb4e60075913fe954dc7d9aa06578e0dd2d56928cd5b59a9e5",
+      "bytes": 11929,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/WebRuntime/NativeAuthorizationBroker.swift",
+      "sha256": "b2907d8f6d327979eef2c85885ee94c875ac942b169f3d2ed7429d61a8bf7765",
+      "bytes": 10668,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameTests.swift",
+      "sha256": "8f5248b6cacb98d01d7674b535f7a048490a052edfcf09109ef8714be03babdb",
+      "bytes": 11865,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameLoginCoordinatorTests.swift",
+      "sha256": "797f7fbce1a5cd59b7ae170530c9a5e6f0e03367810f2193ae8da890526b3b6f",
+      "bytes": 7849,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameDeferredLaunchTests.swift",
+      "sha256": "cd504bf5bedd8990fa8eeb47598056c835e038dc69e4873a5a2314d0864ae1fc",
+      "bytes": 5443,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/AccountInitialRestoreTests.swift",
+      "sha256": "7571ee7d548c2ec53613ea11c30779e1b47b21743ede4a1530576a077cb07095",
+      "bytes": 35117,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeAuthorizationBrokerTests.swift",
+      "sha256": "4d4bf5d20ed2e6e0d8029a822c299d90140760deb064f8f32e0108478d09bf2d",
+      "bytes": 11124,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/NativeGameLifecycleTests.swift",
+      "sha256": "2a2f8612e1708d6c909ffae8533c2209036c5f5028b5d43d025b065a2c5b9853",
+      "bytes": 9668,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunUITests/NativeGamesUITests.swift",
+      "sha256": "a5f0b04f382849ee1a0cd0c94c45acadc922781a6e2fc5cb70861b5c91e4f59e",
+      "bytes": 21222,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/ScannerTests.swift",
+      "sha256": "7c485cddacb91eafc9a085d70f3cb8b2f7c5cc57f8d6107b31508a9b421b2000",
+      "bytes": 18292,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/DeveloperProfileTests.swift",
+      "sha256": "b9bab8a6ed839405f1cdd4a45416982aa646a2b29ed33a55b5a00686e2eb3aa3",
+      "bytes": 23281,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/WorkshopTests.swift",
+      "sha256": "62da8427ac2ee38049410b6f0e0c368066d216452ae8374f36f1ea1ab4560119",
+      "bytes": 28718,
+      "kind": "current-readonly-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/public/.well-known/apple-app-site-association",
+      "sha256": "32e8905346f9785c961908fd3b4fb39b7c21b7bc010f6397a988df258a145e9f",
+      "bytes": 276,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/utils/identity-bootstrap.ts",
+      "sha256": "908fd65abcb13fab1d737e9ed4d66c96fa0f50991d2ff35aca4f074700725d98",
+      "bytes": 3761,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/composables/usePlaySession.ts",
+      "sha256": "c9321163fc2336f16827a2bd5bbfe1658d28d44813fb265422318e5cf7625bab",
+      "bytes": 5517,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/composables/useOnlineRoom.ts",
+      "sha256": "755bc4a4e9de8e86dad757ce592ea692fbee3de62ce3e5e6ec11fcc6cc9a6fe5",
+      "bytes": 16811,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/components/online/OnlineRoomLauncher.vue",
+      "sha256": "c86c3d4eb437cf289ef0dedde78c35b21ea2cac72f829960189a3da3a6d4d21d",
+      "bytes": 20293,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/utils/room-creation.ts",
+      "sha256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+      "bytes": 4686,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/test/room-creation.test.ts",
+      "sha256": "ad1b84fa2f121082f92dbed7d8d6d8e9391045591a2f03424f813d4ffab52b09",
+      "bytes": 3863,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/src/http/api.ts",
+      "sha256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+      "bytes": 25171,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/test/http-api.test.ts",
+      "sha256": "5d75631225854be5755accef8b23d1e51ecb6389f5bc8e6e204c956f22e791b6",
+      "bytes": 26315,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/game-server/test/colyseus-play-room.test.ts",
+      "sha256": "adb7b93648eecffaae3aab775b78d6db725f6be77813aa67ef2e5ef6fa4fc0bd",
+      "bytes": 69543,
+      "kind": "current-readonly-Play-source",
+      "readAtUTC": "2026-10-30T09:55:33.326154+00:00",
+      "mutableAfterRead": false
+    }
+  ]
+}

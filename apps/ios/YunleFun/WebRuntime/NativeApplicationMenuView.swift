@@ -3,9 +3,18 @@ import SwiftUI
 struct NativeApplicationMenuView: View {
     let application: CloudApplication
     let currentURL: URL?
+    let hasMarketEntry: Bool
+    let isGame: Bool
     let perform: (WebAppMenuAction) -> Void
     @EnvironmentObject private var runtime: NativeWebRuntime
     @Environment(\.dismiss) private var dismiss
+    @State private var sharing = false
+
+    init(application: CloudApplication, currentURL: URL?, hasMarketEntry: Bool = true, isGame: Bool = false,
+         perform: @escaping (WebAppMenuAction) -> Void) {
+        self.application = application; self.currentURL = currentURL
+        self.hasMarketEntry = hasMarketEntry; self.isGame = isGame; self.perform = perform
+    }
 
     var body: some View {
         NavigationStack {
@@ -23,13 +32,15 @@ struct NativeApplicationMenuView: View {
                     }
                     .padding(.vertical, 4)
                     .accessibilityElement(children: .combine)
-                    NavigationLink {
-                        ApplicationDetailView(application: application)
-                    } label: { Label("应用详情", systemImage: "info.circle") }
-                    if application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
+                    if hasMarketEntry {
                         NavigationLink {
-                            ApplicationReviewsView(application: application)
-                        } label: { Label("评分与评价", systemImage: "star.bubble") }
+                            ApplicationDetailView(application: application)
+                        } label: { Label("应用详情", systemImage: "info.circle") }
+                        if application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
+                            NavigationLink {
+                                ApplicationReviewsView(application: application)
+                            } label: { Label("评分与评价", systemImage: "star.bubble") }
+                        }
                     }
                     if let login = (application.personalMarketOwnerLogin ?? application.ownerLogin)?.nilIfEmpty {
                         NavigationLink {
@@ -41,15 +52,21 @@ struct NativeApplicationMenuView: View {
                     }
                 }
                 Section {
+                    if hasMarketEntry && !isGame && application.accessWorkshopID == nil && application.accessOwnerID == nil && application.personalMarketOwnerLogin == nil {
+                        Button { sharing = true } label: { Label("二维码分享卡片", systemImage: "qrcode") }
+                            .accessibilityIdentifier("runtime.menu.share-card")
+                    }
                     Button { perform(.share) } label: { Label("分享", systemImage: "square.and.arrow.up") }
                     Button { perform(.copyLink) } label: { Label("复制链接", systemImage: "link") }
                     Button { perform(.openBrowser) } label: { Label("在浏览器中打开", systemImage: "safari") }
                     Button { perform(.reload) } label: { Label("重新载入", systemImage: "arrow.clockwise") }
-                    NavigationLink {
-                        ApplicationCacheView(application: application, store: runtime.applicationCache)
-                    } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
-                    .accessibilityIdentifier("runtime.menu.cache")
-                    ApplicationCacheUpdateNotice(application: application, store: runtime.applicationCache)
+                    if !isGame {
+                        NavigationLink {
+                            ApplicationCacheView(application: application, store: runtime.applicationCache)
+                        } label: { Label("应用下载缓存", systemImage: "arrow.down.circle") }
+                        .accessibilityIdentifier("runtime.menu.cache")
+                        ApplicationCacheUpdateNotice(application: application, store: runtime.applicationCache)
+                    }
                 }
                 Section {
                     Button(role: .destructive) { perform(.end) } label: { Label("结束", systemImage: "xmark.circle") }
@@ -61,6 +78,7 @@ struct NativeApplicationMenuView: View {
         }
         .environment(\.runtimeMenu, RuntimeMenuContext(applicationID: application.id, runtimeScope: application.runtimeScope,
                                                        launchURL: application.launchURL, dismiss: { dismiss() }))
+        .sheet(isPresented: $sharing) { ApplicationShareView(application: application) }
     }
 
     static func originLabel(_ url: URL?) -> String? {

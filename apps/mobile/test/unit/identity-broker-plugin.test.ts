@@ -35,6 +35,12 @@ vi.mock('@capacitor/core', () => ({
 }))
 
 vi.mock('../../app/host-runtime', () => ({
+  hostEnvironment: {
+    isNative: () => true,
+    hasRuntime: () => true,
+    platform: () => 'android',
+  },
+  hostApplication: { getInfo: async () => ({ id: 'fun.yunle.apps', version: '1.2.3', build: '42', name: 'test' }) },
   HostRuntime: {
     addListener: vi.fn((_event: string, handler: (event: HostAuthorizationEvent) => Promise<void>) => {
       h.authorizationHandler = handler

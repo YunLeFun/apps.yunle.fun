@@ -1,5 +1,7 @@
 # Capacitor 旧客户端 TestFlight 流程
 
+> 已退役 · 2026-11-05：用户确认旧 Capacitor iOS 客户端未分发。本页仅保留历史记录，下面的构建、版本同步和导出命令不再是当前入口。原生发布请使用[原生 TestFlight 流程](./testflight.md)。历史工程与脚本可从 Git 提交 `7a3a0ef` 获取，退役范围见[迁移记录](./capacitor-retirement.md)。
+
 > 历史兼容入口：仅在明确维护 `apps/mobile/ios` 的旧 Capacitor 客户端时使用。云乐坊日常 TestFlight 更新使用 [原生发布流程](./testflight.md)，不要用本页覆盖已安装的原生版。下方上传记录和环境要求属于旧客户端，执行前重新核对工具与签名。
 
 > 当前流程基于 Capacitor 8、Xcode 26 和本机 Apple Distribution 证书。归档、导出、上传分开执行，

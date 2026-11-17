@@ -1,5 +1,5 @@
-import { Capacitor } from '@capacitor/core'
 import { WEB_APP_ENTRY, WEB_ENTRY_STORAGE_KEY } from '~/constants/showcase'
+import { hostEnvironment } from '~/host-runtime'
 
 /**
  * 根路径分流：展示页只面向浏览器访客。
@@ -11,7 +11,7 @@ import { WEB_APP_ENTRY, WEB_ENTRY_STORAGE_KEY } from '~/constants/showcase'
 export default defineNuxtRouteMiddleware((to) => {
   if (import.meta.server)
     return
-  if (Capacitor.isNativePlatform())
+  if (hostEnvironment.isNative())
     return navigateTo(WEB_APP_ENTRY, { replace: true })
 
   const standalone = window.matchMedia?.('(display-mode: standalone)').matches

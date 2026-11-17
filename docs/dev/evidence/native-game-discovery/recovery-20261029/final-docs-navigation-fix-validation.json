@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "two-docs-navigation-route-fixes-validation",
+  "atUTC": "2026-10-29T19:39:43.736873+00:00",
+  "passed": true,
+  "configBeforeSHA256": "a712231cc866eb532eb38927a7210aebbc6fb8c86d4d98cf59329fd694c438af",
+  "configAfterSHA256": "5dbcdab73488ee948068f12f7ab4e4b5e802bb14ffa18413c7a2687cfd58c390",
+  "authorizedFixes": [
+    "Productnav route andactiveMatch /design/\u2192/product/",
+    "Sidebar labeluser_desktops\u2192user_home_screens andpath/database/user-desktops\u2192/database/user-home-screens"
+  ],
+  "onlyIntendedTwoConfigLinesChanged": true,
+  "preexistingDirtyConfigProtected": true,
+  "independentReview": {
+    "TypeScriptVersion": "5.9.3",
+    "parseDiagnostics": 0,
+    "ASTNavLinks": 6,
+    "ASTSidebarLinks": 47,
+    "ASTLogoLinks": 1,
+    "localTargetsPassed": 54,
+    "localTargetsMissing": 0,
+    "reviewerWroteOrBuiltNothing": true
+  },
+  "markdownLocalLinksPassed": 179,
+  "configLocalLinksPassed": 54,
+  "staticReferenceReceiptSHA256": "4c0664afb58299c415e78587f310651af6245447f3d614e34cd3555dedf04889",
+  "fullIsolatedBuild": {
+    "passed": true,
+    "exitCode": 0,
+    "elapsedSeconds": 6.293,
+    "buildAfterConfigFixInvocationCount": 1,
+    "receiptSHA256": "8caf2fb8d0db25cad1d634fee6bdbc446af74c338f33bacbc8d8559f9b1530c2",
+    "sharedOutputDirectoriesUnchanged": true,
+    "ownedTemporaryCleanup": {
+      "kind": "owned-docs-temporary-cleanup",
+      "files": 321,
+      "logicalBytes": 10333644,
+      "allocatedBytes": 11124736,
+      "removed": true
+    }
+  },
+  "currentPublicBuildReceiptSHA256": "7ceea2d8db8ded4f7eca779c89ca9eae5672a80d9e2fcf5d93b277ed4d101dd0",
+  "historicalReportsPreservedPrivately": true,
+  "earlierIsolationWrapperFailurePreserved": "Firstattemptcompiledbundles butSSR dependencyresolution lacked@vueuse/core inownnode_modules; correctedreadonly links, no repo dependencyinstall orsourceworkaround.",
+  "simulatorUIAccountActions": 0,
+  "rootImplementationModifiedByThisTask": false,
+  "newAcceptanceCheckboxes": 0,
+  "staticChecks": {
+    "eslintConfigErrors": 0,
+    "eslintConfigWarnings": 0,
+    "eslintCache": false,
+    "gitDiffCheckExitCode": 0,
+    "dependencyInstallPerformed": false,
+    "lockfileModified": false
+  }
+}

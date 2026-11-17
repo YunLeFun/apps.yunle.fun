@@ -1,0 +1,170 @@
+{
+  "kind": "native-simulator-paper-star-frame-and-process-rss-observation",
+  "recordedAt": "2026-10-29T06:49:49.370849+08:00",
+  "sourceSHA256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c",
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "sameGameAcrossBothIterations": "Same real WebView/profile/launch/document with single ready; test guards passed",
+  "metrics": [
+    {
+      "iteration": 1,
+      "nativeScopeDurationSeconds": 10.47272745828377,
+      "documentScopeDurationMilliseconds": 10450,
+      "observedFrames": 611,
+      "recordedIntervals": 610,
+      "droppedIntervals": 0,
+      "rAFIntervalMilliseconds": {
+        "p50": 17,
+        "p90": 17,
+        "p99": 18,
+        "max": 28
+      },
+      "intervalsOver33Point333Milliseconds": 0,
+      "intervalsOver50Milliseconds": 0,
+      "intervalsOver100Milliseconds": 0,
+      "tickBeforeAfter": [
+        91,
+        399
+      ],
+      "fireSequenceBeforeAfter": [
+        -1,
+        39
+      ],
+      "hasFocusBeforeAfter": [
+        false,
+        false
+      ],
+      "canvasCSSSize": [
+        874,
+        210
+      ]
+    },
+    {
+      "iteration": 2,
+      "nativeScopeDurationSeconds": 10.191359916643705,
+      "documentScopeDurationMilliseconds": 10171,
+      "observedFrames": 610,
+      "recordedIntervals": 609,
+      "droppedIntervals": 0,
+      "rAFIntervalMilliseconds": {
+        "p50": 17,
+        "p90": 17,
+        "p99": 23,
+        "max": 29
+      },
+      "intervalsOver33Point333Milliseconds": 0,
+      "intervalsOver50Milliseconds": 0,
+      "intervalsOver100Milliseconds": 0,
+      "tickBeforeAfter": [
+        400,
+        705
+      ],
+      "fireSequenceBeforeAfter": [
+        39,
+        79
+      ],
+      "hasFocusBeforeAfter": [
+        false,
+        false
+      ],
+      "canvasCSSSize": [
+        874,
+        210
+      ]
+    }
+  ],
+  "rss": [
+    {
+      "pid": 23030,
+      "role": "native-test-host",
+      "hostPID": 23030,
+      "gameWindowSampleCount": 39,
+      "rssKiB": {
+        "min": 423632,
+        "max": 440208,
+        "first": 439904,
+        "last": 423632
+      },
+      "perIteration": [
+        {
+          "iteration": 1,
+          "samples": 20,
+          "minKiB": 439904,
+          "maxKiB": 440144
+        },
+        {
+          "iteration": 2,
+          "samples": 19,
+          "minKiB": 423632,
+          "maxKiB": 440208
+        }
+      ]
+    },
+    {
+      "pid": 23288,
+      "role": "host-log-observed-WebContent",
+      "hostPID": 23030,
+      "gameWindowSampleCount": 39,
+      "rssKiB": {
+        "min": 353072,
+        "max": 400464,
+        "first": 353072,
+        "last": 375824
+      },
+      "perIteration": [
+        {
+          "iteration": 1,
+          "samples": 20,
+          "minKiB": 353072,
+          "maxKiB": 371472
+        },
+        {
+          "iteration": 2,
+          "samples": 19,
+          "minKiB": 372032,
+          "maxKiB": 400464
+        }
+      ]
+    }
+  ],
+  "processAssociations": [
+    {
+      "hostPID": 23030,
+      "webContentPID": 0,
+      "firstObservedLogLine": 21,
+      "association": "Exact current test-host log explicitly identifies WebContent[PID]; sampled executable basename and stable lstart verified by monitor"
+    },
+    {
+      "hostPID": 23030,
+      "webContentPID": 23288,
+      "firstObservedLogLine": 32,
+      "association": "Exact current test-host log explicitly identifies WebContent[PID]; sampled executable basename and stable lstart verified by monitor"
+    },
+    {
+      "hostPID": 23030,
+      "webContentPID": 23733,
+      "firstObservedLogLine": 273,
+      "association": "Exact current test-host log explicitly identifies WebContent[PID]; sampled executable basename and stable lstart verified by monitor"
+    }
+  ],
+  "totalRecordedIntervals": 1219,
+  "quantiles": "nearest rank within each untruncated raw iteration",
+  "limits": [
+    "rAF callback intervals describe JavaScript/main-thread delivery, not GPU-presented frames or physical-display FPS",
+    "No FPS pass threshold, long-task observer, JS heap estimate, renderer settings change, private process API or Swift RSS sampling",
+    "External host/WebContent RSS must stay separate; RSS is neither exclusive allocation nor footprint",
+    "Simulator Debug and test observer/input/JSON overhead are included; existing fixture disables UIKit animations",
+    "RSS from macOS ps, not physical footprint, JS heap, unique allocations or a leak detector. Native test host includes XCTest; it is separate from WebContent.",
+    "Only PIDs explicitly observed as WebContent in this exact YunleFun test-host log are sampled, checked for executable basename and stable process start time. Prior WebContent can remain alive; no RSS sum is called the active game memory.",
+    "Iteration intervals follow when BEGIN/END log markers are observed by this monitor; log delivery and polling delays remain, not exact cross-clock alignment.",
+    "Simulator and observer overhead; no real-device memory/frame claim; no credentials, environment, argv or descriptors collected.",
+    "Observed interval thresholds are diagnostic definitions, not universal missed-frame or user-perceived-jank pass criteria. No FPS or memory limit was imposed.",
+    "Both rounds are the same existing local game on the same simulator; CSS canvas874x210, synthetic input, hasFocus=false. Do not extrapolate to other resolutions/devices/scenes/online sessions.",
+    "RSS increased during sampling; these short records do not prove memory stability, leak absence or exclusive game allocation. GPU/Networking processes are not included.",
+    "No before/after optimization comparison and no30percent startup acceptance derived from this gameplay sample."
+  ],
+  "rawLog": {
+    "taskPath": "/tmp/yunle-native-games.uGZuY9/paper-star-frame-memory.log",
+    "sha256": "223613ba8890b1e2e11571b710db41c9e35f69a7d6262ee72523dd6163adeba6"
+  },
+  "designRequirement": "Adds simulator diagnostic records for frame callback intervals, long interval counts and per-process RSS; real-device performance remains explicitly deferred."
+}

@@ -1,0 +1,1284 @@
+{
+  "schemaVersion": 1,
+  "kind": "production-web-publication-and-version-drift-verification",
+  "status": "latest-production-source-contract-static-closure-and-html-consistent",
+  "recordedAtUTC": "2026-10-29T19:04:11.960951+00:00",
+  "selectedFinalSnapshotIdentity": {
+    "sourceCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "sourceTree": "875192c93e04df55fef99f86d1ebb31df6d37a90",
+    "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "catalogBodySHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+    "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+  },
+  "publicationLineage": [
+    {
+      "commit": "0e6c13711283b78f4f69b47947f556c5d3f321b4",
+      "deploymentID": "dp0dyj5a4l1s",
+      "catalogVersion": "2b92776d596cc5aab25051b902a61c1daa8c24d2f1301af6f5e9c82d1942e9cf",
+      "meaning": "Agent authorized normal fast-forward publication of the two fixes; independently verified historical deployment, later superseded."
+    },
+    {
+      "commit": "d60d7b944a2c012c942b427e283599a7f1288d30",
+      "deploymentID": "dpusmr2h81ri",
+      "catalogVersion": "1a4e2b31e8c3af0c60ec85bc547c7a5bf585feb0dd35e1963f9e1ed7954e6100",
+      "meaning": "Parallel successor for Flight/Pachinko themes and immersive layout; provider production success and intermediate catalog identity observed, no complete1a4snapshot claimed."
+    },
+    {
+      "commit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+      "deploymentID": "dpwj1wku1mh3",
+      "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+      "meaning": "Parallel successor for Flight lobby anchor below native controls; current final snapshot identity selected by task coordinator."
+    }
+  ],
+  "sourceRelationship": {
+    "atUTC": "2026-10-29T18:59:24.802757+00:00",
+    "previousVerifiedCommit": "0e6c13711283b78f4f69b47947f556c5d3f321b4",
+    "latestRemoteAndDeploymentCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "previousIsAncestorExitCode": 0,
+    "newCommits": [
+      "6ff97db619b7140aa76609e5c2f2a766175fc25e fix(flight-chess): keep lobby anchor below native controls",
+      "d60d7b944a2c012c942b427e283599a7f1288d30 feat(games): theme flight chess and pachinko for immersive play"
+    ],
+    "changedPaths": [
+      "apps/web/app/assets/css/flight-chess.css",
+      "apps/web/app/assets/css/main.css",
+      "apps/web/app/assets/css/pachinko-controls.css",
+      "apps/web/app/assets/css/pachinko-surface.css",
+      "apps/web/app/components/PachinkoMachine.vue",
+      "apps/web/app/components/PachinkoPlayStage.vue",
+      "apps/web/app/components/online/NativeOnlineLaunch.vue",
+      "apps/web/app/components/online/OnlineGameRoom.vue",
+      "apps/web/app/composables/useFlightChessSurface.ts",
+      "apps/web/app/features/pachinko/PachinkoHost.ts",
+      "apps/web/app/features/pachinko/three/Pachinko3DRenderer.ts",
+      "apps/web/app/features/pachinko/three/PachinkoCabinet.ts",
+      "apps/web/app/features/pachinko/three/PachinkoRoom.ts",
+      "apps/web/app/layouts/default.vue",
+      "apps/web/app/layouts/pachinko.vue",
+      "apps/web/app/pages/games/flight-chess/index.vue",
+      "apps/web/test/pachinko-host.test.ts"
+    ],
+    "criticalSourceIdentity": [
+      {
+        "path": "scripts/export-native-game-assets.mjs",
+        "unchanged": true,
+        "beforeSHA256": "c2bd0d45c4f63628949cfcf3c273120aef735387f5d3a1ac9e3247199986a016",
+        "afterSHA256": "c2bd0d45c4f63628949cfcf3c273120aef735387f5d3a1ac9e3247199986a016"
+      },
+      {
+        "path": "scripts/test-native-game-assets.mjs",
+        "unchanged": true,
+        "beforeSHA256": "91e5fb45d973ba90ea779b0f96fd0de7aa411397bc9af97d979ccf39185e9bc0",
+        "afterSHA256": "91e5fb45d973ba90ea779b0f96fd0de7aa411397bc9af97d979ccf39185e9bc0"
+      },
+      {
+        "path": "apps/web/app/composables/useOnlineRoom.ts",
+        "unchanged": true,
+        "beforeSHA256": "e9cf47713e32c449b1b294afa2eaeb1f5f363bb207597b31f7dcb067c9a72f3f",
+        "afterSHA256": "e9cf47713e32c449b1b294afa2eaeb1f5f363bb207597b31f7dcb067c9a72f3f"
+      },
+      {
+        "path": "apps/web/test/online-room-role.test.ts",
+        "unchanged": true,
+        "beforeSHA256": "ebf96ffdc1f2baf8d6a101afc27733534cd2c1f11964937acc091abaf7c1b7fb",
+        "afterSHA256": "ebf96ffdc1f2baf8d6a101afc27733534cd2c1f11964937acc091abaf7c1b7fb"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "unchanged": true,
+        "beforeSHA256": "f0528326e605ea5d08ba4e3b195b7d65c943f5841b716e19cff6b1574cd4d360",
+        "afterSHA256": "f0528326e605ea5d08ba4e3b195b7d65c943f5841b716e19cff6b1574cd4d360"
+      },
+      {
+        "path": "packages/protocol/src/index.ts",
+        "unchanged": true,
+        "beforeSHA256": "8cc66bde8543b81a7e60ae54984e46b443ceecedb0c9da8b6d64133ac6a68a9b",
+        "afterSHA256": "8cc66bde8543b81a7e60ae54984e46b443ceecedb0c9da8b6d64133ac6a68a9b"
+      },
+      {
+        "path": "apps/web/app/utils/native-game-host.ts",
+        "unchanged": true,
+        "beforeSHA256": "fd4a13194f0cbcd6fbcf0962ad71a1f59481dd3306f47bfede12136035281e7a",
+        "afterSHA256": "fd4a13194f0cbcd6fbcf0962ad71a1f59481dd3306f47bfede12136035281e7a"
+      }
+    ],
+    "scope": "Read-only comparison; no checkout/rebase/push, no new tests/build or Native action. Local43 tests bind relatively to unchanged core composable/protocol/dependencies, not a full UI-regression claim for parallel themes."
+  },
+  "officialDeploymentUI": {
+    "provider": "Tencent Cloud EdgeOne Makers",
+    "projectName": "yunlefun-play",
+    "projectID": "makers-kfyo1gwlc0hp",
+    "deploymentID": "dpwj1wku1mh3",
+    "detailURL": "https://console.cloud.tencent.com/edgeone/makers/project/makers-kfyo1gwlc0hp/deployment/dpwj1wku1mh3",
+    "sourceCommitURL": "https://github.com/YunLeFun/play/commit/6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "branch": "main",
+    "environmentDisplayed": "生产",
+    "statusDisplayed": "成功",
+    "timestampDisplayed": "2026/10/30 02:50:44",
+    "timestampTimezone": "Asia/Shanghai",
+    "timestampUTC": "2026-10-29T18:50:44Z",
+    "buildDurationSecondsDisplayed": 85,
+    "stageDurationsDisplayed": {
+      "初始化": "0s",
+      "克隆仓库": "3s",
+      "安装依赖": "18s",
+      "构建": "1m8s",
+      "部署": "6s"
+    },
+    "allFiveStagesDisplayed": "完成",
+    "finalLatestListStillSelectedCommit": true,
+    "deploymentPreviewURLWithoutValidationQuery": "https://yunlefun-play-dpwj1wku1mh3.edgeone.cool/",
+    "previewLimitation": "Official default-domain preview requires a three-hour validation query. Query was omitted and not used as evidence for canonical production bytes.",
+    "detailSHA256": "c23a38da7b4a38aab916cadd2d68a6c27113422779743001db72d671e97b85ef",
+    "finalLatestListSHA256": "a95b1c0dba2f0291441d2ff3cdc3ebcff5724c83db9803e0c65bf4dec386ea00",
+    "screenshotSHA256": "5b16548dbb73ae2e222ca9c87bdd297f1e68eaf62b550cd607067ac28cbf8f08"
+  },
+  "canonicalPublicResourceVerification": {
+    "normalTLSCertificateAndHostnameValidation": true,
+    "redirectsAllowed": false,
+    "cookiesOrCredentialsSent": false,
+    "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "catalogGeneratedAtUTC": "2026-10-29T18:52:01.283Z",
+    "catalogSemanticComparison": {
+      "baselineCatalogVersion": "2b92776d596cc5aab25051b902a61c1daa8c24d2f1301af6f5e9c82d1942e9cf",
+      "allFieldsEqualExcept": [
+        "catalogVersion",
+        "generatedAt",
+        "games[].resourceVersion"
+      ],
+      "launchModesAvailabilityURLsAndProtocolSchemaUnchanged": true
+    },
+    "contracts": [
+      {
+        "url": "https://play.yunle.fun/native/catalog-v1.json",
+        "observedAtUTC": "2026-10-29T18:54:21.163886+00:00",
+        "status": 200,
+        "bytes": 4561,
+        "sha256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+        "headers": {
+          "Content-Type": "application/json",
+          "Content-Length": "4561",
+          "Cache-Control": "public, max-age=60, must-revalidate",
+          "ETag": "\"80f7ef3714bee14d15edde248ff61f0c\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:10 GMT",
+          "Age": "24",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "tlsCertificateAndHostnameValidation": true,
+        "redirectsAllowed": false
+      },
+      {
+        "url": "https://play.yunle.fun/native/resources/gomoku-v1.json",
+        "observedAtUTC": "2026-10-29T18:54:21.315860+00:00",
+        "status": 200,
+        "bytes": 60913,
+        "sha256": "f7f5f4eb6f41f003596b6919312111310954c385bdc28f6a4f715581c5f37897",
+        "headers": {
+          "Content-Type": "application/json",
+          "Content-Length": "60913",
+          "Cache-Control": "public, max-age=60, must-revalidate",
+          "ETag": "\"5c9bf4788e922516715c36aa14f66b0e\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:10 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "tlsCertificateAndHostnameValidation": true,
+        "redirectsAllowed": false
+      },
+      {
+        "url": "https://play.yunle.fun/native/resources/flight-chess-v1.json",
+        "observedAtUTC": "2026-10-29T18:54:21.271965+00:00",
+        "status": 200,
+        "bytes": 58940,
+        "sha256": "3b3bb54b0d23bd909d5c767feadf9b28ac4c77989e24dd01b441e5d1b7de6762",
+        "headers": {
+          "Content-Type": "application/json",
+          "Content-Length": "58940",
+          "Cache-Control": "public, max-age=60, must-revalidate",
+          "ETag": "\"d1b3d847fdda9ba1c47ca51b8ee87247\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:10 GMT",
+          "Age": "24",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "tlsCertificateAndHostnameValidation": true,
+        "redirectsAllowed": false
+      },
+      {
+        "url": "https://play.yunle.fun/native/resources/paper-star-v1.json",
+        "observedAtUTC": "2026-10-29T18:54:21.323660+00:00",
+        "status": 200,
+        "bytes": 61565,
+        "sha256": "678f6a067b63415a21d8ac8166f22b502df62f67ad5f52d1cb5d9cac759cd141",
+        "headers": {
+          "Content-Type": "application/json",
+          "Content-Length": "61565",
+          "Cache-Control": "public, max-age=60, must-revalidate",
+          "ETag": "\"2d8fa1138d114ecbbeea76b463f87291\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:10 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "tlsCertificateAndHostnameValidation": true,
+        "redirectsAllowed": false
+      }
+    ],
+    "allFourContractsDoubleReadIdentical": true,
+    "gameManifests": [
+      {
+        "gameId": "gomoku",
+        "availableOnline": true,
+        "resourceCount": 231,
+        "totalBytes": 8564877,
+        "oldResourceVersion": "c9c83018e73753b59d0c9acba02c2a82f5802d8bc3b68d5c053be42cd1e760ea",
+        "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2",
+        "manifestSHA256": "f7f5f4eb6f41f003596b6919312111310954c385bdc28f6a4f715581c5f37897",
+        "schemaAndProtocolMetadataEqual": true,
+        "perGameBudgetBytes": 26214400
+      },
+      {
+        "gameId": "flight-chess",
+        "availableOnline": true,
+        "resourceCount": 223,
+        "totalBytes": 8546656,
+        "oldResourceVersion": "499dee2f30edb4833de0ae69710431ca6052da652637a1ebf9112bfbc8ae8608",
+        "resourceVersion": "77c1c8290fb05d82fd47d7fbb82f22932d2f0bc2d11625f57acfb388bb02044f",
+        "manifestSHA256": "3b3bb54b0d23bd909d5c767feadf9b28ac4c77989e24dd01b441e5d1b7de6762",
+        "schemaAndProtocolMetadataEqual": true,
+        "perGameBudgetBytes": 26214400
+      },
+      {
+        "gameId": "paper-star",
+        "availableOnline": false,
+        "resourceCount": 233,
+        "totalBytes": 10960814,
+        "oldResourceVersion": "77ca26bfb516fdaa9f74c7a0f4d8eaf7251fc2fdeee29c61dfb22f23b62f5114",
+        "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973",
+        "manifestSHA256": "678f6a067b63415a21d8ac8166f22b502df62f67ad5f52d1cb5d9cac759cd141",
+        "schemaAndProtocolMetadataEqual": true,
+        "perGameBudgetBytes": 26214400
+      }
+    ],
+    "uniqueResources": 261,
+    "occurrences": 687,
+    "uniqueBytes": 11367582,
+    "aggregateDeclaredGameBytes": 28072347,
+    "perGameBudgetBytes": 26214400,
+    "globalCacheBudgetBytes": 209715200,
+    "newOrChangedResourcesFreshHTTPSCount": 43,
+    "freshResources": [
+      {
+        "url": "https://play.yunle.fun/_nuxt/BLiyW8N9.js",
+        "status": 200,
+        "bytes": 2870,
+        "sha256": "ea212e529b5249ff30789a0bc66db0f6afb12b0fd6a4c576085c1fe7c351bf62",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "2870",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"16efeebc4e45b33ef31eedabd1637dca\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/BNR6dJ3N.js",
+        "status": 200,
+        "bytes": 12058,
+        "sha256": "c792468d987deaa2dfceb86ca232ae6effe424afc4a772cb008ed784cf05cd61",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "12058",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"ae2220c2325f3fdc1b3288ea47c0d8a0\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/BQsW7dYi.js",
+        "status": 200,
+        "bytes": 972,
+        "sha256": "5f15333a7206ee6e46442246a7b361cd361817a7959272ab67b2ad38d2b570b3",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "972",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"f1993ee347693a447bd19b9098b9b5e7\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/BU_fhfME.js",
+        "status": 200,
+        "bytes": 1169,
+        "sha256": "27e311cda5488d9c9cc92e148863e402c6bccd2cfff6bb8439a9ff772660e62d",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1169",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"01844347d56fddfa4119956ff0fb2bb0\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/BXz1awwQ.js",
+        "status": 200,
+        "bytes": 4114,
+        "sha256": "48c569954974569e4a55fb37e87aab8e05aaa05b163821f7c72291a3f8ee2bdf",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "4114",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"a0e971a2685ef1b6e8f06c50c47313f9\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/B_0yxpQd.js",
+        "status": 200,
+        "bytes": 11161,
+        "sha256": "1c9807d4bea22d9900950dd2f640e457085d4c381604940fc42b479d839283a8",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "11161",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"196f1c68eb8c04e41a5bba96815aac4a\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/Bi_1VC-9.js",
+        "status": 200,
+        "bytes": 1542,
+        "sha256": "0a170e178086134a3a5fa380c0ddae0525353bbc6b0b31bc0c16ab947360a437",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1542",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"47b65da1a23c9463e1dcf82487effbf1\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/Bkg4pYUh.js",
+        "status": 200,
+        "bytes": 2844,
+        "sha256": "a582888dbe989bca2c5b5811a204b819c655cd1d3f4e9d42e325ce467f632436",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "2844",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"f0a5919ab84e80f8220e2357f8189165\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/Bpjfk6Fj.js",
+        "status": 200,
+        "bytes": 16210,
+        "sha256": "f5d0ff77dd8a1043d35ad4b10bbfb28d4bdfd71cc820f4646e39bf46538e045c",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "16210",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"ae7004d1147d0c2eabdd21241199c22f\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/C0kQOtdF.js",
+        "status": 200,
+        "bytes": 49,
+        "sha256": "3ff5a4beb7676431e7105de65ae05aa016b8b9474112d9043b98ec236bcca6ab",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "49",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"3e475a0ba1cddd8ca0c94ee634344b5f\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/C19gsFCa.js",
+        "status": 200,
+        "bytes": 929,
+        "sha256": "5bf7bc66eded8920350fcce3a21c3c8472b66c213a1f2927869e1052069bb30f",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "929",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"9a7c09739390866104905c03ea9ece78\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CC_6rmNH.js",
+        "status": 200,
+        "bytes": 366,
+        "sha256": "dbab7c89b7639a235402cac69fc7b8c022385aa791bc1e74db29a46e4e44686f",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "366",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"1b3c77b29661500b20bce194c70e559a\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CDIZpcAQ.js",
+        "status": 200,
+        "bytes": 5691,
+        "sha256": "4964a52820122572a6e804c64b8aa75c9e2f22f43861f5ceaa9f0fed31f65639",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "5691",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"e6c4f9b06da6c5dedaa476447355369d\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CDvrckx4.js",
+        "status": 200,
+        "bytes": 554,
+        "sha256": "aa1fdc1cb5cd169c3ef0e5fe723a8d9d5ba14bec6e3089f702c6f6de1c44374b",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "554",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"20365c6e8708b45394ad941dd561e377\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CEzxIUDg.js",
+        "status": 200,
+        "bytes": 1609,
+        "sha256": "a6f6d068f9ccc5dda9a2ccfec3716f2ee2f52d2f0a7e4789480c5049a2211e86",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1609",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"d7c93e72f131ca853e275189972b4343\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "23",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CFu_fkrM.js",
+        "status": 200,
+        "bytes": 1200,
+        "sha256": "8ef9e97001b5a32e9d55789205682abff62580ea5eb2109f9dce0fc468747e6d",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1200",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"c96d326f87cee8b86839ab7e6c816026\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CJhXQcy6.js",
+        "status": 200,
+        "bytes": 109565,
+        "sha256": "9fa6a35974b23288b95f29acf7663f5b3368fe2660cd76a650dae8244dd9c97f",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "109565",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"d34fddeaa4c5a35aa59fcdb2cb44b8e5\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CNv5oBoI.js",
+        "status": 200,
+        "bytes": 8824,
+        "sha256": "a167047659dc81c2456e6b7c885092c299cef83616bd78b7926da5a8f64ac928",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "8824",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"72ceb1a08a5fc69d4699be0d5b196cc5\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CSM1JMLs.js",
+        "status": 200,
+        "bytes": 26124,
+        "sha256": "7c12adb9d3a4758f1aadfae092de807a3e9f397a47faf970fe0594684976fd32",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "26124",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"bd4828044d814fff3d72d2308d9196fc\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CSrH0NGO.js",
+        "status": 200,
+        "bytes": 808,
+        "sha256": "900b7e4a222d147c2d98e5ce7e9e404e8d9bbd04e5a018c5bba4805cf8d7b0f6",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "808",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"88f2a499822162d96a16f86a14522f10\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:08 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+        "status": 200,
+        "bytes": 276084,
+        "sha256": "328908ddbffcc952863782ea9fc31f80946958463bc61a5756e7ae8e89224115",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "276084",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"0dbc97c9665f2f7cbce14708dd21f41a\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/Co308IoJ.js",
+        "status": 200,
+        "bytes": 9890,
+        "sha256": "cb4e9b4fce6aad78a5a4ddb4e65cbfc87a3e49e6ea504baf05fe70dc2cd73c54",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "9890",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"0fa83f5dfd81a1090bd269cfcc593639\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/Cyv3uC6q.js",
+        "status": 200,
+        "bytes": 1238,
+        "sha256": "05a708d4e9137f7697f03e37e4dc61892e05bb92e171a6a2275d730c5f76d03c",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1238",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"cdfe1d22e3afd0b17ba9064e7d64b7a6\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/CzKzixz1.js",
+        "status": 200,
+        "bytes": 73613,
+        "sha256": "1b120a506fdab07be7378294c00181ce152f994d545099588036d8dee8206082",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "73613",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"e1872c3ee446f2cf1a98a11f7619b6fb\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DBGWICVp.js",
+        "status": 200,
+        "bytes": 3667,
+        "sha256": "f233a83baa4f2b34d67f5f3b1c1e775aa0d86169c64b33485082da411429464a",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "3667",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"a7debb102bdedb139ef70de45fcbadc3\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DEUGhWOY.js",
+        "status": 200,
+        "bytes": 50003,
+        "sha256": "1da0221760f6ea6be37ccce990a049f1c6268a37468e0f3031844889f8a007f5",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "50003",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"a84589f8d17f8072e7b50aa4c9c8b6bc\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DMAsgrvz.js",
+        "status": 200,
+        "bytes": 867,
+        "sha256": "3603a96677d3a52d9ec007b297c4c8ff16925de6c7c782d70bbdc7bdf0d60872",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "867",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"4ebf5dd3e00df7fdca6452372c6ee876\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DSwebNW5.js",
+        "status": 200,
+        "bytes": 45759,
+        "sha256": "3988183a5ff768e1597de32ddcf17dc2eaa572145fb31c0c0fa2c8b1f684132f",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "45759",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"dacbeaa67d3e7dda6cb72e233a7a8949\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DToYqrxq.js",
+        "status": 200,
+        "bytes": 4974,
+        "sha256": "53bb19dd08b52f004ff6ce8afae2492ef1d7d79ce7c81ea7ef576b0835befcf4",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "4974",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"08e591a37530714fc1e34cccd2d0e28c\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DeeoqXZ3.js",
+        "status": 200,
+        "bytes": 565,
+        "sha256": "4afa4e2fdbf10b7e80effec56567985556228df7199f6fde0e3193a6e80f9201",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "565",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"8dffd42d48d44486046ff1ff18790baf\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/DrkHERHy.js",
+        "status": 200,
+        "bytes": 2115,
+        "sha256": "9c9025827abdb9a36605663010f229d06bbde7511ca981aa2364103accf24ffd",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "2115",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"fadcba6d7a2aa9662c9928ef79deb3f9\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/Dw_sPZRE.js",
+        "status": 200,
+        "bytes": 96957,
+        "sha256": "41d073a37fe3c3043c143ad868b1a4c3c2887c11ec16b64c43b77b31d19d6af6",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "96957",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"97059c3e7195e9efd435c6bbcb5d3c8a\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/EEKvQw4R.js",
+        "status": 200,
+        "bytes": 1275,
+        "sha256": "c9b8ccf9c8b9bf8c4a597721a82f2958aac36eaeda02264119b62dff97858796",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1275",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"ec53a20841f243fcee7c4a8830c8591a\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/GBsbYlIi.js",
+        "status": 200,
+        "bytes": 66,
+        "sha256": "2d1af8b0cf2d5490ebdc430a8e77e8922da222c93dd522c029f690b8ae1e9460",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "66",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"d8e28f80f890ee16af23dbc8cc1d14e8\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/VkHn9zPn.js",
+        "status": 200,
+        "bytes": 1411,
+        "sha256": "32b245abfcfac550c227b4c101627964c012468f1c0c303e76e60f7d0d032363",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "1411",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"00a70578e71ff69b456b389a9dfe28ae\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/W-BBBatE.js",
+        "status": 200,
+        "bytes": 2122,
+        "sha256": "ff0309e11ea3fa536fb625683f63a1a72615b3479fb8b8bf1d0dd91b68de9fe3",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "2122",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"31f30ecae532f021a9b75a46d1c02eb0\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/_inviteCode_.BXqlyYjP.css",
+        "status": 200,
+        "bytes": 26538,
+        "sha256": "0e64056357f1ab6fc5ade373831884e931c06d39d91fec66c13eea29ae069f08",
+        "headers": {
+          "Content-Type": "text/css",
+          "Content-Length": "26538",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"d0383f776729698a77c1db1e4fc6211d\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/default.DFw4QNlJ.css",
+        "status": 200,
+        "bytes": 3338,
+        "sha256": "5054512ff5a4c58a1118d62b59559adef74547e310e272b2d013070d421cd521",
+        "headers": {
+          "Content-Type": "text/css",
+          "Content-Length": "3338",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"586fbbc81123751ec046e8da449185ce\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "29",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/entry.BpgnIBUP.css",
+        "status": 200,
+        "bytes": 232030,
+        "sha256": "01b2cb1dced92b5fc3d30410e2c7379404955b3d920a50f8666862e2d31717e7",
+        "headers": {
+          "Content-Type": "text/css",
+          "Content-Length": "232030",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"6edf7950a7391f8e6aedddd57694ef4b\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "29",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/isNH4RRf.js",
+        "status": 200,
+        "bytes": 12098,
+        "sha256": "b7f0786e021d037c0a26ba90c1585a1c7623ad48a5abf568fe39fbe680ab5b61",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "12098",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"55e8ae38881fdb53276b385ea7e68082\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/o4R8596X.js",
+        "status": 200,
+        "bytes": 23156,
+        "sha256": "4f2fa77f3c3434700e5bb829daf7a028845d0ac0ebe465045f66518cb9afdd1a",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "23156",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"d363b0e28b8fa360f2c8588bb7c8611d\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/online.B0GYTICb.css",
+        "status": 200,
+        "bytes": 66,
+        "sha256": "a9f58888cabacd0d74d189be33f85ef04a91f991696380091e042e22e6b463e7",
+        "headers": {
+          "Content-Type": "text/css",
+          "Content-Length": "66",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"b00d0c8c8daba12134ef5125107165f7\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      },
+      {
+        "url": "https://play.yunle.fun/_nuxt/pbds_HbT.js",
+        "status": 200,
+        "bytes": 316,
+        "sha256": "8e20c0bc72cacc87ac74196790dab5cffe89dbbef196ec0a04a8248b4ae07c19",
+        "headers": {
+          "Content-Type": "application/javascript",
+          "Content-Length": "316",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "ETag": "\"4e9cad88f29fce114fd0ec5533a3df82\"",
+          "Last-Modified": "Thu, 29 Oct 2026 18:52:09 GMT",
+          "Age": "0",
+          "Vary": "Origin, Access-Control-Request-Headers, Access-Control-Request-Method"
+        },
+        "sizeSHA256MIMECacheChecksPassed": true
+      }
+    ],
+    "unchangedResourcesOfflineRehashedCount": 218,
+    "offlineReuseLimit": "Reused bodies are exact matches to current declarations and were rehashed from prior verified files/archive members; no fresh HTTP availability claim for unchanged entries.",
+    "exact261BodySourceIndexSHA256": "57e9355c9cf5b6c65627c9658ddd471bddd1f93ed9ae9b52516b65324c49877b",
+    "freshBodyInventorySHA256": "699fdd8140b2129401b0370b240559d9d2f7cedb14d85421041e4f0e6049bb0d",
+    "roomActualJSContainingBothChineseFixes": [
+      {
+        "url": "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+        "bytes": 276084,
+        "sha256": "328908ddbffcc952863782ea9fc31f80946958463bc61a5756e7ae8e89224115",
+        "phrases": [
+          "重连席位已过期，请返回游戏大厅重新加入房间",
+          "连接重试已结束，请返回游戏大厅重新加入房间"
+        ]
+      }
+    ],
+    "actualStaticGraph": {
+      "allChecksPassed": true,
+      "roomURL": "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+      "roomRouteTarget": "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+      "roomRouteSource": "https://play.yunle.fun/_nuxt/Dw_sPZRE.js",
+      "roomRoutePreloadURLs": [
+        "https://play.yunle.fun/_nuxt/CZqz862Y.js",
+        "https://play.yunle.fun/_nuxt/XKyaHtl9.js",
+        "https://play.yunle.fun/_nuxt/CJhXQcy6.js",
+        "https://play.yunle.fun/_nuxt/DEUGhWOY.js",
+        "https://play.yunle.fun/_nuxt/M3KAs7H8.js",
+        "https://play.yunle.fun/_nuxt/DrkHERHy.js",
+        "https://play.yunle.fun/_nuxt/CC_6rmNH.js",
+        "https://play.yunle.fun/_nuxt/DMAsgrvz.js",
+        "https://play.yunle.fun/_nuxt/CSrH0NGO.js",
+        "https://play.yunle.fun/_nuxt/rg2IlEl2.js",
+        "https://play.yunle.fun/_nuxt/Cu88cMMO.js",
+        "https://play.yunle.fun/_nuxt/B_0yxpQd.js",
+        "https://play.yunle.fun/_nuxt/CFu_fkrM.js",
+        "https://play.yunle.fun/_nuxt/Cyv3uC6q.js",
+        "https://play.yunle.fun/_nuxt/CNv5oBoI.js",
+        "https://play.yunle.fun/_nuxt/DBGWICVp.js",
+        "https://play.yunle.fun/_nuxt/CzKzixz1.js",
+        "https://play.yunle.fun/_nuxt/GBsbYlIi.js",
+        "https://play.yunle.fun/_nuxt/CvuXq5qe.js",
+        "https://play.yunle.fun/_nuxt/BU_fhfME.js",
+        "https://play.yunle.fun/_nuxt/Bpjfk6Fj.js",
+        "https://play.yunle.fun/_nuxt/DToYqrxq.js",
+        "https://play.yunle.fun/_nuxt/AnimalChessBoard.2h-iewGz.css",
+        "https://play.yunle.fun/_nuxt/DarkAnimalChessBoard.CtY-AHJu.css",
+        "https://play.yunle.fun/_nuxt/PaperStarArena.DK7aJDRb.css",
+        "https://play.yunle.fun/_nuxt/dist.S5tpV3NC.css",
+        "https://play.yunle.fun/_nuxt/StoneChessBoard.B54_IOvt.css",
+        "https://play.yunle.fun/_nuxt/_inviteCode_.BXqlyYjP.css"
+      ],
+      "roomStaticClosureCount": 28,
+      "perGame": [
+        {
+          "gameId": "gomoku",
+          "availableOnline": true,
+          "declaredResourceCount": 231,
+          "staticDependenciesChecked": 289,
+          "staticImportCSSMissing": [],
+          "roomPreloadMissing": [],
+          "roomStaticClosureMissing": [],
+          "roomRouteSourceMissing": false,
+          "unexpectedRoomURL": false
+        },
+        {
+          "gameId": "flight-chess",
+          "availableOnline": true,
+          "declaredResourceCount": 223,
+          "staticDependenciesChecked": 265,
+          "staticImportCSSMissing": [],
+          "roomPreloadMissing": [],
+          "roomStaticClosureMissing": [],
+          "roomRouteSourceMissing": false,
+          "unexpectedRoomURL": false
+        },
+        {
+          "gameId": "paper-star",
+          "availableOnline": false,
+          "declaredResourceCount": 233,
+          "staticDependenciesChecked": 287,
+          "staticImportCSSMissing": [],
+          "roomPreloadMissing": [],
+          "roomStaticClosureMissing": [],
+          "roomRouteSourceMissing": false,
+          "unexpectedRoomURL": false
+        }
+      ],
+      "parseDiagnostics": [],
+      "bareImportsIgnored": [],
+      "ignoredReferenceCounts": {
+        "external": 10,
+        "dataOrFragment": 52,
+        "outsideNuxt": 0,
+        "dynamicImports": 41
+      },
+      "suppliedFileCount": 80,
+      "parsedJSFiles": 63,
+      "parsedCSSFiles": 17,
+      "scope": "Supplied public text only; all declared JS static imports/exports and CSS url/@import references; only the named room route dynamic import and its Vite preload list. Other dynamic/router edges are not traversed."
+    },
+    "actualStaticGraphResultSHA256": "0cc9ec611dccb73fd81bf59ed495411c0e865e605548d0046a31cd68f179ca61",
+    "anonymousModeHTML": {
+      "atUTC": "2026-10-29T19:01:26.537988+00:00",
+      "catalogSHA256BeforeAndAfter": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+      "anonymousHTMLOnly": true,
+      "tlsCertificateHostnameValidated": true,
+      "redirectsAllowed": false,
+      "latestBuild": {
+        "path": "/_nuxt/builds/latest.json",
+        "status": 200,
+        "bytes": 71,
+        "sha256": "2e3a6313ed3ed1deaabaae84676e047d8c9e2d5626498e880b148f9d50142069",
+        "contentType": "application/json",
+        "cacheControl": "public,max-age=0,must-revalidate",
+        "observedAtUTC": "2026-10-29T19:01:26.332061+00:00"
+      },
+      "latestBuildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87",
+      "modeHTML": [
+        {
+          "path": "/games/gomoku/online",
+          "status": 200,
+          "bytes": 10671,
+          "sha256": "f85f3580035e550fab2819498e4eefe6bde446d456fb617beb6ac9a812206b3c",
+          "contentType": "text/html",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "observedAtUTC": "2026-10-29T19:01:25.959324+00:00",
+          "gameId": "gomoku",
+          "scriptAndStyleURLs": [
+            "https://play.yunle.fun/_nuxt/BNR6dJ3N.js",
+            "https://play.yunle.fun/_nuxt/BQsW7dYi.js",
+            "https://play.yunle.fun/_nuxt/C0kQOtdF.js",
+            "https://play.yunle.fun/_nuxt/CC_6rmNH.js",
+            "https://play.yunle.fun/_nuxt/CDvrckx4.js",
+            "https://play.yunle.fun/_nuxt/CEzxIUDg.js",
+            "https://play.yunle.fun/_nuxt/CJhXQcy6.js",
+            "https://play.yunle.fun/_nuxt/CSM1JMLs.js",
+            "https://play.yunle.fun/_nuxt/CSrH0NGO.js",
+            "https://play.yunle.fun/_nuxt/Co308IoJ.js",
+            "https://play.yunle.fun/_nuxt/DEUGhWOY.js",
+            "https://play.yunle.fun/_nuxt/DMAsgrvz.js",
+            "https://play.yunle.fun/_nuxt/DSwebNW5.js",
+            "https://play.yunle.fun/_nuxt/DeeoqXZ3.js",
+            "https://play.yunle.fun/_nuxt/DrkHERHy.js",
+            "https://play.yunle.fun/_nuxt/Dw_sPZRE.js",
+            "https://play.yunle.fun/_nuxt/GameIcon.BxZK6n9J.css",
+            "https://play.yunle.fun/_nuxt/M3KAs7H8.js",
+            "https://play.yunle.fun/_nuxt/OnlineRoomLauncher.Bn9n5eKc.css",
+            "https://play.yunle.fun/_nuxt/SiteHeader.CwyRSe5U.css",
+            "https://play.yunle.fun/_nuxt/VkHn9zPn.js",
+            "https://play.yunle.fun/_nuxt/XKyaHtl9.js",
+            "https://play.yunle.fun/_nuxt/default.DFw4QNlJ.css",
+            "https://play.yunle.fun/_nuxt/entry.BpgnIBUP.css",
+            "https://play.yunle.fun/_nuxt/online.B0GYTICb.css",
+            "https://play.yunle.fun/_nuxt/rg2IlEl2.js"
+          ],
+          "allNuxtScriptAndStyleReferencesDeclared": true,
+          "missingReferences": [],
+          "publicPayloadReferencesForFreezeAgent": [
+            "/games/gomoku/online/_payload.json?_b=fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+          ],
+          "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+        },
+        {
+          "path": "/games/flight-chess/online",
+          "status": 200,
+          "bytes": 10842,
+          "sha256": "2988a640f6c5db4fea5fa1f6563a857c3ec39a58d0c67c54b88a115f26efa157",
+          "contentType": "text/html",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "observedAtUTC": "2026-10-29T19:01:25.910901+00:00",
+          "gameId": "flight-chess",
+          "scriptAndStyleURLs": [
+            "https://play.yunle.fun/_nuxt/BNR6dJ3N.js",
+            "https://play.yunle.fun/_nuxt/BQsW7dYi.js",
+            "https://play.yunle.fun/_nuxt/C0kQOtdF.js",
+            "https://play.yunle.fun/_nuxt/CC_6rmNH.js",
+            "https://play.yunle.fun/_nuxt/CDvrckx4.js",
+            "https://play.yunle.fun/_nuxt/CEzxIUDg.js",
+            "https://play.yunle.fun/_nuxt/CJhXQcy6.js",
+            "https://play.yunle.fun/_nuxt/CSM1JMLs.js",
+            "https://play.yunle.fun/_nuxt/CSrH0NGO.js",
+            "https://play.yunle.fun/_nuxt/Co308IoJ.js",
+            "https://play.yunle.fun/_nuxt/DEUGhWOY.js",
+            "https://play.yunle.fun/_nuxt/DMAsgrvz.js",
+            "https://play.yunle.fun/_nuxt/DSwebNW5.js",
+            "https://play.yunle.fun/_nuxt/DeeoqXZ3.js",
+            "https://play.yunle.fun/_nuxt/DrkHERHy.js",
+            "https://play.yunle.fun/_nuxt/Dw_sPZRE.js",
+            "https://play.yunle.fun/_nuxt/GameIcon.BxZK6n9J.css",
+            "https://play.yunle.fun/_nuxt/M3KAs7H8.js",
+            "https://play.yunle.fun/_nuxt/OnlineRoomLauncher.Bn9n5eKc.css",
+            "https://play.yunle.fun/_nuxt/SiteHeader.CwyRSe5U.css",
+            "https://play.yunle.fun/_nuxt/VkHn9zPn.js",
+            "https://play.yunle.fun/_nuxt/XKyaHtl9.js",
+            "https://play.yunle.fun/_nuxt/default.DFw4QNlJ.css",
+            "https://play.yunle.fun/_nuxt/entry.BpgnIBUP.css",
+            "https://play.yunle.fun/_nuxt/online.B0GYTICb.css",
+            "https://play.yunle.fun/_nuxt/rg2IlEl2.js"
+          ],
+          "allNuxtScriptAndStyleReferencesDeclared": true,
+          "missingReferences": [],
+          "publicPayloadReferencesForFreezeAgent": [
+            "/games/flight-chess/online/_payload.json?_b=fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+          ],
+          "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+        },
+        {
+          "path": "/games/paper-star/pve",
+          "status": 200,
+          "bytes": 9356,
+          "sha256": "527716285b0cae6f6bdd22ddae51acbfe10431d9d982bd44ce550fa7612fe6dd",
+          "contentType": "text/html",
+          "cacheControl": "public,max-age=0,must-revalidate",
+          "observedAtUTC": "2026-10-29T19:01:25.990202+00:00",
+          "gameId": "paper-star",
+          "scriptAndStyleURLs": [
+            "https://play.yunle.fun/_nuxt/BQsW7dYi.js",
+            "https://play.yunle.fun/_nuxt/BU_fhfME.js",
+            "https://play.yunle.fun/_nuxt/CC_6rmNH.js",
+            "https://play.yunle.fun/_nuxt/CDvrckx4.js",
+            "https://play.yunle.fun/_nuxt/CEzxIUDg.js",
+            "https://play.yunle.fun/_nuxt/CJhXQcy6.js",
+            "https://play.yunle.fun/_nuxt/CSM1JMLs.js",
+            "https://play.yunle.fun/_nuxt/CSrH0NGO.js",
+            "https://play.yunle.fun/_nuxt/Co308IoJ.js",
+            "https://play.yunle.fun/_nuxt/CvuXq5qe.js",
+            "https://play.yunle.fun/_nuxt/CzKzixz1.js",
+            "https://play.yunle.fun/_nuxt/D59HUySn.js",
+            "https://play.yunle.fun/_nuxt/DEUGhWOY.js",
+            "https://play.yunle.fun/_nuxt/DMAsgrvz.js",
+            "https://play.yunle.fun/_nuxt/DSwebNW5.js",
+            "https://play.yunle.fun/_nuxt/DeeoqXZ3.js",
+            "https://play.yunle.fun/_nuxt/DrkHERHy.js",
+            "https://play.yunle.fun/_nuxt/Dw_sPZRE.js",
+            "https://play.yunle.fun/_nuxt/EEKvQw4R.js",
+            "https://play.yunle.fun/_nuxt/GBsbYlIi.js",
+            "https://play.yunle.fun/_nuxt/GameIcon.BxZK6n9J.css",
+            "https://play.yunle.fun/_nuxt/M3KAs7H8.js",
+            "https://play.yunle.fun/_nuxt/PaperStarArena.DK7aJDRb.css",
+            "https://play.yunle.fun/_nuxt/SiteHeader.CwyRSe5U.css",
+            "https://play.yunle.fun/_nuxt/XKyaHtl9.js",
+            "https://play.yunle.fun/_nuxt/default.DFw4QNlJ.css",
+            "https://play.yunle.fun/_nuxt/entry.BpgnIBUP.css",
+            "https://play.yunle.fun/_nuxt/o4R8596X.js",
+            "https://play.yunle.fun/_nuxt/pve.AOxRsspM.css"
+          ],
+          "allNuxtScriptAndStyleReferencesDeclared": true,
+          "missingReferences": [],
+          "publicPayloadReferencesForFreezeAgent": [
+            "/games/paper-star/pve/_payload.json?_b=fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+          ],
+          "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87"
+        }
+      ],
+      "allChecksPassed": true,
+      "scope": "Anonymous actual mode HTML hashed Nuxt script/stylesheet/modulepreload references verified against each exact game resource manifest; public payload refs delegated to full snapshot closure. No browser hydration or account-state claim.",
+      "initialCheckerFormatCorrection": "An initial quoted JSON-key buildId regex matched zero in Nuxt unquoted config object; corrected parser after inspecting only public buildId value. No missing module or hydration failure was inferred."
+    },
+    "anonymousModeHTMLReceiptSHA256": "4716f56ec76821e11c83c76ca87f02f70ad2aae670d51758bb2738b85f462e70",
+    "bodyReadbackSHA256": "aa0c4d3bd5e0f26f7338f7f923c2a0a05a17862bb57f4c0d20483f540d1b01be",
+    "scopeLimit": "All new/changed manifest entries freshly fetched with normal TLS, matching byteCount/SHA256/MIME/immutable headers. Identical preceding0e6 entries reuse exact already-verified bodies rehashed offline. Not a fresh full-site HTTP or new Native/performance sweep."
+  },
+  "githubActions": {
+    "observedAtUTC": "2026-10-29T19:01:26.384818+00:00",
+    "runID": 40934607277,
+    "url": "https://github.com/YunLeFun/play/actions/runs/40934607277",
+    "headSHA": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "conclusion": "failure",
+    "createdAtUTC": "2026-10-29T18:50:41Z",
+    "updatedAtUTC": "2026-10-29T18:50:45Z",
+    "jobs": [
+      {
+        "id": 123661702835,
+        "name": "checks",
+        "status": "completed",
+        "conclusion": "failure",
+        "stepsCount": 0,
+        "failureAnnotation": "The job was not started because an Actions budget is preventing further use."
+      },
+      {
+        "id": 123661703292,
+        "name": "runtime-compat (22.12.0)",
+        "status": "completed",
+        "conclusion": "failure",
+        "stepsCount": 0,
+        "failureAnnotation": "The job was not started because an Actions budget is preventing further use."
+      },
+      {
+        "id": 123661703573,
+        "name": "container",
+        "status": "completed",
+        "conclusion": "failure",
+        "stepsCount": 0,
+        "failureAnnotation": "The job was not started because an Actions budget is preventing further use."
+      },
+      {
+        "id": 123661704088,
+        "name": "runtime-compat (20.19.0)",
+        "status": "completed",
+        "conclusion": "failure",
+        "stepsCount": 0,
+        "failureAnnotation": "The job was not started because an Actions budget is preventing further use."
+      }
+    ],
+    "interpretation": "All four jobs prevented from starting by Actions budget; no executed CI pass or failure can be inferred. EdgeOne build and source identity are separately verified in official UI."
+  },
+  "browserOwnershipAndCleanup": {
+    "ownSpacesUsedForSuccessivePublicationOrDriftRequests": [
+      10,
+      11,
+      12
+    ],
+    "allOwnSpacesFinishedKeepNone": true,
+    "rootBrowserSpacesOrABSessionsTouched": false,
+    "simulatorActions": 0,
+    "staticParserDuplicateInputCleanup": {
+      "duplicateASTInputSHA256": "345a069605dba10d33b2ae60401ffbdcbc5ede5e411bd628879e298f254c793b",
+      "logicalBytesRemoved": 3834531,
+      "allocatedBytesRemoved": 3837952,
+      "reason": "AST verified data-only parse succeeded; exact261body source index plus original verified bodies retain every necessary input; duplicate public JS/CSS JSON is rebuildable"
+    },
+    "freshBodySourceFilesRetainedUntilFinalSnapshotAdoption": true
+  },
+  "noUnapprovedProductionMutation": "Only the originally authorized0e6normalpush was performed by this agent. Later commits were detected and verified read-only; no redeploy/rollback/settings/cache-clearing action was taken.",
+  "privateEvidenceDirectoryLabel": "continuation-2319/web-publication-6ff97db",
+  "privatePublicationReceiptSHA256": "d7405055507f8e61989cfffa6a9cc615a39f86f9944477fbc64a32e41bca2f7a",
+  "acceptanceBoundary": "Static/public evidence only. Full immutable snapshot and final M3 plus real-account524/4003 UI are owned by parent/performance work; no fresh Native/performance claim."
+}

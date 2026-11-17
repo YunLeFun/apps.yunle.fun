@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-30T07:50:38.027333+00:00",
+  "source": {
+    "AssistantView.swift": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+    "Runtime": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "Controller": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "runtimeTests": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509"
+  },
+  "build": {
+    "MCPBuildSucceeded": true,
+    "durationMs": 6763,
+    "parallelTestingEnabled": false,
+    "log": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/build_sim_2026-10-30T07-45-43-922Z_pid19899_0dc75488.log",
+    "normalPreview": 0,
+    "PID": 72102,
+    "installedMatchesBuilt": true,
+    "fingerprints": {
+      "YunleFun": "14fbc4ce55a6a0010363932a8b56ff7e4170ebe9fc16085369869274a9ec97cb",
+      "YunleFun.debug.dylib": "256c2da2cd7fa750a7bc1dccfeae2dbefe0819957e08dfbd2d0395632aedf3c3",
+      "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+    },
+    "performanceLimits": "UI navigation correction only; prior a701 M3 fixed sixty samples remain evidence for that frozen build, no claim of byte-identical new binary or repeated performance measurement."
+  },
+  "realValidation": {
+    "identity": "existing C member selected from normal saved accounts",
+    "entry": "Workshop → AI → history → existing completed recommendation reply",
+    "card": "Today to cook",
+    "result": "Single actual card click immediately shows visible detail title, acquire/try and storage data actions; one Back restores same six-card reply; next Back restores Workshop",
+    "screenshots": [
+      "ai-card-fixed-visible-detail.png",
+      "ai-card-fixed-back-to-reply.png"
+    ],
+    "AX": [
+      "ai-card-fixed-visible-detail.ax.txt",
+      "ai-card-fixed-back-to-reply.ax.txt",
+      "ai-card-fixed-back-to-workshop.ax.txt"
+    ],
+    "freshAIRequestForFixValidation": false,
+    "acquiredApplication": false,
+    "oldDataDeleted": false
+  },
+  "independentReview": "Read-only screenshot/AX and minimal diff reviewed; no blocker. The old stable ai-card-click-detail-in-ax.ax.txt contains Assistant only and is not evidence of the transient detail AX. Original immediate tool observation and visible before/back screenshots establish the old issue.",
+  "rawFiles": {
+    "a-after-c-tutorial-isolated-history.ax.txt": {
+      "bytes": 6475,
+      "sha256": "8e24f6bba49ac5ba3fe30ccf09684cad1e0bf52b55b86b5285570ea39983ba38"
+    },
+    "a-after-c-tutorial-isolated-history.png": {
+      "bytes": 259986,
+      "sha256": "5cbe83573ac7f4b6c574d9204b1c0695385d5db2f8e933c59de15fab566f6d9a"
+    },
+    "after-ai-back-shows-detail.ax.txt": {
+      "bytes": 3917,
+      "sha256": "6583ad18483d7edb23373760f71636890c14990681adb7ff15691d35bab504c3"
+    },
+    "after-ai-back-shows-detail.png": {
+      "bytes": 215577,
+      "sha256": "0004c254b620cc5a9ba8794435f4caa9b6cb0ae594cf299cf0c2e01430384a45"
+    },
+    "ai-card-click-detail-in-ax.ax.txt": {
+      "bytes": 4942,
+      "sha256": "9cbf5f47f72ba2049ca0b5f4560bdf5a4a85ee3c10126b9013be00cd57cb3cd6"
+    },
+    "ai-card-click-still-assistant.png": {
+      "bytes": 262480,
+      "sha256": "b461bf7689098b10dc1714eed93aa99d4841177d8115507bab71a7a7a0aa81a8"
+    },
+    "ai-card-fixed-back-to-reply.ax.txt": {
+      "bytes": 4942,
+      "sha256": "c78a4a3c1c579cbfb17d93b827a430bb76988c64e92fb3ab8e2a38ea462da0ce"
+    },
+    "ai-card-fixed-back-to-reply.png": {
+      "bytes": 261809,
+      "sha256": "c1da298fa691bf93371622e0e0bfbcda7e2a3ff53907495ef40c363803cbfc55"
+    },
+    "ai-card-fixed-back-to-workshop.ax.txt": {
+      "bytes": 4267,
+      "sha256": "987e7bf4bec0fafc4fff4163dc9b02d2d23b3babad95169113b2b71fa8e18795"
+    },
+    "ai-card-fixed-visible-detail.ax.txt": {
+      "bytes": 3846,
+      "sha256": "e5654defc4cf79a99dc612b8f00bea9d18febc42cfe66e12c4e1090a8a3e506e"
+    },
+    "ai-card-fixed-visible-detail.png": {
+      "bytes": 228708,
+      "sha256": "f9981511425011862004dbfad310b97cb90822cf65b2a753c088e153b8d6f52a"
+    },
+    "catalog-same-app-detail.ax.txt": {
+      "bytes": 3917,
+      "sha256": "6583ad18483d7edb23373760f71636890c14990681adb7ff15691d35bab504c3"
+    },
+    "catalog-same-app-detail.png": {
+      "bytes": 216168,
+      "sha256": "38ebfa49bd45fd9810f3cc6e854352fdb7ee28f967d997a97c4fc78f3b813402"
+    },
+    "journey-receipt.json": {
+      "bytes": 5220,
+      "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833"
+    },
+    "star-tutorial-countdown.png": {
+      "bytes": 215524,
+      "sha256": "4e778a81b1731dac117fc10a3afaeec27c59daff92891f4c7bd0f4497e64219e"
+    },
+    "star-tutorial-native-ready.oslog.txt": {
+      "bytes": 219,
+      "sha256": "fbff38bd483e6a2ed26fd3438b9aa11e635066b5db82220ca1d17bce7707228e"
+    },
+    "star-tutorial-rendered.png": {
+      "bytes": 244401,
+      "sha256": "cf732cf05c7008c54e98c2a05165f439e8859ecff42f2a0f33a40f7c0352e816"
+    },
+    "star-tutorial-step2-real-turns.png": {
+      "bytes": 242746,
+      "sha256": "51dfcd8fc8d4334817bc252da0803aac3568de445d5f39e5d32d8f1a430d35fd"
+    },
+    "star-tutorial-step3-real-boost.png": {
+      "bytes": 243026,
+      "sha256": "0fbda3ec7252c5b32ace85ae30e5f02d5ef0d0201d2464ba5f005e3106769939"
+    },
+    "star-tutorial-step4-real-fire.png": {
+      "bytes": 241923,
+      "sha256": "bacbe6a2c912a7ad3440f3cd52f2dfb688f0d3faacb18d53f3206e4cdf90dada"
+    },
+    "star-tutorial-step5-real-ability.png": {
+      "bytes": 244009,
+      "sha256": "9702938f21f99152c225c9f752182ce83cbc3384a73cd0acb54964c397ed8485"
+    }
+  },
+  "StarNativeReadySupplement": {
+    "originalNormalHostPID": 42494,
+    "mode": "tutorial",
+    "readyMilliseconds": 8400.483583,
+    "logAtLocal": "2026-10-30 15:36:13.180",
+    "source": "unchanged existing native cache-launch notice",
+    "limits": "One real HTTPS tutorial functional observation with natural/uncontrolled cache; not N10 or an isolated network stage. Do not combine this elapsed Native time with root observer clock or subtract3s.",
+    "logSHA256": "fbff38bd483e6a2ed26fd3438b9aa11e635066b5db82220ca1d17bce7707228e"
+  },
+  "overall": "M5 advanced, M0.1 and two-game N10 still incomplete"
+}

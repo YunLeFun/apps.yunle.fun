@@ -73,6 +73,9 @@ final class ApplicationCacheRuntimeTests: XCTestCase {
     }
 
     func testRuntimeUsesSavedResourcesAndNewSessionSeesUpdatedCache() async throws {
+        let animationsWereEnabled = UIView.areAnimationsEnabled
+        UIView.setAnimationsEnabled(false)
+        defer { UIView.setAnimationsEnabled(animationsWereEnabled) }
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
         let repository = ApplicationCacheRepository(directory: directory.appendingPathComponent("downloads"))
@@ -123,7 +126,11 @@ final class ApplicationCacheRuntimeTests: XCTestCase {
     }
 
     private func renderedWeb(in root: UIViewController, title: String) async throws -> WKWebView {
-        for _ in 0..<100 {
+        // A cold WebContent process took 11.9s in CI. Wait for the actual
+        // document within XCTest's existing test allowance, rather than failing
+        // a valid archive after an unrelated five-second startup assumption.
+        let deadline = Date().addingTimeInterval(TimeInterval(executionTimeAllowance))
+        while Date() < deadline {
             if let navigation = root.presentedViewController as? UINavigationController,
                let browser = navigation.topViewController as? WebViewController,
                let web = findWeb(in: browser.view),

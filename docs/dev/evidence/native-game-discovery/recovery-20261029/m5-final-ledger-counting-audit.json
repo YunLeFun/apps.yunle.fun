@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "readonly-final-N10-ledger-F01-counting-audit",
+  "snapshotAtUTC": "2026-10-29T18:51:20.160615+00:00",
+  "sourceLedgerSHA256": "0c38bef1c881d8fbad4d3fa99638ee3725687a0e09972cdadcfcc40ad4c1b3b0",
+  "sourceWireSHA256": "6c8e267528254a11557b61b5156655eb2bf8f672932da1df377c970d01060deb",
+  "sourceCompleted": false,
+  "rounds": [
+    {
+      "roundAlias": "G01",
+      "gameId": "gomoku",
+      "passedFlag": true,
+      "pendingCleanup": false,
+      "explicitCountedTowardN10": null,
+      "eligibleByCurrentLedgerFlags": true
+    },
+    {
+      "roundAlias": "F01",
+      "gameId": "flight-chess",
+      "passedFlag": false,
+      "pendingCleanup": false,
+      "explicitCountedTowardN10": false,
+      "eligibleByCurrentLedgerFlags": false,
+      "functionalColdUniversalLinkPassed": true,
+      "automationTimeoutsBeforeBaseline": true,
+      "authorityPreserved": true,
+      "hasActualInputSnapshots": true,
+      "hasPostRecoveryRollAndPlaneObservations": true,
+      "timingDefinition": "Cua host observation upper bound including automation/IPC and gaps; not Native first-frame performance",
+      "exclusionRecorded": true
+    },
+    {
+      "roundAlias": "G02",
+      "gameId": "gomoku",
+      "passedFlag": true,
+      "pendingCleanup": false,
+      "explicitCountedTowardN10": null,
+      "eligibleByCurrentLedgerFlags": true
+    },
+    {
+      "roundAlias": "G03",
+      "gameId": "gomoku",
+      "passedFlag": false,
+      "pendingCleanup": true,
+      "explicitCountedTowardN10": null,
+      "eligibleByCurrentLedgerFlags": false
+    }
+  ],
+  "cleanCountsAtThisSnapshot": {
+    "gomoku": 2,
+    "flight-chess": 0
+  },
+  "F01Conclusion": "Correctly not counted toward cleanN10: passed=false,countedTowardN10=false despite functionalcoldUL and authority/realinput facts. automationtimeout/autoplay contamination is separately retained, not erased.",
+  "remainingAtSnapshot": "In-progress rows and function-only Flight F01 cannot fill the10pergame requirement. Root owns furtherUI/cleanup; this agent made no ledger/wire modifications.",
+  "wireReadLimit": {
+    "eventCount": 383,
+    "truncated": false,
+    "hasMore": false,
+    "scope": "Wire is supporting protocol evidence, not alone proof of Native visibleclick/OSUL/cleanhumanplay. No rawroom identifiers/accountids copied."
+  },
+  "noSimulatorActions": true
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "legacy-native-real-ui-build-retirement-v1",
+  "recordedAt": "2026-10-29T08:29:16.071291+08:00",
+  "mainOnlyBuild": "MCPbuild_sim,buildForTestingfalse,Debug-Onone,29s,normal resolved cachedpackages only, no testscompiled/run for this manual journey",
+  "buildLog": "/Users/yunyou/Library/Developer/XcodeBuildMCP/workspaces/apps.yunle.fun-7e53713c35de/logs/build_sim_2026-10-29T00-23-47-977Z_pid11957_74b21833.log",
+  "buildLogSHA256": "63d7568cb7f299e708185cb8c038ac83afc54f839f164a2ddab3c57ce4c8e41a",
+  "compiledFiles": [
+    {
+      "file": "Info.plist",
+      "bytes": 1801,
+      "sha256": "edd27e3e75e6dadece1daf065c61d8f2872a64d14aafe86318041fe62e547325"
+    },
+    {
+      "file": "YunleFun",
+      "bytes": 40216,
+      "sha256": "74570c32e4539c6ac1da27a121e471dea7b3cce0ba1ffdf1fbf1e4b860ffb787"
+    },
+    {
+      "file": "YunleFun.debug.dylib",
+      "bytes": 37868184,
+      "sha256": "b1206d370c74cb06eae6067dade7c05212b855b909fbe38d9df7e6e003c22009"
+    }
+  ],
+  "testSourceUnchangedSHA256": "b80a48f5ca9b1c0a5578432810982d80a8173b022e924d9565c1fd095f62fe0a",
+  "bundleID": "fun.yunle.apps.native-legacy-01a182f1",
+  "appGroup": "group.fun.yunle.apps.native-legacy-01a182f1",
+  "appStopped": true,
+  "portalSessionEndedViaNativeMenu": true,
+  "ownBundleUninstalled": true,
+  "dataLookupAfterExit": 2,
+  "dataContainerAbsent": true,
+  "derivedDataAbsent": true,
+  "derivedAllocatedBytesBefore": 493871104,
+  "dataAllocatedBytesBefore": 4603904,
+  "measuredAllocatedBytesReclaimed": 498475008,
+  "originalSnapshotAndMainSPMRetained": true,
+  "scope": "Own re-created legacy UI app/data and new UI DerivedData only. No simulator created/erased/deleted. Frozen original inputs and previousresults kept; currentcandidate/mainDerivedData/current9ba public unchanged. Allocated directorysizes, not whole-diskdelta or full keychain/API store enumeration."
+}

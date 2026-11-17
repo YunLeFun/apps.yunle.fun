@@ -1,0 +1,54 @@
+{
+  "classification": "authorized-production-browser-smoke-existing-deployment",
+  "date": "2026-10-29 CST",
+  "authorization": "User explicitly allowed production testing; no deployment authorization inferred",
+  "accountCount": 1,
+  "roomCountCreated": 1,
+  "roomCodeSHA256": "d1447d01d05402d842335e2f4b3a4e726257d2cc988c3e5139e06962d001d491",
+  "game": "flight-chess",
+  "steps": [
+    {
+      "name": "normal WWW to Play SSO",
+      "result": "successful existing browser sign-in; no credentials extracted"
+    },
+    {
+      "name": "create own room and ready",
+      "result": "one owner plus three robots; authoritative revisions advanced"
+    },
+    {
+      "name": "reload owner page",
+      "result": "real-time established, same room, running board at rev108 after prior rev102"
+    },
+    {
+      "name": "same UID spectator URL",
+      "result": "existing production silently returned player privileges, showing owner seat and autopilot control; R5 bug recorded and fixed only in source"
+    },
+    {
+      "name": "cleanup",
+      "result": "second test tab closed; owner used built-in two-click leave; UI confirmed already left and connection safely closed"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/production-room-reconnected.jpg",
+      "bytes": 114223,
+      "sha256": "d39e680b6783104888e2c25200c1d7c4f398cd504ceb80f1bdad57a9453115fe"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/production-spectator-role-conflict.jpg",
+      "bytes": 113469,
+      "sha256": "1a9616b678524730c6a84c62836224048f4ba9ac0e839d0bd31e92c6f695e09d"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/production-test-room-left.jpg",
+      "bytes": 38911,
+      "sha256": "058380f537d30255e33149d4d7734a4d12795322bf9985b13e9e81a9f53eab93"
+    }
+  ],
+  "limitations": [
+    "Not two distinct identities",
+    "Browser current-deployment flow is not new native bridge / contract acceptance",
+    "No permanent room/data deletion or deployment",
+    "No token, ticket, Cookie, authorization callback or raw login URL retained"
+  ]
+}

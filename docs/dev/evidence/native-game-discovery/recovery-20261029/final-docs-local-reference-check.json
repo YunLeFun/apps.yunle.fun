@@ -1,0 +1,1152 @@
+{
+  "schemaVersion": 1,
+  "kind": "current-native-game-docs-local-reference-audit",
+  "atUTC": "2026-10-29T19:39:43.736873+00:00",
+  "markdownFilesChecked": [
+    "specs/native-game-discovery/requirements.md",
+    "specs/native-game-discovery/design.md",
+    "specs/native-game-discovery/tasks.md",
+    "docs/product/native-game-discovery.md",
+    "docs/dev/native-game-discovery-implementation.md"
+  ],
+  "markdownLocalLinkCount": 179,
+  "configNavSidebarAndLogoLinksChecked": 54,
+  "missing": [],
+  "allLinks": [
+    {
+      "source": "specs/native-game-discovery/requirements.md",
+      "link": "./design.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/requirements.md",
+      "link": "./tasks.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/design.md",
+      "link": "./requirements.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/design.md",
+      "link": "./tasks.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/design.md",
+      "link": "../../docs/dev/evidence/native-game-discovery/recovery-20261029/m3-star-cold-phase-fixed20-analysis.json",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "link": "./requirements.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "link": "./design.md",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "link": "../dev/native-game-discovery-implementation.md",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "link": "../dev/native-game-discovery-implementation.md",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "link": "../dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "link": "../dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "link": "../dev/evidence/native-game-discovery/recovery-20261029/m3-online-room-resource-scope-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/m3-final-a701-independent-review.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/production-final-reconnect-terminals.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/final-native-checkpoint-20261030-0315.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/web-publication-6ff97db.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/final-native-checkpoint-20261030.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/native-retry-fix-validation.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/production-role-capacity-offline-removal.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/production-over-window-terminal-failure.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/server-deployment-7723ae8.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/production-expired-roles-after-772.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/production-rotated-old-invite-after-772.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/native-first-retry-still-fails.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/play-7723ae8-recovery.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/recovery-20261029/play-7723ae8-artifact-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-star-browser-smoke.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-star-steering-accepted.jpg",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-edgeone-db02e67.jpg",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/native-build-sim-fingerprint.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-webcontent-termination-error.jpg",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-idempotency-db-audit-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-managed-test-accounts-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-managed-accounts-ready.png",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-managed-account-no-membership.png",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-closed-room-blocks-next-invite.jpg",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-invalid-invite-transport-failure-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-native-regression-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-m4-screenshots-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-deployment-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "../product/native-game-discovery.md",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/goal-blocked-eligibility-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-ui-followup-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-followup-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-gameplay-acceptance-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-gameplay-completion-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reclamation-acceptance-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/final-docs-build.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reclamation-docs-build.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-gameplay-docs-build.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-docs-build.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-ui-docs-build.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-preflight.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/local-room-recovery.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/validation-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/manual-loading-retry.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/operable-final-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/operable-final-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/operable-final-test-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-countdown-constraint-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-native-phase-first.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-native-phase-first-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-document-phase-n3.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-document-phase-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-document-phase-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-resource-phase-v3.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-resource-phase-v3-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-resource-phase-v3-analysis.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-request-trace-v3.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/blank-warmup-experiment-scope.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/blank-warmup-phase-n3.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/blank-warmup-phase-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/blank-warmup-phase-analysis.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/blank-warmup-phase-rss.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/blank-warmup-phase-inputs.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/retained-resume-final-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/retained-resume-final-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/followup-validation-history.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/paper-star-frame-memory-n2.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/paper-star-frame-memory-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/paper-star-frame-memory-analysis.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/paper-star-frame-memory-inputs.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/paper-star-frame-memory-rss.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/entry-comparison-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/entry-comparison-catalog.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-n10-catalog.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-source-input.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-packaging-patch.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-verified-build-settings.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-followup-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-harness-inputs.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-compiled-inputs.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-evidence-index.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-public-play-catalog-lookup.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-public-play-detail-lookup.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-real-catalog-ui-journey.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-real-ui-screenshots.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-gomoku-preflight-n1.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-star-preflight-failure.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-https-preflight-test-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-gomoku-https-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-gomoku-https-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-gomoku-n10-test-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-star-renderer-failure.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-star-diagnostic-test-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-texture-cors-failure.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-cdn-diagnostic-test-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-star-cdn-readiness.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-star-cdn-preflight-invalid-path.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-analysis.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-https-readiness.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/native-guest-authorization-source-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/operable-final-native-layout.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/compact-native-layout.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/maximum-text-games-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/maximum-text-workshop-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/maximum-text-final-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/voiceover-reduce-motion-journey.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/voiceover-reduce-motion-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reduce-motion-before-accessibility.txt",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reduce-motion-enabled-accessibility.txt",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reduce-motion-restored-accessibility.txt",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/compact-renderer-ready-n10.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/candidate-operable-browser-layout.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/resource-fault-acceptance.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/resource-cache-probes/baseline-after-preparation.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/cache-cold-failure-history.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/runtime-cleanup-callbacks.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/resource-cache-probes-idb/native-game-resource-faults.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/resource-cache-probes-idb/native-game-cache-only-baseline-after-preparation.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/resource-fault-idb-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/storage-upgrade-final-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/storage-upgrade-final-tests.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/storage-upgrade-cleanup-callbacks.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation-tests.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation/native-game-session-reclamation-capacity.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation/native-game-session-reclamation-memoryWarning.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation/native-game-session-reclamation-memoryWarningWhilePaused.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation/native-game-discarded-object-release-capacity.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation/native-game-discarded-object-release-memoryWarning.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation/native-game-discarded-object-release-memoryWarningWhilePaused.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/session-reclamation-cleanup.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/manual-native-end-reopen.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-load-boundary-experiment.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/room-creation-idempotency-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/cloudbase-final-code-review.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/spectator-role-full-regression.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/spectator-role-20261029.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-final-readiness.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-followup-readiness.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-startup-followup-readiness.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/external-blocker-recheck-1.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/production-browser-smoke.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/final-candidate-fingerprints.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/followup-candidate-fingerprints.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reclamation-candidate-fingerprints.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-gameplay-candidate-fingerprints.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-current-candidate.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-ui-followup-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/manual-native-candidate-entry.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-completion-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/final-simulator-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/followup-simulator-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/reclamation-simulator-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-gameplay-simulator-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-simulator-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-native-retirement.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/legacy-native-real-ui-build-retirement.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/historical-static-baseline-archive.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/retired-934-static-output.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/owned-fixture-final-recovery.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/owned-early-fixture-recovery.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/startup-load-boundary-cleanup.json",
+      "exists": true
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md",
+      "link": "./evidence/native-game-discovery/followup-mcp-products-cleanup.json",
+      "exists": true
+    }
+  ],
+  "configLinks": [
+    {
+      "link": "/logo.svg",
+      "exists": true
+    },
+    {
+      "link": "/guide/getting-started",
+      "exists": true
+    },
+    {
+      "link": "/product/",
+      "exists": true
+    },
+    {
+      "link": "/ui/",
+      "exists": true
+    },
+    {
+      "link": "/database/",
+      "exists": true
+    },
+    {
+      "link": "/dev/",
+      "exists": true
+    },
+    {
+      "link": "/roadmap",
+      "exists": true
+    },
+    {
+      "link": "/guide/getting-started",
+      "exists": true
+    },
+    {
+      "link": "/guide/jsapi",
+      "exists": true
+    },
+    {
+      "link": "/product/",
+      "exists": true
+    },
+    {
+      "link": "/product/concepts",
+      "exists": true
+    },
+    {
+      "link": "/product/tabs-architecture",
+      "exists": true
+    },
+    {
+      "link": "/product/native-game-discovery",
+      "exists": true
+    },
+    {
+      "link": "/product/home",
+      "exists": true
+    },
+    {
+      "link": "/product/discovery",
+      "exists": true
+    },
+    {
+      "link": "/product/workshop",
+      "exists": true
+    },
+    {
+      "link": "/product/app-engagement-metrics",
+      "exists": true
+    },
+    {
+      "link": "/ui/",
+      "exists": true
+    },
+    {
+      "link": "/ui/ios-native",
+      "exists": true
+    },
+    {
+      "link": "/ui/native-authorization-sheet",
+      "exists": true
+    },
+    {
+      "link": "/database/",
+      "exists": true
+    },
+    {
+      "link": "/database/apps",
+      "exists": true
+    },
+    {
+      "link": "/database/featured-apps",
+      "exists": true
+    },
+    {
+      "link": "/database/user-home-screens",
+      "exists": true
+    },
+    {
+      "link": "/database/weekly-charts",
+      "exists": true
+    },
+    {
+      "link": "/dev/",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-native-migration",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-native-api-audit",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-home-sync",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-host-authorization",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-cross-app-authorization",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-scanner",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-workshops",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-publishing",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-icon-assets",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-assistant",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-acquisition",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-wallet",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-community",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-performance-baseline",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-accessibility-audits",
+      "exists": true
+    },
+    {
+      "link": "/dev/ios-device-validation",
+      "exists": true
+    },
+    {
+      "link": "/dev/auth",
+      "exists": true
+    },
+    {
+      "link": "/dev/barcode-scanner",
+      "exists": true
+    },
+    {
+      "link": "/dev/in-app-browser",
+      "exists": true
+    },
+    {
+      "link": "/dev/sms-login",
+      "exists": true
+    },
+    {
+      "link": "/dev/home-screen-drag",
+      "exists": true
+    },
+    {
+      "link": "/dev/app-store-onboarding",
+      "exists": true
+    },
+    {
+      "link": "/dev/testflight",
+      "exists": true
+    },
+    {
+      "link": "/dev/cloudbase-rules",
+      "exists": true
+    },
+    {
+      "link": "/dev/rum",
+      "exists": true
+    },
+    {
+      "link": "/dev/privacy-checklist",
+      "exists": true
+    },
+    {
+      "link": "/dev/dependency-security",
+      "exists": true
+    },
+    {
+      "link": "/roadmap",
+      "exists": true
+    }
+  ],
+  "sourceFileHashes": {
+    "specs/native-game-discovery/requirements.md": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+    "specs/native-game-discovery/design.md": "ec3964382bfa600441a73c10beef22996fceef886c4f5d33748b7e78f3b8b9b0",
+    "specs/native-game-discovery/tasks.md": "911a074d9a36406ea27fe69118700c21af981134034be1c53756436c0ae4b387",
+    "docs/product/native-game-discovery.md": "99acfe973845b8cc5f725970d158f09dce9ca752bf562fe6701476a2b689c310",
+    "docs/dev/native-game-discovery-implementation.md": "30d71f497eddd7129d2b00de4502d63febcede60539d14a409b183f449011f48"
+  },
+  "simulatorActions": 0,
+  "scope": "Filesystemtargets andVitePressroute/source mapping; externalnetworknotchecked. Backtickhistoricalpaths are not livehyperlinks.",
+  "navigationCorrection": {
+    "previousAuditSHA256": "e8e0890fbe78ad70d4672de8c0663290e492e4db089161e1703af1e640d55598",
+    "previousMissing": [
+      "/design/",
+      "/database/user-desktops"
+    ],
+    "correctedTo": [
+      "/product/",
+      "/database/user-home-screens"
+    ],
+    "priorReportPreservedPrivately": true,
+    "onlyIntendedTwoConfigLinesChanged": true
+  }
+}

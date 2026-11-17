@@ -21,12 +21,15 @@ struct HelpView: View {
         List {
             Section("新手引导") {
                 DisclosureGroup {
-                    explanation("在寻乐查看推荐，在工坊搜索工具并了解应用详情。")
-                    Button("前往寻乐") { navigateTab(.discovery) }
-                        .frame(minHeight: 44).accessibilityIdentifier("help.guide.discovery")
+                    explanation("在工坊浏览精选推荐、搜索应用或让 AI 帮你查找，并在详情中了解和获取应用。")
                     Button("前往工坊") { navigateTab(.workshop) }
                         .frame(minHeight: 44).accessibilityIdentifier("help.guide.workshop")
                 } label: { Text("发现喜欢的云应用").accessibilityIdentifier("help.guide.discover") }
+                DisclosureGroup {
+                    explanation("在寻乐选择游戏和当前可用的模式。单人、同屏和联机的要求以游戏说明为准；最近玩过与仍可恢复的对局会分别显示。")
+                    Button("前往寻乐") { navigateTab(.discovery) }
+                        .frame(minHeight: 44).accessibilityIdentifier("help.guide.discovery")
+                } label: { Text("玩游戏与朋友联机").accessibilityIdentifier("help.guide.games") }
                 DisclosureGroup {
                     explanation("在应用详情中选择“获取”。公开的免登录应用可直接添加，需要账号或权益的应用会先显示确认说明。获取后可从云居打开。")
                     Button("前往云居") { navigateTab(.home) }

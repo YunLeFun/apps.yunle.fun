@@ -1,0 +1,207 @@
+diff --git a/apps/game-server/src/colyseus/play-room.ts b/apps/game-server/src/colyseus/play-room.ts
+index 6729658..5997caf 100644
+--- a/apps/game-server/src/colyseus/play-room.ts
++++ b/apps/game-server/src/colyseus/play-room.ts
+@@ -229,6 +229,8 @@ export function createPlayRoom(
+         const aggregate = await dependencies.rooms.getRoomByInviteCode(
+           this.#inviteCode,
+         )
++        if (aggregate.room.status === 'expired')
++          throw new RoomError('ROOM_EXPIRED', '房间已过期', aggregate.room.revision)
+         if (aggregate.members.some(member => member.userId === user.userId)) {
+           throw new RoomError(
+             'FORBIDDEN',
+diff --git a/apps/game-server/test/colyseus-room-errors.test.ts b/apps/game-server/test/colyseus-room-errors.test.ts
+index 9315ea9..14828ed 100644
+--- a/apps/game-server/test/colyseus-room-errors.test.ts
++++ b/apps/game-server/test/colyseus-room-errors.test.ts
+@@ -28,6 +28,7 @@ describe('colyseus room admission errors', { concurrent: false }, () => {
+   let sdk: ColyseusSDK
+   let endpoint = ''
+   let webSocketAttempts = 0
++  let openUpgradedSockets = 0
+   const clients: Array<ClientRoom<PlayRoomState>> = []
+ 
+   beforeAll(async () => {
+@@ -37,7 +38,11 @@ describe('colyseus room admission errors', { concurrent: false }, () => {
+     const address = httpServer?.address()
+     if (!httpServer || !address || typeof address === 'string')
+       throw new Error('No loopback admission-test port available')
+-    httpServer.on('upgrade', () => webSocketAttempts++)
++    httpServer.on('upgrade', (_request, socket) => {
++      webSocketAttempts++
++      openUpgradedSockets++
++      socket.once('close', () => openUpgradedSockets--)
++    })
+     endpoint = `http://127.0.0.1:${address.port}`
+     sdk = new ColyseusSDK(endpoint.replace('http:', 'ws:'))
+     sdk.http.options.headers = { origin }
+@@ -85,6 +90,19 @@ describe('colyseus room admission errors', { concurrent: false }, () => {
+     )
+   }
+ 
++  async function capacity() {
++    const response = await fetch(`${endpoint}/v1/health`)
++    expect(response.status).toBe(200)
++    const health = await response.json() as {
++      capacity: { activeConnections: number, activeOnlinePlayers: number, activeOnlineRooms: number }
++    }
++    return {
++      activeConnections: health.capacity.activeConnections,
++      activeOnlinePlayers: health.capacity.activeOnlinePlayers,
++      activeOnlineRooms: health.capacity.activeOnlineRooms,
++    }
++  }
++
+   it('rejects an unknown invitation before the SDK attempts a fake reservation WebSocket', async () => {
+     const before = webSocketAttempts
+     const error = await rejection('ZZZ999')
+@@ -199,4 +217,148 @@ describe('colyseus room admission errors', { concurrent: false }, () => {
+     vi.spyOn(runtime.tickets, 'consume').mockRejectedValueOnce(new Error('private-storage-detail'))
+     expect(await rejection(aggregate.room.inviteCode)).toMatchObject({ code: 500, message: '服务暂时不可用' })
+   })
++
++  it.each(['player', 'spectator'] as const)('rejects a fresh %s connection after the last member normally leaves', async (role) => {
++    const aggregate = await runtime.rooms.createRoom(owner)
++    const ownerClient = await join(aggregate.room.inviteCode, owner)
++    const observed = observe(ownerClient)
++    await expect.poll(() => observed.room()?.members.length).toBe(1)
++    ownerClient.send('command', {
++      protocolVersion: PROTOCOL_VERSION,
++      type: 'room.leave',
++      roomId: aggregate.room.id,
++      commandId: `cmd_expire_before_${role}`,
++      expectedRevision: observed.room()!.revision,
++    })
++    await expect.poll(() => observed.messages.find(message => message.type === 'room.left'))
++      .toMatchObject({ reason: 'left' })
++    await expect.poll(() => ownerClient.connection.isOpen).toBe(false)
++    const zeroCapacity = { activeConnections: 0, activeOnlinePlayers: 0, activeOnlineRooms: 0 }
++    await expect.poll(capacity).toEqual(zeroCapacity)
++    await expect.poll(() => openUpgradedSockets).toBe(0)
++
++    const error = await rejection(aggregate.room.inviteCode, guest, role)
++    await expect.poll(() => openUpgradedSockets).toBe(0)
++    const observation = {
++      role,
++      rejection: error === null ? null : { code: error.code, message: error.message },
++      capacity: await capacity(),
++      openUpgradedSockets,
++    }
++    console.info(JSON.stringify({ type: 'play.expired_fresh_admission.regression', observation }))
++    expect(observation).toEqual({
++      role,
++      rejection: { code: 400, message: '房间已过期' },
++      capacity: zeroCapacity,
++      openUpgradedSockets: 0,
++    })
++  })
++
++  it.each(['completed', 'temporarily-offline'] as const)('allows fresh spectators in a %s game without changing membership or seats', async (condition) => {
++    const aggregate = await runtime.rooms.createRoom(owner, {
++      gameId: 'gomoku',
++      rulesetId: 'freestyle-15',
++      rulesetVersion: 1,
++    })
++    const ownerClient = await join(aggregate.room.inviteCode, owner)
++    const observed = observe(ownerClient)
++    const guestClient = await join(aggregate.room.inviteCode, guest)
++    observe(guestClient)
++    await expect.poll(() => observed.room()?.members.length).toBe(2)
++    ownerClient.send('command', {
++      protocolVersion: PROTOCOL_VERSION,
++      type: 'room.ready',
++      roomId: aggregate.room.id,
++      commandId: `cmd_owner_ready_${condition}`,
++      expectedRevision: observed.room()!.revision,
++      ready: true,
++    })
++    await expect.poll(() => observed.room()?.members.find(member => member.userId === owner.userId)?.ready).toBe(true)
++    guestClient.send('command', {
++      protocolVersion: PROTOCOL_VERSION,
++      type: 'room.ready',
++      roomId: aggregate.room.id,
++      commandId: `cmd_guest_ready_${condition}`,
++      expectedRevision: observed.room()!.revision,
++      ready: true,
++    })
++    await expect.poll(() => observed.room()?.status).toBe('playing')
++    const gameSessionId = observed.room()!.activeGameSessionId!
++    if (condition === 'completed') {
++      ownerClient.send('command', {
++        protocolVersion: PROTOCOL_VERSION,
++        type: 'game.resign',
++        gameSessionId,
++        commandId: 'cmd_complete_before_spectator',
++        expectedRevision: observed.room()!.revision,
++      })
++      await expect.poll(() => observed.room()?.status).toBe('completed')
++    }
++    else {
++      for (const client of [ownerClient, guestClient]) {
++        client.reconnection.enabled = false
++        client.connection.close()
++      }
++      await expect.poll(async () => {
++        const current = await runtime.rooms.getRoomByInviteCode(aggregate.room.inviteCode)
++        return current.members.every(member => !member.online)
++      }).toBe(true)
++    }
++    const before = await runtime.rooms.getRoomByInviteCode(aggregate.room.inviteCode)
++    const viewer = { userId: `admission_viewer_${condition}`, displayName: 'Admission Viewer' }
++    const spectator = await join(aggregate.room.inviteCode, viewer, 'spectator')
++    const spectatorObserved = observe(spectator)
++    const expectedStatus = condition === 'completed' ? 'completed' : 'playing'
++    await expect.poll(() => spectatorObserved.room()?.status).toBe(expectedStatus)
++    expect(spectatorObserved.room()).toMatchObject({
++      roomId: aggregate.room.id,
++      activeGameSessionId: gameSessionId,
++      nextSeats: before.room.nextSeats,
++    })
++    expect(spectatorObserved.room()!.members.map(member => member.userId)).toEqual(before.members.map(member => member.userId))
++    expect(spectatorObserved.room()!.members.map(member => member.online)).toEqual(
++      condition === 'completed' ? [true, true] : [false, false],
++    )
++    await expect.poll(() => spectatorObserved.messages.find(message => message.type === 'connection.ready')).toMatchObject({ role: 'spectator' })
++    await expect.poll(() => spectatorObserved.messages.find(message => message.type === 'game.snapshot')).toMatchObject({
++      roomId: aggregate.room.id,
++      gameSessionId,
++      status: condition === 'completed' ? 'resigned' : 'playing',
++      seats: before.room.nextSeats,
++    })
++    expect(spectator.connection.isOpen).toBe(true)
++    const after = await runtime.rooms.getRoomByInviteCode(aggregate.room.inviteCode)
++    expect(after.members).toEqual(before.members)
++    expect(after.room.nextSeats).toEqual(before.room.nextSeats)
++  })
++
++  it('allows a removed member to explicitly spectate with the new valid invitation without restoring membership', async () => {
++    const aggregate = await runtime.rooms.createRoom(owner)
++    const ownerClient = await join(aggregate.room.inviteCode, owner)
++    const observed = observe(ownerClient)
++    const guestClient = await join(aggregate.room.inviteCode, guest)
++    const guestObserved = observe(guestClient)
++    await expect.poll(() => observed.room()?.members.length).toBe(2)
++    ownerClient.send('command', {
++      protocolVersion: PROTOCOL_VERSION,
++      type: 'room.remove_member',
++      roomId: aggregate.room.id,
++      commandId: 'cmd_remove_before_explicit_spectator',
++      expectedRevision: observed.room()!.revision,
++      userId: guest.userId,
++      rotateInviteCode: true,
++    })
++    await expect.poll(() => observed.room()?.members.map(member => member.userId)).toEqual([owner.userId])
++    await expect.poll(() => guestObserved.messages.find(message => message.type === 'room.left')).toMatchObject({ reason: 'removed' })
++    await expect.poll(() => guestClient.connection.isOpen).toBe(false)
++    const rotated = observed.room()!
++    expect(rotated.inviteCode).not.toBe(aggregate.room.inviteCode)
++    const spectator = await join(rotated.inviteCode, guest, 'spectator')
++    const spectatorObserved = observe(spectator)
++    await expect.poll(() => spectatorObserved.room()?.roomId).toBe(aggregate.room.id)
++    await expect.poll(() => spectatorObserved.messages.find(message => message.type === 'connection.ready')).toMatchObject({ role: 'spectator' })
++    expect(spectatorObserved.room()!.members.map(member => member.userId)).toEqual([owner.userId])
++    expect(spectatorObserved.room()!.nextSeats).toBeNull()
++    expect(spectator.connection.isOpen).toBe(true)
++  })
+ })

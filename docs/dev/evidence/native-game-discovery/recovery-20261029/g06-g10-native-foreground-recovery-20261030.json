@@ -1,0 +1,1035 @@
+{
+  "schemaVersion": 1,
+  "kind": "G06-G10-independent-native-foreground-recovery-bulk-audit",
+  "atUTC": "2026-10-30T09:59:41.724081+00:00",
+  "status": "five-scoped-foreground-rounds-functionally-qualified",
+  "gameId": "gomoku",
+  "eligibleRoundCount": 5,
+  "rounds": [
+    {
+      "roundId": "G06",
+      "eligibleForRootCounting": true,
+      "ledgerAtAudit": {
+        "passed": false,
+        "pendingCleanup": false,
+        "modifiedByAudit": false
+      },
+      "identity": {
+        "roomIdSHA256": "c3fa6d9b232ba66b89e666e3dd8b36965e9f7593d4892ad11aa06182bdfdfc4e",
+        "gameSessionIdSHA256": "7bb1e46c13aeddf49ce4e5c4eddfe4a6efe53f8446c94d9fbb9ebaf12b4321b8",
+        "inviteCodeSHA256": "7fffd1729b1a7223a6d5493066800d4b81697f587d9195346917054419054732",
+        "orderedSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "actorSeats": {
+          "A": 1,
+          "B": 0
+        },
+        "requestId": "19204.728"
+      },
+      "creationPlayerReadySequence": 1120,
+      "nativeJoinMembershipConfirmed": true,
+      "originalHelperResultsAllFour": true,
+      "firstActionTranscribed": false,
+      "actions": [
+        {
+          "phase": "before-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 7,
+            "col": 7
+          },
+          "preSequence": 1132,
+          "actualReadFloor": 1134,
+          "postSequence": 1137,
+          "revision": [
+            5,
+            6
+          ],
+          "moveCount": [
+            0,
+            1
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "before-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 7,
+            "col": 8
+          },
+          "preSequence": 1137,
+          "actualReadFloor": 1138,
+          "postSequence": 1140,
+          "revision": [
+            6,
+            7
+          ],
+          "moveCount": [
+            1,
+            2
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 8,
+            "col": 8
+          },
+          "preSequence": 1140,
+          "actualReadFloor": 1141,
+          "postSequence": 1144,
+          "revision": [
+            7,
+            8
+          ],
+          "moveCount": [
+            2,
+            3
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 8,
+            "col": 7
+          },
+          "preSequence": 1144,
+          "actualReadFloor": 1145,
+          "postSequence": 1147,
+          "revision": [
+            8,
+            9
+          ],
+          "moveCount": [
+            3,
+            4
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        }
+      ],
+      "grounding": {
+        "newScreenshotSHA256": "52adf60baedb9786444430ac3d5a54ebd988348a51ec94f8d23624a8b157cdf6",
+        "fixedCanonicalCorners": {
+          "cell00": [
+            1106,
+            806
+          ],
+          "cell014": [
+            1590,
+            806
+          ],
+          "cell140": [
+            1106,
+            1290
+          ],
+          "cell1414": [
+            1590,
+            1290
+          ]
+        },
+        "newScreenshotReviewed": true,
+        "onlineFlipped": false,
+        "allNativeActionPointsMatchCanonicalCorners": true
+      },
+      "foreground": {
+        "actualOSHomeControl": true,
+        "actualAppIconPoint": [
+          1553,
+          490
+        ],
+        "homeAndReturnImageHashesVerified": true,
+        "beforeStoneCount": 2,
+        "returnedStoneCount": 2,
+        "afterStoneCount": 4,
+        "beforeAndReturnedStateSHA256": "04e6e7aa5f080510843dc939ae5bcb8a040b1404e5f05a8ae5bae7a0b3f6a797",
+        "finalStateSHA256": "300906e989c24a7ff7a9aa31f53a821378904ecf9797af0d26a352687673f02d",
+        "beforeSnapshotSequence": 1140,
+        "returnedSnapshotSequence": 1140,
+        "unchangedSnapshotAloneIsNotForegroundProof": true,
+        "freshNativePostInputSequence": 1147,
+        "freshBrowserPostInputSequence": 1144,
+        "clockId": "cua-gomoku-20261030-1793353010992",
+        "homeObservedUptimeMilliseconds": 3237000.501,
+        "iconClickObservedUptimeMilliseconds": 3238407.7205,
+        "returnedObservedUptimeMilliseconds": 3239528.681,
+        "batchElapsedObservationMilliseconds": 8831.113333000336
+      },
+      "roleProof": {
+        "role": "player",
+        "connectionReadySequence": 1120,
+        "sameExplicitBrowserSocket": true,
+        "finalAuthorityFreshSinceFloor": true,
+        "finalRoomSnapshotSequence": 1146,
+        "nativeSocketIdentifierNotClaimed": true
+      },
+      "cleanup": {
+        "nativeAbsentOnlyBRoomSnapshotSequence": 1149,
+        "browserRoomLeftSequence": 1153,
+        "browserSocketClosedSequence": 1156,
+        "leaveReason": "left",
+        "pendingCleanup": false
+      },
+      "privateInputSHA256": {
+        "g06-foreground-batch.json": "837d4d317a9b6235bbf2dc1f0b835eb2dccd30189502907ed45db19cfb9c0f9d",
+        "g06-new-board-grounding.png": "52adf60baedb9786444430ac3d5a54ebd988348a51ec94f8d23624a8b157cdf6",
+        "g06-home.png": "3d899901ec4d2944446b2bad9be3e0f0f244d79ac3aaacf69b31a3e62118b08a",
+        "g06-returned.png": "617ce749717917d200c353fcdd75f3aa8478289918e73c3fc06172527a56139b",
+        "g06-post-inputs.png": "c9d7366eb706ef49123c5f532ecb32e820fe2a8b96676e11f5e2f99b05df01a2"
+      },
+      "frozenRequiredEvidenceSHA256": {
+        "requiredWindowSHA256": "5f5d3124fba530de2261d6ac04fbed9d2e7fd1d48694d266a35b6b62a8b2c385",
+        "ledgerRoundAtAuditSHA256": "3549db57d1ba871c41d1ecacb66fef80b19d95913ce058ef86f3033ccd7356fd"
+      }
+    },
+    {
+      "roundId": "G07",
+      "eligibleForRootCounting": true,
+      "ledgerAtAudit": {
+        "passed": false,
+        "pendingCleanup": false,
+        "modifiedByAudit": false
+      },
+      "identity": {
+        "roomIdSHA256": "feedb7c59155dd38029839741190b1fc32e59bc225ba710e3f959f1c22d720bf",
+        "gameSessionIdSHA256": "5ae51186754c8ea3d7d3eb48e8e54beb13b7946819dc1dd84d4995c8e56065eb",
+        "inviteCodeSHA256": "709dd7ef3650cba27599714c0a4a3dd6306adb5e24f886334ef4402df6e9760e",
+        "orderedSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "actorSeats": {
+          "A": 1,
+          "B": 0
+        },
+        "requestId": "19204.742"
+      },
+      "creationPlayerReadySequence": 1249,
+      "nativeJoinMembershipConfirmed": true,
+      "originalHelperResultsAllFour": true,
+      "firstActionTranscribed": false,
+      "actions": [
+        {
+          "phase": "before-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 7,
+            "col": 7
+          },
+          "preSequence": 1260,
+          "actualReadFloor": 1262,
+          "postSequence": 1265,
+          "revision": [
+            5,
+            6
+          ],
+          "moveCount": [
+            0,
+            1
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "before-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 7,
+            "col": 8
+          },
+          "preSequence": 1265,
+          "actualReadFloor": 1266,
+          "postSequence": 1268,
+          "revision": [
+            6,
+            7
+          ],
+          "moveCount": [
+            1,
+            2
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 8,
+            "col": 8
+          },
+          "preSequence": 1268,
+          "actualReadFloor": 1269,
+          "postSequence": 1272,
+          "revision": [
+            7,
+            8
+          ],
+          "moveCount": [
+            2,
+            3
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 8,
+            "col": 7
+          },
+          "preSequence": 1272,
+          "actualReadFloor": 1273,
+          "postSequence": 1275,
+          "revision": [
+            8,
+            9
+          ],
+          "moveCount": [
+            3,
+            4
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        }
+      ],
+      "grounding": {
+        "newScreenshotSHA256": "aeb7181e10edef276cb2c4e22887787d994c7b1617e231efa3ba0c97a787aab1",
+        "fixedCanonicalCorners": {
+          "cell00": [
+            1106,
+            806
+          ],
+          "cell014": [
+            1590,
+            806
+          ],
+          "cell140": [
+            1106,
+            1290
+          ],
+          "cell1414": [
+            1590,
+            1290
+          ]
+        },
+        "newScreenshotReviewed": true,
+        "onlineFlipped": false,
+        "allNativeActionPointsMatchCanonicalCorners": true
+      },
+      "foreground": {
+        "actualOSHomeControl": true,
+        "actualAppIconPoint": [
+          1553,
+          490
+        ],
+        "homeAndReturnImageHashesVerified": true,
+        "beforeStoneCount": 2,
+        "returnedStoneCount": 2,
+        "afterStoneCount": 4,
+        "beforeAndReturnedStateSHA256": "04e6e7aa5f080510843dc939ae5bcb8a040b1404e5f05a8ae5bae7a0b3f6a797",
+        "finalStateSHA256": "300906e989c24a7ff7a9aa31f53a821378904ecf9797af0d26a352687673f02d",
+        "beforeSnapshotSequence": 1268,
+        "returnedSnapshotSequence": 1268,
+        "unchangedSnapshotAloneIsNotForegroundProof": true,
+        "freshNativePostInputSequence": 1275,
+        "freshBrowserPostInputSequence": 1272,
+        "clockId": "cua-gomoku-20261030-1793353010992",
+        "homeObservedUptimeMilliseconds": 3326983.258959,
+        "iconClickObservedUptimeMilliseconds": 3328164.2895,
+        "returnedObservedUptimeMilliseconds": 3329056.86975,
+        "batchElapsedObservationMilliseconds": 7975.967083000112
+      },
+      "roleProof": {
+        "role": "player",
+        "connectionReadySequence": 1249,
+        "sameExplicitBrowserSocket": true,
+        "finalAuthorityFreshSinceFloor": true,
+        "finalRoomSnapshotSequence": 1274,
+        "nativeSocketIdentifierNotClaimed": true
+      },
+      "cleanup": {
+        "nativeAbsentOnlyBRoomSnapshotSequence": 1277,
+        "browserRoomLeftSequence": 1281,
+        "browserSocketClosedSequence": 1285,
+        "leaveReason": "left",
+        "pendingCleanup": false
+      },
+      "privateInputSHA256": {
+        "g07-foreground-batch.json": "76383b6846c0159687db4096921b50fa209a9a6c77dcbc0f7a6b30c856656141",
+        "g07-new-board-grounding.png": "aeb7181e10edef276cb2c4e22887787d994c7b1617e231efa3ba0c97a787aab1",
+        "g07-home.png": "23bde99adba0b625cd8cb7c9fe6b9b3540485e0ef87cb5ae532d9fa4b84bb4f2",
+        "g07-returned.png": "c9bab32af06a4731d71b0939f02ff3456408e2f13c33f351a92897d5d4d82964",
+        "g07-post-inputs.png": "da5bb2c0d3c5e00bd315ef98a6808fa1d8c5a8ed88e09618979473f9bc973cdc"
+      },
+      "frozenRequiredEvidenceSHA256": {
+        "requiredWindowSHA256": "f1fd552f5c33d5eee9ee0fe9d1ed6a03538be0274fa713b555ee725648badc62",
+        "ledgerRoundAtAuditSHA256": "e4afe53c58c45f6e86bb11a3751820432915446b82663fc2d70c4f3a09ad8404"
+      }
+    },
+    {
+      "roundId": "G08",
+      "eligibleForRootCounting": true,
+      "ledgerAtAudit": {
+        "passed": false,
+        "pendingCleanup": false,
+        "modifiedByAudit": false
+      },
+      "identity": {
+        "roomIdSHA256": "a33103a54c2df3f42793ca8d33eba39fb5f31b7dca788ef4892363b8f60bcc6a",
+        "gameSessionIdSHA256": "280efcd0ed2df128d2740619c7053b8af18be348ea792905f45afdc057c8b99e",
+        "inviteCodeSHA256": "ab8ff31fbebc32a8fe5b1a3b04fb764b6187e6ca1c65c9ae22fa804a8927afff",
+        "orderedSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "actorSeats": {
+          "A": 1,
+          "B": 0
+        },
+        "requestId": "19204.756"
+      },
+      "creationPlayerReadySequence": 1377,
+      "nativeJoinMembershipConfirmed": true,
+      "originalHelperResultsAllFour": true,
+      "firstActionTranscribed": false,
+      "actions": [
+        {
+          "phase": "before-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 7,
+            "col": 7
+          },
+          "preSequence": 1389,
+          "actualReadFloor": 1391,
+          "postSequence": 1394,
+          "revision": [
+            5,
+            6
+          ],
+          "moveCount": [
+            0,
+            1
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "before-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 7,
+            "col": 8
+          },
+          "preSequence": 1394,
+          "actualReadFloor": 1395,
+          "postSequence": 1397,
+          "revision": [
+            6,
+            7
+          ],
+          "moveCount": [
+            1,
+            2
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 8,
+            "col": 8
+          },
+          "preSequence": 1397,
+          "actualReadFloor": 1398,
+          "postSequence": 1401,
+          "revision": [
+            7,
+            8
+          ],
+          "moveCount": [
+            2,
+            3
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 8,
+            "col": 7
+          },
+          "preSequence": 1401,
+          "actualReadFloor": 1402,
+          "postSequence": 1404,
+          "revision": [
+            8,
+            9
+          ],
+          "moveCount": [
+            3,
+            4
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        }
+      ],
+      "grounding": {
+        "newScreenshotSHA256": "f548dc553c25d7fb33a68e1979bc9e70767fca510a14a537beb68fd30b4ea3bb",
+        "fixedCanonicalCorners": {
+          "cell00": [
+            1106,
+            806
+          ],
+          "cell014": [
+            1590,
+            806
+          ],
+          "cell140": [
+            1106,
+            1290
+          ],
+          "cell1414": [
+            1590,
+            1290
+          ]
+        },
+        "newScreenshotReviewed": true,
+        "onlineFlipped": false,
+        "allNativeActionPointsMatchCanonicalCorners": true
+      },
+      "foreground": {
+        "actualOSHomeControl": true,
+        "actualAppIconPoint": [
+          1553,
+          490
+        ],
+        "homeAndReturnImageHashesVerified": true,
+        "beforeStoneCount": 2,
+        "returnedStoneCount": 2,
+        "afterStoneCount": 4,
+        "beforeAndReturnedStateSHA256": "04e6e7aa5f080510843dc939ae5bcb8a040b1404e5f05a8ae5bae7a0b3f6a797",
+        "finalStateSHA256": "300906e989c24a7ff7a9aa31f53a821378904ecf9797af0d26a352687673f02d",
+        "beforeSnapshotSequence": 1397,
+        "returnedSnapshotSequence": 1397,
+        "unchangedSnapshotAloneIsNotForegroundProof": true,
+        "freshNativePostInputSequence": 1404,
+        "freshBrowserPostInputSequence": 1401,
+        "clockId": "cua-gomoku-20261030-1793353010992",
+        "homeObservedUptimeMilliseconds": 3423020.33975,
+        "iconClickObservedUptimeMilliseconds": 3424161.021292,
+        "returnedObservedUptimeMilliseconds": 3424852.743584,
+        "batchElapsedObservationMilliseconds": 7898.928041999694
+      },
+      "roleProof": {
+        "role": "player",
+        "connectionReadySequence": 1377,
+        "sameExplicitBrowserSocket": true,
+        "finalAuthorityFreshSinceFloor": true,
+        "finalRoomSnapshotSequence": 1403,
+        "nativeSocketIdentifierNotClaimed": true
+      },
+      "cleanup": {
+        "nativeAbsentOnlyBRoomSnapshotSequence": 1406,
+        "browserRoomLeftSequence": 1410,
+        "browserSocketClosedSequence": 1414,
+        "leaveReason": "left",
+        "pendingCleanup": false
+      },
+      "privateInputSHA256": {
+        "g08-foreground-batch.json": "ff907c5a419217eab0b6c1e3ed014ea47486f9f1774e9c4b64e9e38120ee0915",
+        "g08-new-board-grounding.png": "f548dc553c25d7fb33a68e1979bc9e70767fca510a14a537beb68fd30b4ea3bb",
+        "g08-home.png": "449a6d181937edcbfbf8ecac5ba2ae7aaa60aa82902263bc3a03415f3740c71a",
+        "g08-returned.png": "d2c86db3a543189fe5356fb1779e8e8b22e952f20337c4d78aaaa602dc1fb436",
+        "g08-post-inputs.png": "c2d7b6496c3536c6e0e158b9f7cde0ff17dc044899fa86cc9286d873d1c552b0"
+      },
+      "frozenRequiredEvidenceSHA256": {
+        "requiredWindowSHA256": "aa05c71daf326fbd6ca7e75b88db5b3dc1e05d32317e118c69ea43f0becd4c57",
+        "ledgerRoundAtAuditSHA256": "43145e24c3dac769f20f27cc7b5fc294aa605e78f6ec966a76ff39d4e7cd3fc5"
+      }
+    },
+    {
+      "roundId": "G09",
+      "eligibleForRootCounting": true,
+      "ledgerAtAudit": {
+        "passed": false,
+        "pendingCleanup": false,
+        "modifiedByAudit": false
+      },
+      "identity": {
+        "roomIdSHA256": "ff06477e96e0e663dd1975e509f1cad84ef10706b6674d76e84754e12fc9e08a",
+        "gameSessionIdSHA256": "9cd618849627aad28277a31738a60cfe6854a20c374bd3dabaaba4f2794a5777",
+        "inviteCodeSHA256": "314c02548b9b056e63ea68b2c9c83cf992e05fe247947ef650bd6a5b33eca597",
+        "orderedSeatUIDHashes": [
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+        ],
+        "actorSeats": {
+          "A": 0,
+          "B": 1
+        },
+        "requestId": "19204.770"
+      },
+      "creationPlayerReadySequence": 1505,
+      "nativeJoinMembershipConfirmed": true,
+      "originalHelperResultsAllFour": true,
+      "firstActionTranscribed": false,
+      "actions": [
+        {
+          "phase": "before-foreground",
+          "actor": "A",
+          "seat": 0,
+          "position": {
+            "row": 7,
+            "col": 7
+          },
+          "preSequence": 1516,
+          "actualReadFloor": 1518,
+          "postSequence": 1520,
+          "revision": [
+            5,
+            6
+          ],
+          "moveCount": [
+            0,
+            1
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "before-foreground",
+          "actor": "B",
+          "seat": 1,
+          "position": {
+            "row": 7,
+            "col": 8
+          },
+          "preSequence": 1520,
+          "actualReadFloor": 1521,
+          "postSequence": 1524,
+          "revision": [
+            6,
+            7
+          ],
+          "moveCount": [
+            1,
+            2
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "A",
+          "seat": 0,
+          "position": {
+            "row": 8,
+            "col": 8
+          },
+          "preSequence": 1524,
+          "actualReadFloor": 1525,
+          "postSequence": 1527,
+          "revision": [
+            7,
+            8
+          ],
+          "moveCount": [
+            2,
+            3
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "B",
+          "seat": 1,
+          "position": {
+            "row": 8,
+            "col": 7
+          },
+          "preSequence": 1527,
+          "actualReadFloor": 1528,
+          "postSequence": 1531,
+          "revision": [
+            8,
+            9
+          ],
+          "moveCount": [
+            3,
+            4
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        }
+      ],
+      "grounding": {
+        "newScreenshotSHA256": "4729fa3814837b4939c15f27f2c0c6c277c3916f66d2fdf076a75584a1cbd387",
+        "fixedCanonicalCorners": {
+          "cell00": [
+            1106,
+            806
+          ],
+          "cell014": [
+            1590,
+            806
+          ],
+          "cell140": [
+            1106,
+            1290
+          ],
+          "cell1414": [
+            1590,
+            1290
+          ]
+        },
+        "newScreenshotReviewed": true,
+        "onlineFlipped": false,
+        "allNativeActionPointsMatchCanonicalCorners": true
+      },
+      "foreground": {
+        "actualOSHomeControl": true,
+        "actualAppIconPoint": [
+          1553,
+          490
+        ],
+        "homeAndReturnImageHashesVerified": true,
+        "beforeStoneCount": 2,
+        "returnedStoneCount": 2,
+        "afterStoneCount": 4,
+        "beforeAndReturnedStateSHA256": "04e6e7aa5f080510843dc939ae5bcb8a040b1404e5f05a8ae5bae7a0b3f6a797",
+        "finalStateSHA256": "300906e989c24a7ff7a9aa31f53a821378904ecf9797af0d26a352687673f02d",
+        "beforeSnapshotSequence": 1524,
+        "returnedSnapshotSequence": 1524,
+        "unchangedSnapshotAloneIsNotForegroundProof": true,
+        "freshNativePostInputSequence": 1527,
+        "freshBrowserPostInputSequence": 1531,
+        "clockId": "cua-gomoku-20261030-1793353010992",
+        "homeObservedUptimeMilliseconds": 3564591.739375,
+        "iconClickObservedUptimeMilliseconds": 3565771.799584,
+        "returnedObservedUptimeMilliseconds": 3566667.574584,
+        "batchElapsedObservationMilliseconds": 8007.935999999754
+      },
+      "roleProof": {
+        "role": "player",
+        "connectionReadySequence": 1505,
+        "sameExplicitBrowserSocket": true,
+        "finalAuthorityFreshSinceFloor": true,
+        "finalRoomSnapshotSequence": 1530,
+        "nativeSocketIdentifierNotClaimed": true
+      },
+      "cleanup": {
+        "nativeAbsentOnlyBRoomSnapshotSequence": 1533,
+        "browserRoomLeftSequence": 1537,
+        "browserSocketClosedSequence": 1544,
+        "leaveReason": "left",
+        "pendingCleanup": false
+      },
+      "privateInputSHA256": {
+        "g09-foreground-batch.json": "7f96d0e6ef1b2a256c477b22f7c3e14929d848eb0fffab1b273d92f44e000901",
+        "g09-new-board-grounding.png": "4729fa3814837b4939c15f27f2c0c6c277c3916f66d2fdf076a75584a1cbd387",
+        "g09-home.png": "12c23db22cd600790b49ed7ab04698f5d1483449c6c8fdd452ea89693ee33c25",
+        "g09-returned.png": "c4552354980d274f4b11ce70a375d0c51fc48c6cd9d3ee92943a61fdcd6f5ad3",
+        "g09-post-inputs.png": "cdc8ab6648d1413fb66992082ac32a720554cb3a6b6fb3d6bd93cdf572e3b3cf"
+      },
+      "frozenRequiredEvidenceSHA256": {
+        "requiredWindowSHA256": "010fee69bdae1d17ee3ab998897891c09e10b6de983ea25f617b2f1534845377",
+        "ledgerRoundAtAuditSHA256": "f319666887258aee155c5344445c4a4462009902facdebfd7347b139cc11af25"
+      }
+    },
+    {
+      "roundId": "G10",
+      "eligibleForRootCounting": true,
+      "ledgerAtAudit": {
+        "passed": false,
+        "pendingCleanup": false,
+        "modifiedByAudit": false
+      },
+      "identity": {
+        "roomIdSHA256": "2fa2622efb5a5814d84e943fa8fad27ca8ab30fa1f5f7ea03be0311f9c2c832d",
+        "gameSessionIdSHA256": "086902180475e80a044f81e9c3077e212a8180b3b951d5bb0fdd32627fa15727",
+        "inviteCodeSHA256": "fb3b7ff7dc16109822a4355a8101d7ed7b3051a012845971bc7f9f2e833d3b70",
+        "orderedSeatUIDHashes": [
+          "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+          "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+        ],
+        "actorSeats": {
+          "A": 1,
+          "B": 0
+        },
+        "requestId": "19204.784"
+      },
+      "creationPlayerReadySequence": 1632,
+      "nativeJoinMembershipConfirmed": true,
+      "originalHelperResultsAllFour": true,
+      "firstActionTranscribed": false,
+      "actions": [
+        {
+          "phase": "before-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 7,
+            "col": 7
+          },
+          "preSequence": 1644,
+          "actualReadFloor": 1646,
+          "postSequence": 1649,
+          "revision": [
+            5,
+            6
+          ],
+          "moveCount": [
+            0,
+            1
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "before-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 7,
+            "col": 8
+          },
+          "preSequence": 1649,
+          "actualReadFloor": 1650,
+          "postSequence": 1652,
+          "revision": [
+            6,
+            7
+          ],
+          "moveCount": [
+            1,
+            2
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "B",
+          "seat": 0,
+          "position": {
+            "row": 8,
+            "col": 8
+          },
+          "preSequence": 1652,
+          "actualReadFloor": 1653,
+          "postSequence": 1656,
+          "revision": [
+            7,
+            8
+          ],
+          "moveCount": [
+            2,
+            3
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        },
+        {
+          "phase": "after-foreground",
+          "actor": "A",
+          "seat": 1,
+          "position": {
+            "row": 8,
+            "col": 7
+          },
+          "preSequence": 1656,
+          "actualReadFloor": 1657,
+          "postSequence": 1659,
+          "revision": [
+            8,
+            9
+          ],
+          "moveCount": [
+            3,
+            4
+          ],
+          "freshSingleCellAndLastMoveConfirmed": true
+        }
+      ],
+      "grounding": {
+        "newScreenshotSHA256": "60f69a8b2ee07da35e4e2a6ede69e52f9729e1409be3a08be65600d956e42f5e",
+        "fixedCanonicalCorners": {
+          "cell00": [
+            1106,
+            806
+          ],
+          "cell014": [
+            1590,
+            806
+          ],
+          "cell140": [
+            1106,
+            1290
+          ],
+          "cell1414": [
+            1590,
+            1290
+          ]
+        },
+        "newScreenshotReviewed": true,
+        "onlineFlipped": false,
+        "allNativeActionPointsMatchCanonicalCorners": true
+      },
+      "foreground": {
+        "actualOSHomeControl": true,
+        "actualAppIconPoint": [
+          1553,
+          490
+        ],
+        "homeAndReturnImageHashesVerified": true,
+        "beforeStoneCount": 2,
+        "returnedStoneCount": 2,
+        "afterStoneCount": 4,
+        "beforeAndReturnedStateSHA256": "04e6e7aa5f080510843dc939ae5bcb8a040b1404e5f05a8ae5bae7a0b3f6a797",
+        "finalStateSHA256": "300906e989c24a7ff7a9aa31f53a821378904ecf9797af0d26a352687673f02d",
+        "beforeSnapshotSequence": 1652,
+        "returnedSnapshotSequence": 1652,
+        "unchangedSnapshotAloneIsNotForegroundProof": true,
+        "freshNativePostInputSequence": 1659,
+        "freshBrowserPostInputSequence": 1656,
+        "clockId": "cua-gomoku-20261030-1793353010992",
+        "homeObservedUptimeMilliseconds": 3699836.9025,
+        "iconClickObservedUptimeMilliseconds": 3701001.395667,
+        "returnedObservedUptimeMilliseconds": 3701934.698,
+        "batchElapsedObservationMilliseconds": 8257.34462499991
+      },
+      "roleProof": {
+        "role": "player",
+        "connectionReadySequence": 1632,
+        "sameExplicitBrowserSocket": true,
+        "finalAuthorityFreshSinceFloor": true,
+        "finalRoomSnapshotSequence": 1658,
+        "nativeSocketIdentifierNotClaimed": true
+      },
+      "cleanup": {
+        "nativeAbsentOnlyBRoomSnapshotSequence": 1661,
+        "browserRoomLeftSequence": 1665,
+        "browserSocketClosedSequence": 1672,
+        "leaveReason": "left",
+        "pendingCleanup": false
+      },
+      "privateInputSHA256": {
+        "g10-foreground-batch.json": "f03e977a7d73e5215a6078836f97e5918a986831a033ece6251a4cb13c379fbf",
+        "g10-new-board-grounding.png": "60f69a8b2ee07da35e4e2a6ede69e52f9729e1409be3a08be65600d956e42f5e",
+        "g10-home.png": "d0ec5c3400e7ea60be9adce68a4d7ce54b86ef968a0cd0d5920ae996948ba1bc",
+        "g10-returned.png": "9e7d149b8127540a458145e61800d313782109a1cbd9ed7fd4a7b4a69f31a45b",
+        "g10-post-inputs.png": "9ae84f1174d67a29dff37821bbe2304e99f8174a0b567343037b857134cecb30"
+      },
+      "frozenRequiredEvidenceSHA256": {
+        "requiredWindowSHA256": "81dff24b733ca45031559c218e1f753d68855c0c2caca9931b08cdca2bce0cd9",
+        "ledgerRoundAtAuditSHA256": "14fc41927bebdf92a2ea1b534271d4a59fcdb015c0f719daaaab7de31ed0cfad"
+      }
+    }
+  ],
+  "distinctRoomAndGameAndInviteCount": 5,
+  "allPendingCleanupFalseBeforeFinalization": true,
+  "ledgerChangedByAudit": false,
+  "automaticHelperN10PassClaim": false,
+  "actualRecovery": "Each round used actual OSHome/SpringBoard then actual Appicon return; both controlled humans made accepted UI moves before and after.",
+  "wire": {
+    "finalFrozenCursor": 1672,
+    "finalSourceSHA256": "5461a6acca00486c96781a9d422a3e4eebef80b0401c9dd16c6047b0d06dc379",
+    "issues": [],
+    "rawCDPFramesPersisted": false,
+    "requiredWindowsFrozenPerRound": true
+  },
+  "sourceMapping": {
+    "sourceReferenceCommit": "6ff97db619b7140aa76609e5c2f2a766175fc25e",
+    "onlineGomokuBoardDoesNotPassFlipped": true,
+    "canonicalCornerEvidence": "Each new empty-board screenshot was actually reviewed against the preset four corners. Online display is not the local-two-player flipped board.",
+    "observerV3SHA256": "fcb8623aba70e2615c7fdfdce708a2d418fa7f20898149fb82f0b8d24f5a147c",
+    "actualUIActionHelperSHA256": "49b7dbaea8e2a6a97c22cdac4fff2bb9e2c69de02053436f165bdaf7b6fab3a4"
+  },
+  "screenshotSubAudit": {
+    "reviewer": "independent source/image reviewer",
+    "all20PrivatePNGsViewedAtOriginalSize": true,
+    "observedEachRound": [
+      "Fresh empty board/step1 at same grounded geometry",
+      "Actual SpringBoard Home with the NativeAppicon",
+      "Returned step3/two stones",
+      "Final step5/four stones"
+    ],
+    "crossRoundCodesDistinctAndWithinRoundConsistent": true,
+    "seatVariation": "G09 Native starts on black; other shown initial views wait for the opponent. Seat assignment does not imply board flip."
+  },
+  "representativeScreenshot": {
+    "file": "g10-native-foreground-post-inputs-20261030.png",
+    "sha256": "9ae84f1174d67a29dff37821bbe2304e99f8174a0b567343037b857134cecb30",
+    "bytes": 260218,
+    "roundId": "G10",
+    "caption": "Representative final Native board after both new post-return human moves; all five original image hashes retained without copying20PNG."
+  },
+  "privateOriginalInputsSHA256": {
+    "g06-foreground-batch.json": "837d4d317a9b6235bbf2dc1f0b835eb2dccd30189502907ed45db19cfb9c0f9d",
+    "g06-new-board-grounding.png": "52adf60baedb9786444430ac3d5a54ebd988348a51ec94f8d23624a8b157cdf6",
+    "g06-home.png": "3d899901ec4d2944446b2bad9be3e0f0f244d79ac3aaacf69b31a3e62118b08a",
+    "g06-returned.png": "617ce749717917d200c353fcdd75f3aa8478289918e73c3fc06172527a56139b",
+    "g06-post-inputs.png": "c9d7366eb706ef49123c5f532ecb32e820fe2a8b96676e11f5e2f99b05df01a2",
+    "g07-foreground-batch.json": "76383b6846c0159687db4096921b50fa209a9a6c77dcbc0f7a6b30c856656141",
+    "g07-new-board-grounding.png": "aeb7181e10edef276cb2c4e22887787d994c7b1617e231efa3ba0c97a787aab1",
+    "g07-home.png": "23bde99adba0b625cd8cb7c9fe6b9b3540485e0ef87cb5ae532d9fa4b84bb4f2",
+    "g07-returned.png": "c9bab32af06a4731d71b0939f02ff3456408e2f13c33f351a92897d5d4d82964",
+    "g07-post-inputs.png": "da5bb2c0d3c5e00bd315ef98a6808fa1d8c5a8ed88e09618979473f9bc973cdc",
+    "g08-foreground-batch.json": "ff907c5a419217eab0b6c1e3ed014ea47486f9f1774e9c4b64e9e38120ee0915",
+    "g08-new-board-grounding.png": "f548dc553c25d7fb33a68e1979bc9e70767fca510a14a537beb68fd30b4ea3bb",
+    "g08-home.png": "449a6d181937edcbfbf8ecac5ba2ae7aaa60aa82902263bc3a03415f3740c71a",
+    "g08-returned.png": "d2c86db3a543189fe5356fb1779e8e8b22e952f20337c4d78aaaa602dc1fb436",
+    "g08-post-inputs.png": "c2d7b6496c3536c6e0e158b9f7cde0ff17dc044899fa86cc9286d873d1c552b0",
+    "g09-foreground-batch.json": "7f96d0e6ef1b2a256c477b22f7c3e14929d848eb0fffab1b273d92f44e000901",
+    "g09-new-board-grounding.png": "4729fa3814837b4939c15f27f2c0c6c277c3916f66d2fdf076a75584a1cbd387",
+    "g09-home.png": "12c23db22cd600790b49ed7ab04698f5d1483449c6c8fdd452ea89693ee33c25",
+    "g09-returned.png": "c4552354980d274f4b11ce70a375d0c51fc48c6cd9d3ee92943a61fdcd6f5ad3",
+    "g09-post-inputs.png": "cdc8ab6648d1413fb66992082ac32a720554cb3a6b6fb3d6bd93cdf572e3b3cf",
+    "g10-foreground-batch.json": "f03e977a7d73e5215a6078836f97e5918a986831a033ece6251a4cb13c379fbf",
+    "g10-new-board-grounding.png": "60f69a8b2ee07da35e4e2a6ede69e52f9729e1409be3a08be65600d956e42f5e",
+    "g10-home.png": "d0ec5c3400e7ea60be9adce68a4d7ce54b86ef968a0cd0d5920ae996948ba1bc",
+    "g10-returned.png": "9e7d149b8127540a458145e61800d313782109a1cbd9ed7fd4a7b4a69f31a45b",
+    "g10-post-inputs.png": "9ae84f1174d67a29dff37821bbe2304e99f8174a0b567343037b857134cecb30"
+  },
+  "privateRequiredWindowsSHA256": {
+    "G06": {
+      "requiredWindowSHA256": "5f5d3124fba530de2261d6ac04fbed9d2e7fd1d48694d266a35b6b62a8b2c385",
+      "ledgerRoundAtAuditSHA256": "3549db57d1ba871c41d1ecacb66fef80b19d95913ce058ef86f3033ccd7356fd"
+    },
+    "G07": {
+      "requiredWindowSHA256": "f1fd552f5c33d5eee9ee0fe9d1ed6a03538be0274fa713b555ee725648badc62",
+      "ledgerRoundAtAuditSHA256": "e4afe53c58c45f6e86bb11a3751820432915446b82663fc2d70c4f3a09ad8404"
+    },
+    "G08": {
+      "requiredWindowSHA256": "aa05c71daf326fbd6ca7e75b88db5b3dc1e05d32317e118c69ea43f0becd4c57",
+      "ledgerRoundAtAuditSHA256": "43145e24c3dac769f20f27cc7b5fc294aa605e78f6ec966a76ff39d4e7cd3fc5"
+    },
+    "G09": {
+      "requiredWindowSHA256": "010fee69bdae1d17ee3ab998897891c09e10b6de983ea25f617b2f1534845377",
+      "ledgerRoundAtAuditSHA256": "f319666887258aee155c5344445c4a4462009902facdebfd7347b139cc11af25"
+    },
+    "G10": {
+      "requiredWindowSHA256": "81dff24b733ca45031559c218e1f753d68855c0c2caca9931b08cdca2bce0cd9",
+      "ledgerRoundAtAuditSHA256": "14fc41927bebdf92a2ea1b534271d4a59fcdb015c0f719daaaab7de31ed0cfad"
+    }
+  },
+  "limits": [
+    "Five foreground recovery rounds only; no cold restart, new Native socket handshake or forced WebContent termination claimed.",
+    "All20 moves are original saved helper results, unlike G05 first-A transcription; raw first-A limitation remains scoped to its separate G05 report.",
+    "Old unchanged Browser snapshot on UI return is not counted as freshforeground authority; actual Home/returned images and new A/B accepted moves provide that proof.",
+    "No Flight timers/autoplay fields were fabricated for Gomoku. Actual2-to4moves, exact lastMove and single-cell changes were checked.",
+    "Observer timestamps and batch durations include UI/IPC/polling and are not networkRTT or performance baselines.",
+    "This independent audit only read evidence/source and wrote new private windows/publicreceipt/oneimage; no UI/network, ledger/source, counters or checkboxes were changed."
+  ]
+}

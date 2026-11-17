@@ -1,6 +1,6 @@
 # 客户端工作区与部署
 
-更新日期：2026-10-24。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web、iOS 和 Android 客户端；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
+更新日期：2026-10-24。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web 和 Android 客户端（旧 iOS 已于 2026-11-05 退役）；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
 
 ## 目录与命令
 
@@ -8,7 +8,7 @@
 | ------------------- | ----------------------------------------------------------- | ------------------------------------------------------- |
 | Web／移动源码和 API | `apps/mobile/app/`、`apps/mobile/server/`                   | 保留原有页面、Ionic 导航和云端 API                      |
 | 移动配置与环境文件  | `apps/mobile/nuxt.config.ts`、`capacitor.config.ts`、`.env` | 私有环境值只保存在本机或 CI Secret                      |
-| 原生工程            | `apps/mobile/ios/`、`apps/mobile/android/`                  | Capacitor 在移动应用目录执行                            |
+| 原生工程            | `apps/mobile/android/`                                      | Capacitor 在移动应用目录执行                            |
 | 移动脚本与测试      | `apps/mobile/scripts/`、`apps/mobile/test/`                 | 脚本自行定位移动应用根目录                              |
 | 桌面入口            | `apps/desktop/`                                             | 独立 renderer、Electron main／preload、Forge 配置和测试 |
 | 公共包              | `packages/`                                                 | 按实际消费者提取协议和业务，移动原生插件不引入桌面      |
@@ -98,27 +98,20 @@ Nuxt 生产服务器不自动读取 `.env`；运行时覆盖需要匹配已声�
 
 `netlify.toml` 作为历史备选配置更新 Node.js 和资源目录；启用 Netlify 时仍需验证它的 Nuxt 服务端适配与 monorepo package directory。`cloudbaserc.json` 没有源码路径，继续保留现有环境与 CloudRun 名称。参考 [Netlify monorepo 设置](https://docs.netlify.com/build/configure-builds/monorepos/)。
 
-## Capacitor 兼容工程与发布
+## Android 与原生 iOS 发布
 
-云乐坊原生 iOS 位于 `apps/ios`，日常 TestFlight 更新使用[原生发布流程](./testflight.md)。下列命令用于 `apps/mobile` 的旧 Capacitor 兼容客户端，不作为原生发布前置步骤。
-
-Capacitor 的 `webDir` 仍相对 `apps/mobile` 指向 `.output/public`。构建和同步命令保持原有行为：
+Capacitor 仅用于 `apps/mobile/android`。`webDir` 仍相对 `apps/mobile` 指向 `.output/public`：
 
 ```bash
 pnpm build
-pnpm sync
-pnpm build:ios
+pnpm sync # 仅执行 cap sync android
 ```
 
-iOS Podfile、Android Gradle 与本地 StoreKit 插件需解析工作区中的依赖，不能依赖迁移前的根 `ios`／`android` 目录。iOS archive 和 Android APK／AAB 留在各自原生工程下，上传、签名和真机验证仍是独立发布步骤。
-
-从仓库根手动执行移动脚本时使用完整路径，例如：
-
-```bash
-bash apps/mobile/scripts/ios-testflight.sh
-```
-
-详见 [TestFlight 发布](./testflight.md) 和 [Android 发布](./android-release.md)。桌面客户端使用自己的构建、安装包、签名及更新渠道，接入范围见 [桌面架构](./desktop-electron-architecture.md)。
+Android 发布使用 `pnpm build:android:release`，详见[Android 发布](./android-release.md)。
+旧 Capacitor iOS 客户端未分发，工程与旧构建 / 版本同步脚本已退役。
+云乐坊原生 iOS 位于 `apps/ios`，按[原生发布流程](./testflight.md)执行，不依赖 Nuxt、CocoaPods 或 Capacitor。
+共享授权协议与 WebView 代码在 `apps/ios/YunleFun/WebRuntime`，原生 macOS 直接引用该目录中的公共服务。
+桌面客户端保持独立的构建和更新渠道，见[桌面架构](./desktop-electron-architecture.md)。
 
 移动与桌面的 Git Tag 需要区分。建议移动使用 `mobile-vX.Y.Z`；桌面若使用官方公共 GitHub 更新服务，可保留 `vX.Y.Z` 的有效 SemVer Tag。当前移动 `release` 命令发布前需核对标签命名，桌面接入不自动上传发布、签名或开启产品更新渠道。
 

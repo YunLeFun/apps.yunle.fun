@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-flight-chess-baseline-persistent-evidence-audit",
+  "recordedAtUTC": "2026-10-29T16:26:34.772516+00:00",
+  "readOnly": true,
+  "newTestsOrUI": false,
+  "scope": "Selected persistent task evidence and current implementation record, not an assertion that every file on the computer was searched",
+  "references": [
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-browser-smoke.json",
+      "bytes": 2313,
+      "sha256": "e493cf1a402a71f447158567a4f93ed15620beb1cdd1854c3d6463f84d5506b9"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/local-room-recovery.json",
+      "bytes": 9485,
+      "sha256": "177f82369a71816b53a526a3a8a34d1a919f03e852c16451359e63abfe377b93"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/production-m4-checkpoint-20261029.json",
+      "bytes": 8043,
+      "sha256": "5722ba90c732ef9751e20f4182e3bddd413bca9429599176096178825f82fb68"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/operable-final-n10.json",
+      "bytes": 377661,
+      "sha256": "ea9b0b2e14a77b5c3114deab3df80116717466d2ff88ce18083cbd56cf1aa647"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/historical-native-gomoku-n10-test-summary.json",
+      "bytes": 953,
+      "sha256": "fb2366b7a38730b57652910b2b3a4fcf106158c9ab507bab8c643fc4adcdb5c2"
+    }
+  ],
+  "findings": [
+    {
+      "source": "production-browser-smoke.json",
+      "classification": "real-production-browser-functional-evidence",
+      "accountCount": 1,
+      "roomsCreated": 1,
+      "game": "flight-chess",
+      "verified": [
+        "NormalSSO",
+        "Owner plus3 robots ready/running",
+        "Reload same room and authoritative progression",
+        "Normal leave cleanup"
+      ],
+      "twoDistinctHumanIdentities": false,
+      "createTapToRoomOrJoinToReadyNumericSamplesPresent": false,
+      "performanceBaselineClaimAllowed": false
+    },
+    {
+      "source": "local-room-recovery.json",
+      "classification": "local-memory-http-websocket-protocol-only",
+      "flightChessSuccessfulRounds": 10,
+      "flightChessRecoveryMilliseconds": [
+        255.6,
+        252.74,
+        254.35,
+        254.35,
+        253.65,
+        255.15,
+        252.47,
+        209.37,
+        252.72,
+        253.36
+      ],
+      "roomStore": "memory",
+      "ticketStore": "memory",
+      "identityType": "SessionStore-seeded synthetic test identities",
+      "realColyseusHTTPWebSocket": true,
+      "createTapToRoomOrJoinToReadyNumericSamplesPresent": false,
+      "canReplaceRealNativeTwoAccountBaseline": false,
+      "note": "Numeric values measure local synthetic transport recovery only, not production creation/join startup."
+    },
+    {
+      "source": "production-m4-checkpoint-20261029.json",
+      "classification": "early-real-two-account-functional-checkpoint",
+      "flightChessNumericCreationJoinSamplesFound": false,
+      "note": "Persisted early real two-account journeys are Gomoku; not a FlightChess timing baseline."
+    },
+    {
+      "source": "docs/dev/native-game-discovery-implementation.md phase report",
+      "classification": "historicalF01-functional-report",
+      "flightChessF01ReportedPassed": true,
+      "reportedScope": "RealHome→foreground, same room/game and existingpiece retained; new human roll/move accepted",
+      "numericCreationJoinTimingsInPersistentReferencedEvidenceFound": false,
+      "countsAsFinalN10OrM0Complete": false
+    },
+    {
+      "source": "operable-final-n10.json",
+      "classification": "historical9ba-offline-entry-N10",
+      "games": [
+        "gomoku/computer",
+        "paper-star/local"
+      ],
+      "containsFlightChessCreateJoinBaseline": false
+    }
+  ],
+  "conclusion": "In inspected durable evidence, FlightChess has realproduction functional facts and separate local synthetic recoveryN10, but no version-bound two-real-account click→create/join→room-ready numeric baseline. M0.1 must remain unchecked; two offline M3 scenes do not cover all threegame/mode requirements.",
+  "nextMinimumAction": "Root finaltwo-game productionN10 will additionally capture FlightChess UIclick→authoritative roomready upperbounds in one observation clock, disclosing polling/IPC delay and source/device/network/cache conditions. These are currentversion operationalbaselines, not Nativefirstframe or an oldhistoricalcommit baseline; each client clock stays separate.",
+  "separateOtherGaps": [
+    "Star tutorial/local/open online mode baseline scope remains distinct",
+    "Exact oldNative/Git and observed productionbytes scopes cannot be mixed to fabricate a single historicalbaseline"
+  ]
+}

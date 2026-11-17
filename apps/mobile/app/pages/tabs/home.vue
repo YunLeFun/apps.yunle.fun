@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { YlfAppInfo } from '@yunlefun/types'
 /**
  * Home Page - 云居主页
  *
@@ -9,9 +10,7 @@
  * - 长按编辑模式
  */
 
-import type { YlfAppInfo } from '@yunlefun/types'
 import type { InstalledApp } from '~/types/homeScreen'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import {
   IonButton,
   IonButtons,
@@ -29,6 +28,7 @@ import {
 } from '@ionic/vue'
 import { add, addCircleOutline, qrCodeOutline, searchOutline } from 'ionicons/icons'
 import { homeApps } from '~/constants/apps'
+import { hostHaptics, HostImpactStyle } from '~/host-runtime'
 import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
 
 const router = useRouter()
@@ -319,7 +319,7 @@ function handleLongPress(app: InstalledApp | null, position: { x: number, y: num
   }
   else {
     homeScreenStore.enterEditMode()
-    Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+    hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
   }
 }
 
@@ -335,7 +335,7 @@ function handleDockLongPress(app: InstalledApp, position: { x: number, y: number
 function handleContextEditHomeScreen() {
   closeContextMenu()
   homeScreenStore.enterEditMode()
-  Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {})
+  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
 }
 
 /** 关闭上下文菜单 */

@@ -33,6 +33,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>用于扫描云应用和个人工坊二维码。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>用于将你选择的应用分享卡片存储到照片。</string>
 	<key>YunleFeedbackAppGroup</key>
 	<string>$(FEEDBACK_APP_GROUP)</string>
 </dict>

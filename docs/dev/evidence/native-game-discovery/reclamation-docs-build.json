@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-10-29T06:27:25.085311+08:00",
+  "status": "passed",
+  "command": [
+    "./node_modules/.bin/vitepress",
+    "build",
+    "docs",
+    "--outDir",
+    "/tmp/yunle-native-games.uGZuY9/reclamation-docs-build.781wmkhs"
+  ],
+  "outputDirectory": "/tmp/yunle-native-games.uGZuY9/reclamation-docs-build.781wmkhs",
+  "log": "/tmp/yunle-native-games.uGZuY9/reclamation-docs-build.log",
+  "runtime": "existing local binary; no package installation or trust override",
+  "exitCode": 0,
+  "elapsedSeconds": 6.031265750003513,
+  "outputFileBytesRemoved": 10134177,
+  "outputRemoved": true,
+  "reportSHA256": "218e55cb4b7652bd60327eebce5723b292b0c533f6ade997c6d04375ccaadd64"
+}

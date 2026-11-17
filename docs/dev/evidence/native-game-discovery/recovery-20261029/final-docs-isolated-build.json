@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "current-full-docs-isolated-build-after-navigation-fix",
+  "atUTC": "2026-10-29T19:39:43.736873+00:00",
+  "passed": true,
+  "exitCode": 0,
+  "elapsedSeconds": 6.293,
+  "framework": "InstalledVitePress1.6.4; Node24.18.0",
+  "privateBuildReceiptSHA256": "8caf2fb8d0db25cad1d634fee6bdbc446af74c338f33bacbc8d8559f9b1530c2",
+  "privateLogSHA256": "a1b30275922e7b5fbf738dac6bb592ec241f902b9d0b68917170cf603870f49a",
+  "workflowSHA256": "1ead92589112fba46054831db68d0ca2480fd44dd99735ec50015f8400db2c78",
+  "clientAndServerBundlesCompiled": true,
+  "allPagesRendered": true,
+  "sharedOutputDirectoriesUnchanged": true,
+  "sharedOutputScopes": [
+    "docs/.temp",
+    "docs/.vitepress/cache",
+    "docs/.vitepress/.temp",
+    "docs/.vitepress/dist"
+  ],
+  "newOwnedTemporaryDirectoriesRemaining": [],
+  "sourceInputHashesBefore": {
+    "docs/.vitepress/config.ts": "5dbcdab73488ee948068f12f7ab4e4b5e802bb14ffa18413c7a2687cfd58c390",
+    "docs/.vitepress/theme/index.ts": "e468242217336d2861b21beb1860a2df4ee297b51639dc178623f1a673fe6ccb",
+    "docs/.vitepress/theme/custom.css": "e85ece625447b282374cd85fbee9bd00e991e63a030b60ecda553ad503e188b8",
+    "docs/dev/native-game-discovery-implementation.md": "30d71f497eddd7129d2b00de4502d63febcede60539d14a409b183f449011f48",
+    "docs/product/native-game-discovery.md": "99acfe973845b8cc5f725970d158f09dce9ca752bf562fe6701476a2b689c310"
+  },
+  "sourceInputHashesAfter": {
+    "docs/.vitepress/config.ts": "5dbcdab73488ee948068f12f7ab4e4b5e802bb14ffa18413c7a2687cfd58c390",
+    "docs/.vitepress/theme/index.ts": "e468242217336d2861b21beb1860a2df4ee297b51639dc178623f1a673fe6ccb",
+    "docs/.vitepress/theme/custom.css": "e85ece625447b282374cd85fbee9bd00e991e63a030b60ecda553ad503e188b8",
+    "docs/dev/native-game-discovery-implementation.md": "30d71f497eddd7129d2b00de4502d63febcede60539d14a409b183f449011f48",
+    "docs/product/native-game-discovery.md": "99acfe973845b8cc5f725970d158f09dce9ca752bf562fe6701476a2b689c310"
+  },
+  "sourceInputsUnchanged": true,
+  "firstAttempt": {
+    "status": "failed",
+    "exitCode": 1,
+    "elapsedSeconds": 5.659,
+    "failureScope": "Isolationwrapper linkedonlyvitepress/vue, butSSRgeneratedmodule imported@vueuse/core from own.temp root. Repositorybundles compiled. Correctedownreadonlydependency links; no repo source/dependency/configfix."
+  },
+  "warnings": [
+    "env languagefallsbacktotxt forhighlighting",
+    "someclientchunks exceed500kB minified"
+  ],
+  "localReferenceAudit": "final-docs-local-reference-check.json",
+  "outstandingExistingConfigRouteFindings": [],
+  "temporaryCleanup": {
+    "ownOutputCacheAndTempRemoved": true,
+    "sharedDirectoriesDeletedOrRebuilt": false,
+    "ownedTemporaryFiles": 321,
+    "logicalBytesBeforeRemoval": 10333644,
+    "allocatedBytesBeforeRemoval": 11124736,
+    "newTemporaryDirectoriesRemaining": [],
+    "globalFilesystemFreeSpaceDeltaNotAttributed": true
+  },
+  "simulatorActions": 0,
+  "newPerformanceTests": 0,
+  "noAcceptanceCheckboxAdvanced": true,
+  "previousSuccessfulBuildBeforeRouteFixSHA256": "ffda17c1cc9184f6144538604784850bf1af5a7fde2fba255df90659f2fad534",
+  "resolvedNavigationFindings": {
+    "before": [
+      "/design/",
+      "/database/user-desktops"
+    ],
+    "after": [
+      "/product/",
+      "/database/user-home-screens"
+    ],
+    "exactTwoLineDiffReviewed": true,
+    "predirtyConfigBytesProtected": true
+  }
+}

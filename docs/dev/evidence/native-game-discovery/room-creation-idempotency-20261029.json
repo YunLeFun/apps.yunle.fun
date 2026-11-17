@@ -1,0 +1,123 @@
+{
+  "classification": "local-memory-and-repository-adapter-idempotency-regression",
+  "completedAt": "2026-10-28T18:14:24.741312+00:00",
+  "repositoryBaseHEAD": "540e8e343cefeccd386159d9ba0e19f3b27b5952",
+  "sourceFiles": [
+    {
+      "path": "apps/game-server/src/http/api.ts",
+      "sha256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee"
+    },
+    {
+      "path": "apps/game-server/src/room/cloudbase-repository.ts",
+      "sha256": "8fab3117f9beddecf97daa84377de0e75418ebadfd6a12d5e0c08639ab1cb5f6"
+    },
+    {
+      "path": "apps/game-server/src/room/model.ts",
+      "sha256": "da9cc9ddbbe65219f36f552c43b4e2fc2cdfcb8cf03f42808bfd80898646eb83"
+    },
+    {
+      "path": "apps/game-server/src/room/service.ts",
+      "sha256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1"
+    },
+    {
+      "path": "apps/game-server/src/room/storage-schema.ts",
+      "sha256": "d204d79e4fa13cb1c9fcef4604f0d9f2998316cfd39c75b9d7c14cb3a99a9c86"
+    },
+    {
+      "path": "apps/game-server/test/room-creation-idempotency.test.ts",
+      "sha256": "1af08c71425a4aabca268fda614c67322a313f7df23ce5b1e5f325925d4efc12"
+    },
+    {
+      "path": "apps/web/app/components/online/OnlineRoomLauncher.vue",
+      "sha256": "c86c3d4eb437cf289ef0dedde78c35b21ea2cac72f829960189a3da3a6d4d21d"
+    },
+    {
+      "path": "apps/web/app/utils/room-creation.ts",
+      "sha256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea"
+    },
+    {
+      "path": "apps/web/test/room-creation.test.ts",
+      "sha256": "ad1b84fa2f121082f92dbed7d8d6d8e9391045591a2f03424f813d4ffab52b09"
+    }
+  ],
+  "contract": {
+    "header": "Idempotency-Key",
+    "keyFormat": "random UUID v4; normalized case",
+    "authority": "Play Cookie session plus exact Origin and release gates on every request",
+    "identity": "SHA256 namespace + authenticated UID + request key -> stable internal room ID",
+    "persistence": "private immutable creator UID and canonical parameter fingerprint in existing room aggregate",
+    "conflict": "HTTP 409 IDEMPOTENCY_CONFLICT; never overwrite original room",
+    "expired": "ROOM_EXPIRED; explicit new key required",
+    "legacyClients": "header optional; no idempotency guarantee is retroactively asserted for legacy unkeyed requests",
+    "clientJournal": "same profile localStorage, account-scoped; no tokens/cookies; failures retain operation; confirmed result reused until explicit new operation",
+    "lateResponses": "component UID/parameter epoch and mounted state guard navigation; older journal key cannot replace newer confirmation"
+  },
+  "validation": [
+    {
+      "check": "server Vitest: new idempotency, existing room-service/storage-schema/http-api",
+      "files": 4,
+      "passed": 55,
+      "failed": 0,
+      "newIdempotencyCases": 7
+    },
+    {
+      "check": "client room-creation journal Vitest",
+      "files": 1,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "check": "server TypeScript --noEmit",
+      "result": "passed"
+    },
+    {
+      "check": "Web vue-tsc --noEmit using existing Nuxt generated configuration",
+      "result": "passed"
+    },
+    {
+      "check": "ESLint limited to 9 listed source/test files",
+      "result": "passed"
+    },
+    {
+      "check": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "coverage": [
+    "HTTP response discarded after committed creation then retry",
+    "simultaneous requests across separate service instances",
+    "repository commit acknowledged late/lost",
+    "new service restores serialized persistent room fact after owner/game mutations",
+    "same-key changed payload conflict and different authenticated UID isolation",
+    "expired original operation never silently recreated",
+    "CloudBase repository adapter with real query projection fields and SDK _id",
+    "atomic not-exists creation rejects replacement",
+    "private creation metadata absent from current and legacy public snapshots",
+    "client persisted operation survives journal recreation",
+    "confirmed result requires explicit new-operation action",
+    "storage failure/corrupt record handling and terminal-versus-uncertain error behavior"
+  ],
+  "runner": {
+    "vitest": "4.1.12 preinstalled resolved CLI",
+    "node": "v24.18.0",
+    "packageInstallPerformed": false,
+    "packageTrustOverrides": false,
+    "note": "stale root .bin Vitest shim pointed to removed 4.1.10; used existing 4.1.12 CLI without reinstalling"
+  },
+  "limitations": [
+    "CloudBase adapter exercised against serial in-memory transaction fixture, not live cloud transactions",
+    "No native SSO, production account, production room, simulator or deployment used",
+    "Web source typechecked but final full Nuxt build/export is coordinated by parent/Play agent",
+    "No browser end-to-end UI journey is asserted by these unit/service tests",
+    "Production rollout requires server support before relying on client operation persistence"
+  ],
+  "cleanup": {
+    "startedServices": 0,
+    "createdSimulators": 0,
+    "intermediateBuildDirectoriesCreated": 0,
+    "preserved": [
+      "test source",
+      "this report"
+    ]
+  }
+}

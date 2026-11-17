@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "kind": "M5-normal-home-game-and-help-functional-journey",
+  "atUTC": "2026-10-30T09:08:24.556647+00:00",
+  "status": "passed-scoped-functional-journey",
+  "account": {
+    "label": "controlled-A",
+    "uidSHA256": "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+    "rawUIDOrCredentialPublished": false
+  },
+  "game": {
+    "gameId": "paper-star",
+    "publicAppId": "app_fbe104682abc48dea486e8295c22eb93",
+    "marketShortName": "paper-star",
+    "publicName": "星纸",
+    "modeId": "local",
+    "modeLabel": "自由练习"
+  },
+  "precondition": {
+    "kind": "new-controlled-fixture-via-normal-free-acquisition",
+    "homePreviouslyHadInstalledGames": false,
+    "normalAcquisitionObserved": true,
+    "before": "Star detail showed 获取; controlled account Home had no installed/dock game entry.",
+    "after": "Normal 获取 completed directly, detail changed to 打开 and 已加入云居, and a Star tile appeared under Home 我的应用.",
+    "payment": "Operator observed no payment flow; no paid purchase or account balance mutation was performed for setup.",
+    "historicalUpgradeClaim": false,
+    "historicalExistingNonemptyGameLibraryClaim": false,
+    "fixtureRetainedAtRootRequest": true
+  },
+  "journey": [
+    {
+      "step": "Help → Workshop",
+      "atUTC": "2026-10-30T09:00:14.603Z",
+      "evidence": "help.guide.workshop before action; catalog.assistant and official catalog after action; public screenshot shows 工坊 selected."
+    },
+    {
+      "step": "Acquire Star through normal public detail",
+      "atUTC": "2026-10-30T09:01:43.180Z",
+      "evidence": "detail.acquire → detail.open + detail.added; HomeAX 打开星纸."
+    },
+    {
+      "step": "Home Star tile → playable free practice",
+      "evidence": "Normal operator tool sequence plus captured game render; stored Home-open screenshot countdown2:19."
+    },
+    {
+      "step": "Minimize → Games continue entry → resume",
+      "atUTC": "2026-10-30T09:02:58.060Z",
+      "evidence": "games.resume.paper-star explicitly says 恢复正在运行的游戏; actual resumed screenshot shows countdown2:17."
+    },
+    {
+      "step": "Actual visible boost input",
+      "atUTC": "2026-10-30T09:03:17.103Z",
+      "control": "加速",
+      "durationMs": 500,
+      "evidence": "Private actualInput record; no injected game event."
+    },
+    {
+      "step": "Minimize → Home Star tile → open again",
+      "evidence": "HomeAX still has 打开星纸 and 正在运行（2）; actual reopened screenshot countdown2:02."
+    }
+  ],
+  "countdownEvidence": {
+    "operatorEarlierObservation": "2:41, reported by the actual operator before the saved first-render screenshot",
+    "storedHomeOpenScreenshot": "2:19",
+    "storedGamesResumedScreenshot": "2:17",
+    "storedHomeReopenedScreenshot": "2:02",
+    "scope": "Visible decreasing countdown and continued entry support functional continuity; this is not a timing benchmark or object-identity probe."
+  },
+  "mapping": {
+    "catalogIdentity": "public market id app_fbe104… with marketShortName/slug paper-star maps to registered game paper-star.",
+    "homePath": "NativeWebRuntime.open checks registeredGame against id/marketShortName/slug and the controlled Play game path; existing registered game context resumes, otherwise openGame selects available local mode.",
+    "gamesPath": "Games continue button games.resume.paper-star calls the game resume path for paper-star.",
+    "supportingPassedRuntimeTests": [
+      {
+        "method": "YunleFunTests/NativeGameRuntimeTests/testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext",
+        "status": "passed",
+        "evidenceLogSHA256": "99e8a9b6eb237f23f9432225a769ea78b406153eb7838cd9c7a48bab37e68c92"
+      },
+      {
+        "method": "YunleFunTests/NativeGameRuntimeTests/testMarketDatabaseIdentityAndCanonicalGameSlugReuseOneSession",
+        "status": "passed",
+        "evidenceLogSHA256": "99e8a9b6eb237f23f9432225a769ea78b406153eb7838cd9c7a48bab37e68c92"
+      }
+    ],
+    "runtime17PublicReceipt": "m5-fixture-lifecycle-final-validation.json",
+    "runtime17PublicReceiptSHA256": "1b75f9dbb8b77aab0533edef820870f2cfd2f481b4004591c681289e5540d473",
+    "objectIdentityClaim": false,
+    "portalCompatibility": "The separate legacy play portal appId app_55d184f8cda84547a18e41848faf0084 remains its original aggregate web entry. No claim or requirement that portal and single-game Star share a WebView, session key or profile."
+  },
+  "orientation": {
+    "observed": "DeviceHub screenshot retains a portrait device shell while the Star App content is displayed sideways in a landscape arrangement.",
+    "systemSceneLandscapeRotationVerified": false,
+    "countsAsSystemLandscapeRotationAcceptance": false
+  },
+  "retainedState": {
+    "newStarHomeEntryRetained": true,
+    "starSessionMinimizedAtEnd": true,
+    "homeRunningCountObserved": 2,
+    "otherSession": "Preexisting other running session preserved; running count is not evidence of an active online room."
+  },
+  "screenshots": [
+    {
+      "file": "m5-help-to-workshop-20261030.png",
+      "sha256": "d026535640c94bb0932309d621eba5244e892705b0a481588102ee9e8ba0d281",
+      "bytes": 235629,
+      "sourcePrivateFile": "m5-help-workshop.png",
+      "copyPreservesOriginalBytes": true,
+      "caption": "After actual Help → 前往工坊 navigation; workshop tab and catalog visible."
+    },
+    {
+      "file": "m5-star-added-home-20261030.png",
+      "sha256": "78b1053a095d18ab0dcc6ed9796f726d8750c7065083951d6d21b8b7aa69a473",
+      "bytes": 188930,
+      "sourcePrivateFile": "m5-star-added-home.png",
+      "copyPreservesOriginalBytes": true,
+      "caption": "Newly acquired Star tile in Home 我的应用; this is controlled setup data created in this round."
+    },
+    {
+      "file": "m5-star-home-reopened-20261030.png",
+      "sha256": "05ab2ee4d932722a8fc6e7f8dc552b5e674c5b25f369a02cc7ba730bc9cc82f6",
+      "bytes": 217721,
+      "sourcePrivateFile": "m5-star-home-reopened.png",
+      "copyPreservesOriginalBytes": true,
+      "caption": "Star game after second Home open, visible countdown2:02; sideways App content within portrait DeviceHub shell."
+    }
+  ],
+  "sourceSHA256": {
+    "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "apps/ios/YunleFun/Services/HomeLibrary.swift": "66830006870304542a8d09e56c7d17c925ff83928eeb8fcea8016f1d5d1c3825",
+    "apps/ios/YunleFun/Models/HomeScreen.swift": "227073123f65b2e38126e91b12f68d4866c9a1736e2b3c4f96ae76e181db1209",
+    "apps/ios/YunleFun/Models/CloudApplication.swift": "44c4dc79688754828f6716791bb28688f72a537e0af326f713ead805af53a27e",
+    "apps/ios/YunleFun/Features/Games/GamesView.swift": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+    "apps/ios/YunleFun/Features/Support/HelpView.swift": "ed39c95060207bb0fca35c3565182df613898d615e40baa7343e7d37d27129e4",
+    "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509",
+    "specs/native-game-discovery/design.md": "ec3964382bfa600441a73c10beef22996fceef886c4f5d33748b7e78f3b8b9b0"
+  },
+  "privateEvidenceSHA256": {
+    "m5-help-workshop.json": "b6b81e69e0663c16c76263f759bb1c0829c895df3186751e226bd11f40f99313",
+    "m5-help-workshop.png": "d026535640c94bb0932309d621eba5244e892705b0a481588102ee9e8ba0d281",
+    "m5-star-acquire.json": "48266463cf45afe7fe4ee1d2407a0fd1d292086b3be22c9470e4dd0783a9e82e",
+    "m5-star-added-home.png": "78b1053a095d18ab0dcc6ed9796f726d8750c7065083951d6d21b8b7aa69a473",
+    "m5-star-home-running.png": "3745a68c8965c26f4d42866f32800a78b3ea6c8e56ae8875c72e233f19f1afb4",
+    "m5-star-resume.json": "1aade9963abbc35657b6345990e8d1a38232d96feee6e3dde32403b9fac2ea23",
+    "m5-star-games-resumed.png": "e38256d09f71cdd1b61f37e21de758109983ce4dfa3fd037924ca2356e7a1933",
+    "m5-star-reopened.json": "2d7d381a5d6dbe3d1b5b057049a9e09f86a55eca56df3b4f6bc9fba241176867",
+    "m5-star-home-reopened.png": "05ab2ee4d932722a8fc6e7f8dc552b5e674c5b25f369a02cc7ba730bc9cc82f6"
+  },
+  "historicalBoundary": {
+    "earlierPreservedHomeEntry": "今天来做菜, public appId f454953769a313e90014743c0e7bfcf7; not a game.",
+    "legacyNativeUICandidateSHA256": "e4f72f681cd4422ba3a868e9cd10a4ae365538db0ec09067a015bc737293589e",
+    "legacyPublicPortalLookupSHA256": "9ecb7ad534fe9b9d3ae96379210aa05af96f982b0b7a833a753b12944b50f0ae",
+    "scope": "Earlier preview/history claims did not prove a preexisting production Home game entry; this normal-acquisition journey supplies a new controlled prerequisite."
+  },
+  "limitations": [
+    "UI countdown, actual continued entry and passed Runtime mapping tests jointly support the scoped behavior; no instrumented same-WKWebView-pointer claim.",
+    "This is a living local free-practice session journey, not cold restart, WebContent kill, online invitation or full old-data upgrade acceptance.",
+    "Newly acquired Star is retained test setup; no cloud/local Home JSON was injected or overwritten to manufacture the entry.",
+    "Images are unedited exact source copies; no system orientation conclusion is inferred from sideways content.",
+    "This task only read existing evidence/source and wrote new report/screenshots; no UI, network, installation, test run, main docs or checkbox changes were performed by this audit."
+  ]
+}

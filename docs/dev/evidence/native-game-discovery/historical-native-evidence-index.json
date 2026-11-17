@@ -1,0 +1,74 @@
+{
+  "schema": "historical-native-evidence-index-v1",
+  "rawCopies": [
+    {
+      "file": "historical-native-gomoku-preflight-n1.json",
+      "source": "historical-native-https-preflight-attachments/C5B84721-F20E-4858-B81D-27CCA2908F1C.json",
+      "bytes": 15242,
+      "sha256": "7cda3ecc3e4a42aeab703845ffa0d38e42eeecc752a481cceaf8845016378dae"
+    },
+    {
+      "file": "historical-native-star-preflight-failure.json",
+      "source": "historical-native-https-preflight-attachments/5B5B29A0-8F69-4696-9D50-435224531510.json",
+      "bytes": 9973,
+      "sha256": "a95a20f25f13ee2ae9b2d274df5cd90536e1735732a60da304d3016063abfcd8"
+    },
+    {
+      "file": "historical-native-star-renderer-failure.json",
+      "source": "historical-native-star-diagnostic-attachments/041FB09B-25BD-40C2-BF57-CB501A4F6056.json",
+      "bytes": 32950,
+      "sha256": "71051dad9e4268ec7b1c430cc3bc2773b4568ff7cadeeb70c2112f0f25a478c3"
+    },
+    {
+      "file": "historical-native-texture-cors-failure.json",
+      "source": "historical-native-cdn-diagnostic-attachments/5B991387-69FB-4D4E-BC7D-E16CF54417C5.json",
+      "bytes": 4061,
+      "sha256": "7a08d40fd89244dcb2fb30ab890e6c473106d59a1c4d126e82e0d01d5cc6d7cd"
+    },
+    {
+      "file": "historical-native-gomoku-https-n10.json",
+      "source": "historical-native-gomoku-n10-attachments/BB8F3A46-08B3-48A5-AC68-FDD37E65FC45.json",
+      "bytes": 405627,
+      "sha256": "7977d86cad8b046b2e3e76ea35fd0ffb8bf970e6bb3234c4e18b0c2d5291df3e"
+    }
+  ],
+  "resultSummaries": [
+    {
+      "resultBundle": "/tmp/yunle-native-games.uGZuY9/historical-native-https-preflight.xcresult",
+      "summaryFile": "historical-native-https-preflight-test-summary.json",
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0
+    },
+    {
+      "resultBundle": "/tmp/yunle-native-games.uGZuY9/historical-native-star-diagnostic.xcresult",
+      "summaryFile": "historical-native-star-diagnostic-test-summary.json",
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0
+    },
+    {
+      "resultBundle": "/tmp/yunle-native-games.uGZuY9/historical-native-cdn-diagnostic.xcresult",
+      "summaryFile": "historical-native-cdn-diagnostic-test-summary.json",
+      "passedTests": 0,
+      "failedTests": 1,
+      "skippedTests": 0
+    },
+    {
+      "resultBundle": "/tmp/yunle-native-games.uGZuY9/historical-native-gomoku-n10.xcresult",
+      "summaryFile": "historical-native-gomoku-n10-test-summary.json",
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0
+    }
+  ],
+  "manualSupplementaryUI": {
+    "completed": false,
+    "search": "play",
+    "valueObserved": true,
+    "result": "No matching applications shown",
+    "ChineseTypeText": "Tool failure",
+    "openedPlay": false,
+    "scope": "Normal old main UI supplementary journey did not reach Play. Runtime HTTPS harness uses own public Play fixture; it does not prove catalogue-to-detail UI."
+  }
+}

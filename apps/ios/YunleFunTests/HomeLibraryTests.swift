@@ -420,4 +420,135 @@ final class HomeLibraryTests: XCTestCase {
         XCTAssertEqual(backups.count, 1)
         XCTAssertEqual(try Data(contentsOf: XCTUnwrap(backups.first)), data)
     }
+
+    func testRemoteEmptyRevisionEncodesNullAndRoundTrips() throws {
+        for schema in 1...3 {
+            let remote = RemoteHomeScreen(schemaVersion: schema, revision: nil, configuration: HomeConfiguration())
+            let data = try JSONEncoder().encode(remote)
+            let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            XCTAssertTrue(json["revision"] is NSNull, "An empty remote baseline must carry an explicit null revision")
+            XCTAssertEqual(try JSONDecoder().decode(RemoteHomeScreen.self, from: data), remote)
+            let populated = RemoteHomeScreen(schemaVersion: schema, revision: String(repeating: "a", count: 64),
+                                             configuration: HomeConfiguration(installedApps: [.init(appId: "a")]))
+            XCTAssertEqual(try JSONDecoder().decode(RemoteHomeScreen.self, from: JSONEncoder().encode(populated)), populated)
+        }
+    }
+
+    func testEmptyRemoteBaseSurvivesHomeLibraryRestart() throws {
+        let library = HomeLibrary(directory: directory, accountID: "empty-account")
+        try library.adopt(RemoteHomeScreen(revision: nil, configuration: HomeConfiguration()))
+        let saved = try Data(contentsOf: library.fileURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: saved) as? [String: Any])
+        let base = try XCTUnwrap(json["base"] as? [String: Any])
+        XCTAssertTrue(base["revision"] is NSNull)
+        let reopened = HomeLibrary(directory: directory, accountID: "empty-account")
+        XCTAssertNil(reopened.storageError)
+        XCTAssertFalse(reopened.needsRecovery)
+        XCTAssertEqual(reopened.snapshot, library.snapshot)
+        XCTAssertEqual(try Data(contentsOf: library.fileURL), saved, "A restart must not rewrite the saved baseline")
+    }
+
+    func testLegacyEmptyLocalBasePreservesPendingLayoutAcrossRestart() throws {
+        var expected = HomeLibrarySnapshot()
+        expected.configuration = HomeConfiguration(installedApps: [.init(appId: "a"), .init(appId: "b")],
+                                                    dockApps: [.init(appId: "a")], recentApps: [.init(appId: "b", usedAt: 42)], updatedAt: 83,
+                                                    folders: [.init(id: "f", name: "工具", appIds: ["b"])],
+                                                    applicationSources: [.init(appId: "a", ownerLogin: "Author")])
+        expected.cachedApplications = [CloudApplication(id: "a", name: "作者应用", personalMarketOwnerLogin: "Author"),
+                                       CloudApplication(id: "b", name: "应用 B")]
+        expected.base = RemoteHomeScreen(revision: nil, configuration: HomeConfiguration())
+        expected.hasPendingChanges = true
+        expected.syncEnabled = false
+        expected.autoSyncEnabled = false
+        expected.legacyImportID = String(repeating: "a", count: 64)
+        expected.lastRestoreID = UUID().uuidString
+        let oldData = try JSONSerialization.data(withJSONObject: snapshotWithoutBaseRevision(expected))
+        let file = HomeLibrary(directory: directory, accountID: "legacy-empty-account").fileURL
+        try oldData.write(to: file)
+
+        let library = HomeLibrary(directory: directory, accountID: "legacy-empty-account")
+        XCTAssertNil(library.storageError)
+        XCTAssertFalse(library.needsRecovery)
+        XCTAssertEqual(library.snapshot, expected, "Recovering only the empty baseline must preserve every pending edit and retry identity")
+        XCTAssertEqual(try Data(contentsOf: file), oldData, "Compatibility reading alone must not rewrite the old file")
+        library.setDockVisible(true)
+        expected.dockVisible = true
+        XCTAssertEqual(library.snapshot, expected)
+        XCTAssertEqual(HomeLibrary(directory: directory, accountID: "legacy-empty-account").snapshot, expected)
+        let rewritten = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String: Any])
+        XCTAssertTrue(try XCTUnwrap(rewritten["base"] as? [String: Any])["revision"] is NSNull)
+    }
+
+    func testLocalMissingRevisionRejectsNondefaultBase() throws {
+        let configurations = [
+            HomeConfiguration(installedApps: [.init(appId: "a")]),
+            HomeConfiguration(dockApps: [.init(appId: "a")]),
+            HomeConfiguration(recentApps: [.init(appId: "a", usedAt: 0)]),
+            HomeConfiguration(updatedAt: 1),
+            HomeConfiguration(installedApps: [.init(appId: "a")], folders: [.init(id: "f", name: "工具", appIds: ["a"])]),
+            HomeConfiguration(installedApps: [.init(appId: "a")], applicationSources: [.init(appId: "a", ownerLogin: "Author")]),
+        ]
+        for configuration in configurations {
+            var snapshot = HomeLibrarySnapshot()
+            snapshot.base = RemoteHomeScreen(revision: nil, configuration: configuration)
+            let data = try JSONSerialization.data(withJSONObject: snapshotWithoutBaseRevision(snapshot))
+            XCTAssertThrowsError(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: data), "A missing revision cannot establish a nondefault baseline")
+        }
+    }
+
+    func testLocalMissingRevisionRejectsIncompleteUnknownOrOtherVersionBase() throws {
+        var empty = HomeLibrarySnapshot()
+        empty.base = RemoteHomeScreen(revision: nil, configuration: HomeConfiguration())
+        let valid = try snapshotWithoutBaseRevision(empty)
+        let base = try XCTUnwrap(valid["base"] as? [String: Any])
+        let configuration = try XCTUnwrap(base["configuration"] as? [String: Any])
+        func snapshot(with base: [String: Any], version: Int = 3) -> [String: Any] {
+            var json = valid; json["base"] = base; json["version"] = version; return json
+        }
+        var invalid: [(String, [String: Any])] = []
+        for key in ["installedApps", "dockApps", "recentApps", "updatedAt", "folders", "applicationSources"] {
+            var missing = configuration; missing.removeValue(forKey: key)
+            var missingBase = base; missingBase["configuration"] = missing
+            invalid.append(("missing \(key)", snapshot(with: missingBase)))
+            var null = configuration; null[key] = NSNull()
+            var nullBase = base; nullBase["configuration"] = null
+            invalid.append(("null \(key)", snapshot(with: nullBase)))
+        }
+        var unknownConfiguration = configuration; unknownConfiguration["futureContent"] = []
+        var unknownContentBase = base; unknownContentBase["configuration"] = unknownConfiguration
+        invalid.append(("unknown configuration field", snapshot(with: unknownContentBase)))
+        var unknownBase = base; unknownBase["futureRevision"] = "unknown"
+        invalid.append(("unknown base field", snapshot(with: unknownBase)))
+        var missingSchema = base; missingSchema.removeValue(forKey: "schemaVersion")
+        invalid.append(("missing base schema", snapshot(with: missingSchema)))
+        var nullConfiguration = base; nullConfiguration["configuration"] = NSNull()
+        invalid.append(("null configuration", snapshot(with: nullConfiguration)))
+        for schema in [1, 2, 4] {
+            var otherSchema = base; otherSchema["schemaVersion"] = schema
+            invalid.append(("base schema \(schema)", snapshot(with: otherSchema)))
+        }
+        invalid.append(("snapshot version 2", snapshot(with: base, version: 2)))
+        invalid.append(("snapshot version 4", snapshot(with: base, version: 4)))
+        for (name, json) in invalid {
+            XCTAssertThrowsError(try JSONDecoder().decode(HomeLibrarySnapshot.self, from: JSONSerialization.data(withJSONObject: json)), name)
+        }
+    }
+
+    func testRemoteMissingRevisionRemainsRejected() throws {
+        for schema in 1...3 {
+            let remote = RemoteHomeScreen(schemaVersion: schema, revision: nil, configuration: HomeConfiguration())
+            var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(remote)) as? [String: Any])
+            json.removeValue(forKey: "revision")
+            XCTAssertThrowsError(try JSONDecoder().decode(RemoteHomeScreen.self, from: JSONSerialization.data(withJSONObject: json)),
+                                 "Local compatibility must not accept an incomplete schema \(schema) remote response")
+        }
+    }
+
+    private func snapshotWithoutBaseRevision(_ snapshot: HomeLibrarySnapshot) throws -> [String: Any] {
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(snapshot)) as? [String: Any])
+        var base = try XCTUnwrap(json["base"] as? [String: Any])
+        base.removeValue(forKey: "revision")
+        json["base"] = base
+        return json
+    }
 }

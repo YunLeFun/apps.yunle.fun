@@ -1,0 +1,562 @@
+{
+  "schemaVersion": 1,
+  "kind": "M0.1-existing-gomoku-online-baseline-addendum",
+  "atUTC": "2026-10-30T09:01:05.221825+00:00",
+  "readOnlyEvidenceInspection": true,
+  "newBuildTestNetworkUIRoomOrCredentialReads": false,
+  "purpose": "Map the already-published Gomoku online mode to existing G01–G04 observations, closing the omitted mode mapping in the separate consolidation without new tests or a new matrix.",
+  "originalConsolidationUnmodified": true,
+  "taskCheckboxesChanged": false,
+  "binding": {
+    "nativeRuntimeSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "nativeControllerSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "nativeBundledCatalogVersion": "b25149ae2fd0fe3383c4a350dbc3343294fa2f9a7c56b330ba3f972bc4846c8b",
+    "backendCommitAsRecorded": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "webDeploymentGitAndCatalogPerRound": null,
+    "webAttributionLimit": "The per-round selected script URI is retained in the private ledger where available; this evidence does not prove a full per-round deployed Web Git/catalog. The historical b251 Native catalog must not be relabeled as final a701.",
+    "exactMeasuredNativeExecutableSHA256": null,
+    "productLimit": "Source-level Runtime/Controller/catalog bindings are recorded. No new exact executable SHA is assigned to these historical G rounds.",
+    "device": "Existing shared4502 iPhone18Pro iOS27.0 as recorded in the original consolidation/checkpoint context; no device query performed by this addendum.",
+    "network": "Normal production HTTPS/Colyseus with independent existing NativeA and BrowserB identities; no loopback fixture."
+  },
+  "firstVisitAndCacheScope": {
+    "initialVisitOrder": "G01 is the earliest of these selected recorded Gomoku online rounds, not proof of first-ever use or fresh installation.",
+    "HTTPResourceCache": "Natural/unknown in all G rounds; no clear/prepare/cache-hit evidence.",
+    "WebViewIdentity": "No new/same WebView identity assertion for these normal online joins.",
+    "retainedVersusRestart": "Cold Universal Link, transport reconnect, actual App restart and WebContent retry are separate recovery types; none is equated with the historical same-document retained-session benchmark."
+  },
+  "eventDefinitions": [
+    {
+      "event": "Creation UI trigger",
+      "definition": "Existing root createClickObservedAtUTC marks the actual visible create action observation. Absolute UTC order alone is not a monotonic latency measurement."
+    },
+    {
+      "event": "Room creation authority",
+      "definition": "First saved matching room.snapshot with selected Gomoku, waiting and one actual member; sequence-bound on the observed B socket. A displayed invitation code alone is insufficient."
+    },
+    {
+      "event": "Initial join membership",
+      "definition": "First saved same-room room.snapshot with the two independent human members. Initial playing snapshot and two-stone game baseline establish subsequent ready/use; no separate Native join stopwatch is inferred."
+    },
+    {
+      "event": "Recovery trigger",
+      "definition": "Use each round actual recorded OS link, B offline operation, Native termination/relaunch/continue, or one Native WebContent retry. These are distinct actions and scopes."
+    },
+    {
+      "event": "Recovery authority",
+      "definition": "Saved room.snapshot and normalized game.snapshot summary with same room/gameSession/ordered seats and baseline state SHA; then new actual A/B inputs increase stones from2 to4. This is continued usability, not a declared reconnect-latency or production SLA."
+    },
+    {
+      "event": "Timing boundary",
+      "definition": "Only existing G01/G02 createToReady observer upper bounds are copied. They include automation/IPC/operator gaps. G03/G04 create and all initial Native join elapsed are missing; no cross-clock subtraction or fabricated timing."
+    },
+    {
+      "event": "Normal cleanup",
+      "definition": "Saved matching normal room.left and socket-closed authority. All four recorded pendingCleanup flags are false."
+    }
+  ],
+  "rounds": [
+    {
+      "id": "G01",
+      "binding": "historical-b251-native-online-observations",
+      "evidence": [
+        "g01_g04_public_checkpoint",
+        "g01_g04_frozen_private_ledger",
+        "g01_g04_sanitized_wire",
+        "g01_safari_source",
+        "g01_cold_recovered"
+      ],
+      "recordedStartedAtUTC": "2026-10-29T18:17:36.385Z",
+      "recordedCreateClickAtUTC": "2026-10-29T18:17:36.831Z",
+      "creationAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 4602,
+        "revision": 1,
+        "status": "waiting"
+      },
+      "initialTwoHumanMembershipAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 4605,
+        "revision": 3,
+        "status": "waiting"
+      },
+      "initialPlayingRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 4611,
+        "revision": 5,
+        "status": "playing"
+      },
+      "createToReadyObserverUpperBoundMilliseconds": 50846.913832999766,
+      "createTimingDefinition": "Cua host observation upper bound, including automation/IPC and gaps; not Native first-frame performance",
+      "nativeJoinElapsedMilliseconds": null,
+      "nativeJoinEndpointLimit": "The saved matching two-member room authority establishes membership, not a separately timed Native onGameRoomReady event. No clock value is backfilled.",
+      "nativeInputVerifiedAtUTC": null,
+      "baselineGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 4620,
+        "revision": 7,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "recoveryType": "actual OS cold Universal Link from Safari after Native app termination",
+      "recoveryTriggerObservations": {
+        "beforeColdAtUTC": "2026-10-29T18:28:14.859Z",
+        "universalLinkClickAtUTC": "2026-10-29T18:28:46.537Z"
+      },
+      "recoveryObservedAtUTC": "2026-10-29T18:29:19.364Z",
+      "recoveredRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 4625,
+        "revision": 9,
+        "status": "playing"
+      },
+      "recoveredGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 4626,
+        "revision": 9,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "sameRoom": true,
+      "sameGameSession": true,
+      "sameOrderedSeatHashes": true,
+      "sameBaselineStateSHA256": true,
+      "freshRealInputsAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 4633,
+        "revision": 11,
+        "status": "playing",
+        "stoneCount": 4
+      },
+      "normalCleanupAuthority": [
+        {
+          "kind": "room.snapshot",
+          "sequence": 4632,
+          "revision": 11,
+          "status": "playing"
+        },
+        {
+          "kind": "game.snapshot",
+          "sequence": 4633,
+          "revision": 11,
+          "status": "playing",
+          "stoneCount": 4
+        },
+        {
+          "kind": "room.snapshot",
+          "sequence": 4635,
+          "revision": 12,
+          "status": "waiting"
+        },
+        {
+          "kind": "room.left",
+          "sequence": 4639
+        },
+        {
+          "kind": "socket-closed",
+          "sequence": 4642
+        }
+      ],
+      "passedAsRecorded": true,
+      "pendingCleanupAsRecorded": false,
+      "wireProjectionMatches": {
+        "creationRoom": true,
+        "baseline": true,
+        "recovered": true,
+        "recoveredRoom": true,
+        "afterFreshActions": true
+      },
+      "cleanupWireProjectionAllMatch": true,
+      "doesNotCreateNewM4Count": true,
+      "initialJoinUIRoute": "Not separately encoded in this selected ledger; recovery route is actual Safari OS cold Universal Link after Native termination."
+    },
+    {
+      "id": "G02",
+      "binding": "historical-b251-native-online-observations",
+      "evidence": [
+        "g01_g04_public_checkpoint",
+        "g01_g04_frozen_private_ledger",
+        "g01_g04_sanitized_wire"
+      ],
+      "recordedStartedAtUTC": "2026-10-29T18:43:02.428Z",
+      "recordedCreateClickAtUTC": "2026-10-29T18:43:03.235Z",
+      "creationAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5067,
+        "revision": 1,
+        "status": "waiting"
+      },
+      "initialTwoHumanMembershipAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5072,
+        "revision": 4,
+        "status": "waiting"
+      },
+      "initialPlayingRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5078,
+        "revision": 6,
+        "status": "playing"
+      },
+      "createToReadyObserverUpperBoundMilliseconds": 9483.113874999806,
+      "createTimingDefinition": "Cua host observation upper bound including automation/IPC and gaps; not Native first-frame performance",
+      "nativeJoinElapsedMilliseconds": null,
+      "nativeJoinEndpointLimit": "The saved matching two-member room authority establishes membership, not a separately timed Native onGameRoomReady event. No clock value is backfilled.",
+      "nativeInputVerifiedAtUTC": null,
+      "baselineGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 5087,
+        "revision": 8,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "recoveryType": "Browser B short network outage via CDP; Native A remains online",
+      "recoveryTriggerObservations": {
+        "networkOfflineAtUTC": "2026-10-29T18:45:31.553Z"
+      },
+      "recoveryObservedAtUTC": "2026-10-29T18:46:33.735Z",
+      "recoveredRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5135,
+        "revision": 10,
+        "status": "playing"
+      },
+      "recoveredGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 5136,
+        "revision": 10,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "sameRoom": true,
+      "sameGameSession": true,
+      "sameOrderedSeatHashes": true,
+      "sameBaselineStateSHA256": true,
+      "freshRealInputsAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 5142,
+        "revision": 12,
+        "status": "playing",
+        "stoneCount": 4
+      },
+      "normalCleanupAuthority": [
+        {
+          "kind": "game.snapshot",
+          "sequence": 5142,
+          "revision": 12,
+          "status": "playing",
+          "stoneCount": 4
+        },
+        {
+          "kind": "room.snapshot",
+          "sequence": 5144,
+          "revision": 13,
+          "status": "waiting"
+        },
+        {
+          "kind": "room.left",
+          "sequence": 5148
+        },
+        {
+          "kind": "socket-closed",
+          "sequence": 5151
+        }
+      ],
+      "passedAsRecorded": true,
+      "pendingCleanupAsRecorded": false,
+      "wireProjectionMatches": {
+        "creationRoom": true,
+        "baseline": true,
+        "recovered": true,
+        "recoveredRoom": true,
+        "afterFreshActions": true
+      },
+      "cleanupWireProjectionAllMatch": true,
+      "doesNotCreateNewM4Count": true,
+      "recordedActualBOfflineMilliseconds": 14978,
+      "offlineDurationIsNotReconnectLatency": true,
+      "networkScope": "B browser transport interruption; Native A stayed active. Not a Native network-loss measurement."
+    },
+    {
+      "id": "G03",
+      "binding": "historical-b251-native-online-observations",
+      "evidence": [
+        "g01_g04_public_checkpoint",
+        "g01_g04_frozen_private_ledger",
+        "g01_g04_sanitized_wire",
+        "g03_restart_continue",
+        "g03_cold_recovered"
+      ],
+      "recordedStartedAtUTC": "2026-10-29T18:47:42.204Z",
+      "recordedCreateClickAtUTC": "2026-10-29T18:47:42.558Z",
+      "creationAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5946,
+        "revision": 1,
+        "status": "waiting"
+      },
+      "initialTwoHumanMembershipAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5949,
+        "revision": 3,
+        "status": "waiting"
+      },
+      "initialPlayingRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5955,
+        "revision": 5,
+        "status": "playing"
+      },
+      "createToReadyObserverUpperBoundMilliseconds": null,
+      "createTimingDefinition": "No create-to-ready elapsed was recorded for this round; none is reconstructed",
+      "nativeJoinElapsedMilliseconds": null,
+      "nativeJoinEndpointLimit": "The saved matching two-member room authority establishes membership, not a separately timed Native onGameRoomReady event. No clock value is backfilled.",
+      "nativeInputVerifiedAtUTC": "2026-10-29T18:54:58.501Z",
+      "baselineGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 5964,
+        "revision": 7,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "recoveryType": "actual Native process termination/relaunch and persisted return-to-room",
+      "recoveryTriggerObservations": {
+        "beforeRestartAtUTC": "2026-10-29T18:57:22.581Z",
+        "restartedAtUTC": "2026-10-29T18:57:58.976Z",
+        "continueClickAtUTC": "2026-10-29T18:58:34.227Z"
+      },
+      "recoveryObservedAtUTC": "2026-10-29T19:05:09.495Z",
+      "recoveredRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 5969,
+        "revision": 9,
+        "status": "playing"
+      },
+      "recoveredGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 5970,
+        "revision": 9,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "sameRoom": true,
+      "sameGameSession": true,
+      "sameOrderedSeatHashes": true,
+      "sameBaselineStateSHA256": true,
+      "freshRealInputsAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 5977,
+        "revision": 11,
+        "status": "playing",
+        "stoneCount": 4
+      },
+      "normalCleanupAuthority": [
+        {
+          "kind": "room.left",
+          "sequence": 5983
+        },
+        {
+          "kind": "socket-closed",
+          "sequence": 5987
+        }
+      ],
+      "passedAsRecorded": true,
+      "pendingCleanupAsRecorded": false,
+      "wireProjectionMatches": {
+        "creationRoom": true,
+        "baseline": true,
+        "recovered": true,
+        "recoveredRoom": true,
+        "afterFreshActions": true
+      },
+      "cleanupWireProjectionAllMatch": true,
+      "doesNotCreateNewM4Count": true,
+      "initialInputCaveat": "Earlier unverified text entry was not attributed to product. Only explicit verified code/input and subsequent same-session recovery are used."
+    },
+    {
+      "id": "G04",
+      "binding": "historical-b251-native-online-observations",
+      "evidence": [
+        "g01_g04_public_checkpoint",
+        "g01_g04_frozen_private_ledger",
+        "g01_g04_sanitized_wire",
+        "g04_failed_webcontent",
+        "g04_one_retry_recovered",
+        "g04_verified_typed_input"
+      ],
+      "recordedStartedAtUTC": "2026-10-29T19:08:13.788Z",
+      "recordedCreateClickAtUTC": "2026-10-29T19:08:13.790Z",
+      "creationAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 6084,
+        "revision": 1,
+        "status": "waiting"
+      },
+      "initialTwoHumanMembershipAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 6086,
+        "revision": 3,
+        "status": "waiting"
+      },
+      "initialPlayingRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 6092,
+        "revision": 5,
+        "status": "playing"
+      },
+      "createToReadyObserverUpperBoundMilliseconds": null,
+      "createTimingDefinition": "No create-to-ready elapsed was recorded for this round; none is reconstructed",
+      "nativeJoinElapsedMilliseconds": null,
+      "nativeJoinEndpointLimit": "The saved matching two-member room authority establishes membership, not a separately timed Native onGameRoomReady event. No clock value is backfilled.",
+      "nativeInputVerifiedAtUTC": "2026-10-29T19:08:30.507Z",
+      "baselineGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 6101,
+        "revision": 7,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "recoveryType": "actual WebContent process termination and Native retry",
+      "recoveryTriggerObservations": {
+        "retryClickObservedAtUTC": "2026-10-29T19:11:08.058Z"
+      },
+      "recoveryObservedAtUTC": "2026-10-29T19:11:35.437Z",
+      "recoveredRoomAuthority": {
+        "kind": "room.snapshot",
+        "sequence": 6106,
+        "revision": 9,
+        "status": "playing"
+      },
+      "recoveredGameAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 6107,
+        "revision": 9,
+        "status": "playing",
+        "stoneCount": 2
+      },
+      "sameRoom": true,
+      "sameGameSession": true,
+      "sameOrderedSeatHashes": true,
+      "sameBaselineStateSHA256": true,
+      "freshRealInputsAuthority": {
+        "kind": "game.snapshot",
+        "sequence": 6114,
+        "revision": 11,
+        "status": "playing",
+        "stoneCount": 4
+      },
+      "normalCleanupAuthority": [
+        {
+          "kind": "room.left",
+          "sequence": 6120
+        },
+        {
+          "kind": "socket-closed",
+          "sequence": 6123
+        }
+      ],
+      "passedAsRecorded": true,
+      "pendingCleanupAsRecorded": false,
+      "wireProjectionMatches": {
+        "baseline": true,
+        "recovered": true,
+        "recoveredRoom": true,
+        "afterFreshActions": true
+      },
+      "cleanupWireProjectionAllMatch": true,
+      "doesNotCreateNewM4Count": true,
+      "retryScope": "One actual retry after the uniquely mapped visible WebContent was terminated; saved failure and recovered screenshots. No synthetic ready/room callback.",
+      "unrelatedFieldExcluded": "The ledger field closedUnusedCampsDOM is a later Flight-lobby annotation and is excluded from this Gomoku baseline mapping."
+    }
+  ],
+  "independentCrossCheck": {
+    "originalConsolidatedReferenceCount": 32,
+    "originalConsolidatedExactPathBytesAndSHA256Pass": 32,
+    "originalConsolidatedUndefinedEvidenceIDs": 0,
+    "selectedG01G04EqualCurrentLedgerAtInspection": true,
+    "selectedRoomGameAndCleanupObjectsAllProjectExactlyIntoSavedSanitizedWire": true,
+    "savedWireReportsTruncated": false,
+    "savedWireReportsHasMore": false,
+    "wireLimit": "The selected durable sanitized event set contains the referenced positive chain. Its own false flags are not a claim to have persisted every raw browser/CDP frame, credential, or all system events.",
+    "gamePayloadPersistenceLimit": "The selected durable G01–G04 sanitized game events store normalized identity/counter/state-digest summaries, not every complete raw game-state payload. Same-state facts are supported by the saved matching digest and screenshots; no full-state replay claim is made."
+  },
+  "reviewConclusion": {
+    "M0_1Mapping": "Together with the original consolidation, the named modes and existing event/cache/recovery categories are sufficiently recorded for root to close the M0.1 baseline-recording task; no new experiment is required for this omitted mapping.",
+    "boundary": "This closes baseline documentation coverage only. Unknown controlled cache state and historical executable/Web deployment attribution remain unknown, and current a701 performance is provided by the separate fixed M3 samples.",
+    "M4RequirementWording": "tasks4.3 says dual clients complete10 room rounds; it does not literally say per game. The already-adopted G10/F10 execution target remains unchanged and cannot be reduced by this wording observation.",
+    "M4CurrentHistoricalCheckpointOnly": {
+      "gomoku": 4,
+      "flight-chess": 0,
+      "note": "These counts describe the linked historical checkpoint, not current total; F05 is separately retained as one valid Flight round in the main consolidation."
+    },
+    "M4AndM5NotClosed": true
+  },
+  "references": {
+    "m0_consolidated": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-baseline-consolidated-20261030.json",
+      "location": "repository",
+      "bytes": 38102,
+      "sha256": "702ba8a03a6f43f2ff524d40f7ccded4d13364aade79a5ee5dc102cdec22d77e"
+    },
+    "g01_g04_public_checkpoint": {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/final-native-checkpoint-20261030-0315.json",
+      "location": "repository",
+      "bytes": 3704,
+      "sha256": "fb50e2dc83de0ebf3ec8c58b1d66ba1ee6bc745bf97ad38bc2e6c3d2f11c1f1c"
+    },
+    "g01_g04_frozen_private_ledger": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/ledger-before-flight-timing-qualification.json",
+      "location": "private-local-evidence",
+      "bytes": 64024,
+      "sha256": "7888d969c564ac4eec5ecdf07bdfe6505c5d7d5ffd92cc1442c10a2afdd6e46d"
+    },
+    "g01_g04_sanitized_wire": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/live-wire-sanitized.json",
+      "location": "private-local-evidence",
+      "bytes": 303829,
+      "sha256": "ac7322ca180844d475ceab66be767e84aa405417a6a893124abab96413834b03"
+    },
+    "g01_safari_source": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G01-safari-source.png",
+      "location": "private-local-evidence",
+      "bytes": 213090,
+      "sha256": "a52897db48dc009028559a5c1c22363705308120c41b0336eb88bb3cd2f2ec47"
+    },
+    "g01_cold_recovered": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G01-cold-recovered.png",
+      "location": "private-local-evidence",
+      "bytes": 276464,
+      "sha256": "783d40c3566e399c852b92bee4a61010aa598f22b9ab4f00d3aba44d10dc70c7"
+    },
+    "g03_restart_continue": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G03-restart-continue.png",
+      "location": "private-local-evidence",
+      "bytes": 261494,
+      "sha256": "01e63777812c9bcb1dc989d1b38aa7acc3763c6ef972933172f420212d982bb7"
+    },
+    "g03_cold_recovered": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G03-cold-recovered.png",
+      "location": "private-local-evidence",
+      "bytes": 276687,
+      "sha256": "66e478e906b62e3541fff42e9b3388c6e5c9fbcb8aaa5b4c0540c0591ecda98b"
+    },
+    "g04_failed_webcontent": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G04-webcontent-failed.png",
+      "location": "private-local-evidence",
+      "bytes": 203382,
+      "sha256": "5a8208390c7ca60d8ab5e6338948fa20afe67b1c8759ad4091c9375fbb1d3def"
+    },
+    "g04_one_retry_recovered": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G04-one-retry-recovered.png",
+      "location": "private-local-evidence",
+      "bytes": 276283,
+      "sha256": "8c8f7c89432ab9f668d387c80408403b948bc24e107b20965a421b6e83b1715e"
+    },
+    "g04_verified_typed_input": {
+      "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/final-native-n10/G04-typed-input.txt",
+      "location": "private-local-evidence",
+      "bytes": 3036,
+      "sha256": "2f83afc6545a899a213df8546a3594ff36e2e30f8a16660e52861138c41efb7b"
+    }
+  }
+}

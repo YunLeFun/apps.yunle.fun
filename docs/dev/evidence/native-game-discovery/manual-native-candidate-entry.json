@@ -1,0 +1,44 @@
+{
+  "kind": "manual-native-candidate-entry-and-resume",
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "simulator": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "previewOnly": true,
+  "game": "gomoku",
+  "mode": "local",
+  "steps": [
+    "Tapped actual native same-screen mode button",
+    "Built local board visible in WKWebView",
+    "Minimized to Games; recent entry changed to same-screen mode and running-session button appeared",
+    "Tapped running-session resume; returned to the game container",
+    "Minimized again and left candidate on Games tab"
+  ],
+  "limits": [
+    "Native snapshot tool does not expose WebKit internal DOM here",
+    "Return key alone did not place a visible stone; no manual move success claimed",
+    "Not native SSO or Universal Link acceptance"
+  ],
+  "screenshots": [
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-games-continue-candidate.jpg",
+      "sha256": "5199e2ae2ec9f0d80967a64a026f5bdeea958626fc9f7074251e7fd5dc0cdbb8"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-games-candidate.jpg",
+      "sha256": "f7546d9ff8769f4ab522197893a7ab1931e7ea2be27093e07cd34d0e9f6a9662"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-paper-star-candidate.jpg",
+      "sha256": "9aef2d1b4b90c16f5f213892be022b2789d946bdf6e3285f80947020317d1da5"
+    }
+  ],
+  "additionalJourney": {
+    "game": "paper-star",
+    "mode": "tutorial",
+    "steps": [
+      "Opened recent PaperStar tutorial in actual native container",
+      "Observed rendered 3D scene, active timer and five touch controls in short landscape",
+      "Minimized to Games; screenshot shows both Gomoku and PaperStar running-session rows"
+    ],
+    "scope": "Manual normal-text-size visual check; automated DOM/state/layout evidence recorded separately"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "kind": "current-M0-M5-closure-audit-with-one-known-production-validation-dependency",
+  "atUTC": "2026-10-30T11:05:19.991201+00:00",
+  "reviewBasis": "Independent read-only subagent review of requirements/design/tasks/current sources and existing frozen evidence; Root current selected evidence/source/ledger reads. No new build, test, UI, network or production operation by this audit.",
+  "goalAchieved": false,
+  "productionAuthorization": "already requested for newly discovered last-owner fix; awaiting human response; system goal continuation is not approval",
+  "M6OrTestFlightAdded": false,
+  "items": [
+    {
+      "task": "0.1",
+      "status": "passed",
+      "evidenceScope": "M0 consolidated and online addendum;32+11 source references previously independently checked"
+    },
+    {
+      "task": "0.2",
+      "status": "passed",
+      "evidenceScope": "a701 directory and frozen launch contracts cover actually released modes"
+    },
+    {
+      "task": "0.3",
+      "status": "passed",
+      "evidenceScope": "82 data-protection checks, runtime17, and home-to-game compatibility journey"
+    },
+    {
+      "task": "1.1",
+      "status": "passed",
+      "evidenceScope": "real Workshop search4/category5/clear restoration plus public revision and honest empty fallback"
+    },
+    {
+      "task": "1.2",
+      "status": "passed",
+      "evidenceScope": "real member AI6 cards and corrected visible navigation; personal management supported empty state"
+    },
+    {
+      "task": "1.3",
+      "status": "passed",
+      "evidenceScope": "four Tabs with independent stacks; Help to Workshop and legacy entry routing"
+    },
+    {
+      "task": "2.1",
+      "status": "passed",
+      "evidenceScope": "three games with actual publication gates and supported native entry paths"
+    },
+    {
+      "task": "2.2",
+      "status": "passed",
+      "evidenceScope": "a701 actual ready60 samples and actual mode/layout/input journeys"
+    },
+    {
+      "task": "2.3",
+      "status": "passed-with-recorded-local-limits",
+      "evidenceScope": "retained two-gameN10, actual minimize/resume, capacity/memory models, AX/VoiceOver"
+    },
+    {
+      "task": "3.1",
+      "status": "passed",
+      "evidenceScope": "a701 261 resources/687 entries, room static closure and freeze"
+    },
+    {
+      "task": "3.2",
+      "status": "passed-with-recorded-local-limits",
+      "evidenceScope": "cache-only bytes/SHA failure flows preserve Cookie/local/IDB and active game"
+    },
+    {
+      "task": "3.3",
+      "status": "passed-under-user-adjusted-standard",
+      "evidenceScope": "fixed60 actual operable samples and627 independent checks; retain countdown and historical failures"
+    },
+    {
+      "task": "4.1",
+      "status": "passed-with-layered-evidence",
+      "evidenceScope": "final-scope17 clauses include login/invite/role/AASA and actual OS cold/warm links; not every branch claimed production UI"
+    },
+    {
+      "task": "4.2",
+      "status": "incomplete-known-defect",
+      "evidenceScope": "create/join/session/idempotency/error evidence stands; last owner observer normal leave fails production772"
+    },
+    {
+      "task": "4.3",
+      "status": "incomplete-same-defect",
+      "evidenceScope": "G01-G10 and F05-F11/F13-F15 yield10 valid rooms per game; F12 normal terminal cleanup unresolved"
+    },
+    {
+      "task": "5.1",
+      "status": "incomplete-same-defect",
+      "evidenceScope": "runtime17/data82 and real Workshop/AI/tutorial/Home/account journeys reusable; pending changed leave branch production closure"
+    },
+    {
+      "task": "5.2",
+      "status": "passed",
+      "evidenceScope": "shared simulator pool reused; no new device this turn; no hardware performance claim"
+    },
+    {
+      "task": "5.3",
+      "status": "passed-delivery-records-with-pending-addendum",
+      "evidenceScope": "installed playable candidate/source fingerprints/frozen evidence/known defect/rollback and cleanup recorded; append final release identity when proven"
+    }
+  ],
+  "requirementMap": {
+    "R1": [
+      "1.1",
+      "1.2",
+      "1.3"
+    ],
+    "R2": [
+      "0.2",
+      "2.1",
+      "2.2"
+    ],
+    "R3": [
+      "0.3",
+      "2.3",
+      "3.2",
+      "4.1",
+      "4.2"
+    ],
+    "R4": [
+      "3.1",
+      "3.2",
+      "3.3"
+    ],
+    "R5": [
+      "4.1",
+      "4.2",
+      "4.3"
+    ],
+    "R6": [
+      "2.3",
+      "4.3"
+    ],
+    "R7": [
+      "2.1",
+      "2.3",
+      "5.2"
+    ],
+    "R8": [
+      "0.1",
+      "0.2",
+      "1.3",
+      "2.2",
+      "3.3",
+      "4.1",
+      "4.3",
+      "5.1",
+      "5.3"
+    ]
+  },
+  "currentCriticalSourceSHA256": {
+    "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+    "apps/mobile/ios/App/App/WebViewController.swift": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+    "apps/ios/YunleFun/Features/Assistant/AssistantView.swift": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+    "apps/ios/YunleFunTests/NativeRuntimeSessionTests.swift": "bd0a9b6065c8a73d5de728ff453d42a20e3d33d2bf71348ea454f964db976c3b"
+  },
+  "rootConfirmedValidCounts": {
+    "gomoku": 10,
+    "flight-chess": 10
+  },
+  "mutablePrivateLedgerSHA256AtRead": "a18f3c515d5beb36abe582eb79036b579d4ccdc82d46515979d2135df4d12234",
+  "F12ExcludedAndPendingCleanup": true,
+  "remainingClosure": [
+    "Obtain response to already-pending release question; no repeated compatibility/Star approval",
+    "Freeze current candidate-specific release/finalize/rollback helpers and inspect fresh exact772 configuration/zero capacity in authorized window",
+    "Deploy only reviewed candidate preserving772 recovery artifacts/runtime and business release gates",
+    "Normal UI leave of exact ownedF12 and authority/terminal/socket closure evidence; closed probe/health0 are insufficient",
+    "If originalF12 has finished as last rendered DOM showed, run one controlled new room solely for changed playing+sole-owner-observer branch: owner leaves/rejoins, other player leaves, sole observer-owner normal leave expires room and cancels active all-bot game",
+    "Append final production identity/branch regression evidence; never relabel prior20 rooms as new backend or retroactively countF12",
+    "Update4.2/4.3/5.1 and goal only after the remaining evidence proves completion"
+  ],
+  "limits": [
+    "No independent missing requirement found beyond the one known leave defect and its final integration evidence",
+    "No demand to rerun already-passed runtime17/M3/N10 or expand to all-game/all-role/all-device matrices",
+    "Source SHA and selected evidence digests do not assert every historical private byte was re-read by this audit",
+    "Latest production remains last recorded772 until a new deployment is independently proven"
+  ],
+  "references": [
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-baseline-consolidated-20261030.json",
+      "bytes": 38102,
+      "sha256": "702ba8a03a6f43f2ff524d40f7ccded4d13364aade79a5ee5dc102cdec22d77e"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m0-gomoku-online-addendum-20261030.json",
+      "bytes": 23598,
+      "sha256": "10414c9f2bad24c6570fd214cf81073535b87ae459867763d6f6d86ff9691aa9"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "bytes": 25597,
+      "sha256": "2a7fc020214342220bf02a99d3b71549b854c5396504c2d34d838ea9c4b2be11"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-freeze.json",
+      "bytes": 5688,
+      "sha256": "7abf6baf7f698124b4311bd56f5bc5556b256c7d7d39fb60e4e98cfda5430e16"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-fixture-lifecycle-final-validation.json",
+      "bytes": 7198,
+      "sha256": "1b75f9dbb8b77aab0533edef820870f2cfd2f481b4004591c681289e5540d473"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-home-game-and-help-journey-20261030.json",
+      "bytes": 9435,
+      "sha256": "90cb4038d8d0d63f56c4c7b181b5a6ac8ee30b75d5538b3254a8948f8b31f03a"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-ai-card-navigation-fix-validation.json",
+      "bytes": 6360,
+      "sha256": "378a5db476712242870590d802d23f6d709e7f2734a0847f38cdb2abe4e134aa"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/m5-unlocked-real-journey-20261030.json",
+      "bytes": 5220,
+      "sha256": "b96b945fe6778973e1f97a3d4fb02ab4d5716639c1de1f4f336c5cd8b35c0833"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/g05-native-foreground-recovery-20261030.json",
+      "bytes": 9794,
+      "sha256": "907a813f80d6eb3411f8069bd564d2ca6e1a19f2169c80656620c7402e7e3976"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/g06-g10-native-foreground-recovery-20261030.json",
+      "bytes": 35816,
+      "sha256": "edb4245d84df16431ed7baf7eccbd56e9dcf2b681bd54506e4174a6d40c9fc85"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/f10-f15-native-foreground-recovery-20261030.json",
+      "bytes": 553348,
+      "sha256": "a8ad0b414999ab7ab9cb044ef4c4a0bba1863d7c966e1c3ca73bb7fefa7e78fe"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/final-scope-audit-20261030.json",
+      "bytes": 94265,
+      "sha256": "860f41b666f68efadc711e2ed9a1ec45196fa3f0633e55b3f874e22963ef1a28"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/final-native-candidate-inventory-20261030.json",
+      "bytes": 16905,
+      "sha256": "6a5b1c919f6427061238134bad496abe81aa582d07d6af2c0bd81783a5d50117"
+    },
+    {
+      "path": "docs/dev/evidence/native-game-discovery/recovery-20261029/last-owner-observer-local-candidate-20261030.json",
+      "bytes": 13796,
+      "sha256": "28cad167c738c0509f70b0427c1d7fb1bc6f0d0279ae419323c3f0e4cb8f0280"
+    }
+  ]
+}

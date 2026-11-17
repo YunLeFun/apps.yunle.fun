@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "kind": "actual-last-owner-observer-production-deployment-and-readback-pending-ui",
+  "atUTC": "2026-10-31T08:04:49.462033+00:00",
+  "goalAchieved": false,
+  "authorization": "User explicitly authorized this production leave fix and subsequent acceptance; login restored before execution. No additional release approval is pending.",
+  "executionEvidenceBasis": "Actual downloaded remote deployment and read-only reports, byte/SHA checked locally; independent release execution review passed. Preparation files are not used as proof of execution.",
+  "deployment": {
+    "executed": true,
+    "finalized": false,
+    "deployedAtUTC": "2026-10-31T07:42:22.912681+00:00",
+    "sourceCommit": null,
+    "sourceBaseCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "sourceTree": "38f267f3bfaa1fe68004c957e82b4768156ad46d",
+    "sourceIdentityKind": "uncommitted-git-tree",
+    "sourceArchiveSHA256": "db3ebf1a675ab1a83fc8be88e872a3cc049bf81c4fe420b40d0783085faf21b5",
+    "imageArchiveSHA256": "c6aea1bca00596e3908de4cef2aedd83e900cc8e6ede5fd5ec3caf71f4eaef55",
+    "imageId": "sha256:e73c4e33218f30a36ea4ce3b0ef4bdc05ceda1ebe39e9c075d2ee90065c2bb5e",
+    "imageIdKind": "oci-platform-manifest",
+    "containerId": "e682f0817b78e8229b2ac3ef4bb4fe5bf6877c0a7fb0332bcac3877bffbb8e69",
+    "freshPredeployInspectionSHA256": "c9d517fdf40e3c1ea3fd1cc692a702c1e7c30114d006016c9e8d943a6238794e",
+    "freshZeroCapacityBeforeReplacement": {
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0
+    },
+    "configuredAndFullEnvironmentHashesPreserved": true,
+    "runtimeFileBytesAndMetadataPreserved": true,
+    "composeMetadataPreserved": true,
+    "old772SourceAndImageRecoveryArchivesRetained": true,
+    "applicationRestartedForDeployment": true,
+    "releaseJournalSteps": [
+      "backup-complete",
+      "database-CAS-started",
+      "single-service-up-started",
+      "new-image-healthy"
+    ],
+    "deploymentReceipt": {
+      "artifact": "backend-deployed.json",
+      "bytes": 3185,
+      "sha256": "0bf400379cffb6ff934c69260ebf8caab73ccc3ddd3d285d9c45ed8e3c2644b8"
+    },
+    "releaseArchive": {
+      "artifact": "release-phase-20261031.remote.tar.gz",
+      "bytes": 3997,
+      "sha256": "8efca1813588aea1f859f86b05b45b853f4cda55b17cd4741ca682ca7f830ef9"
+    },
+    "independentExecutionReview": {
+      "artifact": "independent-remote-release-phase-review-20261031.json",
+      "bytes": 3690,
+      "sha256": "ba49adf83d4c2947b41038c773d47ca27c53df57941fc42317472baa37a9f5cc"
+    },
+    "fourJournalStepsClosed": true
+  },
+  "independentLiveReadback": {
+    "passed": true,
+    "observedAtUTC": "2026-10-31T07:59:59.594100+00:00",
+    "containerAndImageMatchActualDeploy": true,
+    "actualCompiledSHA256": {
+      "room/service.js": "6a8086bb6957e9a30d3cf6ee880f6b3abaff4e9102c7fb72b12aa4ae345ef5aa",
+      "colyseus/play-room.js": "9aa28f32df203f5172135782d11d7f631e0c9f9b2791d977612b07b14c30bd10"
+    },
+    "threeComposeCopiesMatchCandidate": true,
+    "composeSHA256": "a14366e7edb2fd95f1e1ae02686c39f4d7b9dd9ebbcea2b3c195e6f01faba4da",
+    "environmentAndRuntimePreserved": true,
+    "recoveryArchivesRetained": true,
+    "manifestStillBeforeFinalization": true,
+    "manifestSHA256": "808a84970d2d0cf690259062fd3be7d1b198f570fa15e19959d90cf9e7f84ef3",
+    "finalizationReceiptSHA256": null,
+    "applicationRestartedByReadback": false,
+    "productionConfigurationOrDocumentsWrittenByReadback": false,
+    "runtimeEnvironmentValuesEmitted": false,
+    "receipt": {
+      "artifact": "live-readback-deployed-20261031.json",
+      "bytes": 3049,
+      "sha256": "577d4f6b905c74874f6fd3304e59cdb20335ddc6e3c40de7b9e623a7219e1344"
+    }
+  },
+  "anonymousHTTP": {
+    "passedCount": 8,
+    "caseCount": 8,
+    "success": true,
+    "cases": [
+      {
+        "name": "trusted-anonymous-room-post",
+        "status": 401,
+        "code": "AUTH_REQUIRED",
+        "passed": true
+      },
+      {
+        "name": "evil-anonymous-room-post",
+        "status": 403,
+        "code": "ORIGIN_NOT_ALLOWED",
+        "passed": true
+      },
+      {
+        "name": "evil-anonymous-session-get",
+        "status": 401,
+        "code": "AUTH_REQUIRED",
+        "passed": true
+      },
+      {
+        "name": "no-origin-health-get",
+        "status": 200,
+        "code": null,
+        "passed": true
+      },
+      {
+        "name": "trusted-room-preflight",
+        "status": 204,
+        "code": null,
+        "passed": true
+      },
+      {
+        "name": "evil-room-preflight",
+        "status": 204,
+        "code": null,
+        "passed": true
+      },
+      {
+        "name": "no-origin-room-preflight",
+        "status": 204,
+        "code": null,
+        "passed": true
+      },
+      {
+        "name": "trusted-matchmaking-preflight",
+        "status": 204,
+        "code": null,
+        "passed": true
+      }
+    ],
+    "credentialsSent": false,
+    "redirectsAllowed": false,
+    "TLSVerification": "normal system trust",
+    "newRoomsCreated": false,
+    "retriesPerformed": false,
+    "scope": "Anonymous HTTP compatibility boundaries only; not authenticated UI or native login proof.",
+    "receipt": {
+      "artifact": "postdeploy-anonymous-http-observer-20261031.json",
+      "bytes": 7275,
+      "sha256": "e3e0a994f71a1afc4bc2d682b2bcb99aa050ab16f95ae9c4509527d21462be44"
+    }
+  },
+  "F12": {
+    "excludedFromValidN10": true,
+    "passed": false,
+    "pendingCleanup": true,
+    "normalUILeaveAfterReleaseProven": false,
+    "authorityRead": {
+      "querySucceeded": true,
+      "stableRoomBeforeAfter": true,
+      "roomIdSHA256": "514d89e4b9ddf355e5a6ca93ddda043b5cea93caa2183dbc2e0833222eff1224",
+      "roomStatus": "completed",
+      "revision": 343,
+      "ownerUIDSHA256": "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+      "memberUIDHashes": [
+        "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+      ],
+      "memberProjectionCount": 1,
+      "aggregateAndProjectionMemberSetsMatch": true,
+      "activeGameSessionIdSHA256": "3abffabfdee9cd05fd57f4c85683e20787e0cd0d47e303d177420ff1d597089c",
+      "selectedGameSource": "current-room-active-game",
+      "selectedGameStatus": "won",
+      "selectedGameTurnDeadline": null,
+      "selectedGameAggregateAndProjectionMatch": true,
+      "roomTerminalEmptyAuthority": false,
+      "productionDocumentsWritten": false,
+      "receipt": {
+        "artifact": "f12-room-authority-20261031.json",
+        "bytes": 4469,
+        "sha256": "6e13212348eac7bc195d40fc2c71f2f540d8959b4e819caac3f314cc77beb1c1"
+      }
+    },
+    "conclusion": "Exact room remains completed with one member who is owner B and a won active game; tab closure and zero live counters did not clean membership. This is not the new playing-game branch proof."
+  },
+  "O01": {
+    "pending": true,
+    "executed": false,
+    "passed": false,
+    "scope": "One controlled new room: normal UI sole-member observer-owner leaves while the exact game remains playing; verify room expired, members empty and exact game cancelled with deadline cleared."
+  },
+  "currentAcceptanceAccess": {
+    "source": "Root-reported normal test-account UI login diagnosis in this work session; no authentication response or credential copied here.",
+    "BNewLoginStatus": 400,
+    "BNewLoginCode": "INVALID_USERNAME_OR_PASSWORD",
+    "passwordChanged": false,
+    "nextStep": "Resume the existing dedicated B session through normal UI, then perform F12 cleanup and controlled O01 acceptance."
+  },
+  "taskStatus": {
+    "4.2": "pending",
+    "4.3": "pending",
+    "5.1": "pending",
+    "M6": "deferred",
+    "TestFlight": "not included"
+  },
+  "versionBoundaries": {
+    "existingValidRecoveryCounts": {
+      "gomoku": 10,
+      "flight-chess": 10
+    },
+    "existing20RoomsRetainTheirRecordedOldCandidateAndBackendIdentity": true,
+    "M3Fixed60SamplesRelabelledNewSource": false,
+    "interactionSettings": "Separate exact current-source five-pass WebKit receipt remains distinct; no new menu manual UI or hardware long-press claim."
+  },
+  "limits": [
+    "Deploy/load/journal and compiled readback passed; production leave branch, exact F12 terminal cleanup and finalization remain unproven.",
+    "No room, membership or game document was changed by the authority query or the readback.",
+    "No claim of all M0–M5 completion, new-backend N10, production SLA, restore drill or TestFlight distribution.",
+    "Private artifact locations, environment values, credentials, cookies, tokens, raw user IDs and raw room/game IDs are omitted."
+  ]
+}

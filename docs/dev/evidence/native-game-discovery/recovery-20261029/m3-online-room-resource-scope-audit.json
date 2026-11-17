@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "kind": "online-room-static-resource-manifest-scope-readonly-audit",
+  "atUTC": "2026-10-29T18:11:01.274601+00:00",
+  "newTestsBuildsOrDeployments": 0,
+  "filesModifiedByThisAudit": 0,
+  "sourceInputs": [
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/scripts/export-native-game-assets.mjs",
+      "sha256": "827506ee5a2dc0764dfb41be97c0bd6be4f4d41d32035524ba45df3dcea243f4"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/scripts/test-native-game-assets.mjs",
+      "sha256": "affe29656739eaaf83011264bfa89a1d59e5a0d3e86cd0be25b8b2b378f02477"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/pages/games/[gameId]/online.vue",
+      "sha256": "8762f4daa9411b93f3847f612facb84d26e971c3d81274cec33be9b8e2825279"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/components/online/NativeOnlineLaunch.vue",
+      "sha256": "559b3c5ad19be5c4871b1e799cd6fd0b4065c1751a57d198c55f97ab6784678a"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/components/online/OnlineRoomLauncher.vue",
+      "sha256": "c86c3d4eb437cf289ef0dedde78c35b21ea2cac72f829960189a3da3a6d4d21d"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/app/pages/room/[inviteCode].vue",
+      "sha256": "d903365aad848375bf175151aec6792f96711e8c8841afa182071a8ddb9dc3a7"
+    }
+  ],
+  "generatorBehavior": {
+    "onlineModePageKey": "pages/games/[gameId]/online.vue",
+    "bundleRoots": [
+      "client manifest isEntry files",
+      "layouts/default.vue",
+      "selected launch mode pages"
+    ],
+    "staticImportsFollowed": true,
+    "nonEntryDynamicImportsFollowed": true,
+    "routerEntryDynamicImportsSkipped": true,
+    "genericRoomRouteExplicitRoot": "absent",
+    "reason": "Entry dynamicimports enumerate allwebsite routes, intentionally excluded to avoid downloading everypage."
+  },
+  "runtimeRouteChain": [
+    "pages/games/[gameId]/online.vue → NativeOnlineLaunch → OnlineRoomLauncher",
+    "Create/join/role path uses navigateTo(/room/<code>)",
+    "pages/room/[inviteCode].vue → OnlineGameRoom and actual room renderer"
+  ],
+  "productScopeFinding": "The code explicitly limits graph collection to selectedentry routes, but no inspected source/doc/test explicitly declares a productcontract that online resourcepreparation intentionally stops before the roomrenderer. Navigation to /room is not an importedge, so the necessary publichash roombundle is omitted. This is an online staticcoverage gap; FlightChess has only an online mode and cannot claim complete playable-static preparation from the currentmanifest.",
+  "frozenB251GenericRouteProof": [
+    {
+      "path": "_nuxt/CNjz4wUP.js",
+      "bytes": 275601,
+      "sha256": "8be9752cfca095a31c84e9910afc654c8fa0351c4a7cab0fd436d353739ef20a",
+      "inAnyB251GameManifest": false,
+      "classification": "Frozenb251 genericroom route entry identified by compiled componentname"
+    }
+  ],
+  "parentObservedLaterLiveGenericAsset": {
+    "url": "https://play.yunle.fun/_nuxt/SGY0YVVf.js",
+    "bytes": 275873,
+    "absentFromThreeLiveManifestsReportedByRoot": true,
+    "independentlyFetchedByThisAudit": false,
+    "notRelabeledAsB251": true
+  },
+  "cacheBoundary": {
+    "publicHashedRoomJavaScriptMayBePrepared": true,
+    "roomAPIsCookiesSessionsTicketsStateMayBeCachedAsStatic": false,
+    "staticRendererIsNotDynamicRoomState": true
+  },
+  "documentationConclusion": "State that current game-manifest SHA/bytechecks prove declaredentry-route resourceintegrity and the two offline representative journeys only. Do not call this full online-room pre-cache; keep online renderercoverage as an explicit remaininggap. Online still loads missing publicJS normally over network; thisaudit does not prove it cannotplay.",
+  "testCoverageFinding": "Existing bundlegraph test covers selectedroute/worker/dynamicrenderer and excludes otherpage, but has no online-setup→generic-room navigation coverage assertion.",
+  "implementationActionTaken": "None; no manifest changes or deployment. Root will choose followup scope."
+}

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "kind": "b251-static-closure-freeze-summary",
+  "recordedAtUTC": "2026-10-29T17:38:06.903243+00:00",
+  "catalogVersion": "b25149ae2fd0fe3383c4a350dbc3343294fa2f9a7c56b330ba3f972bc4846c8b",
+  "catalogSHA256": "82778af26af77f0993f273e1a4a1f89aefb9349b3d6243f98d1815f145d549bd",
+  "buildID": "ed7fe8d8-d4c7-4d77-bfc2-0537bf99e0b8",
+  "archive": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final-b251-closure-preparation/final-b251-static-closure.tar.gz",
+    "sha256": "2406caebb59a544e29936d9324512fed60d9e381ff054b917bc8e7da6a0dbd5c",
+    "bytes": 10587082,
+    "memberCount": 378,
+    "allMembersReopenedAndVerified": true
+  },
+  "closureReceipt": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final-b251-closure-preparation/closure-receipt.json",
+    "sha256": "098d0927120fa9da8545fb082e40989aac69c5ddd85ff2d19dd5e277900d8ea1"
+  },
+  "gameManifests": [
+    {
+      "gameId": "gomoku",
+      "resourceVersion": "841defb83b8ebdb8efbfbedc3395c92ce620c198d75f5350c5262fd7433a06cd",
+      "resourceCount": 214,
+      "totalBytes": 6382458,
+      "manifestSHA256": "cbb457bfc84187cb401fd7d5c102d0fb8092d949ea16d223e28d71fb6b8e84dd"
+    },
+    {
+      "gameId": "flight-chess",
+      "resourceVersion": "ffae1f766519a409a4f021a5fc40c171df40d5d0adeae786474dbaf9c56ce33b",
+      "resourceCount": 203,
+      "totalBytes": 6358611,
+      "manifestSHA256": "04885d5d3a3328b051bb76daa9972933a2e47190f7f559b5fb07451b6b415bc4"
+    },
+    {
+      "gameId": "paper-star",
+      "resourceVersion": "32ea539cf8b84317075f3130343b867b04032560b124b6a58918a6259707b9d9",
+      "resourceCount": 238,
+      "totalBytes": 10953199,
+      "manifestSHA256": "41dd946960c0aac47a32d793dcc9e2b7349969dd69069a7f09db3d9c7e3dc6a8"
+    }
+  ],
+  "uniqueGameResources": 249,
+  "gameResourceOccurrences": 655,
+  "allDeclaredBytesValidated": true,
+  "positiveStaticFiles": 377,
+  "positiveBytes": 16613996,
+  "contractAndHTMLDoubleReadCount": 13,
+  "doubleReadAllMatched": true,
+  "ASTParser": "TypeScript5.9.3 createSourceFile on frozenJS as data; no eval",
+  "staticDependencyKinds": {
+    "observedLegacyPrefetchRoute": 2,
+    "CSS-url-or-import": 178,
+    "HTML-static-link-src": 964,
+    "HTML-game-route-prefetch": 83,
+    "static-import": 331,
+    "static-asset-path-literal": 486,
+    "static-export": 4,
+    "literal-asset-array-including-vite-mapDeps": 153,
+    "dynamic-import-literal": 45,
+    "new-URL-static-asset": 3,
+    "webmanifest-icons": 3
+  },
+  "parserDiagnostics": [],
+  "unresolvedComputedDynamicImports": [],
+  "productionNegativeResponses": [
+    {
+      "path": "/_nuxt/rapier_wasm2d_bg.wasm",
+      "status": 404,
+      "bytes": 4407,
+      "sha256": "6fc48d963a993ba92a336a1a259a5186ae77277f027316984aaa61ef7ec5a6d4",
+      "contentType": "text/html"
+    },
+    {
+      "path": "/_nuxt/rapier_wasm3d_bg.wasm",
+      "status": 404,
+      "bytes": 4407,
+      "sha256": "6fc48d963a993ba92a336a1a259a5186ae77277f027316984aaa61ef7ec5a6d4",
+      "contentType": "text/html"
+    },
+    {
+      "path": "/_nuxt/rapier_wasm3d_bg.js",
+      "status": 404,
+      "bytes": 4407,
+      "sha256": "6fc48d963a993ba92a336a1a259a5186ae77277f027316984aaa61ef7ec5a6d4",
+      "contentType": "text/html"
+    }
+  ],
+  "negativePolicy": "Preserve actual404 body/status/MIME; never return synthetic200. N1 must produce0unfrozen paths before N10.",
+  "scope": "Staticliteral imports/exports/dynamic imports, Vite literalasset arrays/mapDeps, staticasset URLliterals, CSS URLs, HTML src/modulepreload/prefetch/manifest and sameorigin gameanchor route payloads. Computed runtimeimports, worker-generated requests, externalorigins and APIs are not fabricated or claimed complete. Wait one N1 serverrequest audit before deciding final60.",
+  "externalOriginReferencesNotRecursivelyDownloaded": 13,
+  "nativeChange": "Only bundledJSON moved926→b251; schema/mode URLs/available/protocol unchanged. Controllere6d/Runtimeb61 unchanged.",
+  "nativeBuildReceipt": {
+    "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final-b251-run/incremental-build-receipt.json",
+    "sha256": "508ae0a2f485902b1b1995a13e8295f5f42ce507dba73f9d43821051c561b282"
+  },
+  "historicalAttempt1": "Original92660raw and archive889928 preserved as limitedfixture observation because5 local404 paths were actually200 in production. Not M3 acceptance.",
+  "versionPinPolicy": "After this complete freeze, useb251 consistently. Later online-only releases are not relabeled as byte-identical and do not replace this measuredsnapshot.",
+  "deployedGitClaim": null,
+  "gitLimit": "Concurrent main735943d source observation explains a possible parallelWeb change but does not prove the frozenproduction deploymentGit.",
+  "temporaryUnpackedPreparationRemoved": true,
+  "redundantHTTPSCacheReclaimedAllocatedBytes": 5828608
+}

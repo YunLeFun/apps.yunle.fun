@@ -1,0 +1,77 @@
+{
+  "automaticSessionLimit" : 5,
+  "completed" : true,
+  "kind" : "native-game-session-reclamation",
+  "lateCallbackOwnership" : "The test alone holds the evicted old browser long enough to deliver a stale callback. A separate attachment observes weak object release only after that strong-owner frame has returned; system RAM and process exit are not inferred.",
+  "memoryWarningModel" : "NotificationCenter posts UIApplication.didReceiveMemoryWarningNotification to the product's real observer. This is not actual OS pressure, WebContent termination or app restart.",
+  "pausedPolicy" : "Capacity removes the oldest unpresented session; memory warning preserves a presented session and, when none is presented, the most recent paused session.",
+  "scope" : "Real NativeWebRuntime and WKWebView with simulated origin-bound documents and lifecycle messages; no Play network, production account or room.",
+  "steps" : [
+    {
+      "expectedRetainedGame" : "paper-star",
+      "hadPresentedController" : false,
+      "mostRecentApplicationID" : "paper-star",
+      "olderLaunchID" : "3796F4B4-1D9E-4BAB-8E2D-C05A3CF8C5C8",
+      "olderPausedGame" : "gomoku",
+      "retainedLaunchID" : "3AE4FA28-19A8-4CA0-8364-034947128966",
+      "retainedWasPaused" : true,
+      "stage" : "memory-warning-notification"
+    },
+    {
+      "launchID" : "3AE4FA28-19A8-4CA0-8364-034947128966",
+      "presentedController" : false,
+      "removedGame" : "gomoku",
+      "retainedGame" : "paper-star",
+      "runningGameIDs" : [
+        "paper-star"
+      ],
+      "stage" : "most-recent-paused-session-retained"
+    },
+    {
+      "recentHistoryRetained" : true,
+      "releasedGame" : "gomoku",
+      "releasedStatusRemoved" : true,
+      "retainedGame" : "paper-star",
+      "retainedReason" : "most-recent-paused-then-explicitly-resumed",
+      "runningGameIDs" : [
+        "paper-star"
+      ],
+      "sameRetainedBrowser" : true,
+      "sessionCount" : 1,
+      "stage" : "paused-session-released"
+    },
+    {
+      "discardedBrowserCallbackRejected" : true,
+      "newLaunch" : true,
+      "newLaunchID" : "38D96293-0E0F-47F9-94A2-BF2452B90F48",
+      "newProfileID" : "B249014B-005E-48C4-BCEA-F38C2CED4939",
+      "newWebView" : true,
+      "oldLaunchID" : "3796F4B4-1D9E-4BAB-8E2D-C05A3CF8C5C8",
+      "oldLaunchThroughCurrentWebKitChannelRejected" : true,
+      "oldProfileID" : "B249014B-005E-48C4-BCEA-F38C2CED4939",
+      "readyCallbacksByGame" : [
+        "gomoku",
+        "paper-star",
+        "gomoku"
+      ],
+      "restoredStorage" : {
+        "cookie" : "keep",
+        "indexedDB" : "keep",
+        "localStorage" : "keep"
+      },
+      "runningGameIDs" : [
+        "gomoku",
+        "paper-star"
+      ],
+      "sameProfile" : true,
+      "seededStorage" : {
+        "cookie" : "keep",
+        "indexedDB" : "keep",
+        "localStorage" : "keep"
+      },
+      "stage" : "recent-history-reopens-fresh-session"
+    }
+  ],
+  "storageScope" : "Random fixture-only Cookie\/localStorage\/IndexedDB marker in the exact owned named profile; fixture teardown removes only its tracked stores.",
+  "trigger" : "memoryWarningWhilePaused"
+}

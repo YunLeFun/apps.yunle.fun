@@ -146,6 +146,11 @@ struct SettingsView: View {
                 }
                 .disabled(library.snapshot.recentIDs.isEmpty)
             }
+            Section("寻乐") {
+                NavigationLink { GameInteractionSettingsView() } label: {
+                    SettingsLabel("游戏交互设置", systemImage: "gamecontroller.fill", color: .indigo)
+                }
+            }
             Section {
                 NavigationLink { ApplicationCacheSettingsView(store: runtime.applicationCache) } label: {
                     SettingsLabel("应用下载缓存", systemImage: "internaldrive.fill", color: .gray)

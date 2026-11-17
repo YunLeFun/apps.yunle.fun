@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-29T05:36:30.452269+08:00",
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "productSourceChangeInFollowup": false,
+  "testSourceFingerprints": [
+    {
+      "path": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+      "sha256": "64b398fb73bbf55674b43d9c10fa799380e67f00ac9c356e70ba6d0406e49901"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/NativeRuntimeSessionTests.swift",
+      "sha256": "bd0a9b6065c8a73d5de728ff453d42a20e3d33d2bf71348ea454f964db976c3b"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WebProfileRepositoryTests.swift",
+      "sha256": "f06734e08e2c02e4cf1312ffde1ee7d8c0a6fd29516c170c9837dc8b41f7bc34"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/NativeGamesUITests.swift",
+      "sha256": "a5f0b04f382849ee1a0cd0c94c45acadc922781a6e2fc5cb70861b5c91e4f59e"
+    }
+  ],
+  "nativeCandidate": {
+    "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app/YunleFun",
+    "sha256": "a08a452bdfb1d9b5e43fd529fda7c1a8e04e5dec95e5e815a343c852086fe2bd",
+    "buildLog": "/tmp/yunle-native-games.uGZuY9/retained-document-identity-build.log",
+    "launchedPID": 13837,
+    "debugPreviewExplicitOptIn": true
+  },
+  "artifacts": [
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-games-followup-candidate.jpg",
+      "sha256": "4c2461c45bc37137c38305ed21593af263471c9c0ca138c52a6c5c5918fc18a9"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-voiceover-workshop-final.png",
+      "sha256": "4d08f76341381584afc040afd444f7ca48797307e3e5567d1860ce8abc3dcc1c"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-voiceover-room-final.png",
+      "sha256": "d8182a674d93946554bd8144f4ba38f3ae05c16387fa020a9389cd97cb7cae20"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-system-reduce-motion-enabled.png",
+      "sha256": "09b93bc4f57c26ba746e8ae16a06e241b43d3e14af544e6488ab937f8ad36b6c"
+    },
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-system-reduce-motion-restored.png",
+      "sha256": "6b5a0649910d1dd3e414c6568a6b9ac80480508f8edf65dce059f211464c7655"
+    }
+  ]
+}

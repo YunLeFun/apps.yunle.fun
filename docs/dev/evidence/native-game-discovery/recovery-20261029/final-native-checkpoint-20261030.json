@@ -1,0 +1,81 @@
+{
+  "observedAtUTC": "2026-10-29T18:50:37.934601+00:00",
+  "complete": false,
+  "privateLedgerSHA256": "0c38bef1c881d8fbad4d3fa99638ee3725687a0e09972cdadcfcc40ad4c1b3b0",
+  "nativeSourceSHA256": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+  "runtimeSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+  "bundledCatalogVersion": "b25149ae2fd0fe3383c4a350dbc3343294fa2f9a7c56b330ba3f972bc4846c8b",
+  "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "successfulCount": {
+    "gomoku": 2,
+    "flight-chess": 0
+  },
+  "rounds": [
+    {
+      "id": "G01",
+      "gameId": "gomoku",
+      "recovery": "actual OS cold Universal Link from Safari after Native app termination",
+      "passed": true,
+      "pendingCleanup": false,
+      "functionalColdUniversalLinkPassed": false,
+      "countedTowardN10": true,
+      "authorityPreserved": true,
+      "exclusion": null,
+      "actualOfflineMilliseconds": null,
+      "gameSessionPreserved": true,
+      "baselineStoneCount": 2,
+      "afterFreshActionStoneCount": 4
+    },
+    {
+      "id": "F01",
+      "gameId": "flight-chess",
+      "recovery": "actual OS cold Universal Link from Safari after Native app termination",
+      "passed": false,
+      "pendingCleanup": false,
+      "functionalColdUniversalLinkPassed": true,
+      "countedTowardN10": false,
+      "authorityPreserved": true,
+      "exclusion": "Automation delays caused multiple timeout/auto-play turns. Cold Universal Link, same authority and real post-recovery input are supported, but excluded from final clean N10 count.",
+      "actualOfflineMilliseconds": null,
+      "gameSessionPreserved": true,
+      "baselineStoneCount": null,
+      "afterFreshActionStoneCount": null
+    },
+    {
+      "id": "G02",
+      "gameId": "gomoku",
+      "recovery": "Browser B short network outage via CDP; Native A remains online",
+      "passed": true,
+      "pendingCleanup": false,
+      "functionalColdUniversalLinkPassed": false,
+      "countedTowardN10": true,
+      "authorityPreserved": true,
+      "exclusion": null,
+      "actualOfflineMilliseconds": 14978,
+      "gameSessionPreserved": true,
+      "baselineStoneCount": 2,
+      "afterFreshActionStoneCount": 4
+    },
+    {
+      "id": "G03",
+      "gameId": "gomoku",
+      "recovery": "actual Native process termination/relaunch and persisted return-to-room",
+      "passed": false,
+      "pendingCleanup": true,
+      "functionalColdUniversalLinkPassed": false,
+      "countedTowardN10": false,
+      "authorityPreserved": false,
+      "exclusion": null,
+      "actualOfflineMilliseconds": null,
+      "gameSessionPreserved": false,
+      "baselineStoneCount": null,
+      "afterFreshActionStoneCount": null
+    }
+  ],
+  "limitations": [
+    "This is an intermediate checkpoint, not final N10 completion",
+    "Creation-to-ready observations include automation and IPC gaps and do not measure Native first frame",
+    "Flight F01 is excluded from clean final N10 because timeout/auto-play occurred; individual cold Universal Link and actual input facts remain",
+    "Browser B short network outage does not establish Native A network loss"
+  ]
+}

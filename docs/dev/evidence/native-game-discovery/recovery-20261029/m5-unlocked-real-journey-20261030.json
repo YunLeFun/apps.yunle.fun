@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-30T07:43:54.156176+00:00",
+  "simulator": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "normalHostPID": 42494,
+  "product": "frozen final a701 normal preview0",
+  "desktopUnlockedObserved": true,
+  "AI": {
+    "account": "existing C member",
+    "serviceReply": "real normal preset request, six approved cards, completed",
+    "sameAppControl": "Today to cook from ordinary Workshop featured opens visibly immediately",
+    "failureReproduced": "From AI card Today to cook, detail content appears in AX but visible screen remains Assistant. One actual Back shows detail, another returns Workshop. Screenshots authoritative for visible presentation.",
+    "fixSource": "apps/ios/YunleFun/Features/Assistant/AssistantView.swift",
+    "fixSHA256": "53059acd75786a1d1fae60e0359a45c4d17bed05ee890dd8ece9e8f1c254d481",
+    "fixStatus": "written and parse checked, new-build real UI validation pending",
+    "earlierNoNavigationLimitation": "Original Go Far Away attempts remain unproven; this new same-app control establishes a reproducible issue for Today to cook, not a claim all destinations failed."
+  },
+  "StarTutorial": {
+    "actualMode": "tutorial",
+    "actualLaunchAtUTC": "2026-10-30T07:36:04.404Z",
+    "launchRootObserverUptimeMs": 297315.448917,
+    "firstAXObservationUptimeMs": 300361.973167,
+    "firstAX": "progress10%, not ready",
+    "laterScreenshot": "3 second start remained, sampled visible countdown2; then rendered ship, touch controls and timer",
+    "realInputs": [
+      "left hold450ms",
+      "right hold450ms",
+      "boost hold450ms",
+      "fire hold1200ms",
+      "ability press200ms"
+    ],
+    "verifiedSteps": [
+      "steering→2/8",
+      "boost→3/8",
+      "continuous fire→4/8",
+      "ability→5/8"
+    ],
+    "laterObservation": "6/8 visible after simulation progressed; no claim that this was a new manual action",
+    "fullTutorialCompletion": false,
+    "timingLimits": "Functional journey only, no isolated ready/performance sample. Observer calls include IPC/tool/operator time; no subtracting countdown or combining Web/Native clocks. No new M3 N10 claim.",
+    "orientation": "Actual DeviceHub Rotate Left showed correct landscape gameplay. Later Controls Rotate Right was attempted once; Cua observation timed out/reset. Fresh screenshot then confirmed portrait host; no repeated/restarted rotation action.",
+    "end": "Minimized local session, normal C→A account selection ended old runtime, A Games showed G/F history and no Star entry/continue. No online room was created."
+  },
+  "accountIsolation": {
+    "C": "New Star tutorial reference from actual ready local play",
+    "A": "Existing G/F references remain, no C Star reference in current Games AX; no current C running game after switch",
+    "limits": "This does not prove original version upgrade migration for arbitrary nonempty user data."
+  },
+  "rawFiles": {
+    "a-after-c-tutorial-isolated-history.ax.txt": {
+      "bytes": 6475,
+      "sha256": "8e24f6bba49ac5ba3fe30ccf09684cad1e0bf52b55b86b5285570ea39983ba38"
+    },
+    "a-after-c-tutorial-isolated-history.png": {
+      "bytes": 259986,
+      "sha256": "5cbe83573ac7f4b6c574d9204b1c0695385d5db2f8e933c59de15fab566f6d9a"
+    },
+    "after-ai-back-shows-detail.ax.txt": {
+      "bytes": 3917,
+      "sha256": "6583ad18483d7edb23373760f71636890c14990681adb7ff15691d35bab504c3"
+    },
+    "after-ai-back-shows-detail.png": {
+      "bytes": 215577,
+      "sha256": "0004c254b620cc5a9ba8794435f4caa9b6cb0ae594cf299cf0c2e01430384a45"
+    },
+    "ai-card-click-detail-in-ax.ax.txt": {
+      "bytes": 4942,
+      "sha256": "9cbf5f47f72ba2049ca0b5f4560bdf5a4a85ee3c10126b9013be00cd57cb3cd6"
+    },
+    "ai-card-click-still-assistant.png": {
+      "bytes": 262480,
+      "sha256": "b461bf7689098b10dc1714eed93aa99d4841177d8115507bab71a7a7a0aa81a8"
+    },
+    "catalog-same-app-detail.ax.txt": {
+      "bytes": 3917,
+      "sha256": "6583ad18483d7edb23373760f71636890c14990681adb7ff15691d35bab504c3"
+    },
+    "catalog-same-app-detail.png": {
+      "bytes": 216168,
+      "sha256": "38ebfa49bd45fd9810f3cc6e854352fdb7ee28f967d997a97c4fc78f3b813402"
+    },
+    "star-tutorial-countdown.png": {
+      "bytes": 215524,
+      "sha256": "4e778a81b1731dac117fc10a3afaeec27c59daff92891f4c7bd0f4497e64219e"
+    },
+    "star-tutorial-rendered.png": {
+      "bytes": 244401,
+      "sha256": "cf732cf05c7008c54e98c2a05165f439e8859ecff42f2a0f33a40f7c0352e816"
+    },
+    "star-tutorial-step2-real-turns.png": {
+      "bytes": 242746,
+      "sha256": "51dfcd8fc8d4334817bc252da0803aac3568de445d5f39e5d32d8f1a430d35fd"
+    },
+    "star-tutorial-step3-real-boost.png": {
+      "bytes": 243026,
+      "sha256": "0fbda3ec7252c5b32ace85ae30e5f02d5ef0d0201d2464ba5f005e3106769939"
+    },
+    "star-tutorial-step4-real-fire.png": {
+      "bytes": 241923,
+      "sha256": "bacbe6a2c912a7ad3440f3cd52f2dfb688f0d3faacb18d53f3206e4cdf90dada"
+    },
+    "star-tutorial-step5-real-ability.png": {
+      "bytes": 244009,
+      "sha256": "9702938f21f99152c225c9f752182ce83cbc3384a73cd0acb54964c397ed8485"
+    }
+  },
+  "scopeStatus": "M5 real journey advanced; AI correction requires fresh build validation; G4/F0 round counts unchanged"
+}

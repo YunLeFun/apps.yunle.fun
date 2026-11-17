@@ -1,0 +1,171 @@
+{
+  "schema": "external-blocker-readiness-recheck-v1",
+  "recordedAt": "2026-10-29T08:21:07.107974+08:00",
+  "scope": "Anonymous normalTLS GET and OPTIONS only; noCookie/Auth/headercredentialread, roomwrite/deployment/certbypass. Assetprefix check does not replace prior realrendererCORSfailure or fullhash evidence.",
+  "requests": [
+    {
+      "name": "aasa-root",
+      "url": "https://play.yunle.fun/apple-app-site-association",
+      "method": "GET",
+      "status": 404,
+      "finalURL": "https://play.yunle.fun/apple-app-site-association",
+      "contentType": "text/html",
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "contentLengthHeader": "4323",
+      "bodyBytesRead": 4323,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "aasa-well-known",
+      "url": "https://play.yunle.fun/.well-known/apple-app-site-association",
+      "method": "GET",
+      "status": 404,
+      "finalURL": "https://play.yunle.fun/.well-known/apple-app-site-association",
+      "contentType": "text/html",
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "contentLengthHeader": "4323",
+      "bodyBytesRead": 4323,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "native-catalog",
+      "url": "https://play.yunle.fun/native/catalog-v1.json",
+      "method": "GET",
+      "status": 404,
+      "finalURL": "https://play.yunle.fun/native/catalog-v1.json",
+      "contentType": "text/html",
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "contentLengthHeader": "4323",
+      "bodyBytesRead": 4323,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "resources-gomoku",
+      "url": "https://play.yunle.fun/native/resources/gomoku-v1.json",
+      "method": "GET",
+      "status": 404,
+      "finalURL": "https://play.yunle.fun/native/resources/gomoku-v1.json",
+      "contentType": "text/html",
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "contentLengthHeader": "4323",
+      "bodyBytesRead": 4323,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "resources-flight-chess",
+      "url": "https://play.yunle.fun/native/resources/flight-chess-v1.json",
+      "method": "GET",
+      "errorType": "URLError"
+    },
+    {
+      "name": "resources-paper-star",
+      "url": "https://play.yunle.fun/native/resources/paper-star-v1.json",
+      "method": "GET",
+      "status": 404,
+      "finalURL": "https://play.yunle.fun/native/resources/paper-star-v1.json",
+      "contentType": "text/html",
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "contentLengthHeader": "4323",
+      "bodyBytesRead": 4323,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "health",
+      "url": "https://api.play.yunle.fun/v1/health",
+      "method": "GET",
+      "status": 200,
+      "finalURL": "https://api.play.yunle.fun/v1/health",
+      "contentType": "application/json; charset=utf-8",
+      "allowOrigin": "*",
+      "allowCredentials": "true",
+      "contentLengthHeader": "867",
+      "bodyBytesRead": 867,
+      "headersAllowIdempotency": false,
+      "publicHealth": {
+        "ok": true,
+        "protocolVersion": 3
+      }
+    },
+    {
+      "name": "anonymous-session",
+      "url": "https://api.play.yunle.fun/v1/session",
+      "method": "GET",
+      "status": 401,
+      "finalURL": "https://api.play.yunle.fun/v1/session",
+      "contentType": "application/json; charset=utf-8",
+      "allowOrigin": "*",
+      "allowCredentials": "true",
+      "contentLengthHeader": "140",
+      "bodyBytesRead": 140,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "room-cors",
+      "url": "https://api.play.yunle.fun/v1/rooms",
+      "method": "OPTIONS",
+      "status": 204,
+      "finalURL": "https://api.play.yunle.fun/v1/rooms",
+      "contentType": null,
+      "allowOrigin": "https://play.yunle.fun",
+      "allowCredentials": "true",
+      "contentLengthHeader": null,
+      "bodyBytesRead": 0,
+      "headersAllowIdempotency": false
+    },
+    {
+      "name": "planes-texture",
+      "url": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png?webgl=1",
+      "method": "GET",
+      "status": 200,
+      "finalURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png?webgl=1",
+      "contentType": "image/png",
+      "allowOrigin": "*",
+      "allowCredentials": null,
+      "contentLengthHeader": "956518",
+      "bodyBytesRead": 16,
+      "headersAllowIdempotency": false,
+      "readOnlyPrefix": true,
+      "pngSignature": true,
+      "scope": "16byteprefixonly, nofullSHAordecode/re-render"
+    },
+    {
+      "name": "world-texture",
+      "url": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "method": "GET",
+      "status": 200,
+      "finalURL": "https://assets.play.yunle.fun/games/paper-star/runtime/v2/world-sprites.png?webgl=1",
+      "contentType": "image/png",
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "contentLengthHeader": "775328",
+      "bodyBytesRead": 16,
+      "headersAllowIdempotency": false,
+      "readOnlyPrefix": true,
+      "pngSignature": true,
+      "scope": "16byteprefixonly, nofullSHAordecode/re-render"
+    }
+  ],
+  "observation": {
+    "missingNativeEndpoints": 5,
+    "world200WithoutAllowOrigin": true,
+    "idempotencyAllowed": false,
+    "missingNativeEndpointsAfterBoundedRetry": 6
+  },
+  "classification": "No progress if prerequisites unchanged; read-only revalidation is not completion or a new performance result.",
+  "retryAfterTransientURLError": {
+    "recordedAt": "2026-10-29T08:21:18.181538+08:00",
+    "result": {
+      "name": "resources-flight-chess",
+      "url": "https://play.yunle.fun/native/resources/flight-chess-v1.json",
+      "method": "GET",
+      "status": 404,
+      "contentType": "text/html",
+      "bodyBytesRead": 4323
+    }
+  }
+}

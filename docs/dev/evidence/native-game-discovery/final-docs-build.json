@@ -1,0 +1,19 @@
+{
+  "kind": "final-vitepress-docs-build",
+  "startedAt": "2026-10-29T04:23:30.190974+08:00",
+  "command": [
+    "./node_modules/.bin/vitepress",
+    "build",
+    "docs",
+    "--outDir",
+    "/tmp/yunle-native-games.uGZuY9/docs-cache-cold-final-qe5xybe3/site"
+  ],
+  "outputLog": "/tmp/yunle-native-games.uGZuY9/docs-cache-cold-final.log",
+  "usedExistingInstalledBinary": true,
+  "packageManagerInstallOrTrustBypass": false,
+  "exitCode": 0,
+  "passed": true,
+  "outputBytesReclaimed": 10084394,
+  "temporaryOutputRemoved": true,
+  "finishedAt": "2026-10-29T04:23:36.752984+08:00"
+}

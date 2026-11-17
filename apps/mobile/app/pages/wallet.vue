@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CoinPackId, CoinTransaction } from '@yunlefun/types'
+import type { CoinTransaction } from '@yunlefun/types'
 import {
   IonBackButton,
   IonButtons,
@@ -14,7 +14,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { COIN_PACKS, COIN_RATE_FEN, formatCoin, formatPrice, IAP_COIN_PRODUCTS, PLAN_NAMES } from '@yunlefun/types'
+import { COIN_RATE_FEN, formatCoin, formatPrice, PLAN_NAMES } from '@yunlefun/types'
 import {
   diamondOutline,
   ribbonOutline,
@@ -33,37 +33,10 @@ const router = useRouter()
 const { account, balance, membership, isMember, loading, refresh, reconcileOrders, listTransactions } = useCoin()
 const toast = useToast()
 
-const { channel, canPurchase, goRecharge } = usePaymentChannel({
+const { goRecharge } = usePaymentChannel({
   // 从 www 支付页回到 App：兜底对账 + 刷新余额与流水
   onReturn: () => reconcileAndRefresh(),
 })
-const iap = useIap()
-
-/** iOS 充值包（App Store 本地化价；商品未就绪时整体隐藏，见审核 3.1.1） */
-const iapCoinPacks = computed(() =>
-  (Object.keys(COIN_PACKS) as CoinPackId[])
-    .map((packId) => {
-      const product = iap.findProduct(IAP_COIN_PRODUCTS[packId])
-      return product
-        ? { packId, coin: COIN_PACKS[packId].coin, priceText: product.displayPrice }
-        : null
-    })
-    .filter(pack => pack !== null),
-)
-
-async function handleIapRecharge(packId: CoinPackId) {
-  const ok = await iap.purchase(IAP_COIN_PRODUCTS[packId])
-  if (ok) {
-    toast.showSuccess('充值已到账')
-    iap.reset()
-    await loadTransactions(true)
-  }
-  else if (iap.phase.value === 'fail') {
-    toast.showError(iap.errorMessage.value || '购买失败，请稍后重试', '')
-    iap.reset()
-  }
-}
-
 /** 余额等价人民币（1 云币 = 10 分） */
 const balanceEquivText = computed(() =>
   `≈ ${formatPrice(balance.value * COIN_RATE_FEN)} · 100 云币 = 10 元`,
@@ -112,12 +85,6 @@ onMounted(async () => {
   if (!userStore.isLoggedIn) {
     router.replace('/login')
     return
-  }
-  if (channel === 'ios-iap') {
-    await iap.loadProducts()
-    const settled = await iap.processUnfinished()
-    if (settled > 0)
-      toast.showSuccess('购买已到账')
   }
   await reconcileAndRefresh()
 })
@@ -175,37 +142,12 @@ const memberExpireText = computed(() => formatExpireDate(membership.value?.expir
           {{ balanceEquivText }}
         </div>
         <!-- Web：跳 www 微信支付；iOS：站内 IAP（见下方充值包） -->
-        <k-button v-if="canPurchase" rounded class="recharge-btn" @click="goRecharge">
+        <k-button rounded class="recharge-btn" @click="goRecharge">
           充值云币
         </k-button>
       </k-block>
 
       <!-- iOS 充值包（App Store 内购；商品未就绪时整体隐藏，审核 3.1.1 不可降级为外部支付） -->
-      <template v-if="channel === 'ios-iap' && iapCoinPacks.length > 0">
-        <k-block-title>充值云币</k-block-title>
-        <k-block strong inset>
-          <div class="iap-pack-grid">
-            <button
-              v-for="pack in iapCoinPacks"
-              :key="pack.packId"
-              type="button"
-              class="iap-pack-card"
-              :disabled="iap.purchasing.value"
-              @click="handleIapRecharge(pack.packId)"
-            >
-              <div class="iap-pack-coin">
-                {{ pack.coin }}
-              </div>
-              <div class="iap-pack-unit">
-                云币
-              </div>
-              <div class="iap-pack-price">
-                {{ pack.priceText }}
-              </div>
-            </button>
-          </div>
-        </k-block>
-      </template>
 
       <!-- 会员状态 -->
       <k-block-title>会员</k-block-title>
@@ -321,49 +263,4 @@ const memberExpireText = computed(() => formatExpireDate(membership.value?.expir
 }
 
 /* iOS IAP 充值包 */
-.iap-pack-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.iap-pack-card {
-  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
-  border-radius: 14px;
-  padding: 14px 8px 10px;
-  color: inherit;
-  text-align: center;
-  background: color-mix(in srgb, var(--ion-item-background, var(--ion-background-color)) 94%, currentColor 6%);
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
-}
-
-.iap-pack-card:active:not(:disabled) {
-  border-color: color-mix(in srgb, var(--ion-color-primary) 50%, currentColor);
-  background: color-mix(in srgb, var(--ion-color-primary) 10%, var(--ion-item-background, var(--ion-background-color)));
-  transform: scale(0.985);
-}
-
-.iap-pack-card:disabled {
-  opacity: 0.5;
-}
-
-.iap-pack-coin {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.iap-pack-unit {
-  font-size: 12px;
-  color: var(--ion-color-medium);
-}
-
-.iap-pack-price {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ion-color-primary, #007aff);
-  margin-top: 6px;
-}
 </style>

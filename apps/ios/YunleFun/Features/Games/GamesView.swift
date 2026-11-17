@@ -1,0 +1,439 @@
+import SwiftUI
+
+struct GamesView: View {
+    @ObservedObject var store: NativeGameCatalogStore
+    @ObservedObject var history: NativeGameHistoryStore
+    let open: (NativeGame, NativeGameMode) -> Void
+    let resume: (RuntimeSessionRecovery) -> Void
+    let runningSessions: [NativeGameContinuation]
+    let onRoom: (NativeGameRoomIntent) -> Void
+    let continuationRoom: NativeGameRoomIntent?
+    var fallback: ((NativeGame) -> Void)? = nil
+    var prepareResources: ((NativeGame) -> Void)? = nil
+    var createRoom: ((String?) -> Void)? = nil
+    @EnvironmentObject private var accounts: AccountStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var query = ""
+    @State private var filter = GameFilter.all
+    @State private var joinSheet: JoinSheet?
+    @State private var pendingRoom: NativeGameRoomIntent?
+    @State private var pendingRoomIdentity: UUID?
+    @State private var pendingCreation: UUID?
+
+    private struct JoinSheet: Identifiable { let id = UUID(); let identity: UUID; var publicRooms = false }
+    private enum GameFilter: String, CaseIterable, Identifiable {
+        case all = "全部", solo = "单人", local = "同屏", online = "联机"
+        var id: Self { self }
+        func matches(_ game: NativeGame) -> Bool {
+            switch self {
+            case .all: return true
+            case .solo: return game.launchModes.contains { ["computer", "tutorial", "pve"].contains($0.id) }
+            case .local: return game.launchModes.contains { $0.id == "local" }
+            case .online: return game.launchModes.contains { $0.id == "online" }
+            }
+        }
+    }
+
+    private var isBrowsing: Bool { query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && filter == .all }
+    private var visibleGames: [NativeGame] {
+        let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return store.games.filter { game in
+            filter.matches(game) && (term.isEmpty || ([game.name, game.description] + game.launchModes.map(\.title))
+                .contains { $0.localizedStandardContains(term) })
+        }
+    }
+    private var recentGames: [(NativeGameHistoryEntry, NativeGame, NativeGameMode)] {
+        history.entries.prefix(6).compactMap { entry in
+            guard let game = store.game(id: entry.gameID), let mode = game.mode(id: entry.modeID) else { return nil }
+            return (entry, game, mode)
+        }
+    }
+
+    var body: some View {
+        List {
+            catalogNotice
+            if isBrowsing {
+                runningSection
+                publicRoomsSection
+                roomSection
+                recentSection
+            }
+            gamesSection
+        }
+        .navigationTitle("寻乐")
+        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索游戏" : "搜索游戏或玩法"))
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                NavigationLink {
+                    GameInteractionSettingsView()
+                } label: { Label("游戏交互设置", systemImage: "gearshape") }
+                .accessibilityIdentifier("games.settings")
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button { joinSheet = JoinSheet(identity: accounts.identityGeneration) } label: { Label("加入房间", systemImage: "person.2.badge.plus") }
+                    .accessibilityIdentifier("games.join-room")
+                    .disabled(accounts.isRestoring || accounts.isInitialRestorePending)
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Picker("玩法", selection: $filter) {
+                        ForEach(GameFilter.allCases) { Text($0.rawValue).tag($0) }
+                    }
+                } label: {
+                    Label("玩法", systemImage: filter == .all ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                }
+                .accessibilityValue(filter.rawValue)
+                .accessibilityIdentifier("games.filter")
+            }
+        }
+        .sheet(item: $joinSheet, onDismiss: continueRequestedRoom) { sheet in
+            if sheet.publicRooms {
+                NativePublicRoomsView(games: store.games, onCreate: {
+                    guard sheet.identity == accounts.identityGeneration else { return }
+                    pendingCreation = sheet.identity
+                }) { intent in
+                    queueRoom(intent, from: sheet)
+                }
+            } else {
+                GameRoomJoinView { intent in
+                    queueRoom(intent, from: sheet)
+                }
+            }
+        }
+        .task(id: accounts.identityGeneration) {
+            history.activate(accountID: accounts.user?.id)
+            await store.load()
+        }
+        .onChange(of: accounts.identityGeneration) { _ in
+            pendingRoom = nil
+            pendingRoomIdentity = nil
+            pendingCreation = nil
+            joinSheet = nil
+        }
+        .refreshable { await store.load(force: true) }
+    }
+
+    private var publicRoomsSection: some View {
+        Section {
+            if let createRoom {
+                Button { createRoom(nil) } label: {
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("创建房间").foregroundStyle(.primary)
+                            Text("选择游戏，设置公开或私密").font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    } icon: { Image(systemName: "plus.circle.fill") }
+                }
+                .disabled(accounts.isRestoring || accounts.isInitialRestorePending)
+                .accessibilityIdentifier("games.create-room")
+            }
+            Button { joinSheet = JoinSheet(identity: accounts.identityGeneration, publicRooms: true) } label: {
+                Label {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("公开房间").foregroundStyle(.primary)
+                        Text("看看谁正在玩，点选加入").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                } icon: { Image(systemName: "person.2.fill") }
+            }
+            .disabled(accounts.isRestoring || accounts.isInitialRestorePending)
+            .accessibilityIdentifier("games.public-rooms")
+        }
+    }
+
+    private func queueRoom(_ intent: NativeGameRoomIntent, from sheet: JoinSheet) {
+        guard sheet.identity == accounts.identityGeneration else { return }
+        pendingRoom = intent
+        pendingRoomIdentity = sheet.identity
+    }
+
+    @ViewBuilder private var catalogNotice: some View {
+        if let error = store.error, !store.games.isEmpty {
+            Section {
+                HStack {
+                    Label("游戏列表暂未更新", systemImage: "wifi.exclamationmark").font(.subheadline)
+                    Spacer()
+                    Button("重试") { Task { await store.load(force: true) } }
+                }
+                .accessibilityIdentifier("games.catalog-notice")
+                .accessibilityHint(error)
+            } footer: { Text("可以继续浏览已收录的游戏，进入时会确认玩法是否可用。") }
+        }
+        if let notice = store.storageNotice { Section { Text(notice).font(.footnote).foregroundStyle(.secondary) } }
+    }
+
+    @ViewBuilder private var runningSection: some View {
+        if !runningSessions.isEmpty {
+            Section("继续游戏") {
+                ForEach(runningSessions) { session in
+                    Button { resume(session.recovery) } label: {
+                        if let id = session.gameID, let game = store.game(id: id) {
+                            gameSummary(game, subtitle: "恢复正在运行的游戏", systemImage: "play.circle.fill")
+                        } else {
+                            Label {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(session.recovery.title).foregroundStyle(.primary)
+                                    Text("恢复正在运行的房间或页面").font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            } icon: { Image(systemName: "play.circle.fill") }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(accounts.isRestoring)
+                    .accessibilityIdentifier("games.resume.\(session.gameID ?? session.id)")
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var roomSection: some View {
+        if let room = continuationRoom {
+            Section {
+                Button { onRoom(room) } label: {
+                    Label {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("返回上次房间")
+                            Text("\(room.inviteCode) · \(room.role == .spectator ? "观战" : "加入对局")")
+                                .font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    } icon: { Image(systemName: "arrow.uturn.backward.circle") }
+                }
+                .accessibilityIdentifier("games.continue-room")
+                .disabled(accounts.isRestoring)
+                ShareLink(item: room.url) { Label("分享房间邀请", systemImage: "square.and.arrow.up") }
+                    .accessibilityIdentifier("games.share-room")
+            } footer: { Text("进入时会重新确认房间和席位是否仍可用。") }
+        }
+    }
+
+    @ViewBuilder private var recentSection: some View {
+        if !recentGames.isEmpty {
+            Section("最近玩过") {
+                ForEach(recentGames, id: \.0.id) { _, game, mode in
+                    Button { launchGame(game, mode: mode) } label: { gameSummary(game, subtitle: mode.title, systemImage: "clock") }
+                        .buttonStyle(.plain)
+                        .disabled(accounts.isRestoring || !game.isPlayable || !mode.available)
+                        .accessibilityIdentifier("games.recent.\(game.gameId)")
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var gamesSection: some View {
+        if store.games.isEmpty && store.isLoading {
+            Section { ProgressView("正在寻找好玩的游戏").frame(maxWidth: .infinity, minHeight: 160) }
+        } else if store.games.isEmpty {
+            Section {
+                ContentStateView(title: "游戏列表暂不可用", systemImage: "gamecontroller",
+                                 message: store.error ?? "稍后刷新，看看新收录的游戏。", actionTitle: "刷新",
+                                 action: { Task { await store.load(force: true) } })
+            }
+        } else if visibleGames.isEmpty {
+            Section {
+                ContentStateView(title: "没有找到相关游戏", systemImage: "magnifyingglass", message: "试试其他关键词或玩法。",
+                                 actionTitle: "显示全部", action: { query = ""; filter = .all })
+            }
+        } else {
+            Section(isBrowsing ? "精选游戏" : "游戏 · \(visibleGames.count)") {
+                ForEach(visibleGames) { game in gameCard(game) }
+            }
+        }
+    }
+
+    private func gameCard(_ game: NativeGame) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if isBrowsing, let cover = GameCover(game.gameId) {
+                cover.header(for: game, showsArt: !dynamicTypeSize.isAccessibilitySize)
+            } else {
+                HStack(alignment: .top, spacing: 14) {
+                    gameIcon(game, size: 48)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(game.name).font(.headline)
+                        if let players = game.players { Label(players.label, systemImage: "person.2").font(.caption).foregroundStyle(.secondary) }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            Text(game.description).font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 180 : 112), alignment: .leading)], alignment: .leading, spacing: 10) {
+                ForEach(game.launchModes) { mode in
+                    let launch = Button { launchGame(game, mode: mode) } label: {
+                        Text(mode.title).font(.subheadline).frame(maxWidth: .infinity, minHeight: 32).fixedSize(horizontal: false, vertical: true)
+                    }
+                    Group {
+                        if mode.id == game.availableModes.first?.id {
+                            launch.buttonStyle(.borderedProminent)
+                        } else {
+                            launch.buttonStyle(.bordered)
+                        }
+                    }
+                    .disabled(accounts.isRestoring || !game.isPlayable || !mode.available)
+                    .accessibilityLabel("\(game.name)，\(mode.title)")
+                    .accessibilityHint(mode.available ? (mode.requiresLogin ? "联网玩法，进入时确认登录。" : "直接进入这个玩法。") : "当前客户端暂未提供这个玩法，可在 Play 中查看。")
+                    .accessibilityIdentifier("games.launch.\(game.gameId).\(mode.id)")
+                }
+            }
+            if game.launchModes.allSatisfy({ !$0.available }) {
+                Text("当前客户端暂未提供这些玩法，可在 Play 中查看游戏。")
+                    .font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            } else if game.availableModes.contains(where: \.requiresNetwork) {
+                Text("联机玩法需要联网，进入时确认房间与登录状态。")
+                    .font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+            if game.fallbackURL != nil, let fallback {
+                Button { fallback(game) } label: { Label("在 Play 查看玩法", systemImage: "arrow.up.forward.app") }
+                    .accessibilityIdentifier("games.fallback.\(game.gameId)")
+            }
+            if game.resourceManifestURL != nil, let prepareResources {
+                Button { prepareResources(game) } label: { Label("游戏资源", systemImage: "arrow.down.circle") }
+                    .accessibilityIdentifier("games.resources.\(game.gameId)")
+            }
+        }
+        .padding(.vertical, 10)
+        .accessibilityIdentifier("games.game.\(game.gameId)")
+    }
+
+    private func gameSummary(_ game: NativeGame, subtitle: String, systemImage: String) -> some View {
+        HStack(spacing: 12) {
+            gameIcon(game, size: 44)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(game.name).foregroundStyle(Color.primary)
+                Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: systemImage).foregroundStyle(.secondary).accessibilityHidden(true)
+        }
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder private func gameIcon(_ game: NativeGame, size: CGFloat) -> some View {
+        if game.iconURL == nil, let cover = GameCover(game.gameId) {
+            Image(cover.asset).resizable().scaledToFill().frame(width: size, height: size)
+                .background(cover.color).clipShape(RoundedRectangle(cornerRadius: size * 0.22))
+                .accessibilityHidden(true)
+        } else {
+            ApplicationIcon(application: game.iconApplication, size: size)
+        }
+    }
+
+    private func continueRequestedRoom() {
+        if let identity = pendingCreation {
+            pendingCreation = nil
+            if identity == accounts.identityGeneration { createRoom?(nil) }
+            return
+        }
+        let intent = pendingRoom
+        let identity = pendingRoomIdentity
+        pendingRoom = nil
+        pendingRoomIdentity = nil
+        guard let intent, identity == accounts.identityGeneration else { return }
+        onRoom(intent)
+    }
+
+    private func launchGame(_ game: NativeGame, mode: NativeGameMode) {
+        if mode.id == "online", let createRoom { createRoom(game.gameId) }
+        else { open(game, mode) }
+    }
+}
+
+struct GameInteractionSettingsView: View {
+    @EnvironmentObject private var runtime: NativeWebRuntime
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("双击放大网页", isOn: $runtime.gameInteractionSettings.allowsDoubleTapZoom)
+                Toggle("长按选中与预览", isOn: $runtime.gameInteractionSettings.allowsLongPress)
+                Toggle("页面边缘回弹", isOn: $runtime.gameInteractionSettings.allowsPageBounce)
+            } header: {
+                Text("游戏网页手势")
+            } footer: {
+                Text("设置应用于本机所有寻乐对局。开启后由游戏网页决定是否支持该手势。关闭后仍可正常滚动、双指缩放和编辑输入框。")
+            }
+        }
+        .navigationTitle("游戏交互设置")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private enum GameCover: String {
+    case gomoku, flight = "flight-chess", star = "paper-star"
+
+    init?(_ gameID: String) { self.init(rawValue: gameID) }
+    var asset: String {
+        switch self {
+        case .gomoku: return "GameCoverGomoku"
+        case .flight: return "GameCoverFlight"
+        case .star: return "GameCoverPaperStar"
+        }
+    }
+    var color: Color {
+        switch self {
+        case .gomoku: return Color(red: 0.12, green: 0.26, blue: 0.24)
+        case .flight: return Color(red: 0.10, green: 0.31, blue: 0.40)
+        case .star: return Color(red: 0.18, green: 0.17, blue: 0.34)
+        }
+    }
+
+    func header(for game: NativeGame, showsArt: Bool) -> some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(game.name).font(.title3.bold())
+                if let players = game.players { Label(players.label, systemImage: "person.2").font(.subheadline) }
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(14)
+            .layoutPriority(1)
+            Spacer(minLength: 0)
+            if showsArt {
+                Image(asset).resizable().scaledToFit().frame(maxWidth: 136)
+                    .accessibilityHidden(true)
+            }
+        }
+        .foregroundStyle(.white)
+        .background(LinearGradient(colors: [color, color, color.opacity(0.88)], startPoint: .leading, endPoint: .trailing))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+private struct GameRoomJoinView: View {
+    let onJoin: (NativeGameRoomIntent) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var input = ""
+    @State private var role = NativeGameRoomIntent.Role.player
+    @State private var error: String?
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("六位房间号或邀请链接", text: $input)
+                        .textInputAutocapitalization(.characters).autocorrectionDisabled()
+                        .focused($focused).submitLabel(.go).onSubmit(join)
+                        .accessibilityIdentifier("games.room-input")
+                    Picker("进入方式", selection: $role) {
+                        Text("加入对局").tag(NativeGameRoomIntent.Role.player)
+                        Text("观战").tag(NativeGameRoomIntent.Role.spectator)
+                    }
+                } footer: { Text("邀请链接会保留其中指定的进入方式。进入后会确认房间是否可用，联机需要登录。") }
+                if let error { Section { Text(error).foregroundStyle(.red).accessibilityIdentifier("games.room-error") } }
+                Section {
+                    Button("继续", action: join).disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .accessibilityIdentifier("games.room-submit")
+                }
+            }
+            .navigationTitle("加入房间").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } } }
+        }
+    }
+
+    private func join() {
+        do {
+            let intent = try NativeGameRoomIntent(input: input, role: role)
+            focused = false
+            onJoin(intent)
+            dismiss()
+        } catch { self.error = error.localizedDescription }
+    }
+}

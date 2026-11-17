@@ -1,8 +1,6 @@
 import type { HostAppInfo } from '~/host-runtime'
 import type { AppIconAssets } from '~/types/app'
-import { Browser } from '@capacitor/browser'
-import { Capacitor } from '@capacitor/core'
-import { HostRuntime } from '~/host-runtime'
+import { hostBrowser, hostEnvironment, HostRuntime } from '~/host-runtime'
 import { resolveAppIconPresentation } from '~/utils/appIconAssets'
 import { getPublicCloudbaseStorageUrl } from '~/utils/cloudbase-storage-url'
 
@@ -73,13 +71,13 @@ export function openCatalogAppInBrowser(app: CatalogBrowserApp): Promise<void> {
  * iOS / Android: 平台原生 WebView，默认标题栏形态；
  *      沉浸形态（全屏平铺 + 悬浮胶囊）仅由官方应用经目录声明 displayMode 启用；
  *      容器内点击跨站外链时按设置以 App 内系统浏览器视图（默认）或手机默认浏览器打开
- * 「手机内置」模式使用 @capacitor/browser。
+ * 「手机内置」模式使用宿主浏览器适配器。
  */
 export async function openInAppBrowser(
   url: string,
   options?: InAppBrowserOptions,
 ) {
-  if (!Capacitor.isNativePlatform()) {
+  if (!hostEnvironment.isNative()) {
     window.open(url, '_blank')
     return
   }
@@ -103,12 +101,12 @@ export async function openInAppBrowser(
     }
     catch (e) {
       console.warn('[useBrowser] HostRuntime.open failed, falling back to Browser:', e)
-      // fall through to @capacitor/browser below
+      // Fall through to the system browser adapter.
     }
   }
 
   // system 模式或自定义容器降级
-  await Browser.open({
+  await hostBrowser.open({
     url,
     toolbarColor: options?.toolbarColor,
     presentationStyle: options?.presentationStyle || 'fullscreen',
@@ -169,7 +167,7 @@ function refreshReviewMeta(app?: InAppWebViewAppInfo) {
  * 关闭应用内浏览器
  */
 export async function closeInAppBrowser() {
-  if (!Capacitor.isNativePlatform())
+  if (!hostEnvironment.isNative())
     return
 
   if (useSettingsStore().inAppBrowserMode !== 'system') {
@@ -177,12 +175,12 @@ export async function closeInAppBrowser() {
     return
   }
 
-  await Browser.close()
+  await hostBrowser.close()
 }
 
 /** 清理原生容器中由宿主身份派生的第一方应用会话。 */
 export async function clearInAppBrowserIdentitySessions() {
-  if (!Capacitor.isNativePlatform()) {
+  if (!hostEnvironment.isNative()) {
     return
   }
   await HostRuntime.clearIdentitySessions()
@@ -195,7 +193,7 @@ export function useBrowserEvents() {
   const isOpen = ref(false)
 
   onMounted(async () => {
-    const useCustom = Capacitor.isNativePlatform()
+    const useCustom = hostEnvironment.isNative()
       && useSettingsStore().inAppBrowserMode !== 'system'
 
     if (useCustom) {
@@ -204,23 +202,23 @@ export function useBrowserEvents() {
       })
     }
     else {
-      Browser.addListener('browserPageLoaded', () => {
+      hostBrowser.addListener('browserPageLoaded', () => {
         isOpen.value = true
       })
-      Browser.addListener('browserFinished', () => {
+      hostBrowser.addListener('browserFinished', () => {
         isOpen.value = false
       })
     }
   })
 
   onUnmounted(async () => {
-    const useCustom = Capacitor.isNativePlatform()
+    const useCustom = hostEnvironment.isNative()
       && useSettingsStore().inAppBrowserMode !== 'system'
 
     if (useCustom)
       await HostRuntime.removeAllListeners()
     else
-      Browser.removeAllListeners()
+      hostBrowser.removeAllListeners()
   })
 
   return { isOpen }

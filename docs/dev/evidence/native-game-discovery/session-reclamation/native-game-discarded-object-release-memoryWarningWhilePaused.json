@@ -1,0 +1,6 @@
+{
+  "oldBrowserReleased" : true,
+  "oldWebViewReleased" : true,
+  "scope" : "Weak object observations after the test's strong callback-validation frame ended; not an assertion about system RAM or WebContent process exit.",
+  "trigger" : "memoryWarningWhilePaused"
+}

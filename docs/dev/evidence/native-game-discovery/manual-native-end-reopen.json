@@ -1,0 +1,567 @@
+{
+  "kind": "manual-native-end-reopen",
+  "recordedAt": "2026-10-28T22:25:57.165Z",
+  "simulatorID": "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+  "bundleID": "fun.yunle.apps.native-dev",
+  "previewExplicitOptIn": true,
+  "processID": 77548,
+  "completed": true,
+  "finalScreen": "寻乐, no retained-game row after final End; recent records remain",
+  "scope": [
+    "Normal app UI; real loopback candidate Play page; no account fixture or production writes",
+    "End through native menu, return to Games, reopen via recent record, minimize; retained row visually verified; MCP semantic snapshot omits that visible row",
+    "Open current mode again, End via menu, leave Games as final screen",
+    "No storage preservation, object lifetime, launch identity or real engine-ready timestamp inferred from this manual UI journey; automated evidence covers those"
+  ],
+  "snapshots": [
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "10bdsvd",
+          "seq": 83,
+          "count": 134,
+          "targets": [
+            "e19|typeText|text-field||搜索游戏或玩法|",
+            "e17|tap|button|加入房间||games.join-room",
+            "e18|tap|button|玩法||games.filter",
+            "e39|tap|button|五子棋、电脑对手||games.recent.gomoku",
+            "e47|tap|button|星纸、互动教程||games.recent.paper-star",
+            "e67|tap|button|五子棋，电脑对手||games.launch.gomoku.computer",
+            "e68|tap|button|五子棋，同屏双人||games.launch.gomoku.local",
+            "e70|tap|button|在 Play 查看玩法||games.game.gomoku",
+            "e73|tap|button|游戏资源||games.game.gomoku",
+            "e107|tap|tab|云居|0|house",
+            "e109|tap|tab|寻乐|1|gamecontroller",
+            "e111|tap|tab|工坊|0|square.grid.2x2",
+            "e113|tap|tab|我|0|person.crop.circle"
+          ],
+          "scroll": [
+            "e1|swipe|application|云乐坊 Native||"
+          ],
+          "text": [
+            "e41|text|text|五子棋||",
+            "e43|text|text|电脑对手||",
+            "e49|text|text|星纸||",
+            "e51|text|text|互动教程||",
+            "e62|text|text|五子棋||games.game.gomoku",
+            "e63|text|text|1–2 人||games.game.gomoku",
+            "e65|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||games.game.gomoku",
+            "e71|text|text|在 Play 查看玩法||",
+            "e74|text|text|游戏资源||",
+            "e80|text|text|飞行棋||games.game.flight-chess",
+            "e81|text|text|1–4 人||games.game.flight-chess",
+            "e83|text|text|掷骰起飞、跳跃撞机，可单人挑战三个机器人，也支持好友邀请联机。||games.game.flight-chess"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e17\"},{\"action\":\"tap\",\"elementRef\":\"e18\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e17\" })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "1i5704l",
+          "seq": 84,
+          "count": 26,
+          "targets": [
+            "e8|tap|button|收起应用||runtime.minimize",
+            "e10|tap|button|更多操作||runtime.more"
+          ],
+          "scroll": [
+            "e15|swipe|scroll-view|||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e8\"},{\"action\":\"tap\",\"elementRef\":\"e10\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e8\" })",
+        "Scroll visible content: swipe({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", withinElementRef: \"e15\", direction: \"up\", distance: 0.5 })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "1i5704l",
+          "seq": 85,
+          "count": 26,
+          "targets": [
+            "e8|tap|button|收起应用||runtime.minimize",
+            "e10|tap|button|更多操作||runtime.more"
+          ],
+          "scroll": [
+            "e15|swipe|scroll-view|||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e8\"},{\"action\":\"tap\",\"elementRef\":\"e10\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e8\" })",
+        "Scroll visible content: swipe({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", withinElementRef: \"e15\", direction: \"up\", distance: 0.5 })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "093uicw",
+          "seq": 87,
+          "count": 102,
+          "targets": [
+            "e8|tap|button|收起应用||runtime.minimize",
+            "e10|tap|button|更多操作||runtime.more",
+            "e30|tap|button|表单控制柄|已展开|",
+            "e40|tap|button|完成||",
+            "e62|tap|button|分享||",
+            "e68|tap|button|复制链接||",
+            "e75|tap|button|在浏览器中打开||",
+            "e82|tap|button|重新载入||",
+            "e90|tap|button|结束||"
+          ],
+          "scroll": [
+            "e15|swipe|scroll-view|||"
+          ],
+          "text": [
+            "e53|text|text|五子棋、十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。、http://127.0.0.1:18146||",
+            "e55|text|text|五子棋||",
+            "e56|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||",
+            "e57|text|text|http://127.0.0.1:18146||",
+            "e64|text|text|分享||",
+            "e70|text|text|复制链接||",
+            "e76|text|text|在浏览器中打开||",
+            "e84|text|text|重新载入||",
+            "e91|text|text|结束||",
+            "e96|text|text|结束后会释放当前会话，再次打开将重新载入。||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e8\"},{\"action\":\"tap\",\"elementRef\":\"e10\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e8\" })",
+        "Scroll visible content: swipe({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", withinElementRef: \"e15\", direction: \"up\", distance: 0.5 })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "1b6wpn1",
+          "seq": 88,
+          "count": 134,
+          "targets": [
+            "e19|typeText|text-field||搜索游戏或玩法|",
+            "e16|tap|button|加入房间||games.join-room",
+            "e17|tap|button|玩法||games.filter",
+            "e39|tap|button|五子棋、电脑对手||games.recent.gomoku",
+            "e47|tap|button|星纸、互动教程||games.recent.paper-star",
+            "e67|tap|button|五子棋，电脑对手||games.launch.gomoku.computer",
+            "e68|tap|button|五子棋，同屏双人||games.launch.gomoku.local",
+            "e70|tap|button|在 Play 查看玩法||games.game.gomoku",
+            "e73|tap|button|游戏资源||games.game.gomoku",
+            "e107|tap|tab|云居|0|house",
+            "e109|tap|tab|寻乐|1|gamecontroller",
+            "e111|tap|tab|工坊|0|square.grid.2x2",
+            "e113|tap|tab|我|0|person.crop.circle"
+          ],
+          "scroll": [
+            "e1|swipe|application|云乐坊 Native||"
+          ],
+          "text": [
+            "e41|text|text|五子棋||",
+            "e43|text|text|电脑对手||",
+            "e49|text|text|星纸||",
+            "e51|text|text|互动教程||",
+            "e62|text|text|五子棋||games.game.gomoku",
+            "e63|text|text|1–2 人||games.game.gomoku",
+            "e65|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||games.game.gomoku",
+            "e71|text|text|在 Play 查看玩法||",
+            "e74|text|text|游戏资源||",
+            "e80|text|text|飞行棋||games.game.flight-chess",
+            "e81|text|text|1–4 人||games.game.flight-chess"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e16\"},{\"action\":\"tap\",\"elementRef\":\"e17\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e16\" })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "1i5704l",
+          "seq": 89,
+          "count": 26,
+          "targets": [
+            "e8|tap|button|收起应用||runtime.minimize",
+            "e10|tap|button|更多操作||runtime.more"
+          ],
+          "scroll": [
+            "e15|swipe|scroll-view|||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e8\"},{\"action\":\"tap\",\"elementRef\":\"e10\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e8\" })",
+        "Scroll visible content: swipe({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", withinElementRef: \"e15\", direction: \"up\", distance: 0.5 })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "0p1qrvw",
+          "seq": 91,
+          "count": 119,
+          "targets": [
+            "e19|typeText|text-field||搜索游戏或玩法|",
+            "e16|tap|button|加入房间||games.join-room",
+            "e17|tap|button|玩法||games.filter",
+            "e42|tap|button|五子棋、电脑对手||games.recent.gomoku",
+            "e50|tap|button|星纸、互动教程||games.recent.paper-star",
+            "e70|tap|button|五子棋，电脑对手||games.launch.gomoku.computer",
+            "e71|tap|button|五子棋，同屏双人||games.launch.gomoku.local",
+            "e73|tap|button|在 Play 查看玩法||games.game.gomoku",
+            "e92|tap|tab|云居|0|house",
+            "e94|tap|tab|寻乐|1|gamecontroller",
+            "e96|tap|tab|工坊|0|square.grid.2x2",
+            "e98|tap|tab|我|0|person.crop.circle"
+          ],
+          "scroll": [
+            "e1|swipe|application|云乐坊 Native||"
+          ],
+          "text": [
+            "e44|text|text|五子棋||",
+            "e46|text|text|电脑对手||",
+            "e52|text|text|星纸||",
+            "e54|text|text|互动教程||",
+            "e65|text|text|五子棋||games.game.gomoku",
+            "e66|text|text|1–2 人||games.game.gomoku",
+            "e68|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||games.game.gomoku",
+            "e74|text|text|在 Play 查看玩法||",
+            "e77|text|text|游戏资源||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e16\"},{\"action\":\"tap\",\"elementRef\":\"e17\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e16\" })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "0p1qrvw",
+          "seq": 92,
+          "count": 119,
+          "targets": [
+            "e19|typeText|text-field||搜索游戏或玩法|",
+            "e16|tap|button|加入房间||games.join-room",
+            "e17|tap|button|玩法||games.filter",
+            "e42|tap|button|五子棋、电脑对手||games.recent.gomoku",
+            "e50|tap|button|星纸、互动教程||games.recent.paper-star",
+            "e70|tap|button|五子棋，电脑对手||games.launch.gomoku.computer",
+            "e71|tap|button|五子棋，同屏双人||games.launch.gomoku.local",
+            "e73|tap|button|在 Play 查看玩法||games.game.gomoku",
+            "e92|tap|tab|云居|0|house",
+            "e94|tap|tab|寻乐|1|gamecontroller",
+            "e96|tap|tab|工坊|0|square.grid.2x2",
+            "e98|tap|tab|我|0|person.crop.circle"
+          ],
+          "scroll": [
+            "e1|swipe|application|云乐坊 Native||"
+          ],
+          "text": [
+            "e44|text|text|五子棋||",
+            "e46|text|text|电脑对手||",
+            "e52|text|text|星纸||",
+            "e54|text|text|互动教程||",
+            "e65|text|text|五子棋||games.game.gomoku",
+            "e66|text|text|1–2 人||games.game.gomoku",
+            "e68|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||games.game.gomoku",
+            "e74|text|text|在 Play 查看玩法||",
+            "e77|text|text|游戏资源||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e16\"},{\"action\":\"tap\",\"elementRef\":\"e17\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e16\" })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "1cjndi1",
+          "seq": 94,
+          "count": 26,
+          "targets": [
+            "e8|tap|button|收起应用||runtime.minimize",
+            "e10|tap|button|更多操作||runtime.more"
+          ],
+          "scroll": [
+            "e15|swipe|scroll-view|||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e8\"},{\"action\":\"tap\",\"elementRef\":\"e10\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e8\" })",
+        "Scroll visible content: swipe({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", withinElementRef: \"e15\", direction: \"up\", distance: 0.5 })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "0r24pd8",
+          "seq": 96,
+          "count": 102,
+          "targets": [
+            "e8|tap|button|收起应用||runtime.minimize",
+            "e10|tap|button|更多操作||runtime.more",
+            "e30|tap|button|表单控制柄|已展开|",
+            "e40|tap|button|完成||",
+            "e62|tap|button|分享||",
+            "e68|tap|button|复制链接||",
+            "e75|tap|button|在浏览器中打开||",
+            "e82|tap|button|重新载入||",
+            "e90|tap|button|结束||"
+          ],
+          "scroll": [
+            "e15|swipe|scroll-view|||"
+          ],
+          "text": [
+            "e53|text|text|五子棋、十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。、http://127.0.0.1:18146||",
+            "e55|text|text|五子棋||",
+            "e56|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||",
+            "e57|text|text|http://127.0.0.1:18146||",
+            "e64|text|text|分享||",
+            "e70|text|text|复制链接||",
+            "e76|text|text|在浏览器中打开||",
+            "e84|text|text|重新载入||",
+            "e91|text|text|结束||",
+            "e96|text|text|结束后会释放当前会话，再次打开将重新载入。||"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e8\"},{\"action\":\"tap\",\"elementRef\":\"e10\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e8\" })",
+        "Scroll visible content: swipe({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", withinElementRef: \"e15\", direction: \"up\", distance: 0.5 })"
+      ]
+    },
+    {
+      "schema": "xcodebuildmcp.output.capture-result",
+      "schemaVersion": "2",
+      "didError": false,
+      "error": null,
+      "data": {
+        "summary": {
+          "status": "SUCCEEDED"
+        },
+        "artifacts": {
+          "simulatorId": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        },
+        "capture": {
+          "type": "runtime-snapshot",
+          "rs": "1",
+          "screenHash": "1b6wpn1",
+          "seq": 97,
+          "count": 134,
+          "targets": [
+            "e19|typeText|text-field||搜索游戏或玩法|",
+            "e16|tap|button|加入房间||games.join-room",
+            "e17|tap|button|玩法||games.filter",
+            "e39|tap|button|五子棋、电脑对手||games.recent.gomoku",
+            "e47|tap|button|星纸、互动教程||games.recent.paper-star",
+            "e67|tap|button|五子棋，电脑对手||games.launch.gomoku.computer",
+            "e68|tap|button|五子棋，同屏双人||games.launch.gomoku.local",
+            "e70|tap|button|在 Play 查看玩法||games.game.gomoku",
+            "e73|tap|button|游戏资源||games.game.gomoku",
+            "e107|tap|tab|云居|0|house",
+            "e109|tap|tab|寻乐|1|gamecontroller",
+            "e111|tap|tab|工坊|0|square.grid.2x2",
+            "e113|tap|tab|我|0|person.crop.circle"
+          ],
+          "scroll": [
+            "e1|swipe|application|云乐坊 Native||"
+          ],
+          "text": [
+            "e41|text|text|五子棋||",
+            "e43|text|text|电脑对手||",
+            "e49|text|text|星纸||",
+            "e51|text|text|互动教程||",
+            "e62|text|text|五子棋||games.game.gomoku",
+            "e63|text|text|1–2 人||games.game.gomoku",
+            "e65|text|text|十五路自由规则，可挑战电脑、同屏轮流或邀请朋友联机。无需登录也能单人开局。||games.game.gomoku",
+            "e71|text|text|在 Play 查看玩法||",
+            "e74|text|text|游戏资源||",
+            "e80|text|text|飞行棋||games.game.flight-chess",
+            "e81|text|text|1–4 人||games.game.flight-chess"
+          ],
+          "udid": "4502D5E9-9630-4AF0-9050-3C9109139FD0"
+        }
+      },
+      "nextSteps": [
+        "Refresh after layout changes: snapshot_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\" })",
+        "Wait for UI to settle: wait_for_ui({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", predicate: \"settled\" })",
+        "Batch same-screen taps: batch({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", steps: [{\"action\":\"tap\",\"elementRef\":\"e16\"},{\"action\":\"tap\",\"elementRef\":\"e17\"}] })",
+        "Tap an elementRef: tap({ simulatorId: \"4502D5E9-9630-4AF0-9050-3C9109139FD0\", elementRef: \"e16\" })"
+      ]
+    }
+  ],
+  "screenshots": [
+    "native-end-reopened-gomoku.jpg",
+    "native-end-reopened-minimized.jpg",
+    "native-games-reclamation-candidate.jpg"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "auditTypes" : [
+    "sufficientElementDescription",
+    "trait",
+    "textClipped",
+    "dynamicType",
+    "hitRegion"
+  ],
+  "issues" : [
+
+  ],
+  "requestedContentSizeCategory" : "UICTContentSizeCategoryAccessibilityXXXL",
+  "scope" : "Native visible viewport and reachable primary control; automated semantic audit, not a VoiceOver gesture journey",
+  "screen" : "工坊"
+}

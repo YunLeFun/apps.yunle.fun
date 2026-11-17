@@ -1,0 +1,581 @@
+{
+  "kind": "not-adopted-native-load-boundary-experiment",
+  "recordedAt": "2026-10-29T04:37:05.278741+08:00",
+  "decision": "do-not-adopt; root requested exact rollback",
+  "experimentalCatalogVersion": "41614f5714fb815496ca5eb22dc5b8dc6f7c95b7fa92ad4a21cd955356962455",
+  "baselineCatalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "build": "passed; 58 prerendered routes",
+  "scope": "Static build / manifest / byte inspection only; no new browser, simulator, startup timing, room, account or production verification",
+  "findings": [
+    "Lazy Header client loader boundary does not prevent static prerender HTML modulepreloading its Header/Reka code; modulepreload count increases 23 to 25.",
+    "SSO exchange implementation moves out of the eager entry chunk, reducing entry bytes, but that is not proof of startup latency improvement.",
+    "The conservative exporter traverses non-entry dynamic imports; the separated identity module now adds CloudBase SDK to every game preparation manifest, plus 3 resources / 741590 bytes each.",
+    "No new timing or real authentication proof was attempted; 30 percent engineering target is not met by this experiment.",
+    "Keep existing shared route and resource policy; do not expand routes or weaken integrity checks for a passing number."
+  ],
+  "resourceManifests": [
+    {
+      "gameId": "flight-chess",
+      "resourceVersion": "4616b09af044838556deae44ed761e6b5d229db9b416f724b05ca90d21bcc431",
+      "manifestBytes": 55012,
+      "manifestSHA256": "5f2f631d74af1d80f09dc9af706a2c6ff52cfbceb4242cca6e168acbf7621387",
+      "resourceCount": 207,
+      "totalBytes": 7091359,
+      "countDelta": 3,
+      "bytesDelta": 741590,
+      "localBytesAndSHAValidatedResources": 207,
+      "remoteMetadataNotReFetched": [],
+      "newlyNamedResources": [
+        {
+          "url": "https://play.yunle.fun/_nuxt/BLHjjQnS.js",
+          "sha256": "0b285236e088a0cb9b8c8b8f278d27614015b18b2aa608e4149c64754e1f38f6",
+          "byteCount": 554,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CC-pHnXD.js",
+          "sha256": "15e8a9913bea73cf96bd47cd7659159ae9fed6fd7a1ae7721cef3109a30f5078",
+          "byteCount": 733443,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CKcEYlY9.js",
+          "sha256": "f74b6b63b87e14e80b0b1089cc1536ebbaea5a3f5cdbbf44806aca03bc367631",
+          "byteCount": 12073,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/ChqfUI2B.js",
+          "sha256": "d56c01b5a74555f6fc8b716e53696db48d700e6843c33064f4c453b02817af23",
+          "byteCount": 1293,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DTkPL93j.js",
+          "sha256": "f28b81ecaed54c4d06206a83cab86ddb6cc0a45db69ca2c9692db89640bf5843",
+          "byteCount": 101734,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DTocI6SK.js",
+          "sha256": "084cc7ffda061cab3cc93bbffe84414feae55cbe670534bacce055cf64945fd5",
+          "byteCount": 45783,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DXD4P_07.js",
+          "sha256": "0458aeadce5f9cacc8f8fa48817fbe6dd0aaa9ae24ae8afb2493adc71b81d3b5",
+          "byteCount": 1425,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/R6iNzpXr.js",
+          "sha256": "b5554b726460d03ce9c2d6d3226475dc3ab66036883a7583a5b52f5af06f5d3c",
+          "byteCount": 2169,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/_AJp5Nzr.js",
+          "sha256": "9da52b6cb931f4b879f2d34b23ee6e94095bbd86c1916148e046791860716eda",
+          "byteCount": 3740,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/entry.Dyu6CLs4.css",
+          "sha256": "47e68876812637f466c9641a10a546cc6fd2016606e978dfa0ad69202e3d9253",
+          "byteCount": 207592,
+          "contentType": "text/css",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/zVcyOktz.js",
+          "sha256": "41b93e9c1c9b26d98f77079ac29887f4062b82bc67822dc6477f85a77fb121e9",
+          "byteCount": 4312,
+          "contentType": "text/javascript",
+          "required": true
+        }
+      ],
+      "versionDigestValidated": true,
+      "allDeclaredMIMEsMatchRegisteredExtension": true
+    },
+    {
+      "gameId": "gomoku",
+      "resourceVersion": "0fc65fc217ed38492ef8fc019b9aece3aeef0c92f2953a628a0fda3a6e412136",
+      "manifestBytes": 57711,
+      "manifestSHA256": "5bd5ad517d2e62ab497cb5b4c329982464b8b69f172b3112186e0ff2b464fc2d",
+      "resourceCount": 218,
+      "totalBytes": 7115015,
+      "countDelta": 3,
+      "bytesDelta": 741590,
+      "localBytesAndSHAValidatedResources": 218,
+      "remoteMetadataNotReFetched": [],
+      "newlyNamedResources": [
+        {
+          "url": "https://play.yunle.fun/_nuxt/BLHjjQnS.js",
+          "sha256": "0b285236e088a0cb9b8c8b8f278d27614015b18b2aa608e4149c64754e1f38f6",
+          "byteCount": 554,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/BldZgzoi.js",
+          "sha256": "81d1fe5fe2e9b86b50625047b43d9655ac1666bd23146a8e23dd404ce4da0d0a",
+          "byteCount": 2546,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/Bslae0e_.js",
+          "sha256": "9b081dd204a1f14fcd071b0fbe4b420a0e58df6ba297de544343bdf4af65a7f7",
+          "byteCount": 1544,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CC-pHnXD.js",
+          "sha256": "15e8a9913bea73cf96bd47cd7659159ae9fed6fd7a1ae7721cef3109a30f5078",
+          "byteCount": 733443,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CKcEYlY9.js",
+          "sha256": "f74b6b63b87e14e80b0b1089cc1536ebbaea5a3f5cdbbf44806aca03bc367631",
+          "byteCount": 12073,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/ChqfUI2B.js",
+          "sha256": "d56c01b5a74555f6fc8b716e53696db48d700e6843c33064f4c453b02817af23",
+          "byteCount": 1293,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CtkjjN7G.js",
+          "sha256": "7439b57d5d77c1b56f45292d67eefd727cac7ab62df3ebb84c998f8a2fabaec6",
+          "byteCount": 1238,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DTkPL93j.js",
+          "sha256": "f28b81ecaed54c4d06206a83cab86ddb6cc0a45db69ca2c9692db89640bf5843",
+          "byteCount": 101734,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DTocI6SK.js",
+          "sha256": "084cc7ffda061cab3cc93bbffe84414feae55cbe670534bacce055cf64945fd5",
+          "byteCount": 45783,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DXD4P_07.js",
+          "sha256": "0458aeadce5f9cacc8f8fa48817fbe6dd0aaa9ae24ae8afb2493adc71b81d3b5",
+          "byteCount": 1425,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DzL30tkl.js",
+          "sha256": "4974a60dd429d451c68e0a955eb7ea7b1fbbceb282a85f43a4b0979e87f57f17",
+          "byteCount": 3757,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/R6iNzpXr.js",
+          "sha256": "b5554b726460d03ce9c2d6d3226475dc3ab66036883a7583a5b52f5af06f5d3c",
+          "byteCount": 2169,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/_AJp5Nzr.js",
+          "sha256": "9da52b6cb931f4b879f2d34b23ee6e94095bbd86c1916148e046791860716eda",
+          "byteCount": 3740,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/entry.Dyu6CLs4.css",
+          "sha256": "47e68876812637f466c9641a10a546cc6fd2016606e978dfa0ad69202e3d9253",
+          "byteCount": 207592,
+          "contentType": "text/css",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/ryX51X5I.js",
+          "sha256": "7cfdd92fdccb44d8f3fdf45f8de46b8b887d21721d175018a9ccfbfcaa646560",
+          "byteCount": 928,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/zVcyOktz.js",
+          "sha256": "41b93e9c1c9b26d98f77079ac29887f4062b82bc67822dc6477f85a77fb121e9",
+          "byteCount": 4312,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/zcOffc9V.js",
+          "sha256": "6d2beed64c75f81ea572cb823f16f35f81c07e75f7c80512beabb7827a0be84f",
+          "byteCount": 1200,
+          "contentType": "text/javascript",
+          "required": true
+        }
+      ],
+      "versionDigestValidated": true,
+      "allDeclaredMIMEsMatchRegisteredExtension": true
+    },
+    {
+      "gameId": "paper-star",
+      "resourceVersion": "7438ec0f7fa768dbc38c60cc45d547bd10a648de15e5647122afc5662f9ca32b",
+      "manifestBytes": 63754,
+      "manifestSHA256": "fe84f8011c6c6895a709b75aeb4a65549f8b3ee0fd648a78f496a6eb22fa3f50",
+      "resourceCount": 242,
+      "totalBytes": 11636702,
+      "countDelta": 3,
+      "bytesDelta": 741590,
+      "localBytesAndSHAValidatedResources": 242,
+      "remoteMetadataNotReFetched": [],
+      "newlyNamedResources": [
+        {
+          "url": "https://play.yunle.fun/_nuxt/BKk9j2GH.js",
+          "sha256": "141fc4981fa74ea627469fa1c27b38b8c45ddc952f03eb2f6e128f0ae3efa100",
+          "byteCount": 38,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/BLHjjQnS.js",
+          "sha256": "0b285236e088a0cb9b8c8b8f278d27614015b18b2aa608e4149c64754e1f38f6",
+          "byteCount": 554,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/BPsUPJsR.js",
+          "sha256": "61ac35684e7180bb90fd32b8703009716177ad10f118b6801c2f808c0fe4f4f0",
+          "byteCount": 41,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/BisleJsZ.js",
+          "sha256": "ad5fd306628d744ecd1fa2aa3a29500061d37148570235914cbb452c15d1d6a1",
+          "byteCount": 23153,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/BzyqfLrF.js",
+          "sha256": "2ed59904f1bc3b96349750a406fedc2e299d2974940a957270c05d158a9e58e3",
+          "byteCount": 316,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/C7X_4O-V.js",
+          "sha256": "4276f2224886818c454710bfd4f152b96534f757d25a3f155be15c46d457743f",
+          "byteCount": 73688,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/C7yf7wD0.js",
+          "sha256": "486ec942d809aaffb8cc0a0970bcbe59313e403b20e83110055f6e2d77559a1e",
+          "byteCount": 613339,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CC-pHnXD.js",
+          "sha256": "15e8a9913bea73cf96bd47cd7659159ae9fed6fd7a1ae7721cef3109a30f5078",
+          "byteCount": 733443,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CCu4V0ED.js",
+          "sha256": "995de84d5b09e4ecdc2992cc50a0c7fa1414d18e5252c1da309f91880268db85",
+          "byteCount": 1275,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CIg9Kngl.js",
+          "sha256": "f30b3ed6d3db590c2c32f5641ce99971619ea9eae42997185d6004d10ad446f3",
+          "byteCount": 44,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/CKcEYlY9.js",
+          "sha256": "f74b6b63b87e14e80b0b1089cc1536ebbaea5a3f5cdbbf44806aca03bc367631",
+          "byteCount": 12073,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/ChqfUI2B.js",
+          "sha256": "d56c01b5a74555f6fc8b716e53696db48d700e6843c33064f4c453b02817af23",
+          "byteCount": 1293,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/Ct6d3Mdv.js",
+          "sha256": "b538aed6af3c5d36d34fbd5f055022fd0d1a530ac348604ebcdbbcb340c44660",
+          "byteCount": 140,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/D7UqJb7M.js",
+          "sha256": "dcb15b504fbb8fca8a9bcd54140ee3aa92c79a83cb61ceefe0232dc970944210",
+          "byteCount": 42,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DMR26D0z.js",
+          "sha256": "717abb145e00db5910178e5ffbeeb11b80109188be1b6b63fa8513e8973243e0",
+          "byteCount": 12119,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DTkPL93j.js",
+          "sha256": "f28b81ecaed54c4d06206a83cab86ddb6cc0a45db69ca2c9692db89640bf5843",
+          "byteCount": 101734,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DTocI6SK.js",
+          "sha256": "084cc7ffda061cab3cc93bbffe84414feae55cbe670534bacce055cf64945fd5",
+          "byteCount": 45783,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DXD4P_07.js",
+          "sha256": "0458aeadce5f9cacc8f8fa48817fbe6dd0aaa9ae24ae8afb2493adc71b81d3b5",
+          "byteCount": 1425,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/DY1-qR4u.js",
+          "sha256": "84205b3bf1b3505093843d2fa5b40a33726ed853b081a7104b64091773cdc83b",
+          "byteCount": 42,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/FYAhRYUD.js",
+          "sha256": "0a19eccb42c9dbcf6c270f6fc7645a24094ad55da7ff1135cf9051d3f20b9310",
+          "byteCount": 1169,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/R6iNzpXr.js",
+          "sha256": "b5554b726460d03ce9c2d6d3226475dc3ab66036883a7583a5b52f5af06f5d3c",
+          "byteCount": 2169,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/_AJp5Nzr.js",
+          "sha256": "9da52b6cb931f4b879f2d34b23ee6e94095bbd86c1916148e046791860716eda",
+          "byteCount": 3740,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/dwBLU6N1.js",
+          "sha256": "753483da28c9f1593b341adad5d0974040a3bda558a6c2a61d8ca03c539a3b29",
+          "byteCount": 275,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/entry.Dyu6CLs4.css",
+          "sha256": "47e68876812637f466c9641a10a546cc6fd2016606e978dfa0ad69202e3d9253",
+          "byteCount": 207592,
+          "contentType": "text/css",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/k3rUfs8M.js",
+          "sha256": "6aea9a5c2626b33f6233b74c0776fafee47a289962168129fd445169d1ea9f9e",
+          "byteCount": 2841,
+          "contentType": "text/javascript",
+          "required": true
+        },
+        {
+          "url": "https://play.yunle.fun/_nuxt/zVcyOktz.js",
+          "sha256": "41b93e9c1c9b26d98f77079ac29887f4062b82bc67822dc6477f85a77fb121e9",
+          "byteCount": 4312,
+          "contentType": "text/javascript",
+          "required": true
+        }
+      ],
+      "versionDigestValidated": true,
+      "allDeclaredMIMEsMatchRegisteredExtension": true
+    }
+  ],
+  "sourcePolicySHA256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+  "baseline9ba": {
+    "modeHTMLBytes": 50514,
+    "modeHTMLSHA256": "d32b8bdec29079ea7615ab9e957772eafa797f4d6306597d57ed2b63d6dcfee1",
+    "modulepreloadCount": 23,
+    "modulepreloadPaths": [
+      "/_nuxt/-y8qBI_C.js",
+      "/_nuxt/wVLXA12u.js",
+      "/_nuxt/CWsFXUlc.js",
+      "/_nuxt/M3KAs7H8.js",
+      "/_nuxt/Bpd_VwL2.js",
+      "/_nuxt/CjcJQf_U.js",
+      "/_nuxt/Dc0PfEhn.js",
+      "/_nuxt/XKyaHtl9.js",
+      "/_nuxt/CK-Z3bWJ.js",
+      "/_nuxt/DDxLYCp2.js",
+      "/_nuxt/YQt_JkNv.js",
+      "/_nuxt/C5vyvYkt.js",
+      "/_nuxt/DGBUUPem.js",
+      "/_nuxt/BhwFw5Ad.js",
+      "/_nuxt/GOfINFGw.js",
+      "/_nuxt/Ctcp1w2l.js",
+      "/_nuxt/gomoku-bot.worker-BRA8EH6l.js",
+      "/_nuxt/CoZc7CsZ.js",
+      "/_nuxt/CfIRr0YP.js",
+      "/_nuxt/SulIcQsq.js",
+      "/_nuxt/CAhTsZXk.js",
+      "/_nuxt/BJL2jZhd.js",
+      "/_nuxt/B7axk2eH.js"
+    ],
+    "ordinaryWebSSRHeaderPresent": true,
+    "headerChunks": [
+      {
+        "path": "/_nuxt/CjcJQf_U.js",
+        "bytes": 45777,
+        "sha256": "3e0e55507f179bf2881de75eb19a98adbdac0241e4bfcc6c8be51ae9b35d402c",
+        "modulepreloaded": true
+      }
+    ],
+    "entryChunks": [
+      {
+        "file": "-y8qBI_C.js",
+        "bytes": 108375,
+        "sha256": "241005d19738a02cc2b68d728ba23f1abcf1ba3ea7aafd7b4e6f7576fb67e62b",
+        "containsExchangeFailureImplementationMarker": true
+      }
+    ]
+  },
+  "experimental416": {
+    "modeHTMLBytes": 50597,
+    "modeHTMLSHA256": "b0636185e42d3729adb6a69c523a9142bd458df35b4913a9478e4fa95cca383c",
+    "modulepreloadCount": 25,
+    "modulepreloadPaths": [
+      "/_nuxt/DTkPL93j.js",
+      "/_nuxt/wVLXA12u.js",
+      "/_nuxt/CWsFXUlc.js",
+      "/_nuxt/M3KAs7H8.js",
+      "/_nuxt/DXD4P_07.js",
+      "/_nuxt/DTocI6SK.js",
+      "/_nuxt/Dc0PfEhn.js",
+      "/_nuxt/XKyaHtl9.js",
+      "/_nuxt/CK-Z3bWJ.js",
+      "/_nuxt/R6iNzpXr.js",
+      "/_nuxt/_AJp5Nzr.js",
+      "/_nuxt/zVcyOktz.js",
+      "/_nuxt/YQt_JkNv.js",
+      "/_nuxt/C5vyvYkt.js",
+      "/_nuxt/DGBUUPem.js",
+      "/_nuxt/BhwFw5Ad.js",
+      "/_nuxt/BLHjjQnS.js",
+      "/_nuxt/DzL30tkl.js",
+      "/_nuxt/gomoku-bot.worker-BRA8EH6l.js",
+      "/_nuxt/CoZc7CsZ.js",
+      "/_nuxt/zcOffc9V.js",
+      "/_nuxt/SulIcQsq.js",
+      "/_nuxt/CtkjjN7G.js",
+      "/_nuxt/Bslae0e_.js",
+      "/_nuxt/B7axk2eH.js"
+    ],
+    "ordinaryWebSSRHeaderPresent": true,
+    "headerChunks": [
+      {
+        "path": "/_nuxt/DTocI6SK.js",
+        "bytes": 45783,
+        "sha256": "084cc7ffda061cab3cc93bbffe84414feae55cbe670534bacce055cf64945fd5",
+        "modulepreloaded": true
+      }
+    ],
+    "entryChunks": [
+      {
+        "file": "DTkPL93j.js",
+        "bytes": 101734,
+        "sha256": "f28b81ecaed54c4d06206a83cab86ddb6cc0a45db69ca2c9692db89640bf5843",
+        "containsExchangeFailureImplementationMarker": false
+      }
+    ]
+  },
+  "tests": {
+    "ssoLoadingAndExistingNativeHost": {
+      "passed": 35,
+      "note": "11 experimental plugin-loading tests; will be removed with the rejected optimization"
+    },
+    "exporter": {
+      "passed": 4
+    },
+    "limitedESLint": "passed",
+    "independentVueTsc": "passed",
+    "diffCheck": "passed"
+  },
+  "catalogIdentityDigestValidated": true,
+  "rollback": {
+    "performedAt": "2026-10-29T04:37:38.407962+08:00",
+    "files": [
+      {
+        "path": "apps/web/app/layouts/default.vue",
+        "sha256": "bec7c00e35e27c9833a4c21f8e0d971d8739fd38c8b5741dbe3cfb72e6b92e10",
+        "byteForByteMatchesPreExperimentSource": true,
+        "proof": "Inverse of exact task substitutions from frozen experimental input; preserves all earlier native host and native login-return changes"
+      },
+      {
+        "path": "apps/web/app/plugins/sso.client.ts",
+        "sha256": "473b0794ef6d3c33bf422284f88355f1f4f0e4ce13a92b04f6855d505f0b88f9",
+        "byteForByteMatchesPreExperimentSource": true,
+        "proof": "Inverse of exact task substitutions from frozen experimental input; preserves all earlier native host and native login-return changes"
+      }
+    ],
+    "newTestRemoved": true,
+    "noGitResetOrCheckout": true,
+    "baselineSourceHashLimit": "The 9ba static output is not a source archive. These bytes match the source inspected immediately before this experiment; no independent complete 9ba source-hash snapshot for these two files was found in its retained metadata.",
+    "validation": {
+      "existingNativeHostTests": 24,
+      "failed": 0,
+      "limitedESLint": "passed",
+      "diffCheck": "passed"
+    },
+    "oldIndependentSourceHashSearch": "Only experiment records contain these source paths in task JSON; older 9ba retained metadata has no source hash entry for these files."
+  }
+}

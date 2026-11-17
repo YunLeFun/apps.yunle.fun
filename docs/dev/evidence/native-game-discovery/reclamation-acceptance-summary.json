@@ -1,0 +1,84 @@
+{
+  "kind": "native-game-reclamation-and-startup-diagnosis-acceptance",
+  "recordedAt": "2026-10-29T06:27:53.478023+08:00",
+  "supersedesLatestStatusOf": "followup-acceptance-summary.json; preserved as historical evidence",
+  "overallM0ToM5Status": "incomplete",
+  "productSourceChangedInContinuation": false,
+  "newlyAccepted": {
+    "capacityAndMemoryPolicyPassed": 3,
+    "sameClockStartupDiagnosticPassed": 2,
+    "sameClockDiagnosticSamples": 12,
+    "manualNativeEndRecentReopenMinimize": "completed; visual board and retained row; no inferred storage/identity metric"
+  },
+  "previouslyAcceptedAndStillApplicable": {
+    "dataProtectionRegressionPassed": 82,
+    "initialRestoreBoundaryPassed": 18,
+    "realCacheFaultAndIndexedDBFlow": "passed; 215/215 ×4 plus216/216 B",
+    "trueOperableStartupSamples": 60,
+    "retainedResumeN10Samples": 20,
+    "voiceOverAndActualReduceMotionEvents": 90
+  },
+  "remaining": [
+    "30 percent new-start P50 improvement remains unmet: gomoku21.4 percent, paper-star8.0 percent; N3 diagnosis is not acceptance",
+    "Complete specified historical baseline across entry and multiplayer modes",
+    "Production native real-account SSO, OS Universal Link cold invite, two real users/full interruption recovery and deployed CloudBase idempotency transaction; current production lacks compatible AASA/native static contracts/new CORS header"
+  ],
+  "actionsOutsideGoalPerformed": {
+    "productionDeployment": false,
+    "testflightDistribution": false,
+    "commitOrPush": false
+  },
+  "evidence": [
+    {
+      "path": "session-reclamation-summary.json",
+      "sha256": "a0206c7dcbfd0043e165b76b2c8c2e1286843ab924d8e8d4e518b478f3cd5d99"
+    },
+    {
+      "path": "session-reclamation-tests.json",
+      "sha256": "22667247acbd8a60686680451f671fcfc33990bfc7c8b478dba95fad15df14aa"
+    },
+    {
+      "path": "session-reclamation-cleanup.json",
+      "sha256": "8fbd6dad954a1ec53142df9c78ae691b4df48526ff8b9f9ad2b12ef359d0409c"
+    },
+    {
+      "path": "startup-native-phase-first.json",
+      "sha256": "fe4b72e23b5bb15d3a813697cc358db3480a711d214a914f8944e70a358eec5b"
+    },
+    {
+      "path": "startup-native-phase-first-summary.json",
+      "sha256": "73237dcce8a017506c83987f4466a9e34b30515e06267b8fc38d2185f4f77b77"
+    },
+    {
+      "path": "startup-document-phase-n3.json",
+      "sha256": "93ee8cf5e7c04819cf74f9dbf85dec82d516b2d76be83c93501ce261f427a16a"
+    },
+    {
+      "path": "startup-document-phase-summary.json",
+      "sha256": "a8097263e3d07cac89b7ecf88eda864673a1fc0d0dd201afd228f0d73232c511"
+    },
+    {
+      "path": "startup-document-phase-metrics.json",
+      "sha256": "ce0131c6e1b49b09049d74b093ce6ed1fe42bd7591fe8a6194738e78ea7ce3b8"
+    },
+    {
+      "path": "manual-native-end-reopen.json",
+      "sha256": "702547ffc2e19e1d7a2f164620d49709247cf1ead12fdc42e03a5acb8bfed25e"
+    },
+    {
+      "path": "reclamation-candidate-fingerprints.json",
+      "sha256": "c70708970c48e001394aa83ae5923570bd4f4372b308d000757d4c818d183d69"
+    },
+    {
+      "path": "reclamation-simulator-audit.json",
+      "sha256": "2e11c719c42ef098969fd0a1656aefe5a17f567fd0a050526811e6a9d5f76589"
+    },
+    {
+      "path": "reclamation-docs-build.json",
+      "sha256": "5283774a4e55a267af586b0e87a789df61b0fcddbef488a5f4cba740d863779c"
+    }
+  ],
+  "keyProductSourceHashesMatchPreviousCandidate": true,
+  "candidateBuildFingerprintChanged": true,
+  "scopeNote": "Prior N10 and regressions retained with unchanged selected product sources and static catalog; fresh candidate binary hash recorded separately."
+}

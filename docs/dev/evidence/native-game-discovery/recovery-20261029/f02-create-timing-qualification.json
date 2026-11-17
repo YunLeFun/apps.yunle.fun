@@ -1,0 +1,27 @@
+{
+  "atUTC": "2026-10-29T20:33:29.181712+00:00",
+  "kind": "F02-create-timing-qualification",
+  "M0_1Complete": false,
+  "originalLedgerSHA256": "7888d969c564ac4eec5ecdf07bdfe6505c5d7d5ffd92cc1442c10a2afdd6e46d",
+  "wireObservationSHA256": "2d3b04a132b956e725b914862c6ce28474d2975fb2f94d50d167f9986c899841",
+  "originalUIInviteObservationMilliseconds": 790.8462499994785,
+  "originalFieldNameWasMisleading": "browserCreateToRoomObservationMilliseconds did not require a matching room.snapshot; no creationRoom was saved",
+  "originalObservationProves": "Create click until invite/copy control visible plus first observer read; not authoritative room ready",
+  "firstMatchingAuthorityObservationMilliseconds": 18117.01120799966,
+  "firstMatchingSequence": 6662,
+  "firstMatchingRoomIdSHA256": "9a6a8ff8149a6464e2faeed148a35e4b79cd371889f892a7bd071a1719eb669f",
+  "firstMatchingObservation": {
+    "label": "F02 waiting host configuration",
+    "readStartedUptimeMilliseconds": 16224609.889334,
+    "readCompletedUptimeMilliseconds": 16224631.539042,
+    "completedAtUTC": "2026-10-29T19:52:10.146Z",
+    "clock": "root persistent Cua Node performance clock; batch observation upper bound, not server timestamp"
+  },
+  "limits": [
+    "First authoritative observation includes an operator/tool interval and a room-configuration action after creation. It is a loose upper bound, not isolated connection latency or usable performance benchmark.",
+    "One creation observation does not establish N10 or P50/P90.",
+    "Native join never occurred due screen lock; F02 remains aborted, not counted."
+  ],
+  "nextCollectorRequirement": "Record invite UI phase separately; immediately require matching room.snapshot and connection.ready/player for its requestId, without an intervening configuration action, before assigning authoritative-ready timing.",
+  "qualifiedLedgerSHA256": "c9eb0d5bf0fb4e72d926ba2a91bddfab808fc1ce2ec660dd3b28b7258949020c"
+}

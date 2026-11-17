@@ -1,0 +1,219 @@
+{
+  "kind": "held-inert-blank-negative-mechanism-result",
+  "adoption": "Not adopted; no product source changed",
+  "rows": [
+    {
+      "iteration": 1,
+      "condition": "normal",
+      "pair": 1,
+      "tapToReadyMilliseconds": 1278.7503749714233,
+      "fullCaseStartToReadyMilliseconds": 1282.3091250029393,
+      "blankInitializationMilliseconds": null,
+      "weakBlankObjectReleasedWithinBound": null
+    },
+    {
+      "iteration": 2,
+      "condition": "heldBlank",
+      "pair": 1,
+      "tapToReadyMilliseconds": 1304.505958338268,
+      "fullCaseStartToReadyMilliseconds": 1925.5862083518878,
+      "blankInitializationMilliseconds": 619.5116666494869,
+      "weakBlankObjectReleasedWithinBound": true
+    },
+    {
+      "iteration": 3,
+      "condition": "heldBlank",
+      "pair": 2,
+      "tapToReadyMilliseconds": 721.725375042297,
+      "fullCaseStartToReadyMilliseconds": 1336.357083346229,
+      "blankInitializationMilliseconds": 612.8152916789986,
+      "weakBlankObjectReleasedWithinBound": true
+    },
+    {
+      "iteration": 4,
+      "condition": "normal",
+      "pair": 2,
+      "tapToReadyMilliseconds": 732.7740833279677,
+      "fullCaseStartToReadyMilliseconds": 733.8206249987707,
+      "blankInitializationMilliseconds": null,
+      "weakBlankObjectReleasedWithinBound": null
+    },
+    {
+      "iteration": 5,
+      "condition": "normal",
+      "pair": 3,
+      "tapToReadyMilliseconds": 748.2063333736733,
+      "fullCaseStartToReadyMilliseconds": 749.3684166693129,
+      "blankInitializationMilliseconds": null,
+      "weakBlankObjectReleasedWithinBound": null
+    },
+    {
+      "iteration": 6,
+      "condition": "heldBlank",
+      "pair": 3,
+      "tapToReadyMilliseconds": 768.0800416856073,
+      "fullCaseStartToReadyMilliseconds": 1426.4671666896902,
+      "blankInitializationMilliseconds": 656.8026666645892,
+      "weakBlankObjectReleasedWithinBound": true
+    }
+  ],
+  "medians": {
+    "normal": {
+      "tapToReadyMilliseconds": 748.2063333736733,
+      "fullStartToReadyMilliseconds": 749.3684166693129
+    },
+    "heldBlank": {
+      "tapToReadyMilliseconds": 768.0800416856073,
+      "fullStartToReadyMilliseconds": 1426.4671666896902
+    }
+  },
+  "observedRSSByCase": [
+    {
+      "iteration": 1,
+      "pids": [
+        {
+          "pid": 48277,
+          "role": "native-test-host",
+          "sampleCount": 2,
+          "rssKiBMin": 440752,
+          "rssKiBMax": 442624
+        },
+        {
+          "pid": 48544,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 1,
+          "rssKiBMin": 199488,
+          "rssKiBMax": 199488
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "pids": [
+        {
+          "pid": 48277,
+          "role": "native-test-host",
+          "sampleCount": 4,
+          "rssKiBMin": 443792,
+          "rssKiBMax": 444336
+        },
+        {
+          "pid": 48576,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 3,
+          "rssKiBMin": 170352,
+          "rssKiBMax": 170544
+        },
+        {
+          "pid": 48587,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 2,
+          "rssKiBMin": 166688,
+          "rssKiBMax": 192352
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "pids": [
+        {
+          "pid": 48277,
+          "role": "native-test-host",
+          "sampleCount": 3,
+          "rssKiBMin": 444336,
+          "rssKiBMax": 444672
+        },
+        {
+          "pid": 48622,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 2,
+          "rssKiBMin": 170560,
+          "rssKiBMax": 170624
+        },
+        {
+          "pid": 48634,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 1,
+          "rssKiBMin": 244944,
+          "rssKiBMax": 244944
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "pids": [
+        {
+          "pid": 48277,
+          "role": "native-test-host",
+          "sampleCount": 1,
+          "rssKiBMin": 444496,
+          "rssKiBMax": 444496
+        }
+      ]
+    },
+    {
+      "iteration": 5,
+      "pids": [
+        {
+          "pid": 48277,
+          "role": "native-test-host",
+          "sampleCount": 2,
+          "rssKiBMin": 444624,
+          "rssKiBMax": 444704
+        },
+        {
+          "pid": 48676,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 1,
+          "rssKiBMin": 188304,
+          "rssKiBMax": 188304
+        }
+      ]
+    },
+    {
+      "iteration": 6,
+      "pids": [
+        {
+          "pid": 48277,
+          "role": "native-test-host",
+          "sampleCount": 3,
+          "rssKiBMin": 444672,
+          "rssKiBMax": 444800
+        },
+        {
+          "pid": 48748,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 2,
+          "rssKiBMin": 170592,
+          "rssKiBMax": 170640
+        },
+        {
+          "pid": 48763,
+          "role": "host-log-observed-WebContent",
+          "sampleCount": 1,
+          "rssKiBMin": 192512,
+          "rssKiBMax": 192512
+        }
+      ]
+    }
+  ],
+  "conclusion": "No convincing tap-to-ready benefit in this small crossover probe. Median heldBlank tap was768.08ms versus748.21ms without extra blank; including initialization1426.47ms versus749.37ms. Keep original runtime and discard the blank-keepalive hypothesis as an optimization candidate for this scope.",
+  "safety": "All3 warm cases proved about:blank, unique title, complete, zero observed resources, exact named profile, held through genuine ready, and weak WK object release within1second. Fresh user content controller has no installed host handlers/scripts by construction.",
+  "limits": [
+    "Preparation is common and reported once; HTTP caches are not cleared or re-downloaded between alternating cases",
+    "WebKit/JIT/network process state can carry over across cases; this small mechanism probe is not a 30 percent target result",
+    "Profile/cleanup checks are experimental guards, not verification of real account-generation races",
+    "Public SDK does not guarantee that a held blank view shares a WebContent process with the fresh game",
+    "Warm creation/wait and full start-to-genuine-ready costs use native uptime; no document/server clock subtraction",
+    "Weak WK object release is not proof of process termination, RSS release or exclusive game memory",
+    "RSS from macOS ps, not physical footprint, JS heap, unique allocations or a leak detector. Native test host includes XCTest; it is separate from WebContent.",
+    "Only PIDs explicitly observed as WebContent in this exact YunleFun test-host log are sampled, checked for executable basename and stable process start time. Prior WebContent can remain alive; no RSS sum is called the active game memory.",
+    "Case intervals follow when BEGIN/END log markers are observed by this monitor; log delivery and polling delays remain, not exact cross-clock alignment.",
+    "Simulator and observer overhead; no real-device memory/frame claim; no credentials, environment, argv or descriptors collected.",
+    "hasHostBridge is a narrow probe for absence of window.ylf, not an exhaustive bridge inspection; empty constructed controller is the stronger source evidence.",
+    "RSS windows are short, some cases have no WebContent sample. A missing sample does not prove absent process. Multiple per-PID RSS values are never added as exclusive memory, and PIDs are not assigned to blank/game solely by timing.",
+    "No adopted product change, no N10 or30percent acceptance, no hidden gameplay. Prior Star opening and target unchanged."
+  ],
+  "activeTestSourceInputSHA256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c",
+  "compiledExperimentalSourceSHA256": "7763e09b952ab60255f29a916e1aa7c725aaed18188e6a2e5ab282ad7faab0f5"
+}

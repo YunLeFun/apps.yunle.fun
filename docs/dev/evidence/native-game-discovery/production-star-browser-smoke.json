@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-29T07:19:25.845Z",
+  "url": "https://play.yunle.fun/games/paper-star/tutorial",
+  "client": "Isolated in-app browser guest",
+  "canvas": {
+    "canvasCount": 1,
+    "className": "paper-star-canvas is-ready",
+    "height": 446.71875,
+    "opacity": "1",
+    "width": 885
+  },
+  "visibleGameSpritesObserved": true,
+  "loadAlertCount": 0,
+  "menuPauseAndResumeAccepted": true,
+  "leftAndRightPointerControlsAccepted": true,
+  "tutorialAdvancedFromStep": 1,
+  "tutorialAdvancedToStep": 2,
+  "console": {
+    "sampledWarningsAndErrors": 0,
+    "errorCount": 0
+  },
+  "nativeWKWebViewTest": false,
+  "authenticationUsed": false,
+  "productionRoomCreated": false,
+  "tutorialCompleted": false
+}

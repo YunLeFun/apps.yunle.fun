@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "M5-fixture-lifecycle-compiled-copy-retirement",
+  "atUTC": "2026-10-29T20:12:45.681661+00:00",
+  "status": "retired-after-verified-compact-archive",
+  "owner": "native-game-acceptance-fixture-lifecycle",
+  "removedArtifact": "lifecycle.xctestproducts",
+  "removedArtifactAbsent": true,
+  "archive": {
+    "name": "m5-fixture-lifecycle-source-and-unit-binary.tar.gz",
+    "sha256": "b0db66e08981b58da9d4e8b5038a36003a585d0b31ee62551630df498d78bb24",
+    "byteCount": 4472708,
+    "allocatedBytes": 4599808,
+    "memberCount": 34,
+    "allMembersReopenedAndByteCompared": true,
+    "sourceSHA256": "9ef3e9909877e5ca34ca7bf0ce38af95f71ee7e53c2db6fb96194db7bad55509",
+    "actualPassedUnitBinarySHA256": "df4a7d6af9fe2ee859e168a67809c6429f063c5ab4674b274920e2b73cf0d226",
+    "preserved": [
+      "Exact9ef test source",
+      "Entire small signed unit-test bundle containing actualdf4a binary",
+      "Test-products metadata and xctestrun",
+      "Actual resigned main sample and signing-difference identity",
+      "Build, targeted2, complete17, restoration and independent-review evidence"
+    ],
+    "fullRunnableAppBundle": false,
+    "boundary": "Compact evidence archive preserves actual executed inputs/identity; rebuilding a runnable full product also requires protected repository inputs and shared build dependencies."
+  },
+  "referenceChecks": {
+    "exactTargetOpenFileReferences": 0,
+    "exactTargetProcessArgumentReferences": 0,
+    "lsofExitCode": 1,
+    "lsofStdoutAndStderrEmpty": true,
+    "performedAgainImmediatelyBeforeRetirement": true
+  },
+  "allocationAccounting": {
+    "productAllocatedRemovedBytes": 160923648,
+    "compactArchiveAllocatedBytes": 4599808,
+    "taskScopeAllocatedBeforeBytes": 163016704,
+    "taskScopeAllocatedAfterBytes": 6717440,
+    "taskScopeAllocatedReductionBytes": 156299264,
+    "taskScopeAllocatedReductionMiB": 149.05859
+  },
+  "filesystemFreeObservation": {
+    "availableBeforeArchiveBytes": 96366592000,
+    "availableBeforeDeleteBytes": 96359260160,
+    "availableAfterDeleteBytes": 96359116800,
+    "changeDuringDeletionBytes": -143360,
+    "sameAsSummedAllocatedChange": false,
+    "limit": "Separate global point observations; APFS references and concurrent activity can make available-space change differ from summed file allocation. No claim of153MiB additional physical free space."
+  },
+  "protected": {
+    "source9efUnchanged": true,
+    "productControllerE6dAndRuntimeB61Unchanged": true,
+    "frozenFinalA701ProductsAndSharedDerivedDataRetained": true,
+    "targeted2AndFull17ResultsAndAttachmentsRetained": true,
+    "original15pass2failEvidenceRetained": true,
+    "exactOldTwoOwnershipAndPendingCleanupPlanRetained": true,
+    "repositorySourceModified": false,
+    "simulatorUITestOrProcessControlPerformed": false
+  },
+  "privateEvidenceSHA256": {
+    "preflight.json": "9fa3720241ee733a161abc8092ee556ea3faf83322cbd1e00badf25402670c79",
+    "archive-manifest.json": "71bdee0f6343844c608035dc311ff562207d62b4dacb412b4d8b5b8b305ef9e4",
+    "archive-verification.json": "96e931b8093d7d8dc930de2c2d3306ac5021c2f8959c0b2207192bca5a308778",
+    "retirement-receipt.json": "b29184f92afefdbd43862f6247326d06c26149019d749ebc5898f6c0ad94194b"
+  },
+  "acceptanceStatusUnchanged": {
+    "targetedTwo": "2pass0fail0skip once",
+    "fullSeventeen": "17pass0fail0skip once",
+    "newOwned40ConfirmedAbsent": true,
+    "oldFailedRound": "15pass2fail retained",
+    "oldFixtureProfilesStillPendingAbsenceVerification": 2
+  }
+}

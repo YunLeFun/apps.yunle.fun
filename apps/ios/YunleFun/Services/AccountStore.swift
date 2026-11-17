@@ -8,6 +8,10 @@ protocol AccountAuthorizing: AnyObject {
 }
 extension AccountStore: AccountAuthorizing {}
 
+enum AccountInitialRestorePhase: Equatable {
+    case unprepared, pending, restoring, settled
+}
+
 @MainActor
 final class AccountStore: ObservableObject {
     @Published private(set) var overview = AccountOverview()
@@ -15,17 +19,22 @@ final class AccountStore: ObservableObject {
     @Published private(set) var notice: String?
     @Published private(set) var identityGeneration = UUID()
     @Published private(set) var selectionOperationGeneration = UUID()
+    @Published private(set) var initialRestorePhase = AccountInitialRestorePhase.unprepared
     private let session: AccountSession
     private let signInOverview: @Sendable (AccountSession, AccountSignInCommit) async throws -> AccountOverview
+    private let initialRestoreReconciliationOverview: @Sendable (AccountSession) async throws -> AccountOverview
     private let identityDidChange: (String?) -> Void
     private let accountWillRemove: (String) throws -> Void
     private let accountDidRemove: (String) -> Void
     private var selectionOperationEpoch = 0
     private var activeSignInAttemptID: UUID?
     private var lastProvenSuccess: AccountSignInSuccess?
+    private var initialRestoreSelection: UUID?
+    private var interactiveSignInSelections: Set<UUID> = []
 
     init(session: AccountSession = AccountSession(),
          signInOverview: (@Sendable (AccountSession, AccountSignInCommit) async throws -> AccountOverview)? = nil,
+         initialRestoreReconciliationOverview: (@Sendable (AccountSession) async throws -> AccountOverview)? = nil,
          accountWillRemove: @escaping (String) throws -> Void = { _ in },
          accountDidRemove: @escaping (String) -> Void = { _ in },
          identityDidChange: @escaping (String?) -> Void = { _ in }) {
@@ -33,12 +42,94 @@ final class AccountStore: ObservableObject {
         self.signInOverview = signInOverview ?? { session, commit in
             try await session.overview(matching: commit)
         }
+        self.initialRestoreReconciliationOverview = initialRestoreReconciliationOverview ?? { session in
+            try await session.overview()
+        }
         self.identityDidChange = identityDidChange
         self.accountWillRemove = accountWillRemove
         self.accountDidRemove = accountDidRemove
     }
 
     var user: AccountUser? { overview.activeUser }
+    var isInitialRestorePending: Bool { initialRestorePhase == .pending || initialRestorePhase == .restoring }
+
+    /// Reserve startup before the store is exposed to URL handlers. A later
+    /// task must consume this exact selection, never create another boundary.
+    func prepareInitialRestore() {
+        guard initialRestorePhase == .unprepared else { return }
+        guard selectionOperationEpoch == 0, !isRestoring else {
+            initialRestorePhase = .settled
+            return
+        }
+        if user == nil { _ = beginSelectionOperation(advancingSelectionEpoch: false) }
+        initialRestoreSelection = selectionOperationGeneration
+        initialRestorePhase = .pending
+    }
+
+    func consumeInitialRestore() async {
+        guard initialRestorePhase == .pending, let selection = initialRestoreSelection else { return }
+        guard selection == selectionOperationGeneration, !isRestoring, !Task.isCancelled else {
+            settleInitialRestore()
+            return
+        }
+        initialRestorePhase = .restoring
+        isRestoring = true
+        await performInitialRestore(selection: selection)
+        await finishInitialRestore(selection: selection)
+    }
+
+    private func performInitialRestore(selection: UUID) async {
+        guard await publishInitialRestore(selection: selection) else { return }
+        do {
+            try await session.restore()
+            try Task.checkCancellation()
+            guard initialRestoreIsCurrent(selection) else { return }
+            notice = nil
+        } catch is CancellationError { return }
+        catch AccountError.sessionChanged { return }
+        catch {
+            guard initialRestoreIsCurrent(selection) else { return }
+            notice = AccountError.message(for: error)
+        }
+        _ = await publishInitialRestore(selection: selection)
+    }
+
+    private func finishInitialRestore(selection: UUID) async {
+        defer {
+            isRestoring = false
+            settleInitialRestore()
+        }
+        // Even a cancelled/stale restore can have invalidated an actor-side
+        // credential. Reconcile a newly read authoritative snapshot, tied to
+        // the selection in effect now rather than the original reservation.
+        await reconcileInitialRestore(selection: selectionOperationGeneration, reportingFor: selection)
+    }
+
+    private func reconcileInitialRestore(selection: UUID, reportingFor original: UUID? = nil) async {
+        guard selection == selectionOperationGeneration else { return }
+        if user == nil, interactiveSignInSelections.contains(selection) { return }
+        do {
+            let latest = try await initialRestoreReconciliationOverview(session)
+            guard selection == selectionOperationGeneration else { return }
+            // A guest login owns publication of its committed identity and
+            // continuation proof in one MainActor turn. Publishing it here
+            // first would incorrectly expire that login's guest origin.
+            if user == nil, interactiveSignInSelections.contains(selection) { return }
+            apply(latest)
+        } catch {
+            if let original, initialRestoreIsCurrent(original), !Task.isCancelled, !(error is CancellationError) {
+                notice = AccountError.message(for: error)
+            }
+        }
+    }
+
+    private func finishInteractiveSignIn(selection: UUID, published: Bool) async {
+        interactiveSignInSelections.remove(selection)
+        // A failed API or publication may leave a committed/saved identity in
+        // the actor. Read it anew without refreshing a profile or borrowing a
+        // later login's selection. Preserve the original sign-in error.
+        if !published { await reconcileInitialRestore(selection: selection) }
+    }
 
     func isCurrent(_ success: AccountSignInSuccess) -> Bool {
         lastProvenSuccess == success && user?.isUsable == true
@@ -72,10 +163,17 @@ final class AccountStore: ObservableObject {
         let attempt = attemptID ?? UUID()
         activeSignInAttemptID = attempt
         let continuationGeneration = selectionOperationGeneration
-        let commit = try await session.passwordSignIn(identifier: identifier, password: password, captcha: captcha,
-                                                       attemptID: attempt)
-        try await publishSignIn(commit, epoch: epoch, continuationGeneration: continuationGeneration,
-                                continuation: continuation, onCommitted: onCommitted, onAuthenticated: onAuthenticated)
+        interactiveSignInSelections.insert(continuationGeneration)
+        do {
+            let commit = try await session.passwordSignIn(identifier: identifier, password: password, captcha: captcha,
+                                                           attemptID: attempt)
+            try await publishSignIn(commit, epoch: epoch, continuationGeneration: continuationGeneration,
+                                    continuation: continuation, onCommitted: onCommitted, onAuthenticated: onAuthenticated)
+            await finishInteractiveSignIn(selection: continuationGeneration, published: true)
+        } catch {
+            await finishInteractiveSignIn(selection: continuationGeneration, published: false)
+            throw error
+        }
     }
 
     func sendVerification(address: VerificationAddress, captcha: String?) async throws -> VerificationChallenge {
@@ -91,17 +189,26 @@ final class AccountStore: ObservableObject {
         let attempt = attemptID ?? UUID()
         activeSignInAttemptID = attempt
         let continuationGeneration = selectionOperationGeneration
-        let commit = try await session.verify(challenge, code: code, captcha: captcha, attemptID: attempt)
-        try await publishSignIn(commit, epoch: epoch, continuationGeneration: continuationGeneration,
-                                continuation: continuation, onCommitted: onCommitted, onAuthenticated: onAuthenticated)
+        interactiveSignInSelections.insert(continuationGeneration)
+        do {
+            let commit = try await session.verify(challenge, code: code, captcha: captcha, attemptID: attempt)
+            try await publishSignIn(commit, epoch: epoch, continuationGeneration: continuationGeneration,
+                                    continuation: continuation, onCommitted: onCommitted, onAuthenticated: onAuthenticated)
+            await finishInteractiveSignIn(selection: continuationGeneration, published: true)
+        } catch {
+            await finishInteractiveSignIn(selection: continuationGeneration, published: false)
+            throw error
+        }
     }
 
     func cancelSignIn(attemptID: UUID? = nil) async {
         if let attemptID, activeSignInAttemptID != attemptID { return }
         _ = beginSelectionOperation()
+        let selection = selectionOperationGeneration
         // The actor checks again: another login may start while this call waits
         // to enter AccountSession after the Store-side check has succeeded.
         await session.cancelSignIn(attemptID: attemptID)
+        await reconcileInitialRestore(selection: selection)
     }
 
     func authorization(forceRefresh: Bool = false) async throws -> AuthorizedAccount {
@@ -162,6 +269,32 @@ final class AccountStore: ObservableObject {
         } catch { notice = AccountError.message(for: error) }
     }
 
+    private func initialRestoreIsCurrent(_ selection: UUID) -> Bool {
+        initialRestorePhase == .restoring && initialRestoreSelection == selection
+            && selectionOperationGeneration == selection
+    }
+
+    private func publishInitialRestore(selection: UUID) async -> Bool {
+        do {
+            let next = try await session.overview()
+            try Task.checkCancellation()
+            guard initialRestoreIsCurrent(selection) else { return false }
+            apply(next)
+            return true
+        } catch {
+            if initialRestoreIsCurrent(selection), !(error is CancellationError) {
+                notice = AccountError.message(for: error)
+            }
+            return false
+        }
+    }
+
+    private func settleInitialRestore() {
+        guard isInitialRestorePending else { return }
+        initialRestoreSelection = nil
+        initialRestorePhase = .settled
+    }
+
     private func publishSignIn(_ commit: AccountSignInCommit, epoch: Int, continuationGeneration: UUID,
                                continuation: AccountSignInContinuation?,
                                onCommitted: ((AccountSignInSuccess) -> Void)?,
@@ -220,6 +353,9 @@ final class AccountStore: ObservableObject {
         }
         lastProvenSuccess = nil
         selectionOperationGeneration = UUID()
+        // A delayed startup task cannot refresh or publish over a later user
+        // selection, including a same-UID choice or an in-flight manual login.
+        settleInitialRestore()
         return selectionOperationEpoch
     }
 

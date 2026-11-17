@@ -1,0 +1,103 @@
+{
+  "kind": "cache-and-cold-start-fix-final-acceptance",
+  "recordedAt": "2026-10-29T04:24:32.623867+08:00",
+  "requestedFixes": "passed-targeted-validation",
+  "overallM0ToM5Goal": "incomplete",
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "accepted": [
+    {
+      "name": "account-cache-regression",
+      "passed": 92,
+      "failed": 0,
+      "expectedSkipped": 9
+    },
+    {
+      "name": "runtime-followup-with-preview-disabled",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "core-native-ui-journeys",
+      "passed": 4,
+      "note": "Prior combined bundle also had two fixture cleanup failures; retained as failure history; independent runtime followup passed"
+    },
+    {
+      "name": "maximum-AX-XXXL-semantic-audit",
+      "testsPassed": 1,
+      "screens": 2,
+      "issues": 0
+    },
+    {
+      "name": "genuine-operable-N10-and-layout",
+      "testsPassed": 2,
+      "startupSamples": 60,
+      "nativeLayoutModes": 3
+    }
+  ],
+  "remainingGates": [
+    "30 percent tap-to-operable P50 engineering target not met (21.4 percent Gomoku; 8.0 percent PaperStar)",
+    "Complete historical entry and all multiplayer mode baseline",
+    "Full VoiceOver gesture journey",
+    "Native real-account SSO, OS Universal Link cold invite, two real users and complete interruption recovery",
+    "Deployed CloudBase idempotent transaction behavior"
+  ],
+  "productionPrerequisites": [
+    "Both AASA paths and native catalog/resource manifests return 404",
+    "CORS preflight does not allow new Idempotency-Key header",
+    "Rollout order must make backend compatible before new Play/client creation logic"
+  ],
+  "productionChangesPerformed": false,
+  "testflightUploaded": false,
+  "commitOrPushPerformed": false,
+  "evidence": [
+    {
+      "path": "cache-cold-regression-summary.json",
+      "sha256": "b68e2dee6a82e4669dcbad0c7da1085706e73c74b2cd5dd3898881e9fa680e75"
+    },
+    {
+      "path": "runtime-final-summary.json",
+      "sha256": "3cf1e23b06cf18b48f757dbc5178bf9438085ea6c5f6c2e40c4cfd89fce1705d"
+    },
+    {
+      "path": "operable-final-test-summary.json",
+      "sha256": "de1431bf46279673353b7cbaa4b19130722ce4a94447e13ded351ec5e2d97a36"
+    },
+    {
+      "path": "maximum-text-final-summary.json",
+      "sha256": "45ba4569390a4991c09af7637236f1cd7ce2c5c4cd7cadf81e5ae78eb560a5ad"
+    },
+    {
+      "path": "resource-fault-acceptance.json",
+      "sha256": "335f866a4738bf67049c8d39b7ae477c90e3247eeb1ea6cc6168431cc8a02296"
+    },
+    {
+      "path": "operable-final-metrics.json",
+      "sha256": "ae3c229bd7fb2e628ea3427f336384bfa83a6c06109ca8fcbf3d05351a3efd5a"
+    },
+    {
+      "path": "production-final-readiness.json",
+      "sha256": "7be468fa5780268e4fff7d247c698c5fd29099ea0c6d52228b71bb33ea3cc99d"
+    },
+    {
+      "path": "cloudbase-final-code-review.json",
+      "sha256": "f551e19fc094542eb9b82aa80ced2ce7bbe91268f9db79a42abad1caa9575455"
+    },
+    {
+      "path": "final-simulator-audit.json",
+      "sha256": "811bfa2d9f2c8a080dca734bec3e11c28ff73ba44db70b2e66e1edb4a525b0f0"
+    },
+    {
+      "path": "final-docs-build.json",
+      "sha256": "d19572ca0c04c93a36ce8284443275311b4b3826187d4c2f5edb53690a677c8d"
+    },
+    {
+      "path": "final-candidate-fingerprints.json",
+      "sha256": "306ec65ca634c2a32826e7b60eb82aef5ece5ada83e43887724a8e66a03c61e0"
+    },
+    {
+      "path": "final-media-artifacts.json",
+      "sha256": "d08dc33e2b0f79bbe99be965110112b1a3796409000cd1dcadbdda2b830ad55f"
+    }
+  ]
+}

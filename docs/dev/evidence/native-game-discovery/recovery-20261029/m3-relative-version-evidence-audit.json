@@ -1,0 +1,1123 @@
+{
+  "schemaVersion": 1,
+  "kind": "m3-relative-performance-version-evidence-audit",
+  "recordedAtUTC": "2026-10-29T16:12:07.589019+00:00",
+  "scope": {
+    "readOnlyProductSourceAudit": true,
+    "newPerformanceTestsRun": 0,
+    "uiOrSimulatorActions": 0,
+    "networkRequestsDuringInitialAudit": 0,
+    "productSourceFilesModified": 0,
+    "authorizedDocumentationFilesModified": [
+      "specs/native-game-discovery/requirements.md",
+      "specs/native-game-discovery/design.md",
+      "specs/native-game-discovery/tasks.md",
+      "docs/product/native-game-discovery.md"
+    ],
+    "privatePreparationOnly": "Downloaded canonical public bytes, wrote archive/receipts/server script/command plan; did not bind server or launch Native",
+    "sanitized": true,
+    "rawTmpEvidenceRecreated": false,
+    "subsequentPreparationSuccessfulHTTPFetchCount": 81
+  },
+  "currentAcceptance": {
+    "sourceSpecifications": [
+      {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/requirements.md",
+        "bytes": 10479,
+        "sha256": "92423ef82512d3c132d6ab81a6030d33dbdbda0a1683619fb8670c84007e0aa4"
+      },
+      {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/design.md",
+        "bytes": 14076,
+        "sha256": "57486f3a241ada8e08bb24a08d548df6469b152348495a53002cda0ff052e523"
+      },
+      {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/specs/native-game-discovery/tasks.md",
+        "bytes": 15143,
+        "sha256": "95cd08cce31294b13f2624de94f2800a210cd4f6fb4d5be29aad7b13df330082"
+      },
+      {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/product/native-game-discovery.md",
+        "bytes": 6062,
+        "sha256": "f750891e3349650ce5d0fa13770ece1ade7a92a21d7e8aba0481c5ff33aab7b3"
+      }
+    ],
+    "task": "3.3",
+    "samplesPerRepresentativeScenarioAtLeast": 10,
+    "sameDeviceAndNetwork": true,
+    "preparedP50MustImproveAgainstSameConditionOldEntry": true,
+    "coldP90MaximumRegressionPercent": 10,
+    "preservePaperStarCountdownMilliseconds": 3000,
+    "uniform30PercentGateAppliesNow": false,
+    "historical30PercentFailuresPreserved": true,
+    "discloseSeparately": [
+      "configured gameplay countdown",
+      "resource wait with explicit measurement scope",
+      "complete tap-to-genuine-operable duration"
+    ],
+    "completionDecision": "Finalversion-boundN10 remains pending. Existing same-document resource/renderer observations may disclose limited scope and unknown intervals; no new Worker/full-network experiment is a current acceptance requirement."
+  },
+  "historicalN10": {
+    "rawEvidence": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/operable-final-n10.json",
+      "bytes": 377661,
+      "sha256": "ea9b0b2e14a77b5c3114deab3df80116717466d2ff88ce18083cbd56cf1aa647"
+    },
+    "derivedMetrics": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/operable-final-metrics.json",
+      "bytes": 3038,
+      "sha256": "ae3c229bd7fb2e628ea3427f336384bfa83a6c06109ca8fcbf3d05351a3efd5a"
+    },
+    "origin": "http://127.0.0.1:18146",
+    "historicalCommitBaseline": false,
+    "sampleCount": 60,
+    "stages": [
+      {
+        "gameId": "gomoku",
+        "modeId": "computer",
+        "stage": "same-build-home-detail-mode-cold",
+        "sampleCount": 10,
+        "p50Milliseconds": 1055.0039999652654,
+        "p90Milliseconds": 1719.4494583527558,
+        "reportedQuantilesMatch": true
+      },
+      {
+        "gameId": "gomoku",
+        "modeId": "computer",
+        "stage": "direct-mode-cold",
+        "sampleCount": 10,
+        "p50Milliseconds": 838.2645416422747,
+        "p90Milliseconds": 1423.9738750038669,
+        "reportedQuantilesMatch": true
+      },
+      {
+        "gameId": "gomoku",
+        "modeId": "computer",
+        "stage": "direct-mode-prepared",
+        "sampleCount": 10,
+        "p50Milliseconds": 828.9277500007302,
+        "p90Milliseconds": 1458.2295833388343,
+        "reportedQuantilesMatch": true
+      },
+      {
+        "gameId": "paper-star",
+        "modeId": "local",
+        "stage": "same-build-home-detail-mode-cold",
+        "sampleCount": 10,
+        "p50Milliseconds": 4192.959999956656,
+        "p90Milliseconds": 4311.312416626606,
+        "reportedQuantilesMatch": true
+      },
+      {
+        "gameId": "paper-star",
+        "modeId": "local",
+        "stage": "direct-mode-cold",
+        "sampleCount": 10,
+        "p50Milliseconds": 3865.1744999806397,
+        "p90Milliseconds": 3923.2552500325255,
+        "reportedQuantilesMatch": true
+      },
+      {
+        "gameId": "paper-star",
+        "modeId": "local",
+        "stage": "direct-mode-prepared",
+        "sampleCount": 10,
+        "p50Milliseconds": 3859.4821667065844,
+        "p90Milliseconds": 3953.8312499644235,
+        "reportedQuantilesMatch": true
+      }
+    ],
+    "statisticalDefinition": "nearest-rank: N=10 uses sorted fifth P50 and ninth P90",
+    "comparisons": [
+      {
+        "gameId": "gomoku",
+        "preparedP50ReductionPercent": 21.428947186169765,
+        "coldP90ChangePercent": -17.184313380862992,
+        "meetsCurrentRelativeThresholdsForThisHistoricalCandidate": true,
+        "historical30PercentTargetMet": false
+      },
+      {
+        "gameId": "paper-star",
+        "preparedP50ReductionPercent": 7.953279622355547,
+        "coldP90ChangePercent": -9.000905735746157,
+        "meetsCurrentRelativeThresholdsForThisHistoricalCandidate": true,
+        "historical30PercentTargetMet": false
+      }
+    ],
+    "paperStarPlayingSampleCount": 30,
+    "paperStarRendererReadySampleCount": 30,
+    "testScope": {
+      "device": "shared iPhone 18 Pro simulator, iOS 27.0",
+      "testStartUTC": "2026-10-28T19:52:14.282Z",
+      "testFinishUTC": "2026-10-28T19:55:24.271Z",
+      "freshWKWebView": true,
+      "clearedOnlyFixtureHTTPMemoryAndDiskCache": true,
+      "resetOSAndWebKitProcesses": false,
+      "fixtureCatalogAndAccountPreloaded": true,
+      "UIKitAnimationsDisabled": true,
+      "automationPollMilliseconds": 20,
+      "observerAndPollingOverheadIncluded": true,
+      "productionNetworkPerformanceClaim": false,
+      "physicalDevicePerformanceClaim": false
+    }
+  },
+  "historical9baIdentity": {
+    "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+    "catalogVersionIsGitCommit": false,
+    "catalogVersionMeaning": "SHA-256 generated catalog content identity, separate from Git SHA-1 commits and catalog file SHA-256",
+    "catalogFile": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/candidate-operable-catalog.json",
+      "bytes": 4708,
+      "sha256": "5a7eb4c64ee2c1b3720a853dbd17c5a288a365a5c312d5601b17c9abd73ae949"
+    },
+    "frozenPublicCatalogFile": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/native/catalog-v1.json",
+      "bytes": 4708,
+      "sha256": "5a7eb4c64ee2c1b3720a853dbd17c5a288a365a5c312d5601b17c9abd73ae949"
+    },
+    "catalogBytesExactlyMatchPersistentEvidence": true,
+    "frozenBuildRoot": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx",
+    "retentionReceipt": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/verification/retained.json",
+      "bytes": 1245,
+      "sha256": "e6f8355b23cecbd39d5e986ae2f1047a598dfe285b52053a3bff29895b7ca7f8"
+    },
+    "retainedPurposeAndReclaimCondition": {
+      "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+      "catalogFileSHA256": "5a7eb4c64ee2c1b3720a853dbd17c5a288a365a5c312d5601b17c9abd73ae949",
+      "purpose": "Final R4 actual playable-phase ready + R5 explicit role snapshot; root native QA/performance",
+      "reclaimCondition": "Root completes native QA/performance, exports exact catalog/evidence, and no preview server references this public",
+      "games": [
+        {
+          "gameId": "gomoku",
+          "resourceCount": 215,
+          "totalBytes": 6373425,
+          "version": "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856"
+        },
+        {
+          "gameId": "flight-chess",
+          "resourceCount": 204,
+          "totalBytes": 6349769,
+          "version": "25479726569bbb37b118ae325c1065080e1c7cb86a23013f6911753c5e4930a3"
+        },
+        {
+          "gameId": "paper-star",
+          "resourceCount": 239,
+          "totalBytes": 10895112,
+          "version": "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415"
+        }
+      ],
+      "readyContract": "PaperStar rendererReady && hostOperable && current snapshot phase === playing, followed by requestAnimationFrame, one report per launch; countdown unchanged. Prior snapshots measured render-ready and are not this R4 metric."
+    },
+    "clientManifest": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/verification/client.manifest.mjs",
+      "bytes": 140663,
+      "sha256": "952d652852798e523f3f6eb3233fb1d009610db1a6dcf34c51a6469cddcbddb4"
+    },
+    "publicationInput": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/verification/native-publication-v1.json",
+      "bytes": 140,
+      "sha256": "95b5415da802d66d75d014fdbbb5f789e35238d80ee8930c168351fb3e20c1ce"
+    },
+    "nitroBuildMetadata": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/nitro.json",
+      "bytes": 241,
+      "sha256": "07254e1461b02b102e24722349affa00242dd552ac42c459e6d19183626696b0"
+    },
+    "nitroFrameworkVersion": {
+      "name": "nuxt",
+      "version": "4.6.1"
+    },
+    "resourceManifestChecks": [
+      {
+        "gameId": "flight-chess",
+        "manifest": {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/native/resources/flight-chess-v1.json",
+          "bytes": 54283,
+          "sha256": "0a9caad7cf068e194c1090ee72b929bf8a44a3be49fe228d7d17d7781b5545b1"
+        },
+        "resourceVersion": "25479726569bbb37b118ae325c1065080e1c7cb86a23013f6911753c5e4930a3",
+        "recomputedResourcesSHA256": "25479726569bbb37b118ae325c1065080e1c7cb86a23013f6911753c5e4930a3",
+        "versionMatches": true,
+        "resourceCount": 204,
+        "declaredTotalBytes": 6349769,
+        "sumByteCount": 6349769,
+        "verifiedLocalOccurrences": 204,
+        "failures": []
+      },
+      {
+        "gameId": "gomoku",
+        "manifest": {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/native/resources/gomoku-v1.json",
+          "bytes": 56982,
+          "sha256": "f7b0216d01c5406bcfb152e2ee7703368b82f152efe3b36aa88a5d4f348ebd89"
+        },
+        "resourceVersion": "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856",
+        "recomputedResourcesSHA256": "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856",
+        "versionMatches": true,
+        "resourceCount": 215,
+        "declaredTotalBytes": 6373425,
+        "sumByteCount": 6373425,
+        "verifiedLocalOccurrences": 215,
+        "failures": []
+      },
+      {
+        "gameId": "paper-star",
+        "manifest": {
+          "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/native/resources/paper-star-v1.json",
+          "bytes": 63025,
+          "sha256": "623d2b0f270e63cba5e0cd479fc6664a72aabf6c150fa554d8d4c5e9c248518b"
+        },
+        "resourceVersion": "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415",
+        "recomputedResourcesSHA256": "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415",
+        "versionMatches": true,
+        "resourceCount": 239,
+        "declaredTotalBytes": 10895112,
+        "sumByteCount": 10895112,
+        "verifiedLocalOccurrences": 239,
+        "failures": []
+      }
+    ],
+    "resourceOccurrences": 658,
+    "uniqueResourceURLs": 250,
+    "uniqueResourceFilesVerifiedLocally": 250,
+    "sourceMapsPresent": false,
+    "compiledBundleProofs": {
+      "M3KAs7H8.js": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/_nuxt/M3KAs7H8.js",
+        "bytes": 10536,
+        "sha256": "4c7323ce7d4d71f7f4c5ef4fac1c563a7e3be8c768273cdf40c663039af61058"
+      },
+      "t29SRqlW.js": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/_nuxt/t29SRqlW.js",
+        "bytes": 52293,
+        "sha256": "4959aa0ec5664e12cae4c8c855e8ecada0ef35886642756a15db84cb83d82418"
+      },
+      "wVLXA12u.js": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/play/apps/web/.nuxt/native-operable-final.easok0tx/output/public/_nuxt/wVLXA12u.js",
+        "bytes": 95330,
+        "sha256": "f909ba7bcddd04a52cdaa5bb53ae266a774d6fc087cb5bcb05ef1aac4934893a"
+      }
+    },
+    "compiledBundleVersions": {
+      "nuxt": {
+        "version": "4.6.1",
+        "proof": "frozen nitro metadata and wVLXA12u.js emitted version getter"
+      },
+      "pixi.js": {
+        "version": "8.19.0",
+        "proof": "t29SRqlW.js emitted VERSION literal"
+      }
+    },
+    "sameOriginTextureFixAlreadyPresent": [
+      {
+        "url": "https://play.yunle.fun/games/paper-star/runtime/v2/navy-paper-texture.78f12da035cd30838855b4657299cf58273dc7b3d38fd43631fd2477c55c02bc.avif",
+        "sha256": "78f12da035cd30838855b4657299cf58273dc7b3d38fd43631fd2477c55c02bc"
+      },
+      {
+        "url": "https://play.yunle.fun/games/paper-star/runtime/v2/planes.11687bec1a36d8166abaeab599daeafd4930080ef86e7b44254553f2b5ababb1.png",
+        "sha256": "11687bec1a36d8166abaeab599daeafd4930080ef86e7b44254553f2b5ababb1"
+      },
+      {
+        "url": "https://play.yunle.fun/games/paper-star/runtime/v2/world-sprites.776670c0c426750e51242e45e4e951a5afaf1b5fc0314620e1aa434a3dbdf9c0.png",
+        "sha256": "776670c0c426750e51242e45e4e951a5afaf1b5fc0314620e1aa434a3dbdf9c0"
+      }
+    ],
+    "exactSourceCommitProven": false,
+    "exactN10NativeBinaryProven": false,
+    "fingerprintTimingCaveat": "Selected source/executable fingerprints recorded at 2026-10-29T04:21:35+08:00 after the N10 test ended at 03:55:24+08:00; these metadata do not establish an exact N10 executable identity. Original full source snapshot/raw temporary result bundle is unavailable; no replacement was fabricated.",
+    "availabilityAfterAudit": {
+      "checkedAtUTC": "2026-10-29T16:26:34.767434+00:00",
+      "frozenBuildRootExists": false,
+      "observation": "Verified oldcatalog/manifests/all250 unique resources before preparation. Subsequently the original .nuxt build folder disappeared while other unrelated work was active. This agent did not remove it. Prior byte verification is retained as an observation; missing oldraw bytes/manifests are not reconstructed.",
+      "rootReportedNoCleanupByCurrentTeam": true,
+      "oldByteAvailabilityNowClaimed": false
+    }
+  },
+  "gitSourceMapping": {
+    "playObjectFormat": "sha1",
+    "knownSourceCommit": "38ed8d9af641c3389b731b61aff82447a5de48db",
+    "knownWebProductionSourceBaseline": "b0f63be5b0780272d56f16d603eacb5afd2a58e8",
+    "targetPlayCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+    "selectedHistoricalPlayFingerprints": [
+      {
+        "path": "apps/web/app/components/PaperStarArena.vue",
+        "frozenSelectedSHA256": "18c32deea8d9888556c3430012bc071e5082c445928bef967446c6149a77c579",
+        "target772SHA256": "18c32deea8d9888556c3430012bc071e5082c445928bef967446c6149a77c579",
+        "matches": true,
+        "physicalOriginalSHA256": "18c32deea8d9888556c3430012bc071e5082c445928bef967446c6149a77c579",
+        "matchesAtKnownCommits": {
+          "38ed8d9": true,
+          "b0f63be": true,
+          "7723ae8": true
+        }
+      },
+      {
+        "path": "apps/web/app/assets/css/paper-star-adventure.css",
+        "frozenSelectedSHA256": "075a9c35b442b326b9df3d4a2a0131f10821ea41406192dd59224fb8a4acc3ac",
+        "target772SHA256": "075a9c35b442b326b9df3d4a2a0131f10821ea41406192dd59224fb8a4acc3ac",
+        "matches": true,
+        "physicalOriginalSHA256": "075a9c35b442b326b9df3d4a2a0131f10821ea41406192dd59224fb8a4acc3ac",
+        "matchesAtKnownCommits": {
+          "38ed8d9": true,
+          "b0f63be": true,
+          "7723ae8": true
+        }
+      },
+      {
+        "path": "apps/web/app/components/PaperStarTutorialCoach.vue",
+        "frozenSelectedSHA256": "dbf879007d84164d8286fb3256ba2965404071bd8ab46530e598aac03ffbf4d0",
+        "target772SHA256": "dbf879007d84164d8286fb3256ba2965404071bd8ab46530e598aac03ffbf4d0",
+        "matches": true,
+        "physicalOriginalSHA256": "dbf879007d84164d8286fb3256ba2965404071bd8ab46530e598aac03ffbf4d0",
+        "matchesAtKnownCommits": {
+          "38ed8d9": true,
+          "b0f63be": true,
+          "7723ae8": true
+        }
+      },
+      {
+        "path": "apps/web/app/utils/room-creation.ts",
+        "frozenSelectedSHA256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+        "target772SHA256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+        "matches": true,
+        "physicalOriginalSHA256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+        "matchesAtKnownCommits": {
+          "38ed8d9": true,
+          "b0f63be": true,
+          "7723ae8": true
+        }
+      },
+      {
+        "path": "apps/game-server/src/http/api.ts",
+        "frozenSelectedSHA256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+        "target772SHA256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+        "matches": true,
+        "physicalOriginalSHA256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+        "matchesAtKnownCommits": {
+          "38ed8d9": true,
+          "b0f63be": true,
+          "7723ae8": true
+        }
+      },
+      {
+        "path": "apps/game-server/src/room/service.ts",
+        "frozenSelectedSHA256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1",
+        "target772SHA256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1",
+        "matches": true,
+        "physicalOriginalSHA256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1",
+        "matchesAtKnownCommits": {
+          "38ed8d9": true,
+          "b0f63be": true,
+          "7723ae8": true
+        }
+      },
+      {
+        "path": "apps/game-server/src/room/cloudbase-repository.ts",
+        "frozenSelectedSHA256": "8fab3117f9beddecf97daa84377de0e75418ebadfd6a12d5e0c08639ab1cb5f6",
+        "target772SHA256": "f41170d519446aa61b04970b9dc424aaa1ccbd3467f6d37adedfbc113789d207",
+        "matches": false,
+        "physicalOriginalSHA256": "8fab3117f9beddecf97daa84377de0e75418ebadfd6a12d5e0c08639ab1cb5f6",
+        "matchesAtKnownCommits": {
+          "38ed8d9": false,
+          "b0f63be": false,
+          "7723ae8": false
+        }
+      },
+      {
+        "path": "apps/game-server/src/colyseus/play-room.ts",
+        "frozenSelectedSHA256": "13da2d0b8ec83ecbc41f8cc84e7ee8e08e5b46ea45b45fe966e82635013692ef",
+        "target772SHA256": "1abed466b33ef29645ac8fcbccc5d3d80c7131e94c7a83de4d437e809852cf68",
+        "matches": false,
+        "physicalOriginalSHA256": "13da2d0b8ec83ecbc41f8cc84e7ee8e08e5b46ea45b45fe966e82635013692ef",
+        "matchesAtKnownCommits": {
+          "38ed8d9": false,
+          "b0f63be": false,
+          "7723ae8": false
+        }
+      }
+    ],
+    "paperStarCountdownFingerprints": [
+      {
+        "path": "packages/games/paper-star/src/index.ts",
+        "frozenSelectedSHA256": "00ab12e8421a50ae9ac65e0c4700fc3c98b4f3c8ad70e536b707144b5c294a47",
+        "target772SHA256": "00ab12e8421a50ae9ac65e0c4700fc3c98b4f3c8ad70e536b707144b5c294a47",
+        "matches": true
+      },
+      {
+        "path": "apps/web/app/features/paper-star/local-game.ts",
+        "frozenSelectedSHA256": "529d2e573cb09374641c8e1a083b3cb075c4b0b072de66c74d83f75435c01afd",
+        "target772SHA256": "529d2e573cb09374641c8e1a083b3cb075c4b0b072de66c74d83f75435c01afd",
+        "matches": true
+      },
+      {
+        "path": "apps/web/app/pages/games/paper-star/local.vue",
+        "frozenSelectedSHA256": "da65be638e836b1aded2d13b57de899903ba9e2402a1c4e4dab87162087474dd",
+        "target772SHA256": "da65be638e836b1aded2d13b57de899903ba9e2402a1c4e4dab87162087474dd",
+        "matches": true
+      }
+    ],
+    "additionalPhysicalSourceComparison": [
+      {
+        "path": "apps/web/app/features/paper-star/PaperStarArena.ts",
+        "physicalOriginalSHA256": "dc7899b5bea3a4235f5dbd55545840762628514c31bb08c64fff9eeffcc6fd0d",
+        "target772SHA256": "dc7899b5bea3a4235f5dbd55545840762628514c31bb08c64fff9eeffcc6fd0d",
+        "matches": true,
+        "old9baSourceSnapshotBinding": false
+      },
+      {
+        "path": "apps/web/app/pages/games/gomoku/computer.vue",
+        "physicalOriginalSHA256": "e879f90205e009153f87136a1ee8c9e4828a9521d99f8e231be485f05be51aed",
+        "target772SHA256": "e879f90205e009153f87136a1ee8c9e4828a9521d99f8e231be485f05be51aed",
+        "matches": true,
+        "old9baSourceSnapshotBinding": false
+      },
+      {
+        "path": "apps/web/app/utils/native-game-host.ts",
+        "physicalOriginalSHA256": "fd4a13194f0cbcd6fbcf0962ad71a1f59481dd3306f47bfede12136035281e7a",
+        "target772SHA256": "fd4a13194f0cbcd6fbcf0962ad71a1f59481dd3306f47bfede12136035281e7a",
+        "matches": true,
+        "old9baSourceSnapshotBinding": false
+      },
+      {
+        "path": "apps/web/nuxt.config.ts",
+        "physicalOriginalSHA256": "1aa287c3747009a17cd90768f347be5e1de09de69ff19152949216525d5c57e0",
+        "target772SHA256": "1aa287c3747009a17cd90768f347be5e1de09de69ff19152949216525d5c57e0",
+        "matches": true,
+        "old9baSourceSnapshotBinding": false
+      },
+      {
+        "path": "scripts/export-native-game-assets.mjs",
+        "physicalOriginalSHA256": "827506ee5a2dc0764dfb41be97c0bd6be4f4d41d32035524ba45df3dcea243f4",
+        "target772SHA256": "827506ee5a2dc0764dfb41be97c0bd6be4f4d41d32035524ba45df3dcea243f4",
+        "matches": true,
+        "old9baSourceSnapshotBinding": false
+      }
+    ],
+    "mappingLimit": "Selected files match reachable 38ed/b0/772 blobs; frozen dependencies differ, and no complete historical 9ba source snapshot or exact Git commit is proven. The dirty physical original tree is a comparison input, not an asserted historical build source.",
+    "webChanges38edTo772": [
+      "M\tapps/web/app/components/online/OnlineGameRoom.vue",
+      "M\tapps/web/app/composables/useOnlineRoom.ts",
+      "M\tapps/web/test/online-room-role.test.ts",
+      "M\tapps/web/test/paper-star-native-ready.test.ts",
+      "M\tedgeone.json"
+    ],
+    "serverOnlyChangesB0To772": [
+      "M\tapps/game-server/src/colyseus/play-room.ts",
+      "M\tapps/game-server/test/colyseus-room-errors.test.ts"
+    ],
+    "physicalOriginalVs772": {
+      "method": "SHA-256 compare actual physical tracked AND untracked nonignored source paths against Git target blobs; plain git diff cannot account for original untracked feature source",
+      "scopes": [
+        "apps/web",
+        "packages/game-catalog",
+        "packages/games",
+        "packages/play-protocol",
+        "packages/play-sdk",
+        "scripts/export-native-game-assets.mjs",
+        "pnpm-lock.yaml",
+        "package.json",
+        "edgeone.json"
+      ],
+      "physicalPathCount": 263,
+      "targetPathCount": 265,
+      "differentFileCount": 16,
+      "differences": [
+        {
+          "path": "apps/web/app/components/online/OnlineGameRoom.vue",
+          "physicalOriginalSHA256": "5b10f1ce312c1532a6fb5b841b0d6bbfeee04ab0322cd8fd38f7a66dff0d9a19",
+          "target772SHA256": "9ef912f65859e07037eda77b4689bce4b2e3fb475d1a1a82c17d05c875f13d8c",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/app/composables/useOnlineRoom.ts",
+          "physicalOriginalSHA256": "755bc4a4e9de8e86dad757ce592ea692fbee3de62ce3e5e6ec11fcc6cc9a6fe5",
+          "target772SHA256": "8910bca73b75aefb5061c292c3c7298facc1ec515291a091451cd385c253ec6d",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/app/features/pachinko/PachinkoScenes.ts",
+          "physicalOriginalSHA256": "f9ef26fa007373a37cc8b4157d3e7f903edc5fd59bbc157a7ff224769a2d04d2",
+          "target772SHA256": "58b64e2f479a51bb9f2f512684cdd493d58946d83cd03566b578aee5c8ea560b",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/app/features/pachinko/three/Pachinko3DRenderer.ts",
+          "physicalOriginalSHA256": "bae7d6b5f2da5c5336cad149dc9c4b325213f8a406b54018c323f754a0e0a591",
+          "target772SHA256": "573dcce658b8da529ae4349c62d37cfe95b8a8b72d13346819d62c4e802a5d82",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/app/utils/identity-bootstrap.ts",
+          "physicalOriginalSHA256": "908fd65abcb13fab1d737e9ed4d66c96fa0f50991d2ff35aca4f074700725d98",
+          "target772SHA256": "238e21d586d74c74b4ec8aa6a023d4e526bf99318876f4182aea4384c1aca7f6",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/playwright.config.ts",
+          "physicalOriginalSHA256": "614528c3f5ec26505f1e7b6175f12a55af7e33d9ef3a61a1731271ab2d13f266",
+          "target772SHA256": "4590430312c1c31a5988c7b5e64c23f1cbed09205a812c1c1aa3eca846e84cb7",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/test/e2e/pachinko-3d.spec.ts",
+          "physicalOriginalSHA256": "fc629945cf912a55e785748cf6da92811918ab02894a2f61b61cc5e481ecfad5",
+          "target772SHA256": "450d53e54a8540c22b13184058c221db3c2ea4f118409435ebfe397001511770",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/test/e2e/pachinko-assets.spec.ts",
+          "physicalOriginalSHA256": null,
+          "target772SHA256": "62eaa7bc877ea6889325ee32dcfd8aadd46d400d81bd62781192bcd4ebd7149f",
+          "physicalOriginalTrackedAtHEAD": false
+        },
+        {
+          "path": "apps/web/test/e2e/play.spec.ts",
+          "physicalOriginalSHA256": "c50befb6f581234312434c9332f4d00a41f4d35b8fba29a9e139801619279a0e",
+          "target772SHA256": "3aa3cec5f03de3017910359ea3d1ba40e3fef686451074c9984a899bcd445a8c",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "apps/web/test/identity-exchange.test.ts",
+          "physicalOriginalSHA256": null,
+          "target772SHA256": "942c9d824fd8e11217e34dbf077c419ee82a735731637517a88dbbc2ec8eaefb",
+          "physicalOriginalTrackedAtHEAD": false
+        },
+        {
+          "path": "apps/web/test/online-room-role.test.ts",
+          "physicalOriginalSHA256": "4535fc7c4ff6cfc11b35e7003ddb7c66338443945fbc14c3e9734e5074722473",
+          "target772SHA256": "c67a3699225d056038550c1d900674f5b82af37873ea7d5b205d3fd221f68384",
+          "physicalOriginalTrackedAtHEAD": false
+        },
+        {
+          "path": "apps/web/test/paper-star-native-ready.test.ts",
+          "physicalOriginalSHA256": "d2c54f71cbda5586852b70e2a389e0cb8a08fdba73daffcc74b1831654937393",
+          "target772SHA256": "a463feca1bccea3a4936acc021d8385f742b0f16f19e47c184ae7155cc452c7e",
+          "physicalOriginalTrackedAtHEAD": false
+        },
+        {
+          "path": "edgeone.json",
+          "physicalOriginalSHA256": "7974de467adc2c2bddbc438a6a31a08ec52ed3bfeb955132a5cfd2fd8aa99182",
+          "target772SHA256": "7e3ff4156d238bcdcd1f916b574a8a885c8a90b700ac4c4590d6c2f180bc5d3b",
+          "physicalOriginalTrackedAtHEAD": false
+        },
+        {
+          "path": "package.json",
+          "physicalOriginalSHA256": "bfd0bd1d6ed83cf4948e3de7ec88c78ba0bdd04600b031addc6cf17555d8d898",
+          "target772SHA256": "93b26918c4fc68f4732924797532738310cb180ced60d0a4b4c6b9070146010f",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "packages/game-catalog/tsconfig.build.json",
+          "physicalOriginalSHA256": "507fc2f3803f5bbc44a8dc9524102a76f1a48f57cf81467774891528fd8f8953",
+          "target772SHA256": "bea9e00ff89faa94e1c0c4695deaf043439c9a87dc4227457b7d4a437b754802",
+          "physicalOriginalTrackedAtHEAD": true
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "physicalOriginalSHA256": "f350a8e13d410d412f9f300646cf43fae9daa8d8b54055056e3d253a32d62435",
+          "target772SHA256": "f0528326e605ea5d08ba4e3b195b7d65c943f5841b716e19cff6b1574cd4d360",
+          "physicalOriginalTrackedAtHEAD": true
+        }
+      ]
+    }
+  },
+  "nativeSourceComparison": {
+    "repositoryHEADAtObservation": "e68ed57d523997a1bc669a5586f925d79c352fb0",
+    "selectedFingerprintReceipt": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/final-candidate-fingerprints.json",
+      "bytes": 3356,
+      "sha256": "306ec65ca634c2a32826e7b60eb82aef5ece5ada83e43887724a8e66a03c61e0"
+    },
+    "productSourceMatchCount": 5,
+    "productSourceSelectedCount": 6,
+    "files": [
+      {
+        "path": "apps/ios/YunleFun/App/YunleFunApp.swift",
+        "frozenSelectedSHA256": "1bfeec0dbea1f85b657dd7cc0f8a65af99e4c5e189aeedcffd287821d23c17f0",
+        "observedCurrentSHA256": "1bfeec0dbea1f85b657dd7cc0f8a65af99e4c5e189aeedcffd287821d23c17f0",
+        "matches": true,
+        "category": "product"
+      },
+      {
+        "path": "apps/ios/YunleFun/App/AppRootView.swift",
+        "frozenSelectedSHA256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+        "observedCurrentSHA256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+        "matches": true,
+        "category": "product"
+      },
+      {
+        "path": "apps/ios/YunleFun/Services/AccountStore.swift",
+        "frozenSelectedSHA256": "df80adf44696c9026f2ccd865ee0e53b3cbfb2906562049983496aca294ffd58",
+        "observedCurrentSHA256": "df80adf44696c9026f2ccd865ee0e53b3cbfb2906562049983496aca294ffd58",
+        "matches": true,
+        "category": "product"
+      },
+      {
+        "path": "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift",
+        "frozenSelectedSHA256": "d90fb618a50eac189bbe7ddfab748a33e5de3f17a62e0850421273545182b3ae",
+        "observedCurrentSHA256": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+        "matches": false,
+        "category": "product"
+      },
+      {
+        "path": "apps/ios/YunleFun/Services/NativeGameResourceCache.swift",
+        "frozenSelectedSHA256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+        "observedCurrentSHA256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+        "matches": true,
+        "category": "product"
+      },
+      {
+        "path": "apps/ios/YunleFun/Features/Games/GamesView.swift",
+        "frozenSelectedSHA256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+        "observedCurrentSHA256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+        "matches": true,
+        "category": "product"
+      },
+      {
+        "path": "apps/ios/YunleFunTests/AccountInitialRestoreTests.swift",
+        "frozenSelectedSHA256": "7571ee7d548c2ec53613ea11c30779e1b47b21743ede4a1530576a077cb07095",
+        "observedCurrentSHA256": "7571ee7d548c2ec53613ea11c30779e1b47b21743ede4a1530576a077cb07095",
+        "matches": true,
+        "category": "test"
+      },
+      {
+        "path": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+        "frozenSelectedSHA256": "82ea350c9f6a10584846214d3cddac75dd9e8d079d9c0bf94eb88044354beab2",
+        "observedCurrentSHA256": "dcd09c65ffb400213fb785bbd5203da295567336171c53fc3cabb3f88cf880ab",
+        "matches": false,
+        "category": "test"
+      },
+      {
+        "path": "apps/ios/YunleFunUITests/NativeGamesUITests.swift",
+        "frozenSelectedSHA256": "cbaa5ef4a9f42246fa2ded13bb5c0540f13e597a1c25209b20d2b081c87cfee1",
+        "observedCurrentSHA256": "a5f0b04f382849ee1a0cd0c94c45acadc922781a6e2fc5cb70861b5c91e4f59e",
+        "matches": false,
+        "category": "test"
+      }
+    ],
+    "additionalObservedCurrentInputs": [
+      {
+        "path": "apps/mobile/ios/App/App/WebViewController.swift",
+        "sha256": "03da939929a57c642cd98cb71e57032aa4a2a7a5c4e20c135ca348ec5fe2dba8",
+        "includedInOldSelectedFingerprint": false
+      },
+      {
+        "path": "apps/ios/project.yml",
+        "sha256": "a8cbce396fe3e7d95560a9628bd3bbed9ccf89379152e2e5fef698c3afc1f0e7",
+        "includedInOldSelectedFingerprint": false
+      },
+      {
+        "path": "apps/ios/YunleFun/Services/NativeGameCatalogStore.swift",
+        "sha256": "2a5b8f8f7b4fb07853976f950ec446ec38cfcb8b2bfedd76ccfbde0fc0e9dfb2",
+        "includedInOldSelectedFingerprint": false
+      },
+      {
+        "path": "apps/ios/YunleFun/Services/NativeGameHostEnvironment.swift",
+        "sha256": "8271975a485b654900172f0852646da8275e252428da3bf6afff8f667c5c6fc5",
+        "includedInOldSelectedFingerprint": false
+      }
+    ],
+    "oldRuntimeRecovery": {
+      "oldSHA256": "d90fb618a50eac189bbe7ddfab748a33e5de3f17a62e0850421273545182b3ae",
+      "reachablePathHistoryCommitsInspected": 21,
+      "matchingReachablePathBlobs": [],
+      "limit": "No matching blob among these reachable path-history commits; not a claim about all unreachable Git objects. Cannot reconstruct or byte-diff the old Runtime from its hash alone."
+    },
+    "runtimeChangeContext": "Current release includes closed generic-invite handling; parent Native agent is also reviewing WebContent termination/retry behavior. Observe and freeze the final binary/source after that work, not this moving source observation.",
+    "webViewControllerOldSnapshotBinding": "Shared compatibility WebViewController.swift is built into Native project but was absent from historical selected fingerprints; its complete old source/binary identity is not proven."
+  },
+  "materialLoadingAndCachingChanges": [
+    {
+      "area": "dependency graph and generated JS",
+      "oldCompiledVersions": {
+        "nuxt": "4.6.1",
+        "pixi.js": "8.19.0"
+      },
+      "target772LockVersions": {
+        "nuxt": "4.6.2",
+        "pixi.js": "8.22.0",
+        "@cloudbase/js-sdk": "3.10.3",
+        "@colyseus/sdk": "0.17.43",
+        "vue": "3.5.44",
+        "vue-router": "5.4.0",
+        "typescript": "6.0.3",
+        "vitest": "5.0.5"
+      },
+      "physicalOriginalLockSHA256": "f350a8e13d410d412f9f300646cf43fae9daa8d8b54055056e3d253a32d62435",
+      "target772LockSHA256": "f0528326e605ea5d08ba4e3b195b7d65c943f5841b716e19cff6b1574cd4d360",
+      "classification": "material bundle/resource identity difference; old timing cannot certify new build",
+      "limit": "Only Nuxt/Pixi old versions are directly proven in frozen output. Other old dependency versions inferred from current physical original lock are not asserted as exact 9ba graph."
+    },
+    {
+      "area": "offline Gomoku and PaperStar genuine-ready/countdown source",
+      "classification": "selected ready and countdown fingerprints unchanged at 772",
+      "details": "PaperStar ready waits rendererReady && hostOperable && phase playing, then requestAnimationFrame, once per launch. Countdown remains 3000 ms; Gomoku ready follows worker initialization. Selected-source equality is not generated-bundle equality."
+    },
+    {
+      "area": "PaperStar texture origins",
+      "classification": "same-origin hashed textures already exist and validate in measured 9ba; not a 9ba-to926 optimization"
+    },
+    {
+      "area": "hashed client cache headers",
+      "classification": "edgeone source adds immutable one-year Cache-Control for /_nuxt/*.js and /_nuxt/*.css after known 38ed source",
+      "details": "Target production config adds one-year immutable headers for hashedJS/CSS after38ed. The retained historical loopback server source already declares immutable headers for /_nuxt/. This source/config comparison alone does not prove actual production response headers; no new header-specific test was performed."
+    },
+    {
+      "area": "online room lifecycle",
+      "classification": "generation/disposed/terminal-reconnect guards changed after 38ed; changes affect online recoveries, not a reason to discard unchanged offline engine rule evidence",
+      "details": "Online component/chunk changes can still alter emitted shared resources and must be bound by final manifests."
+    },
+    {
+      "area": "target server b0 to772",
+      "classification": "two-line expired spectator gate and SDK error tests only; Web/engine/catalog/export/lock unchanged",
+      "needsSeparateOfflineM3RerunSolelyForThisDelta": false
+    },
+    {
+      "area": "identity bootstrap adapter (physical original to772)",
+      "classification": "Target wraps newer transient auth with explicit custom-ticket/getSession/signOut shape; selected historical9ba source binding for this file is absent",
+      "details": "Seen in actual physical dirty source comparison, not asserted as a proven9ba source delta. The local offline fixture preloads account/catalog; online login remains separately verified."
+    }
+  ],
+  "target926Identity": {
+    "bundledNativeCatalog": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/Resources/native-game-catalog-v1.json",
+      "bytes": 4561,
+      "sha256": "55eef13791c2a9069b4becad8583118f89b37ec578a75e5fd82ae30de65006df"
+    },
+    "catalogVersion": "9263452a8a0666c437d926ee09476d0a700e58cd3dffbacd6a2f73b46cb966a6",
+    "gameResourceVersions": [
+      {
+        "gameId": "gomoku",
+        "resourceVersion": "65e2b2eca35ee835d2c3df5d1a3eec9a28bf0c7064b85007bbf6dd890f81f561"
+      },
+      {
+        "gameId": "flight-chess",
+        "resourceVersion": "116932d4a6a8a3f4733d852edd6c86127d636c922e22cb797530ccfbae24d769"
+      },
+      {
+        "gameId": "paper-star",
+        "resourceVersion": "a90c332656c4f27017f61507cffe287dd331c7a78399706834c98f7e6c560249"
+      }
+    ],
+    "oldGameResourceVersions": [
+      {
+        "gameId": "gomoku",
+        "resourceVersion": "41caecbf8e4a504653331ae85d7e918cff0e452e6d60a02e954ac152444c8856"
+      },
+      {
+        "gameId": "flight-chess",
+        "resourceVersion": "25479726569bbb37b118ae325c1065080e1c7cb86a23013f6911753c5e4930a3"
+      },
+      {
+        "gameId": "paper-star",
+        "resourceVersion": "64c82ec850eb9761899a424ef2511e54d23d48d238d6eec7c5b97559347c7415"
+      }
+    ],
+    "allGameResourceVersionsChanged": true,
+    "existingInstalledCatalogProof": {
+      "catalogFileExists": true,
+      "catalogSHA256": "55eef13791c2a9069b4becad8583118f89b37ec578a75e5fd82ae30de65006df",
+      "catalogVersion": "9263452a8a0666c437d926ee09476d0a700e58cd3dffbacd6a2f73b46cb966a6"
+    },
+    "existingHTTPReceiptSummary": {
+      "atUTC": "2026-10-29T15:50:44.154981+00:00",
+      "catalog": {
+        "status": 200,
+        "originalURLRetained": true,
+        "bytes": 4561,
+        "sha256": "55eef13791c2a9069b4becad8583118f89b37ec578a75e5fd82ae30de65006df",
+        "catalogVersion": "9263452a8a0666c437d926ee09476d0a700e58cd3dffbacd6a2f73b46cb966a6"
+      }
+    },
+    "existingProofFiles": [
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/installed-after-reboot.json",
+        "bytes": 407,
+        "sha256": "96deb204f0f0ebe01f3686de8ffb9081fb9ebc468724f51bac4f027a7863f493"
+      },
+      {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/continuation-2319/post-reboot-public-current-check.json",
+        "bytes": 480,
+        "sha256": "668d4b8a2ae3496e53e5f0d0686f67960831a23db6e4e229bf34503c7693cd35"
+      }
+    ],
+    "allCurrent926ManifestBodiesAndActualPublicFilesLocatedAndValidatedInThisAudit": false,
+    "current926PerResourceDiffProven": true,
+    "limit": "Initial read-only audit could not locate lost926 files. Subsequent authorized preparation now validates all three currentHTTPS manifest bodies and249 resource files, reusing197 only when exactSHA and length match9ba and fetching52 others. The five selected entry documents/assets are separately byte-frozen; this is not a completewebsite snapshot or a complete network trace. Historical246/3 summary was not the9ba→926 comparison and must not substitute for this exact197/52 observation. No finalNative N10 has run.",
+    "subsequentAuthorizedPreparation": {
+      "receipt": {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final926-preparation/final926-public-receipt.json",
+        "sha256": "69a45188a39adcb84d2cf14cfef2561934fb30848c110968136c5cdcb445e2d3"
+      },
+      "archive": {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final926-preparation/final926-public.tar.gz",
+        "bytes": 8844905,
+        "sha256": "889928038179a5aac687e77fc0adefd5ad1671708d6cdfc648f08d114200cfec",
+        "memberCount": 278,
+        "allMembersReopenedAndVerified": true
+      },
+      "allThreeManifestBodiesAnd249UniqueResourcesNowValidated": true,
+      "resourceOccurrences": 655,
+      "uniqueManifestResources": 249,
+      "old9baToFinal926": {
+        "exactOldPhysicalPublicFilesReusedByExpectedFinalSHA256AndLength": 197,
+        "currentHTTPSManifestResourcesFetched": 52,
+        "completeOldManifestURLSetDiffAvailableNow": false,
+        "limit": "Old manifests were fully read and250 unique files verified during initial audit, but the old .nuxt frozen directory disappeared after current926 preparation. No full oldmanifest URL list was copied to persistent evidence before that disappearance. Do not reverse-infer new/removed URL membership from197+52, and do not use historical246/3 as this comparison."
+      },
+      "compiledFinalBundleVersionLiteralProofs": [
+        {
+          "path": "_nuxt/0L7RI5TM.js",
+          "sha256": "4b5d9f9b087f8a1df5cbe192d6bd19dfddf85e25802c04382f54e0b57f14690c",
+          "versionLiterals": [
+            "8.22.0"
+          ]
+        },
+        {
+          "path": "_nuxt/CjhJu0eH.js",
+          "sha256": "8c35f1e7af9accb25e6f3748f73b346d2678ac293e2b31396a5ea151f88c226c",
+          "versionLiterals": [
+            "8.22.0"
+          ]
+        },
+        {
+          "path": "_nuxt/Ct685yqi.js",
+          "sha256": "2c5cf286bb897e194211cb9a5979bdcb9df450a2c467e4b9e6b42765423ba7d0",
+          "versionLiterals": [
+            "4.6.2"
+          ]
+        }
+      ],
+      "entryRouteCount": 5,
+      "publicFileCount": 278,
+      "publicBytes": 11305202,
+      "completeWebsiteFrozen": false,
+      "selectedRouteAndManifestScope": "All249 final926 manifest resources plus selected5 legacy/direct entryHTML routes, payloads, same-origin HTML/CSS assets and both exactNuxt buildJSON files;278 frozen files. Not a completewebsite snapshot or complete networktrace.",
+      "externalHTMLAssetsUnchanged": [
+        "https://assets.play.yunle.fun/games/pachinko/scenes/v1/cloud-carnival-ac36dfe3.avif?v=ac36dfe3",
+        "https://assets.play.yunle.fun/games/paper-star/runtime/v2/icon.png",
+        "https://assets.play.yunle.fun/games/paper-star/runtime/v2/navy-paper-texture.avif",
+        "https://assets.play.yunle.fun/games/paper-star/runtime/v2/paper-texture.avif",
+        "https://assets.play.yunle.fun/games/paper-star/runtime/v2/planes.png",
+        "https://dayun-kicker.yunle.fun/game-card.png?v=d422d26b"
+      ],
+      "serverStarted": false,
+      "testLaunches": 0,
+      "preparationElapsedSeconds": 26.492,
+      "temporaryScopeRemoved": true,
+      "runnerPlan": {
+        "path": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final926-preparation/run-plan.json",
+        "sha256": "dbe6a9602991ae3d5ac04f99801f98ad6566c66ee139bafc1d088e63a11b96b9"
+      },
+      "nuxtBuildMetadataSupplement": {
+        "buildID": "baf6fa19-9c02-4cd6-b2cb-2b13888b2e9f",
+        "files": [
+          {
+            "path": "_nuxt/builds/meta/baf6fa19-9c02-4cd6-b2cb-2b13888b2e9f.json",
+            "bytes": 88,
+            "sha256": "92368d4b192a2f329449c92167422fa05c2328d0dc75342e841490d6b102213c",
+            "source": "current-public-https"
+          },
+          {
+            "path": "_nuxt/builds/latest.json",
+            "bytes": 71,
+            "sha256": "6b6de2bad83c1c753d848de2711e94a651adc7fbcc8d8a5483f2a44d94595066",
+            "source": "current-public-https"
+          }
+        ],
+        "runtimeReference": "_nuxt/B-pjZttP.js reads builds/meta/<app.buildId>.json and delayed builds/latest.json",
+        "modifiesGameResourcesOrDocuments": false,
+        "elapsedSeconds": 1.793,
+        "originalArchiveExactSubsetReproductionVerified": true,
+        "temporaryScope": "/var/folders/tx/zs0fhdtn52l29nbtqby57qlh0000gn/T/yunle-m3-public-meta-qgr9fkwy",
+        "temporaryScopeRemoved": true
+      }
+    }
+  },
+  "resourceWaitDisclosure": {
+    "completeNetworkCoverageFalseSampleCount": 60,
+    "mainDocumentOnlySnapshots": 64,
+    "documentSnapshotCount": 64,
+    "completeResourceWaitWallClockProven": false,
+    "separateNativeAndDocumentClocks": true,
+    "allowedExistingEvidence": [
+      "Native uptime full tap-to-genuine-operable N10 distribution for old9ba fixture",
+      "Document-clock main-document ResourceTiming observations with explicitly incomplete coverage",
+      "Configured 3000 ms gameplay countdown from source and actual playing phase from 30 Star samples",
+      "N3 diagnostic request/primary-HTML matching as diagnostic evidence only"
+    ],
+    "prohibitedDerivations": [
+      "native tap duration minus 3000 ms is not measured resource wait",
+      "native uptime minus document performance timestamp crosses clocks",
+      "sum of parallel ResourceTiming durations is not wall time",
+      "zero transferSize does not prove a cache hit",
+      "main-document-only entries do not cover pending, worker, or all required resources"
+    ],
+    "diagnosticLimit": "Existing six N3 primary-HTML matches and fast HTML response timings do not isolate full resource wait or attribute remaining latency to WebKit. Preserve these limits when disclosing countdown/resource/total.",
+    "currentReportingDecision": "Retain complete native tap→playing as primary metric and configured3second rule separately. Report existing same-document resource/renderer observations with coverage limits and unknown portions; do not add a Worker/full-network experiment or derive pure resource wait by cross-clock or total-minus3s subtraction."
+  },
+  "reuseDecision": {
+    "reuseAsHistorical": {
+      "allowed": true,
+      "items": [
+        "60 genuine-operable old9ba samples and recomputed same-build relative P50/P90 results",
+        "Historical 30 percent failures remain false; new numerical thresholds pass only at this historical scope",
+        "250 locally verified old9ba public resources, catalog/manifests and emitted bundle version proof",
+        "Unchanged selected ready/countdown source and cache-integrity logic evidence, subject to original scope"
+      ]
+    },
+    "reuseAsFinal926Play772PerformanceAcceptance": {
+      "allowed": false,
+      "reasons": [
+        "All target catalog game resourceVersions differ",
+        "Compiled dependency graph changed at least Nuxt/Pixi",
+        "Historical Native Runtime differs and full shared WebViewController source/binary was not frozen",
+        "N10 exact Native executable was not bound at test time",
+        "Final926 public bytes now durably frozen; finalNative binary/version-bound sample metadata still pending"
+      ]
+    },
+    "rerun269TestsNeededForThisAudit": false,
+    "rerunOfflineN10SolelyForExpiredSpectatorDeltaNeeded": false,
+    "resourceDisclosureLimitDoesNotRequireNewExperiment": true
+  },
+  "nextMinimumCorrectAction": {
+    "action": "After the Native retry correction is final, freeze one exact final Native binary/source fingerprint and final926 catalog/manifests/public artifact plus Play772 server label; run one version-bound same-condition N10 comparison matrix.",
+    "matrix": [
+      {
+        "gameId": "gomoku",
+        "modeId": "computer"
+      },
+      {
+        "gameId": "paper-star",
+        "modeId": "local"
+      }
+    ],
+    "stages": [
+      "same-final-build home→detail→mode cold control",
+      "same-final-build direct mode cold",
+      "same-final-build direct mode after resource preparation"
+    ],
+    "samplesPerGamePerStage": 10,
+    "totalSamples": 60,
+    "requireSameConditions": [
+      "same shared simulator/device and iOS runtime",
+      "same final frontend/public build in all stages",
+      "same origin/protocol/network",
+      "same cache/reset and account/catalog preload policy",
+      "same observer/polling and genuine ready definition"
+    ],
+    "resourceWaitGapAction": "Use only existing same-document-clock resource/renderer observations, state coverage limits and unknown intervals, retain complete native tap→playing as primary acceptance and configured3000ms rule separately. No new Worker/full-network/performance experiment is required for this run. Never mix clocks or label total-minus3000ms a pure resource wait.",
+    "doNotCompareAsEquivalent": [
+      "old9ba localhost HTTP against new production HTTPS",
+      "different historical commits without an explicit historical-baseline design",
+      "online room recovery round latency against offline M3 startup"
+    ],
+    "separateRemainingWork": "M4 real two-account creation/join/recovery N10 remains separate; this audit neither runs nor completes it.",
+    "preparedRunnerPlan": "/Users/yunyou/Library/Application Support/YunleFun/Acceptance/native-game-20261029/m3-final926-preparation/run-plan.json"
+  },
+  "references": [
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/operable-final-n10.json",
+      "bytes": 377661,
+      "sha256": "ea9b0b2e14a77b5c3114deab3df80116717466d2ff88ce18083cbd56cf1aa647"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/operable-final-metrics.json",
+      "bytes": 3038,
+      "sha256": "ae3c229bd7fb2e628ea3427f336384bfa83a6c06109ca8fcbf3d05351a3efd5a"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/operable-final-test-summary.json",
+      "bytes": 999,
+      "sha256": "de1431bf46279673353b7cbaa4b19130722ce4a94447e13ded351ec5e2d97a36"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/candidate-operable-catalog.json",
+      "bytes": 4708,
+      "sha256": "5a7eb4c64ee2c1b3720a853dbd17c5a288a365a5c312d5601b17c9abd73ae949"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/final-candidate-fingerprints.json",
+      "bytes": 3356,
+      "sha256": "306ec65ca634c2a32826e7b60eb82aef5ece5ada83e43887724a8e66a03c61e0"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/startup-countdown-constraint-audit.json",
+      "bytes": 1812,
+      "sha256": "6a2e9555b7345b61ae4edfb6b4a3235d6fe196630a5bf550df475413493978c6"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/startup-resource-phase-v3-analysis.json",
+      "bytes": 4667,
+      "sha256": "c40356306f9e0b1b6390a2eb07871f432d903dc9ed7402fcf5323b64ead096f0"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/startup-document-phase-metrics.json",
+      "bytes": 2745,
+      "sha256": "ce0131c6e1b49b09049d74b093ce6ed1fe42bd7591fe8a6194738e78ea7ce3b8"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/startup-request-trace-fixture.json",
+      "bytes": 19499,
+      "sha256": "262b550b08a552716200570ef54a7caba67f36aa53e87b9a85a1f48271ba21ed"
+    },
+    {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/historical-native-current-candidate.json",
+      "bytes": 2095,
+      "sha256": "9fe1f6cfa44daac1f92517a268569c3149daecd6a0bba3730c2b0ff0c6ae541e"
+    }
+  ],
+  "preservation": {
+    "originalPlayStatusSHA256Before": "2d0af2037aeff6acfa20a4320803b38c00d7301f5b449e14046925aecae5c37d",
+    "originalPlayStatusSHA256After": "2d0af2037aeff6acfa20a4320803b38c00d7301f5b449e14046925aecae5c37d",
+    "originalPlayTrackedDiffSHA256Before": "4e7ea2a0d879cc4c06d2d5e6126f8ce93c7c1f0d5f0d61763b6ecf8be57dda3a",
+    "originalPlayTrackedDiffSHA256After": "4e7ea2a0d879cc4c06d2d5e6126f8ce93c7c1f0d5f0d61763b6ecf8be57dda3a",
+    "restored772SourceModified": false,
+    "existingReportsModified": false,
+    "temporaryBuildArtifactsCreated": 0,
+    "authorizedFourDocsUpdated": true,
+    "frozen9baDirectoryModifiedByThisAgent": false,
+    "frozen9baDirectoryPresentAtFinalCheck": false
+  },
+  "updatedAtUTC": "2026-10-29T16:31:38.075567+00:00",
+  "latestOutcomeAfterAuthorizedFixedRuns": {
+    "atUTC": "2026-10-29T18:19:28.238618+00:00",
+    "old926Attempt": "Preserved limited60; missingstaticresources found; not accepted",
+    "fixedB251": {
+      "raw": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-operable-n10.json",
+        "sha256": "81ddb8eef26ef14a0198f755481d973c53056b7e82baa3fe695a61c686419907"
+      },
+      "metrics": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-metrics.json",
+        "sha256": "4ee0f0fe48ee39bbf937722c9b61a0e1b40193a5ded82f26d3e61e917424fae3"
+      },
+      "sampleCount": 60,
+      "staticHTTP200Responses": 2609,
+      "acceptance3_3": false,
+      "failure": "Star directcoldP90 +28.145368percent > adopted10percent maximum"
+    },
+    "boundedDiagnostic20": {
+      "raw": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-star-cold-phase-fixed20-raw.json",
+        "sha256": "21e3f5e56af0032b551b0d038ded0f5741be320009684019dddb448827a517fc"
+      },
+      "analysis": {
+        "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-star-cold-phase-fixed20-analysis.json",
+        "sha256": "f9e3b15c84e85c1b01c56ac49cabf393702e8dfd3d2095e33a78a52da17bd37b"
+      },
+      "originalFailureNotReplaced": true,
+      "testSourceExactlyRestored": true,
+      "formalNormalAppReinstalledPreview0": true,
+      "ownServersAndExtractionsStoppedAndRemoved": true
+    },
+    "onlineStaticScopeGap": {
+      "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-online-room-resource-scope-audit.json",
+      "sha256": "8784c5839a831cdf411cb018e8f7adf8314eb51e5f1e9cb009292bb984d429fe",
+      "acceptance3_1": false
+    },
+    "onlyAuthorizedPersistentNativeSourceInputChange": "BundledcatalogJSON926→b251; controller e6d andRuntimeb61 unchanged. Temporarytest-only diagnosticpatch restored dcd09.",
+    "futurePlanOwner": "Root/fixauthor will publish finalavailable-online renderercoverage plusotherreviewedWebchanges, then freeze that finalsnapshot and pre-register one N1+60. No newexperiment by thisagent now; b251 results stay historicalactualmeasurements."
+  }
+}

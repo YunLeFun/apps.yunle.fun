@@ -1,0 +1,24 @@
+{
+  "kind": "final-a701-M3-owned-docs-static-checks",
+  "atUTC": "2026-10-29T19:26:05.401059+00:00",
+  "fourDocLinksChecked": 12,
+  "brokenLinks": [],
+  "ownedEvidenceJSONFilesParsed": 9,
+  "JSONFailures": [],
+  "pythonWorkflowASTParsed": true,
+  "eslintOwnedFourDocs": {
+    "errors": 0,
+    "warnings": 0,
+    "cache": false,
+    "dependencyInstallWarning": "pnpm notes installed patchedDependencies differs from lock; no install or lockfile mutation performed"
+  },
+  "docsBuildExecuted": false,
+  "isolatedDocsBuildPrepared": true,
+  "sourceFiles": {
+    "specs/native-game-discovery/requirements.md": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+    "specs/native-game-discovery/design.md": "1a0a434652611cfeb4c4fe182ea11d7da8b767713e3e8a492f81776b7ad03ce8",
+    "specs/native-game-discovery/tasks.md": "911a074d9a36406ea27fe69118700c21af981134034be1c53756436c0ae4b387",
+    "docs/product/native-game-discovery.md": "99acfe973845b8cc5f725970d158f09dce9ca752bf562fe6701476a2b689c310"
+  },
+  "checkboxScope": "3.1/3.3 nowcomplete from finalfrozenN1+one60+independentreview; 0.1/M4/M5 unchanged"
+}

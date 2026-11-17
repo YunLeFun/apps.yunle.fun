@@ -1,0 +1,117 @@
+{
+  "recordedAtUTC": "2026-10-29T16:45:19.819Z",
+  "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "roomBefore": {
+    "kind": "room.snapshot",
+    "roomId": "room_e0c8851f374edf8b943a5fe8e4616f4971fd1fba49eb02da2ad342d380c870eb",
+    "revision": 1,
+    "status": "waiting",
+    "sequence": 2763,
+    "requestId": "37559.1996",
+    "inviteCode": "S54NFY",
+    "selectedGame": {
+      "gameId": "gomoku",
+      "rulesetId": "freestyle-15",
+      "rulesetVersion": 1
+    },
+    "memberUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "memberCount": 1,
+    "seatUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "online": [
+      true
+    ]
+  },
+  "roomAfter": {
+    "kind": "room.snapshot",
+    "roomId": "room_e0c8851f374edf8b943a5fe8e4616f4971fd1fba49eb02da2ad342d380c870eb",
+    "revision": 4,
+    "status": "waiting",
+    "sequence": 2804,
+    "requestId": "37559.2002",
+    "inviteCode": "D94UVS",
+    "selectedGame": {
+      "gameId": "gomoku",
+      "rulesetId": "freestyle-15",
+      "rulesetVersion": 1
+    },
+    "memberUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "memberCount": 1,
+    "seatUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "online": [
+      true
+    ]
+  },
+  "sameCanonicalRoom": true,
+  "oldCodeInvalidated": true,
+  "currentURL": "https://play.yunle.fun/room/D94UVS",
+  "UIChinese": "邀请码不存在或已失效",
+  "matchmaking": [
+    {
+      "path": "/matchmake/joinOrCreate/play_room",
+      "host": "api.play.yunle.fun",
+      "status": 400
+    }
+  ],
+  "errorResponse": {
+    "code": 400,
+    "error": "邀请码不存在或已失效"
+  },
+  "socketCreatedCount": 0,
+  "frames": [],
+  "hasMore": false,
+  "truncated": false,
+  "newCodeFreshJoinVerified": true,
+  "currentRoomState": "two authenticated clients connected for Native retry verification; not yet cleanup",
+  "privateEvidenceDigests": [
+    {
+      "name": "rotated-old-code-772.json",
+      "bytes": 1876,
+      "sha256": "03df2b8f7fc7738de50a4f70532107963e0e2c4b083025251adbbc9cb8eb3779"
+    },
+    {
+      "name": "rotated-old-code-772-ui.png",
+      "bytes": 45454,
+      "sha256": "927a47468f512338da03d14d61dc8951227f994c0f150b60c2ff468d7071c2a1"
+    },
+    {
+      "name": "rotated-new-code-fresh-native-join.json",
+      "bytes": 733,
+      "sha256": "5a81da6a876b78a1f338c571a639041b4360ba6c0a8a4d0df6d2d6208ebecae2"
+    }
+  ],
+  "newCodeJoinAuthority": {
+    "kind": "room.snapshot",
+    "roomId": "room_e0c8851f374edf8b943a5fe8e4616f4971fd1fba49eb02da2ad342d380c870eb",
+    "revision": 6,
+    "status": "waiting",
+    "sequence": 2807,
+    "requestId": "37559.2002",
+    "inviteCode": "D94UVS",
+    "selectedGame": {
+      "gameId": "gomoku",
+      "rulesetId": "freestyle-15",
+      "rulesetVersion": 1
+    },
+    "memberUIDHashes": [
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1",
+      "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4"
+    ],
+    "memberCount": 2,
+    "seatUIDHashes": [
+      "ac1e1b3e745ec74a542cf64be12b9088cb4f84b9be9d07af01fbe856f56861b4",
+      "fe760387ad529a4e072efd35f23e0d9ccec4a9d370bd2f46d279167489fd08b1"
+    ],
+    "online": [
+      true,
+      true
+    ]
+  }
+}

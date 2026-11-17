@@ -1,75 +1,83 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// --- Capacitor mock：通过变量控制平台 ---
-let mockIsNative = false
-let mockPlatform = 'web'
+const h = vi.hoisted(() => ({
+  native: false,
+  mounted: [] as Array<() => void | Promise<void>>,
+  unmounted: [] as Array<() => void>,
+  browserHandlers: new Map<string, () => void | Promise<void>>(),
+  open: vi.fn(),
+  returned: vi.fn(),
+  remove: vi.fn(),
+}))
 
-vi.mock('@capacitor/core', () => ({
-  Capacitor: {
-    isNativePlatform: () => mockIsNative,
-    getPlatform: () => mockPlatform,
+vi.mock('../../app/host-runtime', () => ({
+  hostEnvironment: { isNative: () => h.native },
+  hostBrowser: {
+    addListener: async (event: string, handler: () => void | Promise<void>) => {
+      h.browserHandlers.set(event, handler)
+      return { remove: h.remove }
+    },
   },
 }))
 
-vi.mock('@capacitor/browser', () => ({
-  Browser: {
-    addListener: vi.fn(async () => ({ remove: vi.fn() })),
-  },
-}))
+vi.stubGlobal('openInAppBrowser', h.open)
+vi.stubGlobal('onMounted', (callback: () => void | Promise<void>) => h.mounted.push(callback))
+vi.stubGlobal('onUnmounted', (callback: () => void) => h.unmounted.push(callback))
 
-const mockOpenInAppBrowser = vi.fn()
-vi.stubGlobal('openInAppBrowser', mockOpenInAppBrowser)
-// usePaymentChannel 在组件外调用时 onMounted/onUnmounted 为空操作
-vi.stubGlobal('onMounted', vi.fn())
-vi.stubGlobal('onUnmounted', vi.fn())
-
-const { getPaymentChannel, usePaymentChannel, WWW_PRICING_URL, WWW_WALLET_URL } = await import('../../app/composables/usePaymentChannel')
+const { usePaymentChannel, WWW_PRICING_URL, WWW_WALLET_URL } = await import('../../app/composables/usePaymentChannel')
+let documentFixture: EventTarget & { visibilityState: string }
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockIsNative = false
-  mockPlatform = 'web'
+  h.native = false
+  h.mounted.length = 0
+  h.unmounted.length = 0
+  h.browserHandlers.clear()
+  h.remove.mockImplementation(async () => h.browserHandlers.clear())
+  documentFixture = Object.assign(new EventTarget(), { visibilityState: 'hidden' })
+  vi.stubGlobal('document', documentFixture)
 })
 
-describe('getPaymentChannel', () => {
-  it('web 环境走 web-redirect', () => {
-    expect(getPaymentChannel()).toBe('web-redirect')
-  })
-
-  it('iOS 原生壳走 ios-iap', () => {
-    mockIsNative = true
-    mockPlatform = 'ios'
-    expect(getPaymentChannel()).toBe('ios-iap')
-  })
-
-  it('android 原生壳走 web-redirect', () => {
-    mockIsNative = true
-    mockPlatform = 'android'
-    expect(getPaymentChannel()).toBe('web-redirect')
-  })
-})
-
-describe('usePaymentChannel', () => {
-  it('web 通道可购买，跳转携带 from=apps', () => {
-    const { canPurchase, goRecharge, goMembershipPurchase } = usePaymentChannel()
-    expect(canPurchase.value).toBe(true)
-
-    goRecharge()
-    expect(mockOpenInAppBrowser).toHaveBeenCalledWith(WWW_WALLET_URL)
+describe('online payment return', () => {
+  it('keeps recharge and membership links attributed to Apps', () => {
+    const payment = usePaymentChannel()
+    payment.goRecharge()
+    expect(h.open).toHaveBeenLastCalledWith(WWW_WALLET_URL)
     expect(WWW_WALLET_URL).toContain('from=apps')
-
-    goMembershipPurchase()
-    expect(mockOpenInAppBrowser).toHaveBeenCalledWith(WWW_PRICING_URL)
+    payment.goMembershipPurchase()
+    expect(h.open).toHaveBeenLastCalledWith(WWW_PRICING_URL)
     expect(WWW_PRICING_URL).toContain('from=apps')
   })
 
-  it('iOS IAP 通道下外跳入口禁用（审核 3.1.1）', () => {
-    mockIsNative = true
-    mockPlatform = 'ios'
-    const { canPurchase, goRecharge } = usePaymentChannel()
-    expect(canPurchase.value).toBe(false)
+  it('reconciles once after Android checkout closes, without refreshing on unrelated dismissals', async () => {
+    h.native = true
+    const payment = usePaymentChannel({ onReturn: h.returned })
+    await h.mounted[0]!()
+    await h.browserHandlers.get('browserFinished')!()
+    expect(h.returned).not.toHaveBeenCalled()
+    payment.goRecharge()
+    await h.browserHandlers.get('browserFinished')!()
+    await h.browserHandlers.get('browserFinished')!()
+    expect(h.returned).toHaveBeenCalledOnce()
+    h.unmounted[0]!()
+    expect(h.remove).toHaveBeenCalledOnce()
+    expect(h.browserHandlers.size).toBe(0)
+  })
 
-    goRecharge()
-    expect(mockOpenInAppBrowser).not.toHaveBeenCalled()
+  it('waits for the Web tab to become visible and removes its return listener on unmount', async () => {
+    const payment = usePaymentChannel({ onReturn: h.returned })
+    await h.mounted[0]!()
+    payment.goMembershipPurchase()
+    documentFixture.dispatchEvent(new Event('visibilitychange'))
+    expect(h.returned).not.toHaveBeenCalled()
+    documentFixture.visibilityState = 'visible'
+    documentFixture.dispatchEvent(new Event('visibilitychange'))
+    documentFixture.dispatchEvent(new Event('visibilitychange'))
+    await Promise.resolve()
+    expect(h.returned).toHaveBeenCalledOnce()
+    h.unmounted[0]!()
+    payment.goRecharge()
+    documentFixture.dispatchEvent(new Event('visibilitychange'))
+    expect(h.returned).toHaveBeenCalledOnce()
   })
 })

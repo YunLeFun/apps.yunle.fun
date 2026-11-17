@@ -8,9 +8,14 @@ struct CatalogView: View {
     @State private var category = "全部"
     @State private var showScanner = false
     @State private var isRefreshing = false
+    @StateObject private var discovery = WorkshopDiscoveryStore()
     @State private var returningShortcut: Shortcut?
     @AccessibilityFocusState(for: .voiceOver) private var focusedShortcut: Shortcut?
-    private enum Shortcut: Hashable { case applications, workshops, lookup }
+    private enum Shortcut: Hashable { case assistant, applications, workshops, lookup }
+
+    private var isBrowsing: Bool {
+        query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && category == "全部"
+    }
 
     private var filtered: [CloudApplication] {
         catalog.applications.filter { (category == "全部" || $0.browseCategory == category) && $0.matches(query) }
@@ -26,10 +31,13 @@ struct CatalogView: View {
         .sheet(isPresented: $showScanner) { QRScannerView(purpose: .workshop) }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
+        .task { await discovery.load() }
         .refreshable {
             isRefreshing = true
             defer { isRefreshing = false }
+            async let recommendations: Void = discovery.load()
             await catalog.refreshWithIcons()
+            await recommendations
         }
         .animation(Motion.standard(reduceMotion: reduceMotion), value: category)
         .haptic(.selection, trigger: category)
@@ -54,12 +62,16 @@ struct CatalogView: View {
 
     private var content: some View {
         List {
-            Section {
-                shortcut("我的应用", systemImage: "square.and.pencil", entry: .applications) { MyApplicationsView() }
-                shortcut("个人工坊", systemImage: "person.2", entry: .workshops) { MyWorkshopsView() }
-                shortcut("打开个人工坊", systemImage: "number", entry: .lookup) { WorkshopLookupView() }
+            if isBrowsing {
+                Section {
+                    shortcut("AI 找应用", systemImage: "sparkles", entry: .assistant) { AssistantView() }
+                        .accessibilityIdentifier("catalog.assistant")
+                }
             }
             CatalogStatusView()
+            if isBrowsing {
+                WorkshopDiscoverySections(applications: catalog.applications, payload: discovery.payload)
+            }
             if catalog.isLoading && catalog.applications.isEmpty {
                 EmptyView()
             } else if let error = catalog.error, catalog.applications.isEmpty {
@@ -89,6 +101,13 @@ struct CatalogView: View {
                                 .accessibilityIdentifier("catalog.filter.clear")
                         }
                     }
+                }
+            }
+            if isBrowsing {
+                Section("个人工坊与创作") {
+                    shortcut("我的应用", systemImage: "square.and.pencil", entry: .applications) { MyApplicationsView() }
+                    shortcut("个人工坊", systemImage: "person.2", entry: .workshops) { MyWorkshopsView() }
+                    shortcut("打开个人工坊", systemImage: "number", entry: .lookup) { WorkshopLookupView() }
                 }
             }
         }

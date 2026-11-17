@@ -1,9 +1,5 @@
-import type { CapacitorBarcodeScannerScanResult } from '@capacitor/barcode-scanner'
-import {
-  CapacitorBarcodeScanner,
-  CapacitorBarcodeScannerCameraDirection,
-  CapacitorBarcodeScannerTypeHintALLOption,
-} from '@capacitor/barcode-scanner'
+import type { NativeBarcodeResult } from '~/host-runtime'
+import { scanNativeBarcode } from '~/host-runtime'
 
 export function useBarcodeScan() {
   const isScanning = ref(false)
@@ -12,18 +8,11 @@ export function useBarcodeScan() {
    * 开始扫描
    * 用户主动取消时返回 null 而非抛错
    */
-  async function startScan(): Promise<CapacitorBarcodeScannerScanResult | null> {
+  async function startScan(): Promise<NativeBarcodeResult | null> {
     try {
       isScanning.value = true
 
-      const result = await CapacitorBarcodeScanner.scanBarcode({
-        hint: CapacitorBarcodeScannerTypeHintALLOption.ALL,
-        cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
-        scanInstructions: '将二维码或条形码放入框内',
-        cancelButtonAccessibilityLabel: '取消扫码',
-        torchButtonOnAccessibilityLabel: '关闭手电筒',
-        torchButtonOffAccessibilityLabel: '打开手电筒',
-      })
+      const result = await scanNativeBarcode()
 
       // 检查是否扫描成功
       if (result.ScanResult) {

@@ -1,0 +1,151 @@
+{
+  "recordedAt": "2026-10-29T06:51:15.597907+08:00",
+  "productSourceChangedInContinuation": false,
+  "catalogVersion": "9ba070328a0cce53691378e6a631c0239b5a7f9f926ad61504e8c1da4e4f0405",
+  "testSources": [
+    {
+      "path": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+      "sha256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/NativeRuntimeSessionTests.swift",
+      "sha256": "bd0a9b6065c8a73d5de728ff453d42a20e3d33d2bf71348ea454f964db976c3b"
+    },
+    {
+      "path": "apps/ios/YunleFunTests/WebProfileRepositoryTests.swift",
+      "sha256": "f06734e08e2c02e4cf1312ffde1ee7d8c0a6fd29516c170c9837dc8b41f7bc34"
+    },
+    {
+      "path": "apps/ios/YunleFunUITests/NativeGamesUITests.swift",
+      "sha256": "a5f0b04f382849ee1a0cd0c94c45acadc922781a6e2fc5cb70861b5c91e4f59e"
+    }
+  ],
+  "candidate": {
+    "path": "/tmp/yunle-native-games.uGZuY9/DerivedData/Build/Products/Debug-iphonesimulator/YunleFun.app/YunleFun",
+    "sha256": "477ce19e40d186d52f79479e26027ba7c60b24da1243cf270a207c7d9b0c18e0",
+    "previousBinarySHA256": "a08a452bdfb1d9b5e43fd529fda7c1a8e04e5dec95e5e815a343c852086fe2bd",
+    "unchangedBinary": false,
+    "lastSuccessfulBuildLog": "/tmp/yunle-native-games.uGZuY9/frame-memory-build.log",
+    "launchedPID": 25932,
+    "explicitDebugPreview": true,
+    "binaryScope": "New build fingerprint; not byte-identical to previous executable. Selected product source hashes compared independently; prior N10 remains same product source/static catalog, not this executable hash."
+  },
+  "artifacts": [
+    {
+      "path": "/Users/yunyou/.codex/visualizations/2026/10/28/01a182f1-abfa-7290-bb5e-2f23f550dbcc/native-game-discovery/native-games-startup-gameplay-candidate.jpg",
+      "sha256": "9a8ea9fbb53955db0c175828204ac79e1571ac73d10397ecfaa09402fae43984"
+    }
+  ],
+  "selectedProductSourceFingerprints": [
+    {
+      "repo": "apps",
+      "path": "apps/ios/YunleFun/App/YunleFunApp.swift",
+      "sha256": "1bfeec0dbea1f85b657dd7cc0f8a65af99e4c5e189aeedcffd287821d23c17f0",
+      "baselineSHA256": "1bfeec0dbea1f85b657dd7cc0f8a65af99e4c5e189aeedcffd287821d23c17f0",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "apps",
+      "path": "apps/ios/YunleFun/App/AppRootView.swift",
+      "sha256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+      "baselineSHA256": "51c5f37368a0a395d781c8f4ff89a5ddf31fb06175a0ae1421b1b9210b68a1a4",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "apps",
+      "path": "apps/ios/YunleFun/Services/AccountStore.swift",
+      "sha256": "df80adf44696c9026f2ccd865ee0e53b3cbfb2906562049983496aca294ffd58",
+      "baselineSHA256": "df80adf44696c9026f2ccd865ee0e53b3cbfb2906562049983496aca294ffd58",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "apps",
+      "path": "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift",
+      "sha256": "d90fb618a50eac189bbe7ddfab748a33e5de3f17a62e0850421273545182b3ae",
+      "baselineSHA256": "d90fb618a50eac189bbe7ddfab748a33e5de3f17a62e0850421273545182b3ae",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "apps",
+      "path": "apps/ios/YunleFun/Services/NativeGameResourceCache.swift",
+      "sha256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+      "baselineSHA256": "30aa1e87d12bbbe02447de4911e891797be070f2dba1381bf83885018b655260",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "apps",
+      "path": "apps/ios/YunleFun/Features/Games/GamesView.swift",
+      "sha256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+      "baselineSHA256": "985f9853fa3546ae3aa7a45185fb4cd19e1eca6956eb5e0e9863480fa32ccd57",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/web/app/components/PaperStarArena.vue",
+      "sha256": "18c32deea8d9888556c3430012bc071e5082c445928bef967446c6149a77c579",
+      "baselineSHA256": "18c32deea8d9888556c3430012bc071e5082c445928bef967446c6149a77c579",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/web/app/assets/css/paper-star-adventure.css",
+      "sha256": "075a9c35b442b326b9df3d4a2a0131f10821ea41406192dd59224fb8a4acc3ac",
+      "baselineSHA256": "075a9c35b442b326b9df3d4a2a0131f10821ea41406192dd59224fb8a4acc3ac",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/web/app/components/PaperStarTutorialCoach.vue",
+      "sha256": "dbf879007d84164d8286fb3256ba2965404071bd8ab46530e598aac03ffbf4d0",
+      "baselineSHA256": "dbf879007d84164d8286fb3256ba2965404071bd8ab46530e598aac03ffbf4d0",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/web/app/utils/room-creation.ts",
+      "sha256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+      "baselineSHA256": "3c688b81502a7853af74b3dd9dfeb17efb3b4ee0140a14d777131b81cb0b12ea",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/game-server/src/http/api.ts",
+      "sha256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+      "baselineSHA256": "228f95c468b61040563df62e5756a2bda72a7c7e9c03e338c7a2299ff19874ee",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/game-server/src/room/service.ts",
+      "sha256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1",
+      "baselineSHA256": "5254baf25ec5ea47176b9fa52e0d1c9a7f8d94a81255d397eb13bf23169e6cf1",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/game-server/src/room/cloudbase-repository.ts",
+      "sha256": "8fab3117f9beddecf97daa84377de0e75418ebadfd6a12d5e0c08639ab1cb5f6",
+      "baselineSHA256": "8fab3117f9beddecf97daa84377de0e75418ebadfd6a12d5e0c08639ab1cb5f6",
+      "matchesPreviousCandidateSource": true
+    },
+    {
+      "repo": "play",
+      "path": "apps/game-server/src/colyseus/play-room.ts",
+      "sha256": "13da2d0b8ec83ecbc41f8cc84e7ee8e08e5b46ea45b45fe966e82635013692ef",
+      "baselineSHA256": "13da2d0b8ec83ecbc41f8cc84e7ee8e08e5b46ea45b45fe966e82635013692ef",
+      "matchesPreviousCandidateSource": true
+    }
+  ],
+  "selectedProductSourceAllMatchPreviousCandidate": true,
+  "purpose": "After startup-v3 and Star frame/RSS diagnostics",
+  "currentDiagnosticSource": {
+    "path": "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift",
+    "sha256": "31549f9da304677682671eb937156f9f99ff022193796b243eda4e060cafbd0c"
+  },
+  "normalPreviewServer": {
+    "pid": 12343,
+    "script": "/tmp/yunle-native-games.uGZuY9/preview-server.mjs",
+    "traceEnabled": false,
+    "faultEnabled": false
+  }
+}

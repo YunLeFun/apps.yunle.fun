@@ -1,0 +1,806 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "4502D5E9-9630-4AF0-9050-3C9109139FD0",
+      "deviceName" : "iPhone 18 Pro",
+      "modelName" : "iPhone 18 Pro",
+      "osBuildNumber" : "24A434",
+      "osVersion" : "27.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "0.016s",
+                  "durationInSeconds" : 0.015856027603149414,
+                  "name" : "testAccountSwitchClearsProjectionAndRestoresOnlyTheSelectedNamespace()",
+                  "nodeIdentifier" : "HomeLibraryTests/testAccountSwitchClearsProjectionAndRestoresOnlyTheSelectedNamespace()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testAccountSwitchClearsProjectionAndRestoresOnlyTheSelectedNamespace",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0075s",
+                  "durationInSeconds" : 0.007536053657531738,
+                  "name" : "testAnotherDeviceUsesSelectedAuthorWithoutTrustingItsMarketCache()",
+                  "nodeIdentifier" : "HomeLibraryTests/testAnotherDeviceUsesSelectedAuthorWithoutTrustingItsMarketCache()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testAnotherDeviceUsesSelectedAuthorWithoutTrustingItsMarketCache",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0048s",
+                  "durationInSeconds" : 0.004845976829528809,
+                  "name" : "testBatchPinningIsAllOrNothingAndWritesOnce()",
+                  "nodeIdentifier" : "HomeLibraryTests/testBatchPinningIsAllOrNothingAndWritesOnce()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testBatchPinningIsAllOrNothingAndWritesOnce",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0023s",
+                  "durationInSeconds" : 0.0022559165954589844,
+                  "name" : "testChangingSourceKeepsOnlyCachedPresentationForAnUnavailableMarketEntry()",
+                  "nodeIdentifier" : "HomeLibraryTests/testChangingSourceKeepsOnlyCachedPresentationForAnUnavailableMarketEntry()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testChangingSourceKeepsOnlyCachedPresentationForAnUnavailableMarketEntry",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0052s",
+                  "durationInSeconds" : 0.005190014839172363,
+                  "name" : "testConfirmedPublicRemovalPreservesArtworkAndDoesNotDisableScopedApps()",
+                  "nodeIdentifier" : "HomeLibraryTests/testConfirmedPublicRemovalPreservesArtworkAndDoesNotDisableScopedApps()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testConfirmedPublicRemovalPreservesArtworkAndDoesNotDisableScopedApps",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0022s",
+                  "durationInSeconds" : 0.002196073532104492,
+                  "name" : "testCorruptDataIsReportedAndNeverOverwritten()",
+                  "nodeIdentifier" : "HomeLibraryTests/testCorruptDataIsReportedAndNeverOverwritten()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testCorruptDataIsReportedAndNeverOverwritten",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0068s",
+                  "durationInSeconds" : 0.0068089962005615234,
+                  "name" : "testCreatingAFolderGathersMembersAtTheDropTarget()",
+                  "nodeIdentifier" : "HomeLibraryTests/testCreatingAFolderGathersMembersAtTheDropTarget()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testCreatingAFolderGathersMembersAtTheDropTarget",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0012s",
+                  "durationInSeconds" : 0.001217961311340332,
+                  "name" : "testEditOrderMovingAndLanding()",
+                  "nodeIdentifier" : "HomeLibraryTests/testEditOrderMovingAndLanding()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testEditOrderMovingAndLanding",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0031s",
+                  "durationInSeconds" : 0.003090977668762207,
+                  "name" : "testExplicitSourceSelectionChangesAlreadyInstalledAppAndSurvivesRestart()",
+                  "nodeIdentifier" : "HomeLibraryTests/testExplicitSourceSelectionChangesAlreadyInstalledAppAndSurvivesRestart()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testExplicitSourceSelectionChangesAlreadyInstalledAppAndSurvivesRestart",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.008s",
+                  "durationInSeconds" : 0.008016109466552734,
+                  "name" : "testFolderMembershipFollowsAddRemovePinAndDissolve()",
+                  "nodeIdentifier" : "HomeLibraryTests/testFolderMembershipFollowsAddRemovePinAndDissolve()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testFolderMembershipFollowsAddRemovePinAndDissolve",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0014s",
+                  "durationInSeconds" : 0.0014129877090454102,
+                  "name" : "testGridMetricsAlignColumnsToTheLayoutMargins()",
+                  "nodeIdentifier" : "HomeLibraryTests/testGridMetricsAlignColumnsToTheLayoutMargins()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testGridMetricsAlignColumnsToTheLayoutMargins",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0036s",
+                  "durationInSeconds" : 0.0035849809646606445,
+                  "name" : "testLegacyBuiltInYunHomeRestoresWithoutChangingCloudReferences()",
+                  "nodeIdentifier" : "HomeLibraryTests/testLegacyBuiltInYunHomeRestoresWithoutChangingCloudReferences()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testLegacyBuiltInYunHomeRestoresWithoutChangingCloudReferences",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0051s",
+                  "durationInSeconds" : 0.005115985870361328,
+                  "name" : "testMigrationCannotOverwriteAChangedOldFileAndCanRetryAfterRestoringThatFile()",
+                  "nodeIdentifier" : "HomeLibraryTests/testMigrationCannotOverwriteAChangedOldFileAndCanRetryAfterRestoringThatFile()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testMigrationCannotOverwriteAChangedOldFileAndCanRetryAfterRestoringThatFile",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0042s",
+                  "durationInSeconds" : 0.004153013229370117,
+                  "name" : "testPersistsOrderAndRecentUseWithoutMixingAccounts()",
+                  "nodeIdentifier" : "HomeLibraryTests/testPersistsOrderAndRecentUseWithoutMixingAccounts()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testPersistsOrderAndRecentUseWithoutMixingAccounts",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0025s",
+                  "durationInSeconds" : 0.0024629831314086914,
+                  "name" : "testRemoteMarketSelectionCannotReusePreviousAuthorURLAndCanRefreshPublicMetadata()",
+                  "nodeIdentifier" : "HomeLibraryTests/testRemoteMarketSelectionCannotReusePreviousAuthorURLAndCanRefreshPublicMetadata()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testRemoteMarketSelectionCannotReusePreviousAuthorURLAndCanRefreshPublicMetadata",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0024s",
+                  "durationInSeconds" : 0.0024080276489257812,
+                  "name" : "testRemovingAnApplicationRemovesItsRecentEntry()",
+                  "nodeIdentifier" : "HomeLibraryTests/testRemovingAnApplicationRemovesItsRecentEntry()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testRemovingAnApplicationRemovesItsRecentEntry",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.003s",
+                  "durationInSeconds" : 0.002969980239868164,
+                  "name" : "testReorderIgnoresUnknownDuplicateAndUnchangedKeys()",
+                  "nodeIdentifier" : "HomeLibraryTests/testReorderIgnoresUnknownDuplicateAndUnchangedKeys()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testReorderIgnoresUnknownDuplicateAndUnchangedKeys",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0043s",
+                  "durationInSeconds" : 0.004269003868103027,
+                  "name" : "testReorderingASubsetKeepsHiddenSlotsAndPersists()",
+                  "nodeIdentifier" : "HomeLibraryTests/testReorderingASubsetKeepsHiddenSlotsAndPersists()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testReorderingASubsetKeepsHiddenSlotsAndPersists",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0059s",
+                  "durationInSeconds" : 0.005920052528381348,
+                  "name" : "testReorderingGridItemsMovesWholeFolders()",
+                  "nodeIdentifier" : "HomeLibraryTests/testReorderingGridItemsMovesWholeFolders()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testReorderingGridItemsMovesWholeFolders",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0049s",
+                  "durationInSeconds" : 0.004884958267211914,
+                  "name" : "testReorderingTheDock()",
+                  "nodeIdentifier" : "HomeLibraryTests/testReorderingTheDock()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testReorderingTheDock",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0018s",
+                  "durationInSeconds" : 0.0017679929733276367,
+                  "name" : "testSnapshotsAndServerCopiesWithoutFoldersStayCompatible()",
+                  "nodeIdentifier" : "HomeLibraryTests/testSnapshotsAndServerCopiesWithoutFoldersStayCompatible()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testSnapshotsAndServerCopiesWithoutFoldersStayCompatible",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0032s",
+                  "durationInSeconds" : 0.003222942352294922,
+                  "name" : "testSourceLifetimeFollowsAllReferencesAndOldServersCannotEraseIt()",
+                  "nodeIdentifier" : "HomeLibraryTests/testSourceLifetimeFollowsAllReferencesAndOldServersCannotEraseIt()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testSourceLifetimeFollowsAllReferencesAndOldServersCannotEraseIt",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.002s",
+                  "durationInSeconds" : 0.0020020008087158203,
+                  "name" : "testSourceValidationRejectsAmbiguityDanglingReferencesAndInvalidAuthorNames()",
+                  "nodeIdentifier" : "HomeLibraryTests/testSourceValidationRejectsAmbiguityDanglingReferencesAndInvalidAuthorNames()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testSourceValidationRejectsAmbiguityDanglingReferencesAndInvalidAuthorNames",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0012s",
+                  "durationInSeconds" : 0.0011769533157348633,
+                  "name" : "testUnknownHomeApplicationUsesShortUnavailableName()",
+                  "nodeIdentifier" : "HomeLibraryTests/testUnknownHomeApplicationUsesShortUnavailableName()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testUnknownHomeApplicationUsesShortUnavailableName",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0037s",
+                  "durationInSeconds" : 0.003738999366760254,
+                  "name" : "testVersionTwoMigratesAuthorProvenanceWithoutChangingReferencesOrLosingPendingEdits()",
+                  "nodeIdentifier" : "HomeLibraryTests/testVersionTwoMigratesAuthorProvenanceWithoutChangingReferencesOrLosingPendingEdits()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests/testVersionTwoMigratesAuthorProvenanceWithoutChangingReferencesOrLosingPendingEdits",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "HomeLibraryTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/HomeLibraryTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0.057s",
+                  "durationInSeconds" : 0.05709993839263916,
+                  "name" : "testAnotherImporterCannotReassignAnAlreadyClaimedRecord()",
+                  "nodeIdentifier" : "LegacyImportTests/testAnotherImporterCannotReassignAnAlreadyClaimedRecord()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testAnotherImporterCannotReassignAnAlreadyClaimedRecord",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.011s",
+                  "durationInSeconds" : 0.011417031288146973,
+                  "name" : "testArchiveFailureAndCorruptionNeverFallBackToReplacingData()",
+                  "nodeIdentifier" : "LegacyImportTests/testArchiveFailureAndCorruptionNeverFallBackToReplacingData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testArchiveFailureAndCorruptionNeverFallBackToReplacingData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.058s",
+                  "durationInSeconds" : 0.058039069175720215,
+                  "name" : "testCancelledReadDoesNotStageOrPublishPartialData()",
+                  "nodeIdentifier" : "LegacyImportTests/testCancelledReadDoesNotStageOrPublishPartialData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testCancelledReadDoesNotStageOrPublishPartialData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0088s",
+                  "durationInSeconds" : 0.008785009384155273,
+                  "name" : "testCompletedImportCannotOverwriteLaterHomeEdits()",
+                  "nodeIdentifier" : "LegacyImportTests/testCompletedImportCannotOverwriteLaterHomeEdits()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testCompletedImportCannotOverwriteLaterHomeEdits",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0035s",
+                  "durationInSeconds" : 0.0034630298614501953,
+                  "name" : "testConfirmationRejectsAccountRoundTripAndGuestTransition()",
+                  "nodeIdentifier" : "LegacyImportTests/testConfirmationRejectsAccountRoundTripAndGuestTransition()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testConfirmationRejectsAccountRoundTripAndGuestTransition",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0033s",
+                  "durationInSeconds" : 0.0033360719680786133,
+                  "name" : "testConfirmRechecksArchiveIntegrityWithoutAnExplicitReload()",
+                  "nodeIdentifier" : "LegacyImportTests/testConfirmRechecksArchiveIntegrityWithoutAnExplicitReload()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testConfirmRechecksArchiveIntegrityWithoutAnExplicitReload",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0034s",
+                  "durationInSeconds" : 0.003392934799194336,
+                  "name" : "testDiscoverStagesProtectedCopyAndLeavesNativeHomeUntouched()",
+                  "nodeIdentifier" : "LegacyImportTests/testDiscoverStagesProtectedCopyAndLeavesNativeHomeUntouched()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testDiscoverStagesProtectedCopyAndLeavesNativeHomeUntouched",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.004s",
+                  "durationInSeconds" : 0.004040956497192383,
+                  "name" : "testFailedArchiveReloadInvalidatesPreviouslyDisplayedConfirmation()",
+                  "nodeIdentifier" : "LegacyImportTests/testFailedArchiveReloadInvalidatesPreviouslyDisplayedConfirmation()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testFailedArchiveReloadInvalidatesPreviouslyDisplayedConfirmation",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.011s",
+                  "durationInSeconds" : 0.01088404655456543,
+                  "name" : "testHomeWriteFailureKeepsClaimAndCanResumeAfterRepair()",
+                  "nodeIdentifier" : "LegacyImportTests/testHomeWriteFailureKeepsClaimAndCanResumeAfterRepair()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testHomeWriteFailureKeepsClaimAndCanResumeAfterRepair",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0096s",
+                  "durationInSeconds" : 0.009579062461853027,
+                  "name" : "testImportPreservesReferencesPreferencesAndBackupAcrossRestart()",
+                  "nodeIdentifier" : "LegacyImportTests/testImportPreservesReferencesPreferencesAndBackupAcrossRestart()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testImportPreservesReferencesPreferencesAndBackupAcrossRestart",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.014s",
+                  "durationInSeconds" : 0.01444399356842041,
+                  "name" : "testInterruptedClaimOnlyResumesForOriginalAccountAndKeepsCloudBase()",
+                  "nodeIdentifier" : "LegacyImportTests/testInterruptedClaimOnlyResumesForOriginalAccountAndKeepsCloudBase()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testInterruptedClaimOnlyResumesForOriginalAccountAndKeepsCloudBase",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0085s",
+                  "durationInSeconds" : 0.008513927459716797,
+                  "name" : "testInterruptedCompletionDoesNotReplaceEditsMadeAfterHomeCommit()",
+                  "nodeIdentifier" : "LegacyImportTests/testInterruptedCompletionDoesNotReplaceEditsMadeAfterHomeCommit()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testInterruptedCompletionDoesNotReplaceEditsMadeAfterHomeCommit",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "5秒",
+                  "durationInSeconds" : 5.030465006828308,
+                  "name" : "testLateReaderCannotReplaceAnImportCompletedByAnotherWindow()",
+                  "nodeIdentifier" : "LegacyImportTests/testLateReaderCannotReplaceAnImportCompletedByAnotherWindow()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testLateReaderCannotReplaceAnImportCompletedByAnotherWindow",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.014s",
+                  "durationInSeconds" : 0.013799905776977539,
+                  "name" : "testMalformedStorageCannotEraseOrGrantNativeData()",
+                  "nodeIdentifier" : "LegacyImportTests/testMalformedStorageCannotEraseOrGrantNativeData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testMalformedStorageCannotEraseOrGrantNativeData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2秒",
+                  "durationInSeconds" : 2.7617690563201904,
+                  "name" : "testNativeImportStateScreenshots()",
+                  "nodeIdentifier" : "LegacyImportTests/testNativeImportStateScreenshots()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testNativeImportStateScreenshots",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0012s",
+                  "durationInSeconds" : 0.001199960708618164,
+                  "name" : "testOldStorageContractPreservesLayoutAndAccountHintsWithoutAuthenticating()",
+                  "nodeIdentifier" : "LegacyImportTests/testOldStorageContractPreservesLayoutAndAccountHintsWithoutAuthenticating()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testOldStorageContractPreservesLayoutAndAccountHintsWithoutAuthenticating",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2秒",
+                  "durationInSeconds" : 2.1513699293136597,
+                  "name" : "testRealPersistentWebKitRecordsAreNotMistakenForEmptyStorage()",
+                  "nodeIdentifier" : "LegacyImportTests/testRealPersistentWebKitRecordsAreNotMistakenForEmptyStorage()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testRealPersistentWebKitRecordsAreNotMistakenForEmptyStorage",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.59s",
+                  "durationInSeconds" : 0.5885250568389893,
+                  "name" : "testRealWebKitReaderFindsNoLegacyDataInFreshStore()",
+                  "nodeIdentifier" : "LegacyImportTests/testRealWebKitReaderFindsNoLegacyDataInFreshStore()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testRealWebKitReaderFindsNoLegacyDataInFreshStore",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.702895998954773,
+                  "name" : "testRealWebKitReaderUsesSameOriginAndNeverReadsCredentialKeys()",
+                  "nodeIdentifier" : "LegacyImportTests/testRealWebKitReaderUsesSameOriginAndNeverReadsCredentialKeys()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests/testRealWebKitReaderUsesSameOriginAndNeverReadsCredentialKeys",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "LegacyImportTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/LegacyImportTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "2秒",
+                  "durationInSeconds" : 2.125627040863037,
+                  "name" : "testAcceptedMarketAcquisitionCancelsThePreviousPersonalReadAndPreservesItsSheet()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testAcceptedMarketAcquisitionCancelsThePreviousPersonalReadAndPreservesItsSheet()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testAcceptedMarketAcquisitionCancelsThePreviousPersonalReadAndPreservesItsSheet",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2秒",
+                  "durationInSeconds" : 2.4957950115203857,
+                  "name" : "testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testAccountSwitchPartitionsWebStorageWithoutDeletingDrafts",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.7472999095916748,
+                  "name" : "testChangedLaunchURLReplacesSessionAndClosesDetails()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testChangedLaunchURLReplacesSessionAndClosesDetails()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testChangedLaunchURLReplacesSessionAndClosesDetails",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.428655982017517,
+                  "name" : "testCloseCallbackClosesWholeApplicationFromNestedSheet()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testCloseCallbackClosesWholeApplicationFromNestedSheet()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testCloseCallbackClosesWholeApplicationFromNestedSheet",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.4642820358276367,
+                  "name" : "testConfirmedRecoveryClosesCurrentPageAndReopensTheSelectedStore()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testConfirmedRecoveryClosesCurrentPageAndReopensTheSelectedStore()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testConfirmedRecoveryClosesCurrentPageAndReopensTheSelectedStore",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.3241530656814575,
+                  "name" : "testCorruptOwnershipMetadataCannotFallBackToTheLegacySharedStore()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testCorruptOwnershipMetadataCannotFallBackToTheLegacySharedStore()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testCorruptOwnershipMetadataCannotFallBackToTheLegacySharedStore",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.4182960987091064,
+                  "name" : "testDetachedAnchorCannotPresentIntoPreviouslyCachedWindow()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testDetachedAnchorCannotPresentIntoPreviouslyCachedWindow()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testDetachedAnchorCannotPresentIntoPreviouslyCachedWindow",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.454271912574768,
+                  "name" : "testEndingAnotherOldSessionDoesNotCancelTheNewPersonalPublicationRead()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testEndingAnotherOldSessionDoesNotCancelTheNewPersonalPublicationRead()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testEndingAnotherOldSessionDoesNotCancelTheNewPersonalPublicationRead",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.461906909942627,
+                  "name" : "testEndingApplicationClosesNestedSheetsAndKeepsHomeEntry()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testEndingApplicationClosesNestedSheetsAndKeepsHomeEntry()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testEndingApplicationClosesNestedSheetsAndKeepsHomeEntry",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.3039849996566772,
+                  "name" : "testEndingTheSameApplicationCancelsItsPendingPersonalPublicationRead()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testEndingTheSameApplicationCancelsItsPendingPersonalPublicationRead()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testEndingTheSameApplicationCancelsItsPendingPersonalPublicationRead",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.5314499139785767,
+                  "name" : "testIdentityResetCancelsQueuedOpenAndLateMinimizeCallback()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testIdentityResetCancelsQueuedOpenAndLateMinimizeCallback()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testIdentityResetCancelsQueuedOpenAndLateMinimizeCallback",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.4147719144821167,
+                  "name" : "testIdentityResetRemovesSessionAndNestedFirstPartySheets()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testIdentityResetRemovesSessionAndNestedFirstPartySheets()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testIdentityResetRemovesSessionAndNestedFirstPartySheets",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.296697974205017,
+                  "name" : "testIdentitySwitchDismissesTheUnavailableApplication()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testIdentitySwitchDismissesTheUnavailableApplication()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testIdentitySwitchDismissesTheUnavailableApplication",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.502384066581726,
+                  "name" : "testLatePersonalPublicationReadCannotReplaceALaterPublicOpen()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testLatePersonalPublicationReadCannotReplaceALaterPublicOpen()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testLatePersonalPublicationReadCannotReplaceALaterPublicOpen",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.4323689937591553,
+                  "name" : "testLatestOpenWinsDuringAnimatedSwitch()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testLatestOpenWinsDuringAnimatedSwitch()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testLatestOpenWinsDuringAnimatedSwitch",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.97s",
+                  "durationInSeconds" : 0.9695559740066528,
+                  "name" : "testMinimizeClosesNestedSheetsAndRestoresSameBrowser()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testMinimizeClosesNestedSheetsAndRestoresSameBrowser()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testMinimizeClosesNestedSheetsAndRestoresSameBrowser",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.390989065170288,
+                  "name" : "testOldCloseCallbackCannotEndReplacementSession()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testOldCloseCallbackCannotEndReplacementSession()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testOldCloseCallbackCannotEndReplacementSession",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.5310839414596558,
+                  "name" : "testPersonalAndMarketRevisionsWithTheSameIDAndURLUseDifferentSessions()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testPersonalAndMarketRevisionsWithTheSameIDAndURLUseDifferentSessions()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testPersonalAndMarketRevisionsWithTheSameIDAndURLUseDifferentSessions",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.521651029586792,
+                  "name" : "testRecoveryRejectsGuestAndIdentityChangesIncludingReturnToSameAccount()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testRecoveryRejectsGuestAndIdentityChangesIncludingReturnToSameAccount()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testRecoveryRejectsGuestAndIdentityChangesIncludingReturnToSameAccount",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.6270389556884766,
+                  "name" : "testSwitchFromDetailsUsesOneRootAndRestoresSameBrowser()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testSwitchFromDetailsUsesOneRootAndRestoresSameBrowser()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testSwitchFromDetailsUsesOneRootAndRestoresSameBrowser",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1秒",
+                  "durationInSeconds" : 1.2961289882659912,
+                  "name" : "testUnavailableOpenCancelsThePreviousPersonalReadInsteadOfAllowingALateApplication()",
+                  "nodeIdentifier" : "NativeRuntimeSessionTests/testUnavailableOpenCancelsThePreviousPersonalReadInsteadOfAllowingALateApplication()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests/testUnavailableOpenCancelsThePreviousPersonalReadInsteadOfAllowingALateApplication",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "NativeRuntimeSessionTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/NativeRuntimeSessionTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0.0074s",
+                  "durationInSeconds" : 0.00739896297454834,
+                  "name" : "testAccountsGuestAndProvidersRemainSeparateAfterRepositoryRecreation()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testAccountsGuestAndProvidersRemainSeparateAfterRepositoryRecreation()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testAccountsGuestAndProvidersRemainSeparateAfterRepositoryRecreation",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "5秒",
+                  "durationInSeconds" : 5.570139050483704,
+                  "name" : "testActualGuestContinuationRetainsBothStoresWhenAccountAlreadyHasData()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testActualGuestContinuationRetainsBothStoresWhenAccountAlreadyHasData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testActualGuestContinuationRetainsBothStoresWhenAccountAlreadyHasData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2秒",
+                  "durationInSeconds" : 2.621890068054199,
+                  "name" : "testActualWebKitStoresKeepAccountDataAfterRecreatingRepositoryAndBrowser()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testActualWebKitStoresKeepAccountDataAfterRecreatingRepositoryAndBrowser()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testActualWebKitStoresKeepAccountDataAfterRecreatingRepositoryAndBrowser",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0051s",
+                  "durationInSeconds" : 0.005073904991149902,
+                  "name" : "testApplicationOriginAndTrustScopeAreBoundWithoutPersistingURLSecrets()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testApplicationOriginAndTrustScopeAreBoundWithoutPersistingURLSecrets()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testApplicationOriginAndTrustScopeAreBoundWithoutPersistingURLSecrets",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0043s",
+                  "durationInSeconds" : 0.004311084747314453,
+                  "name" : "testCorruptFutureAndDuplicateOwnershipFilesArePreservedAndRejected()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testCorruptFutureAndDuplicateOwnershipFilesArePreservedAndRejected()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testCorruptFutureAndDuplicateOwnershipFilesArePreservedAndRejected",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0044s",
+                  "durationInSeconds" : 0.0044100284576416016,
+                  "name" : "testExplicitRecoverySwapsStoresAndPreservesTheDisplacedData()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testExplicitRecoverySwapsStoresAndPreservesTheDisplacedData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testExplicitRecoverySwapsStoresAndPreservesTheDisplacedData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0043s",
+                  "durationInSeconds" : 0.0042580366134643555,
+                  "name" : "testGuestLoginAdoptsOnlyTheAcceptedApplicationAndRotatesItsGuestAssignment()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testGuestLoginAdoptsOnlyTheAcceptedApplicationAndRotatesItsGuestAssignment()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testGuestLoginAdoptsOnlyTheAcceptedApplicationAndRotatesItsGuestAssignment",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0019s",
+                  "durationInSeconds" : 0.0019170045852661133,
+                  "name" : "testInvalidIdentityDoesNotCreateMetadataAndMissingStateNeverAdoptsLegacyData()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testInvalidIdentityDoesNotCreateMetadataAndMissingStateNeverAdoptsLegacyData()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testInvalidIdentityDoesNotCreateMetadataAndMissingStateNeverAdoptsLegacyData",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.00095s",
+                  "durationInSeconds" : 0.0009469985961914062,
+                  "name" : "testReadingRecoveryChoicesDoesNotCreateAnAssignmentOrFile()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testReadingRecoveryChoicesDoesNotCreateAnAssignmentOrFile()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testReadingRecoveryChoicesDoesNotCreateAnAssignmentOrFile",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0041s",
+                  "durationInSeconds" : 0.004126906394958496,
+                  "name" : "testRecoveryRejectsForeignAccountApplicationProviderAndStaleConfirmation()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testRecoveryRejectsForeignAccountApplicationProviderAndStaleConfirmation()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testRecoveryRejectsForeignAccountApplicationProviderAndStaleConfirmation",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0046s",
+                  "durationInSeconds" : 0.0046350955963134766,
+                  "name" : "testRecoveryWriteFailurePreservesBothAssignmentsAndAllowsRetry()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testRecoveryWriteFailurePreservesBothAssignmentsAndAllowsRetry()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testRecoveryWriteFailurePreservesBothAssignmentsAndAllowsRetry",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0043s",
+                  "durationInSeconds" : 0.004325985908508301,
+                  "name" : "testRemovingAccountRetainsDataWithoutExposingItToGuestOrAnotherAccount()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testRemovingAccountRetainsDataWithoutExposingItToGuestOrAnotherAccount()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testRemovingAccountRetainsDataWithoutExposingItToGuestOrAnotherAccount",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0037s",
+                  "durationInSeconds" : 0.003722071647644043,
+                  "name" : "testReturningAccountPreservesItsExistingDraftsAndRetainsGuestContinuation()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testReturningAccountPreservesItsExistingDraftsAndRetainsGuestContinuation()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testReturningAccountPreservesItsExistingDraftsAndRetainsGuestContinuation",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0033s",
+                  "durationInSeconds" : 0.003265976905822754,
+                  "name" : "testStaleGuestPageCannotRebindOrConsumeANewerGuestsAssignment()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testStaleGuestPageCannotRebindOrConsumeANewerGuestsAssignment()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testStaleGuestPageCannotRebindOrConsumeANewerGuestsAssignment",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0032s",
+                  "durationInSeconds" : 0.00324404239654541,
+                  "name" : "testTwoRepositoryInstancesReloadBeforeMutationInsteadOfLosingAssignments()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testTwoRepositoryInstancesReloadBeforeMutationInsteadOfLosingAssignments()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testTwoRepositoryInstancesReloadBeforeMutationInsteadOfLosingAssignments",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0023s",
+                  "durationInSeconds" : 0.002252936363220215,
+                  "name" : "testWriteFailureCannotPublishGuestOwnershipTransfer()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testWriteFailureCannotPublishGuestOwnershipTransfer()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testWriteFailureCannotPublishGuestOwnershipTransfer",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0.0018s",
+                  "durationInSeconds" : 0.0018399953842163086,
+                  "name" : "testWriteFailureDuringRemovalPreservesEveryAssignment()",
+                  "nodeIdentifier" : "WebProfileRepositoryTests/testWriteFailureDuringRemovalPreservesEveryAssignment()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests/testWriteFailureDuringRemovalPreservesEveryAssignment",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "WebProfileRepositoryTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests/WebProfileRepositoryTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "YunleFunTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/YunleFun/YunleFunTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "YunleFun",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

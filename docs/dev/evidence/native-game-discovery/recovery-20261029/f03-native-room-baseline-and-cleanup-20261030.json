@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "atUTC": "2026-10-30T08:07:31.947622+00:00",
+  "roundId": "F03",
+  "gameId": "flight-chess",
+  "inviteCodeSHA256": "c207951b17df2839aaffc9f919a90df37e4ccabbc4b6950eca624a00e52ad04e",
+  "roomIdSHA256": "6ea909af02f41003507d00b0cce8454f54247115ed7ede5da43fe0de172817d5",
+  "normalProductPID": 72102,
+  "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+  "newCandidateSource": "Assistant53059 UI correction only; Runtimeb61/Controllere6d unchanged",
+  "creation": {
+    "sourceFlow": "Existing logged-in independent B browser, actual legacy Play home Flight radio, explicit new room action",
+    "inviteUiUpperBoundMilliseconds": 1461.668874999974,
+    "authorityUpperBoundMilliseconds": 2639.839208999998,
+    "matchingGate": {
+      "passed": true,
+      "streamId": "iab4-tab10-unlocked-20261030",
+      "requestId": "19204.293",
+      "role": "player",
+      "connectionReadySequence": 157,
+      "firstMatchingSnapshotSequence": 158
+    },
+    "configurationBetweenSubmitAndAuthorityRead": false,
+    "limits": "One real UI create observation. Both intervals are Cua observer upper bounds including UI/IPC/polling, not isolated RTT, Native clock, N10 or P50/P90."
+  },
+  "NativeJoin": {
+    "normalAccount": "Existing A zero vs B standard, independent identities",
+    "actualTypedValueVerified": true,
+    "actualPlayerSeatsAndNativeRoomVisible": true,
+    "observerMembershipGatePassed": true,
+    "observerUpperBoundMilliseconds": 41100.41075000004,
+    "observerLimit": "Includes initial bounded polling and later screenshot/operator gap; not isolated join latency.",
+    "nativeRoomConnectedMilliseconds": 23993.902083,
+    "nativeRoomConnectedLocal": "2026-10-30 15:56:58.661",
+    "nativeGameReadyMilliseconds": 167830.794667,
+    "gameReadyLimit": "Includes human wait in room until both ready. Must not label167s as page loading or subtract it against observer clock. First Native Play room after normal candidate installation; profile not cleared.24s connection requires follow-up diagnosis.",
+    "nativeLogSHA256": "1bfd406381c693cf77371b1c387ab4a270cefc82a62a3b552ad2b9f556a9ecb2"
+  },
+  "outcome": {
+    "passed": false,
+    "countedTowardN10": false,
+    "recoveryAttempted": false,
+    "reason": "Driver assumed browser first, but server selected NativeA as first seat. Tool/model gaps exceeded turn deadlines and both autoplay seats appeared. Native attempted roll was not reliably attributed before deadline and is not claimed as a verified manual move.",
+    "currentSuccessfulCounts": {
+      "gomoku": 4,
+      "flight-chess": 0
+    },
+    "normalCleanup": {
+      "nativeVisibleAlreadyLeft": true,
+      "browserVisibleAlreadyLeft": true,
+      "browserRoomLeft": {
+        "streamId": "iab4-tab10-unlocked-20261030",
+        "sequence": 272,
+        "requestId": "19204.293",
+        "protocolEvidence": "raw-application-protocol-3",
+        "observation": {
+          "clockId": "cua-root-unlocked-20261030T0752",
+          "readStartedUptimeMilliseconds": 1345966.251084,
+          "readCompletedUptimeMilliseconds": 1345979.556667,
+          "completedAtUTC": "2026-10-30T08:03:20.123Z"
+        },
+        "kind": "room.left",
+        "roomIdSHA256": "6ea909af02f41003507d00b0cce8454f54247115ed7ede5da43fe0de172817d5",
+        "reason": "left"
+      },
+      "browserSocketClosed": {
+        "streamId": "iab4-tab10-unlocked-20261030",
+        "sequence": 274,
+        "requestId": "19204.293",
+        "protocolEvidence": "raw-cdp-lifecycle",
+        "observation": {
+          "clockId": "cua-root-unlocked-20261030T0752",
+          "readStartedUptimeMilliseconds": 1345966.251084,
+          "readCompletedUptimeMilliseconds": 1345979.556667,
+          "completedAtUTC": "2026-10-30T08:03:20.123Z"
+        },
+        "kind": "socket-closed"
+      }
+    }
+  },
+  "collector": {
+    "moduleSHA256": "ff17de9d8cbb91b638c0e8e657ff756ecbd377e88156769e62579f791bc65c6a",
+    "offlineAssertions": 35,
+    "issues": [],
+    "wireEvidenceSHA256": "d87425747bf1f95c390976a6fa26bf6efe77b2b170cd6446f20f43209a1434d3",
+    "clockId": "cua-root-unlocked-20261030T0752",
+    "streamId": "iab4-tab10-unlocked-20261030",
+    "noRawAuthFramesPersisted": true
+  },
+  "rawArtifacts": {
+    "f03-creation.json": {
+      "bytes": 7143,
+      "sha256": "465fd196304fa4ad1b29b08a025c7000c2d3eb4331d30cd8785e200393c2c304"
+    },
+    "f03-native-join.json": {
+      "bytes": 3803,
+      "sha256": "828390bd157bda00f13f4cd337f30ed18e4d4e92583a4792952aedd6f66d7ea1"
+    },
+    "f03-native-left.png": {
+      "bytes": 204736,
+      "sha256": "61b5c7eb93a2b4b949ec568e436c85007348b08bdcf9b84db1641eeb06df5633"
+    },
+    "f03-native-ready.oslog.txt": {
+      "bytes": 334,
+      "sha256": "1bfd406381c693cf77371b1c387ab4a270cefc82a62a3b552ad2b9f556a9ecb2"
+    },
+    "f03-native-room-waiting.png": {
+      "bytes": 284031,
+      "sha256": "14a0569c61b62eb6ed3a8bc60135e05f9c3b9d0cc43909b335e5d7a0bbc09b77"
+    },
+    "f03-native-typed-code.ax.txt": {
+      "bytes": 3499,
+      "sha256": "b86381fdc2cb85c13feca453670f2766c181df967af92d99ee736ea8215a7c76"
+    },
+    "f03-timeout-autoplay-native.png": {
+      "bytes": 249128,
+      "sha256": "46fb24ca151f19ae2039dcf1a10d610e2d8712e5442b636fea200203fd828a25"
+    },
+    "wire-observations.json": {
+      "bytes": 190764,
+      "sha256": "d87425747bf1f95c390976a6fa26bf6efe77b2b170cd6446f20f43209a1434d3"
+    }
+  },
+  "ledgerSHA256": "7bf01b5a8f8f084183c6e439fe37de130011433c582113978b52b975a4752daf",
+  "requiredNext": "Prepare next actual UI actions before ready, choose authoritative currentSeat, record accepted manual actions and recovery; complete remaining10 valid rooms per game without relabeling F01/F02/F03."
+}

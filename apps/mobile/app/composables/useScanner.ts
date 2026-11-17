@@ -1,3 +1,4 @@
+import { hostEnvironment, pickNativePhoto } from '~/host-runtime'
 /**
  * 统一扫码 composable
  *
@@ -7,7 +8,6 @@
  * - 支持从相册选择图片解码二维码
  * - 用户主动取消时静默处理，不抛错
  */
-import { Capacitor } from '@capacitor/core'
 
 type AlbumImageSource = File | string
 
@@ -80,7 +80,7 @@ export function useScanner() {
 }
 
 async function pickPhotoLibraryImageSource(): Promise<AlbumImageSource | null> {
-  if (!Capacitor.isNativePlatform())
+  if (!hostEnvironment.isNative())
     return pickImageFile()
 
   try {
@@ -95,17 +95,7 @@ async function pickPhotoLibraryImageSource(): Promise<AlbumImageSource | null> {
 }
 
 async function pickNativePhotoLibraryImageSource(): Promise<string | null> {
-  const { Camera, MediaTypeSelection } = await import('@capacitor/camera')
-  const { results } = await Camera.chooseFromGallery({
-    mediaType: MediaTypeSelection.Photo,
-    allowMultipleSelection: false,
-    editable: 'no',
-    quality: 100,
-    correctOrientation: true,
-    presentationStyle: 'fullscreen',
-  })
-
-  return results[0]?.webPath ?? null
+  return pickNativePhoto()
 }
 
 function isPhotoPickerCancel(error: unknown): boolean {

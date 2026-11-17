@@ -1,0 +1,17 @@
+{
+  "classification": "local-real-loopback-full-room-regression",
+  "sourceReport": "spectator-role-20261029.json",
+  "total": 31,
+  "passed": 31,
+  "failed": 0,
+  "pending": 0,
+  "success": true,
+  "rawReportSHA256": "bb0cb3cde8352a1cf7d48b173aeaee82cd780b968c30b5be9994a6b4e7a75e33",
+  "testFile": "apps/game-server/test/colyseus-play-room.test.ts",
+  "notes": [
+    "31 complete Colyseus tests rerun after spectator role source fix; no name filter",
+    "Used installed local vitest executable; no dependency installation",
+    "No production network or simulator use",
+    "Test shutdown hooks completed and runner exited"
+  ]
+}

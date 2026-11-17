@@ -1,0 +1,717 @@
+{
+  "schemaVersion": 1,
+  "kind": "final-a701-fixed-version-one-formal60",
+  "atUTC": "2026-10-29T19:22:30.814437+00:00",
+  "raw": {
+    "filename": "m3-final-a701-operable-n10.json",
+    "sha256": "f00ab2d10ea153ece4ecf3670128dcd1e5e1f63673418c1235cd08c14d28fe85",
+    "exactXCTestAttachmentBytes": true
+  },
+  "XCTest": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "sampleCount": 60,
+    "elapsedCommandSeconds": 182.384
+  },
+  "formalRunInvocationCount": 1,
+  "resamplingTrimmingOrReplacedHistoricalFailure": false,
+  "groups": [
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "same-build-home-detail-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 1118.3716666655528,
+      "p90Milliseconds": 1867.586708334784,
+      "sampleOrderMilliseconds": [
+        1633.2887916669279,
+        1161.77454166791,
+        1149.4428749992949,
+        1006.8399166666495,
+        1869.8592499986262,
+        1062.656166666784,
+        1118.3716666655528,
+        1035.4395833328454,
+        1867.586708334784,
+        1008.2869166653836
+      ],
+      "sortedMilliseconds": [
+        1006.8399166666495,
+        1008.2869166653836,
+        1035.4395833328454,
+        1062.656166666784,
+        1118.3716666655528,
+        1149.4428749992949,
+        1161.77454166791,
+        1633.2887916669279,
+        1867.586708334784,
+        1869.8592499986262
+      ],
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+    },
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "direct-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 881.2414166677627,
+      "p90Milliseconds": 1531.8459583340882,
+      "sampleOrderMilliseconds": [
+        918.6449583321519,
+        889.5350416660222,
+        881.2414166677627,
+        1531.8459583340882,
+        896.4948749999166,
+        854.3121250004333,
+        867.1937083327066,
+        867.789541667662,
+        1534.2840416669787,
+        854.4908749991009
+      ],
+      "sortedMilliseconds": [
+        854.3121250004333,
+        854.4908749991009,
+        867.1937083327066,
+        867.789541667662,
+        881.2414166677627,
+        889.5350416660222,
+        896.4948749999166,
+        918.6449583321519,
+        1531.8459583340882,
+        1534.2840416669787
+      ],
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+    },
+    {
+      "gameId": "gomoku",
+      "modeId": "computer",
+      "stage": "direct-mode-prepared",
+      "n": 10,
+      "p50Milliseconds": 833.7102916666481,
+      "p90Milliseconds": 1451.3396250004007,
+      "sampleOrderMilliseconds": [
+        833.7102916666481,
+        1636.0207083325804,
+        843.231624998225,
+        824.4193333321164,
+        829.2890833326965,
+        862.733208334248,
+        1451.3396250004007,
+        814.258708333,
+        839.6462916680321,
+        828.7997499992343
+      ],
+      "sortedMilliseconds": [
+        814.258708333,
+        824.4193333321164,
+        828.7997499992343,
+        829.2890833326965,
+        833.7102916666481,
+        839.6462916680321,
+        843.231624998225,
+        862.733208334248,
+        1451.3396250004007,
+        1636.0207083325804
+      ],
+      "resourceVersion": "3903a7af984899d4cedc76cb50c9817e7fb14092dc8e43cd57d4b0d7f5e1d5e2"
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "same-build-home-detail-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 4268.493291667255,
+      "p90Milliseconds": 4403.839500000686,
+      "sampleOrderMilliseconds": [
+        4261.462708333056,
+        4271.696124998925,
+        4212.65620833401,
+        4492.864083335007,
+        4195.797708334794,
+        4403.839500000686,
+        4228.531166667381,
+        4357.763458332556,
+        4268.493291667255,
+        4366.8587083320745
+      ],
+      "sortedMilliseconds": [
+        4195.797708334794,
+        4212.65620833401,
+        4228.531166667381,
+        4261.462708333056,
+        4268.493291667255,
+        4271.696124998925,
+        4357.763458332556,
+        4366.8587083320745,
+        4403.839500000686,
+        4492.864083335007
+      ],
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "direct-mode-cold",
+      "n": 10,
+      "p50Milliseconds": 3909.455708333553,
+      "p90Milliseconds": 4096.255791666408,
+      "sampleOrderMilliseconds": [
+        3909.455708333553,
+        4096.255791666408,
+        3901.941041667669,
+        4111.651083332617,
+        3845.0025000001915,
+        4019.8884999990696,
+        3833.412750000207,
+        4014.761249998628,
+        3888.6087500013673,
+        4064.878166665949
+      ],
+      "sortedMilliseconds": [
+        3833.412750000207,
+        3845.0025000001915,
+        3888.6087500013673,
+        3901.941041667669,
+        3909.455708333553,
+        4014.761249998628,
+        4019.8884999990696,
+        4064.878166665949,
+        4096.255791666408,
+        4111.651083332617
+      ],
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+    },
+    {
+      "gameId": "paper-star",
+      "modeId": "local",
+      "stage": "direct-mode-prepared",
+      "n": 10,
+      "p50Milliseconds": 3889.9272916660266,
+      "p90Milliseconds": 4012.5060833324824,
+      "sampleOrderMilliseconds": [
+        4005.0380416669213,
+        3822.487541667215,
+        4560.283333332336,
+        3889.9272916660266,
+        4012.5060833324824,
+        3879.3653333341354,
+        3959.925375000239,
+        3871.2503333317727,
+        3977.3883749985544,
+        3837.4027916670457
+      ],
+      "sortedMilliseconds": [
+        3822.487541667215,
+        3837.4027916670457,
+        3871.2503333317727,
+        3879.3653333341354,
+        3889.9272916660266,
+        3959.925375000239,
+        3977.3883749985544,
+        4005.0380416669213,
+        4012.5060833324824,
+        4560.283333332336
+      ],
+      "resourceVersion": "38ef6921e58e2d83d1d013769a68208a762ebc64a5f37f90f827365f0280b973"
+    }
+  ],
+  "comparisons": [
+    {
+      "gameId": "gomoku",
+      "preparedP50ReductionPercent": 25.453199815731043,
+      "coldP90ChangePercent": -17.977250989329207,
+      "preparedP50BetterThanLegacy": true,
+      "coldP90RegressionNoMoreThan10Percent": true,
+      "preparedVersusDirectColdP50ChangePercent": -5.393655370947492
+    },
+    {
+      "gameId": "paper-star",
+      "preparedP50ReductionPercent": 8.86884373791208,
+      "coldP90ChangePercent": -6.984444104609844,
+      "preparedP50BetterThanLegacy": true,
+      "coldP90RegressionNoMoreThan10Percent": true,
+      "preparedVersusDirectColdP50ChangePercent": -0.4995175319648437
+    }
+  ],
+  "acceptance3_3Complete": true,
+  "configuredPaperStarCountdownMilliseconds": 3000,
+  "starPlayingAndRendererTrueSamples": 30,
+  "resourceDisclosure": {
+    "starObservedSamples": [
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 1,
+        "nativeTapToReadyMilliseconds": 4261.462708333056,
+        "documentRendererAtMilliseconds": 548,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3316,
+        "resourceCountAcrossObservedDocuments": 120,
+        "documentNavigationResponseEndMilliseconds": [
+          5,
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 2,
+        "nativeTapToReadyMilliseconds": 4271.696124998925,
+        "documentRendererAtMilliseconds": 810,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3558,
+        "resourceCountAcrossObservedDocuments": 84,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 3,
+        "nativeTapToReadyMilliseconds": 4212.65620833401,
+        "documentRendererAtMilliseconds": 519,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3306,
+        "resourceCountAcrossObservedDocuments": 122,
+        "documentNavigationResponseEndMilliseconds": [
+          4,
+          3
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 4,
+        "nativeTapToReadyMilliseconds": 4492.864083335007,
+        "documentRendererAtMilliseconds": 788,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3560,
+        "resourceCountAcrossObservedDocuments": 86,
+        "documentNavigationResponseEndMilliseconds": [
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 5,
+        "nativeTapToReadyMilliseconds": 4195.797708334794,
+        "documentRendererAtMilliseconds": 811,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3568,
+        "resourceCountAcrossObservedDocuments": 85,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 6,
+        "nativeTapToReadyMilliseconds": 4403.839500000686,
+        "documentRendererAtMilliseconds": 572,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3330,
+        "resourceCountAcrossObservedDocuments": 104,
+        "documentNavigationResponseEndMilliseconds": [
+          6,
+          37
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 7,
+        "nativeTapToReadyMilliseconds": 4228.531166667381,
+        "documentRendererAtMilliseconds": 835,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3584,
+        "resourceCountAcrossObservedDocuments": 84,
+        "documentNavigationResponseEndMilliseconds": [
+          6
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 8,
+        "nativeTapToReadyMilliseconds": 4357.763458332556,
+        "documentRendererAtMilliseconds": 841,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3605,
+        "resourceCountAcrossObservedDocuments": 85,
+        "documentNavigationResponseEndMilliseconds": [
+          8
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 9,
+        "nativeTapToReadyMilliseconds": 4268.493291667255,
+        "documentRendererAtMilliseconds": 659,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3354,
+        "resourceCountAcrossObservedDocuments": 122,
+        "documentNavigationResponseEndMilliseconds": [
+          4,
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "same-build-home-detail-mode-cold",
+        "sample": 10,
+        "nativeTapToReadyMilliseconds": 4366.8587083320745,
+        "documentRendererAtMilliseconds": 842,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3594,
+        "resourceCountAcrossObservedDocuments": 85,
+        "documentNavigationResponseEndMilliseconds": [
+          7
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 1,
+        "nativeTapToReadyMilliseconds": 3909.455708333553,
+        "documentRendererAtMilliseconds": 557,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3233,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          6
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 2,
+        "nativeTapToReadyMilliseconds": 4096.255791666408,
+        "documentRendererAtMilliseconds": 571,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3289,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          43
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 3,
+        "nativeTapToReadyMilliseconds": 3901.941041667669,
+        "documentRendererAtMilliseconds": 526,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3236,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 4,
+        "nativeTapToReadyMilliseconds": 4111.651083332617,
+        "documentRendererAtMilliseconds": 627,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3317,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          28
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 5,
+        "nativeTapToReadyMilliseconds": 3845.0025000001915,
+        "documentRendererAtMilliseconds": 466,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3216,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 6,
+        "nativeTapToReadyMilliseconds": 4019.8884999990696,
+        "documentRendererAtMilliseconds": 610,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3238,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          6
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 7,
+        "nativeTapToReadyMilliseconds": 3833.412750000207,
+        "documentRendererAtMilliseconds": 524,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3222,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 8,
+        "nativeTapToReadyMilliseconds": 4014.761249998628,
+        "documentRendererAtMilliseconds": 518,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3242,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 9,
+        "nativeTapToReadyMilliseconds": 3888.6087500013673,
+        "documentRendererAtMilliseconds": 561,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3234,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-cold",
+        "sample": 10,
+        "nativeTapToReadyMilliseconds": 4064.878166665949,
+        "documentRendererAtMilliseconds": 552,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3267,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          7
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 1,
+        "nativeTapToReadyMilliseconds": 4005.0380416669213,
+        "documentRendererAtMilliseconds": 559,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3210,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          11
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 2,
+        "nativeTapToReadyMilliseconds": 3822.487541667215,
+        "documentRendererAtMilliseconds": 427,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3196,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 3,
+        "nativeTapToReadyMilliseconds": 4560.283333332336,
+        "documentRendererAtMilliseconds": 482,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3210,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          6
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 4,
+        "nativeTapToReadyMilliseconds": 3889.9272916660266,
+        "documentRendererAtMilliseconds": 465,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3211,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 5,
+        "nativeTapToReadyMilliseconds": 4012.5060833324824,
+        "documentRendererAtMilliseconds": 513,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3219,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 6,
+        "nativeTapToReadyMilliseconds": 3879.3653333341354,
+        "documentRendererAtMilliseconds": 459,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3221,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          8
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 7,
+        "nativeTapToReadyMilliseconds": 3959.925375000239,
+        "documentRendererAtMilliseconds": 487,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3206,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 8,
+        "nativeTapToReadyMilliseconds": 3871.2503333317727,
+        "documentRendererAtMilliseconds": 499,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3208,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 9,
+        "nativeTapToReadyMilliseconds": 3977.3883749985544,
+        "documentRendererAtMilliseconds": 462,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3214,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          5
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      },
+      {
+        "stage": "direct-mode-prepared",
+        "sample": 10,
+        "nativeTapToReadyMilliseconds": 3837.4027916670457,
+        "documentRendererAtMilliseconds": 451,
+        "documentRendererPhase": "countdown",
+        "documentPlayingReadySnapshotAtMilliseconds": 3200,
+        "resourceCountAcrossObservedDocuments": 50,
+        "documentNavigationResponseEndMilliseconds": [
+          4
+        ],
+        "resourceTimingOverflowCount": 0,
+        "mainDocumentOnly": true
+      }
+    ],
+    "clockBoundary": "Native tap-to-ready is systemuptime. Renderer/resource/playing snapshots use eachdocumentperformanceclock; no cross-clock subtraction or totalminus3000 as pureresourcewait.",
+    "coverage": "Each departing document is frozen immediately before its actual link click, plus the final genuine engine-ready snapshot. Retain the latest snapshot per timeOrigin to avoid SPA double counting. Requests still pending at a cutoff or completing between click and unload may be absent; this is not complete network-path coverage.",
+    "completeResourceWaitWallClockKnown": false,
+    "parallelResourceDurationSumsAreNotWallTime": true,
+    "zeroTransferSizeDoesNotProveCacheHit": true
+  },
+  "staticServerCounter": {
+    "startByte": 345976,
+    "endByte": 1225103,
+    "requestCount": 2969,
+    "statusCounts": {
+      "200": 2969
+    },
+    "badJSONLines": 0,
+    "unfrozenFixturePaths": [],
+    "non200Responses": [],
+    "scope": "Complete serializedJSON bytewindow for thisformal60 only; not allnetworkpaths or independent cachehitproof"
+  },
+  "binding": {
+    "webSourceAttribution": "6ff97db619b7140aa76609e5c2f2a766175fc25e; root verified EO production, exact bytes frozen independently",
+    "catalogVersion": "a7011d9ff8aeb3542a8fa6979485f8b3bbd389bd5cad67cc221c464f472d1b63",
+    "buildID": "fe3fda5f-b9ff-4829-bd8a-afa68fbb9c87",
+    "publicArchiveSHA256": "0a21ef3c62ef1d38c2eb394219f7d958cd8f881ebc4bcb1134180c10214544b7",
+    "freezeReceiptSHA256": "6bed9838f65dcbf33c75ab076876632a3031b8edc5125a1a0bad3740063f83e9",
+    "sourceGuards": {
+      "apps/mobile/ios/App/App/WebViewController.swift": "e6d22106f2b76bf3f7e4b5ad4d33c97b03fc33c5bffb408160d24421b44e7e5c",
+      "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "b61f007adba218023146ad4aaa8d03c0fa03052e6aaa6f7d3064c7cd4389ca20",
+      "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "dcd09c65ffb400213fb785bbd5203da295567336171c53fc3cabb3f88cf880ab"
+    },
+    "catalogSourceSHA256": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b",
+    "runReceiptSHA256": "340f6b8d9f00a4f9a33c1a38d3e25bb960d66c0b635bc9a77e79c4ecbaa9208d",
+    "testBinarySHA256": "47b771779718bf2623781eb071d2279115520ac311bba93c20463b415ade5818",
+    "sourceUnchangedDuringRun": true,
+    "productsUnchangedDuringRun": true,
+    "productFiles": {
+      "YunleFun": "86bb74531b26a46d2cc3bd73e941ec424579dfd9d78186eefce9fba494adbe29",
+      "YunleFun.debug.dylib": "257a9dde4ab30e1f3ac6c30e3522f21b20e217b52cac7301f0cd45216b130d71",
+      "Info.plist": "dd7c662f083fc0037388b7c2ee0456b2fc98a61b10c1a8158ff57769e8123ba5",
+      "native-game-catalog-v1.json": "7bb3727e3a76df52fadecbbd918de097296a8c11b089e65181b4479667176a9b"
+    }
+  },
+  "scopeLimits": [
+    "SharediPhone18Pro/iOS27 Debug simulator, fixedloopbackHTTP publicbuild, fixtureidentity preloaded, UIKit animations off",
+    "FreshWebView with only fixtureprofile HTTPmemory/disk cachescleared; WebKitprocess andOS cache notreset",
+    "Actualvisible legacyanchors automaticallypolled20ms; observer/poll overhead included; nohuman thinktime model",
+    "Only main-documentresource snapshots andrenderer observations; pendingrequests/worker/externalpaths may be absent",
+    "This is same-build entrycomparison andnot a direct historicalnativecommit comparison; historicalb251failure retained",
+    "Preparedvsdirectcold is reportedseparately; do notattribute allentry improvement toresourcecache"
+  ],
+  "nextAction": "Report unchanged one-run distribution; preserve anyfailure rather than resample. Complete separateM5 andnormalApp restoration."
+}

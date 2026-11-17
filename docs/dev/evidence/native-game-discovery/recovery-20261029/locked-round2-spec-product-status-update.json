@@ -1,0 +1,124 @@
+{
+  "kind": "locked-round2-spec-product-M5-status-correction",
+  "atUTC": "2026-10-29T20:09:35.510933+00:00",
+  "changedFiles": [
+    "specs/native-game-discovery/tasks.md",
+    "docs/product/native-game-discovery.md"
+  ],
+  "unchangedOwnedFiles": [
+    "specs/native-game-discovery/requirements.md",
+    "specs/native-game-discovery/design.md"
+  ],
+  "beforeSHA256": {
+    "specs/native-game-discovery/requirements.md": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+    "specs/native-game-discovery/design.md": "ec3964382bfa600441a73c10beef22996fceef886c4f5d33748b7e78f3b8b9b0",
+    "specs/native-game-discovery/tasks.md": "911a074d9a36406ea27fe69118700c21af981134034be1c53756436c0ae4b387",
+    "docs/product/native-game-discovery.md": "99acfe973845b8cc5f725970d158f09dce9ca752bf562fe6701476a2b689c310"
+  },
+  "afterSHA256": {
+    "specs/native-game-discovery/requirements.md": "e19708e5249f8c08244e6afeb17c3c74bfb1db9eef83f369d45f23b30705f029",
+    "specs/native-game-discovery/design.md": "ec3964382bfa600441a73c10beef22996fceef886c4f5d33748b7e78f3b8b9b0",
+    "specs/native-game-discovery/tasks.md": "e4b7a01d25c7ac6d7853b9614a0a5dd6e20ad680e9aa8ede722e03abc344190f",
+    "docs/product/native-game-discovery.md": "d5c4f97270d36c1fd9c80925be0fa22220d9e93b05ae78caad0f8761152149fb"
+  },
+  "actualDiffSHA256": "8618438f0556e48025071a2dd9e11c52495253143d0d8d03dfcf189011c8b0e9",
+  "sourceEvidenceSHA256": {
+    "m5-fixture-lifecycle-final-validation.json": "0a2a774b1c728a926c4a3af667e19f48e5fa9d09885bb06b1d2320876052c04d",
+    "m5-real-native-journey-checkpoint.json": "042585f858ee4fdeae0be1a937c419ea84caac1bc21946341be90220bdb0cb5e"
+  },
+  "acceptanceCheckboxesUnchanged": true,
+  "M0_1_M4_M5NotMarkedComplete": true,
+  "sourceOrHistoricalFailureEvidenceModified": false,
+  "buildsTestsSimulatorUIAccountActions": 0,
+  "localReferencesChecked": 17,
+  "missingLocalReferences": [],
+  "localReferences": [
+    {
+      "source": "specs/native-game-discovery/requirements.md",
+      "href": "./design.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/requirements.md",
+      "href": "./tasks.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/design.md",
+      "href": "./requirements.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/design.md",
+      "href": "./tasks.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/design.md",
+      "href": "../../docs/dev/evidence/native-game-discovery/recovery-20261029/m3-star-cold-phase-fixed20-analysis.json",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "href": "../../docs/dev/evidence/native-game-discovery/recovery-20261029/m5-fixture-lifecycle-final-validation.json",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "href": "../../docs/dev/evidence/native-game-discovery/recovery-20261029/m5-runtime-b61-final-a701-validation.json",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "href": "../../docs/dev/evidence/native-game-discovery/recovery-20261029/m5-real-native-journey-checkpoint.json",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "href": "./requirements.md",
+      "exists": true
+    },
+    {
+      "source": "specs/native-game-discovery/tasks.md",
+      "href": "./design.md",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/native-game-discovery-implementation.md",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/native-game-discovery-implementation.md",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/evidence/native-game-discovery/recovery-20261029/m3-final-a701-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-metrics.json",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/evidence/native-game-discovery/recovery-20261029/m3-online-room-resource-scope-audit.json",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/evidence/native-game-discovery/recovery-20261029/m5-fixture-lifecycle-final-validation.json",
+      "exists": true
+    },
+    {
+      "source": "docs/product/native-game-discovery.md",
+      "href": "../dev/evidence/native-game-discovery/recovery-20261029/m5-real-native-journey-checkpoint.json",
+      "exists": true
+    }
+  ],
+  "gitDiffCheckExitCode": 0,
+  "staticChecksAtUTC": "2026-10-29T20:10:14.752794+00:00"
+}

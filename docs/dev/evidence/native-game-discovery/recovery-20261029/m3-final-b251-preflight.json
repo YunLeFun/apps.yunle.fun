@@ -1,0 +1,27 @@
+{
+  "kind": "b251-fixed-snapshot-N1-preflight-accepted",
+  "atUTC": "2026-10-29T17:36:20.523318+00:00",
+  "raw": {
+    "path": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/docs/dev/evidence/native-game-discovery/recovery-20261029/m3-final-b251-preflight-raw.json",
+    "sha256": "99b23379593e56e24435022c11a62789b5b10f69ff545c3993e8f7fd5e344570"
+  },
+  "testResult": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "sampleCount": 6
+  },
+  "staticRequestCounter": {
+    "requestCount": 1002,
+    "statusCounts": {
+      "200": 1002
+    },
+    "unfrozenFixturePaths": [],
+    "non200Responses": [],
+    "scope": "Ownedloopbackserver duringN1 only; no complete external/Worker network claim"
+  },
+  "catalogVersion": "b25149ae2fd0fe3383c4a350dbc3343294fa2f9a7c56b330ba3f972bc4846c8b",
+  "archiveSHA256": "2406caebb59a544e29936d9324512fed60d9e381ff054b917bc8e7da6a0dbd5c",
+  "sourceAndProductUnchanged": true,
+  "nextAction": "Run exactlyone fixed-b251 60sample N10; N1 numbers are diagnostic, not acceptancequantiles."
+}

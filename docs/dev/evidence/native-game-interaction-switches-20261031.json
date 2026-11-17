@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-31",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Opt-in browser interactions for native iOS game sessions",
+  "settings": {
+    "location": "游戏 → 更多操作 → 游戏网页交互",
+    "defaults": {
+      "allowsPageBounce": false,
+      "allowsLongPress": false
+    },
+    "scope": "Per game entry on this device; invitation entry stored separately",
+    "effect": "Apply immediately to current document and subframes without reloading; restore choice on future navigations and runtime recreation"
+  },
+  "build": {
+    "summary": {
+      "status": "SUCCEEDED",
+      "durationMs": 41145,
+      "target": "simulator"
+    },
+    "diagnostics": {
+      "warnings": [
+        {
+          "message": "converting function value of type '@MainActor () -> UIViewController?' to '() -> UIViewController?' loses global actor 'MainActor'; this is an error in the Swift 6 language mode",
+          "location": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/WebRuntime/CrossAppAuthorization.swift:118"
+        },
+        {
+          "message": "converting function value of type '@MainActor (URL, @escaping @MainActor (Bool) -> Void) -> ()' to 'CrossAppAuthorizationPage.Opener' (aka '(URL, @escaping @MainActor (Bool) -> ()) -> ()') loses global actor 'MainActor'; this is an error in the Swift 6 language mode",
+          "location": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFun/WebRuntime/CrossAppAuthorization.swift:119"
+        },
+        {
+          "message": "expression implicitly coerced from 'String??' to 'Any?'",
+          "location": "/Users/yunyou/repos/github.com/YunLeFun/apps.yunle.fun/apps/ios/YunleFunTests/AccountSessionTests.swift:364"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "validation": {
+    "summary": {
+      "status": "SUCCEEDED",
+      "durationMs": 62954,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "target": "simulator"
+    },
+    "testCases": [
+      {
+        "suite": "NativeGameRuntimeTests",
+        "test": "testDiscoveryAndHomeReuseOneGameSessionWithoutLosingLaunchContext",
+        "status": "passed",
+        "durationMs": 3513
+      },
+      {
+        "suite": "NativeGameRuntimeTests",
+        "test": "testGameInteractionPreferencesPersistAcrossRuntimeRecreation",
+        "status": "passed",
+        "durationMs": 489
+      },
+      {
+        "suite": "NativeWebNavigationTests",
+        "test": "testGameInteractionPolicyPreservesScrollingAndEditingAcrossNavigation",
+        "status": "passed",
+        "durationMs": 1051
+      },
+      {
+        "suite": "NativeWebNavigationTests",
+        "test": "testGameInteractionSwitchesApplyIndependentlyWithoutReloading",
+        "status": "passed",
+        "durationMs": 1091
+      },
+      {
+        "suite": "NativeWebNavigationTests",
+        "test": "testOrdinaryWebApplicationKeepsBrowserInteractions",
+        "status": "passed",
+        "durationMs": 771
+      }
+    ],
+    "scope": "Real WKWebView using controlled documents, iframe, host JS bridge and native game-runtime fixtures. Confirms independent flags, live style/native changes, stable page progress marker, no user-script accumulation, persistent settings and ordinary app behavior. SwiftUI menu compiles; no manual tap of the menu switches or physical-device long-press verification."
+  },
+  "sources": {
+    "scripts": "https://developer.apple.com/documentation/webkit/wkusercontentcontroller",
+    "javascript": "https://developer.apple.com/documentation/webkit/wkwebview/evaluatejavascript(_:in:in:completionhandler:)"
+  },
+  "sourceSHA256": {
+    "apps/mobile/ios/App/App/WebViewController.swift": "70e7468d9485a61fdcdefa86fae631633022065210e8ad37aece1c2170f51b11",
+    "apps/ios/YunleFunTests/NativeGameRuntimeTests.swift": "4ccf946ccdb48f0729db87d0c187b2a3b87abe7eb9cc04bc3733cd27a45a3177",
+    "apps/ios/YunleFunTests/NativeWebNavigationTests.swift": "d89477f502a80334a20c6a964c665d43195a2ef170d75bf108a153dca343220b",
+    "apps/ios/YunleFun/WebRuntime/NativeApplicationMenuView.swift": "dbb212b2b61f4df6da8aea0be2c1aa1c224d1a5becb2d9184f014af66c9a2d75",
+    "apps/ios/YunleFun/WebRuntime/NativeWebRuntime.swift": "a7d89ca9bb0d8a9110a9345e14674d7cb59ecb05558ae8439f0349fbf95aef6f",
+    "docs/product/native-game-discovery.md": "e5527346a47cdb5ed09a3fa24dd28a7a20a3b2dd6354fea7cb059852ac5918ca"
+  },
+  "xcresultSummary": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+          "deviceName": "iPad Pro 11-inch (M5)",
+          "modelName": "iPad Pro 11-inch (M5)",
+          "osBuildNumber": "24A434",
+          "osVersion": "27.0",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 5,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "YunleFun · Built with macOS 26.6.2",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1793385340.951,
+    "passedTests": 5,
+    "result": "Passed",
+    "runtimeWarnings": [],
+    "skippedTests": 0,
+    "startTime": 1793385282.655,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - YunleFun",
+    "topInsights": [],
+    "totalTestCount": 5
+  },
+  "simulator": {
+    "device": "iPad Pro 11-inch (M5)",
+    "udid": "7B3387F5-93E8-4CDF-AD40-579437A7D719",
+    "initialState": "Shutdown",
+    "finalState": "Shutdown",
+    "createdDevices": 0,
+    "parallelTesting": false
+  },
+  "cleanup": {
+    "removedRebuildableAllocatedKiB": 782892,
+    "remainingTaskArtifacts": 0,
+    "observedAvailableBytesDelta": 640368640,
+    "note": "Removed task-owned DerivedData, controlled-document xcresult and exported test products after preserving the native result summary and source hashes. Shared packages/build caches and simulator app data were preserved. Available-space delta is a concurrent filesystem snapshot."
+  }
+}

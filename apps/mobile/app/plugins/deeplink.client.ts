@@ -8,15 +8,13 @@
  * - yunlefun://workshop/EJ83N5 → 个人工坊
  * - https://apps.yunle.fun/w/EJ83N5 → Universal Link 个人工坊
  */
-import { App } from '@capacitor/app'
-import { Browser } from '@capacitor/browser'
-import { Capacitor } from '@capacitor/core'
 import { useAppsAcquisitionStorage } from '~/composables/auth/useAppsAcquisition'
+import { hostApplication, hostBrowser, hostEnvironment } from '~/host-runtime'
 import { readAppsLaunchAcquisitionUrl } from '~/utils/apps-acquisition-storage'
 import { resolveNativeDeepLink } from '~/utils/nativeDeepLink'
 
 export default defineNuxtPlugin(() => {
-  if (!Capacitor.isNativePlatform())
+  if (!hostEnvironment.isNative())
     return
 
   const router = useRouter()
@@ -39,7 +37,7 @@ export default defineNuxtPlugin(() => {
       lastHandledAt = now
 
       if (target.closeBrowser)
-        await Browser.close().catch(() => {})
+        await hostBrowser.close().catch(() => {})
 
       if (target.type === 'oauth-callback') {
         const { handleNativeOAuthCallback } = useCloudbaseAuth()
@@ -60,13 +58,13 @@ export default defineNuxtPlugin(() => {
     }
   }
 
-  void App.addListener('appUrlOpen', ({ url }) => {
+  void hostApplication.addListener('appUrlOpen', ({ url }) => {
     void handleAppUrl(url)
   }).catch((err) => {
     console.error('[Deeplink] 监听注册失败:', err)
   })
 
-  void App.getLaunchUrl().then((launch) => {
+  void hostApplication.getLaunchUrl().then((launch) => {
     if (launch?.url)
       return handleAppUrl(launch.url)
   }).catch((err) => {

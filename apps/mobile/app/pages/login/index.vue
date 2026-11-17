@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import type { TcbOtpData, TcbSignUpData } from '~/composables/auth/useCloudbaseOtp'
-import { Capacitor } from '@capacitor/core'
 import {
   IonBackButton,
   IonButtons,
@@ -23,7 +22,7 @@ import {
 } from 'ionicons/icons'
 import { config } from '~/config'
 import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
-import { HostRuntime } from '~/host-runtime'
+import { hostEnvironment, HostRuntime } from '~/host-runtime'
 import {
   clearNativeAuthorizationLogin,
   NATIVE_AUTHORIZATION_LOGIN_RETURN_TO,
@@ -51,11 +50,11 @@ const {
 const router = useRouter()
 const route = useRoute()
 const accountsStore = useAccountsStore()
-const nativePlatform = Capacitor.isNativePlatform()
+const nativePlatform = hostEnvironment.isNative()
 const nativeAuthorizationReturnError = ref('')
 const pendingNativeAuthorization = ref(
   nativePlatform
-  && Capacitor.isPluginAvailable('HostRuntime')
+  && hostEnvironment.hasRuntime()
   && !!readNativeAuthorizationLogin(),
 )
 const returningToApplication = ref(false)
@@ -111,7 +110,7 @@ const { remaining: signupCountdown, isActive: signupCountdownActive, start: star
 
 // 恢复上次登录信息
 onMounted(() => {
-  const requestId = nativePlatform && Capacitor.isPluginAvailable('HostRuntime')
+  const requestId = nativePlatform && hostEnvironment.hasRuntime()
     ? readNativeAuthorizationLogin()
     : undefined
   pendingNativeAuthorization.value = !!requestId
@@ -135,7 +134,7 @@ onMounted(() => {
 })
 
 onBeforeRouteLeave(async () => {
-  const requestId = nativePlatform && Capacitor.isPluginAvailable('HostRuntime')
+  const requestId = nativePlatform && hostEnvironment.hasRuntime()
     ? readNativeAuthorizationLogin()
     : undefined
   if (!requestId)
@@ -273,7 +272,7 @@ async function completeLoginNavigation(): Promise<void> {
 
   loginNavigation = (async () => {
     nativeAuthorizationReturnError.value = ''
-    const requestId = nativePlatform && Capacitor.isPluginAvailable('HostRuntime')
+    const requestId = nativePlatform && hostEnvironment.hasRuntime()
       ? readNativeAuthorizationLogin()
       : undefined
 

@@ -1,0 +1,77 @@
+{
+  "recordedAtUTC": "2026-10-29T16:37:19.533Z",
+  "backendCommit": "7723ae87194def2c1aff137497456cce53ebdcc1",
+  "webCommit": "b0f63be5b0780272d56f16d603eacb5afd2a58e8",
+  "expiredRoom": "VW7PD3",
+  "player": {
+    "UIChinese": "房间已过期",
+    "frames": [
+      {
+        "kind": "ERROR",
+        "code": 400,
+        "message": "房间已过期",
+        "sequence": 480
+      }
+    ],
+    "socketCreatedCount": 1,
+    "socketClosedCount": 1,
+    "hasMore": false,
+    "truncated": false
+  },
+  "spectator": {
+    "UIChinese": "房间已过期",
+    "frames": [
+      {
+        "kind": "ERROR",
+        "code": 400,
+        "message": "房间已过期",
+        "sequence": 925
+      }
+    ],
+    "socketCreatedCount": 1,
+    "socketClosedCount": 1,
+    "hasMore": false,
+    "truncated": false
+  },
+  "protocolNote": "Matchmaking returns an HTTP200 reservation; actual WebSocket ERROR protocol11 code400拒绝.400 is not an HTTP status. No JOIN_ROOM, connection.ready, room.snapshot or game.snapshot was received.",
+  "credentialsNotWritten": true,
+  "finalCapacityObservation": {
+    "atUTC": "2026-10-29T16:39:27.347227+00:00",
+    "status": 200,
+    "ok": true,
+    "capacity": {
+      "activeConnections": 0,
+      "activeOnlinePlayers": 0,
+      "activeOnlineRooms": 0
+    },
+    "scope": "after both rejected expired roles and diagnostic VTQ9QA normal cleanup"
+  },
+  "verificationLimits": [
+    "One owned expired room and two requested roles, authenticated ordinary test account",
+    "Matchmaking HTTP200 is separate from WebSocket ERROR code400",
+    "Not a claim that transient WebSocket reservations were never created",
+    "Not a production SLA or Native retry fix"
+  ],
+  "privateEvidenceDigests": [
+    {
+      "name": "expired-player-772-ui.png",
+      "bytes": 44976,
+      "sha256": "fd61e0ffc7a426664ab89b12539ccbd64a6ed152934525d3ee44f957dc1799f0"
+    },
+    {
+      "name": "expired-spectator-772-ui.png",
+      "bytes": 44847,
+      "sha256": "e74074ee13439e596ed9ce828af4ac8ab37707cf1d88cc510ea28839e1cb81de"
+    },
+    {
+      "name": "expired-production-roles-772.json",
+      "bytes": 1059,
+      "sha256": "9818d71193ad335d3f4c222d41b2977ded7cd76a0f0931a2e1f385a2a8ac645f"
+    },
+    {
+      "name": "expired-role-and-diagnostic-cleanup-health.json",
+      "bytes": 272,
+      "sha256": "2394b7a50d342ec029073823c0a5432dbbc30f139e9aaaf3d16bff4db6920488"
+    }
+  ]
+}

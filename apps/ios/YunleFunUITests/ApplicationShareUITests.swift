@@ -76,6 +76,7 @@ final class ApplicationShareUITests: XCTestCase {
 
     /// The public catalog and card renderer both wait on apps.yunle.fun.
     /// A cold runner can miss the first attempt; the error state offers 重试.
+    @available(iOS 16.4, *)
     private func openPublicApplication(_ slug: String, in app: XCUIApplication) {
         app.open(URL(string: "yunlefun://app/\(slug)")!)
         let share = app.buttons["detail.share"]

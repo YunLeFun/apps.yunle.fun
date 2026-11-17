@@ -8,7 +8,7 @@ final class ApplicationShareUITests: XCTestCase {
         let app = XCUIApplication(); app.launch()
         app.open(URL(string: "yunlefun://app/dayun-kicker")!)
         let share = app.buttons["detail.share"]
-        XCTAssertTrue(share.waitForExistence(timeout: 20)); share.tap()
+        XCTAssertTrue(share.waitForExistence(timeout: 50)); share.tap()
         let directory = app.buttons["application.share.catalog"]
         XCTAssertTrue(directory.waitForExistence(timeout: 10)); directory.tap()
         let slug = app.textFields["share.catalog.slug"]
@@ -90,7 +90,7 @@ final class ApplicationShareUITests: XCTestCase {
         let app = XCUIApplication(); app.launch()
         app.open(URL(string: "yunlefun://app/air-conditioner")!)
         let share = app.buttons["detail.share"]
-        XCTAssertTrue(share.waitForExistence(timeout: 20)); share.tap()
+        XCTAssertTrue(share.waitForExistence(timeout: 50)); share.tap()
         let export = app.buttons["application.share.image"]
         XCTAssertTrue(export.waitForExistence(timeout: 20))
         XCTAssertTrue(export.wait(for: \.isEnabled, toEqual: true, timeout: 30))

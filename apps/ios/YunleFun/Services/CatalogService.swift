@@ -42,7 +42,10 @@ struct CatalogService: CatalogServing, ApplicationAvailabilityServing {
             config.httpShouldSetCookies = false
             config.httpCookieStorage = nil
             config.urlCredentialStorage = nil
-            config.timeoutIntervalForRequest = 20
+            // The public catalog is one response. GitHub's macOS runners often
+            // need more than 20s to receive the first byte from apps.yunle.fun.
+            config.timeoutIntervalForRequest = 45
+            config.timeoutIntervalForResource = 60
             self.session = URLSession(configuration: config)
         }
     }

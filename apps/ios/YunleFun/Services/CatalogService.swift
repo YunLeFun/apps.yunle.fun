@@ -44,8 +44,8 @@ struct CatalogService: CatalogServing, ApplicationAvailabilityServing {
             config.urlCredentialStorage = nil
             // The public catalog is one response. GitHub's macOS runners often
             // need more than 20s to receive the first byte from apps.yunle.fun.
-            config.timeoutIntervalForRequest = 45
-            config.timeoutIntervalForResource = 60
+            config.timeoutIntervalForRequest = 60
+            config.timeoutIntervalForResource = 75
             self.session = URLSession(configuration: config)
         }
     }

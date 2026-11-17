@@ -5,18 +5,16 @@ final class ApplicationShareUITests: XCTestCase {
     func testSlugPreviewAndDirectoryGenerationReachTheSystemFilePicker() throws {
         guard #available(iOS 16.4, *) else { throw XCTSkip("URL launch requires iOS 16.4") }
         continueAfterFailure = false
+        executionTimeAllowance = 180
         let app = XCUIApplication(); app.launch()
-        app.open(URL(string: "yunlefun://app/dayun-kicker")!)
-        let share = app.buttons["detail.share"]
-        XCTAssertTrue(share.waitForExistence(timeout: 50)); share.tap()
+        openPublicApplication("dayun-kicker", in: app)
         let directory = app.buttons["application.share.catalog"]
         XCTAssertTrue(directory.waitForExistence(timeout: 10)); directory.tap()
         let slug = app.textFields["share.catalog.slug"]
         XCTAssertTrue(slug.waitForExistence(timeout: 10))
         XCTAssertEqual(slug.value as? String, "dayun-kicker")
         app.buttons["share.catalog.preview"].tap()
-        let image = app.images["share.catalog.application.preview"]
-        XCTAssertTrue(image.waitForExistence(timeout: 30))
+        let image = waitForSharePreview(in: app)
         XCTAssertTrue(image.wait(for: \.isHittable, toEqual: true, timeout: 10))
         XCTAssertTrue(image.label.contains("暴力电驴"))
         let done = try XCTUnwrap(app.navigationBars.matching(identifier: "分享应用").buttons.matching(identifier: "完成").allElementsBoundByIndex.first(where: \.isHittable))
@@ -24,7 +22,7 @@ final class ApplicationShareUITests: XCTestCase {
         let generate = app.buttons["share.catalog.generate"]
         XCTAssertTrue(generate.waitForExistence(timeout: 10)); generate.tap()
         let ready = app.staticTexts["share.catalog.ready"]
-        XCTAssertTrue(ready.waitForExistence(timeout: 40))
+        XCTAssertTrue(ready.waitForExistence(timeout: 70))
         XCTAssertEqual(ready.label, "已生成 1 张卡片")
         app.buttons["share.catalog.save"].tap()
         let save = localFilesSaveButton(in: app)
@@ -76,6 +74,33 @@ final class ApplicationShareUITests: XCTestCase {
         }
     }
 
+    /// The public catalog and card renderer both wait on apps.yunle.fun.
+    /// A cold runner can miss the first attempt; the error state offers 重试.
+    private func openPublicApplication(_ slug: String, in app: XCUIApplication) {
+        app.open(URL(string: "yunlefun://app/\(slug)")!)
+        let share = app.buttons["detail.share"]
+        if !share.waitForExistence(timeout: 45) { tapRetry(in: app) }
+        XCTAssertTrue(share.waitForExistence(timeout: 50), "Public catalog must load the application detail")
+        share.tap()
+    }
+
+    private func waitForSharePreview(in app: XCUIApplication) -> XCUIElement {
+        let image = app.images["share.catalog.application.preview"]
+        let deadline = Date().addingTimeInterval(75)
+        while Date() < deadline {
+            if image.exists { return image }
+            tapRetry(in: app)
+            RunLoop.current.run(until: Date().addingTimeInterval(1))
+        }
+        XCTAssertTrue(image.waitForExistence(timeout: 5), "The share card preview must finish rendering")
+        return image
+    }
+
+    private func tapRetry(in app: XCUIApplication) {
+        let retry = app.buttons["重试"]
+        if retry.exists, retry.isHittable { retry.tap() }
+    }
+
     private func documentPickerState(_ app: XCUIApplication) -> String {
         let bars = app.navigationBars.allElementsBoundByIndex.prefix(3).map { bar in
             let labels = bar.staticTexts.allElementsBoundByIndex.prefix(4).map(\.label)
@@ -87,17 +112,16 @@ final class ApplicationShareUITests: XCTestCase {
     func testPublicLinkOpensDetailAndExportsBothAppearances() throws {
         guard #available(iOS 16.4, *) else { throw XCTSkip("URL launch requires iOS 16.4") }
         continueAfterFailure = false
+        executionTimeAllowance = 180
         let app = XCUIApplication(); app.launch()
-        app.open(URL(string: "yunlefun://app/air-conditioner")!)
-        let share = app.buttons["detail.share"]
-        XCTAssertTrue(share.waitForExistence(timeout: 50)); share.tap()
+        openPublicApplication("air-conditioner", in: app)
         let export = app.buttons["application.share.image"]
         XCTAssertTrue(export.waitForExistence(timeout: 20))
-        XCTAssertTrue(export.wait(for: \.isEnabled, toEqual: true, timeout: 30))
+        XCTAssertTrue(export.wait(for: \.isEnabled, toEqual: true, timeout: 70))
         let picker = app.segmentedControls["application.share.appearance"]
         for title in ["浅色", "深色"] {
             picker.buttons[title].tap()
-            XCTAssertTrue(export.wait(for: \.isEnabled, toEqual: true, timeout: 30))
+            XCTAssertTrue(export.wait(for: \.isEnabled, toEqual: true, timeout: 60))
             let preview = app.images["application.share.preview"]
             XCTAssertTrue(preview.waitForExistence(timeout: 10))
             let card = XCTAttachment(screenshot: preview.screenshot())

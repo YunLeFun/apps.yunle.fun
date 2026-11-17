@@ -29,6 +29,7 @@ overrides:
   '@babel/plugin-transform-modules-systemjs': ^7.29.8 # 任意代码生成（workbox > babel）
   '@capacitor/cli': 8.6.0 # @nuxtjs/ionic 仍声明 Capacitor 7，统一强制到 v8
   '@capacitor/core': 8.6.0 # 避免工作区安装两份 Capacitor runtime
+  '@nuxt/schema@>=3.5.0 <4.6.4': 4.6.4 # 开发服务器读取上级目录（GHSA-mjrq-cffv-q4qc）；与 Nuxt 4.6.4 同一 schema
   '@protobufjs/utf8': ^1.1.2 # overlong UTF-8 decoding（飞书 SDK）
   '@vue/compiler-sfc': 3.5.44 # 与 Nuxt 4.6 的 Vue runtime 保持同一 patch 版本
   '@vue/server-renderer': 3.5.44 # 与根 Vue runtime 保持精确一致
@@ -43,7 +44,7 @@ overrides:
   follow-redirects: ^1.16.2 # 跨域 header 泄露（axios）
   form-data@>=3.0.0 <3.0.5: ^3.0.5 # multipart 字段名 CRLF 注入（腾讯云 SDK）
   form-data@>=4.0.0 <4.0.6: ^4.0.6 # multipart 字段名 CRLF 注入（CloudBase / Ionic）
-  get-uri@6.0.5>basic-ftp: 6.2.3 # FTP 响应 header 注入；保留 Client API 并限制跨 host 传输
+  get-uri@6.0.5>basic-ftp: 6.2.6 # header 注入、MLSD __proto__ DoS 与 downloadToDir 路径穿越；保留 Client API
   glob@>=9.0.0 <14.0.2: ^14.0.3 # AbortSignal 取消后立即结束遍历
   h3@>=1.0.0 <1.15.11: ^1.15.11 # 仅修复 H3 1；保留 devframe 所需的 H3 2
   immutable: ^5.1.9 # trie 溢出 / 哈希碰撞 DoS（sass）

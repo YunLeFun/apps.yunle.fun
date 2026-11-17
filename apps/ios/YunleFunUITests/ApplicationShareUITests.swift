@@ -27,15 +27,61 @@ final class ApplicationShareUITests: XCTestCase {
         XCTAssertTrue(ready.waitForExistence(timeout: 40))
         XCTAssertEqual(ready.label, "已生成 1 张卡片")
         app.buttons["share.catalog.save"].tap()
-        let save = app.buttons["DOCPicker.actionButton"]
-        XCTAssertTrue(save.waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["我的iPhone"].exists, "Use the local Files provider for this export")
+        let save = localFilesSaveButton(in: app)
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "share-directory-system-picker"; attachment.lifetime = .keepAlways; add(attachment)
         let filename = XCTAttachment(string: app.textFields["DOCPicker.filenameTextField"].value as? String ?? "")
         filename.name = "share-directory-exported-name"; filename.lifetime = .keepAlways; add(filename)
         save.tap()
         XCTAssertTrue(app.staticTexts["目录已存储"].waitForExistence(timeout: 20), "The Files copy must finish successfully")
+    }
+
+    /// The export sheet is the system Files picker. Its copy follows the simulator
+    /// language, and a freshly created simulator opens on the last-used location,
+    /// which does not exist yet. Require the on-device provider either way:
+    /// 「我的iPhone」 on a Chinese simulator, 「On My iPhone」 on the English CI image.
+    private let localFilesProviderTitles = ["我的iPhone", "On My iPhone"]
+
+    private func localFilesSaveButton(in app: XCUIApplication) -> XCUIElement {
+        let save = app.buttons["DOCPicker.actionButton"]
+        XCTAssertTrue(save.waitForExistence(timeout: 10))
+        if !showingLocalFilesProvider(in: app) { openLocalFilesProvider(in: app) }
+        XCTAssertTrue(showingLocalFilesProvider(in: app), "Use the local Files provider for this export. \(documentPickerState(app))")
+        XCTAssertTrue(save.wait(for: \.isEnabled, toEqual: true, timeout: 10), "The local Files save action must be enabled. \(documentPickerState(app))")
+        return save
+    }
+
+    private func showingLocalFilesProvider(in app: XCUIApplication) -> Bool {
+        let bars = app.navigationBars
+        let titled = NSPredicate(format: "label IN %@ OR identifier IN %@", localFilesProviderTitles, localFilesProviderTitles)
+        return bars.matching(NSPredicate(format: "identifier IN %@", localFilesProviderTitles)).firstMatch.exists
+            || bars.staticTexts.matching(titled).firstMatch.exists
+            || bars.buttons.matching(titled).firstMatch.exists
+    }
+
+    private func openLocalFilesProvider(in app: XCUIApplication) {
+        let row = NSPredicate(format: "identifier BEGINSWITH 'DOC.sidebar.item.On My '")
+        let back = NSPredicate(format: "identifier == 'BackButton' OR label IN %@", ["BackButton", "Back", "返回", "Browse", "浏览"])
+        let title = NSPredicate(format: "label IN %@", localFilesProviderTitles)
+        for _ in 0..<5 {
+            let location = app.cells.matching(row).firstMatch
+            if location.exists, location.isHittable {
+                location.tap()
+                if app.navigationBars.staticTexts.matching(title).firstMatch.waitForExistence(timeout: 5) { return }
+                if showingLocalFilesProvider(in: app) { return }
+            }
+            let up = app.buttons.matching(back).firstMatch
+            guard up.exists, up.isHittable else { return }
+            up.tap()
+        }
+    }
+
+    private func documentPickerState(_ app: XCUIApplication) -> String {
+        let bars = app.navigationBars.allElementsBoundByIndex.prefix(3).map { bar in
+            let labels = bar.staticTexts.allElementsBoundByIndex.prefix(4).map(\.label)
+            return "\(bar.identifier) \(labels)"
+        }
+        return "navigation=\(bars.joined(separator: " | "))"
     }
 
     func testPublicLinkOpensDetailAndExportsBothAppearances() throws {

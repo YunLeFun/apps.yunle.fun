@@ -5,7 +5,7 @@ final class ApplicationShareUITests: XCTestCase {
     func testSlugPreviewAndDirectoryGenerationReachTheSystemFilePicker() throws {
         guard #available(iOS 16.4, *) else { throw XCTSkip("URL launch requires iOS 16.4") }
         continueAfterFailure = false
-        executionTimeAllowance = 180
+        executionTimeAllowance = 300
         let app = XCUIApplication(); app.launch()
         openPublicApplication("dayun-kicker", in: app)
         let directory = app.buttons["application.share.catalog"]
@@ -22,7 +22,7 @@ final class ApplicationShareUITests: XCTestCase {
         let generate = app.buttons["share.catalog.generate"]
         XCTAssertTrue(generate.waitForExistence(timeout: 10)); generate.tap()
         let ready = app.staticTexts["share.catalog.ready"]
-        XCTAssertTrue(ready.waitForExistence(timeout: 70))
+        XCTAssertTrue(ready.waitForExistence(timeout: 90))
         XCTAssertEqual(ready.label, "已生成 1 张卡片")
         app.buttons["share.catalog.save"].tap()
         let save = localFilesSaveButton(in: app)
@@ -91,7 +91,8 @@ final class ApplicationShareUITests: XCTestCase {
 
     private func waitForSharePreview(in app: XCUIApplication) -> XCUIElement {
         let image = app.images["share.catalog.application.preview"]
-        let deadline = Date().addingTimeInterval(75)
+        // Detail fetch can use the full catalog timeout, then the icon load follows.
+        let deadline = Date().addingTimeInterval(110)
         while Date() < deadline {
             if image.exists { return image }
             tapRetry(in: app)

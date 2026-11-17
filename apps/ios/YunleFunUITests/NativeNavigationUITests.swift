@@ -369,6 +369,12 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(me.waitForExistence(timeout: 10))
         me.tap()
         XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+        let login = app.buttons["me.login"]
+        XCTAssertTrue(login.waitForExistence(timeout: 5))
+        XCTAssertTrue(login.label.contains("继续你的云乐生活"))
+        for title in ["钱包", "云乐坊会员", "我的应用", "个人工坊", "我的举报"] {
+            XCTAssertFalse(app.buttons[title].exists, "Guest Me should hide \(title)")
+        }
         app.buttons["设置"].tap()
         XCTAssertTrue(app.navigationBars["设置"].waitForExistence(timeout: 5))
         app.buttons["云居同步"].tap()

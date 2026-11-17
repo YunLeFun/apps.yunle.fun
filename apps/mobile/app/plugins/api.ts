@@ -1,20 +1,8 @@
-import { NATIVE_API_BASE_URL } from '~/constants/api'
-import { hostEnvironment } from '~/host-runtime'
-
 export default defineNuxtPlugin((nuxtApp) => {
   const userStore = useUserStore()
   const config = useRuntimeConfig()
 
-  /**
-   * 打包进原生壳后页面 origin 是 capacitor://localhost（无 Nitro server），
-   * /api 默认回退到线上 Web 部署；live reload（cap run -l，origin 为局域网
-   * dev server）不回退，仍走同源的本地 Nitro。
-   */
-  const isPackagedNative = typeof window !== 'undefined'
-    && hostEnvironment.isNative()
-    && window.location.hostname === 'localhost'
-  const baseURL = config.public.apiBaseUrl
-    || (isPackagedNative ? NATIVE_API_BASE_URL : undefined)
+  const baseURL = config.public.apiBaseUrl || undefined
 
   const api = $fetch.create({
     baseURL,

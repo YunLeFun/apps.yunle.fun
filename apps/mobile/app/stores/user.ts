@@ -1,6 +1,5 @@
 import type { YlfUserInfo } from '@yunlefun/auth'
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import { hostEnvironment } from '~/host-runtime'
 
 export type UserInfo = YlfUserInfo
 
@@ -20,16 +19,12 @@ const defaultUserInfo: YlfUserInfo = {
 export const userInfo = ref<YlfUserInfo>(JSON.parse(JSON.stringify(defaultUserInfo)))
 
 export const useUserStore = defineStore('user', () => {
-  // 原生壳内 origin 是 capacitor://localhost（非 HTTPS），带 Secure 标记的 cookie
-  // 可能被 WebKit 拒写；且 WKWebView 对自定义 scheme 的 cookie 持久化不可靠
-  const isNativeShell = import.meta.client && hostEnvironment.isNative()
-
   // 使用 Cookie 存储 JWT token（Web 端 SSR 友好）
   const accessToken = useCookie<string>(TOKEN_KEY, {
     default: () => '',
     maxAge: 60 * 60 * 24 * 31, // 31 天过期（与 refresh token 有效期对齐）
     sameSite: 'strict', // 防止 CSRF
-    secure: import.meta.env.PROD && !isNativeShell, // 生产环境使用 HTTPS；原生壳非 HTTPS 上下文
+    secure: import.meta.env.PROD,
     httpOnly: false, // 客户端需要访问，设为 false
   })
 
@@ -38,9 +33,9 @@ export const useUserStore = defineStore('user', () => {
     default: () => defaultUserInfo,
     maxAge: 60 * 60 * 24 * 31, // 31 天过期
     sameSite: 'strict',
-    secure: import.meta.env.PROD && !isNativeShell,
+    secure: import.meta.env.PROD,
   })
-  // cookie 丢失（原生壳重启/更新后常见）时从 localStorage 镜像恢复，
+  // cookie 丢失时从 localStorage 镜像恢复，
   // 与 CloudBase SDK 凭证（persistence: 'local'，同在 localStorage）同生共死
   if (import.meta.client) {
     try {

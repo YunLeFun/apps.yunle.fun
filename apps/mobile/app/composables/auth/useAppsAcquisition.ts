@@ -1,10 +1,7 @@
 import type { AppsAcquisitionSession } from '~/utils/apps-acquisition-recorder'
 import type { AppsAcquisitionAuthMethod, AppsAcquisitionStorage } from '~/utils/apps-acquisition-storage'
-import { NATIVE_API_BASE_URL } from '~/constants/api'
-import { hostEnvironment } from '~/host-runtime'
 import { createAppsAcquisitionRecorder, isTransientAppsAcquisitionError } from '~/utils/apps-acquisition-recorder'
 import { createAppsAcquisitionStorage } from '~/utils/apps-acquisition-storage'
-import { readNativeAuthorizationLogin } from '~/utils/native-authorization-login'
 
 let acquisitionStorage: AppsAcquisitionStorage | undefined
 
@@ -40,8 +37,7 @@ export function useAppsAuthAcquisition(core: AcquisitionAuthCore) {
 function createRecorder(core: AcquisitionAuthCore) {
   const config = useRuntimeConfig()
   const storage = useAppsAcquisitionStorage()
-  const packagedNative = import.meta.client && hostEnvironment.isNative() && window.location.hostname === 'localhost'
-  const baseURL = config.public.apiBaseUrl || (packagedNative ? NATIVE_API_BASE_URL : undefined)
+  const baseURL = config.public.apiBaseUrl || undefined
   const recorder = createAppsAcquisitionRecorder({
     storage,
     currentUserId: () => core.user.value?.id || null,
@@ -81,8 +77,7 @@ function createRecorder(core: AcquisitionAuthCore) {
   })
 
   function beginAuthentication(authMethod: AppsAcquisitionAuthMethod, oauthState?: string) {
-    const delegatedSso = hostEnvironment.isNative() && !!readNativeAuthorizationLogin()
-    return storage.beginAuthentication(authMethod, oauthState, delegatedSso)
+    return storage.beginAuthentication(authMethod, oauthState)
   }
 
   async function recordAfterAuthentication(oauthState?: string) {

@@ -13,9 +13,10 @@ struct MeView: View {
     private enum Entry: Hashable { case profile, login, wallet, membership, applications, workshops, accounts, settings, about, reports, help, feedback }
 
     var body: some View {
+        let user = accounts.user
         List {
             Section {
-                if let user = accounts.user {
+                if let user {
                     NavigationLink { AccountProfileView().onAppear { returningEntry = .profile; focusedEntry = nil } } label: { AccountIdentityLabel(user: user) }
                         .accessibilityFocused($focusedEntry, equals: .profile)
                 } else {
@@ -49,11 +50,16 @@ struct MeView: View {
                 }
             }
             Section {
-                navigationRow("钱包", systemImage: "wallet.pass.fill", color: .green, entry: .wallet) { WalletView() }
-                navigationRow("云乐坊会员", systemImage: "crown.fill", color: .orange, entry: .membership) { MembershipView() }
-                navigationRow("我的应用", systemImage: "square.and.pencil", color: .blue, entry: .applications) { MyApplicationsView() }
-                navigationRow("个人工坊", systemImage: "person.2.crop.square.stack.fill", color: .purple, entry: .workshops) { MyWorkshopsView() }
-                navigationRow("账号管理", systemImage: "person.2.fill", color: .teal, entry: .accounts) { AccountManagementView() }
+                if user != nil {
+                    navigationRow("钱包", systemImage: "wallet.pass.fill", color: .green, entry: .wallet) { WalletView() }
+                    navigationRow("云乐坊会员", systemImage: "crown.fill", color: .orange, entry: .membership) { MembershipView() }
+                    navigationRow("我的应用", systemImage: "square.and.pencil", color: .blue, entry: .applications) { MyApplicationsView() }
+                    navigationRow("个人工坊", systemImage: "person.2.crop.square.stack.fill", color: .purple, entry: .workshops) { MyWorkshopsView() }
+                }
+                // A user who removed their active account can still switch to another saved account.
+                if !accounts.overview.users.isEmpty {
+                    navigationRow("账号管理", systemImage: "person.2.fill", color: .teal, entry: .accounts) { AccountManagementView() }
+                }
                 navigationRow("设置", systemImage: "gearshape.fill", color: .gray, entry: .settings) { SettingsView() }
                 navigationRow("关于云乐坊", systemImage: "info", color: .indigo, entry: .about) { AboutView() }
             }
@@ -61,7 +67,9 @@ struct MeView: View {
                 Text("支持").font(.headline).foregroundStyle(Color.primary)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
-                navigationRow("我的举报", systemImage: "flag.fill", color: .red, entry: .reports) { MyReportsView() }
+                if user != nil {
+                    navigationRow("我的举报", systemImage: "flag.fill", color: .red, entry: .reports) { MyReportsView() }
+                }
                 navigationRow("使用帮助", systemImage: "questionmark", color: .blue, entry: .help) {
                     HelpView(logs: diagnostics, accounts: accounts, navigateTab: navigateTab)
                 }
@@ -108,7 +116,7 @@ struct MeView: View {
     private var loginText: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("登录云乐坊").font(.headline).foregroundStyle(Color.primary)
-            Text("继续你的应用生活").font(.subheadline).foregroundStyle(Color.primary)
+            Text("继续你的云乐生活").font(.subheadline).foregroundStyle(Color.primary)
         }
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)

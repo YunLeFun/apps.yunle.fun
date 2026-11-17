@@ -1,6 +1,6 @@
 /**
  * Web 端条码扫描（使用浏览器 API）
- * 作为 Capacitor 插件的备用方案
+ * 用于浏览器扫码
  */
 export function useWebBarcodeScan() {
   const isScanning = ref(false)

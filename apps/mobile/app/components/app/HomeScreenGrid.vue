@@ -11,7 +11,7 @@ import type { YlfAppInfo } from '@yunlefun/types'
 import type { UseDraggableReturn } from 'vue-draggable-plus'
 import type { InstalledApp } from '~/types/homeScreen'
 import { VueDraggable } from 'vue-draggable-plus'
-import { hostHaptics, HostImpactStyle } from '~/host-runtime'
+import { vibrate } from '~/utils/web-haptics'
 
 interface Props {
   /** 已安装应用列表（单一纵向列表，可拖拽排序） */
@@ -88,14 +88,14 @@ onMounted(initSortable)
 
 /** 拖拽开始 */
 function onDragStart() {
-  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+  vibrate(12)
 }
 
 /** 拖拽结束时更新 */
 function onDragEnd() {
   homeScreenStore.updateInstalledApps([...gridModel.value])
   homeScreenStore.markPendingChanges()
-  hostHaptics.impact({ style: HostImpactStyle.Light }).catch(() => {})
+  vibrate(8)
 }
 
 /** 处理应用点击 */
@@ -126,7 +126,7 @@ function clearLongPressTimer() {
 }
 
 function handleLongPress(app: InstalledApp | null, x: number, y: number) {
-  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+  vibrate(12)
   const iconRect = longPressElement?.getBoundingClientRect() ?? null
   emit('longPress', app, { x, y }, iconRect)
 }

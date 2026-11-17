@@ -141,7 +141,7 @@ const otherApps = computed(() => {
     .slice(0, 12)
 })
 
-// 嵌入态：兼容旧的远程详情 JSAPI，以及新的 bundled Capacitor 详情 sheet。
+// 嵌入态：兼容仍在使用远程详情页的旧客户端。
 const isEmbedded = shallowRef(false)
 const reviewTargetRequested = shallowRef(false)
 const didScrollToReviews = shallowRef(false)

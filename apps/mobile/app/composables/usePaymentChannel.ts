@@ -1,12 +1,9 @@
-import type { HostListenerHandle } from '~/host-runtime'
-import { hostBrowser, hostEnvironment } from '~/host-runtime'
-
 /** www 钱包 / 会员页（携带 from=apps，支付成功后 www 显示「返回云乐坊」） */
 export const WWW_WALLET_URL = 'https://www.yunle.fun/wallet?from=apps'
 export const WWW_PRICING_URL = 'https://www.yunle.fun/pricing?from=apps'
 
 /**
- * Open online checkout and reconcile once when its browser or tab returns.
+ * Open online checkout and reconcile once when its tab becomes visible again.
  * Native iOS commerce is owned by apps/ios, independently of these Web pages.
  */
 export function usePaymentChannel(options: {
@@ -35,25 +32,14 @@ export function usePaymentChannel(options: {
     openInAppBrowser(WWW_PRICING_URL)
   }
 
-  // 回到 App 的两条路径：
-  // - 原生壳：in-app browser 关闭（browserFinished）
-  // - 纯 Web：window.open 新标签页支付后切回来（visibilitychange）
-  let browserHandle: HostListenerHandle | null = null
-
   function onVisibilityChange() {
     if (document.visibilityState === 'visible')
       handleReturn()
   }
 
-  onMounted(async () => {
-    if (hostEnvironment.isNative())
-      browserHandle = await hostBrowser.addListener('browserFinished', handleReturn)
-    else
-      document.addEventListener('visibilitychange', onVisibilityChange)
-  })
+  onMounted(() => document.addEventListener('visibilitychange', onVisibilityChange))
 
   onUnmounted(() => {
-    browserHandle?.remove()
     document.removeEventListener('visibilitychange', onVisibilityChange)
   })
 

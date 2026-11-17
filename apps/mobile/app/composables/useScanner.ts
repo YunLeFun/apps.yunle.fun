@@ -1,4 +1,3 @@
-import { hostEnvironment, pickNativePhoto } from '~/host-runtime'
 /**
  * 统一扫码 composable
  *
@@ -31,7 +30,7 @@ export function useScanner() {
    */
   async function scanFromAlbum(): Promise<string | null> {
     try {
-      const imageSource = await pickPhotoLibraryImageSource()
+      const imageSource = await pickImageFile()
       if (!imageSource)
         return null
 
@@ -77,30 +76,6 @@ export function useScanner() {
     /** 关闭扫码 */
     closeScanner,
   }
-}
-
-async function pickPhotoLibraryImageSource(): Promise<AlbumImageSource | null> {
-  if (!hostEnvironment.isNative())
-    return pickImageFile()
-
-  try {
-    return await pickNativePhotoLibraryImageSource()
-  }
-  catch (error) {
-    if (isPhotoPickerCancel(error))
-      return null
-
-    throw error
-  }
-}
-
-async function pickNativePhotoLibraryImageSource(): Promise<string | null> {
-  return pickNativePhoto()
-}
-
-function isPhotoPickerCancel(error: unknown): boolean {
-  const message = String((error as any)?.message || error).toLowerCase()
-  return message.includes('cancel') || message.includes('dismiss') || message.includes('no image')
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Keep native SDK imports behind the mobile host boundary without replacing
+ * Prevent reintroducing the retired bridge into browser code without replacing
  * the repository's existing restricted-import or restricted-syntax rules.
  * @type {import('eslint').Rule.RuleModule}
  */
@@ -8,14 +8,14 @@ export const hostTransportBoundary = {
     type: 'problem',
     schema: [],
     messages: {
-      adapterOnly: 'Load native SDKs inside host-runtime/adapters and use ~/host-runtime in business code.',
+      adapterOnly: 'Capacitor and Cordova are retired; browser code uses Web APIs.',
     },
   },
   create(context) {
     function check(source) {
       if (typeof source?.value !== 'string')
         return
-      if (source.value.startsWith('@capacitor/') || source.value === '@yunlefun/capacitor-storekit')
+      if (source.value.startsWith('@capacitor/') || source.value.startsWith('cordova-') || source.value === '@yunlefun/capacitor-storekit')
         context.report({ node: source, messageId: 'adapterOnly' })
     }
     return {

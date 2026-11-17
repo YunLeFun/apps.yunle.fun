@@ -19,7 +19,7 @@ import {
   logoWechat,
 } from 'ionicons/icons'
 import { config } from '~/config'
-import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
+import { authMethods, getEnabledLoginTabs } from '~/config/auth'
 // 用户名校验正则：字母开头，包含字母数字下划线连字符，3-64 字符。
 // 最终合法性仍由认证服务判断；客户端不应拦截已有的长用户名。
 const USERNAME_REGEX = /^[a-z][\w-]{2,63}$/i
@@ -49,6 +49,15 @@ watch(isAuthenticated, (value) => {
 // 页面模式：登录 / 注册
 type PageMode = 'login' | 'signup'
 const pageMode = ref<PageMode>('login')
+
+const { data: loginOptions, status: loginOptionsStatus } = useFetch<{ weChatLoginVisible: boolean }>('/api/login-options', {
+  server: false,
+  lazy: true,
+  timeout: 2500,
+  retry: 0,
+})
+const showWeChatLogin = computed(() => loginOptionsStatus.value === 'success' && loginOptions.value?.weChatLoginVisible === true)
+const showOAuthProviders = computed(() => authMethods.github || showWeChatLogin.value)
 
 // 登录方式配置
 const loginTabs = getEnabledLoginTabs()
@@ -443,17 +452,17 @@ async function completeLoginNavigation(): Promise<void> {
           </form>
 
           <!-- 分割线 -->
-          <div v-if="hasEnabledOAuthProviders()" class="auth-divider">
+          <div v-if="showOAuthProviders" class="auth-divider">
             <span class="auth-divider-text">其他登录方式</span>
           </div>
 
           <!-- 第三方登录 - 图标模式 -->
-          <div v-if="hasEnabledOAuthProviders()" class="auth-social-icons">
+          <div v-if="showOAuthProviders" class="auth-social-icons">
             <button v-if="authMethods.github" class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
               <IonIcon :icon="logoGithub" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">GitHub</span>
             </button>
-            <button v-if="authMethods.wechat" class="auth-social-circle auth-social-circle--wechat" :disabled="loading" @click="loginWithWeChat()">
+            <button v-if="showWeChatLogin" class="auth-social-circle auth-social-circle--wechat" :disabled="loading" @click="loginWithWeChat()">
               <IonIcon :icon="logoWechat" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">微信</span>
             </button>

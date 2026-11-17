@@ -14,8 +14,6 @@ export interface AuthMethodConfig {
   password: boolean
   /** GitHub OAuth 登录 */
   github: boolean
-  /** 微信 OAuth 登录 */
-  wechat: boolean
   /** 手机号注册 */
   phoneSignup: boolean
 }
@@ -28,7 +26,6 @@ export const authMethods: AuthMethodConfig = {
   emailOtp: true,
   password: true,
   github: false,
-  wechat: false,
   phoneSignup: true,
 }
 
@@ -44,23 +41,4 @@ export function getEnabledLoginTabs() {
   if (authMethods.password)
     tabs.push({ key: 'password', label: '密码' })
   return tabs
-}
-
-/**
- * 获取启用的第三方登录列表
- */
-export function getEnabledOAuthProviders() {
-  const providers: { key: string, label: string }[] = []
-  if (authMethods.github)
-    providers.push({ key: 'github', label: 'GitHub' })
-  if (authMethods.wechat)
-    providers.push({ key: 'wechat', label: '微信' })
-  return providers
-}
-
-/**
- * 是否有启用的第三方登录
- */
-export function hasEnabledOAuthProviders() {
-  return authMethods.github || authMethods.wechat
 }

@@ -23,7 +23,9 @@
 
 ## 微信登录
 
-移动端微信登录集成，基于 `cordova-plugin-wechat` 实现。
+云乐坊网页的 `/login` 使用现有 CloudBase `wx_open` OAuth 流程。入口默认隐藏，由 Admin「系统设置 → 登录方式」控制；刷新登录页即可读取新配置。`GET /api/login-options` 只返回 `weChatLoginVisible`，缺少配置、格式错误或读取失败时按关闭处理。
+
+上线前需在 Admin 和 Apps 共用的 CloudBase 环境创建 `app_login_options` 集合，并设为 `ADMINONLY`（Admin 仓库的 `scripts/ensure-app-login-options.mjs` 提供预检）；只有 Admin owner 可以修改 `web` 文档。开关只控制网页入口，不修改 CloudBase 微信 Provider、回调地址或原生客户端。开放前应先验证微信 OAuth 和 `/auth/callback`。
 
 ## 登录方式开关配置
 
@@ -39,7 +41,6 @@ export const authMethods: AuthMethodConfig = {
   emailOtp: true, // 邮箱 OTP 登录
   password: true, // 密码登录
   github: false, // GitHub OAuth 登录（当前关闭）
-  wechat: false, // 微信 OAuth 登录（当前关闭）
   phoneSignup: true, // 手机号注册
 }
 ```
@@ -52,19 +53,14 @@ export const authMethods: AuthMethodConfig = {
 | `emailOtp`    | `boolean` | 邮箱验证码登录    | 登录 Tab、邮箱输入表单   |
 | `password`    | `boolean` | 账号密码登录      | 登录 Tab、密码表单       |
 | `github`      | `boolean` | GitHub 第三方登录 | 第三方登录区域           |
-| `wechat`      | `boolean` | 微信第三方登录    | 第三方登录区域           |
 | `phoneSignup` | `boolean` | 手机号注册入口    | 注册入口链接、注册页面   |
 
 ### 行为规则
 
 - 当所有 Tab 类登录方式（`phoneOtp`、`emailOtp`、`password`）中仅启用一种时，Segmented Control 将自动隐藏
-- 当 `github` 和 `wechat` 均关闭时，「其他登录方式」分割线和第三方登录区域将隐藏
+- 当 GitHub 和后台设置的微信入口均关闭时，「其他登录方式」区域将隐藏
 - 当 `phoneSignup` 关闭时，登录页底部的「还没有账号？」注册入口将隐藏
 
 ### 辅助函数
 
-| 函数                         | 返回值             | 说明                     |
-| ---------------------------- | ------------------ | ------------------------ |
-| `getEnabledLoginTabs()`      | `{ key, label }[]` | 获取启用的登录 Tab 列表  |
-| `getEnabledOAuthProviders()` | `{ key, label }[]` | 获取启用的第三方登录列表 |
-| `hasEnabledOAuthProviders()` | `boolean`          | 是否有启用的第三方登录   |
+`getEnabledLoginTabs()` 返回当前启用的登录方式列表。

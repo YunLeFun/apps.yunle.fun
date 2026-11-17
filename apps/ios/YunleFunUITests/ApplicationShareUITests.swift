@@ -28,8 +28,6 @@ final class ApplicationShareUITests: XCTestCase {
         let save = localFilesSaveButton(in: app)
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "share-directory-system-picker"; attachment.lifetime = .keepAlways; add(attachment)
-        let filename = XCTAttachment(string: app.textFields["DOCPicker.filenameTextField"].value as? String ?? "")
-        filename.name = "share-directory-exported-name"; filename.lifetime = .keepAlways; add(filename)
         save.tap()
         XCTAssertTrue(app.staticTexts["目录已存储"].waitForExistence(timeout: 20), "The Files copy must finish successfully")
     }
@@ -78,10 +76,16 @@ final class ApplicationShareUITests: XCTestCase {
     /// A cold runner can miss the first attempt; the error state offers 重试.
     @available(iOS 16.4, *)
     private func openPublicApplication(_ slug: String, in app: XCUIApplication) {
-        app.open(URL(string: "yunlefun://app/\(slug)")!)
         let share = app.buttons["detail.share"]
-        if !share.waitForExistence(timeout: 45) { tapRetry(in: app) }
-        XCTAssertTrue(share.waitForExistence(timeout: 50), "Public catalog must load the application detail")
+        app.open(URL(string: "yunlefun://app/\(slug)")!)
+        if !share.waitForExistence(timeout: 40) {
+            tapRetry(in: app)
+            if !share.waitForExistence(timeout: 20) {
+                app.terminate(); app.launch()
+                app.open(URL(string: "yunlefun://app/\(slug)")!)
+            }
+        }
+        XCTAssertTrue(share.waitForExistence(timeout: 40), "Public catalog must load the application detail")
         share.tap()
     }
 

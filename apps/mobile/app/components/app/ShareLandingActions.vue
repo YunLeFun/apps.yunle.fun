@@ -1,13 +1,6 @@
 <script setup lang="ts">
-import { hostEnvironment } from '~/host-runtime'
-
 const props = defineProps<{ appKey: string, websiteUrl?: string }>()
 const emit = defineEmits<{ online: [] }>()
-const isBrowser = shallowRef(false)
-onMounted(() => {
-  isBrowser.value = !hostEnvironment.isNative()
-})
-
 // A tap is intentional; never probe installation or redirect on a timer.
 const nativeUrl = computed(() => /^[\w-]{1,256}$/.test(props.appKey)
   ? `yunlefun://app/${encodeURIComponent(props.appKey)}`
@@ -22,7 +15,7 @@ const hasWebsite = computed(() => {
 </script>
 
 <template>
-  <section v-if="isBrowser" class="share-landing" aria-label="选择体验方式">
+  <section class="share-landing" aria-label="选择体验方式">
     <div class="share-landing-copy">
       <strong>在你喜欢的地方，打开快乐。</strong>
       <span>已安装云乐坊？可在 App 中查看。也可以直接体验在线版。</span>

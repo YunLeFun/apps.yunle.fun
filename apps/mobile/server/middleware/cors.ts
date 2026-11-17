@@ -1,7 +1,7 @@
 import { resolveCorsOrigin } from '../utils/cors'
 
 /**
- * /api 跨域支持（Capacitor 原生壳 + 本地调试指向线上）
+ * /api 跨域支持（已安装旧客户端和本地调试）
  *
  * 仅当请求携带白名单内的 Origin 时追加 CORS 头，Web 同源访问不受影响。
  */

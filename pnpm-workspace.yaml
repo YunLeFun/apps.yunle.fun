@@ -27,12 +27,11 @@ overrides:
   # 键按字母升序排列（eslint yaml/sort-keys 要求）
   '@babel/core@<=7.29.0': ^7.29.1 # 任意文件读取（workbox / Nuxt 构建链）
   '@babel/plugin-transform-modules-systemjs': ^7.29.8 # 任意代码生成（workbox > babel）
-  '@capacitor/cli': 8.6.0 # @nuxtjs/ionic 仍声明 Capacitor 7，统一强制到 v8
-  '@capacitor/core': 8.6.0 # 避免工作区安装两份 Capacitor runtime
+  '@nuxt/schema@>=3.5.0 <4.6.4': 4.6.4 # GHSA-mjrq-cffv-q4qc：Nuxt 开发服务器目录边界
   '@protobufjs/utf8': ^1.1.2 # overlong UTF-8 decoding（飞书 SDK）
   '@vue/compiler-sfc': 3.5.44 # 与 Nuxt 4.6 的 Vue runtime 保持同一 patch 版本
   '@vue/server-renderer': 3.5.44 # 与根 Vue runtime 保持精确一致
-  '@xmldom/xmldom': ^0.8.15 # XML 注入 / DoS（@capacitor/cli > plist）
+  '@xmldom/xmldom': ^0.8.15 # XML 注入 / DoS
   appdmg@0.6.6>image-size: 2.0.4 # 安全图像解析；appdmg 补丁适配异步 file API
   axios: ^1.21.0 # SSRF / 原型污染 / MITM（tencentcloud-sdk）
   brace-expansion: ^5.0.12 # DoS（minimatch 链；新告警覆盖所有旧主版本）
@@ -47,7 +46,7 @@ overrides:
   glob@>=9.0.0 <14.0.2: ^14.0.3 # AbortSignal 取消后立即结束遍历
   h3@>=1.0.0 <1.15.11: ^1.15.11 # 仅修复 H3 1；保留 devframe 所需的 H3 2
   immutable: ^5.1.9 # trie 溢出 / 哈希碰撞 DoS（sass）
-  ip-address: ^10.7.6 # Address6 XSS（@nuxtjs/ionic > socks）
+  ip-address: ^10.7.6 # Address6 XSS
   js-cookie: ^3.0.8 # 原型劫持（@vue/test-utils > js-beautify）
   js-yaml@>=4.0.0 <4.3.2: ^4.3.2 # 原型污染（eslint typegen 链）
   katex: ^0.19.1 # 防止原型污染绕过 trust（Markdown lint 与数学渲染）
@@ -61,16 +60,16 @@ overrides:
   picomatch@>=4.0.0 <4.0.5: ^4.0.7 # ReDoS / fdir peer（typescript-eslint、Nuxt 链）
   postcss: ^8.5.32 # source map 路径穿越 / CSS stringify XSS（vite）
   protobufjs: ^7.6.6 # critical 任意代码执行（腾讯云 SDK）
-  qs: ^6.17.1 # DoS（@nuxtjs/ionic > superagent）
+  qs: ^6.17.1 # DoS
   semver@<7.0.0: '>=7.7.4'
   serialize-javascript: ^7.1.4 # RCE / 序列化脚本 XSS（webpack 链）
   shell-quote: ^1.12.0 # 换行转义绕过 / 二次复杂度 DoS（Nuxt DevTools）
-  shelljs: ^0.8.5 # 提权（cordova-plugin-wechat）
+  shelljs: ^0.8.5 # 提权
   simple-git: ^3.36.0 # RCE（@nuxt/devtools）
   svgo: ^4.1.0 # removeScripts 绕过（Nuxt CSS 压缩链）
-  tar: ^7.5.22 # 路径穿越 / 符号链接 / 栈溢出（@capacitor/cli、node-pre-gyp）
+  tar: ^7.5.22 # 路径穿越 / 符号链接 / 栈溢出（node-pre-gyp）
   tinypool@>=2.0.0 <2.1.2: ^2.2.0 # oxfmt worker options 原型污染 RCE
-  tmp: ^0.2.7 # 路径穿越（@nuxtjs/ionic > inquirer）
+  tmp: ^0.2.7 # 路径穿越
   undici@>=7.0.0 <7.29.1: ^7.30.1 # TLS / WebSocket / header 处理（jsdom 测试链）
   unhead@>=2.0.0 <2.1.15: ^2.1.17 # 修复 Ionic 的旧版依赖，同时保留 Nuxt 4.6 所需的 Unhead 3
   uuid@<11.1.1: ^11.1.1 # v3/v5/v6 buffer 越界（腾讯云 SDK）
@@ -82,7 +81,6 @@ overrides:
 patchedDependencies:
   '@electron/asar@3.4.1': patches/@electron__asar@3.4.1.patch
   appdmg@0.6.6: patches/appdmg@0.6.6.patch
-  cordova-plugin-wechat@3.1.0: patches/cordova-plugin-wechat@3.1.0.patch
   deepmerge@4.3.1: patches/deepmerge@4.3.1.patch
   glob@7.2.3: patches/glob@7.2.3.patch
   lodash.set@4.3.2: patches/lodash.set@4.3.2.patch

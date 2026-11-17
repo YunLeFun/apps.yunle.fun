@@ -46,7 +46,6 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     // '@prisma/nuxt',
     '@nuxt/test-utils/module',
-    '@nuxtjs/ionic',
   ],
 
   icon: {
@@ -141,6 +140,8 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'viewport-fit=cover, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' },
         { name: 'description', content: appDescription },
+        { name: 'color-scheme', content: 'light dark' },
+        { name: 'format-detection', content: 'telephone: no' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         // Open Graph（微信内分享卡片 / 通用爬虫）
         { property: 'og:type', content: 'website' },
@@ -184,16 +185,6 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       standalone: false,
-    },
-  },
-
-  ionic: {
-    css: {
-      basic: false,
-    },
-    config: {
-      backButtonText: '返回',
-      mode: 'ios',
     },
   },
 

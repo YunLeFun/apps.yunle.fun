@@ -28,11 +28,10 @@ import {
 } from '@ionic/vue'
 import { add, addCircleOutline, qrCodeOutline, searchOutline } from 'ionicons/icons'
 import { homeApps } from '~/constants/apps'
-import { hostHaptics, HostImpactStyle } from '~/host-runtime'
 import { RECENT_DEFAULT_DISPLAY } from '~/types/homeScreen'
+import { vibrate } from '~/utils/web-haptics'
 
 const router = useRouter()
-const route = useRoute()
 const homeScreenStore = useHomeScreenStore()
 const settingsStore = useSettingsStore()
 const userStore = useUserStore()
@@ -319,7 +318,7 @@ function handleLongPress(app: InstalledApp | null, position: { x: number, y: num
   }
   else {
     homeScreenStore.enterEditMode()
-    hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+    vibrate(12)
   }
 }
 
@@ -335,7 +334,7 @@ function handleDockLongPress(app: InstalledApp, position: { x: number, y: number
 function handleContextEditHomeScreen() {
   closeContextMenu()
   homeScreenStore.enterEditMode()
-  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+  vibrate(12)
 }
 
 /** 关闭上下文菜单 */
@@ -383,9 +382,6 @@ function handleContentClick() {
     <!-- Ionic 标准 Header -->
     <IonHeader :translucent="true">
       <IonToolbar>
-        <IonButtons slot="start">
-          <AppRunningEntry />
-        </IonButtons>
         <IonTitle>云居</IonTitle>
         <IonButtons slot="end">
           <IonButton v-if="homeScreenStore.isEditMode" @click="finishEditing()">
@@ -563,10 +559,6 @@ function handleContentClick() {
       :visible="recentDrag.isDragging.value"
       :active-zone="recentDrag.activeDropZone.value"
     />
-    <!-- Ionic 缓存 Tab 页面；仅在云居可见时展示收起的原生网页会话。 -->
-    <ClientOnly>
-      <AppMinimizedCard v-if="route.path === '/tabs/home'" />
-    </ClientOnly>
   </IonPage>
 </template>
 

@@ -7,7 +7,7 @@
  * 支持矩阵（2025-05）：
  *   - ✅ Chrome / Edge（Android、桌面）
  *   - ✅ Safari iOS 17.4+
- *   - ✅ Capacitor iOS WebView（基于 WKWebView，跟随 Safari）
+ *   - ✅ 支持相关约束的 WKWebView
  *   - ❌ Firefox（标准未实现）
  *   - ❌ 前置摄像头通常无 torch
  *

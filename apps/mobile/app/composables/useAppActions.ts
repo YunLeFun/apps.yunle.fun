@@ -56,7 +56,7 @@ export function useAppActions() {
   /**
    * 分享应用
    *
-   * 优先级：Web Share API（含 Capacitor iOS WebView）→ 复制链接到剪贴板
+   * 优先级：Web Share API→ 复制链接到剪贴板
    */
   async function shareApp(app: YlfAppInfo) {
     const url = getShareUrl(app)

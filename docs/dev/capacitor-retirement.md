@@ -2,7 +2,14 @@
 
 2026-11-05：用户确认旧 Capacitor iOS 客户端没有对外或通过 TestFlight 分发，按未发布客户端退役。历史上传 / 编译记录不作为已分发证明，也不把历史覆盖升级或 Sandbox 未通过项改写为通过。
 
-## 当前边界
+## 2026-11-13：Android 独立与官网收口
+
+- Android 项目迁至 `apps/android`，使用 Kotlin 和 Material Views 提供目录、搜索与详情。公开免费应用在 Kotlin 容器中试用，收起后可以恢复一个会话；应用内授权走系统浏览器的 SSO。主界面和 APK 构建不需要打包网页。
+- 过渡 Web 保留 Ionic Vue 页面和 Nitro API，移除 Capacitor / Cordova 的依赖、桥接和构建命令。旧已安装客户端需要的 URL 与 API 暂保留。
+- 官网优先接手公开浏览和详情入口。应用创建、编辑和私人工坊暂保留旧入口，等官网流程验收后逐条切换；目录、云居同步、SSO 及 Universal Links 不随网页跳转一起迁移。
+- Android 登录态、云居同步、扫码、支付和覆盖升级是发布前的后续工作。详见仓库内的 `specs/native-android-retirement/design.md` 和[Android 发布](./android-release.md)。
+
+## 2026-11-05 的退役边界
 
 | 消费者                | 当前实现                                           | Capacitor 状态                                |
 | --------------------- | -------------------------------------------------- | --------------------------------------------- |
@@ -52,11 +59,3 @@ Web 类型检查、生产构建、Android 同步与 Debug 整包构建、iOS / m
 随后按仓库既有 CI 的 collect / verify 流程复验，72 项专项与独立回收测试通过；核对 32 项归属记录，剩余存储为空、目录已删除，验证进程与创建进程不同。
 没有更改原生测试断言或增加跳过来隐藏首轮失败。
 未分发旧壳无需作为产品升级来源继续维护；这不代表原生客户端整体的支付 Sandbox、硬件、性能或辅助功能矩阵已经完成。
-
-## 下一阶段：Android
-
-Android 仍需要宿主容器、会话池、SSO 授权、扫码 / 相册、触感、生命周期与深链。
-可以先复用现有 Kotlin WebView、导航与会话服务，替换 `BridgeActivity` 和 `HostRuntimePlugin` 的 Capacitor 适配层，同时保留现有 Nuxt 界面。
-
-`@nuxtjs/ionic@1.0.2` 还会传递引入 Capacitor core / CLI，当前通过 overrides 统一到 8.6。
-最终退出时，需替换该 Nuxt 集成入口并验证 Ionic 页面栈 / 返回行为，再删除剩余 Capacitor / Cordova 包、兼容配置及原生构建入口；不影响 Web、原生 iOS / macOS 或 Electron。

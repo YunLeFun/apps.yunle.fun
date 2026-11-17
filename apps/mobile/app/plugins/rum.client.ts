@@ -1,7 +1,5 @@
 import Aegis from 'aegis-web-sdk'
 import consola from 'consola'
-import { hostEnvironment } from '~/host-runtime'
-import { getRumPageUrl } from '~/utils/rum'
 
 /**
  * 腾讯云 RUM（前端性能监控 / 错误上报）
@@ -43,10 +41,9 @@ export default defineNuxtPlugin(() => {
   }
 
   try {
-    const isNativePlatform = hostEnvironment.isNative()
     const resolvePageUrl = () => typeof window === 'undefined'
       ? 'https://apps.yunle.fun/'
-      : getRumPageUrl(window.location, isNativePlatform)
+      : window.location.href
     const aegis = new Aegis({
       id: appId,
       uin: '',
@@ -56,8 +53,6 @@ export default defineNuxtPlugin(() => {
       hostUrl: 'https://rumt-zh.com',
       // 环境标记，便于在 RUM 控制台过滤
       env: import.meta.dev ? 'dev' : 'production',
-      // RUM 只按 Web URL 聚合页面。原生壳保留路由，但把
-      // capacitor://localhost 映射到应用的公开 HTTPS origin。
       pageUrl: resolvePageUrl(),
       urlHandler: resolvePageUrl,
     } as any)

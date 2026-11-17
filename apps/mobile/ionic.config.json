@@ -1,7 +1,0 @@
-{
-  "name": "apps-yunle-fun",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "vue"
-}

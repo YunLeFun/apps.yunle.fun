@@ -1,9 +1,7 @@
-<!-- eslint-disable no-alert -->
 <script setup lang="ts">
 import { isPlatform } from '@ionic/vue'
 import { createEmbeddedWxLogin } from '@yunlefun/auth'
-import { consola } from 'consola'
-import { hostEnvironment } from '~/host-runtime'
+import { logoWechat } from 'ionicons/icons'
 
 const config = useRuntimeConfig()
 
@@ -56,28 +54,8 @@ function initWxLoginInIframe() {
  * 添加复制到微信内打开的提示
  */
 function goToWxLogin() {
-  // const url = generateQrconnectUrl({
-  //   appid: config.public.wxOpenAppId,
-  //   redirectUri: config.public.wxOpenRedirectUri,
-  // })
-  // window.open(url, '_blank')
-
-  const isNativePlatform = hostEnvironment.isNative()
-  consola.info('isNativePlatform', isNativePlatform)
-  if (isNativePlatform) {
-    // TODO
-    Wechat.auth('snsapi_userinfo', `_${new Date()}`, (res: any) => {
-      alert(JSON.stringify(res))
-    }, (reason: any) => {
-      alert(`Failed: ${reason}`)
-    })
-  }
-  else {
-    const url = generateUserAuthLink({
-      appid: config.public.wxOpenAppId,
-    })
-    window.open(url, '_blank')
-  }
+  const url = generateUserAuthLink({ appid: config.public.wxOpenAppId })
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 onMounted(() => {
@@ -95,7 +73,7 @@ onMounted(() => {
   <div class="flex flex-col items-center justify-center gap-4">
     <template v-if="!inMobile">
       <ion-chip>
-        <ion-icon :icon="ioniconsLogoWechat" color="success" />
+        <ion-icon :icon="logoWechat" color="success" />
         <ion-label>微信登录</ion-label>
       </ion-chip>
 
@@ -117,7 +95,7 @@ onMounted(() => {
       class="wx-login-btn"
       @click="goToWxLogin"
     >
-      <ion-icon :icon="ioniconsLogoWechat" class="text-xl" />
+      <ion-icon :icon="logoWechat" class="text-xl" />
       <span>微信登录</span>
     </button>
   </div>

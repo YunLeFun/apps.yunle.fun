@@ -16,7 +16,7 @@ import {
   IonToolbar,
 } from '@ionic/vue'
 import { star, starOutline } from 'ionicons/icons'
-import { hostHaptics, HostImpactStyle } from '~/host-runtime'
+import { vibrate } from '~/utils/web-haptics'
 
 const props = defineProps<{
   isOpen: boolean
@@ -60,7 +60,7 @@ const canSubmit = computed(() => rating.value >= 1 && rating.value <= 5 && conte
 
 function setRating(value: number) {
   rating.value = value
-  hostHaptics.impact({ style: HostImpactStyle.Light }).catch(() => {})
+  vibrate(8)
 }
 
 function submit() {

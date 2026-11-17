@@ -6,16 +6,16 @@
 [![Desktop CI](https://github.com/YunLeFun/apps.yunle.fun/actions/workflows/desktop.yml/badge.svg)](https://github.com/YunLeFun/apps.yunle.fun/actions/workflows/desktop.yml)
 [![License](https://img.shields.io/github/license/YunLeFun/apps.yunle.fun)](./LICENSE)
 
-本仓库使用 pnpm workspace。现有 Web 和 Android 客户端位于 `apps/mobile/`，继续提供 `apps.yunle.fun` 浏览器版本；原生 iOS 位于 `apps/ios/`，原生 macOS 位于 `apps/macos/`，Electron 桌面端位于 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
+本仓库使用 pnpm workspace。过渡 Web 界面与 API 位于 `apps/mobile/`，继续提供 `apps.yunle.fun`；原生 Android 位于 `apps/android/`，原生 iOS 位于 `apps/ios/`，原生 macOS 位于 `apps/macos/`，Electron 桌面端位于 `apps/desktop/`。公共业务与宿主协议按实际复用需求放入 `packages/`，各端独立构建和发布。
 
-旧 iOS 兼容工程已按未分发客户端退役；Capacitor 当前仅用于 Android 主壳。共享原生代码已迁入 `apps/ios`，原生 iOS、原生 macOS 和 Electron 不依赖 Capacitor。剩余调用与后续迁移见 [Capacitor 使用边界与退役准备](./docs/dev/capacitor-retirement.md)。
+旧 Capacitor 主壳已退出源码和构建流程。Android 的原生目录、详情与云应用容器独立构建；Web 产品入口逐步收口到 `www.yunle.fun`。见 [退役与迁移方案](./docs/dev/capacitor-retirement.md)。
 
 ## ✨ 特性
 
 - 🏠 **云居（Home）** —— iOS 风格桌面网格，长按编辑、拖拽排序、毛玻璃 Dock
 - 🔍 **寻乐（Discovery）** —— 每日编辑推荐 + 每周热门排行
 - 🏗️ **工坊（Workshop）** —— 分类浏览、搜索、安装云应用；开发者可发布作品
-- 📱 **跨平台** —— Web + Android（Capacitor）+ 原生 iOS / macOS + Electron
+- 📱 **跨平台** —— Web + 原生 Android / iOS / macOS + Electron
 - 🔐 **多种登录** —— 微信、手机号 OTP、邮箱、密码、GitHub（仅 Web）
 - ☁️ **云端同步** —— 桌面配置实时同步多设备
 
@@ -27,7 +27,7 @@
 
 EdgeOne 使用 Nuxt 框架和 `apps/mobile` 构建目录，通过 `apps/mobile/edgeone.json` 执行 `pnpm --dir ../.. install --frozen-lockfile` 和 `pnpm run build:edgeone`，Node.js 为 24.18.0。平台官方适配器生成完整 `.edgeone` 产物：`.edgeone/assets` 提供浏览器资源，`.edgeone/cloud-functions/ssr-node` 提供 Nitro API 和页面 fallback。每次发布都应按 [仓库迁移与部署](./docs/dev/monorepo.md) 核验实际页面、API 和部署版本。
 
-专用 EdgeOne 构建入口要求干净检出，不允许应用目录或函数产物包含私有 `.env` 文件；服务器变量在平台配置。日常 `pnpm build` 和 Capacitor 构建继续使用原有 `.output` 流程。
+专用 EdgeOne 构建入口要求干净检出，不允许应用目录或函数产物包含私有 `.env` 文件；服务器变量在平台配置。日常 Web 构建继续使用 `.output`。
 
 ## 🚀 快速开始
 
@@ -56,7 +56,6 @@ pnpm dev      # 启动开发服务器（http://localhost:8001）
 | `pnpm test:watch`            | 单元测试 watch 模式                              |
 | `pnpm test:coverage`         | 测试覆盖率报告                                   |
 | `pnpm test:e2e`              | Playwright E2E 测试                              |
-| `pnpm sync`                  | 同步 web → Android                               |
 | `pnpm build:android:release` | 构建并验签 Android 发布包                        |
 | `pnpm release`               | 更新移动版本；发布前核对独立移动 Tag，见迁移文档 |
 
@@ -98,7 +97,7 @@ pnpm verify:desktop-launch    # 实际启动当前平台原生包
 | UI              | Ionic Vue（ios 模式） + Konsta UI                     |
 | 样式            | Tailwind CSS 4 + UnoCSS（仅图标） + SCSS              |
 | 状态            | Pinia                                                 |
-| 移动端          | Capacitor 8（仅 Android）                             |
+| 移动端          | Kotlin / AndroidX 与 SwiftUI                          |
 | 原生 macOS      | SwiftUI + AppKit + WKWebView（复用 iOS Swift 业务层） |
 | Electron 桌面端 | Electron 44.7.0 + Electron Forge 8.0.1                |
 | 后端            | Nitro Server + 腾讯 CloudBase                         |
@@ -111,10 +110,10 @@ pnpm verify:desktop-launch    # 实际启动当前平台原生包
 apps/
 ├── ios/                # 独立 SwiftUI 原生客户端（改造进行中）
 ├── macos/              # SwiftUI + WKWebView，共享 iOS 目录与认证源码
-├── mobile/             # Web + Ionic + Capacitor
+├── android/            # Kotlin / AndroidX 原生客户端
+├── mobile/             # 过渡 Web / Ionic + Nitro
 │   ├── app/            # Nuxt 4 页面、组件、composables、stores、plugins
 │   ├── server/         # 云端 Nitro API
-│   ├── android/        # Capacitor Android 工程
 │   ├── scripts/        # 移动构建、版本同步与发布脚本
 │   ├── test/           # Vitest + Playwright
 │   └── package.json    # Web／移动端依赖和版本
@@ -127,7 +126,7 @@ pnpm-workspace.yaml     # 工作区与依赖安全策略
 pnpm-lock.yaml          # 所有工作区共用锁文件
 ```
 
-移动端环境文件在 `apps/mobile/.env`；iOS / Android 版本从 `apps/mobile/package.json` 读取。各应用的 `.nuxt`、`.output`、测试结果和原生构建产物均留在各自目录。
+过渡 Web 环境文件在 `apps/mobile/.env`；Android 版本在 `apps/android/version.properties`。各应用的 `.nuxt`、`.output`、测试结果和原生构建产物均留在各自目录。
 
 ## 📖 文档
 

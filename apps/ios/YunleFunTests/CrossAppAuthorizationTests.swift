@@ -70,6 +70,7 @@ final class CrossAppAuthorizationTests: XCTestCase {
         var opened: [URL] = []
         var issues: [CrossAppAuthorizationIssue?] = []
         let page = makePage(open: { url, done in opened.append(url); done(true) }, finished: { issues.append($0) })
+        page.authorizationCheckSucceeded()
         page.resolve(page.requestID, result: ["ok": true, "code": String(repeating: "k", count: 43)], error: nil)
         XCTAssertEqual(opened.count, 1)
         XCTAssertTrue(opened[0].absoluteString.hasPrefix("https://life.yunle.fun/auth/callback#ylf_sso="))
@@ -83,6 +84,7 @@ final class CrossAppAuthorizationTests: XCTestCase {
     func testUnopenableCallbackDiscardsTheCode() {
         var issues: [CrossAppAuthorizationIssue?] = []
         let page = makePage(open: { _, done in done(false) }, finished: { issues.append($0) })
+        page.authorizationCheckSucceeded()
         page.resolve(page.requestID, result: ["ok": true, "code": String(repeating: "k", count: 43)], error: nil)
         XCTAssertEqual(issues, [.unableToReturn("原 App")])
     }
@@ -90,8 +92,10 @@ final class CrossAppAuthorizationTests: XCTestCase {
     func testDenialAndOtherAccountReturnWithoutCodeAndInvalidRequestsNeverReturn() throws {
         var opened: [URL] = []
         let denied = makePage(open: { url, done in opened.append(url); done(true) })
+        denied.authorizationCheckSucceeded()
         denied.resolve(denied.requestID, result: nil, error: HostAuthorizationError.denied.code)
         let other = makePage(open: { url, done in opened.append(url); done(true) })
+        other.authorizationCheckSucceeded()
         XCTAssertTrue(other.useOtherAccount(other.requestID))
         XCTAssertEqual(opened.map { decodedPayload($0)["reason"] as? String }, ["access_denied", "account_selection_required"])
         XCTAssertTrue(opened.allSatisfy { decodedPayload($0)["code"] == nil })
@@ -102,6 +106,30 @@ final class CrossAppAuthorizationTests: XCTestCase {
         XCTAssertEqual(opened.count, 2)
         XCTAssertEqual(issues, [.invalidRequest])
         XCTAssertFalse(invalid.useOtherAccount("another-request"))
+    }
+
+    func testVerificationCancellationClearsLoadingWithoutOpeningAnUnverifiedCallback() throws {
+        var opened = false
+        var checking: [Bool] = []
+        var issues: [CrossAppAuthorizationIssue?] = []
+        let request = try XCTUnwrap(CrossAppAuthorizationLink.parse(entry()))
+        let page = CrossAppAuthorizationPage(request: request, accounts: nil, presenter: { nil }, open: { _, done in
+            opened = true; done(true)
+        }, onCheckingChange: { checking.append($0) }, finished: { issues.append($0) })
+        page.authorizationCheckStarted()
+        XCTAssertEqual(checking, [true])
+        XCTAssertFalse(page.useOtherAccount(page.requestID))
+        page.resolve(page.requestID, result: nil, error: HostAuthorizationError.denied.code)
+        XCTAssertEqual(checking, [true, false])
+        XCTAssertFalse(opened)
+        XCTAssertEqual(issues, [nil])
+    }
+
+    func testFailedVerificationNeverOpensTheCallerSuppliedCallback() {
+        var issues: [CrossAppAuthorizationIssue?] = []
+        let page = makePage(open: { _, _ in XCTFail("Unverified callback opened") }, finished: { issues.append($0) })
+        page.resolve(page.requestID, result: nil, error: HostAuthorizationError.unavailable.code)
+        XCTAssertEqual(issues, [.verificationUnavailable])
     }
 
     func testCrossAppRequestsAlwaysRequireExplicitConsentEvenForTrustedClients() async throws {

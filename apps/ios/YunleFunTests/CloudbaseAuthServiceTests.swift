@@ -226,13 +226,17 @@ final class AuthHTTPFixture: @unchecked Sendable {
     private let lock = NSLock()
     private var received: [URLRequest] = []
     private var replies: [(Int, String)]
+    private var transportErrors: [URLError.Code]
     let contentType: String
-    init(replies: [(Int, String)], contentType: String = "application/json") { self.replies = replies; self.contentType = contentType }
+    init(replies: [(Int, String)], contentType: String = "application/json", transportErrors: [URLError.Code] = []) {
+        self.replies = replies; self.contentType = contentType; self.transportErrors = transportErrors
+    }
     var requests: [URLRequest] { lock.lock(); defer { lock.unlock() }; return received }
-    func take(_ request: URLRequest) -> (Int, String) {
+    func take(_ request: URLRequest) -> Result<(Int, String), URLError> {
         lock.lock(); defer { lock.unlock() }
         received.append(request)
-        return replies.isEmpty ? (500, "{}") : replies.removeFirst()
+        if !transportErrors.isEmpty { return .failure(URLError(transportErrors.removeFirst())) }
+        return .success(replies.isEmpty ? (500, "{}") : replies.removeFirst())
     }
 }
 
@@ -248,7 +252,11 @@ final class AuthHTTPProtocol: URLProtocol {
         let fixture = Self.fixtures[request.url?.host ?? ""]
         Self.lock.unlock()
         guard let fixture else { client?.urlProtocol(self, didFailWithError: URLError(.badURL)); return }
-        let (status, body) = fixture.take(request)
+        let status: Int, body: String
+        switch fixture.take(request) {
+        case .success(let reply): (status, body) = reply
+        case .failure(let error): client?.urlProtocol(self, didFailWithError: error); return
+        }
         client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil,
                                                             headerFields: ["Content-Type": fixture.contentType])!, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: Data(body.utf8))

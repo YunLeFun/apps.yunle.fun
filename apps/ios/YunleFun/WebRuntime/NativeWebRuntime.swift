@@ -477,6 +477,10 @@ final class NativeWebRuntime: ObservableObject {
                      parameters: page.request.brokerParameters, page: page, requireConsent: true)
     }
 
+    func cancelCrossAppAuthorization(_ page: CrossAppAuthorizationPage) -> Bool {
+        authorizationBroker?.cancel(page: page) ?? false
+    }
+
     func configureCommerce(wallet: WalletStore, purchases: PurchaseCoordinator) {
         self.wallet = wallet; self.purchases = purchases
     }

@@ -85,6 +85,12 @@ struct AppRootView: View {
                     createdRoom = (room, selection.boundary)
                 }
             }
+            .accessibilityHidden(crossAppAuthorization.isChecking)
+            .overlay {
+                if crossAppAuthorization.isChecking {
+                    CrossAppAuthorizationProgressView { crossAppAuthorization.cancelCheck(runtime: runtime) }
+                }
+            }
             .background(EmptyView().alert(item: $crossAppAuthorization.issue) { issue in
                 Alert(title: Text(issue.title), message: Text(issue.message), dismissButton: .default(Text("好")))
             })

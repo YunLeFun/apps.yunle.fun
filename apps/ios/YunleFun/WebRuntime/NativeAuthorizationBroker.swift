@@ -9,7 +9,14 @@ protocol HostAuthorizationPage: AnyObject {
     func showLogin(application: String, completion: @escaping (Bool) -> Void) -> Bool
     func showConsent(policy: HostSsoPolicy, user: AccountUser, completion: @escaping (AuthorizationSheetChoice) -> Void) -> Bool
     func dismissAuthorizationUI()
+    func authorizationCheckStarted()
+    func authorizationCheckSucceeded()
     func useOtherAccount(_ requestID: String) -> Bool
+}
+
+extension HostAuthorizationPage {
+    func authorizationCheckStarted() {}
+    func authorizationCheckSucceeded() {}
 }
 
 /// Coordinates a single user decision. All async work is tied to both the
@@ -88,19 +95,23 @@ final class NativeAuthorizationBroker {
         resumeAfterLoginIfReady(current)
     }
 
-    func cancel(page: HostAuthorizationPage) {
-        guard let current = flow, current.page === page else { return }
+    @discardableResult
+    func cancel(page: HostAuthorizationPage) -> Bool {
+        guard let current = flow, current.page === page else { return false }
         finish(current, error: .denied)
+        return true
     }
 
     private func run(_ current: Flow, requireConsent: Bool) {
         current.phase = .resolving
+        current.page.authorizationCheckStarted()
         arm(current, seconds: 30)
         current.operation = Task { [weak self] in
             guard let self else { return }
             do {
                 let policy = try await self.service.resolve(current.request)
                 try self.ensureCurrent(current)
+                current.page.authorizationCheckSucceeded()
                 if policy.prompt == "select_account" {
                     self.otherAccount(current)
                     return

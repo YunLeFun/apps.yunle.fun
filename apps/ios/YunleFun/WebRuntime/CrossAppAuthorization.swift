@@ -87,12 +87,13 @@ enum CrossAppRedirect: Equatable {
 }
 
 enum CrossAppAuthorizationIssue: Equatable {
-    case invalidRequest, busy, unableToReturn(String)
+    case invalidRequest, busy, verificationUnavailable, unableToReturn(String)
 
     var runtimeIssue: RuntimeIssue {
         switch self {
         case .invalidRequest: RuntimeIssue(title: "该授权请求无效", message: "请回到发起登录的 App 重新尝试。")
         case .busy: RuntimeIssue(title: "有一个授权正在进行", message: "请先完成或取消当前的授权，再回到发起登录的 App 重试。")
+        case .verificationUnavailable: RuntimeIssue(title: "暂时无法验证登录请求", message: "请回到发起登录的 App 重试。")
         case .unableToReturn(let name): RuntimeIssue(title: "无法返回\(name)", message: "请更新\(name)后重试。本次授权已作废。")
         }
     }
@@ -110,16 +111,26 @@ final class CrossAppAuthorizationPage: HostAuthorizationPage {
     private let presenter: () -> UIViewController?
     private let open: Opener
     private let finished: (CrossAppAuthorizationIssue?) -> Void
+    private let onCheckingChange: (Bool) -> Void
     private var isResolved = false
+    private var hasVerifiedCallback = false
     private var applicationName = "原 App"
     private weak var modal: UIViewController?
 
     init(request: CrossAppAuthorizationRequest, accounts: AccountStore?,
          presenter: @escaping () -> UIViewController? = CrossAppAuthorizationPage.topPresenter,
          open: @escaping Opener = CrossAppAuthorizationPage.openUniversalLink,
+         onCheckingChange: @escaping (Bool) -> Void = { _ in },
          finished: @escaping (CrossAppAuthorizationIssue?) -> Void) {
         self.request = request; self.accounts = accounts
         self.presenter = presenter; self.open = open; self.finished = finished
+        self.onCheckingChange = onCheckingChange
+    }
+
+    func authorizationCheckStarted() { onCheckingChange(true) }
+    func authorizationCheckSucceeded() {
+        hasVerifiedCallback = true
+        onCheckingChange(false)
     }
 
     func isPending(_ requestID: String) -> Bool { !isResolved && requestID == self.requestID }
@@ -130,11 +141,14 @@ final class CrossAppAuthorizationPage: HostAuthorizationPage {
     func resolve(_ requestID: String, result: [String: Any]?, error: String?) {
         guard isPending(requestID) else { return }
         isResolved = true
-        if let code = result?["code"] as? String {
-            returnToClient(.approved(code: code))
-        } else if error == HostAuthorizationError.invalidRequest.code {
-            // 参数或注册策略不通过时不回跳，避免把云乐坊当作向任意链接发送内容的跳板
+        onCheckingChange(false)
+        if error == HostAuthorizationError.invalidRequest.code {
             finished(.invalidRequest)
+        } else if !hasVerifiedCallback {
+            // Cancellation or a network failure can arrive before the registry has approved the destination.
+            finished(error == HostAuthorizationError.denied.code ? nil : .verificationUnavailable)
+        } else if let code = result?["code"] as? String {
+            returnToClient(.approved(code: code))
         } else {
             // 拒绝、关闭面板、超时与账号变化都按拒绝返回，不携带 code
             returnToClient(.denied)
@@ -142,8 +156,9 @@ final class CrossAppAuthorizationPage: HostAuthorizationPage {
     }
 
     func useOtherAccount(_ requestID: String) -> Bool {
-        guard isPending(requestID) else { return false }
+        guard isPending(requestID), hasVerifiedCallback else { return false }
         isResolved = true
+        onCheckingChange(false)
         // v1 不在云乐坊内切换账号，交给接入方用网页授权选择其他账号
         returnToClient(.accountSelectionRequired)
         return true
@@ -217,7 +232,17 @@ final class CrossAppAuthorizationPage: HostAuthorizationPage {
 @MainActor
 final class CrossAppAuthorizationCoordinator: ObservableObject {
     @Published var issue: RuntimeIssue?
+    @Published private(set) var isChecking = false
     private var page: CrossAppAuthorizationPage?
+    private var pendingStart: Task<Void, Never>?
+
+    func cancelCheck(runtime: NativeWebRuntime) {
+        guard isChecking, let page else { return }
+        pendingStart?.cancel()
+        if !runtime.cancelCrossAppAuthorization(page) {
+            page.resolve(page.requestID, result: nil, error: HostAuthorizationError.denied.code)
+        }
+    }
 
     /// 返回 `true` 表示地址属于授权入口（无论是否有效），调用方不再交给其他路由
     func handle(_ url: URL, runtime: NativeWebRuntime, accounts: AccountStore) -> Bool {
@@ -230,18 +255,66 @@ final class CrossAppAuthorizationCoordinator: ObservableObject {
             issue = CrossAppAuthorizationIssue.busy.runtimeIssue
             return true
         }
-        let page = CrossAppAuthorizationPage(request: request, accounts: accounts) { [weak self] issue in
+        let page = CrossAppAuthorizationPage(request: request, accounts: accounts, onCheckingChange: { [weak self] checking in
+            self?.isChecking = checking
+        }) { [weak self] issue in
             self?.page = nil
+            self?.pendingStart = nil
             if let issue { self?.issue = issue.runtimeIssue }
         }
         self.page = page
-        Task { [weak runtime, weak accounts] in
-            for _ in 0..<100 where accounts?.isRestoring == true {
-                try? await Task.sleep(for: .milliseconds(100))
+        isChecking = true
+        pendingStart = Task { [weak runtime, weak accounts] in
+            let deadline = ContinuousClock.now + .seconds(10)
+            while let accounts, accounts.isRestoring || accounts.isInitialRestorePending {
+                guard ContinuousClock.now < deadline else {
+                    page.resolve(page.requestID, result: nil, error: HostAuthorizationError.unavailable.code)
+                    return
+                }
+                do { try await Task.sleep(for: .milliseconds(50)) }
+                catch { return }
             }
-            guard let runtime, page.isPending(page.requestID) else { return }
+            guard !Task.isCancelled, page.isPending(page.requestID) else { return }
+            guard let runtime, accounts != nil else {
+                page.resolve(page.requestID, result: nil, error: HostAuthorizationError.unavailable.code)
+                return
+            }
             runtime.beginCrossAppAuthorization(page)
         }
         return true
+    }
+}
+
+
+struct CrossAppAuthorizationProgressView: View {
+    let onCancel: () -> Void
+    @AccessibilityFocusState private var isTitleFocused: Bool
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.28)
+                .ignoresSafeArea()
+                .accessibilityHidden(true)
+            VStack(spacing: 20) {
+                ProgressView()
+                    .controlSize(.large)
+                    .accessibilityHidden(true)
+                Text("正在验证登录请求")
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                    .accessibilityFocused($isTitleFocused)
+                    .accessibilityIdentifier("crossAppAuthorizationChecking")
+                Button("取消", role: .cancel, action: onCancel)
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("cancelCrossAppAuthorizationCheck")
+            }
+            .padding(24)
+            .frame(maxWidth: 340)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24))
+            .padding(.horizontal, 24)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityAddTraits(.isModal)
+        .onAppear { isTitleFocused = true }
     }
 }

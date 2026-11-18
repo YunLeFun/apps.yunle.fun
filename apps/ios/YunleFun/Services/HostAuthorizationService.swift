@@ -184,7 +184,16 @@ struct HostAuthorizationService: HostAuthorizationServing {
     func resolve(_ request: HostSsoRequest) async throws -> HostSsoPolicy {
         var fields = request.protocolFields
         if let prompt = request.prompt { fields["prompt"] = prompt }
-        let result = try await send(resolver, fields: fields, token: nil)
+        let started = ContinuousClock.now
+        let result: [String: Any]
+        do {
+            result = try await send(resolver, fields: fields, token: nil)
+        } catch let error as URLError where error.code == .networkConnectionLost
+                    && started.duration(to: .now) < .seconds(1) {
+            // The broker lookup is read-only. An idle connection can close on the first write.
+            try Task.checkCancellation()
+            result = try await send(resolver, fields: fields, token: nil)
+        }
         return try HostSsoPolicy(response: result, request: request)
     }
     func issue(_ request: HostSsoRequest, identity: AuthorizedAccount) async throws -> HostSsoCode {

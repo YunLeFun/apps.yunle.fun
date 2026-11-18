@@ -134,6 +134,28 @@ final class HostAuthorizationServiceTests: XCTestCase {
         XCTAssertNil(production.urlCache)
     }
 
+    func testReadOnlyResolveRecoversOnceFromAnEarlyLostConnection() async throws {
+        let request = try ssoRequest()
+        let fixture = AuthHTTPFixture(replies: [(200, try json(ssoPolicyBody(request)))],
+                                      transportErrors: [.networkConnectionLost])
+        let service = service(fixture)
+        _ = try await service.resolve(request)
+        XCTAssertEqual(fixture.requests.count, 2)
+        XCTAssertEqual(try fields(fixture.requests[0])["nonce"] as? String, try fields(fixture.requests[1])["nonce"] as? String)
+    }
+
+    func testLostConnectionDuringCodeIssuanceIsNeverRetried() async throws {
+        let fixture = AuthHTTPFixture(replies: [], transportErrors: [.networkConnectionLost])
+        let service = service(fixture)
+        do {
+            _ = try await service.issue(ssoRequest(), identity: AuthorizedAccount(userID: "host-a", accessToken: "test"))
+            XCTFail("Transport failure must be returned without issuing again")
+        } catch let error as URLError {
+            XCTAssertEqual(error.code, .networkConnectionLost)
+        }
+        XCTAssertEqual(fixture.requests.count, 1)
+    }
+
     private func service(_ fixture: AuthHTTPFixture) -> HostAuthorizationService {
         let resolverHost = "resolve-" + UUID().uuidString.lowercased() + ".invalid"
         let gatewayHost = "gateway-" + UUID().uuidString.lowercased() + ".invalid"

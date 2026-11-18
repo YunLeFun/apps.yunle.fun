@@ -5,33 +5,28 @@ struct WorkshopDiscoverySections: View {
     let payload: WorkshopDiscoveryPayload?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    private var selection: WorkshopDiscoverySelection? { payload?.selection(from: applications) }
-    private var eligible: [CloudApplication] { WorkshopDiscoveryPayload.publicApplications(applications) }
-    private var official: [CloudApplication] { eligible.filter { $0.isOfficial == true } }
-    private var featured: WorkshopDiscoverySelection.Featured? {
-        selection?.featured.first ?? official.first.map { .init(application: $0, title: nil, subtitle: nil) }
-    }
-
     var body: some View {
+        let selection = payload?.selection(from: applications)
+        let eligible = WorkshopDiscoveryPayload.publicApplications(applications)
+        let official = eligible.filter { $0.isOfficial == true }
+        let featured = selection?.featured.first
         if let featured {
             Section {
-                NavigationLink(value: featured.application) {
-                    featuredContent(featured)
-                }
-                .accessibilityIdentifier("catalog.featured")
-            } header: {
-                Text(selection?.featured.isEmpty == false ? "编辑精选" : "云乐坊出品")
-                    .foregroundStyle(Color.primary)
-            }
+                featuredLink(featured)
+            } header: { Text("编辑精选").foregroundStyle(Color.primary) }
         }
-        let otherOfficial = official.filter { $0.id != featured?.id }
-        if !otherOfficial.isEmpty {
+        let fallback = featured == nil ? official.first : nil
+        let otherOfficial = official.filter { $0.id != (featured?.id ?? fallback?.id) }
+        if fallback != nil || !otherOfficial.isEmpty {
             Section {
+                if let fallback {
+                    featuredLink(.init(application: fallback, title: nil, subtitle: nil))
+                }
                 ForEach(otherOfficial.prefix(5)) { app in
                     NavigationLink(value: app) { ApplicationRow(application: app) }
                         .accessibilityIdentifier("catalog.official.\(app.id)")
                 }
-            } header: { Text("官方出品").foregroundStyle(Color.primary) }
+            } header: { Text("云乐坊出品").foregroundStyle(Color.primary) }
         }
         if let weekly = selection?.weekly, !weekly.isEmpty {
             Section {
@@ -57,6 +52,13 @@ struct WorkshopDiscoverySections: View {
                 }
             } header: { Text("随手发现").foregroundStyle(Color.primary) }
         }
+    }
+
+    private func featuredLink(_ item: WorkshopDiscoverySelection.Featured) -> some View {
+        NavigationLink(value: item.application) {
+            featuredContent(item)
+        }
+        .accessibilityIdentifier("catalog.featured")
     }
 
     private func featuredContent(_ item: WorkshopDiscoverySelection.Featured) -> some View {

@@ -36,6 +36,8 @@ Apple 的[数据使用声明说明](https://developer.apple.com/documentation/bu
 
 账号资料、访问 / 刷新令牌和认证 UUID 保存在一个 Keychain 状态中，设置为 `AfterFirstUnlockThisDeviceOnly`、不通过 iCloud Keychain 同步。该状态模型不保存登录密码；系统密码保存入口是另一条由用户决定的流程。退出移除对应账号并写回状态，不等于删除其他账号、云居副本或远端业务数据。
 
+登录表单在本机 UserDefaults 保存上次成功登录的方式和账号输入，用于下次登录预填。该记录不保存密码、验证码或会话令牌。
+
 云居、升级前副本、导入副本、工坊草稿、诊断缓冲和支持编号各有独立存储路径及账号边界。文件保护选项是实现事实，模拟器无法据此证明锁屏后的保护效果。旧版导入只读取允许的业务键，不把旧令牌或已购缓存转换成原生授权，见[升级与回退](./ios-upgrade-migration.md)。
 
 认证、诊断及多数账号业务请求采用 ephemeral URLSession，禁用 Cookie / URLCredentialStorage，敏感请求拒绝重定向。公开目录、图标缓存和云应用 WebKit 是另行管理的路径，不能把上述配置描述成整个 App 不持久化 Cookie 或不访问第三方网络。SSO 通过受限授权流程传递一次性 code，宿主长期令牌不作为通用网页桥接返回值。

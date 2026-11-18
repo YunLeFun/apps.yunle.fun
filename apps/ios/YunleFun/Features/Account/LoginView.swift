@@ -8,11 +8,14 @@ struct LoginView: View {
     var continuation: AccountSignInContinuation? = nil
     var onCommitted: ((AccountSignInSuccess) -> Void)? = nil
     var onCancelled: (() -> Void)? = nil
+    var prefillsLastIdentifier = true
     @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var method = Method.phone
-    @State private var identifier = ""
+    @AppStorage("account.lastSuccessfulLoginMethod") private var lastSuccessfulMethodValue = Method.phone.rawValue
+    @AppStorage("account.lastSuccessfulLoginIdentifier") private var lastSuccessfulIdentifier = ""
+    @State private var selectedMethod: Method?
+    @State private var enteredIdentifier: String?
     @State private var password = ""
     @State private var isPasswordVisible = false
     @State private var isUsernameFocused = false
@@ -31,9 +34,32 @@ struct LoginView: View {
     @AccessibilityFocusState private var errorFocused: Bool
 
     private enum Method: String, CaseIterable, Identifiable {
-        case phone = "手机号", email = "邮箱", password = "密码"
+        case phone, email, password
         var id: Self { self }
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .phone: "短信验证码"
+            case .email: "邮箱验证码"
+            case .password: "密码"
+            }
+        }
     }
+
+    private var lastSuccessfulMethod: Method? { Method(rawValue: lastSuccessfulMethodValue) }
+    private var method: Method { selectedMethod ?? lastSuccessfulMethod ?? .phone }
+
+    private var identifier: String {
+        if let enteredIdentifier { return enteredIdentifier }
+        guard prefillsLastIdentifier, authorizationApplication == nil, accounts.user == nil,
+              method == lastSuccessfulMethod else { return "" }
+        return lastSuccessfulIdentifier
+    }
+
+    private var identifierBinding: Binding<String> {
+        Binding(get: { identifier }, set: { enteredIdentifier = $0 })
+    }
+
     private enum Field { case identifier, code }
     private enum Action: String, Identifiable {
         case sendCode, signIn
@@ -84,9 +110,7 @@ struct LoginView: View {
                         codeField
                     }
                 } footer: {
-                    if method == .password {
-                        passwordLoginHelp
-                    } else {
+                    if method != .password {
                         Text(codeFooter)
                     }
                 }
@@ -139,7 +163,7 @@ struct LoginView: View {
             }
             .onChange(of: method) { _ in
                 dismissKeyboard()
-                resetChallenge(); password = ""; isPasswordVisible = false; identifier = ""; error = nil
+                resetChallenge(); password = ""; isPasswordVisible = false; enteredIdentifier = nil; error = nil
             }
             .onChange(of: focus) { field in
                 if field != nil { isUsernameFocused = false; isPasswordFocused = false }
@@ -148,7 +172,7 @@ struct LoginView: View {
                 // Pasted or autofilled numbers often carry +86 / 0086 or spacing.
                 if method == .phone {
                     let number = VerificationAddress.normalizedPhoneInput(value)
-                    if number != value { identifier = number }
+                    if number != value { enteredIdentifier = number }
                 }
                 resetChallenge(); error = nil
             }
@@ -157,8 +181,8 @@ struct LoginView: View {
     }
 
     private var methodPicker: some View {
-        Picker("登录方式", selection: $method) {
-            ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
+        Picker("登录方式", selection: Binding(get: { method }, set: { selectedMethod = $0 })) {
+            ForEach(Method.allCases) { Text($0.title).tag($0) }
         }
         .accessibilityIdentifier("login.method")
     }
@@ -187,28 +211,6 @@ struct LoginView: View {
         }
     }
 
-    private var passwordLoginHelp: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("忘记密码？可使用手机号或邮箱验证码登录。")
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 16) { verificationLoginButtons }.fixedSize(horizontal: true, vertical: false)
-                VStack(alignment: .leading, spacing: 4) { verificationLoginButtons }
-            }
-        }
-        .disabled(isBusy)
-    }
-
-    private var verificationLoginButtons: some View {
-        Group {
-            Button("手机号验证码登录") { method = .phone }
-                .accessibilityIdentifier("login.use-phone-code")
-            Button("邮箱验证码登录") { method = .email }
-                .accessibilityIdentifier("login.use-email-code")
-        }
-        .buttonStyle(.borderless)
-        .frame(minHeight: 44, alignment: .leading)
-    }
-
     private var keyboardDismissPlacement: ToolbarItemPlacement {
         if #available(iOS 17, *) { return .topBarTrailing }
         return .navigationBarTrailing
@@ -221,14 +223,14 @@ struct LoginView: View {
                 if !identifier.hasPrefix("+") {
                     Text("+86").foregroundStyle(.secondary).accessibilityLabel("中国大陆，区号 86")
                 }
-                TextField("手机号", text: $identifier)
+                TextField("手机号", text: identifierBinding)
                     .accessibilityLabel("手机号")
                     .accessibilityIdentifier("login.phone")
                     .textContentType(.telephoneNumber).keyboardType(.phonePad)
                     .focused($focus, equals: .identifier)
             }
         case .email:
-            TextField("邮箱地址", text: $identifier)
+            TextField("邮箱地址", text: identifierBinding)
                 .accessibilityLabel("邮箱地址")
                 .accessibilityIdentifier("login.email")
                 .textContentType(.emailAddress).keyboardType(.emailAddress)
@@ -240,7 +242,7 @@ struct LoginView: View {
         case .password:
             // Both credentials share UIKit focus ownership. SwiftUI's focus system must not
             // issue a deferred keyboard dismissal when Next hands off to the password field.
-            LoginCredentialField(text: $identifier, isFocused: $isUsernameFocused,
+            LoginCredentialField(text: identifierBinding, isFocused: $isUsernameFocused,
                                  placeholder: "用户名、邮箱或手机号", contentType: .username,
                                  identifier: "login.username", onSubmit: { isPasswordFocused = true })
         }
@@ -299,6 +301,8 @@ struct LoginView: View {
 
     private func perform(_ action: Action, captcha: String? = nil) {
         guard !isBusy else { return }
+        let method = self.method
+        let identifier = self.identifier.trimmingCharacters(in: .whitespacesAndNewlines)
         error = nil
         isBusy = true
         dismissKeyboard()
@@ -319,7 +323,11 @@ struct LoginView: View {
                         authenticationCommitted = true
                         onCommitted?(success)
                     }
-                    let authenticated = { authenticationCommitted = true }
+                    let authenticated = {
+                        authenticationCommitted = true
+                        lastSuccessfulIdentifier = method == .phone ? VerificationAddress.normalizedPhoneInput(identifier) : identifier
+                        lastSuccessfulMethodValue = method.rawValue
+                    }
                     if method == .password {
                         try await accounts.passwordSignIn(identifier: identifier, password: password, captcha: captcha,
                                                           continuation: continuation, onCommitted: committed,

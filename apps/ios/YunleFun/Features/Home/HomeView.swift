@@ -726,7 +726,7 @@ private struct HomeStatusStrip<Actions: View>: View {
     }
 
     private var messageLabel: some View {
-        HStack(alignment: .center, spacing: 6) {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
             Image(systemName: systemImage)
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.secondary)

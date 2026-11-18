@@ -2,6 +2,10 @@
   "applinks": {
     "details": [
       {
+        "appIDs": ["QT792GAY4C.fun.yunle.apps"],
+        "components": [{ "/": "/auth/wechat/*" }]
+      },
+      {
         "appIDs": ["QT792GAY4C.fun.yunle.apps", "QT792GAY4C.fun.yunle.www"],
         "components": [
           {

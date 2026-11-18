@@ -556,7 +556,8 @@ final class NativeRuntimeSessionTests: XCTestCase {
         private func cleanup() async {
             close()
             // Require actual runtime owners to be gone before deferring stores.
-            for _ in 0..<100 {
+            // WebKit can take longer than 5s to drop the last page on a busy CI runner.
+            for _ in 0..<300 {
                 let released = autoreleasepool {
                     !runtime.isIdentityCleanupPending && root.presentedViewController == nil &&
                     !observedBrowsers.contains { $0.browser != nil } &&

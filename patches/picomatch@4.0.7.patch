@@ -1,0 +1,23 @@
+diff --git a/lib/parse.js b/lib/parse.js
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -539,9 +539,17 @@
+   const extglobClose = token => {
+     const literal = input.slice(token.startIndex, state.index + 1);
+     const body = input.slice(token.startIndex + 2, state.index);
++    const repeated = token.type === 'plus' || token.type === 'star';
+     const analysis = analyzeRepeatedExtglob(body, opts);
+-
+-    if ((token.type === 'plus' || token.type === 'star') && analysis.risky) {
++    // Wildcards inside a repeated extglob introduce overlapping regex repetitions.
++    // Inspect parser tokens so escaped, quoted and bracketed stars remain literal.
++    const hasWildcard = repeated && tokens.slice(token.tokensIndex + 2).some((item, index, inner) => {
++      const next = inner[index + 1];
++      const extglobOpener = next?.type === 'paren' && next.extglob && next.value === '(';
++      return item.value && !extglobOpener && (item.type === 'star' || item.type === 'globstar');
++    });
++
++    if (repeated && (analysis.risky || hasWildcard)) {
+       const safeOutput = analysis.safeOutput
+         ? (token.output ? '' : ONE_CHAR) + (opts.capture ? `(${analysis.safeOutput})` : analysis.safeOutput)
+         : undefined;

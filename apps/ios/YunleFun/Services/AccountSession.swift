@@ -66,6 +66,39 @@ actor AccountSession {
         return try await accept(response, attempt: attemptID, deviceID: deviceID)
     }
 
+    func signInWithWeChat(attemptID: UUID, authorize: @MainActor @Sendable () async throws -> String) async throws -> AccountSignInCommit {
+        try Task.checkCancellation()
+        signInAttempt = attemptID
+        let code = try await authorize()
+        try Task.checkCancellation()
+        guard signInAttempt == attemptID else { throw AccountError.sessionChanged }
+        let deviceID = try requestDeviceID()
+        let response = try await api.signInWithWeChat(code: code, deviceID: deviceID)
+        return try await accept(response, attempt: attemptID, deviceID: deviceID)
+    }
+
+    func weChatLoginAvailable() async -> Bool { await api.weChatLoginAvailable() }
+
+    func weChatBinding(for accountID: String) async throws -> Bool {
+        let generation = selectionGeneration
+        let identity = try await authorization()
+        guard identity.userID == accountID else { throw AccountError.sessionChanged }
+        try requireCurrent(identity, generation: generation)
+        let bound = try await api.weChatBinding(accessToken: identity.accessToken, deviceID: requestDeviceID())
+        try requireCurrent(identity, generation: generation)
+        return bound
+    }
+
+    func changeWeChatBinding(code: String?, for accountID: String) async throws {
+        let generation = selectionGeneration
+        let identity = try await authorization()
+        try Task.checkCancellation()
+        guard identity.userID == accountID else { throw AccountError.sessionChanged }
+        try requireCurrent(identity, generation: generation)
+        try await api.changeWeChatBinding(code: code, accessToken: identity.accessToken, deviceID: requestDeviceID())
+        try requireCurrent(identity, generation: generation)
+    }
+
     func cancelSignIn(attemptID: UUID? = nil) {
         if let attemptID, signInAttempt != attemptID { return }
         signInAttempt = nil

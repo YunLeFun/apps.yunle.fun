@@ -8,6 +8,7 @@ shellEmulator: true
 auditConfig:
   # 仅接受已回移安全补丁但上游尚未发布修复版的精确告警（详见安全文档）
   ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf # picomatch 2.3.2 / 4.0.7 已补丁，阻止重复 extglob 编译内层通配符
     - GHSA-gcqx-w48m-w2h4 # deepmerge 无已发布修复；CJS/UMD/源码均阻止原型键并覆盖恶意与合法输入
     - GHSA-p6mc-m468-83gw # lodash.set 无上游补丁；本仓库应用等价原型污染防护补丁
 
@@ -84,6 +85,8 @@ patchedDependencies:
   deepmerge@4.3.1: patches/deepmerge@4.3.1.patch
   glob@7.2.3: patches/glob@7.2.3.patch
   lodash.set@4.3.2: patches/lodash.set@4.3.2.patch
+  picomatch@2.3.2: patches/picomatch@2.3.2.patch
+  picomatch@4.0.7: patches/picomatch@4.0.7.patch
 allowBuilds:
   '@parcel/watcher': true
   core-js: true

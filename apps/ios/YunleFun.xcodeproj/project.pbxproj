@@ -170,6 +170,7 @@
 		A08273F4BE1EA3F9F674B6B7 /* ScreenshotFeedbackCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E35C4F712EDFEB38126A3A /* ScreenshotFeedbackCoordinator.swift */; };
 		A0F2166297CB29E81F6F4671 /* ApplicationAcquisitionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797DDCF6F5F42A5C90A95DAB /* ApplicationAcquisitionView.swift */; };
 		A116E50159E09A79EF72957C /* SupportFeedbackClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F7F7951CFE8755843D6593 /* SupportFeedbackClient.swift */; };
+		A125339ED7AF147CBB3AB862 /* YunleWeChatBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B8275F728732E1F7DAF41F1 /* YunleWeChatBridge.m */; };
 		A25945070CC67336D804AEED /* CatalogIconAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756FFE5C49DFE9A39F135852 /* CatalogIconAssetsTests.swift */; };
 		A2C5937DCA8DBC41F5131037 /* AssistantMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = B880AE1936C2460C496F2D58 /* AssistantMarkdown.swift */; };
 		A4184EB1B69AA507D2C8C929 /* Workshop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39155D43848A6D19C931B010 /* Workshop.swift */; };
@@ -259,6 +260,7 @@
 		DAE782629EF66C9AC921F161 /* ApplicationIconTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41BED686047B5CD8FB88FBC4 /* ApplicationIconTests.swift */; };
 		DAEBCD07889FBD108AE3A9D2 /* AccountInitialRestoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C51E41F139CDC1277FA6094 /* AccountInitialRestoreTests.swift */; };
 		DB3A4170E6DFBB2464E74DF8 /* NativePublicRoomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFA6CF97823B2438DD83624 /* NativePublicRoomTests.swift */; };
+		DDA67E24DC024383D33B1E41 /* WeChatAuthorizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9AC71E8D81BC27E32E42FB /* WeChatAuthorizationTests.swift */; };
 		DE1881121F42276DB02DC59B /* HomeLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 597E70F3FA8FB89CD3D35EFB /* HomeLibraryTests.swift */; };
 		DE606CD50A7CB90BDF527B71 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B795359C3562F4F6C3DE7B87 /* CatalogView.swift */; };
 		DF4AC86744990D73FE5FB317 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 61A353AB1764009D8EE3CD56 /* Products.storekit */; };
@@ -267,6 +269,7 @@
 		E20938681ED5D7ED227D63B1 /* HomeBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C347F44B3B4DD4B972358FA5 /* HomeBackup.swift */; };
 		E3133EDB3D07D144D0C1F0D8 /* SharedFeedbackReceiptsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DF72EB9600B55AB2FCC643 /* SharedFeedbackReceiptsSection.swift */; };
 		E46DB6FAAF203B521A02BABE /* NativeGameCatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FBCE9244CEEC16436E2D0 /* NativeGameCatalogStore.swift */; };
+		E52932B73D1AE665E6D0C1A2 /* WeChatAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECFA939B22E7BFDB572DCA97 /* WeChatAuthorization.swift */; };
 		E555E2B7FEA9E70B5E6DFD10 /* ShareFeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1AE67FA7E92998DA8D6C82 /* ShareFeedbackComposer.swift */; };
 		E61BD9BFC57587D7E84D2108 /* WalletTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F7E20307BE7EBBCC7D47FED /* WalletTests.swift */; };
 		E68073EE56D020541649766C /* AssistantComposerFieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEC023C8B20FF1B0608C6D2 /* AssistantComposerFieldTests.swift */; };
@@ -290,6 +293,7 @@
 		FA55ADC498C2253C6CF72286 /* ApplicationCacheUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6883DE98E7C209F7EC8513 /* ApplicationCacheUITests.swift */; };
 		FB149C968E4580240C1B6A67 /* NativeWebRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE89F9570E54A55D52A4928B /* NativeWebRuntime.swift */; };
 		FBDA5E0C5D986D10ECAD1B4E /* SupportWebsiteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E9D55E8DF613B6EC0718CD /* SupportWebsiteView.swift */; };
+		FBDC5E2FE09C2DB4A9CB37CB /* WeChatBindingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC1F3220E0D692753411A10 /* WeChatBindingSection.swift */; };
 		FC89B5C57842FD9940DD8B45 /* AssistantComposerField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE16B5AC6A49812FAFC68EE /* AssistantComposerField.swift */; };
 		FE7A2816D5105FDEA8AD2FDE /* WalletVisualFixtureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80ACDE8DD828BCBB5B220B47 /* WalletVisualFixtureTests.swift */; };
 		FFB2D2968748F4A40901611B /* SupportMailComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7754D6FCD87D4767163DF9BC /* SupportMailComposer.swift */; };
@@ -388,6 +392,7 @@
 		17AE8AD6D948E794DD9F8CBC /* ApplicationCacheWebKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCacheWebKitTests.swift; sourceTree = "<group>"; };
 		19877609E64F65C7144ED534 /* FeedbackLoginCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackLoginCoordinatorTests.swift; sourceTree = "<group>"; };
 		19F2D789B008EC5171A62D72 /* LegacyImportStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyImportStore.swift; sourceTree = "<group>"; };
+		1A3EA9FD9F486E0466CAB287 /* YunleWeChatBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YunleWeChatBridge.h; sourceTree = "<group>"; };
 		1B1AE67FA7E92998DA8D6C82 /* ShareFeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareFeedbackComposer.swift; sourceTree = "<group>"; };
 		1CB95D5B88CA6522AE16B037 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		1D5304555374B6DC00769774 /* SharedFeedbackTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFeedbackTestSupport.swift; sourceTree = "<group>"; };
@@ -485,6 +490,7 @@
 		6B4852DB61BBB9719B249882 /* ManagedAccountLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedAccountLiveTests.swift; sourceTree = "<group>"; };
 		6C044F213AAF9F02B4A8950A /* PublishingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingTests.swift; sourceTree = "<group>"; };
 		6E11781B68CFA29A03F01A3D /* HomeSyncLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncLiveTests.swift; sourceTree = "<group>"; };
+		6E9AC71E8D81BC27E32E42FB /* WeChatAuthorizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatAuthorizationTests.swift; sourceTree = "<group>"; };
 		70721D183B3994216AA79E00 /* SupportCenterStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportCenterStore.swift; sourceTree = "<group>"; };
 		717E85C04C50681D8D783BAC /* HostAuthorizationLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAuthorizationLiveTests.swift; sourceTree = "<group>"; };
 		718FD4337D218B4CAAD3DE2A /* HomeFolderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFolderView.swift; sourceTree = "<group>"; };
@@ -513,6 +519,7 @@
 		86EB319B999E3EF70CC7ED24 /* NativeGameLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGameLifecycleTests.swift; sourceTree = "<group>"; };
 		87B37F2FAD6B826144FF3B84 /* WorkshopDiscoverySections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopDiscoverySections.swift; sourceTree = "<group>"; };
 		893498B73E6CD5929B1E7FC5 /* CatalogIconAssets.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogIconAssets.generated.swift; sourceTree = "<group>"; };
+		8B8275F728732E1F7DAF41F1 /* YunleWeChatBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YunleWeChatBridge.m; sourceTree = "<group>"; };
 		8C00F88E35F0AE928B2572CD /* ScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResult.swift; sourceTree = "<group>"; };
 		8F7E20307BE7EBBCC7D47FED /* WalletTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletTests.swift; sourceTree = "<group>"; };
 		8FD9D9AA87AFECCDE39A15EF /* ScreenshotFeedbackPromptStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotFeedbackPromptStateTests.swift; sourceTree = "<group>"; };
@@ -625,6 +632,8 @@
 		EA283D3485FAB5BF247F763D /* NativeGameResourceCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGameResourceCache.swift; sourceTree = "<group>"; };
 		EB8B245227FD1D501409847E /* WebStoragePageFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebStoragePageFixture.swift; sourceTree = "<group>"; };
 		EC1B63E1B44278210C81D0B6 /* ContentStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentStateView.swift; sourceTree = "<group>"; };
+		ECFA939B22E7BFDB572DCA97 /* WeChatAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatAuthorization.swift; sourceTree = "<group>"; };
+		EDC1F3220E0D692753411A10 /* WeChatBindingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeChatBindingSection.swift; sourceTree = "<group>"; };
 		EDE16B5AC6A49812FAFC68EE /* AssistantComposerField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantComposerField.swift; sourceTree = "<group>"; };
 		EE9CEAAFF9CD97FC484A3957 /* HomeGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeGrid.swift; sourceTree = "<group>"; };
 		EF05F6FDE79BB411600C35BF /* HomeBackupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeBackupStore.swift; sourceTree = "<group>"; };
@@ -742,6 +751,7 @@
 				80ACDE8DD828BCBB5B220B47 /* WalletVisualFixtureTests.swift */,
 				42B62BD240BDB6A578A8F5E5 /* WebProfileRepositoryTests.swift */,
 				EB8B245227FD1D501409847E /* WebStoragePageFixture.swift */,
+				6E9AC71E8D81BC27E32E42FB /* WeChatAuthorizationTests.swift */,
 				E6E8DF5DC112BC33E9F0BA6F /* WorkshopDiscoveryTests.swift */,
 				3919C9C8281F13A135771E47 /* WorkshopTests.swift */,
 				F297FB3E7C0224C0603C3A18 /* Fixtures */,
@@ -920,6 +930,7 @@
 				231DFB369624390113AD7651 /* AccountManagementView.swift */,
 				ABA6045E4BCB5121375F4190 /* CaptchaView.swift */,
 				09C1FCD85CC1C05CE2FC1E36 /* LoginView.swift */,
+				EDC1F3220E0D692753411A10 /* WeChatBindingSection.swift */,
 			);
 			path = Account;
 			sourceTree = "<group>";
@@ -946,6 +957,16 @@
 				4D3C47432884C98C9B9E84D4 /* SwiftDraw-LICENSE.txt */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		76EBBC2F9D02A207898EF8B5 /* WeChat */ = {
+			isa = PBXGroup;
+			children = (
+				ECFA939B22E7BFDB572DCA97 /* WeChatAuthorization.swift */,
+				1A3EA9FD9F486E0466CAB287 /* YunleWeChatBridge.h */,
+				8B8275F728732E1F7DAF41F1 /* YunleWeChatBridge.m */,
+			);
+			path = WeChat;
 			sourceTree = "<group>";
 		};
 		7A9C479591264E40A258F669 /* Features */ = {
@@ -1036,6 +1057,7 @@
 				71FD02FD3A8A43482D675BDD /* Resources */,
 				D812664F98EF39118328D346 /* Services */,
 				3CAE9772AC7B91FE6842966E /* WebRuntime */,
+				76EBBC2F9D02A207898EF8B5 /* WeChat */,
 			);
 			path = YunleFun;
 			sourceTree = "<group>";
@@ -1260,6 +1282,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7DC1069D5E26C31538E4190B /* Build configuration list for PBXNativeTarget "YunleFun" */;
 			buildPhases = (
+				879A042D263FAB97875A180A /* Prepare WeChat OpenSDK for enabled device builds */,
 				0FB4D4F2E64B553BA1ED6A6A /* Sources */,
 				3484D47132ADCF42CE49FF91 /* Resources */,
 				6C7BA835D5D15D4BF9261B97 /* Frameworks */,
@@ -1441,6 +1464,31 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		879A042D263FAB97875A180A /* Prepare WeChat OpenSDK for enabled device builds */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Prepare WeChat OpenSDK for enabled device builds";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_TEMP_DIR)/YunleWeChatSDK/libWechatOpenSDK.a",
+				"$(TARGET_TEMP_DIR)/YunleWeChatSDK/WXApi.h",
+				"$(TARGET_TEMP_DIR)/YunleWeChatSDK/WXApiObject.h",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "bash \"$SRCROOT/scripts/prepare-wechat-sdk.sh\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		0FB4D4F2E64B553BA1ED6A6A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -1600,6 +1648,8 @@
 				D79A54F92A7FDC019064B067 /* WalletService.swift in Sources */,
 				BEA5A07D60821D4F4A0467AD /* WalletStore.swift in Sources */,
 				BFEF421A5EB58D120FAD5076 /* WalletView.swift in Sources */,
+				E52932B73D1AE665E6D0C1A2 /* WeChatAuthorization.swift in Sources */,
+				FBDC5E2FE09C2DB4A9CB37CB /* WeChatBindingSection.swift in Sources */,
 				D3C23B64234B8865A69F9976 /* WebProfileRecoveryView.swift in Sources */,
 				52363BEE9FFB782A589709DE /* WebProfileRepository.swift in Sources */,
 				07629C12475FC069F79C0853 /* WebViewController.swift in Sources */,
@@ -1610,6 +1660,7 @@
 				CE438A8357969338ABC22AA5 /* WorkshopShareView.swift in Sources */,
 				290C927742F0D16BEBFFC639 /* WorkshopStore.swift in Sources */,
 				210C63C7D7A887626042B1E1 /* YunleFunApp.swift in Sources */,
+				A125339ED7AF147CBB3AB862 /* YunleWeChatBridge.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1720,6 +1771,7 @@
 				9F6C61FC31A864A5355446B2 /* SupportViewTests.swift in Sources */,
 				E61BD9BFC57587D7E84D2108 /* WalletTests.swift in Sources */,
 				FE7A2816D5105FDEA8AD2FDE /* WalletVisualFixtureTests.swift in Sources */,
+				DDA67E24DC024383D33B1E41 /* WeChatAuthorizationTests.swift in Sources */,
 				48AE1A2FF6905FC41A5173FA /* WebProfileRepositoryTests.swift in Sources */,
 				CA0EF9F9DE182D94B74E661E /* WebStoragePageFixture.swift in Sources */,
 				F18DBE676938AFA0B22890AB /* WorkshopDiscoveryTests.swift in Sources */,
@@ -1940,7 +1992,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = YunleFun/YunleFun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphoneos*]" = "$(inherited) $(YUNLE_WECHAT_DEFINITIONS_$(YUNLE_WECHAT_SDK_ENABLED))";
 				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) \"$(TARGET_TEMP_DIR)/YunleWeChatSDK\"";
 				INFOPLIST_FILE = YunleFun/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "云乐坊";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -1953,9 +2007,14 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) $(YUNLE_WECHAT_LDFLAGS_$(YUNLE_WECHAT_SDK_ENABLED))";
 				PRODUCT_BUNDLE_IDENTIFIER = fun.yunle.apps;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = YunleFun/WeChat/YunleWeChatBridge.h;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				YUNLE_WECHAT_DEFINITIONS_YES = "YUNLE_HAS_WECHAT_SDK=1";
+				YUNLE_WECHAT_LDFLAGS_YES = "-force_load \"$(TARGET_TEMP_DIR)/YunleWeChatSDK/libWechatOpenSDK.a\" -framework Security -framework UIKit -framework CoreGraphics -framework WebKit -lz -lsqlite3 -lc++";
+				YUNLE_WECHAT_SDK_ENABLED = YES;
 			};
 			name = Release;
 		};
@@ -2272,7 +2331,9 @@
 				CODE_SIGN_ENTITLEMENTS = YunleFun/YunleFun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FEEDBACK_APP_GROUP = "group.fun.yunle.apps.benchmark-dev";
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphoneos*]" = "$(inherited) $(YUNLE_WECHAT_DEFINITIONS_$(YUNLE_WECHAT_SDK_ENABLED))";
 				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) \"$(TARGET_TEMP_DIR)/YunleWeChatSDK\"";
 				INFOPLIST_FILE = YunleFun/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "云乐坊 Benchmark";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -2285,9 +2346,14 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) $(YUNLE_WECHAT_LDFLAGS_$(YUNLE_WECHAT_SDK_ENABLED))";
 				PRODUCT_BUNDLE_IDENTIFIER = "fun.yunle.apps.benchmark-dev";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = YunleFun/WeChat/YunleWeChatBridge.h;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				YUNLE_WECHAT_DEFINITIONS_YES = "YUNLE_HAS_WECHAT_SDK=1";
+				YUNLE_WECHAT_LDFLAGS_YES = "-force_load \"$(TARGET_TEMP_DIR)/YunleWeChatSDK/libWechatOpenSDK.a\" -framework Security -framework UIKit -framework CoreGraphics -framework WebKit -lz -lsqlite3 -lc++";
+				YUNLE_WECHAT_SDK_ENABLED = NO;
 			};
 			name = Benchmark;
 		};
@@ -2369,7 +2435,9 @@
 				CODE_SIGN_ENTITLEMENTS = YunleFun/YunleFun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FEEDBACK_APP_GROUP = "group.fun.yunle.apps.native-dev";
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=iphoneos*]" = "$(inherited) $(YUNLE_WECHAT_DEFINITIONS_$(YUNLE_WECHAT_SDK_ENABLED))";
 				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) \"$(TARGET_TEMP_DIR)/YunleWeChatSDK\"";
 				INFOPLIST_FILE = YunleFun/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "云乐坊 Native";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -2382,9 +2450,14 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) $(YUNLE_WECHAT_LDFLAGS_$(YUNLE_WECHAT_SDK_ENABLED))";
 				PRODUCT_BUNDLE_IDENTIFIER = "fun.yunle.apps.native-dev";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = YunleFun/WeChat/YunleWeChatBridge.h;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				YUNLE_WECHAT_DEFINITIONS_YES = "YUNLE_HAS_WECHAT_SDK=1";
+				YUNLE_WECHAT_LDFLAGS_YES = "-force_load \"$(TARGET_TEMP_DIR)/YunleWeChatSDK/libWechatOpenSDK.a\" -framework Security -framework UIKit -framework CoreGraphics -framework WebKit -lz -lsqlite3 -lc++";
+				YUNLE_WECHAT_SDK_ENABLED = NO;
 			};
 			name = Debug;
 		};

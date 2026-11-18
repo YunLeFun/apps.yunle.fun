@@ -36,11 +36,13 @@ Apple 的[数据使用声明说明](https://developer.apple.com/documentation/bu
 
 账号资料、访问 / 刷新令牌和认证 UUID 保存在一个 Keychain 状态中，设置为 `AfterFirstUnlockThisDeviceOnly`、不通过 iCloud Keychain 同步。该状态模型不保存登录密码；系统密码保存入口是另一条由用户决定的流程。退出移除对应账号并写回状态，不等于删除其他账号、云居副本或远端业务数据。
 
+登录表单在本机 UserDefaults 保存上次成功登录的方式和账号输入，用于下次登录预填。该记录不保存密码、验证码或会话令牌。
+
 云居、升级前副本、导入副本、工坊草稿、诊断缓冲和支持编号各有独立存储路径及账号边界。文件保护选项是实现事实，模拟器无法据此证明锁屏后的保护效果。旧版导入只读取允许的业务键，不把旧令牌或已购缓存转换成原生授权，见[升级与回退](./ios-upgrade-migration.md)。
 
 认证、诊断及多数账号业务请求采用 ephemeral URLSession，禁用 Cookie / URLCredentialStorage，敏感请求拒绝重定向。公开目录、图标缓存和云应用 WebKit 是另行管理的路径，不能把上述配置描述成整个 App 不持久化 Cookie 或不访问第三方网络。SSO 通过受限授权流程传递一次性 code，宿主长期令牌不作为通用网页桥接返回值。
 
-当前原生宿主源码未接入 Aegis / 微信 OpenSDK；候选包没有嵌入第三方 framework，`otool -L` 为 Apple 系统 / Swift 依赖。静态源码搜索与动态依赖列表不等于全网络审计，也不能约束用户打开的云应用。第三方网页及其 SDK 的行为、服务端日志和运行期请求仍需单独核实。
+上述历史候选包未接入 Aegis 或微信 OpenSDK，当时的 `otool -L` 只列出 Apple 系统与 Swift 依赖。新的设备 Release 构建会静态链接微信 OpenSDK 并随包包含其隐私清单，用户选择微信授权时才注册 SDK 并发起授权。发行前应重新核对合并后的 Privacy Report 和真机行为。详见 [iOS 微信登录](./ios-wechat-login.md)。
 
 诊断上传需要登录、完整预览和确认，不自动重传；真实合成旅程已验证取消前后为零记录、确认后唯一记录、支持编号恢复和精确清理。原生事件缓冲与上传有数量 / 时间 / 字节上限，服务端回读到 7 天到期字段及管理员规则，但未据此证明定时删除已实际发生。详见[真实诊断验证](./ios-feedback-login-validation.md#真实诊断上传与清理-·-2026-10-18)。
 

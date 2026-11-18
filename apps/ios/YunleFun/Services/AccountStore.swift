@@ -158,21 +158,9 @@ final class AccountStore: ObservableObject {
                         continuation: AccountSignInContinuation? = nil,
                         onCommitted: ((AccountSignInSuccess) -> Void)? = nil,
                         attemptID: UUID? = nil, onAuthenticated: (() -> Void)? = nil) async throws {
-        try checkContinuation(continuation)
-        let epoch = beginSelectionOperation()
-        let attempt = attemptID ?? UUID()
-        activeSignInAttemptID = attempt
-        let continuationGeneration = selectionOperationGeneration
-        interactiveSignInSelections.insert(continuationGeneration)
-        do {
-            let commit = try await session.passwordSignIn(identifier: identifier, password: password, captcha: captcha,
-                                                           attemptID: attempt)
-            try await publishSignIn(commit, epoch: epoch, continuationGeneration: continuationGeneration,
-                                    continuation: continuation, onCommitted: onCommitted, onAuthenticated: onAuthenticated)
-            await finishInteractiveSignIn(selection: continuationGeneration, published: true)
-        } catch {
-            await finishInteractiveSignIn(selection: continuationGeneration, published: false)
-            throw error
+        try await interactiveSignIn(continuation: continuation, attemptID: attemptID,
+                                    onCommitted: onCommitted, onAuthenticated: onAuthenticated) { attempt in
+            try await session.passwordSignIn(identifier: identifier, password: password, captcha: captcha, attemptID: attempt)
         }
     }
 
@@ -184,6 +172,34 @@ final class AccountStore: ObservableObject {
                 continuation: AccountSignInContinuation? = nil,
                 onCommitted: ((AccountSignInSuccess) -> Void)? = nil,
                 attemptID: UUID? = nil, onAuthenticated: (() -> Void)? = nil) async throws {
+        try await interactiveSignIn(continuation: continuation, attemptID: attemptID,
+                                    onCommitted: onCommitted, onAuthenticated: onAuthenticated) { attempt in
+            try await session.verify(challenge, code: code, captcha: captcha, attemptID: attempt)
+        }
+    }
+
+    func signInWithWeChat(continuation: AccountSignInContinuation?, attemptID: UUID,
+                          onCommitted: ((AccountSignInSuccess) -> Void)?, onAuthenticated: (() -> Void)?,
+                          authorize: @MainActor @Sendable () async throws -> String) async throws {
+        try await interactiveSignIn(continuation: continuation, attemptID: attemptID,
+                                    onCommitted: onCommitted, onAuthenticated: onAuthenticated) { attempt in
+            try await session.signInWithWeChat(attemptID: attempt, authorize: authorize)
+        }
+    }
+
+    func weChatLoginAvailable() async -> Bool { await session.weChatLoginAvailable() }
+
+    func weChatBinding(for accountID: String) async throws -> Bool {
+        try await session.weChatBinding(for: accountID)
+    }
+
+    func changeWeChatBinding(code: String?, for accountID: String) async throws {
+        try await session.changeWeChatBinding(code: code, for: accountID)
+    }
+
+    private func interactiveSignIn(continuation: AccountSignInContinuation?, attemptID: UUID?,
+                                   onCommitted: ((AccountSignInSuccess) -> Void)?, onAuthenticated: (() -> Void)?,
+                                   operation: (UUID) async throws -> AccountSignInCommit) async throws {
         try checkContinuation(continuation)
         let epoch = beginSelectionOperation()
         let attempt = attemptID ?? UUID()
@@ -191,7 +207,7 @@ final class AccountStore: ObservableObject {
         let continuationGeneration = selectionOperationGeneration
         interactiveSignInSelections.insert(continuationGeneration)
         do {
-            let commit = try await session.verify(challenge, code: code, captcha: captcha, attemptID: attempt)
+            let commit = try await operation(attempt)
             try await publishSignIn(commit, epoch: epoch, continuationGeneration: continuationGeneration,
                                     continuation: continuation, onCommitted: onCommitted, onAuthenticated: onAuthenticated)
             await finishInteractiveSignIn(selection: continuationGeneration, published: true)

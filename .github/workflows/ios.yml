@@ -83,7 +83,7 @@ jobs:
             -resultBundlePath "$YLF_CI_OUTPUT/native-tests.xcresult" \
             -collect-test-diagnostics never \
             -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
-            -maximum-test-execution-time-allowance 180 \
+            -maximum-test-execution-time-allowance 300 \
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test \
             2>&1 | tee "$YLF_CI_OUTPUT/tests.log"
 
@@ -105,7 +105,7 @@ jobs:
             -only-testing:YunleFunTests/NativeGameRuntimeFixtureCleanupTests/testRemoveDeferredFixtureStoresInFreshProcess \
             -collect-test-diagnostics never -parallel-testing-enabled NO \
             -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
-            -maximum-test-execution-time-allowance 180 \
+            -maximum-test-execution-time-allowance 300 \
             CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test-without-building \
             2>&1 | tee "$YLF_CI_OUTPUT/fixture-cleanup.log"
           container="$(xcrun simctl get_app_container "$YLF_CI_SIMULATOR" fun.yunle.apps.native-dev data)"

@@ -210,7 +210,7 @@ final class HomeSyncTests: XCTestCase {
         let service = HomeTestService(remote: old)
         let sync = coordinator(library, service)
         await sync.synchronize()
-        XCTAssertEqual(sync.phase, .failed(HomeSyncError.unsupportedSchema.localizedDescription))
+        XCTAssertEqual(sync.phase, .failed(ServiceFailure(message: HomeSyncError.unsupportedSchema.localizedDescription)))
         XCTAssertEqual(library.snapshot.mutationId, mutation)
         XCTAssertTrue(library.snapshot.hasPendingChanges)
         let writes = await service.writes
@@ -349,7 +349,7 @@ final class HomeSyncTests: XCTestCase {
 
         let signedOut = guestCoordinator(library, iCloud(store, identity: { nil }))
         await signedOut.synchronize()
-        XCTAssertEqual(signedOut.phase, .failed(HomeSyncError.iCloudUnavailable.localizedDescription))
+        XCTAssertEqual(signedOut.phase, .failed(ServiceFailure(message: HomeSyncError.iCloudUnavailable.localizedDescription)))
         XCTAssertTrue(store.values.isEmpty)
         XCTAssertTrue(library.snapshot.hasPendingChanges)
     }

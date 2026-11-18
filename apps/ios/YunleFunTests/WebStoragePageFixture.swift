@@ -26,7 +26,7 @@ final class WebStoragePageFixture: NSObject, WKScriptMessageHandler {
         }, { once: true });</script></body></html>
         """, baseURL: origin)
         // A cold WebContent launch on a shared CI runner has taken 14 seconds; success returns at once.
-        guard await XCTWaiter.fulfillment(of: [probe.ready], timeout: 30) == .completed else {
+        guard await XCTWaiter.fulfillment(of: [probe.ready], timeout: 45) == .completed else {
             throw Failure.documentNotReady
         }
         // The title KVO update can arrive after the script message. Verify

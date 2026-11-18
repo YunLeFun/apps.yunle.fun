@@ -6,24 +6,16 @@ import XCTest
 
 @MainActor
 final class HomeLayoutVisualTests: XCTestCase {
-    func testSharedConnectivityFailuresUseOneCompactSentence() {
-        let catalog = "无法连接工坊，请检查网络后重试。"
-        let sync = "网络暂时无法连接，更改已保存在此设备。"
-        XCTAssertTrue(HomeStatusBanner.isConnectivityFailure(catalog))
-        XCTAssertTrue(HomeStatusBanner.isConnectivityFailure(sync))
-        XCTAssertTrue(HomeStatusBanner.isConnectivityFailure("云同步暂时无法使用，更改已保存在此设备。"))
-        XCTAssertFalse(HomeStatusBanner.isConnectivityFailure("登录状态需要更新，请重新登录后同步。"))
-        XCTAssertFalse(HomeStatusBanner.isConnectivityFailure("访问有些频繁，请稍后再试。"))
-        XCTAssertFalse(HomeStatusBanner.isConnectivityFailure("无法保存云居，请检查设备存储空间后重试。"))
-        let combined = HomeStatusBanner.combinedMessage(catalog: catalog, sync: sync)
-        XCTAssertTrue(combined.contains("应用信息载入失败"))
-        XCTAssertTrue(combined.contains("网络暂时无法连接"))
-        XCTAssertTrue(combined.contains("更改已保存在此设备"))
-        XCTAssertEqual(HomeStatusBanner.catalogMessage(for: catalog), "应用信息载入失败")
-        XCTAssertEqual(HomeStatusBanner.catalogMessage(for: "访问有些频繁，请稍后再试。"), "访问有些频繁，请稍后再试。")
-        let outage = HomeStatusBanner.combinedMessage(catalog: catalog, sync: "云同步暂时无法使用，更改已保存在此设备。")
-        XCTAssertTrue(outage.contains(catalog))
-        XCTAssertTrue(outage.contains("云同步暂时无法使用，更改已保存在此设备。"))
+    func testServiceOutagesKeepSeparateFailureNotices() async throws {
+        let fixture = try await HomeStateFixture(service: HomeStateService(failure: HomeSyncError.unavailable),
+            catalogService: ImmediateCatalogFailure(error: CatalogError.http(500)))
+        defer { fixture.close() }
+        await fixture.catalog.load()
+        await fixture.sync.synchronize()
+
+        let screen = try await fixture.readScreen(named: "home-service-outage", containing: "云同步暂时无法使用", test: self)
+        XCTAssertTrue(screen.contains("工坊暂时无法连接"), "A catalog HTTP failure must keep its own notice")
+        XCTAssertTrue(screen.contains("云同步暂时无法使用"), "A sync HTTP failure must keep its own notice")
     }
 
     func testHomeRefreshRecoversApplicationMetadataAfterCatalogFailure() async throws {
@@ -55,8 +47,12 @@ final class HomeLayoutVisualTests: XCTestCase {
         try fixture.library.adopt(remote)
         _ = try await fixture.readScreen(named: "home-refresh-before-account-switch", containing: "暂不可用", test: self)
         let originalIdentity = fixture.accounts.identityGeneration
+        let firstSync = expectation(description: "The first account starts syncing while the catalog is in flight")
+        await service.observeRequests { firstSync.fulfill() }
         try fixture.pullToRefresh()
         try await gate.waitUntilEntered()
+        await fulfillment(of: [firstSync], timeout: 5)
+        await service.observeRequests {}
 
         try await fixture.accounts.select("home-state-other")
         XCTAssertNotEqual(fixture.accounts.identityGeneration, originalIdentity)
@@ -84,7 +80,7 @@ final class HomeLayoutVisualTests: XCTestCase {
         await fulfillment(of: [unexpectedSync], timeout: 0.5)
 
         let loads = await service.loadUsers, saves = await service.saveUsers
-        XCTAssertEqual(loads, ["home-state-other"], "Only the second account's explicit conflict check may reach the cloud")
+        XCTAssertEqual(loads, ["home-state-user", "home-state-other"], "Each account has exactly one explicit sync check")
         XCTAssertTrue(saves.isEmpty)
         XCTAssertEqual(fixture.sync.phase, .conflict(conflict), "An older account's refresh must preserve the current conflict")
         XCTAssertEqual(fixture.library.snapshot.configuration, snapshot.configuration)
@@ -315,23 +311,29 @@ final class HomeLayoutVisualTests: XCTestCase {
 
     func testEmptySignedInHomeShowsSyncFailureAndRetry() async throws {
         let service = HomeStateService(failure: URLError(.notConnectedToInternet))
-        let fixture = try await HomeStateFixture(service: service, catalogService: ImmediateCatalogFailure())
-        defer { fixture.close() }
+        let gate = HomeStateLoadGate()
+        let catalogService = HomeCatalogGatedFixture(gate: gate, initialFailure: URLError(.notConnectedToInternet))
+        let fixture = try await HomeStateFixture(service: service, catalogService: catalogService)
+        defer { fixture.close(); Task { await gate.open() } }
+        await fixture.catalog.load()
         await fixture.sync.synchronize()
         guard case .failed = fixture.sync.phase else { return XCTFail("The fixture must reach a real coordinator failure") }
-        let screen = try await fixture.readScreen(named: "home-empty-sync-failed", containing: "网络暂时无法连接", test: self)
+        let screen = try await fixture.readScreen(named: "home-empty-sync-failed", containing: "下拉可重试", test: self)
+        XCTAssertTrue(screen.contains("应用信息载入失败"))
         XCTAssertTrue(screen.contains("网络暂时无法连接"), "An unsuccessful account restore must not look like an ordinary new home")
+        XCTAssertTrue(screen.contains("更改已保存在此设备"))
+        XCTAssertTrue(screen.contains("云居同步"))
+        XCTAssertEqual(screen.components(separatedBy: "下拉可重试").count - 1, 1, "Both offline failures share one notice")
         XCTAssertFalse(screen.contains("重试同步"), "Pull to refresh replaces the sync retry button")
         XCTAssertTrue(fixture.library.snapshot.applications.isEmpty)
-        let before = await service.loadUsers.count
+
+        let retry = expectation(description: "Pull to refresh retries sync even while the catalog is waiting")
+        await service.observeRequests { retry.fulfill() }
         try fixture.pullToRefresh()
-        let deadline = Date().addingTimeInterval(5)
-        var loads = await service.loadUsers.count
-        while loads <= before && Date() < deadline {
-            try await Task.sleep(nanoseconds: 50_000_000)
-            loads = await service.loadUsers.count
-        }
-        XCTAssertGreaterThan(loads, before, "Pull to refresh must retry the failed sync without a retry button")
+        try await gate.waitUntilEntered()
+        XCTAssertTrue(fixture.catalog.isLoading)
+        await fulfillment(of: [retry], timeout: 5)
+        await gate.open()
     }
 
     func testEmptySignedInHomeShowsConflictWithoutAdoptingEitherVersion() async throws {
@@ -381,12 +383,12 @@ final class HomeLayoutVisualTests: XCTestCase {
         let fixture = try await HomeStateFixture(service: HomeStateService(failure: URLError(.notConnectedToInternet)),
             size: .accessibility5, dark: true, width: 320, height: 800, catalogService: ImmediateCatalogFailure())
         defer { fixture.close() }
+        await fixture.catalog.load()
         await fixture.sync.synchronize()
         guard case .failed = fixture.sync.phase else { return XCTFail("The fixture must reach a real coordinator failure") }
         let before = fixture.library.snapshot
-        let failure = try await fixture.readScreen(named: "home-empty-sync-failed-dark-accessibility5", containing: "网络暂时无法连接", test: self)
-        XCTAssertTrue(failure.contains("网络暂时无法连接"))
-        XCTAssertFalse(failure.contains("重试同步"), "Large text keeps the failure readable without a separate retry button")
+        let hint = try await fixture.readScreen(named: "home-empty-sync-failed-dark-accessibility5", containing: "下拉可重试", scrollToFind: true, test: self)
+        XCTAssertTrue(hint.contains("下拉可重试"), "Large text keeps the retry hint reachable through native scrolling")
         try fixture.pullToRefresh()
         XCTAssertEqual(fixture.library.snapshot, before)
     }
@@ -756,7 +758,8 @@ private final class HomeStateFixture {
 }
 
 private struct ImmediateCatalogFailure: CatalogServing {
-    func applications() async throws -> [CloudApplication] { throw URLError(.notConnectedToInternet) }
+    var error: Error = URLError(.notConnectedToInternet)
+    func applications() async throws -> [CloudApplication] { throw error }
 }
 
 private actor HomeCatalogRecoveryFixture: CatalogServing {
@@ -769,9 +772,20 @@ private actor HomeCatalogRecoveryFixture: CatalogServing {
     }
 }
 
-private struct HomeCatalogGatedFixture: CatalogServing {
-    let gate: HomeStateLoadGate
+private actor HomeCatalogGatedFixture: CatalogServing {
+    private let gate: HomeStateLoadGate
+    private var initialFailure: URLError?
+
+    init(gate: HomeStateLoadGate, initialFailure: URLError? = nil) {
+        self.gate = gate
+        self.initialFailure = initialFailure
+    }
+
     func applications() async throws -> [CloudApplication] {
+        if let failure = initialFailure {
+            initialFailure = nil
+            throw failure
+        }
         await gate.wait()
         return [CloudApplication(id: "public-ac", name: "云空调", slug: "air-conditioner", marketShortName: "air-conditioner",
                                  websiteUrl: "https://ac.yunyoujun.cn", emoji: "❄️")]

@@ -281,9 +281,10 @@ struct HomeView: View {
             guard identity == accounts.identityGeneration, !isRefreshing else { return }
             isRefreshing = true
             defer { isRefreshing = false }
-            await refreshCatalog()
-            guard identity == accounts.identityGeneration else { return }
+            // A slow public catalog must not block retrying cloud sync.
+            async let catalogRefresh: Void = refreshCatalog()
             await sync.recheck()
+            await catalogRefresh
             guard identity == accounts.identityGeneration else { return }
             await loadMembership(force: true)
         }.value
@@ -305,30 +306,22 @@ struct HomeView: View {
     }
 
     /// Suppressed while the unavailable-app loading row is standing in for the same failure.
-    private var catalogFailureMessage: String? {
+    private var catalogFailure: ServiceFailure? {
         guard !showsCatalogLoadingRow else { return nil }
-        return catalog.error
+        return catalog.failure
     }
 
-    /// User-facing sync failure. `sync.message` is what Home already shows for this phase.
-    private var syncFailureMessage: String? {
-        guard sync.isActive, case .failed = sync.phase else { return nil }
-        return sync.message
-    }
-
-    /// One strip when both failures are loss of connectivity. Other failures stay separate.
     private var combinesOfflineFailures: Bool {
-        guard let catalogFailureMessage, let syncFailureMessage else { return false }
-        return HomeStatusBanner.isConnectivityFailure(catalogFailureMessage)
-            && HomeStatusBanner.isConnectivityFailure(syncFailureMessage)
+        guard catalogFailure?.isOffline == true,
+              sync.isActive, case .failed(let failure) = sync.phase else { return false }
+        return failure.isOffline
     }
 
     private var showsCatalogNotice: Bool {
-        showsCatalogLoadingRow || (catalogFailureMessage != nil && !combinesOfflineFailures)
+        showsCatalogLoadingRow || (catalogFailure != nil && !combinesOfflineFailures)
     }
 
     private var showsSyncNotice: Bool {
-        if combinesOfflineFailures { return true }
         guard sync.isActive else { return false }
         switch sync.phase {
         case .failed, .conflict:
@@ -346,23 +339,21 @@ struct HomeView: View {
                 .font(.subheadline)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityIdentifier("home.catalog.loading")
-        } else if let error = catalogFailureMessage, !combinesOfflineFailures {
-            let message = HomeStatusBanner.catalogMessage(for: error)
+        } else if let failure = catalogFailure, !combinesOfflineFailures {
             HomeStatusStrip(
                 systemImage: "wifi.exclamationmark",
-                message: message,
-                accessibilityMessage: "应用信息载入失败。\(error)。下拉可重试。",
+                message: failure.isOffline ? "应用信息载入失败" : "应用信息载入失败。\(failure.message)",
+                accessibilityMessage: "应用信息载入失败。\(failure.message)",
                 refresh: refreshFromBanner
             )
         }
     }
 
     @ViewBuilder private var syncStatus: some View {
-        if combinesOfflineFailures, let catalogFailureMessage, let syncFailureMessage {
+        if combinesOfflineFailures {
             HomeStatusStrip(
                 systemImage: "wifi.exclamationmark",
-                message: HomeStatusBanner.combinedMessage(catalog: catalogFailureMessage, sync: syncFailureMessage),
-                accessibilityMessage: "应用信息载入失败。\(catalogFailureMessage) \(syncFailureMessage)。下拉可重试。",
+                message: "应用信息载入失败，\(sync.message)",
                 refresh: refreshFromBanner
             ) {
                 syncSettingsLink
@@ -373,7 +364,6 @@ struct HomeView: View {
                 HomeStatusStrip(
                     systemImage: "exclamationmark.icloud",
                     message: sync.message,
-                    accessibilityMessage: "\(sync.message) 下拉可重试。",
                     refresh: refreshFromBanner
                 ) {
                     syncSettingsLink
@@ -693,31 +683,6 @@ private struct HomeGridWidthReader: ViewModifier {
     }
 }
 
-/// Copy for the compact Home status strips. Connectivity failures that happen
-/// together collapse to one sentence; the sync wording stays intact so the
-/// local-save reassurance is still on screen.
-enum HomeStatusBanner {
-    static func isConnectivityFailure(_ message: String) -> Bool {
-        let folded = message.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
-        let markers = ["网络", "无法连接", "互联网", "暂时无法使用", "offline", "internet", "not connected", "timed out", "超时"]
-        return markers.contains { marker in
-            folded.contains(marker.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX")))
-        }
-    }
-
-    /// The title is enough when the detail only restates a network retry.
-    static func catalogMessage(for error: String) -> String {
-        isConnectivityFailure(error) ? "应用信息载入失败" : error
-    }
-
-    static func combinedMessage(catalog: String, sync syncMessage: String) -> String {
-        if syncMessage.contains("网络暂时无法连接") {
-            return "应用信息载入失败，\(syncMessage)"
-        }
-        return "应用信息载入失败。\(catalog) \(syncMessage)"
-    }
-}
-
 /// One status row. A settings link can sit beside or under the message.
 /// Pull-to-refresh retries a failed load; the message exposes that as a VoiceOver action.
 private struct HomeStatusStrip<Actions: View>: View {
@@ -771,7 +736,7 @@ private struct HomeStatusStrip<Actions: View>: View {
     }
 
     private var baseText: some View {
-        Text(message)
+        Text(visibleMessage)
             .font(.subheadline)
             .foregroundStyle(.primary)
             .multilineTextAlignment(.leading)
@@ -779,9 +744,16 @@ private struct HomeStatusStrip<Actions: View>: View {
             .accessibilityLabel(accessibilityMessage ?? message)
     }
 
+    private var visibleMessage: String {
+        guard refresh != nil else { return message }
+        return message + (message.hasSuffix("。") ? "" : "。") + "下拉可重试"
+    }
+
     @ViewBuilder private var messageText: some View {
         if let refresh {
-            baseText.accessibilityAction(named: Text("刷新"), refresh)
+            baseText
+                .accessibilityHint("下拉可重试")
+                .accessibilityAction(named: Text("刷新"), refresh)
         } else {
             baseText
         }

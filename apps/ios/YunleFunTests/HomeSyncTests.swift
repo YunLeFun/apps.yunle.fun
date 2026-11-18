@@ -210,7 +210,7 @@ final class HomeSyncTests: XCTestCase {
         let service = HomeTestService(remote: old)
         let sync = coordinator(library, service)
         await sync.synchronize()
-        XCTAssertEqual(sync.phase, .failed(HomeSyncError.unsupportedSchema.localizedDescription))
+        XCTAssertEqual(sync.phase, .failed(ServiceFailure(message: HomeSyncError.unsupportedSchema.localizedDescription)))
         XCTAssertEqual(library.snapshot.mutationId, mutation)
         XCTAssertTrue(library.snapshot.hasPendingChanges)
         let writes = await service.writes

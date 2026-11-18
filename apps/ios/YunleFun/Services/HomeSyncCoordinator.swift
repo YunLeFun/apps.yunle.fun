@@ -13,7 +13,7 @@ struct HomeSyncConflict: Equatable, Identifiable {
 
 @MainActor
 final class HomeSyncCoordinator: ObservableObject {
-    enum Phase: Equatable { case idle, syncing, failed(String), conflict(HomeSyncConflict) }
+    enum Phase: Equatable { case idle, syncing, failed(ServiceFailure), conflict(HomeSyncConflict) }
     @Published private(set) var phase = Phase.idle
     private let accounts: AccountAuthorizing
     private let library: HomeLibrary
@@ -73,7 +73,7 @@ final class HomeSyncCoordinator: ObservableObject {
         if !library.snapshot.syncEnabled { return "云同步已关闭" }
         switch phase {
         case .syncing: return "正在同步云居"
-        case .failed(let message): return message
+        case .failed(let failure): return failure.message
         case .conflict: return "另一台设备更新了云居"
         case .idle:
             if library.snapshot.hasPendingChanges { return "更改已保存，等待同步" }
@@ -113,12 +113,12 @@ final class HomeSyncCoordinator: ObservableObject {
         let uid = accounts.user?.id
         if let operation { await operation.value; return }
         if case .conflict = phase { return }
-        guard library.storageError == nil else { phase = .failed(HomeSyncError.storage.localizedDescription); return }
+        guard library.storageError == nil else { phase = .failed(failure(for: HomeSyncError.storage)); return }
         if uid == nil, let iCloud {
-            guard iCloud.isAvailable else { phase = .failed(HomeSyncError.iCloudUnavailable.localizedDescription); return }
+            guard iCloud.isAvailable else { phase = .failed(failure(for: HomeSyncError.iCloudUnavailable)); return }
             if iCloud.consumeIdentityChange() {
                 do { try library.detachCloudBase() }
-                catch { phase = .failed(message(for: error)); return }
+                catch { phase = .failed(failure(for: error)); return }
             }
         }
         let generation = library.generation
@@ -156,7 +156,7 @@ final class HomeSyncCoordinator: ObservableObject {
             else { try library.keepCloud(conflict.remote) }
             phase = .idle
             if choice == .device { await synchronize() }
-        } catch { phase = .failed(message(for: error)) }
+        } catch { phase = .failed(failure(for: error)) }
     }
 
     private func run(uid: String?, generation: UUID) async {
@@ -188,7 +188,7 @@ final class HomeSyncCoordinator: ObservableObject {
             if isCurrent(uid: uid, generation: generation) { showConflict(remote, uid: uid, generation: generation) }
         } catch {
             guard isCurrent(uid: uid, generation: generation), !Task.isCancelled else { return }
-            phase = .failed(message(for: error))
+            phase = .failed(failure(for: error))
         }
     }
     private func load(uid: String?, generation: UUID) async throws -> RemoteHomeScreen {
@@ -234,9 +234,11 @@ final class HomeSyncCoordinator: ObservableObject {
         phase = .conflict(HomeSyncConflict(remote: remote, localMutationId: library.snapshot.mutationId,
                                            accountID: uid, generation: generation))
     }
-    private func message(for error: Error) -> String {
-        if let error = error as? HomeSyncError { return error.localizedDescription }
-        if error is AccountError { return AccountError.message(for: error) }
-        return "网络暂时无法连接，更改已保存在此设备。"
+    private func failure(for error: Error) -> ServiceFailure {
+        let message: String
+        if let error = error as? HomeSyncError { message = error.localizedDescription }
+        else if error is AccountError { message = AccountError.message(for: error) }
+        else { message = "网络暂时无法连接，更改已保存在此设备。" }
+        return ServiceFailure(message: message, error: error)
     }
 }

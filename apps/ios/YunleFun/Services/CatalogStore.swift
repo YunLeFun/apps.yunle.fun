@@ -6,12 +6,14 @@ import OSLog
 final class CatalogStore: ObservableObject {
     @Published private(set) var applications: [CloudApplication] = []
     @Published private(set) var isLoading = false
-    @Published private(set) var error: String?
+    @Published private(set) var failure: ServiceFailure?
     @Published private(set) var isCached = false
     @Published private(set) var successfulLoadID: UUID?
     private let service: CatalogServing
     private let cacheURL: URL
     private let logger = Logger(subsystem: "fun.yunle.apps", category: "catalog")
+
+    var error: String? { failure?.message }
 
     init(service: CatalogServing = CatalogService(), cacheURL: URL? = nil) {
         self.service = service
@@ -40,7 +42,7 @@ final class CatalogStore: ObservableObject {
             let result = try await service.applications()
             try Task.checkCancellation()
             applications = result
-            error = nil
+            failure = nil
             isCached = false
             successfulLoadID = UUID()
             do {
@@ -55,12 +57,25 @@ final class CatalogStore: ObservableObject {
         } catch let issue as URLError where issue.code == .cancelled {
             return
         } catch {
-            self.error = (error as? LocalizedError)?.errorDescription ?? "无法连接工坊，请检查网络后重试。"
+            failure = ServiceFailure(message: (error as? LocalizedError)?.errorDescription ?? "无法连接工坊，请检查网络后重试。", error: error)
             isCached = !applications.isEmpty
         }
     }
 
     func application(id: String) -> CloudApplication? {
         applications.first { $0.id == id || $0.marketShortName == id || $0.slug == id }
+    }
+}
+
+struct ServiceFailure: Equatable {
+    let message: String
+    let isOffline: Bool
+
+    init(message: String, error: Error? = nil) {
+        self.message = message
+        switch (error as? URLError)?.code {
+        case .notConnectedToInternet, .networkConnectionLost: isOffline = true
+        default: isOffline = false
+        }
     }
 }

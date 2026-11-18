@@ -349,7 +349,7 @@ final class HomeSyncTests: XCTestCase {
 
         let signedOut = guestCoordinator(library, iCloud(store, identity: { nil }))
         await signedOut.synchronize()
-        XCTAssertEqual(signedOut.phase, .failed(HomeSyncError.iCloudUnavailable.localizedDescription))
+        XCTAssertEqual(signedOut.phase, .failed(ServiceFailure(message: HomeSyncError.iCloudUnavailable.localizedDescription)))
         XCTAssertTrue(store.values.isEmpty)
         XCTAssertTrue(library.snapshot.hasPendingChanges)
     }

@@ -11,8 +11,6 @@ const mocks = vi.hoisted(() => ({
   capture: vi.fn(),
   resume: vi.fn(async () => {}),
   dispose: vi.fn(),
-  native: vi.fn(() => false),
-  browserOpen: vi.fn(async () => {}),
 }))
 
 vi.mock('~/composables/auth/useAppsAcquisition', () => ({
@@ -25,13 +23,6 @@ vi.mock('~/composables/auth/useAppsAcquisition', () => ({
   }),
   useAppsAcquisitionStorage: () => ({ captureEntry: mocks.capture }),
 }))
-
-vi.mock('@capacitor/core', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@capacitor/core')>()
-  return { ...original, Capacitor: { ...original.Capacitor, isNativePlatform: mocks.native } }
-})
-
-vi.mock('@capacitor/browser', () => ({ Browser: { open: mocks.browserOpen, close: vi.fn() } }))
 
 vi.mock('@cloudbase/js-sdk', () => ({
   default: { init: () => ({ auth: () => ({ onAuthStateChange: vi.fn() }) }) },
@@ -62,7 +53,6 @@ function core() {
 describe('apps direct authentication acquisition hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.native.mockReturnValue(false)
     mocks.record.mockResolvedValue()
   })
 
@@ -154,19 +144,6 @@ describe('apps direct authentication acquisition hooks', () => {
     expect(mocks.bind.mock.invocationCallOrder[0]).toBeLessThan(assign.mock.invocationCallOrder[0]!)
     expect(mocks.record).not.toHaveBeenCalled()
     assign.mockRestore()
-  })
-
-  it('preserves Native OAuth state and records after the native provider-token exchange', async () => {
-    mocks.native.mockReturnValue(true)
-    const { state, typed } = core()
-    const oauth = useCloudbaseOAuth(typed)
-    await oauth.loginWithWeChat()
-    expect(mocks.begin).toHaveBeenCalledWith('wx_open', expect.stringMatching(/^app-wx_open_/))
-    expect(mocks.browserOpen).toHaveBeenCalledOnce()
-    await oauth.handleNativeOAuthCallback('code', 'app-wx_open_own')
-    expect(state.auth.grantProviderToken).toHaveBeenCalledWith({ provider_id: 'wx_open', provider_redirect_uri: 'https://www.yunle.fun/auth/callback', provider_code: 'code' })
-    expect(state.auth.signInWithIdToken).toHaveBeenCalledWith({ token: 'provider-token' })
-    expect(mocks.record).toHaveBeenCalledWith('app-wx_open_own')
   })
 
   it('does not create an acquisition attempt for provider binding', async () => {

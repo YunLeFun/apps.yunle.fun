@@ -46,6 +46,41 @@ final class CloudbaseAuthServiceTests: XCTestCase {
         XCTAssertEqual(user.description, "个人简介")
     }
 
+    func testWeChatUsesOneTimeCodeThenRedeemsTheTicketForTheVerifiedSubject() async throws {
+        let (api, fixture) = service([
+            (200, #"{"ok":true,"enabled":true}"#),
+            (200, #"{"ok":true,"ticket":"test-ticket","subject":"test-user"}"#),
+            (200, token),
+        ])
+        let available = await api.weChatLoginAvailable()
+        XCTAssertTrue(available)
+        let response = try await api.signInWithWeChat(code: "fixture-code", deviceID: "test-device")
+        XCTAssertEqual(response.subject, "test-user")
+        let requests = fixture.requests
+        XCTAssertEqual(requests.map { $0.url?.path }, ["/sso-ticket", "/sso-ticket", "/auth/v1/signin/custom"])
+        XCTAssertEqual(try fields(requests[1]), ["action": "exchangeAppsIOSWeChatCode", "code": "fixture-code"])
+        XCTAssertEqual(requests[1].value(forHTTPHeaderField: "Origin"), "https://apps.yunle.fun")
+        XCTAssertNil(requests[1].value(forHTTPHeaderField: "Authorization"))
+        XCTAssertEqual(try fields(requests[2]), ["provider_id": "custom", "ticket": "test-ticket"])
+        XCTAssertEqual(requests[2].value(forHTTPHeaderField: "x-device-id"), "test-device")
+    }
+
+    func testWeChatFailsClosedForUnavailableOptionsAndMismatchedTicketSubject() async throws {
+        let (api, fixture) = service([
+            (503, "{}"),
+            (200, #"{"ok":true,"ticket":"test-ticket","subject":"different-user"}"#),
+            (200, token),
+            (200, "{}"),
+        ])
+        let available = await api.weChatLoginAvailable()
+        XCTAssertFalse(available)
+        do {
+            _ = try await api.signInWithWeChat(code: "fixture-code", deviceID: "test-device")
+            XCTFail("A ticket for another subject cannot create a session")
+        } catch { XCTAssertEqual(error as? AccountError, .invalidResponse) }
+        XCTAssertEqual(fixture.requests.last?.url?.path, "/auth/v1/user/signout")
+    }
+
     func testPhoneVerificationForAnExistingUserSignsInWithoutSendingTheAddressAgain() async throws {
         let (api, fixture) = service([
             (200, #"{"verification_id":"test-verification","expires_in":300,"is_user":true}"#),
@@ -181,7 +216,9 @@ final class CloudbaseAuthServiceTests: XCTestCase {
         AuthHTTPProtocol.register(host, fixture: fixture)
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [AuthHTTPProtocol.self]
-        return (CloudbaseAuthService(session: URLSession(configuration: config), origin: URL(string: "https://\(host)")!), fixture)
+        let origin = URL(string: "https://\(host)")!
+        return (CloudbaseAuthService(session: URLSession(configuration: config), origin: origin,
+                                     weChatBroker: origin.appendingPathComponent("sso-ticket")), fixture)
     }
 }
 

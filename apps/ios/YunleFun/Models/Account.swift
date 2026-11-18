@@ -206,6 +206,7 @@ enum AccountError: Error, Equatable, LocalizedError, Sendable {
 
     static func message(for error: Error) -> String {
         if let known = error as? AccountError { return known.errorDescription ?? "操作失败，请重试。" }
+        if let known = error as? WeChatAccountError { return known.errorDescription ?? "微信登录暂不可用。" }
         if error is URLError { return "网络暂时无法连接，请检查网络后重试。" }
         return "操作未能完成，请稍后重试。"
     }

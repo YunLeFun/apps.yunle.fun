@@ -1,5 +1,5 @@
 import type { YlfAppInfo } from '@yunlefun/types'
-import { hostHaptics, HostImpactStyle } from '~/host-runtime'
+import { vibrate } from '~/utils/web-haptics'
 
 export type DropZoneType = 'add' | 'delete' | null
 
@@ -75,7 +75,7 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
     lastDropZone = null
     isDragging.value = true
 
-    hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+    vibrate(12)
 
     // 拖拽期间禁用浏览器右键菜单（长按在桌面浏览器会触发 contextmenu）
     document.addEventListener('contextmenu', preventContextMenu, { capture: true })
@@ -132,7 +132,7 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
     // drop zone 切换时触发 haptic
     if (zone !== lastDropZone) {
       if (zone !== null) {
-        hostHaptics.impact({ style: HostImpactStyle.Light }).catch(() => {})
+        vibrate(8)
       }
       lastDropZone = zone
     }
@@ -146,7 +146,7 @@ export function useRecentDrag(options: UseRecentDragOptions = {}) {
     const app = dragApp.value
 
     if (zone && app && options.onDrop) {
-      hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+      vibrate(12)
       options.onDrop(zone, app)
     }
 

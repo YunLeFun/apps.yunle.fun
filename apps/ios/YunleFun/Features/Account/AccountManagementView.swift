@@ -45,7 +45,7 @@ struct AccountManagementView: View {
             if busy { ProgressView().accessibilityLabel("正在更新账号") }
         }
         .navigationTitle("账号管理")
-        .sheet(isPresented: $showLogin) { LoginView() }
+        .sheet(isPresented: $showLogin) { LoginView(prefillsLastIdentifier: false) }
         .confirmationDialog("从此设备移除账号？", isPresented: Binding(
             get: { removal != nil }, set: { if !$0 { removal = nil } }
         ), titleVisibility: .visible, presenting: removal) { user in
@@ -103,6 +103,7 @@ struct AccountProfileView: View {
                     if let email = user.email, !email.isEmpty { LabeledContent("邮箱", value: email) }
                     NavigationLink("账号管理") { AccountManagementView() }
                 }
+                WeChatBindingSection(accountID: user.id).id(user.id)
             }
         }
         .navigationTitle("个人资料")

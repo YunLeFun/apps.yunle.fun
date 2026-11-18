@@ -65,12 +65,15 @@ final class NativeNavigationUITests: XCTestCase {
         _ = try tapLetterKey(app)
         visibility.tap()
         app.buttons["login.dismiss-keyboard"].tap()
-        let phoneLink = app.buttons["login.use-phone-code"]
-        XCTAssertTrue(phoneLink.isHittable)
-        XCTAssertTrue(app.buttons["login.use-email-code"].isHittable)
+        let phoneMethod = app.segmentedControls.buttons["短信验证码"]
+        let emailMethod = app.segmentedControls.buttons["邮箱验证码"]
+        XCTAssertTrue(phoneMethod.isHittable)
+        XCTAssertTrue(emailMethod.isHittable)
+        XCTAssertFalse(app.buttons["login.use-phone-code"].exists)
+        XCTAssertFalse(app.buttons["login.use-email-code"].exists)
         XCTAssertGreaterThanOrEqual(app.buttons["login.submit"].frame.height, 44)
         capturePasswordLogin(app, "password-login-actions")
-        phoneLink.tap()
+        phoneMethod.tap()
         let phone = app.textFields["login.phone"]
         XCTAssertTrue(phone.waitForExistence(timeout: 5))
         phone.tap()
@@ -86,7 +89,7 @@ final class NativeNavigationUITests: XCTestCase {
         let revealed = app.textFields["login.password"]
         XCTAssertTrue(revealed.waitForExistence(timeout: 5))
         XCTAssertEqual(revealed.value as? String, "密码", "Switching methods must clear the prior password")
-        app.buttons["login.use-email-code"].tap()
+        emailMethod.tap()
         let email = app.textFields["login.email"]
         XCTAssertTrue(email.waitForExistence(timeout: 5))
         email.tap(); email.typeText("ui-canary@example.invalid")
@@ -96,6 +99,46 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(secure.waitForExistence(timeout: 5))
         XCTAssertEqual(visibility.label, "显示密码")
         app.buttons["取消"].tap()
+    }
+
+    func testLoginPrefillsLastSuccessfulIdentifierForItsMethod() throws {
+        continueAfterFailure = false
+        let app = navigationApplication()
+        let cases = [
+            ("password", "login.username", "ui-canary", "ui-canary"),
+            ("email", "login.email", "ui-canary@example.invalid", "ui-canary@example.invalid"),
+            ("phone", "login.phone", "13800000000", "13800000000"),
+            ("unknown", "login.phone", "ui-canary", "手机号"),
+        ]
+        for (method, field, saved, expected) in cases {
+            // Override preferences in the launch argument domain without changing the device's data.
+            app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+                                   "-account.lastSuccessfulLoginMethod", method,
+                                   "-account.lastSuccessfulLoginIdentifier", saved]
+            app.launch()
+            XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
+            app.tabBars.buttons["我"].tap()
+            let login = app.buttons["me.login"]
+            guard login.waitForExistence(timeout: 5) else {
+                throw XCTSkip("Requires a guest simulator; never signs out an existing account")
+            }
+            login.tap()
+            let identifier = app.textFields[field]
+            XCTAssertTrue(identifier.waitForExistence(timeout: 5), "Unexpected form for \(method)")
+            XCTAssertEqual(identifier.value as? String, expected)
+            if method == "password" {
+                XCTAssertEqual(app.secureTextFields["login.password"].value as? String, "密码")
+                app.segmentedControls.buttons["邮箱验证码"].tap()
+                let email = app.textFields["login.email"]
+                XCTAssertTrue(email.waitForExistence(timeout: 5))
+                XCTAssertEqual(email.value as? String, "邮箱地址", "Don't use the password account in the email form")
+                app.segmentedControls.buttons["密码"].tap()
+                XCTAssertTrue(identifier.waitForExistence(timeout: 5))
+                XCTAssertEqual(identifier.value as? String, expected)
+            }
+            app.buttons["取消"].tap()
+            app.terminate()
+        }
     }
 
     func testPasswordVisibilityPreservesCaretAndRefocusedInput() throws {
@@ -132,7 +175,8 @@ final class NativeNavigationUITests: XCTestCase {
         let app = navigationApplication()
         // A prior journey may have launched at an accessibility text size, where the
         // login method uses a menu. Relaunch with an explicit standard size for this journey.
-        app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL",
+                               "-account.lastSuccessfulLoginMethod", "unknown"]
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
         app.tabBars.buttons["我"].tap()
@@ -170,7 +214,8 @@ final class NativeNavigationUITests: XCTestCase {
         continueAfterFailure = false
         let app = navigationApplication()
         app.launchArguments = ["-UIPreferredContentSizeCategoryName",
-                               large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
+                               large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL",
+                               "-account.lastSuccessfulLoginMethod", "unknown"]
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
         app.tabBars.buttons["我"].tap()
@@ -369,6 +414,12 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(me.waitForExistence(timeout: 10))
         me.tap()
         XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
+        let login = app.buttons["me.login"]
+        XCTAssertTrue(login.waitForExistence(timeout: 5))
+        XCTAssertTrue(login.label.contains("继续你的云乐生活"))
+        for title in ["钱包", "云乐坊会员", "我的应用", "个人工坊", "我的举报"] {
+            XCTAssertFalse(app.buttons[title].exists, "Guest Me should hide \(title)")
+        }
         app.buttons["设置"].tap()
         XCTAssertTrue(app.navigationBars["设置"].waitForExistence(timeout: 5))
         app.buttons["云居同步"].tap()

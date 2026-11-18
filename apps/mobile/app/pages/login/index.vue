@@ -13,22 +13,13 @@ import {
 } from '@ionic/vue'
 import { isValidEmail, isValidPhone, useCountdown } from '@yunlefun/auth'
 import {
-  alertCircleOutline,
   eyeOffOutline,
   eyeOutline,
   logoGithub,
   logoWechat,
-  shieldCheckmarkOutline,
 } from 'ionicons/icons'
 import { config } from '~/config'
-import { authMethods, getEnabledLoginTabs, hasEnabledOAuthProviders } from '~/config/auth'
-import { hostEnvironment, HostRuntime } from '~/host-runtime'
-import {
-  clearNativeAuthorizationLogin,
-  NATIVE_AUTHORIZATION_LOGIN_RETURN_TO,
-  readNativeAuthorizationLogin,
-} from '~/utils/native-authorization-login'
-
+import { authMethods, getEnabledLoginTabs } from '~/config/auth'
 // 用户名校验正则：字母开头，包含字母数字下划线连字符，3-64 字符。
 // 最终合法性仍由认证服务判断；客户端不应拦截已有的长用户名。
 const USERNAME_REGEX = /^[a-z][\w-]{2,63}$/i
@@ -48,16 +39,7 @@ const {
 } = useCloudbaseAuth()
 
 const router = useRouter()
-const route = useRoute()
 const accountsStore = useAccountsStore()
-const nativePlatform = hostEnvironment.isNative()
-const nativeAuthorizationReturnError = ref('')
-const pendingNativeAuthorization = ref(
-  nativePlatform
-  && hostEnvironment.hasRuntime()
-  && !!readNativeAuthorizationLogin(),
-)
-const returningToApplication = ref(false)
 
 watch(isAuthenticated, (value) => {
   if (value)
@@ -67,6 +49,15 @@ watch(isAuthenticated, (value) => {
 // 页面模式：登录 / 注册
 type PageMode = 'login' | 'signup'
 const pageMode = ref<PageMode>('login')
+
+const { data: loginOptions, status: loginOptionsStatus } = useFetch<{ weChatLoginVisible: boolean }>('/api/login-options', {
+  server: false,
+  lazy: true,
+  timeout: 2500,
+  retry: 0,
+})
+const showWeChatLogin = computed(() => loginOptionsStatus.value === 'success' && loginOptions.value?.weChatLoginVisible === true)
+const showOAuthProviders = computed(() => authMethods.github || showWeChatLogin.value)
 
 // 登录方式配置
 const loginTabs = getEnabledLoginTabs()
@@ -110,19 +101,6 @@ const { remaining: signupCountdown, isActive: signupCountdownActive, start: star
 
 // 恢复上次登录信息
 onMounted(() => {
-  const requestId = nativePlatform && hostEnvironment.hasRuntime()
-    ? readNativeAuthorizationLogin()
-    : undefined
-  pendingNativeAuthorization.value = !!requestId
-  if (
-    nativePlatform
-    && route.query.returnTo === NATIVE_AUTHORIZATION_LOGIN_RETURN_TO
-    && !requestId
-    && !isAuthenticated.value
-  ) {
-    nativeAuthorizationReturnError.value = '本次授权请求已结束，你仍可正常登录云乐坊。'
-  }
-
   // 恢复上次密码登录的账号
   const saved = localStorage.getItem(LAST_PASSWORD_ACCOUNT_KEY)
   if (saved)
@@ -131,27 +109,6 @@ onMounted(() => {
   // 恢复上次手机号
   if (accountsStore.lastPhone)
     phone.value = accountsStore.lastPhone
-})
-
-onBeforeRouteLeave(async () => {
-  const requestId = nativePlatform && hostEnvironment.hasRuntime()
-    ? readNativeAuthorizationLogin()
-    : undefined
-  if (!requestId)
-    return true
-  if (returningToApplication.value)
-    return false
-
-  clearNativeAuthorizationLogin(requestId)
-  pendingNativeAuthorization.value = false
-  try {
-    await HostRuntime.cancelAuthorizationLogin({ requestId })
-  }
-  catch {
-    // The native request may already have expired; route navigation should
-    // still be allowed so the login screen never traps the user.
-  }
-  return true
 })
 
 // 校验
@@ -270,32 +227,7 @@ async function completeLoginNavigation(): Promise<void> {
   if (loginNavigation)
     return loginNavigation
 
-  loginNavigation = (async () => {
-    nativeAuthorizationReturnError.value = ''
-    const requestId = nativePlatform && hostEnvironment.hasRuntime()
-      ? readNativeAuthorizationLogin()
-      : undefined
-
-    if (requestId) {
-      returningToApplication.value = true
-      try {
-        await HostRuntime.resumeAuthorizationAfterLogin({ requestId })
-        clearNativeAuthorizationLogin(requestId)
-        pendingNativeAuthorization.value = false
-      }
-      catch {
-        nativeAuthorizationReturnError.value = '原应用暂时无法恢复。你的云乐坊账号已登录，可以重试返回或取消本次授权。'
-        return
-      }
-      finally {
-        returningToApplication.value = false
-      }
-    }
-
-    // 用 replace 而非 push：登录页在 tabs 之外，push 进入 tab 子路由会把 me.vue
-    // 叠在根 outlet 栈上而不重新进入 tabs 外壳，导致底部 IonTabBar 不渲染。
-    await router.replace('/tabs/me')
-  })()
+  loginNavigation = router.replace('/tabs/me').then(() => {})
 
   try {
     await loginNavigation
@@ -311,16 +243,10 @@ async function completeLoginNavigation(): Promise<void> {
     <IonHeader :translucent="true">
       <IonToolbar>
         <IonButtons slot="start">
-          <IonBackButton
-            default-href="/tabs/me"
-            :disabled="returningToApplication"
-            :text="pendingNativeAuthorization ? '取消' : '返回'"
-          />
+          <IonBackButton default-href="/tabs/me" text="返回" />
         </IonButtons>
         <IonTitle>
-          {{ pendingNativeAuthorization
-            ? (pageMode === 'login' ? '登录并继续' : '注册并继续')
-            : (pageMode === 'login' ? '登录' : '注册') }}
+          {{ pageMode === 'login' ? '登录' : '注册' }}
         </IonTitle>
       </IonToolbar>
     </IonHeader>
@@ -328,8 +254,6 @@ async function completeLoginNavigation(): Promise<void> {
     <IonContent :fullscreen="true" class="ion-padding">
       <div
         class="auth-container"
-        :class="{ 'auth-container--returning': returningToApplication }"
-        :aria-busy="returningToApplication"
       >
         <!-- Logo 区域 -->
         <div class="auth-header">
@@ -341,42 +265,6 @@ async function completeLoginNavigation(): Promise<void> {
             {{ pageMode === 'login' ? '登录' : '创建账号' }}
           </h1>
         </div>
-
-        <section
-          v-if="pendingNativeAuthorization || nativeAuthorizationReturnError"
-          class="native-authorization-context"
-          :class="{ 'native-authorization-context--error': nativeAuthorizationReturnError }"
-          :role="nativeAuthorizationReturnError ? 'alert' : 'status'"
-          aria-live="polite"
-        >
-          <div class="native-authorization-context-icon" aria-hidden="true">
-            <IonSpinner v-if="returningToApplication" name="crescent" />
-            <IonIcon
-              v-else
-              :icon="nativeAuthorizationReturnError ? alertCircleOutline : shieldCheckmarkOutline"
-            />
-          </div>
-          <div>
-            <p class="native-authorization-context-title">
-              {{ returningToApplication
-                ? '登录成功，正在返回原应用'
-                : (nativeAuthorizationReturnError ? '暂时无法返回原应用' : '登录后返回原应用') }}
-            </p>
-            <p class="native-authorization-context-description">
-              {{ nativeAuthorizationReturnError
-                || '返回后仍需在原生面板确认；登录本身不会自动授权。' }}
-            </p>
-            <button
-              v-if="nativeAuthorizationReturnError && pendingNativeAuthorization"
-              type="button"
-              class="native-authorization-retry"
-              :disabled="returningToApplication"
-              @click="completeLoginNavigation"
-            >
-              重试返回原应用
-            </button>
-          </div>
-        </section>
 
         <!-- ===== 登录模式 ===== -->
         <template v-if="pageMode === 'login'">
@@ -564,17 +452,17 @@ async function completeLoginNavigation(): Promise<void> {
           </form>
 
           <!-- 分割线 -->
-          <div v-if="hasEnabledOAuthProviders()" class="auth-divider">
+          <div v-if="showOAuthProviders" class="auth-divider">
             <span class="auth-divider-text">其他登录方式</span>
           </div>
 
           <!-- 第三方登录 - 图标模式 -->
-          <div v-if="hasEnabledOAuthProviders()" class="auth-social-icons">
+          <div v-if="showOAuthProviders" class="auth-social-icons">
             <button v-if="authMethods.github" class="auth-social-circle auth-social-circle--github" :disabled="loading" @click="loginWithGitHub()">
               <IonIcon :icon="logoGithub" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">GitHub</span>
             </button>
-            <button v-if="authMethods.wechat" class="auth-social-circle auth-social-circle--wechat" :disabled="loading" @click="loginWithWeChat()">
+            <button v-if="showWeChatLogin" class="auth-social-circle auth-social-circle--wechat" :disabled="loading" @click="loginWithWeChat()">
               <IonIcon :icon="logoWechat" class="auth-social-circle-icon" />
               <span class="auth-social-circle-label">微信</span>
             </button>
@@ -691,20 +579,6 @@ async function completeLoginNavigation(): Promise<void> {
   padding: 0 4px;
 }
 
-.auth-container--returning {
-  .auth-header,
-  .auth-segment,
-  .auth-form,
-  .auth-divider,
-  .auth-social-icons,
-  .auth-footer,
-  .auth-terms {
-    opacity: 0.42;
-    pointer-events: none;
-    user-select: none;
-  }
-}
-
 // Header
 .auth-header {
   text-align: center;
@@ -779,69 +653,9 @@ async function completeLoginNavigation(): Promise<void> {
   padding: 0 16px;
 }
 
-.native-authorization-context {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: 12px;
-  margin: 0 16px 20px;
-  padding: 14px 16px;
-  border: 1px solid transparent;
-  border-color: color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--ion-color-primary) 8%, var(--ion-item-background));
-}
-
-.native-authorization-context--error {
-  border-color: color-mix(in srgb, var(--ion-color-danger) 24%, transparent);
-  background: color-mix(in srgb, var(--ion-color-danger) 7%, var(--ion-item-background));
-}
-
-.native-authorization-context-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
-  color: var(--ion-color-primary);
-  font-size: 20px;
-}
-
 .native-authorization-context--error .native-authorization-context-icon {
   background: color-mix(in srgb, var(--ion-color-danger) 12%, transparent);
   color: var(--ion-color-danger);
-}
-
-.native-authorization-context-title {
-  margin: 1px 0 4px;
-  color: var(--ion-text-color);
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.35;
-}
-
-.native-authorization-context-description {
-  margin: 0;
-  color: var(--ion-color-medium);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.native-authorization-retry {
-  margin-top: 9px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--ion-color-primary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.native-authorization-retry:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 
 // iOS Grouped Card — 浅色模式白色卡片 + 页面灰色背景形成区分（iOS 标准分组列表风格）

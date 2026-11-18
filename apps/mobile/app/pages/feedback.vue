@@ -17,7 +17,6 @@ import {
 } from 'konsta/vue'
 import { config } from '~/config'
 import { YLF_CONTACT } from '~/constants'
-import { hostApplication, hostEnvironment } from '~/host-runtime'
 import {
   estimateDiagnosticLogBytes,
   selectDiagnosticLogs,
@@ -53,8 +52,6 @@ const startTimeInput = ref(toLocalDatetimeInput(initialEndTime - HOUR_MS))
 const endTimeInput = ref(toLocalDatetimeInput(initialEndTime))
 const issueDescription = ref('')
 const uploading = ref(false)
-const appVersion = ref('')
-const buildNumber = ref('')
 
 const rangeStart = computed(() => new Date(startTimeInput.value).getTime())
 // datetime-local 不保留毫秒；结束时间按所选“秒”的末尾计算，避免漏掉同秒日志。
@@ -83,20 +80,6 @@ const availableRangeText = computed(() => {
     return '当前还没有本地日志'
   const last = entries.at(-1) || first
   return `本地可用：${formatDateTime(first.timestamp)} 至 ${formatDateTime(last.timestamp)}`
-})
-
-onMounted(async () => {
-  if (!hostEnvironment.isNative())
-    return
-  try {
-    const info = await hostApplication.getInfo()
-    appVersion.value = info.version
-    buildNumber.value = info.build
-  }
-  catch {
-    appVersion.value = ''
-    buildNumber.value = ''
-  }
 })
 
 function applyRangePreset(preset: Exclude<RangePreset, 'custom'>, duration: number) {
@@ -150,9 +133,7 @@ async function uploadDiagnosticLogs() {
         issueDescription: issueDescription.value,
         logs: selectedDiagnosticLogs.value,
         client: {
-          appVersion: appVersion.value,
-          buildNumber: buildNumber.value,
-          platform: hostEnvironment.platform(),
+          platform: 'web',
           route: route.path,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
           userAgent: navigator.userAgent,
@@ -193,12 +174,7 @@ async function confirmClearDiagnosticLogs() {
  * 去 App Store 评分
  */
 function goToAppStore() {
-  if (hostEnvironment.isNative()) {
-    window.open(config.appStore.url, '_system')
-  }
-  else {
-    window.open(config.appStore.url, '_blank')
-  }
+  window.open(config.appStore.url, '_blank', 'noopener,noreferrer')
 }
 
 /**

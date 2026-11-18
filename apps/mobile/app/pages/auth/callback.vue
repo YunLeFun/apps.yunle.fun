@@ -3,7 +3,7 @@
  * OAuth 回调处理页
  * 处理 GitHub/微信 OAuth 登录回调
  *
- * 两种模式：
+ * 两种模式（保留旧安装包的回调兼容）：
  * 1. Web 端：SDK detectSessionInUrl 自动处理 → checkAuthStatus
  * 2. 原生 App（state 以 'app-' 开头）：把 code+state 通过 deeplink 传回 App
  */
@@ -20,7 +20,6 @@ import {
 } from '@ionic/vue'
 import { checkmarkCircle, closeCircle } from 'ionicons/icons'
 import { useAppsAuthAcquisition } from '~/composables/auth/useAppsAcquisition'
-import { NATIVE_OAUTH_STATE_PREFIX } from '~/composables/auth/useCloudbaseOAuth'
 
 const router = useRouter()
 const { checkAuthStatus, isAuthenticated, user } = useCloudbaseAuth()
@@ -41,7 +40,7 @@ function handleNativeAppCallback(): boolean {
   const code = params.get('code')
   const state = params.get('state')
 
-  if (!state?.startsWith(NATIVE_OAUTH_STATE_PREFIX) || !code)
+  if (!state?.startsWith('app-') || !code)
     return false
 
   // 来自原生 App，通过 deeplink 传回 code+state

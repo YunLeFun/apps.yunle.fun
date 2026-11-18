@@ -21,7 +21,6 @@ export default nuxt(
     },
     {
       files: ['apps/mobile/app/**/*.{ts,vue}'],
-      ignores: ['apps/mobile/app/host-runtime/adapters/**'],
       plugins: {
         'yunlefun-host': { rules: { 'transport-boundary': hostTransportBoundary } },
       },

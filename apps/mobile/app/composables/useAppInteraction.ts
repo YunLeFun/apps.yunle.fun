@@ -22,7 +22,7 @@ import type { YlfAppInfo } from '@yunlefun/types'
  */
 
 import type { Ref } from 'vue'
-import { hostHaptics } from '~/host-runtime'
+import { vibrate } from '~/utils/web-haptics'
 
 export interface AppInteractionOptions {
   /** 点击回调 */
@@ -94,7 +94,7 @@ function detectPerformanceLevel(): 'high' | 'medium' | 'low' {
 function triggerHaptic(pattern: number = 10) {
   if (checkHapticSupport()) {
     try {
-      hostHaptics.vibrate({ duration: pattern })
+      vibrate(pattern)
     }
     catch (error) {
       console.warn('Haptic feedback failed:', error)

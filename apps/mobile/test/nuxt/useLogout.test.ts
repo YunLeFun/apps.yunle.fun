@@ -2,15 +2,10 @@ import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const logoutCloudbase = vi.fn()
-const clearIdentitySessions = vi.hoisted(() => vi.fn())
 
 mockNuxtImport('useCloudbaseAuth', () => () => ({
   logout: logoutCloudbase,
 }))
-vi.mock('~/composables/useBrowser', () => ({
-  clearInAppBrowserIdentitySessions: clearIdentitySessions,
-}))
-
 describe('useLogout', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -23,7 +18,6 @@ describe('useLogout', () => {
     await logout()
 
     expect(logoutCloudbase).toHaveBeenCalledOnce()
-    expect(clearIdentitySessions).toHaveBeenCalledOnce()
   })
 
   it('logs out CloudBase when the server reports an unsuccessful cleanup', async () => {
@@ -36,6 +30,5 @@ describe('useLogout', () => {
     await logout()
 
     expect(logoutCloudbase).toHaveBeenCalledOnce()
-    expect(clearIdentitySessions).toHaveBeenCalledOnce()
   })
 })

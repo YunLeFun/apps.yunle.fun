@@ -1,19 +1,19 @@
 # 客户端工作区与部署
 
-更新日期：2026-10-24。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。现有 Nuxt / Ionic / Capacitor 工程迁入 `apps/mobile/`，该入口继续提供 Web 和 Android 客户端（旧 iOS 已于 2026-11-05 退役）；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
+更新日期：2026-11-13。仓库根目录管理 pnpm workspace、统一命令、锁文件和依赖安全策略。Nuxt / Ionic 工程位于 `apps/mobile/`，继续提供过渡 Web 和 API；Android 使用独立的 `apps/android/`；桌面端在 `apps/desktop/` 接入独立 Nuxt 界面和 Electron Host。迁移在 [产品 PR #41](https://github.com/YunLeFun/apps.yunle.fun/pull/41) 中 review。
 
 ## 目录与命令
 
-| 内容                | 路径                                                        | 说明                                                    |
-| ------------------- | ----------------------------------------------------------- | ------------------------------------------------------- |
-| Web／移动源码和 API | `apps/mobile/app/`、`apps/mobile/server/`                   | 保留原有页面、Ionic 导航和云端 API                      |
-| 移动配置与环境文件  | `apps/mobile/nuxt.config.ts`、`capacitor.config.ts`、`.env` | 私有环境值只保存在本机或 CI Secret                      |
-| 原生工程            | `apps/mobile/android/`                                      | Capacitor 在移动应用目录执行                            |
-| 移动脚本与测试      | `apps/mobile/scripts/`、`apps/mobile/test/`                 | 脚本自行定位移动应用根目录                              |
-| 桌面入口            | `apps/desktop/`                                             | 独立 renderer、Electron main／preload、Forge 配置和测试 |
-| 公共包              | `packages/`                                                 | 按实际消费者提取协议和业务，移动原生插件不引入桌面      |
-| 文档                | `docs/`                                                     | 保留现有 VitePress workspace                            |
-| 运营工具            | `scripts/`                                                  | CloudBase 集合初始化、规则和索引保留在仓库根            |
+| 内容                | 路径                                        | 说明                                                    |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------- |
+| Web／移动源码和 API | `apps/mobile/app/`、`apps/mobile/server/`   | 保留原有页面、Ionic 导航和云端 API                      |
+| 移动配置与环境文件  | `apps/mobile/nuxt.config.ts`、`.env`        | 私有环境值只保存在本机或 CI Secret                      |
+| 原生工程            | `apps/android/`                             | 独立 Gradle 构建                                        |
+| 移动脚本与测试      | `apps/mobile/scripts/`、`apps/mobile/test/` | 脚本自行定位移动应用根目录                              |
+| 桌面入口            | `apps/desktop/`                             | 独立 renderer、Electron main／preload、Forge 配置和测试 |
+| 公共包              | `packages/`                                 | 按实际消费者提取协议和业务，移动原生插件不引入桌面      |
+| 文档                | `docs/`                                     | 保留现有 VitePress workspace                            |
+| 运营工具            | `scripts/`                                  | CloudBase 集合初始化、规则和索引保留在仓库根            |
 
 所有依赖在仓库根安装，使用 `.node-version` 指定的 Node.js 和根 `package.json` 指定的 pnpm：
 
@@ -23,7 +23,7 @@ cp -n apps/mobile/.env.example apps/mobile/.env
 pnpm dev
 ```
 
-原有根命令 `dev`、`build`、`generate`、`typecheck`、`test:*`、`sync`、`build:ios` 和 `build:android:release` 继续转发到移动应用。也可显式执行：
+原有根命令 `dev`、`build`、`generate`、`typecheck`、`test:*` 继续转发到移动应用。也可显式执行：
 
 ```bash
 pnpm --dir apps/mobile run dev
@@ -82,7 +82,7 @@ pnpm make:desktop
 
 完整部署产物位于 `apps/mobile/.edgeone`：`assets/` 包含浏览器资源，`cloud-functions/ssr-node/` 包含函数 handler、路由配置、Nitro chunk 和运行依赖。`outputDirectory` 只选择静态资源；发布必须同时收集函数目录，不能只上传 `.output/public` 或 `.edgeone/assets`。
 
-专用入口清理旧 `.edgeone`，使用空 dotenv 文件构建，并拒绝应用目录或函数产物中的 `.env`、`.env.production`、`.env.local` 和 `.env.production.local`。请在干净检出中部署，服务端变量通过 EdgeOne 环境设置提供；该限制不影响日常移动／Web 构建和 Capacitor 的 `.output` 流程。
+专用入口清理旧 `.edgeone`，使用空 dotenv 文件构建，并拒绝应用目录或函数产物中的 `.env`、`.env.production`、`.env.local` 和 `.env.production.local`。请在干净检出中部署，服务端变量通过 EdgeOne 环境设置提供；该限制不影响日常 Web 构建的 `.output` 流程。
 
 Nuxt 生产服务器不自动读取 `.env`；运行时覆盖需要匹配已声明的 `NUXT_*` 配置，例如 `NUXT_TENCENT_API_SECRET_ID`、`NUXT_TENCENT_API_SECRET_KEY` 和 `NUXT_WX_OPEN_APP_SECRET`。私密值不能放入 `runtimeConfig.public`。平台普通 Node 函数的 `context.env` 契约不能直接证明 Nuxt 函数中的 `process.env` 已传入，必须通过实际页面／只读 API 验证变量可用性，不输出变量值。
 
@@ -100,12 +100,7 @@ Nuxt 生产服务器不自动读取 `.env`；运行时覆盖需要匹配已声�
 
 ## Android 与原生 iOS 发布
 
-Capacitor 仅用于 `apps/mobile/android`。`webDir` 仍相对 `apps/mobile` 指向 `.output/public`：
-
-```bash
-pnpm build
-pnpm sync # 仅执行 cap sync android
-```
+Android 主界面使用原生 Kotlin，不嵌入 Web 构建产物。可在 Android Studio 打开 `apps/android`，或使用独立 Gradle Wrapper。
 
 Android 发布使用 `pnpm build:android:release`，详见[Android 发布](./android-release.md)。
 旧 Capacitor iOS 客户端未分发，工程与旧构建 / 版本同步脚本已退役。
@@ -146,7 +141,6 @@ macOS 的 `preMake` hook 检查 DMG maker 声明的 `macos-alias`／`fs-xattr` �
 本机验证应覆盖：
 
 - 现有 Web 路由、登录页面、API 返回和静态资源。
-- Capacitor 同步后的插件路径、配置和资源。
 - 对应 SDK 下的 iOS／Android 编译与既有原生协议测试。
 - 桌面接入后的类型、Electron 集成测试、原生安装包与 ASAR 校验。
 

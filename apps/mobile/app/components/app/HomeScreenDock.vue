@@ -9,7 +9,7 @@ import type { UseDraggableReturn } from 'vue-draggable-plus'
 import type { InstalledApp } from '~/types/homeScreen'
 import { kGlass } from 'konsta/vue'
 import { VueDraggable } from 'vue-draggable-plus'
-import { hostHaptics, HostImpactStyle } from '~/host-runtime'
+import { vibrate } from '~/utils/web-haptics'
 
 interface Props {
   /** Dock 应用列表 */
@@ -78,11 +78,11 @@ function onDragStart() {
   if (!props.editMode) {
     homeScreenStore.enterEditMode()
   }
-  hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+  vibrate(12)
 }
 
 function onDragEnd() {
-  hostHaptics.impact({ style: HostImpactStyle.Light }).catch(() => {})
+  vibrate(8)
   emit('update:apps', dockApps.value)
 }
 
@@ -113,7 +113,7 @@ function onPointerDown(e: PointerEvent, app: InstalledApp) {
   clearLongPressTimer()
   longPressTimer = setTimeout(() => {
     longPressTimer = null
-    hostHaptics.impact({ style: HostImpactStyle.Medium }).catch(() => {})
+    vibrate(12)
     const iconRect = longPressElement!.getBoundingClientRect()
     emit('longPress', longPressApp!, { x: startX, y: startY }, iconRect)
   }, LONG_PRESS_DELAY)

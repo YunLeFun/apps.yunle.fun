@@ -339,7 +339,7 @@ final class NativeVoiceOverTests: XCTestCase {
         let app = try guestApp(tab: "我", large: large)
         try withVoiceOver(app: app, name: "me-\(large ? "largest" : "standard")") { voiceOver, speech in
             try seek("登录云乐坊", service: voiceOver, speech: speech)
-            for label in ["云居中的应用", "钱包", "云乐坊会员", "我的应用", "个人工坊", "账号管理", "设置"] {
+            for label in ["云居中的应用", "设置"] {
                 try next(label, service: voiceOver, speech: speech)
             }
             app.buttons["设置"].doubleTap()
@@ -349,7 +349,7 @@ final class NativeVoiceOverTests: XCTestCase {
             app.navigationBars["设置"].buttons.element(boundBy: 0).doubleTap()
             XCTAssertTrue(app.navigationBars["我"].waitForExistence(timeout: 5))
             expectFocus("设置", service: voiceOver, speech: speech)
-            for label in ["关于云乐坊", "支持", "我的举报", "使用帮助", "反馈与建议"] {
+            for label in ["关于云乐坊", "支持", "使用帮助", "反馈与建议"] {
                 try next(label, service: voiceOver, speech: speech)
             }
         }

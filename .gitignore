@@ -64,3 +64,6 @@ scripts/cloudbase-rules/*.backup-*.json
 
 # Local archives/exports from the retired, unreleased Capacitor iOS shell.
 /apps/mobile/ios/
+
+# Local outputs left by the retired Android shell; do not add them to the native project.
+/apps/mobile/android/

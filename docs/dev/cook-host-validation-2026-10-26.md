@@ -1,5 +1,7 @@
 # Cook 宿主真实链路验收 · 2026-10-26
 
+> 本文保留 2026-10-26 的验收记录。旧 Android 壳与其登录仪器测试已退役；新项目的入口和当前验收范围见[退役记录](./capacitor-retirement.md)。
+
 Cook 的 [#98](https://github.com/YunYouJun/cook/issues/98) 跟踪宿主集成与原生客户端迁移。本轮在隔离模拟器运行真实宿主容器、生产 Cook 页面和既有 SSO 服务；没有 mock `window.ylf`、授权响应或换码结果。
 
 ## 版本与结果

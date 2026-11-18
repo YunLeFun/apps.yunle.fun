@@ -1,5 +1,4 @@
 import consola from 'consola'
-import { hostEnvironment } from '~/host-runtime'
 
 interface RumClient {
   report: (payload: Record<string, unknown>) => void
@@ -107,7 +106,7 @@ export function reportClientEvent(
   )
   const payload = {
     event: name,
-    platform: hostEnvironment.platform(),
+    platform: 'web',
     route: typeof window === 'undefined' ? '' : window.location.pathname,
     ...normalizedContext,
   }

@@ -1221,6 +1221,9 @@ class WebViewController: UIViewController {
         canGoBackObservation?.invalidate()
         contentOffsetObservation?.invalidate()
         titleObservation?.invalidate()
+        webView?.stopLoading()
+        webView?.navigationDelegate = nil
+        webView?.uiDelegate = nil
         webView?.configuration.userContentController
             .removeScriptMessageHandler(forName: "ylf", contentWorld: .page)
     }

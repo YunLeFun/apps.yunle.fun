@@ -822,28 +822,6 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertTrue(app.navigationBars["云栈"].waitForExistence(timeout: 5))
     }
 
-    func testNativeGuestWalletAndMembershipLoginCanBeCancelled() throws {
-        guard !isLegacy else { throw XCTSkip("Verifies native wallet screens") }
-        continueAfterFailure = false
-        let app = app
-        app.launch(); app.tabBars.buttons["我"].tap()
-        guard app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch.waitForExistence(timeout: 5) else {
-            throw XCTSkip("Requires a guest simulator")
-        }
-        for title in ["钱包", "云乐坊会员"] {
-            app.buttons[title].tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
-            XCTAssertTrue(app.staticTexts["登录后查看云币与会员"].exists)
-            XCTAssertFalse(app.buttons["恢复购买"].exists)
-            attach(app, name: title == "钱包" ? "wallet-guest" : "membership-guest")
-            app.buttons["登录云乐坊"].tap()
-            XCTAssertTrue(app.navigationBars["登录并继续"].waitForExistence(timeout: 5))
-            app.buttons["取消"].tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
-            app.navigationBars[title].buttons.firstMatch.tap()
-        }
-    }
-
     func testNativePublicBrandIconDetail() throws {
         guard !isLegacy else { throw XCTSkip("Verifies native icon rendering") }
         guard #available(iOS 16.4, *) else { throw XCTSkip("XCTest URL launch requires iOS 16.4") }
@@ -867,6 +845,7 @@ final class ApplicationBenchmarks: XCTestCase {
         guard app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "登录云乐坊")).firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("Requires a guest simulator")
         }
+        app.tabBars.buttons["工坊"].tap()
         app.buttons["我的应用"].tap()
         XCTAssertTrue(app.navigationBars["我的应用"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["发布你的云应用"].exists)
@@ -877,10 +856,6 @@ final class ApplicationBenchmarks: XCTestCase {
         XCTAssertTrue(app.staticTexts["login.continuation-context"].exists)
         app.buttons["取消"].tap()
         XCTAssertTrue(app.navigationBars["我的应用"].waitForExistence(timeout: 5))
-        app.tabBars.buttons["工坊"].tap()
-        app.buttons["我的应用"].tap()
-        XCTAssertTrue(app.navigationBars["我的应用"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["发布你的云应用"].exists)
         XCTAssertFalse(app.buttons["保存版本"].exists)
     }
 

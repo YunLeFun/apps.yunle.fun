@@ -2,6 +2,7 @@ import { expect, test } from '@nuxt/test-utils/playwright'
 
 test.describe('登录页面', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/api/login-options', route => route.fulfill({ json: { weChatLoginVisible: false } }))
     await page.goto('/login')
   })
 
@@ -27,6 +28,24 @@ test.describe('登录页面', () => {
     await expect(page.getByPlaceholder('手机号 / 邮箱 / 用户名')).toBeVisible()
     await expect(page.getByPlaceholder('请输入密码')).toBeVisible()
     await expect(page.getByRole('button', { name: '登录', exact: true })).toBeDisabled()
+  })
+
+  test('按后台配置显示微信入口，配置不可用则隐藏', async ({ page }) => {
+    const optionsUrl = '**/api/login-options'
+    const weChat = page.getByRole('button', { name: '微信', exact: true })
+    await page.unroute(optionsUrl)
+    await page.route(optionsUrl, route => route.fulfill({ json: { weChatLoginVisible: true } }))
+    await page.reload()
+    await expect(weChat).toBeVisible()
+    await expect(page.getByPlaceholder('请输入手机号')).toBeVisible()
+
+    await page.unroute(optionsUrl)
+    await page.route(optionsUrl, route => route.fulfill({ status: 503 }))
+    const unavailable = page.waitForResponse(response => response.url().endsWith('/api/login-options'))
+    await page.reload()
+    expect((await unavailable).status()).toBe(503)
+    await expect(page.getByPlaceholder('请输入手机号')).toBeVisible()
+    await expect(weChat).toHaveCount(0)
   })
 
   test('允许已有的长用户名进行密码登录', async ({ page }) => {

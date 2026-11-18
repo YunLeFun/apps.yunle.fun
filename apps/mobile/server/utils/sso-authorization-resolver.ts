@@ -2,7 +2,7 @@ import { sanitizeAcquisitionContext } from '../../app/utils/acquisition'
 
 export interface SsoAuthorizationResolverOptions {
   endpoint: string
-  request?: (url: string, options: Record<string, unknown>) => Promise<unknown>
+  request?: typeof fetch
 }
 
 /**
@@ -16,16 +16,29 @@ export async function resolveCentralSsoAuthorization(
 ): Promise<unknown> {
   const endpoint = exactHttpsEndpoint(options.endpoint)
   const body = normalizeSsoAuthorizationProtocolRequest(input)
-  const request = options.request ?? ((url, requestOptions) => $fetch(url, requestOptions))
-  return await request(endpoint, {
-    method: 'POST',
-    body: {
-      action: 'resolveSsoAuthorization',
-      ...body,
-    },
-    retry: 0,
-    timeout: 10_000,
-  })
+  const request = options.request ?? fetch
+  const controller = new AbortController()
+  const deadline = setTimeout(() => controller.abort(), 10_000)
+  try {
+    const response = await request(endpoint, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resolveSsoAuthorization', ...body }),
+      redirect: 'error',
+      signal: controller.signal,
+    })
+    if (!response.ok)
+      throw new SsoAuthorizationResolverUpstreamError(response.status)
+    return await response.json()
+  }
+  catch (error) {
+    if (error instanceof SsoAuthorizationResolverUpstreamError)
+      throw error
+    throw new SsoAuthorizationResolverUpstreamError(controller.signal.aborted ? 504 : 502)
+  }
+  finally {
+    clearTimeout(deadline)
+  }
 }
 
 export function normalizeSsoAuthorizationProtocolRequest(input: unknown) {
@@ -69,6 +82,14 @@ export function normalizeSsoAuthorizationProtocolRequest(input: unknown) {
 
 export class SsoAuthorizationResolverInputError extends Error {
   override name = 'SsoAuthorizationResolverInputError'
+}
+
+export class SsoAuthorizationResolverUpstreamError extends Error {
+  override name = 'SsoAuthorizationResolverUpstreamError'
+
+  constructor(readonly statusCode: number) {
+    super('Central SSO authorization resolver is unavailable')
+  }
 }
 
 function exactHttpsEndpoint(input: string): string {

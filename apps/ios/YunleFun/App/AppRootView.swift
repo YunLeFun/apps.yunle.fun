@@ -51,9 +51,11 @@ struct AppRootView: View {
                     feedbackLogin.begin(text: text, origin: .init(uid: accounts.user?.id, generation: accounts.identityGeneration),
                                         isRestoring: accounts.isRestoring)
                 }).frame(width: 0, height: 0))
-            .onOpenURL(perform: handleLink)
+            .onOpenURL { url in
+                if !WeChatAuthorization.shared.handle(url) { handleLink(url) }
+            }
             .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
-                if let url = activity.webpageURL { handleLink(url) }
+                if !WeChatAuthorization.shared.handle(activity), let url = activity.webpageURL { handleLink(url) }
             }
             .alert(item: $runtime.issue) { issue in
                 if let recovery = issue.recovery {

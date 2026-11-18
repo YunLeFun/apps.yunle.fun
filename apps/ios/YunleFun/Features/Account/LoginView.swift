@@ -30,6 +30,7 @@ struct LoginView: View {
     @State private var signInAttemptID: UUID?
     @State private var operation: Task<Void, Never>?
     @State private var captchaAction: Action?
+    @State private var showsWeChat = false
     @FocusState private var focus: Field?
     @AccessibilityFocusState private var errorFocused: Bool
 
@@ -62,7 +63,7 @@ struct LoginView: View {
 
     private enum Field { case identifier, code }
     private enum Action: String, Identifiable {
-        case sendCode, signIn
+        case sendCode, signIn, weChatSignIn
         var id: Self { self }
     }
 
@@ -140,6 +141,15 @@ struct LoginView: View {
                 } footer: {
                     Text("继续即表示你已阅读并同意[服务条款](https://www.yunle.fun/docs/terms-of-service)和[隐私政策](https://www.yunle.fun/docs/privacy-policy)。")
                 }
+                if showsWeChat {
+                    Section {
+                        Button { perform(.weChatSignIn) } label: {
+                            Label("微信登录", systemImage: "message.fill")
+                        }
+                        .disabled(isBusy)
+                        .accessibilityIdentifier("login.wechat")
+                    }
+                }
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(authorizationApplication == nil && continuationMessage == nil ? "账号" : "登录并继续")
@@ -158,6 +168,11 @@ struct LoginView: View {
                 }
             }
             .interactiveDismissDisabled(isBusy)
+            .task {
+                guard WeChatAuthorization.shared.isAvailable else { return }
+                let enabled = await accounts.weChatLoginAvailable()
+                if !Task.isCancelled { showsWeChat = enabled }
+            }
             .sheet(item: $captchaAction) { action in
                 CaptchaView { token in perform(action, captcha: token) }
             }
@@ -316,7 +331,7 @@ struct LoginView: View {
                     challenge = try await accounts.sendVerification(address: address, captcha: captcha)
                     resendAt = Date().addingTimeInterval(60)
                     focus = .code
-                case .signIn:
+                case .signIn, .weChatSignIn:
                     let attempt = UUID()
                     signInAttemptID = attempt
                     let committed: (AccountSignInSuccess) -> Void = { success in
@@ -325,10 +340,21 @@ struct LoginView: View {
                     }
                     let authenticated = {
                         authenticationCommitted = true
-                        lastSuccessfulIdentifier = method == .phone ? VerificationAddress.normalizedPhoneInput(identifier) : identifier
-                        lastSuccessfulMethodValue = method.rawValue
+                        if action == .weChatSignIn {
+                            lastSuccessfulIdentifier = ""
+                            lastSuccessfulMethodValue = Method.phone.rawValue
+                        } else {
+                            lastSuccessfulIdentifier = method == .phone ? VerificationAddress.normalizedPhoneInput(identifier) : identifier
+                            lastSuccessfulMethodValue = method.rawValue
+                        }
                     }
-                    if method == .password {
+                    if action == .weChatSignIn {
+                        try await accounts.signInWithWeChat(continuation: continuation, attemptID: attempt,
+                                                           onCommitted: committed, onAuthenticated: authenticated) {
+                            guard await accounts.weChatLoginAvailable() else { throw AccountError.unavailable }
+                            return try await WeChatAuthorization.shared.authorize()
+                        }
+                    } else if method == .password {
                         try await accounts.passwordSignIn(identifier: identifier, password: password, captcha: captcha,
                                                           continuation: continuation, onCommitted: committed,
                                                           attemptID: attempt, onAuthenticated: authenticated)
@@ -346,7 +372,7 @@ struct LoginView: View {
                     dismiss()
                 }
             } catch is CancellationError { }
-            catch AccountError.captchaRequired { captchaAction = action }
+            catch AccountError.captchaRequired where action != .weChatSignIn { captchaAction = action }
             catch {
                 guard !Task.isCancelled else { return }
                 self.error = AccountError.message(for: error)

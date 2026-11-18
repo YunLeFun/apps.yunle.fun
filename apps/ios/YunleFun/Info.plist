@@ -28,9 +28,25 @@
 				<string>yunlefun</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>fun.yunle.apps.wechat</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>wx925d6e320d64f30a</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>weixin</string>
+		<string>weixinULAPI</string>
+		<string>weixinURLParamsAPI</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>用于扫描云应用和个人工坊二维码。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

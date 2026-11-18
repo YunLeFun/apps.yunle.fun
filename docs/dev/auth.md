@@ -25,7 +25,7 @@
 
 云乐坊网页的 `/login` 使用现有 CloudBase `wx_open` OAuth 流程。入口默认隐藏，由 Admin「系统设置 → 登录方式」控制；刷新登录页即可读取新配置。`GET /api/login-options` 只返回 `weChatLoginVisible`，缺少配置、格式错误或读取失败时按关闭处理。
 
-上线前需在 Admin 和 Apps 共用的 CloudBase 环境创建 `app_login_options` 集合，并设为 `ADMINONLY`（Admin 仓库的 `scripts/ensure-app-login-options.mjs` 提供预检）；只有 Admin owner 可以修改 `web` 文档。开关只控制网页入口，不修改 CloudBase 微信 Provider、回调地址或原生客户端。开放前应先验证微信 OAuth 和 `/auth/callback`。
+Admin 和 Apps 共用 `ADMINONLY` 的 `app_login_options` 集合；只有 Admin owner 可以修改 `web` 和 `ios` 各自的配置。网页开关只控制网页入口，开放前应先验证微信 OAuth 和 `/auth/callback`。iOS 使用独立的原生授权和绑定流程，见 [iOS 微信登录](./ios-wechat-login.md)。
 
 ## 登录方式开关配置
 

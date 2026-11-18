@@ -103,6 +103,7 @@ struct AccountProfileView: View {
                     if let email = user.email, !email.isEmpty { LabeledContent("邮箱", value: email) }
                     NavigationLink("账号管理") { AccountManagementView() }
                 }
+                WeChatBindingSection(accountID: user.id).id(user.id)
             }
         }
         .navigationTitle("个人资料")

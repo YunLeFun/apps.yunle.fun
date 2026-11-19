@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { onRequest } from '../../edge-functions/api/auth/sso/resolve'
 import {
+  CLOUDRUN_SSO_RESOLVER,
   resolveCentralSsoAuthorization,
   SsoAuthorizationResolverInputError,
 } from '../../server/utils/sso-authorization-resolver'
@@ -119,21 +120,34 @@ describe('central SSO authorization resolver transport', () => {
 describe('native authorization edge route', () => {
   it('validates every authorization and forwards no credentials or caller-selected action', async () => {
     const broker = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(Response.json({ ok: true, request: { nonce: nativeInput.nonce } }))
+      .mockResolvedValueOnce(Response.json({ ok: true, request: { nonce: nativeInput.nonce } }, { headers: { 'Server-Timing': 'sso-rate-limit;dur=72, sso-policy;dur=1, unexpected;dur=8' } }))
       .mockResolvedValueOnce(Response.json({ ok: true, request: { nonce: 'b'.repeat(32) } }))
     vi.stubGlobal('fetch', broker)
     const first = await onRequest({ request: edgeRequest(JSON.stringify({ ...nativeInput, action: 'issueSsoCode' })), env: {} })
     const second = await onRequest({ request: edgeRequest(JSON.stringify({ ...nativeInput, nonce: 'b'.repeat(32) })), env: {} })
     expect(broker).toHaveBeenCalledTimes(2)
     const [url, options] = broker.mock.calls[0]!
-    expect(url).toBe(endpoint)
+    expect(url).toBe(CLOUDRUN_SSO_RESOLVER)
     expect(new Headers(options?.headers).has('Authorization')).toBe(false)
     expect(new Headers(options?.headers).has('Cookie')).toBe(false)
     expect(JSON.parse(options?.body as string)).toEqual({ action: 'resolveSsoAuthorization', ...nativeInput })
     expect(first.headers.get('Cache-Control')).toContain('no-store')
-    expect(first.headers.get('Server-Timing')).toMatch(/^sso-edge;dur=\d+$/)
+    expect(first.headers.get('Server-Timing')).toMatch(/^sso-edge;dur=\d+, sso-rate-limit;dur=72, sso-policy;dur=1$/)
+    expect(first.headers.get('X-Yunle-Sso-Resolver')).toBe('cloudrun')
     expect(await first.json()).toMatchObject({ request: { nonce: nativeInput.nonce } })
     expect(await second.json()).toMatchObject({ request: { nonce: 'b'.repeat(32) } })
+  })
+
+  it('falls back to read-only SCF when the CloudRun route is unavailable', async () => {
+    const upstream = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(Response.json({ ok: true, request: { nonce: nativeInput.nonce } }))
+    vi.stubGlobal('fetch', upstream)
+    const response = await onRequest({ request: edgeRequest(JSON.stringify(nativeInput)), env: {} })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('X-Yunle-Sso-Resolver')).toBe('scf')
+    expect(upstream.mock.calls.map(call => call[0])).toEqual([CLOUDRUN_SSO_RESOLVER, endpoint])
+    expect(upstream.mock.calls[1]![1]?.body).toBe(upstream.mock.calls[0]![1]?.body)
   })
 
   it('rejects invalid requests and reports broker failure without an authorization result', async () => {
@@ -146,6 +160,7 @@ describe('native authorization edge route', () => {
     expect(broker).not.toHaveBeenCalled()
     const limited = await onRequest({ request: edgeRequest(JSON.stringify(nativeInput)), env: {} })
     expect(limited.status).toBe(429)
+    expect(broker).toHaveBeenCalledTimes(1)
     expect(limited.headers.get('Cache-Control')).toContain('no-store')
   })
 })

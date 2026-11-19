@@ -197,7 +197,8 @@ export default defineNuxtConfig({
     appFirstPartySubmitterUids: firstPartySubmitterUids,
     // 诊断日志管理 API 独立白名单；默认沿用第一方维护者，可用逗号分隔多个 CloudBase UID。
     diagnosticAdminUids: process.env.NUXT_DIAGNOSTIC_ADMIN_UIDS || firstPartySubmitterUids,
-    // 未登录也可读取的中央 SSO 策略解析端点；只返回 Registry 元数据，不签发凭证。
+    ssoResolverUrl: process.env.NUXT_SSO_RESOLVER_URL || 'https://api.yunle.fun/auth/sso/resolve',
+    // 只读服务不可用时使用原有 SCF 核验入口。
     ssoTicketUrl: process.env.NUXT_SSO_TICKET_URL || 'https://api.yunle.fun/sso-ticket',
     // Private Apps-to-account-api acquisition credential; never expose it in public runtime config.
     appsAcquisitionInternalToken: process.env.NUXT_APPS_ACQUISITION_INTERNAL_TOKEN || process.env.APPS_ACQUISITION_INTERNAL_TOKEN || '',

@@ -1,7 +1,12 @@
 import { sanitizeAcquisitionContext } from '../../app/utils/acquisition'
 
+export const CLOUDRUN_SSO_RESOLVER = 'https://api.yunle.fun/auth/sso/resolve'
+export const SCF_SSO_RESOLVER = 'https://api.yunle.fun/sso-ticket'
+
 export interface SsoAuthorizationResolverOptions {
   endpoint: string
+  fallbackEndpoint?: string
+  onResponse?: (response: Response, fallback: boolean) => void
   request?: typeof fetch
 }
 
@@ -16,29 +21,50 @@ export async function resolveCentralSsoAuthorization(
 ): Promise<unknown> {
   const endpoint = exactHttpsEndpoint(options.endpoint)
   const body = normalizeSsoAuthorizationProtocolRequest(input)
+  const fallback = options.fallbackEndpoint && exactHttpsEndpoint(options.fallbackEndpoint)
   const request = options.request ?? fetch
-  const controller = new AbortController()
-  const deadline = setTimeout(() => controller.abort(), 10_000)
+  const encoded = JSON.stringify({ action: 'resolveSsoAuthorization', ...body })
+  const mayFallback = !!fallback && fallback !== endpoint
+
+  async function attempt(url: string, timeoutMs: number, isFallback: boolean) {
+    const controller = new AbortController()
+    const deadline = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await request(url, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: encoded,
+        redirect: 'error',
+        signal: controller.signal,
+      })
+      if (!response.ok)
+        throw new SsoAuthorizationResolverUpstreamError(response.status)
+      const result: unknown = await response.json()
+      options.onResponse?.(response, isFallback)
+      return result
+    }
+    catch (error) {
+      if (error instanceof SsoAuthorizationResolverUpstreamError)
+        throw error
+      throw new SsoAuthorizationResolverUpstreamError(controller.signal.aborted ? 504 : 502)
+    }
+    finally {
+      clearTimeout(deadline)
+    }
+  }
+
   try {
-    const response = await request(endpoint, {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'resolveSsoAuthorization', ...body }),
-      redirect: 'error',
-      signal: controller.signal,
-    })
-    if (!response.ok)
-      throw new SsoAuthorizationResolverUpstreamError(response.status)
-    return await response.json()
+    return await attempt(endpoint, mayFallback ? 2_000 : 10_000, false)
   }
   catch (error) {
-    if (error instanceof SsoAuthorizationResolverUpstreamError)
+    if (!mayFallback || !(error instanceof SsoAuthorizationResolverUpstreamError) || ![404, 502, 503, 504].includes(error.statusCode))
       throw error
-    throw new SsoAuthorizationResolverUpstreamError(controller.signal.aborted ? 504 : 502)
+    return await attempt(fallback, 8_000, true)
   }
-  finally {
-    clearTimeout(deadline)
-  }
+}
+
+export function upstreamSsoTiming(response: Response): string[] {
+  return (response.headers.get('Server-Timing') ?? '').split(',').map(value => value.trim()).filter(value => /^sso-(?:rate-limit|policy);dur=\d{1,5}$/.test(value))
 }
 
 export function normalizeSsoAuthorizationProtocolRequest(input: unknown) {

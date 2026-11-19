@@ -13,7 +13,8 @@ export default defineEventHandler(async (event) => {
   const runtime = useRuntimeConfig(event)
   try {
     return await resolveCentralSsoAuthorization(body, {
-      endpoint: runtime.ssoTicketUrl,
+      endpoint: runtime.ssoResolverUrl,
+      fallbackEndpoint: runtime.ssoTicketUrl,
     })
   }
   catch (error) {

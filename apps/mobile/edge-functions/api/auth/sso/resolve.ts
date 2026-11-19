@@ -1,7 +1,10 @@
 import {
+  CLOUDRUN_SSO_RESOLVER,
   resolveCentralSsoAuthorization,
+  SCF_SSO_RESOLVER,
   SsoAuthorizationResolverInputError,
   SsoAuthorizationResolverUpstreamError,
+  upstreamSsoTiming,
 } from '../../../../server/utils/sso-authorization-resolver'
 
 const responseHeaders = {
@@ -14,7 +17,7 @@ const responseHeaders = {
 /** Keep the native resolver URL on a lightweight runtime. The central broker still validates each request. */
 export async function onRequest({ request, env }: {
   request: Request
-  env: { NUXT_SSO_TICKET_URL?: string }
+  env: { NUXT_SSO_RESOLVER_URL?: string, NUXT_SSO_TICKET_URL?: string }
 }): Promise<Response> {
   if (request.method !== 'POST') {
     return errorResponse(405, 'Method Not Allowed', { Allow: 'POST' })
@@ -30,11 +33,25 @@ export async function onRequest({ request, env }: {
 
   const started = performance.now()
   try {
+    const endpoint = env.NUXT_SSO_RESOLVER_URL || CLOUDRUN_SSO_RESOLVER
+    const fallbackEndpoint = env.NUXT_SSO_TICKET_URL || SCF_SSO_RESOLVER
+    let backend = endpoint === fallbackEndpoint ? 'scf' : 'cloudrun'
+    let timing: string[] = []
     const result = await resolveCentralSsoAuthorization(body, {
-      endpoint: env.NUXT_SSO_TICKET_URL || 'https://api.yunle.fun/sso-ticket',
+      endpoint,
+      fallbackEndpoint,
+      onResponse(response, fallback) {
+        if (fallback)
+          backend = 'scf'
+        timing = upstreamSsoTiming(response)
+      },
     })
     return new Response(JSON.stringify(result), {
-      headers: { ...responseHeaders, 'Server-Timing': `sso-edge;dur=${Math.round(performance.now() - started)}` },
+      headers: {
+        ...responseHeaders,
+        'Server-Timing': [`sso-edge;dur=${Math.round(performance.now() - started)}`, ...timing].join(', '),
+        'X-Yunle-Sso-Resolver': backend,
+      },
     })
   }
   catch (error) {

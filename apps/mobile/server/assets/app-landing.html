@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>云乐坊 App — 把喜欢的云应用带回云居，轻点即开</title>
+    <meta
+      name="description"
+      content="云乐坊 App 是发现和使用云应用的地方：在工坊找工具和小游戏，把喜欢的带回云居，轻点即开，也可以在寻乐随手发现新作品。"
+    />
+    <meta name="theme-color" content="#f5f6f9" />
+    <meta name="apple-itunes-app" content="app-id=6759859441" />
+    <meta property="og:title" content="云乐坊 · 把喜欢的云应用带回云居" />
+    <meta property="og:description" content="在工坊发现云应用，把喜欢的应用带回云居。" />
+    <meta property="og:image" content="https://apps.yunle.fun/og-image.png" />
+    <link rel="canonical" href="https://apps.yunle.fun/" />
+    <link rel="icon" type="image/png" href="/showcase/app-icon.png" />
+    <link rel="stylesheet" href="/landing/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+    <!-- 顶部导航栏：无脚本时完整可用 -->
+    <header class="site-header" id="top">
+      <div class="container header-inner">
+        <a class="brand" href="#top" aria-label="云乐坊 App 首页">
+          <span class="brand-icon-wrap">
+            <img src="/showcase/app-icon.png" alt="云乐坊 App 图标" width="36" height="36" class="brand-icon" />
+          </span>
+          <span class="brand-text">
+            <strong class="brand-name">云乐坊 App</strong>
+            <span class="brand-domain">apps.yunle.fun</span>
+          </span>
+        </a>
+
+        <div class="header-actions">
+          <button
+            type="button"
+            class="motion-toggle"
+            id="motionToggle"
+            aria-label="减弱动态效果"
+            aria-pressed="false"
+            title="切换页面动态效果"
+          >
+            <span class="motion-dot" aria-hidden="true"></span>
+            <span class="motion-label">动效开</span>
+          </button>
+          <a
+            class="btn btn-primary btn-sm"
+            href="https://www.yunle.fun/download"
+            target="_blank"
+            rel="noopener noreferrer"
+            >下载 App</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <!-- 首屏：方寸云居 · 互动收盒与轻点即开 -->
+      <section class="hero" id="experience" aria-labelledby="hero-title">
+        <div class="hero-backdrop" aria-hidden="true">
+          <div class="dot-grid"></div>
+          <div class="glow-orb glow-orb-sky"></div>
+          <div class="glow-orb glow-orb-mint"></div>
+          <div class="glow-orb glow-orb-sun"></div>
+        </div>
+
+        <div class="container hero-grid">
+          <!-- 左侧叙事与行动入口 -->
+          <div class="hero-copy">
+            <div class="eyebrow-row">
+              <span class="cartridge-badge">
+                <span class="pixel-mark" aria-hidden="true">
+                  <svg viewBox="0 0 28 18" width="22" height="14" fill="none">
+                    <path d="M5 0h18v3h5v12h-5v3H5v-3H0V3h5V0z" fill="currentColor" />
+                    <path d="M9 5.5l5.5 3.5L9 12.5V5.5z" fill="#fff" />
+                    <circle cx="19.5" cy="9" r="2.7" fill="#fff" />
+                  </svg>
+                </span>
+                <span>云应用收纳盒 · 轻点即开</span>
+              </span>
+            </div>
+
+            <h1 class="hero-title" id="hero-title">
+              把顺手的工具与小游戏，<br />
+              <span class="title-highlight">都带回你的云居。</span>
+            </h1>
+
+            <p class="hero-lead">
+              在<strong>工坊</strong>按用途挑好作品，去<strong>寻乐</strong>随手撞见新奇彩蛋；
+              喜欢的点一下收进<strong>云居</strong>，不用反复下载安装包，轻点图标就能直接用。
+            </p>
+
+            <div class="hero-cta-group">
+              <a
+                class="btn btn-primary btn-lg"
+                href="https://www.yunle.fun/download"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+                    <path
+                      d="M10 3v9.5m0 0l-3.5-3.5M10 12.5l3.5-3.5M4 15.5h12"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span>下载云乐坊 App</span>
+              </a>
+              <a class="btn btn-glass btn-lg" href="/tabs/home">
+                <span>体验兼容网页版</span>
+                <span class="arrow-shift" aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <div class="hero-meta">
+              <span>无需繁琐安装</span>
+              <span class="meta-sep" aria-hidden="true">·</span>
+              <span>App 与网页互通</span>
+              <span class="meta-sep" aria-hidden="true">·</span>
+              <a class="meta-link" href="https://www.yunle.fun/" target="_blank" rel="noopener noreferrer"
+                >来自云乐坊官网 www.yunle.fun</a
+              >
+            </div>
+
+            <!-- 交互收纳演示 -->
+            <div class="dock-console" hidden aria-label="云居互动体验台">
+              <div class="dock-console-head">
+                <div>
+                  <p class="console-kicker">先试一次 App 的核心手感</p>
+                  <p class="console-desc">
+                    点一个应用，看图标飞进<strong>云居</strong>。再点手机里的图标，就能打开体验。
+                  </p>
+                </div>
+                <button type="button" class="demo-replay-btn" id="autoDemoBtn">
+                  <span aria-hidden="true">▶</span> 演示收盒
+                </button>
+              </div>
+
+              <div class="cartridge-rack" id="cartridgeRack" role="group" aria-label="可收进云居的应用">
+                <button type="button" class="cartridge-chip" data-app-id="ac" aria-label="将云空调收进云居">
+                  <span class="chip-app-icon icon-ac" aria-hidden="true">
+                    <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                      <path
+                        d="M18 5v26M5 18h26M8.8 8.8l18.4 18.4M27.2 8.8L8.8 27.2"
+                        stroke="#38BDF8"
+                        stroke-width="2.6"
+                        stroke-linecap="round"
+                      />
+                      <circle cx="18" cy="18" r="3.5" fill="#E0F2FE" stroke="#0284C7" stroke-width="2" />
+                    </svg>
+                  </span>
+                  <span class="chip-info">
+                    <strong>云空调</strong>
+                    <small>随身冷笑话工具</small>
+                  </span>
+                  <span class="chip-action-pill">+ 收进云居</span>
+                </button>
+
+                <button type="button" class="cartridge-chip" data-app-id="pinball" aria-label="将云乐弹珠收进云居">
+                  <span class="chip-app-icon icon-pinball" aria-hidden="true">
+                    <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                      <rect x="6" y="4" width="24" height="28" rx="6" fill="#fff" fill-opacity="0.92" />
+                      <circle cx="20" cy="12" r="3" fill="#F59E0B" />
+                      <circle cx="14" cy="18" r="2.2" fill="#3B82F6" />
+                      <path d="M11 26h4v3h-4zM16 26h4v3h-4zM21 26h4v3h-4z" fill="#EF4444" />
+                      <path d="M26 22v7" stroke="#EC4899" stroke-width="2.4" stroke-linecap="round" />
+                    </svg>
+                  </span>
+                  <span class="chip-info">
+                    <strong>云乐弹珠</strong>
+                    <small>2.5D 仿真弹珠机</small>
+                  </span>
+                  <span class="chip-action-pill">+ 收进云居</span>
+                </button>
+
+                <button type="button" class="cartridge-chip" data-app-id="starplane" aria-label="将星纸收进云居">
+                  <span class="chip-app-icon icon-starplane" aria-hidden="true">
+                    <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                      <path
+                        d="M6 19l23-10-8 21-4.5-7.5L6 19z"
+                        fill="#38BDF8"
+                        stroke="#0369A1"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                      />
+                      <path d="M29 9L16.5 22.5" stroke="#E0F2FE" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </span>
+                  <span class="chip-info">
+                    <strong>星纸</strong>
+                    <small>纸飞机穿越星球</small>
+                  </span>
+                  <span class="chip-action-pill">+ 收进云居</span>
+                </button>
+
+                <button type="button" class="cartridge-chip" data-app-id="fc" aria-label="将 FC 红白机收进云居">
+                  <span class="chip-app-icon icon-fc" aria-hidden="true">
+                    <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                      <rect x="4" y="10" width="28" height="16" rx="6" fill="#334155" />
+                      <path d="M11 15v6M8 18h6" stroke="#E2E8F0" stroke-width="2.2" stroke-linecap="round" />
+                      <circle cx="22.5" cy="19.5" r="2" fill="#EF4444" />
+                      <circle cx="26.5" cy="16.5" r="2" fill="#F59E0B" />
+                    </svg>
+                  </span>
+                  <span class="chip-info">
+                    <strong>FC 红白机</strong>
+                    <small>即开即玩怀旧手柄</small>
+                  </span>
+                  <span class="chip-action-pill">+ 收进云居</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 云居真机界面与收纳体验 -->
+          <div class="hero-stage">
+            <div class="phone-chassis hero-phone" id="heroPhone" data-tilt-stage>
+              <div class="phone-sheen" aria-hidden="true"></div>
+              <div class="phone-notch" aria-hidden="true"></div>
+
+              <div class="phone-screen" id="heroPhoneScreen">
+                <div class="hero-screen-heading" aria-hidden="true">
+                  <img src="/showcase/home.jpg" alt="" width="603" height="1311" />
+                </div>
+                <div class="hero-screen-apps">
+                  <img
+                    src="/showcase/home.jpg"
+                    alt="云乐坊 App 的云居页面，展示最近使用和我的应用"
+                    width="603"
+                    height="1311"
+                    fetchpriority="high"
+                  />
+                </div>
+
+                <div class="collection-overlay" id="collectionOverlay" aria-label="收进云居的应用">
+                  <div class="collection-slots" id="collectionSlots">
+                    <button class="dock-slot is-empty" type="button" disabled aria-label="空位 1">
+                      <span class="dock-placeholder" aria-hidden="true">+</span>
+                    </button>
+                    <button class="dock-slot is-empty" type="button" disabled aria-label="空位 2">
+                      <span class="dock-placeholder" aria-hidden="true">+</span>
+                    </button>
+                    <button class="dock-slot is-empty" type="button" disabled aria-label="空位 3">
+                      <span class="dock-placeholder" aria-hidden="true">+</span>
+                    </button>
+                    <button class="dock-slot is-empty" type="button" disabled aria-label="空位 4">
+                      <span class="dock-placeholder" aria-hidden="true">+</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 实时提示胶囊 -->
+                <div class="phone-toast" id="phoneToast" role="status" aria-live="polite" hidden>
+                  <span class="toast-check" aria-hidden="true">✓</span>
+                  <span id="phoneToastText">已加入云居</span>
+                </div>
+
+                <!-- 轻点即开：手机内微体验弹窗 -->
+                <div
+                  class="mini-app-sheet"
+                  id="miniAppSheet"
+                  role="dialog"
+                  aria-modal="false"
+                  aria-labelledby="miniAppTitle"
+                  hidden
+                >
+                  <div class="mini-app-bar">
+                    <div class="mini-app-meta">
+                      <span class="mini-app-badge" id="miniAppBadge"></span>
+                      <div>
+                        <strong id="miniAppTitle">云乐坊间</strong>
+                        <small id="miniAppSubtitle">轻点即开 · 实时微体验</small>
+                      </div>
+                    </div>
+                    <button type="button" class="mini-close-btn" id="miniAppClose" aria-label="返回云居">
+                      返回云居
+                    </button>
+                  </div>
+                  <div class="mini-app-body" id="miniAppBody"></div>
+                  <div class="mini-app-foot">
+                    <span class="mini-foot-note">这是落地页内置的交互预览</span>
+                    <a class="mini-open-real" href="/tabs/home"> 打开真实网页版 ↗ </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-stage-status" aria-live="polite">
+              <span class="dock-live-hint" id="dockLiveHint">收进云居后，点图标打开</span>
+              <span class="dock-counter" id="dockCounter">已收纳 0 / 4</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 核心产品叙事：一机四境 · 跟随真实截图看懂云居、工坊、寻乐与应用详情 -->
+      <section class="tour-section" id="features" aria-labelledby="tour-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-kicker">01 — 一机四境</p>
+            <h2 class="section-title" id="tour-title">四个顺手的角落，装下整座云乐坊</h2>
+            <p class="section-subtitle">
+              滚动页面，或直接点击下方标签与手机底部的玻璃导航栏，切换查看云乐坊 App 的真实界面。
+            </p>
+          </div>
+
+          <!-- 窄屏与快捷切换玻璃胶囊 -->
+          <div class="tour-pills" role="tablist" aria-label="App 界面切换">
+            <div class="tour-pills-indicator" id="tourPillsIndicator" aria-hidden="true"></div>
+            <button
+              type="button"
+              class="tour-pill is-active"
+              role="tab"
+              aria-selected="true"
+              data-step="0"
+              id="tab-home"
+            >
+              <span class="pill-index">01</span> 云居
+            </button>
+            <button type="button" class="tour-pill" role="tab" aria-selected="false" data-step="1" id="tab-workshop">
+              <span class="pill-index">02</span> 工坊
+            </button>
+            <button type="button" class="tour-pill" role="tab" aria-selected="false" data-step="2" id="tab-discovery">
+              <span class="pill-index">03</span> 寻乐
+            </button>
+            <button type="button" class="tour-pill" role="tab" aria-selected="false" data-step="3" id="tab-detail">
+              <span class="pill-index">04</span> 详情
+            </button>
+          </div>
+
+          <div class="tour-layout">
+            <!-- 左侧固定手机剧场 -->
+            <div class="tour-stage-col">
+              <div class="tour-phone-sticky">
+                <div class="phone-chassis tour-phone" id="tourPhone">
+                  <div class="phone-notch" aria-hidden="true"></div>
+                  <div class="phone-screen tour-screen">
+                    <!-- 四张真实截图叠加，平滑切换 -->
+                    <figure class="tour-slide is-active" data-slide="0">
+                      <img
+                        src="/showcase/home.jpg"
+                        alt="云居截图：置顶常用应用、最近使用与我的应用网格"
+                        width="603"
+                        height="1311"
+                        loading="lazy"
+                      />
+                      <figcaption class="sr-only">云居主界面</figcaption>
+                      <div class="hotspot align-right" style="top: 25.5%; left: 76%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">置顶玻璃坞 · 常用停在手边</span>
+                      </div>
+                      <div class="hotspot align-left" style="top: 56%; left: 24%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">我的应用 · 轻点图标即开</span>
+                      </div>
+                    </figure>
+
+                    <figure class="tour-slide" data-slide="1">
+                      <img
+                        src="/showcase/workshop.jpg"
+                        alt="工坊截图：按用途与作者搜索应用，浏览游戏分类与个人工坊"
+                        width="603"
+                        height="1311"
+                        loading="lazy"
+                      />
+                      <figcaption class="sr-only">工坊主界面</figcaption>
+                      <div class="hotspot" style="top: 15.5%; left: 50%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">按应用、用途或作者检索</span>
+                      </div>
+                      <div class="hotspot align-right" style="top: 52%; left: 72%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">工具与游戏分区整理</span>
+                      </div>
+                    </figure>
+
+                    <figure class="tour-slide" data-slide="2">
+                      <img
+                        src="/showcase/discovery.jpg"
+                        alt="寻乐截图：随手发现精选云应用、云空调、云风扇与互动小作品"
+                        width="603"
+                        height="1311"
+                        loading="lazy"
+                      />
+                      <figcaption class="sr-only">寻乐主界面</figcaption>
+                      <div class="hotspot align-right" style="top: 36%; left: 74%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">新上架与精选作品流</span>
+                      </div>
+                      <div class="hotspot align-left" style="top: 66%; left: 26%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">随手发现 · 脑洞小应用</span>
+                      </div>
+                    </figure>
+
+                    <figure class="tour-slide" data-slide="3">
+                      <img
+                        src="/showcase/detail.jpg"
+                        alt="应用详情截图：展示云乐坊间介绍、打开按钮与已加入云居状态"
+                        width="603"
+                        height="1311"
+                        loading="lazy"
+                      />
+                      <figcaption class="sr-only">应用详情界面</figcaption>
+                      <div class="hotspot" style="top: 28%; left: 48%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">一键打开 · 已加入云居</span>
+                      </div>
+                      <div class="hotspot align-right" style="top: 76%; left: 72%">
+                        <span class="hotspot-pulse"></span>
+                        <span class="hotspot-tip">官方标识与站点信息透明</span>
+                      </div>
+                    </figure>
+
+                    <!-- 手机底部交互式玻璃导航覆层，与真实截图中底栏位置贴合 -->
+                    <div class="phone-bottom-nav" aria-label="模拟手机底部导航">
+                      <button type="button" class="pnav-btn is-active" data-step="0" aria-label="查看云居截图">
+                        云居
+                      </button>
+                      <button type="button" class="pnav-btn" data-step="2" aria-label="查看寻乐截图">寻乐</button>
+                      <button type="button" class="pnav-btn" data-step="1" aria-label="查看工坊截图">工坊</button>
+                      <button type="button" class="pnav-btn" data-step="3" aria-label="查看应用详情截图">详情</button>
+                    </div>
+                  </div>
+                </div>
+                <p class="tour-stage-note" id="tourStageNote">
+                  当前画面：<strong>01 云居</strong> — 你的随身云应用陈列架
+                </p>
+              </div>
+            </div>
+
+            <!-- 右侧四章故事卡片 -->
+            <div class="tour-steps-col">
+              <article class="tour-card is-active" data-step="0" tabindex="0">
+                <div class="tour-card-top">
+                  <span class="step-tag">01 · 云居</span>
+                  <span class="step-pill">常用置顶 · 轻点即开</span>
+                </div>
+                <h3>你自己的随身云应用桌面</h3>
+                <p>
+                  把高频顺手的工具、刚玩上头的小游戏放进顶部玻璃坞和「我的应用」。
+                  不用翻找浏览器书签，也不必让几十个低频 App 塞满手机主屏，打开云居就都在眼前。
+                </p>
+                <ul class="step-bullets">
+                  <li><strong>顶部玻璃坞</strong>：4 个高频位，顺手一按就进应用</li>
+                  <li><strong>最近使用</strong>：刚玩过的星纸、FC 红白机随时续上</li>
+                  <li><strong>收放自如</strong>：喜欢就留在云居，不需要时一键移出</li>
+                </ul>
+              </article>
+
+              <article class="tour-card" data-step="1" tabindex="0">
+                <div class="tour-card-top">
+                  <span class="step-tag">02 · 工坊</span>
+                  <span class="step-pill">搜索与分类 · 个人工坊</span>
+                </div>
+                <h3>像逛手作市集一样，挑顺手工具与小游戏</h3>
+                <p>
+                  知道自己想找什么，就来工坊。可以按名称、用途或作者直接搜索，
+                  也能在游戏、轻工具与个人工坊里按分类浏览，迅速找到能马上派上用场的云应用。
+                </p>
+                <ul class="step-bullets">
+                  <li><strong>一站检索</strong>：按应用名、用途或创作者精准查找</li>
+                  <li><strong>清晰分区</strong>：从联机小游戏到实用创意工具整齐归类</li>
+                  <li><strong>个人工坊</strong>：连接创作者与你的专属应用清单</li>
+                </ul>
+              </article>
+
+              <article class="tour-card" data-step="2" tabindex="0">
+                <div class="tour-card-top">
+                  <span class="step-tag">03 · 寻乐</span>
+                  <span class="step-pill">随手发现 · 新鲜作品</span>
+                </div>
+                <h3>没想好要什么？来寻乐随手撞见惊喜</h3>
+                <p>
+                  除了高效工具，云乐坊里还藏着许多带着创作者巧思的小作品—— 从一本正经的「问
+                  TA」关系问答，到夏天必开的冷笑话「云空调」「云风扇」，每次刷都有新乐子。
+                </p>
+                <ul class="step-bullets">
+                  <li><strong>随手发现</strong>：发现那些轻松、有趣、值得分享给朋友的作品</li>
+                  <li><strong>即刻尝鲜</strong>：不用先下载几十 MB，看中就先试玩两分钟</li>
+                  <li><strong>持续上新</strong>：独立创作者的新奇想法不断加入</li>
+                </ul>
+              </article>
+
+              <article class="tour-card" data-step="3" tabindex="0">
+                <div class="tour-card-top">
+                  <span class="step-tag">04 · 应用详情</span>
+                  <span class="step-pill">来源透明 · 一键加入</span>
+                </div>
+                <h3>看清介绍与作者，一点即开、一点收进云居</h3>
+                <p>
+                  每个云应用都有清爽的详情卡片：开发者署名、官方认证标识、所属分类与原站域名一目了然。
+                  点蓝色「打开」直接进入，收进云居后状态清晰可见，也能随时从云居移除。
+                </p>
+                <ul class="step-bullets">
+                  <li><strong>直达按钮</strong>：醒目「打开」按钮，拒绝繁琐跳转</li>
+                  <li><strong>状态明确</strong>：绿色「已加入云居」提示，管理不迷路</li>
+                  <li><strong>透明可信</strong>：开发者与站点信息公开展示</li>
+                </ul>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 精选货架：真实应用展示 + 随手寻一乐随机抽取 -->
+      <section class="shelf-section" id="apps" aria-labelledby="shelf-title">
+        <div class="container">
+          <div class="shelf-header">
+            <div>
+              <p class="section-kicker">02 — 工坊与寻乐精选</p>
+              <h2 class="section-title" id="shelf-title">先看看大家都在云居里装了什么</h2>
+              <p class="section-subtitle">
+                每一张卡片都来自云乐坊 App 里的真实云应用——既有杀时间的小游戏，也有轻量工具与会心一笑的脑洞彩蛋。
+              </p>
+            </div>
+
+            <button type="button" class="serendipity-btn" id="serendipityBtn">
+              <span class="dice-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                  <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="2" />
+                  <circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" />
+                  <circle cx="15.5" cy="8.5" r="1.4" fill="currentColor" />
+                  <circle cx="12" cy="12" r="1.4" fill="currentColor" />
+                  <circle cx="8.5" cy="15.5" r="1.4" fill="currentColor" />
+                  <circle cx="15.5" cy="15.5" r="1.4" fill="currentColor" />
+                </svg>
+              </span>
+              <span>随手寻一乐</span>
+            </button>
+          </div>
+
+          <div class="shelf-filters" role="group" aria-label="按分类筛选云应用">
+            <button type="button" class="filter-chip is-active" data-filter="all" aria-pressed="true">全部 · 8</button>
+            <button type="button" class="filter-chip" data-filter="game" aria-pressed="false">小游戏 · 4</button>
+            <button type="button" class="filter-chip" data-filter="tool" aria-pressed="false">轻工具 · 2</button>
+            <button type="button" class="filter-chip" data-filter="fun" aria-pressed="false">随手彩蛋 · 2</button>
+          </div>
+
+          <div class="serendipity-banner" id="serendipityBanner" role="status" aria-live="polite" hidden>
+            <span class="banner-badge">寻乐推荐</span>
+            <span id="serendipityText">为你抽中一款云应用</span>
+          </div>
+
+          <div class="app-grid" id="appGrid">
+            <article class="app-card" data-category="game" data-card-id="party">
+              <div class="app-card-head">
+                <span class="app-tile icon-party" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="32" height="32" fill="none">
+                    <rect x="4" y="4" width="13" height="13" rx="4" fill="#2596FF" />
+                    <rect x="19" y="4" width="13" height="13" rx="4" fill="#22C5B6" />
+                    <rect x="4" y="19" width="13" height="13" rx="4" fill="#F7C948" />
+                    <rect x="19" y="19" width="13" height="13" rx="4" fill="#F26D63" />
+                    <path d="M12.5 23h11a4.5 4.5 0 00.6-8.95A6 6 0 0012.4 13a4.5 4.5 0 00.1 10z" fill="#fff" />
+                  </svg>
+                </span>
+                <span class="cat-badge">游戏 · 官方</span>
+              </div>
+              <h3>云乐坊间</h3>
+              <p>云乐坊旗下的单人、同屏与好友联机小游戏合集，聚会或摸鱼一开即玩。</p>
+              <div class="app-card-foot">
+                <span class="app-source">play.yunle.fun</span>
+                <a class="card-try-link" href="/tabs/home">去云居打开 ↗</a>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="game" data-card-id="starplane">
+              <div class="app-card-head">
+                <span class="app-tile icon-starplane" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="30" height="30" fill="none">
+                    <path
+                      d="M6 19l23-10-8 21-4.5-7.5L6 19z"
+                      fill="#38BDF8"
+                      stroke="#0369A1"
+                      stroke-width="1.8"
+                      stroke-linejoin="round"
+                    />
+                    <path d="M29 9L16.5 22.5" stroke="#E0F2FE" stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                </span>
+                <span class="cat-badge">游戏</span>
+              </div>
+              <h3>星纸</h3>
+              <p>驾驶纸飞机穿越星球、黑洞与虫洞，体验互动教程、本地 PVE 和自由练习。</p>
+              <div class="app-card-foot">
+                <span class="app-source">工坊 · 游戏</span>
+                <button type="button" class="card-preview-btn" data-launch-demo="starplane">在首屏试玩 ↑</button>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="game" data-card-id="pinball">
+              <div class="app-card-head">
+                <span class="app-tile icon-pinball" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="30" height="30" fill="none">
+                    <rect x="6" y="4" width="24" height="28" rx="6" fill="#fff" fill-opacity="0.92" />
+                    <circle cx="20" cy="12" r="3" fill="#F59E0B" />
+                    <circle cx="14" cy="18" r="2.2" fill="#3B82F6" />
+                    <path d="M11 26h4v3h-4zM16 26h4v3h-4zM21 26h4v3h-4z" fill="#EF4444" />
+                  </svg>
+                </span>
+                <span class="cat-badge">游戏</span>
+              </div>
+              <h3>云乐弹珠</h3>
+              <p>云乐坊主题的仿真 2.5D 弹珠机，支持拉杆发射、随机开彩与倍率口挑战。</p>
+              <div class="app-card-foot">
+                <span class="app-source">工坊 · 游戏</span>
+                <button type="button" class="card-preview-btn" data-launch-demo="pinball">在首屏试玩 ↑</button>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="game" data-card-id="fc">
+              <div class="app-card-head">
+                <span class="app-tile icon-fc" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="30" height="30" fill="none">
+                    <rect x="4" y="10" width="28" height="16" rx="6" fill="#334155" />
+                    <path d="M11 15v6M8 18h6" stroke="#E2E8F0" stroke-width="2.2" stroke-linecap="round" />
+                    <circle cx="22.5" cy="19.5" r="2" fill="#EF4444" />
+                    <circle cx="26.5" cy="16.5" r="2" fill="#F59E0B" />
+                  </svg>
+                </span>
+                <span class="cat-badge">游戏</span>
+              </div>
+              <h3>FC 红白机</h3>
+              <p>基于 JSNES 与 Vue 实现的复古红白机，放进云居就能随时来一局童年回忆。</p>
+              <div class="app-card-foot">
+                <span class="app-source">工坊 · 游戏</span>
+                <button type="button" class="card-preview-btn" data-launch-demo="fc">在首屏试玩 ↑</button>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="tool" data-card-id="askta">
+              <div class="app-card-head">
+                <span class="app-tile icon-askta" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                    <path
+                      d="M7 16c0-5.2 4.9-9.5 11-9.5S29 10.8 29 16s-4.9 9.5-11 9.5c-1.5 0-3-.3-4.3-.8L8 27l1.3-4.6C7.8 20.6 7 18.4 7 16z"
+                      fill="#fff"
+                      stroke="#64748B"
+                      stroke-width="2"
+                      stroke-linejoin="round"
+                    />
+                    <circle cx="13.5" cy="16" r="1.4" fill="#475569" />
+                    <circle cx="18" cy="16" r="1.4" fill="#475569" />
+                    <circle cx="22.5" cy="16" r="1.4" fill="#475569" />
+                  </svg>
+                </span>
+                <span class="cat-badge">轻工具</span>
+              </div>
+              <h3>问 TA</h3>
+              <p>和重要的人认真聊一遍：从约会破冰到婚前深聊的关系问答清单。</p>
+              <div class="app-card-foot">
+                <span class="app-source">寻乐 · 精选</span>
+                <a class="card-try-link" href="/tabs/home">去云居打开 ↗</a>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="tool" data-card-id="couplet">
+              <div class="app-card-head">
+                <span class="app-tile icon-couplet" aria-hidden="true">
+                  <span class="couplet-char">春</span>
+                </span>
+                <span class="cat-badge">轻工具</span>
+              </div>
+              <h3>AI 春联</h3>
+              <p>逢年过节随手生成专属春联与横批，贴在云居里，需要时轻点即出。</p>
+              <div class="app-card-foot">
+                <span class="app-source">云居 · 热门</span>
+                <button type="button" class="card-preview-btn" data-launch-demo="couplet">在首屏试玩 ↑</button>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="fun" data-card-id="ac">
+              <div class="app-card-head">
+                <span class="app-tile icon-ac" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                    <path
+                      d="M18 5v26M5 18h26M8.8 8.8l18.4 18.4M27.2 8.8L8.8 27.2"
+                      stroke="#38BDF8"
+                      stroke-width="2.6"
+                      stroke-linecap="round"
+                    />
+                    <circle cx="18" cy="18" r="3.5" fill="#E0F2FE" stroke="#0284C7" stroke-width="2" />
+                  </svg>
+                </span>
+                <span class="cat-badge">随手发现</span>
+              </div>
+              <h3>云空调</h3>
+              <p>便携小空调！其实是个冷笑话，随身携带的毫无制冷效果的仿真小空调。</p>
+              <div class="app-card-foot">
+                <span class="app-source">寻乐 · 彩蛋</span>
+                <button type="button" class="card-preview-btn" data-launch-demo="ac">在首屏试玩 ↑</button>
+              </div>
+            </article>
+
+            <article class="app-card" data-category="fun" data-card-id="fan">
+              <div class="app-card-head">
+                <span class="app-tile icon-fan" aria-hidden="true">
+                  <svg viewBox="0 0 36 36" width="28" height="28" fill="none">
+                    <circle cx="18" cy="18" r="3.2" fill="#16A34A" />
+                    <path
+                      d="M18 14.5c-2.5-4.5-1-8.5 2.5-8.5s5 4.2 1.2 8.2M21.2 19.6c5.1-.1 7.9 3.2 6.2 6.2-1.7 3-6.2 2.4-7.9-2.8M14.8 19.6c-1.7 5.2-6.2 5.8-7.9 2.8-1.7-3 1.1-6.3 6.2-6.2"
+                      fill="#22C55E"
+                    />
+                  </svg>
+                </span>
+                <span class="cat-badge">随手发现</span>
+              </div>
+              <h3>云风扇</h3>
+              <p>便携夏日小风扇！纯 CSS 编写，云空调的前辈，轻点就呼呼吹起心理凉风。</p>
+              <div class="app-card-foot">
+                <span class="app-source">寻乐 · 彩蛋</span>
+                <a class="card-try-link" href="/tabs/home">去云居打开 ↗</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 三大特质：为什么用云乐坊 App -->
+      <section class="pillars-section" id="craft" aria-labelledby="pillars-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-kicker">03 — 为什么是云乐坊 App</p>
+            <h2 class="section-title" id="pillars-title">轻量不占地，顺手又有归属感</h2>
+          </div>
+
+          <div class="pillars-grid">
+            <article class="pillar-card">
+              <div class="pillar-visual visual-instant" aria-hidden="true">
+                <span class="ripple-ring r1"></span>
+                <span class="ripple-ring r2"></span>
+                <span class="instant-core">▶</span>
+              </div>
+              <h3>轻点即开，不拖累手机空间</h3>
+              <p>想玩一局弹珠、用一次工具，不必经历应用商店下载、安装与更新循环；点开即用，用完即走。</p>
+            </article>
+
+            <article class="pillar-card">
+              <div class="pillar-visual visual-dock" aria-hidden="true">
+                <div class="mini-glass-bar">
+                  <span class="mg-dot c1"></span>
+                  <span class="mg-dot c2"></span>
+                  <span class="mg-dot c3"></span>
+                  <span class="mg-dot c4"></span>
+                </div>
+              </div>
+              <h3>常用收云居，找新去工坊与寻乐</h3>
+              <p>工坊负责清晰检索，寻乐负责惊喜推荐，云居只留你真正喜欢的——告别凌乱的浏览器标签页。</p>
+            </article>
+
+            <article class="pillar-card">
+              <div class="pillar-visual visual-sync" aria-hidden="true">
+                <span class="dev-phone"></span>
+                <span class="dev-bridge"></span>
+                <span class="dev-web"></span>
+              </div>
+              <h3>App 与兼容网页版无缝互通</h3>
+              <p>装上云乐坊 App 获得完整顺手的掌上收纳体验；临时换电脑或借手机，打开网页版照样畅用。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 底部终章：黑色像素卡带风下载区，与 App 图标形成首尾呼应 -->
+      <section class="launch-section" id="download" aria-labelledby="launch-title">
+        <div class="container">
+          <div class="launch-card">
+            <div class="launch-grid-bg" aria-hidden="true"></div>
+            <div class="launch-content">
+              <div class="launch-icon-stage">
+                <img
+                  src="/showcase/app-icon.png"
+                  alt="云乐坊 App 图标"
+                  width="88"
+                  height="88"
+                  class="launch-app-icon"
+                />
+                <span class="launch-signal">▶ ● READY TO PLAY</span>
+              </div>
+
+              <h2 class="launch-title" id="launch-title">现在就装起你的随身云居</h2>
+              <p class="launch-desc">
+                下载云乐坊 App，在工坊与寻乐挑选你喜欢的云应用；或者先在浏览器里直接打开兼容网页版逛一圈。
+              </p>
+
+              <div class="launch-actions">
+                <a
+                  class="btn btn-light btn-lg"
+                  href="https://www.yunle.fun/download"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>下载云乐坊 App</span>
+                  <span aria-hidden="true">↓</span>
+                </a>
+                <a class="btn btn-dark-outline btn-lg" href="/tabs/home">
+                  <span>直接打开兼容网页版</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+
+              <p class="launch-portal">
+                想了解整个云乐坊生态与更多作品？前往
+                <a href="https://www.yunle.fun/" target="_blank" rel="noopener noreferrer"
+                  >云乐坊官网 www.yunle.fun ↗</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-brand">
+          <img src="/showcase/app-icon.png" alt="" width="24" height="24" class="footer-icon" />
+          <span><strong>云乐坊 App</strong> · apps.yunle.fun</span>
+        </div>
+        <nav class="footer-links" aria-label="页脚链接">
+          <a href="https://www.yunle.fun/download" target="_blank" rel="noopener noreferrer">下载 App</a>
+          <a href="/tabs/home">兼容网页版</a>
+          <a href="https://www.yunle.fun/" target="_blank" rel="noopener noreferrer">云乐坊官网</a>
+          <a href="https://www.yunle.fun/apps">浏览应用目录</a>
+          <a href="https://www.yunle.fun/docs/privacy-policy">隐私政策</a>
+          <a href="/feedback">问题反馈</a>
+          <a href="#top">回到顶部 ↑</a>
+        </nav>
+      </div>
+    </footer>
+
+    <!-- 收纳动画浮层 -->
+    <div class="flight-layer" id="flightLayer" aria-hidden="true"></div>
+
+    <script defer src="/landing/app.js"></script>
+  </body>
+</html>

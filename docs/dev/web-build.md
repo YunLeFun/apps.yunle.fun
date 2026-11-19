@@ -19,3 +19,9 @@
 - 在目标 CloudBase 环境建立 `web_builds` 集合，应用同名 `ADMINONLY` 规则。为「我的网页」建立 `ownerUid` 升序和 `updatedAt` 降序的联合索引。后台与 Apps 服务使用同一环境。
 - 生成端使用云乐坊 AI Runtime 的 `/ai/v1/chat`，应用 ID 为 `web-build`。配置 `NUXT_WEB_BUILD_RUNTIME_ORIGIN`，并在 Apps 和 Runtime 分别注入同一枚独立签名密钥 `NUXT_WEB_BUILD_RUNTIME_SIGNING_SECRET` 和 `WEB_BUILD_APP_SIGNING_SECRET`。Runtime 使用平台预算承担当次调用费用。账号每日限额为 8 次生成和 12 次发布审核，按上海时区计日。
 - 部署托管 Worker、Apps API 和审核后台，并配置腾讯文本审核。生产验收时保持 `NUXT_WEB_BUILD_ENABLED=false`，通过 `NUXT_WEB_BUILD_PILOT_UID` 仅放行指定的已验证手机号的会员。用该会员验收生成、发布和匿名分享，并核对访客及其他账号被拒绝。通过后开启 `NUXT_WEB_BUILD_ENABLED=true` 并清空验收账号配置。停止开放时同时关闭全量开关和清空验收账号配置。
+
+## 受管测试账号验收
+
+生产会员入口关闭时，服务端可用临时验收会话为单个 `ready` 的生产受管测试账号开放生成、发布和停用。测试账号仍使用正常登录和有效会员权益。虚拟号码保存在 `web_builds` 的私有验收记录里，CloudBase 的用户资料和手机号验证结果沿用正常认证流程。
+
+验收记录使用 `synthetic_pilot_<会话密钥的 SHA-256>` 作为文档 ID，记录 `kind: 'synthetic-pilot'`、`uid`、Admin 的 `identityId`、`virtualPhone`，以及毫秒时间戳 `issuedAt` 和 `expiresAt`。时长最多 30 分钟。虚拟号码使用 `+12025550100` 至 `+12025550199` 的保留号码段。验收程序同时发送正常 Bearer 和 `X-Yunle-Web-Build-Test-Session`。匿名验收已发布作品时不带凭据。验收后停用测试作品并将会话记录的 `expiresAt` 更新为当前时间。[NANPA 保留号码](https://nanpa.com/numbering/555-line-numbers)

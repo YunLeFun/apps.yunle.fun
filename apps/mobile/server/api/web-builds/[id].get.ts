@@ -5,7 +5,7 @@ import { getOwnedWebBuild } from '../../utils/web-build-storage'
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
-  requireWebBuildEditor()
+  requireWebBuildEditor(event)
   const user = await requireWebBuildMember(event)
   return getOwnedWebBuild(getRouterParam(event, 'id') || '', user.uid)
 })

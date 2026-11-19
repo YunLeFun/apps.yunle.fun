@@ -5,7 +5,7 @@ import { getWebBuildRuntimeConfig } from '../../utils/web-build-model'
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
-  if (!webBuildEditorEnabled() || !getWebBuildRuntimeConfig())
+  if (!webBuildEditorEnabled(event) || !getWebBuildRuntimeConfig())
     return { enabled: false }
 
   await requireWebBuildMember(event)

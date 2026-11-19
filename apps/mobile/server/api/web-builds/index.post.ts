@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { createError, getRequestHeader, readRawBody, setResponseHeader } from 'h3'
 import { parseBearerToken } from '../../utils/cloudbase-auth'
 import { requireWebBuildMember } from '../../utils/web-build-access'
-import { requireWebBuildEditor } from '../../utils/web-build-config'
+import { getWebBuildTestSession, requireWebBuildEditor } from '../../utils/web-build-config'
 import { submitWebBuildToMarket } from '../../utils/web-build-market'
 import { generateWebBuildPage, getWebBuildRuntimeConfig } from '../../utils/web-build-model'
 import {
@@ -15,7 +15,7 @@ import {
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
-  requireWebBuildEditor()
+  requireWebBuildEditor(event)
   const user = await requireWebBuildMember(event)
   const length = Number(getRequestHeader(event, 'content-length'))
   if (length > 8192)
@@ -39,8 +39,11 @@ export default defineEventHandler(async (event) => {
     return publishWebBuild(id, user.uid, revision)
   if (action === 'withdraw')
     return withdrawWebBuild(id, user.uid, revision)
-  if (action === 'submit')
+  if (action === 'submit') {
+    if (getWebBuildTestSession(event))
+      throw createError({ statusCode: 403, message: '网页验收会话仅用于生成和分享' })
     return submitWebBuildToMarket(user, id, revision, shortName)
+  }
   if (action !== 'generate')
     throw createError({ statusCode: 400, statusMessage: '未知操作' })
 

@@ -247,10 +247,15 @@ describe('web build membership at the HTTP routes', () => {
     await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
   })
 
-  function request(path = '', body?: Record<string, unknown>, authorization = fixtureBearer) {
+  function request(path = '', body?: Record<string, unknown>, authorization = fixtureBearer, testSession?: string) {
     return nativeFetch(api + path, {
       method: body ? 'POST' : 'GET',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', ...(authorization ? { Authorization: authorization } : {}) },
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...(authorization ? { Authorization: authorization } : {}),
+        ...(testSession ? { 'X-Yunle-Web-Build-Test-Session': testSession } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
     })
   }
@@ -304,6 +309,50 @@ describe('web build membership at the HTTP routes', () => {
     membership = { isActive: false, expireAt: null }
     expect((await request('', { action: 'generate', prompt: '读书会' })).status).toBe(403)
     expect(model).not.toHaveBeenCalled()
+  })
+
+  it('isolates a time-limited test session from the normal membership and SMS gate', async () => {
+    const session = 'c'.repeat(64)
+    const pilotId = `synthetic_pilot_${createHash('sha256').update(session).digest('hex')}`
+    const identityId = 'test-identity'
+    const now = Date.now()
+    const identity = { uid: 'author', source: 'managed', synthetic: true, accountKind: 'fixed', environment: 'production', status: 'ready' }
+    const pilot = { kind: 'synthetic-pilot', uid: 'author', identityId, virtualPhone: '+12025550147', issuedAt: now, expiresAt: now + 60_000 }
+    documents.set(identityId, identity)
+    documents.set(pilotId, pilot)
+    profile.phone_verified = false
+
+    expect((await request('/availability', undefined, fixtureBearer, session)).status).toBe(403)
+    enabled = false
+    expect(await (await request('/availability')).json()).toEqual({ enabled: false })
+    expect((await request('/availability', undefined, '', session)).status).toBe(401)
+    expect((await request('/availability', undefined, fixtureBearer, 'd'.repeat(64))).status).toBe(403)
+    documents.set(pilotId, { ...pilot, uid: 'different-user' })
+    expect((await request('/availability', undefined, fixtureBearer, session)).status).toBe(403)
+    documents.set(pilotId, { ...pilot, expiresAt: now })
+    expect((await request('/availability', undefined, fixtureBearer, session)).status).toBe(403)
+    documents.set(pilotId, pilot)
+    documents.set(identityId, { ...identity, status: 'disabled' })
+    expect((await request('/availability', undefined, fixtureBearer, session)).status).toBe(403)
+    expect(account).not.toHaveBeenCalled()
+    documents.set(identityId, identity)
+
+    membership = { isActive: false, expireAt: null }
+    expect((await request('', { action: 'generate', prompt: '读书会' }, fixtureBearer, session)).status).toBe(403)
+    expect(model).not.toHaveBeenCalled()
+    membership = { isActive: true, expireAt: now + 86_400_000 }
+    expect((await request('', { action: 'submit' }, fixtureBearer, session)).status).toBe(403)
+    const generated = await request('', { action: 'generate', prompt: '读书会' }, fixtureBearer, session)
+    expect(generated.status).toBe(200)
+    const { id } = await generated.json()
+    const published = await request('', { action: 'publish', id, revision: 1 }, fixtureBearer, session)
+    expect(await published.json()).toMatchObject({ shareUrl: `${origin}/site/${id}` })
+    expect((await request(`/public/${id}`, undefined, '')).status).toBe(200)
+
+    expect((await request('', { action: 'withdraw', id, revision: 1 }, fixtureBearer, session)).status).toBe(200)
+    documents.delete(pilotId)
+    expect((await request('/availability', undefined, fixtureBearer, session)).status).toBe(403)
+    expect((await request(`/public/${id}`, undefined, '')).status).toBe(404)
   })
 
   it('allows a verified member to generate, revise and publish and serves published versions without login', async () => {

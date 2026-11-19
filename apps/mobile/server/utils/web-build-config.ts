@@ -1,4 +1,5 @@
-import { createError } from 'h3'
+import type { H3Event } from 'h3'
+import { createError, getRequestHeader } from 'h3'
 
 export const WEB_BUILD_HOST = 'build.yunle.app'
 export const WEB_BUILD_ORIGIN = `https://${WEB_BUILD_HOST}`
@@ -17,12 +18,19 @@ export function getWebBuildWriteToken() {
   return typeof token === 'string' && token.length === 64 && /^[a-f0-9]{64}$/.test(token) ? token : null
 }
 
-export function webBuildEditorEnabled() {
-  const config = useRuntimeConfig()
-  return (config.webBuildEnabled === true || /^[\w.:-]{1,128}$/.test(config.webBuildPilotUid || '')) && !!getWebBuildWriteToken()
+export function getWebBuildTestSession(event: H3Event) {
+  const value = getRequestHeader(event, 'x-yunle-web-build-test-session')
+  if (useRuntimeConfig(event).webBuildEnabled === false && value?.length === 64 && /^[a-f0-9]{64}$/.test(value))
+    return value
 }
 
-export function requireWebBuildEditor() {
-  if (!webBuildEditorEnabled())
+export function webBuildEditorEnabled(event: H3Event) {
+  const config = useRuntimeConfig()
+  return !!getWebBuildWriteToken() && (config.webBuildEnabled === true
+    || /^[\w.:-]{1,128}$/.test(config.webBuildPilotUid || '') || !!getWebBuildTestSession(event))
+}
+
+export function requireWebBuildEditor(event: H3Event) {
+  if (!webBuildEditorEnabled(event))
     throw createError({ statusCode: 503, statusMessage: 'AI 网页服务暂未开放' })
 }

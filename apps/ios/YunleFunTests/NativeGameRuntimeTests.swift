@@ -1,5 +1,6 @@
 import CryptoKit
 import OSLog
+import SwiftUI
 import UIKit
 import WebKit
 import XCTest
@@ -239,6 +240,47 @@ final class NativeGameRuntimeTests: XCTestCase {
         left["room"] = reference.merging(["state": "left"]) { _, new in new }
         try await fixture.document(browser, origin: try XCTUnwrap(browser.url), messages: [left])
         XCTAssertTrue(fixture.runtime.runningGameIDs.isEmpty)
+    }
+
+    func testInviteControlOpensFriendPickerForTheConfirmedRoom() async throws {
+        let fixture = try await makeFixture()
+        let host = AccountUser(id: "room-inviter-fixture", name: "小云")
+        let accounts = AccountStore(session: AccountSession(vault: BillingMemoryVault()),
+                                    initialRestoreReconciliationOverview: { session in
+            let current = try await session.overview()
+            return AccountOverview(revision: current.revision, users: [host], activeID: host.id)
+        })
+        defer { withExtendedLifetime(accounts) {} }
+        accounts.prepareInitialRestore()
+        await accounts.consumeInitialRestore()
+        XCTAssertEqual(accounts.user, host)
+        fixture.runtime.configureAuthorization(accounts: accounts)
+        try await fixture.wait { !fixture.runtime.isIdentityCleanupPending }
+
+        let room = try NativeGameRoomIntent(input: "ABC234")
+        fixture.runtime.openGameRoom(room, catalog: fixture.catalog, library: fixture.library)
+        let browser = try await fixture.browser(applicationID: "play")
+        func inviteButton() -> UIBarButtonItem? {
+            browser.navigationItem.rightBarButtonItems?.first { $0.accessibilityIdentifier == "runtime.invite-room" }
+        }
+        XCTAssertNil(inviteButton())
+        let status = try XCTUnwrap(fixture.runtime.gameSessionStatuses["room"])
+        var ready = fixture.message(status, state: "room-ready")
+        ready["room"] = ["inviteCode": room.inviteCode, "role": "player", "gameId": "gomoku", "state": "waiting"]
+        try await fixture.document(browser, origin: try XCTUnwrap(browser.url), messages: [ready])
+        XCTAssertEqual(browser.currentDocumentURL.flatMap(NativeGameLaunchURL.publicURL), room.url)
+        XCTAssertEqual(browser.roomForInvitation?(), room)
+        try await fixture.wait(seconds: 5) { inviteButton() != nil }
+        let item = try XCTUnwrap(inviteButton())
+        UIApplication.shared.sendAction(try XCTUnwrap(item.action), to: item.target, from: item, for: nil)
+        try await fixture.wait { browser.presentedViewController is UIHostingController<RoomInvitePicker> }
+        browser.dismiss(animated: false)
+
+        var left = fixture.message(status, state: "room-left")
+        left["room"] = ["inviteCode": room.inviteCode, "role": "player", "gameId": "gomoku", "state": "closed"]
+        try await fixture.document(browser, origin: try XCTUnwrap(browser.url), messages: [left])
+        XCTAssertNil(browser.roomForInvitation?())
+        XCTAssertNil(inviteButton())
     }
 
     func testClosedAndFailedRoomsReenterWithNewLaunchWhileKeepingProfileAndStorage() async throws {

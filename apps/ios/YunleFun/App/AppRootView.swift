@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppRootView: View {
     @State private var selectedTab = AppTab.home
+    @State private var discoveryPath = NavigationPath()
     @State private var workshopPath = NavigationPath()
     @StateObject private var feedbackLogin = FeedbackLoginCoordinator()
     @StateObject private var crossAppAuthorization = CrossAppAuthorizationCoordinator()
@@ -36,7 +37,7 @@ struct AppRootView: View {
             })
             .background(EmptyView().sheet(item: Binding(get: { gameLogin.login }, set: { if $0 == nil { gameLogin.presentationEnded() } }),
                                          onDismiss: finishGameLogin) { intent in
-                LoginView(continuationMessage: "登录后继续创建房间，或返回所选游戏与房间。进入时会确认玩法和席位。",
+                LoginView(continuationMessage: gameLoginMessage(for: intent.action),
                           continuation: intent.continuation,
                           onCommitted: { proof in
                     gameLogin.committed(proof, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
@@ -164,7 +165,7 @@ struct AppRootView: View {
         }
     }
     private var discovery: some View {
-        NavigationStack {
+        NavigationStack(path: $discoveryPath) {
             GamesView(store: games, history: gameHistory,
                       open: { game, mode in requestGameLaunch(.game(game, mode)) },
                       resume: { runtime.resumeSession($0, catalog: catalog, library: library) },
@@ -174,6 +175,11 @@ struct AppRootView: View {
                       prepareResources: prepareGameResources,
                       createRoom: { requestGameLaunch(.createRoom(gameID: $0)) })
                 .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
+                .navigationDestination(for: NativeGameRoomInvitation.self) { invitation in
+                    NativeGameRoomInvitationView(invitation: invitation) {
+                        requestGameLaunch(.room(invitation.room))
+                    }
+                }
         }
     }
     private var workshop: some View {
@@ -187,6 +193,17 @@ struct AppRootView: View {
         // 跨 App 授权入口优先：只弹授权面板，不切换 Tab、不打断当前页面
         if crossAppAuthorization.handle(url, runtime: runtime, accounts: accounts) {
             screenshotFeedback.cancelPendingLogin()
+            return
+        }
+        if let invitation = NativeGameRoomInvitation.parse(url) {
+            screenshotFeedback.cancelPendingLogin()
+            let boundary = accountBoundary
+            let selection = accounts.selectionOperationGeneration
+            runtime.revealHostForNavigation {
+                guard accountBoundary == boundary, accounts.selectionOperationGeneration == selection else { return }
+                selectedTab = .discovery
+                discoveryPath = NavigationPath([invitation])
+            }
             return
         }
         if let room = NativeGameRoomIntent.parse(url) {
@@ -257,6 +274,11 @@ struct AppRootView: View {
         performGameLaunch(action)
     }
 
+    private func gameLoginMessage(for action: NativeGameLaunchIntent) -> String {
+        if case .room = action { return "登录后继续进入这个房间。" }
+        return "登录后继续创建房间，或返回所选游戏与房间。进入时会确认玩法和席位。"
+    }
+
     private func deferGameLaunch(_ action: NativeGameLaunchIntent) {
         deferredGameLaunch.enqueue(action, boundary: accountBoundary,
             selectionGeneration: accounts.selectionOperationGeneration, isRestoring: accountRestorationInProgress)
@@ -320,7 +342,7 @@ struct AppRootView: View {
             },
             set: { feedbackLogin.updatePath($0, stack: stackBoundary, current: accountBoundary,
                                             isUsable: accounts.user?.isUsable == true, proofIsCurrent: continuationIsCurrent) })) {
-            MeView(navigateTab: { selectedTab = $0 })
+            MeView(navigateTab: { selectedTab = $0 }, joinRoom: { requestGameLaunch(.room($0)) })
                 .navigationDestination(for: FeedbackResumeRoute.self) { route in
                     if let text = feedbackLogin.text(for: route, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
                                                      proofIsCurrent: continuationIsCurrent) {

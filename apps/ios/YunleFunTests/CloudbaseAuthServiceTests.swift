@@ -26,6 +26,35 @@ final class CloudbaseAuthServiceTests: XCTestCase {
         super.tearDown()
     }
 
+#if os(iOS)
+    func testInviteRepliesOptInAndPreserveJoiningOlderInvitations() async throws {
+        let (transport, fixture) = service([
+            (200, #"{"items":[{"id":"invite","actor":{"nickname":"小云"},"roomInvite":{"inviteCode":"ABC234","gameId":"flight-chess"}}],"nextSkip":null}"#),
+            (200, #"{"items":[{"id":"reply","type":"room_invite_reply","actor":{"nickname":"小飞"},"roomInviteReply":"later","roomInviteGameId":"flight-chess"}],"nextSkip":null,"repliesEnabled":true}"#),
+            (200, #"{"ok":true}"#),
+        ])
+        let service = RoomInviteService(transport: transport)
+        let identity = AuthorizedAccount(userID: "test-user", accessToken: "test-access")
+
+        let older = try await service.messages(skip: 0, identity: identity)
+        XCTAssertNil(older.repliesEnabled)
+        XCTAssertEqual(older.items.first?.roomInvite?.intent?.inviteCode, "ABC234")
+        let page = try await service.messages(skip: 0, identity: identity)
+        XCTAssertEqual(page.repliesEnabled, true)
+        let reply = try XCTUnwrap(page.items.first)
+        XCTAssertTrue(reply.isLaterReply)
+        XCTAssertNil(reply.roomInvite)
+        XCTAssertEqual(reply.roomInviteGameId, "flight-chess")
+
+        let inviteID = "1234567890abcdef12345678"
+        try await service.replyLater(to: inviteID, identity: identity)
+        let request = try XCTUnwrap(fixture.requests.last)
+        XCTAssertEqual(request.url?.path, "/v1/functions/account-api")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-access")
+        XCTAssertEqual(try fields(request), ["action": "replyRoomInviteLater", "inviteId": inviteID])
+    }
+#endif
+
     func testPasswordLoginAndUserInfoMatchTheOfficialWireContract() async throws {
         let (api, fixture) = service([
             (200, token),

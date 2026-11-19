@@ -1,5 +1,21 @@
 import SwiftUI
 
+struct NativeGameRoomInvitationView: View {
+    let invitation: NativeGameRoomInvitation
+    let join: () -> Void
+
+    var body: some View {
+        ScrollView {
+            RoomInviteCard(gameName: invitation.gameName, inviterName: invitation.inviterName, join: join)
+            .padding(16)
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+            .padding(16)
+        }
+        .navigationTitle("游戏邀请")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 struct GamesView: View {
     @ObservedObject var store: NativeGameCatalogStore
     @ObservedObject var history: NativeGameHistoryStore

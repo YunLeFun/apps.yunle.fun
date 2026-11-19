@@ -144,7 +144,7 @@ struct NativeGameMode: Codable, Identifiable, Hashable {
     let orientation: String?
 }
 
-struct NativeGameRoomIntent: Equatable, Identifiable {
+struct NativeGameRoomIntent: Hashable, Identifiable {
     enum Role: String, CaseIterable, Identifiable { case player, spectator; var id: Self { self } }
     let inviteCode: String
     let role: Role
@@ -153,7 +153,9 @@ struct NativeGameRoomIntent: Equatable, Identifiable {
     init(input: String, role: Role = .player) throws {
         let value = input.trimmingCharacters(in: .whitespacesAndNewlines)
         if let url = URL(string: value), url.scheme != nil {
-            guard let parsed = Self.parse(url) else { throw NativeGameError.invalidInvitation }
+            guard let parsed = Self.parse(url) ?? NativeGameRoomInvitation.parse(url)?.room else {
+                throw NativeGameError.invalidInvitation
+            }
             self = parsed
         } else {
             let code = value.uppercased()
@@ -182,8 +184,52 @@ struct NativeGameRoomIntent: Equatable, Identifiable {
         return parts.url!
     }
 
-    private static func validCode(_ value: String) -> Bool {
+    static func validCode(_ value: String) -> Bool {
         value.range(of: "\\A[A-Z0-9]{6}\\z", options: .regularExpression) != nil
+    }
+}
+
+struct NativeGameRoomInvitation: Hashable {
+    let room: NativeGameRoomIntent
+    let gameName: String
+    let inviterName: String
+    private static let fragmentPrefix = "invite?"
+
+    init?(room: NativeGameRoomIntent, gameName: String, inviterName: String) {
+        guard room.role == .player, let game = Self.label(gameName), let inviter = Self.label(inviterName) else { return nil }
+        self.room = room
+        self.gameName = game
+        self.inviterName = inviter
+    }
+
+    var url: URL {
+        var metadata = URLComponents()
+        metadata.queryItems = [URLQueryItem(name: "game", value: gameName), URLQueryItem(name: "from", value: inviterName)]
+        var link = URLComponents(url: room.url, resolvingAgainstBaseURL: false)!
+        // The browser still requests the same room. These labels carry no admission credentials.
+        link.percentEncodedFragment = Self.fragmentPrefix + metadata.percentEncodedQuery!
+        return link.url!
+    }
+
+    static func parse(_ url: URL) -> Self? {
+        guard var link = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let fragment = link.percentEncodedFragment, fragment.utf8.count <= 1600,
+              fragment.hasPrefix(fragmentPrefix),
+              let items = URLComponents(string: "?" + fragment.dropFirst(fragmentPrefix.count))?.queryItems,
+              items.count == 2,
+              let game = items.first(where: { $0.name == "game" })?.value,
+              let inviter = items.first(where: { $0.name == "from" })?.value else { return nil }
+        link.fragment = nil
+        guard let roomURL = link.url, let room = NativeGameRoomIntent.parse(roomURL) else { return nil }
+        return Self(room: room, gameName: game, inviterName: inviter)
+    }
+
+    private static func label(_ value: String) -> String? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.utf8.count <= 240,
+              trimmed.rangeOfCharacter(from: .newlines) == nil,
+              !trimmed.unicodeScalars.contains(where: { $0.properties.generalCategory == .control }) else { return nil }
+        return trimmed
     }
 }
 

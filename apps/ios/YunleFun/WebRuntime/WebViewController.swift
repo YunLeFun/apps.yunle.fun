@@ -98,6 +98,8 @@ class WebViewController: UIViewController {
     /// binds each message to its own launch ID, game, mode and account boundary.
     var onGameLifecycleMessage: (([String: Any], URL) -> Void)?
     var onGameNavigationFailure: (() -> Void)?
+    var roomForInvitation: (() -> NativeGameRoomIntent?)?
+    var makeRoomInvitePicker: ((NativeGameRoomIntent) -> UIViewController?)?
     var publicLinkURL: ((URL) -> URL?)?
     var showsApplicationDetails = true
     private var gameLoadingFailureView: UIView?
@@ -190,6 +192,9 @@ class WebViewController: UIViewController {
     private var usesSystemTitleBar: Bool { usesSystemNavigationBar && displayMode == .titlebar }
     private var nativeBackItem: UIBarButtonItem?
     private var nativeMinimizeItem: UIBarButtonItem?
+    private var nativeMoreItem: UIBarButtonItem?
+    private var nativeRoomInviteItem: UIBarButtonItem?
+    private var floatingRoomInviteButton: UIButton?
     private var nativeFloatingControls: WebChromeControlContainer?
     private var gameURLObservation: NSKeyValueObservation?
     /// 页面通过 JSAPI 主动隐藏了胶囊（每次主文档导航重置；仅沉浸模式可触发）
@@ -321,7 +326,10 @@ class WebViewController: UIViewController {
         if usesSystemTitleBar {
             // Play can enter or leave a game with pushState in the same WebView.
             gameURLObservation = webView.observe(\.url, options: .new) { [weak self] _, _ in
-                DispatchQueue.main.async { self?.updateGameAppearance() }
+                DispatchQueue.main.async {
+                    self?.updateGameAppearance()
+                    self?.updateRoomInviteControls()
+                }
             }
         }
 
@@ -364,7 +372,15 @@ class WebViewController: UIViewController {
                                   target: self, action: #selector(moreTapped))
         more.accessibilityLabel = "更多操作"
         more.accessibilityIdentifier = "runtime.more"
+        nativeMoreItem = more
         navigationItem.rightBarButtonItem = more
+        if roomForInvitation != nil {
+            let invite = UIBarButtonItem(image: UIImage(systemName: "person.badge.plus"), style: .plain,
+                                        target: self, action: #selector(inviteToRoom))
+            invite.accessibilityLabel = "邀请好友"
+            invite.accessibilityIdentifier = "runtime.invite-room"
+            nativeRoomInviteItem = invite
+        }
         if !isDetailSheet, appInfo != nil, showsApplicationDetails {
             navigationItem.titleMenuProvider = { [weak self] _ in
                 UIMenu(children: [UIAction(title: "应用详情", image: UIImage(systemName: "info.circle")) { [weak self] _ in
@@ -374,6 +390,14 @@ class WebViewController: UIViewController {
         }
         updateHeaderTitle()
         updateHistoryControls()
+    }
+
+    func updateRoomInviteControls() {
+        guard let nativeMoreItem, let nativeRoomInviteItem, let floatingRoomInviteButton else { return }
+        let isHidden = roomForInvitation?() == nil
+        guard floatingRoomInviteButton.isHidden != isHidden else { return }
+        floatingRoomInviteButton.isHidden = isHidden
+        navigationItem.rightBarButtonItems = isHidden ? [nativeMoreItem] : [nativeMoreItem, nativeRoomInviteItem]
     }
 
     private func updateHistoryControls() {
@@ -727,6 +751,22 @@ class WebViewController: UIViewController {
             rightControl = m
         }
         controls.addSubview(rightControl)
+
+        if nativeRoomInviteItem != nil {
+            let invite = makeFloatingButton(icon: "person.badge.plus", pointSize: 17)
+            invite.accessibilityLabel = "邀请好友"
+            invite.accessibilityIdentifier = "runtime.invite-room"
+            invite.addTarget(self, action: #selector(inviteToRoom), for: .touchUpInside)
+            invite.isHidden = true
+            controls.addSubview(invite)
+            NSLayoutConstraint.activate([
+                invite.trailingAnchor.constraint(equalTo: rightControl.leadingAnchor, constant: -8),
+                invite.centerYAnchor.constraint(equalTo: rightControl.centerYAnchor),
+                invite.widthAnchor.constraint(equalToConstant: 44),
+                invite.heightAnchor.constraint(equalToConstant: 44),
+            ])
+            floatingRoomInviteButton = invite
+        }
 
         backButton = makeFloatingButton(icon: "chevron.left", pointSize: 14)
         backButton.accessibilityLabel = "返回网页"
@@ -1207,6 +1247,14 @@ class WebViewController: UIViewController {
             popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
         }
         present(av, animated: true)
+    }
+
+    @objc private func inviteToRoom() {
+        guard presentedViewController == nil, let room = roomForInvitation?(),
+              let picker = makeRoomInvitePicker?(room) else { return }
+        picker.modalPresentationStyle = .pageSheet
+        picker.sheetPresentationController?.prefersGrabberVisible = true
+        present(picker, animated: true)
     }
 
     private var currentPublicURL: URL? {
@@ -1837,7 +1885,10 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
         if usesSystemTitleBar {
             let control: UIView? = titleBarVisible ? navigationController?.navigationBar : rightControl
             view.layoutIfNeeded()
-            let rect = control.map { $0.convert($0.bounds, to: webView) } ?? .zero
+            var rect = control.map { $0.convert($0.bounds, to: webView) } ?? .zero
+            if !titleBarVisible, let invite = floatingRoomInviteButton, !invite.isHidden {
+                rect = rect.union(invite.convert(invite.bounds, to: webView))
+            }
             return ["x": rect.minX, "y": rect.minY, "width": rect.width, "height": rect.height]
         }
         var rect = rightControl.frame

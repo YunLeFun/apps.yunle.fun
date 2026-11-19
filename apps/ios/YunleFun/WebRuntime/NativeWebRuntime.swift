@@ -33,6 +33,7 @@ struct NativeGameContinuation: Identifiable {
 @MainActor
 final class NativeWebRuntime: ObservableObject {
     let applicationCache: ApplicationCacheStore
+    let roomInviteService = RoomInviteService()
     @Published private(set) var applications: [CloudApplication] = []
     @Published private(set) var gameSessionStatuses: [String: NativeGameSessionStatus] = [:]
     var onGameReady: ((String, String, String?) -> Void)?
@@ -457,6 +458,19 @@ final class NativeWebRuntime: ObservableObject {
             }
         }
         gameSessionStatuses[context.gameID] = status
+        browser.updateRoomInviteControls()
+    }
+
+    private func roomForInvitation(applicationID: String, browser: WebViewController) -> NativeGameRoomIntent? {
+        guard !isClearingIdentity, sessions[applicationID]?.browser === browser,
+              let context = gameContexts[applicationID], context.identity == identityReset,
+              let status = gameSessionStatuses[context.gameID], status.launchID == context.launchID,
+              status.phase == .roomReady || status.phase == .roomState || status.phase == .ready,
+              !isClosedRoom(status), let confirmed = status.room,
+              let visible = browser.currentDocumentURL.flatMap(NativeGameLaunchURL.publicURL).flatMap(NativeGameRoomIntent.parse),
+              visible.inviteCode == confirmed.inviteCode, confirmed.role == "player",
+              let user = accounts?.user, user.isUsable, user.id == profileAccountID else { return nil }
+        return try? NativeGameRoomIntent(input: confirmed.inviteCode)
     }
 
     func configureAuthorization(accounts: AccountStore, service: HostAuthorizationServing = HostAuthorizationService()) {
@@ -705,6 +719,19 @@ final class NativeWebRuntime: ObservableObject {
                 controller.publicLinkURL = { NativeGameLaunchURL.publicURL($0) ?? NativeGameLaunchURL.publicURL(url) }
                 controller.gameLifecycleOrigin = gameContexts[app.id]?.messageOrigin
                 controller.preferredGameOrientation = gameContexts[app.id]?.orientation
+                controller.roomForInvitation = { [weak self, weak controller] in
+                    guard let self, let controller else { return nil }
+                    return self.roomForInvitation(applicationID: app.id, browser: controller)
+                }
+                controller.makeRoomInvitePicker = { [weak self, weak controller] room in
+                    guard let self, let controller, let accounts = self.accounts else { return nil }
+                    let generation = accounts.identityGeneration
+                    return UIHostingController(rootView: RoomInvitePicker(accounts: accounts, service: self.roomInviteService,
+                                                                          room: room) { [weak controller, weak accounts] in
+                        guard accounts?.identityGeneration == generation else { return nil }
+                        return controller?.roomForInvitation?()
+                    })
+                }
                 controller.onGameLifecycleMessage = { [weak self, weak controller] body, source in
                     guard let self, let controller else { return }
                     self.receiveGameLifecycle(body, source: source, applicationID: app.id, browser: controller)
@@ -713,6 +740,7 @@ final class NativeWebRuntime: ObservableObject {
                     guard let self, let controller, self.sessions[app.id]?.browser === controller,
                           let game = self.gameContexts[app.id], game.identity == self.identityReset else { return }
                     self.gameSessionStatuses[game.gameID]?.phase = .failed
+                    controller.updateRoomInviteControls()
                 }
             }
             let identity = identityReset
@@ -849,6 +877,19 @@ final class NativeWebRuntime: ObservableObject {
         guard let session = sessions[app.id] else { return }
         session.presentation.presentingViewController?.dismiss(animated: true)
         removeSession(app)
+    }
+
+    func revealHostForNavigation(_ navigate: @escaping () -> Void) {
+        guard let root = presentationRootController(), let presented = root.presentedViewController,
+              let session = sessions.values.first(where: { $0.presentation === presented })
+        else { navigate(); return }
+        if presented.isBeingPresented || presented.isBeingDismissed,
+           let transition = presented.transitionCoordinator,
+           transition.animate(alongsideTransition: nil, completion: { [weak self] _ in
+               self?.revealHostForNavigation(navigate)
+           }) { return }
+        session.browser.onMinimize?()
+        root.dismiss(animated: true, completion: navigate)
     }
 
     func retireAccount(_ id: String) throws {

@@ -93,6 +93,49 @@ final class NativeGameTests: XCTestCase {
         ] { XCTAssertThrowsError(try NativeGameRoomIntent(input: value), value) }
     }
 
+    func testRoomInvitationRoundTripsLabelsAndJoinsTheSameRoom() throws {
+        let room = try NativeGameRoomIntent(input: "AB23CD")
+        let invitation = try XCTUnwrap(NativeGameRoomInvitation(room: room, gameName: "五子棋 & 好友", inviterName: "小云 + 小乐 #1"))
+        XCTAssertEqual(NativeGameRoomInvitation.parse(invitation.url), invitation)
+        XCTAssertEqual(try NativeGameRoomIntent(input: invitation.url.absoluteString), room)
+        XCTAssertEqual(NativeGameLaunchURL.publicURL(invitation.url), room.url)
+    }
+
+    func testRoomInvitationRejectsUntrustedRoutesAndMalformedLabels() {
+        for value in [
+            "https://evil.test/room/AB23CD#invite?game=Gomoku&from=Friend",
+            "https://play.yunle.fun/room/AB23CD?role=spectator#invite?game=Gomoku&from=Friend",
+            "https://play.yunle.fun/room/AB23CD?token=secret#invite?game=Gomoku&from=Friend",
+            "https://play.yunle.fun/room/AB23CD#invite?game=Gomoku&game=Other",
+            "https://play.yunle.fun/room/AB23CD#invite?game=Gomoku&from=Friend%0ANew",
+            "https://play.yunle.fun/room/AB23CD#invite?game=Gomoku&from=",
+        ] {
+            XCTAssertNil(NativeGameRoomInvitation.parse(URL(string: value)!), value)
+        }
+    }
+
+    func testRoomInboxBindsTheSenderAndTheExactPlayerRoom() async throws {
+        let host = "room-inbox.test"
+        let fixture = AuthHTTPFixture(replies: [(200, """
+        {"items":[{"id":"invite1","actor":{"nickname":"小云"},"roomInvite":{"inviteCode":"AB23CD","gameId":"gomoku"}}],"nextSkip":null}
+        """)])
+        AuthHTTPProtocol.register(host, fixture: fixture)
+        defer { AuthHTTPProtocol.unregister(host) }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AuthHTTPProtocol.self]
+        let service = RoomInviteService(transport: CloudbaseAuthService(session: URLSession(configuration: configuration),
+                                                                        origin: URL(string: "https://" + host)!))
+        let messages = try await service.messages(skip: 0, identity: AuthorizedAccount(userID: "recipient", accessToken: "fixture-token"))
+        let message = try XCTUnwrap(messages.items.first)
+        XCTAssertEqual(message.actor.nickname, "小云")
+        let invite = try XCTUnwrap(message.roomInvite)
+        XCTAssertEqual(invite.gameId, "gomoku")
+        XCTAssertEqual(invite.intent, try NativeGameRoomIntent(input: "AB23CD", role: .player))
+        XCTAssertNil(RoomInviteMessage.Room(inviteCode: "https://example.test", gameId: nil).intent)
+        XCTAssertEqual(fixture.requests.first?.url?.path, "/v1/functions/account-api")
+        XCTAssertEqual(fixture.requests.first?.value(forHTTPHeaderField: "Authorization"), "Bearer fixture-token")
+    }
+
     @MainActor
     func testCatalogFailurePreservesVerifiedSnapshotAndNeverMarksItOnline() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)

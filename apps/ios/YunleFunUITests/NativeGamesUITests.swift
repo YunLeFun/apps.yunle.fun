@@ -145,6 +145,29 @@ final class NativeGamesUITests: XCTestCase {
         capture(app, "native-games-room-login-cancelled")
     }
 
+    func testRoomInvitationShowsGameAndInviterBeforeGuestLogin() throws {
+        guard #available(iOS 16.4, *) else { throw XCTSkip("Opening a Universal Link requires iOS 16.4") }
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["我"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["我"].tap()
+        guard app.buttons["me.login"].waitForExistence(timeout: 5) else {
+            throw XCTSkip("This journey requires a guest; never signs out an existing account")
+        }
+        var link = URLComponents(string: "https://play.yunle.fun/room/AB23CD")!
+        link.fragment = "invite?game=五子棋&from=小云"
+        app.open(try XCTUnwrap(link.url))
+        XCTAssertTrue(app.staticTexts["五子棋"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["小云 邀请你一起玩"].exists)
+        XCTAssertFalse(app.staticTexts["AB23CD"].exists)
+        let join = app.buttons["games.invitation.join"]
+        XCTAssertTrue(join.exists)
+        join.tap()
+        XCTAssertTrue(app.staticTexts["login.continuation-context"].waitForExistence(timeout: 10))
+        app.buttons["取消"].tap()
+        XCTAssertTrue(join.waitForExistence(timeout: 5))
+    }
+
     func testMaximumAccessibilityTextSizeAuditsNativeGamesAndWorkshop() throws {
         guard ProcessInfo.processInfo.environment["YUNLEFUN_NATIVE_GAMES_ACCESSIBILITY_AUDIT"] == "1" else {
             throw XCTSkip("Opt in with YUNLEFUN_NATIVE_GAMES_ACCESSIBILITY_AUDIT=1")

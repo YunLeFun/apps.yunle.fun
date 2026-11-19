@@ -4,13 +4,15 @@ struct MeView: View {
     @EnvironmentObject private var library: HomeLibrary
     @EnvironmentObject private var accounts: AccountStore
     @EnvironmentObject private var diagnostics: DiagnosticLogStore
+    @EnvironmentObject private var runtime: NativeWebRuntime
     let navigateTab: (AppTab) -> Void
+    let joinRoom: (NativeGameRoomIntent) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showLogin = false
     @State private var returningEntry: Entry?
     @AccessibilityFocusState(for: .voiceOver) private var focusedEntry: Entry?
 
-    private enum Entry: Hashable { case profile, login, wallet, membership, applications, workshops, accounts, settings, about, reports, help, feedback }
+    private enum Entry: Hashable { case profile, login, messages, wallet, membership, applications, workshops, accounts, settings, about, reports, help, feedback }
 
     var body: some View {
         let user = accounts.user
@@ -51,6 +53,11 @@ struct MeView: View {
             }
             Section {
                 if user != nil {
+                    navigationRow("消息", systemImage: "tray.fill", color: .blue, entry: .messages) {
+                        RoomInviteInbox(accounts: accounts, service: runtime.roomInviteService, joinRoom: joinRoom)
+                            .id(accounts.identityGeneration)
+                    }
+                    .accessibilityIdentifier("me.messages")
                     navigationRow("钱包", systemImage: "wallet.pass.fill", color: .green, entry: .wallet) { WalletView() }
                     navigationRow("云乐坊会员", systemImage: "crown.fill", color: .orange, entry: .membership) { MembershipView() }
                     navigationRow("我的应用", systemImage: "square.and.pencil", color: .blue, entry: .applications) { MyApplicationsView() }

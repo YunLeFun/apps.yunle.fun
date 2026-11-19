@@ -3,6 +3,14 @@ import { sanitizeAcquisitionContext } from '../../app/utils/acquisition'
 export const CLOUDRUN_SSO_RESOLVER = 'https://api.yunle.fun/auth/sso/resolve'
 export const SCF_SSO_RESOLVER = 'https://api.yunle.fun/sso-ticket'
 
+export function ssoResolverEndpoints(preferred?: string, ticket?: string) {
+  const fallbackEndpoint = ticket || SCF_SSO_RESOLVER
+  return {
+    endpoint: preferred || (fallbackEndpoint === SCF_SSO_RESOLVER ? CLOUDRUN_SSO_RESOLVER : fallbackEndpoint),
+    fallbackEndpoint,
+  }
+}
+
 export interface SsoAuthorizationResolverOptions {
   endpoint: string
   fallbackEndpoint?: string

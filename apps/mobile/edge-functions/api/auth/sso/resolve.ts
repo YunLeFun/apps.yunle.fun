@@ -1,9 +1,8 @@
 import {
-  CLOUDRUN_SSO_RESOLVER,
   resolveCentralSsoAuthorization,
-  SCF_SSO_RESOLVER,
   SsoAuthorizationResolverInputError,
   SsoAuthorizationResolverUpstreamError,
+  ssoResolverEndpoints,
   upstreamSsoTiming,
 } from '../../../../server/utils/sso-authorization-resolver'
 
@@ -33,8 +32,7 @@ export async function onRequest({ request, env }: {
 
   const started = performance.now()
   try {
-    const endpoint = env.NUXT_SSO_RESOLVER_URL || CLOUDRUN_SSO_RESOLVER
-    const fallbackEndpoint = env.NUXT_SSO_TICKET_URL || SCF_SSO_RESOLVER
+    const { endpoint, fallbackEndpoint } = ssoResolverEndpoints(env.NUXT_SSO_RESOLVER_URL, env.NUXT_SSO_TICKET_URL)
     let backend = endpoint === fallbackEndpoint ? 'scf' : 'cloudrun'
     let timing: string[] = []
     const result = await resolveCentralSsoAuthorization(body, {

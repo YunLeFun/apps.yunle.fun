@@ -1,6 +1,7 @@
 import {
   resolveCentralSsoAuthorization,
   SsoAuthorizationResolverInputError,
+  ssoResolverEndpoints,
 } from '../../../utils/sso-authorization-resolver'
 
 export default defineEventHandler(async (event) => {
@@ -12,10 +13,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const runtime = useRuntimeConfig(event)
   try {
-    return await resolveCentralSsoAuthorization(body, {
-      endpoint: runtime.ssoResolverUrl,
-      fallbackEndpoint: runtime.ssoTicketUrl,
-    })
+    return await resolveCentralSsoAuthorization(body, ssoResolverEndpoints(runtime.ssoResolverUrl, runtime.ssoTicketUrl))
   }
   catch (error) {
     if (error instanceof SsoAuthorizationResolverInputError) {

@@ -4,6 +4,7 @@ import {
   CLOUDRUN_SSO_RESOLVER,
   resolveCentralSsoAuthorization,
   SsoAuthorizationResolverInputError,
+  ssoResolverEndpoints,
 } from '../../server/utils/sso-authorization-resolver'
 import { acquisition } from './acquisition-fixture'
 
@@ -30,6 +31,12 @@ function edgeRequest(body: string): Request {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('central SSO authorization resolver transport', () => {
+  it('keeps a configured non-production Broker as the resolver unless explicitly overridden', () => {
+    const legacy = 'https://dev.example/sso-ticket'
+    expect(ssoResolverEndpoints(undefined, legacy)).toEqual({ endpoint: legacy, fallbackEndpoint: legacy })
+    expect(ssoResolverEndpoints(endpoint, endpoint)).toEqual({ endpoint, fallbackEndpoint: endpoint })
+  })
+
   it('forwards bounded acquisition without adding caller-selected identity fields', async () => {
     const request = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ ok: true }))
     await resolveCentralSsoAuthorization({

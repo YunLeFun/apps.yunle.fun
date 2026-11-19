@@ -8,6 +8,8 @@ import type {
   CreateAppForm,
 } from '~/types/app'
 import { createError } from 'h3'
+import { WEB_BUILD_HOST, webBuildVersionUrl } from './web-build-config'
+import { webBuildAppSlugPattern } from './web-build-page'
 
 const SLUG_PATTERN = /^[a-z][a-z0-9-]{1,49}$/
 const THEME_COLOR_PATTERN = /^#[0-9a-f]{6}$/i
@@ -26,7 +28,7 @@ export function isYunLeFunFirstPartyHostname(hostname: string): boolean {
 
 export function normalizeSubmissionInput(
   value: unknown,
-  options: { thirdPartyEnabled?: boolean } = {},
+  options: { thirdPartyEnabled?: boolean, webBuildId?: string } = {},
 ): NormalizedSubmissionInput {
   if (!isRecord(value))
     invalid('提交内容格式不正确')
@@ -49,8 +51,10 @@ export function normalizeSubmissionInput(
   const websiteUrl = normalizeHttpsUrl(value.websiteUrl, '应用网址', true)
   const privacyPolicyUrl = normalizeHttpsUrl(value.privacyPolicyUrl, '隐私政策链接', true)
   const supportUrl = normalizeHttpsUrl(value.supportUrl, '支持链接', true)
+  const backupUrl = normalizeHttpsUrl(value.backupUrl, '备用链接')
   const hostname = new URL(websiteUrl).hostname
-  if (kind === 'first_party' && audience === 'public' && !isYunLeFunFirstPartyHostname(hostname))
+  const hosted = normalizeWebBuildSource(slug, websiteUrl, backupUrl, options.webBuildId)
+  if (!hosted && kind === 'first_party' && audience === 'public' && !isYunLeFunFirstPartyHostname(hostname))
     invalid('第一方应用网址必须属于 yunle.fun')
 
   const githubRepo = optionalString(value.githubRepo, 'GitHub 仓库', 160)
@@ -74,8 +78,8 @@ export function normalizeSubmissionInput(
       websiteUrl,
       privacyPolicyUrl,
       supportUrl,
-      trustedHosts: normalizeTrustedHosts(value.trustedHosts, hostname),
-      backupUrl: normalizeHttpsUrl(value.backupUrl, '备用链接'),
+      trustedHosts: hosted ? [] : normalizeTrustedHosts(value.trustedHosts, hostname),
+      backupUrl,
       logo: normalizeIconSource(value.logo, 'Logo 链接'),
       ...(iconAssets ? { iconAssets } : {}),
       emoji: optionalString(value.emoji, 'Emoji', 16) || '📱',
@@ -218,6 +222,19 @@ function normalizeHttpsUrl(value: unknown, label: string, required = false): str
   return parsed.toString()
 }
 
+function normalizeWebBuildSource(slug: string, websiteUrl: string, backupUrl: string, projectId?: string): boolean {
+  const reserved = webBuildAppSlugPattern.exec(slug)?.[1]
+  if (!projectId && !reserved && ![websiteUrl, backupUrl].some(url => url && new URL(url).hostname.replace(/\.$/, '') === WEB_BUILD_HOST))
+    return false
+
+  if (projectId && reserved === projectId && !backupUrl) {
+    const releaseId = /\/([0-9a-f]{32})\.html$/.exec(new URL(websiteUrl).pathname)?.[1]
+    if (releaseId && websiteUrl === webBuildVersionUrl(projectId, releaseId))
+      return true
+  }
+  throw createError({ statusCode: 403, statusMessage: 'AI 网页只能在制作页管理' })
+}
+
 function normalizeTrustedHosts(value: unknown, websiteHostname: string): string[] {
   if (value === undefined)
     return [websiteHostname]
@@ -227,6 +244,9 @@ function normalizeTrustedHosts(value: unknown, websiteHostname: string): string[
   if (hosts.length > 10)
     invalid('授信域名最多 10 个')
   for (const host of hosts) {
+    const normalized = host.replace(/\.$/, '')
+    if (normalized === WEB_BUILD_HOST || WEB_BUILD_HOST.endsWith(`.${normalized}`))
+      invalid('作品托管站不能设为授信域名')
     if (host.length > 253 || host.includes('/') || host.includes(':'))
       invalid('授信域名格式不正确')
   }

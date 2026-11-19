@@ -99,7 +99,7 @@ struct PublishingService: PublishingServing {
         guard PublishingValue.identifier(id) else { throw PublishingError.invalidInput }
         return origin.appendingPathComponent("api/apps").appendingPathComponent(id)
     }
-    private func request<Value: Decodable>(_ url: URL, method: String = "GET", fields: [String: Any]? = nil,
+    func request<Value: Decodable>(_ url: URL, method: String = "GET", fields: [String: Any]? = nil,
         rawBody: Data? = nil, contentType: String? = nil, writeVersion: String? = nil, identity: AuthorizedAccount) async throws -> Value {
         var request = URLRequest(url: url)
         if let writeVersion {
@@ -120,9 +120,14 @@ struct PublishingService: PublishingServing {
         switch http.statusCode {
         case 400: throw PublishingError.invalidInput
         case 401: throw PublishingError.unauthorized
-        case 403: throw PublishingError.forbidden
+        case 403:
+            if data.count <= 4096, (try? JSONDecoder().decode(AccessError.self, from: data))?.data?.code == "MEMBERSHIP_REQUIRED" {
+                throw PublishingError.membershipRequired
+            }
+            throw PublishingError.forbidden
         case 404: throw PublishingError.notFound
         case 409, 412: throw PublishingError.conflict
+        case 422: throw PublishingError.contentRejected
         case 428: throw PublishingError.unsupportedServer
         case 429: throw PublishingError.throttled
         case 200..<300: break
@@ -130,6 +135,10 @@ struct PublishingService: PublishingServing {
         }
         guard data.count <= 4 * 1024 * 1024, let result = try? JSONDecoder().decode(Value.self, from: data) else { throw PublishingError.invalidResponse }
         return result
+    }
+    private struct AccessError: Decodable {
+        struct Details: Decodable { let code: String }
+        let data: Details?
     }
     private struct OwnedList: Decodable { let items: [ManagedApplication] }
     private struct DelistReceipt: Decodable { let success: Bool }

@@ -2,10 +2,10 @@ import type { H3Event } from 'h3'
 import type { CloudbaseAdminDb } from './cloudbase-admin'
 import type { AppRecord } from '~/types/app'
 import { Buffer } from 'node:buffer'
-import { createError, getRequestHeader, readRawBody, setResponseHeader } from 'h3'
+import { createError, readRawBody, setResponseHeader } from 'h3'
+import { invokeAccountApi } from './account-api'
 import { useCloudbaseAdmin } from './cloudbase-admin'
-import { parseBearerToken, requireRegisteredCloudbaseUser } from './cloudbase-auth'
-import { resolveCloudbaseEnvId } from './cloudbase-config'
+import { requireRegisteredCloudbaseUser } from './cloudbase-auth'
 import { getPublicAppByKey } from './public-apps'
 
 interface AccountSnapshot {
@@ -26,8 +26,10 @@ export interface ApplicationAcquisitionDependencies {
 }
 export type ApplicationAcquisitionState = 'allowed' | 'membership_required' | 'purchase_required' | 'invitation_required'
 
+const unavailableMessage = '暂时无法核对应用权益，请稍后重试'
+
 function unavailable(): never {
-  throw createError({ statusCode: 503, message: '暂时无法核对应用权益，请稍后重试' })
+  throw createError({ statusCode: 503, message: unavailableMessage })
 }
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -129,35 +131,7 @@ export async function handleApplicationAcquisition(event: H3Event) {
   }
   catch { throw createError({ statusCode: 400 }) }
   const input = readApplicationAcquisitionInput(body)
-  const token = parseBearerToken(getRequestHeader(event, 'authorization'))
-  if (!token)
-    throw createError({ statusCode: 401 })
-  const env = resolveCloudbaseEnvId(useRuntimeConfig(event))
-  if (!/^[\w-]+$/.test(env))
-    unavailable()
-  // Delegation stays on this environment's fixed official gateway, with no redirects or internal secret.
-  const invoke = async (fields: Record<string, unknown>) => {
-    let response: Response
-    try {
-      response = await fetch(`https://${env}.api.tcloudbasegateway.com/v1/functions/account-api`, {
-        method: 'POST',
-        redirect: 'error',
-        cache: 'no-store',
-        signal: AbortSignal.timeout(20000),
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(fields),
-      })
-    }
-    catch { return unavailable() }
-    if (response.status === 401 || response.status === 403)
-      throw createError({ statusCode: response.status })
-    if (!response.ok)
-      unavailable()
-    try {
-      return await response.json() as unknown
-    }
-    catch { return unavailable() }
-  }
+  const invoke = (fields: Record<string, unknown>) => invokeAccountApi(event, fields, unavailableMessage)
   return resolveApplicationAcquisition(user.uid, input, {
     application: getPublicAppByKey,
     account: () => invoke({ action: 'getAccount' }),

@@ -132,21 +132,17 @@ function useTmsClient(): InstanceType<typeof tms.v20201229.Client> {
 }
 
 function normalizeModerationResponse(response: TextModerationResponse): ModerationResult {
-  const detail = response.DetailResults?.[0]
-  const rawSuggestion = detail?.Suggestion || response.Suggestion
+  const details = response.DetailResults || []
+  const suggestions = [response.Suggestion, ...details.map(item => item.Suggestion)].filter(Boolean)
+  const suggestion = suggestions.includes('Block') ? 'Block' : (suggestions.every(value => value === 'Pass') && suggestions.length ? 'Pass' : 'Review')
+  const detail = details.find(item => item.Suggestion === suggestion) || details[0]
   return {
-    suggestion: normalizeSuggestion(rawSuggestion),
+    suggestion,
     label: detail?.Label || response.Label,
     subLabel: detail?.SubLabel || response.SubLabel,
     keywords: detail?.Keywords || response.Keywords || [],
     requestId: response.RequestId,
   }
-}
-
-function normalizeSuggestion(value?: string): ModerationSuggestion {
-  if (value === 'Pass' || value === 'Review' || value === 'Block')
-    return value
-  return 'Review'
 }
 
 function sanitizeDataId(dataId: string): string {

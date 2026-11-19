@@ -209,6 +209,11 @@ export default defineNuxtConfig({
     assistantRolloutPercent: process.env.NUXT_ASSISTANT_ROLLOUT_PERCENT || '100',
     tmsRegion: 'ap-guangzhou',
     tmsBizType: '',
+    webBuildEnabled: false,
+    webBuildWriteToken: '',
+    webBuildRuntimeOrigin: '',
+    webBuildRuntimeSigningSecret: '',
+    webBuildPilotUid: '',
     public: {
       tcbEnvId: DEFAULT_CLOUDBASE_ENV_ID,
       appBaseUrl: process.env.NUXT_PUBLIC_APP_BASE_URL || 'https://apps.yunle.fun',

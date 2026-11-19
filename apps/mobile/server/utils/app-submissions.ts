@@ -13,6 +13,7 @@ import type {
 } from '~/types/app'
 import { randomUUID } from 'node:crypto'
 import { createError } from 'h3'
+import { webBuildAppSlugPattern } from '~~/server/utils/web-build-page'
 import { claimAppIdentifier } from '../domain/app-identifiers'
 import {
   isDuplicateKeyError,
@@ -70,10 +71,12 @@ export async function requireFirstPartySubmitter(user: ServerAuthUser): Promise<
 export async function createAppSubmission(
   user: ServerAuthUser,
   input: unknown,
+  webBuildId?: string,
 ): Promise<AppSubmissionResult> {
   const { db } = useCloudbaseAdmin()
   const normalized = normalizeSubmissionInput(input, {
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
+    webBuildId,
   })
   await enforceSubmissionRateLimit(db, user.uid)
   const nameKey = normalizeAppNameKey(normalized.snapshot.name)
@@ -104,8 +107,8 @@ export async function createAppSubmission(
       hostname,
       checks: [{
         key: 'hostname',
-        status: normalized.kind === 'first_party' && isYunLeFunFirstPartyHostname(hostname) ? 'pass' : 'warning',
-        summary: normalized.kind === 'first_party' ? '域名属于 yunle.fun 第一方候选范围' : '等待第三方归属验证',
+        status: webBuildId || (normalized.kind === 'first_party' && isYunLeFunFirstPartyHostname(hostname)) ? 'pass' : 'warning',
+        summary: webBuildId ? '云乐坊托管的固定静态版本' : normalized.kind === 'first_party' ? '域名属于 yunle.fun 第一方候选范围' : '等待第三方归属验证',
       }],
     },
     submittedAt: now,
@@ -156,6 +159,7 @@ export async function updateAppSubmission(
   appId: string,
   input: unknown,
   ifMatch: string | undefined,
+  webBuildId?: string,
 ): Promise<AppSubmissionResult> {
   const { db } = useCloudbaseAdmin()
   const base = await readOwnedApplicationState(db, appId, user.uid)
@@ -163,6 +167,7 @@ export async function updateAppSubmission(
   const { app } = base
   const normalized = normalizeSubmissionInput(input, {
     thirdPartyEnabled: thirdPartySubmissionsEnabled(),
+    webBuildId,
   })
   await enforceSubmissionRateLimit(db, user.uid)
   const nameKey = normalizeAppNameKey(normalized.snapshot.name)
@@ -205,8 +210,8 @@ export async function updateAppSubmission(
       hostname,
       checks: [{
         key: 'hostname',
-        status: normalized.kind === 'first_party' && isYunLeFunFirstPartyHostname(hostname) ? 'pass' : 'warning',
-        summary: normalized.kind === 'first_party' ? '域名属于 yunle.fun 第一方候选范围' : '等待第三方归属验证',
+        status: webBuildId || (normalized.kind === 'first_party' && isYunLeFunFirstPartyHostname(hostname)) ? 'pass' : 'warning',
+        summary: webBuildId ? '云乐坊托管的固定静态版本' : normalized.kind === 'first_party' ? '域名属于 yunle.fun 第一方候选范围' : '等待第三方归属验证',
       }],
     },
     submittedAt: now,
@@ -251,11 +256,14 @@ export async function updateAppSubmission(
 export async function submitOwnedAppToPublicMarket(
   user: ServerAuthUser,
   appId: string,
-  options: { makePublic?: boolean, shortName?: string, ifMatch?: string } = {},
+  options: { makePublic?: boolean, shortName?: string, ifMatch?: string, webBuild?: { id: string, verify: (transaction: CloudbaseTransaction) => Promise<void> } } = {},
 ): Promise<{ appId: string, submissionId: string, reviewStatus: 'pending' }> {
   const { db } = useCloudbaseAdmin()
   const base = await readOwnedApplicationState(db, appId, user.uid)
   requireApplicationWriteVersion(options.ifMatch, base.writeVersion)
+  const managedId = webBuildAppSlugPattern.exec(base.app.slug)?.[1]
+  if (managedId && managedId !== options.webBuild?.id)
+    throw createError({ statusCode: 403, statusMessage: '请在 AI 制作网页中投稿' })
   const workflow = createPublicMarketSubmissionModule({
     async getOwnedApp() {
       return base.app
@@ -277,7 +285,7 @@ export async function submitOwnedAppToPublicMarket(
       return Number((data?.[0] as AppSubmission | undefined)?.revision || 0)
     },
     async commit(change) {
-      await commitPublicMarketSubmission(db, change, user.uid, options.ifMatch)
+      await commitPublicMarketSubmission(db, change, user.uid, options.ifMatch, options.webBuild?.verify)
     },
   })
   try {
@@ -439,10 +447,12 @@ async function commitPublicMarketSubmission(
   change: PublicMarketSubmissionChange,
   ownerUid: string,
   ifMatch: string | undefined,
+  verify?: (transaction: CloudbaseTransaction) => Promise<void>,
 ): Promise<void> {
   await db.runTransaction(async (transaction: CloudbaseTransaction) => {
     const state = await readOwnedApplicationState(transaction, change.appId, ownerUid)
     requireApplicationWriteVersion(ifMatch, state.writeVersion)
+    await verify?.(transaction)
     const current = state.listing
     if (current?.shortName && current.shortName !== change.listing.shortName)
       throw createError({ statusCode: 409, message: '市场短名已确定，请刷新后重试' })

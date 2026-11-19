@@ -485,3 +485,107 @@ private struct PublishingVisualVault: AccountVault {
     func read() throws -> Data? { data }
     func write(_ data: Data) throws {}
 }
+
+final class WebBuildTransportTests: XCTestCase {
+    private var host: String?
+    private let id = "1234567890abcdef1234567890abcdef"
+    private let identity = AuthorizedAccount(userID: "owner", accessToken: "web-build-test")
+
+    override func tearDown() {
+        if let host { AuthHTTPProtocol.unregister(host) }
+        super.tearDown()
+    }
+
+    func testNativeCreationRevisionPublishingAndSubmission() async throws {
+        let link = "https://build.yunle.app/site/\(id)"
+        let (service, fixture) = makeService(try [
+            (200, #"{"enabled":true}"#),
+            (200, projectJSON(revision: 1)),
+            (200, projectJSON(revision: 2)),
+            (200, projectJSON(revision: 2, shareURL: link)),
+            (200, publishingJSON(["slug": "web-build-\(id)"])),
+        ])
+        let enabled = try await service.available(identity: identity)
+        XCTAssertTrue(enabled)
+        let draft = try await service.update(.generate("做一个读书会邀请页"), project: nil, identity: identity)
+        let revised = try await service.update(.generate("标题改成海边读书会"), project: draft, identity: identity)
+        let published = try await service.update(.publish, project: revised, identity: identity)
+        XCTAssertEqual(published.shareUrl?.absoluteString, link)
+        try await service.submit(project: published, shortName: "reading-club", identity: identity)
+
+        let requests = fixture.requests
+        XCTAssertEqual(requests.first?.url?.path, "/api/web-builds/availability")
+        XCTAssertEqual(requests.dropFirst().compactMap { $0.url?.path }, Array(repeating: "/api/web-builds", count: 4))
+        XCTAssertTrue(requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == "Bearer web-build-test" })
+        let commands = try requests.dropFirst().map(publishingBody)
+        XCTAssertNil(commands[0]["id"])
+        XCTAssertEqual(commands[1]["id"] as? String, id)
+        XCTAssertEqual(commands[1]["revision"] as? Int, 1)
+        XCTAssertEqual(commands[3]["revision"] as? Int, 2)
+    }
+
+    func testMembershipDenialIsDistinctFromOtherForbiddenResponses() async throws {
+        let (service, _) = makeService([
+            (403, #"{"data":{"code":"MEMBERSHIP_REQUIRED"}}"#),
+            (403, #"{"statusCode":403}"#),
+        ])
+        do {
+            _ = try await service.available(identity: identity)
+            XCTFail("Expired membership unlocked the workshop entry")
+        } catch {
+            XCTAssertEqual(error as? PublishingError, .membershipRequired)
+        }
+        do {
+            _ = try await service.project(id: id, identity: identity)
+            XCTFail("Forbidden project was opened")
+        } catch {
+            XCTAssertEqual(error as? PublishingError, .forbidden)
+        }
+    }
+
+    func testRejectsUnexpectedShareOriginAndUnpublishedSubmission() async throws {
+        let (service, fixture) = makeService(try [
+            (200, projectJSON(revision: 1, shareURL: "https://example.test/web/\(id)")),
+            (200, projectJSON(revision: 1)),
+        ])
+        do {
+            _ = try await service.project(id: id, identity: identity)
+            XCTFail("Unexpected share host")
+        } catch {
+            XCTAssertEqual(error as? PublishingError, .invalidResponse)
+        }
+        let draft = try await service.project(id: id, identity: identity)
+        do {
+            try await service.submit(project: draft, shortName: "sample-web", identity: identity)
+            XCTFail("Unpublished project was submitted")
+        } catch {
+            XCTAssertEqual(error as? PublishingError, .invalidInput)
+        }
+        XCTAssertEqual(fixture.requests.count, 2)
+    }
+
+    private func makeService(_ replies: [(Int, String)]) -> (WebBuildService, AuthHTTPFixture) {
+        let host = UUID().uuidString.lowercased() + ".invalid"
+        self.host = host
+        let fixture = AuthHTTPFixture(replies: replies)
+        AuthHTTPProtocol.register(host, fixture: fixture)
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [AuthHTTPProtocol.self]
+        let service = WebBuildService(session: URLSession(configuration: config), origin: URL(string: "https://\(host)")!)
+        return (service, fixture)
+    }
+
+    private func projectJSON(revision: Int, shareURL: String? = nil) throws -> String {
+        var project: [String: Any] = [
+            "id": id, "revision": revision, "updatedAt": 1_800_000_000_000,
+            "page": ["title": "海边读书会", "description": "周日下午见", "palette": "ocean",
+                     "sections": [["title": "活动安排", "text": "下午三点签到", "expandable": true]]],
+            "prompts": ["做一个读书会邀请页"],
+        ]
+        if let shareURL {
+            project["shareUrl"] = shareURL
+            project["publishedRevision"] = revision
+        }
+        return try publishingJSON(project)
+    }
+}

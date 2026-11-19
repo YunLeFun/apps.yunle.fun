@@ -1,0 +1,14 @@
+{
+  "name": "yunle-web-build",
+  "main": "index.mjs",
+  "compatibility_date": "2026-11-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "build.yunle.app/*", "zone_name": "yunle.app" }],
+  "vars": { "APPS_ORIGIN": "https://apps.yunle.fun" },
+  "secrets": { "required": ["WEB_BUILD_WRITE_TOKEN"] },
+  "r2_buckets": [{ "binding": "PAGES", "bucket_name": "yunle-web-build" }],
+  "observability": { "enabled": true }
+}

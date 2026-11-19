@@ -438,3 +438,18 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["设置"].waitForExistence(timeout: 5))
     }
 }
+
+extension NativeNavigationUITests {
+    func testWorkshopHidesWebBuildFromGuests() {
+        let app = XCUIApplication()
+        app.launchEnvironment["YUNLEFUN_UI_DISABLE_ANIMATIONS"] = "1"
+        app.launch()
+
+        let workshop = app.tabBars.buttons["工坊"]
+        XCTAssertTrue(workshop.waitForExistence(timeout: 12))
+        workshop.tap()
+        XCTAssertTrue(app.navigationBars["工坊"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["catalog.assistant"].firstMatch.waitForExistence(timeout: 8))
+        XCTAssertFalse(app.descendants(matching: .any)["catalog.webBuild"].firstMatch.exists)
+    }
+}

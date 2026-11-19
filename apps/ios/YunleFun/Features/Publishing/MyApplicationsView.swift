@@ -97,7 +97,11 @@ private struct ManagedApplicationView: View {
                     LabeledContent("访问方式", value: app.draft.accessMode.label)
                     LabeledContent("发布阶段", value: app.draft.releaseStage.label)
                     LabeledContent("作品状态", value: app.publicationStatus?.label ?? "旧版作品")
-                    if store.canSubmit { Button("编辑作品") { editing = app } }
+                    if let webBuildID = WebBuildValue.id(forAppSlug: app.draft.slug) {
+                        NavigationLink("编辑网页") { WebBuildEditorView(projectID: webBuildID) }
+                    } else if store.canSubmit {
+                        Button("编辑作品") { editing = app }
+                    }
                     if let restriction = app.application.ownerPreviewRestriction { Text(restriction).foregroundStyle(.secondary) }
                     else if app.application.launchURL != nil {
                         Button("预览作品") { runtime.open(app.application, catalog: catalog, library: library) }
@@ -108,7 +112,7 @@ private struct ManagedApplicationView: View {
                 Section("云乐坊投稿") {
                     Label(app.marketState.label, systemImage: "square.and.arrow.up")
                     Text(app.marketState.detail).foregroundStyle(.secondary)
-                    if let action = app.marketState.action, store.canSubmit {
+                    if let action = app.marketState.action, store.canSubmit, WebBuildValue.id(forAppSlug: app.draft.slug) == nil {
                         Button(action == .makePublic ? "设为公开并投稿云乐坊" : "投稿云乐坊") {
                             market = MarketConfirmation(application: app, generation: accounts.identityGeneration)
                         }.disabled(store.isWriting)

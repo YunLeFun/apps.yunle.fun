@@ -53,3 +53,9 @@ function first<T>(data: unknown): T | null {
     return data[0] as T | undefined || null
   return data && typeof data === 'object' ? data as T : null
 }
+
+export async function requireAppIdentityMigration(reader: DocumentReader) {
+  const gate = first<{ ready?: boolean }>((await reader.collection('app_identifiers').doc('migration_v2').get()).data)
+  if (gate?.ready !== true)
+    throw createError({ statusCode: 503, message: '应用管理正在升级，请稍后重试', data: { code: 'APP_IDENTITY_MIGRATION' } })
+}

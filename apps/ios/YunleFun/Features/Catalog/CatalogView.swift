@@ -2,16 +2,18 @@ import SwiftUI
 
 struct CatalogView: View {
     @EnvironmentObject private var catalog: CatalogStore
+    @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var query = ""
     @State private var category = "全部"
     @State private var showScanner = false
     @State private var isRefreshing = false
+    @State private var webBuildAccess: AccountRequestBoundary?
     @StateObject private var discovery = WorkshopDiscoveryStore()
     @State private var returningShortcut: Shortcut?
     @AccessibilityFocusState(for: .voiceOver) private var focusedShortcut: Shortcut?
-    private enum Shortcut: Hashable { case assistant, applications, workshops, lookup }
+    private enum Shortcut: Hashable { case assistant, webBuild, applications, workshops, lookup }
 
     private var isBrowsing: Bool {
         query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && category == "全部"
@@ -32,12 +34,14 @@ struct CatalogView: View {
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
                     prompt: Text(dynamicTypeSize.isAccessibilitySize ? "搜索应用" : "搜索应用、用途或作者"))
         .task { await discovery.load() }
+        .task(id: accounts.identityGeneration) { await checkWebBuildAccess() }
         .refreshable {
             isRefreshing = true
             defer { isRefreshing = false }
             async let recommendations: Void = discovery.load()
+            async let webBuild: Void = checkWebBuildAccess()
             await catalog.refreshWithIcons()
-            await recommendations
+            _ = await (recommendations, webBuild)
         }
         .animation(Motion.standard(reduceMotion: reduceMotion), value: category)
         .haptic(.selection, trigger: category)
@@ -66,6 +70,10 @@ struct CatalogView: View {
                 Section {
                     shortcut("AI 找应用", systemImage: "sparkles", entry: .assistant) { AssistantView() }
                         .accessibilityIdentifier("catalog.assistant")
+                    if accounts.user?.isUsable == true, webBuildAccess?.generation == accounts.identityGeneration {
+                        shortcut("AI 制作网页", systemImage: "sparkle.magnifyingglass", entry: .webBuild) { WebBuildView() }
+                            .accessibilityIdentifier("catalog.webBuild")
+                    }
                 }
             }
             CatalogStatusView()
@@ -111,6 +119,15 @@ struct CatalogView: View {
                 }
             }
         }
+    }
+
+    private func checkWebBuildAccess() async {
+        guard accounts.user?.isUsable == true else { return }
+        let access = AccountRequestAccess<PublishingError>(accounts: accounts)
+        let boundary = access.boundary
+        let enabled = try? await access.perform(boundary: boundary) { try await WebBuildService().available(identity: $0) }
+        guard access.isCurrent(boundary), !Task.isCancelled else { return }
+        webBuildAccess = enabled == true ? boundary : nil
     }
 
     private func shortcut<Destination: View>(_ title: String, systemImage: String, entry: Shortcut,

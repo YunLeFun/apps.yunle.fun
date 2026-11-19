@@ -1,7 +1,7 @@
 import Foundation
 
 enum PublishingError: Error, Equatable, AccountRequestFailure {
-    case invalidInput, invalidResponse, unauthorized, forbidden, notFound, conflict, throttled, unavailable, identityChanged, storage, unsupportedServer
+    case invalidInput, invalidResponse, unauthorized, forbidden, membershipRequired, notFound, conflict, throttled, unavailable, identityChanged, storage, unsupportedServer, contentRejected
     var isUnauthorized: Bool { self == .unauthorized }
     var message: String {
         switch self {
@@ -9,12 +9,14 @@ enum PublishingError: Error, Equatable, AccountRequestFailure {
         case .invalidResponse: return "服务返回的作品信息不完整，请刷新后核对。"
         case .unauthorized: return "登录状态已失效，请重新登录。"
         case .forbidden: return "请使用已验证手机号且状态正常的作品所有者账号操作。"
+        case .membershipRequired: return "AI 制作网页需要有效的云乐坊会员。"
         case .notFound: return "作品已不存在或当前账号无权管理。"
         case .conflict: return "作品、市场短名或审核状态已变化，请刷新后核对。"
         case .throttled: return "操作较频繁，请稍后重试。作品保存还有每日次数限制。"
         case .unavailable: return "暂时无法连接作品服务，请检查网络后重试。"
         case .identityChanged: return "账号已变化，请重新打开作品。"
         case .unsupportedServer: return "服务暂未支持安全保存。请稍后刷新重试，本机草稿可以继续保留。"
+        case .contentRejected: return "网页未通过发布审核，请调整内容后再试。"
         case .storage: return "无法保存本机草稿，原有文件已保留。"
         }
     }

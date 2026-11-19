@@ -34,6 +34,21 @@ describe('app submission validation', () => {
     })
   })
 
+  it('accepts only platform-managed fixed hosted versions and never grants the build host bridge access', () => {
+    const id = '1'.repeat(32)
+    const revision = '2'.repeat(32)
+    const hosted = {
+      ...base,
+      slug: `web-build-${id}`,
+      websiteUrl: `https://build.yunle.app/site/${id}/${revision}.html`,
+      trustedHosts: ['build.yunle.app'],
+    }
+    expect(() => normalizeSubmissionInput(hosted)).toThrow()
+    expect(normalizeSubmissionInput(hosted, { webBuildId: id }).snapshot.trustedHosts).toEqual([])
+    expect(() => normalizeSubmissionInput({ ...hosted, websiteUrl: `https://build.yunle.app/site/${id}` }, { webBuildId: id })).toThrow()
+    expect(() => normalizeSubmissionInput({ ...base, trustedHosts: ['yunle.app'] })).toThrow()
+  })
+
   it('does not confuse lookalike suffixes with first-party domains', () => {
     expect(isYunLeFunFirstPartyHostname('cms.yunle.fun')).toBe(true)
     expect(isYunLeFunFirstPartyHostname('yunle.fun.attacker.example')).toBe(false)

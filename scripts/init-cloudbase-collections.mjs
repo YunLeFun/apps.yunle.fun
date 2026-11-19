@@ -36,6 +36,7 @@ const collections = [
   'workshop_memberships',
   'workshop_events',
   'diagnostic_log_uploads',
+  'web_builds',
 ]
 
 for (const name of collections) {

@@ -75,6 +75,21 @@ describe('moderation utils', () => {
     }))
   })
 
+  it('keeps the strongest suggestion across aggregate and detail results', async () => {
+    const { moderateText } = await import('../../server/utils/moderation')
+    textModerationMock.mockResolvedValueOnce({
+      Suggestion: 'Block',
+      DetailResults: [{ Suggestion: 'Pass' }, { Suggestion: 'Review' }],
+    })
+    const result = await moderateText({
+      content: '网页文案',
+      userId: 'uid-1',
+      dataId: 'web-build',
+      scene: 'web_build',
+    })
+    expect(result.suggestion).toBe('Block')
+  })
+
   it('fails safe to Review when TMS throws', async () => {
     const { moderateText } = await import('../../server/utils/moderation')
     textModerationMock.mockRejectedValueOnce(new Error('timeout'))

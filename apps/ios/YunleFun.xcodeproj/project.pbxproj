@@ -14,6 +14,7 @@
 		012D4872914254AAFBD23D19 /* HomeBackupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA290EB6F51553FC6D61A2C /* HomeBackupRepository.swift */; };
 		01480B2B94D75FF5A3A1D5FF /* NativeGameResourceCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389FD62DB26CD3061DD5512E /* NativeGameResourceCacheTests.swift */; };
 		02728F61CE2F041B3A8B0466 /* ShareFeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1AE67FA7E92998DA8D6C82 /* ShareFeedbackComposer.swift */; };
+		039118B9DB52E35171B6A317 /* RoomInviteViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A63AAEB3349571625E1F07 /* RoomInviteViews.swift */; };
 		047D88D8D4DE0CB77724220D /* ApplicationCacheWebKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17AE8AD6D948E794DD9F8CBC /* ApplicationCacheWebKitTests.swift */; };
 		04EC84341B4BAAA21DCEF676 /* YunleFunFeedbackShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B53891209674F34E81ECFE53 /* YunleFunFeedbackShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		068DDB18C9EE9E906969A937 /* NativePublicRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = F434A989E80DA81061997892 /* NativePublicRoom.swift */; };
@@ -87,7 +88,6 @@
 		49A6E5B5EC885C80FA393D23 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1833026A15F654D9FFD3E4 /* FeedbackView.swift */; };
 		49F62B1EF97143198C12EB06 /* NativePublicRoomsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1634679F48696AB8AC0A6619 /* NativePublicRoomsView.swift */; };
 		4AE75AA08CC708A36C832BCE /* NativeRoomCreationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07B15D776CC60E3A8AAEDA14 /* NativeRoomCreationService.swift */; };
-		51BB901DC8EE48D08DCC2813 /* RoomInviteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7EA8B3C100409FABEB3292 /* RoomInviteService.swift */; };
 		4B67B3796BC859AA55EDBECD /* ApplicationShareCatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B149DA84317A18D3A0730BEE /* ApplicationShareCatalogView.swift */; };
 		4BC70F438EEDFC27D965E124 /* AssistantVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03692F87094D368033C4A0DF /* AssistantVisualTests.swift */; };
 		4D49AA7E4F27E25C96DD6546 /* CrossAppAuthorizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF61FA761097DCDE316E167 /* CrossAppAuthorizationTests.swift */; };
@@ -111,7 +111,6 @@
 		61C728B51CC2880D183DA795 /* DeveloperProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9651F704A0D7D36858EF4763 /* DeveloperProfileService.swift */; };
 		61DE0CE8D4F004AB99A73A3A /* CrossAppAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4DA55FFFF44325B88FC0FA /* CrossAppAuthorization.swift */; };
 		65C239969E5B491B1A3EE5E7 /* GamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222F49174154E525E67FBD58 /* GamesView.swift */; };
-		B8C079E0439C4E7FB65EC7D1 /* RoomInviteViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A910E57C2D4029B6FA0F59 /* RoomInviteViews.swift */; };
 		6662F9B3675951CFD089EEB4 /* WebProfileRecoveryLiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61FA4DFE35928660E8971D33 /* WebProfileRecoveryLiveTests.swift */; };
 		66D09E5420FCA119881C6D7A /* ApplicationAcquisitionVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A783B2878E8485F7552CCD87 /* ApplicationAcquisitionVisualTests.swift */; };
 		67AF07E07C7746B2619536F4 /* ApplicationStaticResourceCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D12A55FB39296ECB4ADFD63 /* ApplicationStaticResourceCache.swift */; };
@@ -136,6 +135,7 @@
 		7F93F728F9738F43564F3D5A /* PurchaseOwnershipJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA6704E6702EC5E8C9E0F36A /* PurchaseOwnershipJournal.swift */; };
 		7F94651618959EFE5200FF07 /* SupportCenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B28942C12C4600FDF8F8124 /* SupportCenterTests.swift */; };
 		80D906D1F3BBE3D1FD888B8C /* DeveloperProfileBenchmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B9B558DD7BEDAE75071DE6 /* DeveloperProfileBenchmarks.swift */; };
+		80E46D25ECF334C277AD182F /* RoomInviteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFB1C33495F6909A2690109A /* RoomInviteService.swift */; };
 		8279C42BD9DBBEFAAD0568AE /* DeveloperProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0976CA2D31E288FE255100AD /* DeveloperProfileStore.swift */; };
 		84857ACE57D89AE79E3CFC69 /* AssistantStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A33093D728DFEF8FA2A971 /* AssistantStore.swift */; };
 		8498085BB7DB40AADBC35896 /* Publishing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37598FCD479F6A029E5A9E0B /* Publishing.swift */; };
@@ -371,7 +371,6 @@
 		04EA7203D9CBBC97514C9EE4 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		052782C967F7135283504C11 /* ApplicationCacheRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCacheRepository.swift; sourceTree = "<group>"; };
 		07B15D776CC60E3A8AAEDA14 /* NativeRoomCreationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRoomCreationService.swift; sourceTree = "<group>"; };
-		BE7EA8B3C100409FABEB3292 /* RoomInviteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomInviteService.swift; sourceTree = "<group>"; };
 		07E8BA15000F0663C8B3815B /* ApplicationIconSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationIconSource.swift; sourceTree = "<group>"; };
 		08193E7FA9EB36BF2F7A4BCC /* CloudbaseAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudbaseAuthService.swift; sourceTree = "<group>"; };
 		0976CA2D31E288FE255100AD /* DeveloperProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperProfileStore.swift; sourceTree = "<group>"; };
@@ -404,7 +403,6 @@
 		208E0C78A488ED3FD3DB510A /* Assistant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assistant.swift; sourceTree = "<group>"; };
 		21DF72EB9600B55AB2FCC643 /* SharedFeedbackReceiptsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFeedbackReceiptsSection.swift; sourceTree = "<group>"; };
 		222F49174154E525E67FBD58 /* GamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamesView.swift; sourceTree = "<group>"; };
-		39A910E57C2D4029B6FA0F59 /* RoomInviteViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomInviteViews.swift; sourceTree = "<group>"; };
 		231DFB369624390113AD7651 /* AccountManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagementView.swift; sourceTree = "<group>"; };
 		251D23F319A863999BC3D62E /* LegacyLocalDataReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyLocalDataReader.swift; sourceTree = "<group>"; };
 		262E4E602D6DB2AAEF358FF2 /* CookExternalLinkLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookExternalLinkLiveTests.swift; sourceTree = "<group>"; };
@@ -598,6 +596,7 @@
 		C6F7F7951CFE8755843D6593 /* SupportFeedbackClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportFeedbackClient.swift; sourceTree = "<group>"; };
 		C7D8EAF48B171B2AE64776D2 /* SettingsIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsIcon.swift; sourceTree = "<group>"; };
 		C87E767F5E430D314C085F57 /* NativeRoomCreationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeRoomCreationStore.swift; sourceTree = "<group>"; };
+		C8A63AAEB3349571625E1F07 /* RoomInviteViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomInviteViews.swift; sourceTree = "<group>"; };
 		C8CC582D7ABAC5D80A5D64FA /* NativeApplicationMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeApplicationMenuView.swift; sourceTree = "<group>"; };
 		C9B030A9E7CFC94AB775172E /* YunleFunUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = YunleFunUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9C4E60632F33A88D7B4803E /* NativeGameResourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGameResourcesView.swift; sourceTree = "<group>"; };
@@ -610,6 +609,7 @@
 		CEAE1655F9687DB025CE06D2 /* PublishingCandidateLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishingCandidateLiveTests.swift; sourceTree = "<group>"; };
 		CEE7EF9B75AF44185997988B /* Community.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Community.swift; sourceTree = "<group>"; };
 		CF5D2D001488D9A5E7696A93 /* ShareFeedbackComposerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareFeedbackComposerTests.swift; sourceTree = "<group>"; };
+		CFB1C33495F6909A2690109A /* RoomInviteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomInviteService.swift; sourceTree = "<group>"; };
 		D0EF59D82409EC05C152CEC2 /* HomeSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSyncService.swift; sourceTree = "<group>"; };
 		D14FBCE9244CEEC16436E2D0 /* NativeGameCatalogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGameCatalogStore.swift; sourceTree = "<group>"; };
 		D1E2B0F1152B7482AFA76A0A /* NativeAuthorizationBroker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthorizationBroker.swift; sourceTree = "<group>"; };
@@ -1018,11 +1018,11 @@
 			isa = PBXGroup;
 			children = (
 				222F49174154E525E67FBD58 /* GamesView.swift */,
-				39A910E57C2D4029B6FA0F59 /* RoomInviteViews.swift */,
 				D81CB195503D86B90D25F256 /* NativeGameLoginCoordinator.swift */,
 				C9C4E60632F33A88D7B4803E /* NativeGameResourcesView.swift */,
 				1634679F48696AB8AC0A6619 /* NativePublicRoomsView.swift */,
 				4D98D533576DC24367E7959C /* NativeRoomCreationView.swift */,
+				C8A63AAEB3349571625E1F07 /* RoomInviteViews.swift */,
 			);
 			path = Games;
 			sourceTree = "<group>";
@@ -1145,7 +1145,6 @@
 				ABDFCD812CABADCC882733A5 /* NativeGameRoomStore.swift */,
 				AF0A726971DE6E4DF923E36B /* NativePublicRoomStore.swift */,
 				07B15D776CC60E3A8AAEDA14 /* NativeRoomCreationService.swift */,
-				BE7EA8B3C100409FABEB3292 /* RoomInviteService.swift */,
 				C87E767F5E430D314C085F57 /* NativeRoomCreationStore.swift */,
 				E213373F19E0E38EC7676F00 /* NativeStoreKit.swift */,
 				55897C761AEF57BD27A91529 /* PhotoQRCodeDecoder.swift */,
@@ -1154,6 +1153,7 @@
 				1E4D0ED083D43128B6A072A1 /* PurchaseCoordinator.swift */,
 				CA6704E6702EC5E8C9E0F36A /* PurchaseOwnershipJournal.swift */,
 				E6EA8F55A6D1A7868965216D /* QRScannerModel.swift */,
+				CFB1C33495F6909A2690109A /* RoomInviteService.swift */,
 				51EE269900107246745FAE36 /* SupportCenterService.swift */,
 				70721D183B3994216AA79E00 /* SupportCenterStore.swift */,
 				54E32CE585DFBDE5046962CA /* SupportTicketClient.swift */,
@@ -1568,7 +1568,6 @@
 				AE93FFC7074EFAD618C10B14 /* FeedbackScreenshotSection.swift in Sources */,
 				49A6E5B5EC885C80FA393D23 /* FeedbackView.swift in Sources */,
 				65C239969E5B491B1A3EE5E7 /* GamesView.swift in Sources */,
-				B8C079E0439C4E7FB65EC7D1 /* RoomInviteViews.swift in Sources */,
 				983BB7164609A7793EBCE44B /* HelpView.swift in Sources */,
 				E20938681ED5D7ED227D63B1 /* HomeBackup.swift in Sources */,
 				012D4872914254AAFBD23D19 /* HomeBackupRepository.swift in Sources */,
@@ -1615,7 +1614,6 @@
 				49F62B1EF97143198C12EB06 /* NativePublicRoomsView.swift in Sources */,
 				8F54F2C1A63EA541D48BB225 /* NativeRoomCreation.swift in Sources */,
 				4AE75AA08CC708A36C832BCE /* NativeRoomCreationService.swift in Sources */,
-				51BB901DC8EE48D08DCC2813 /* RoomInviteService.swift in Sources */,
 				1E43F3D5CA332985C2DAF0C0 /* NativeRoomCreationStore.swift in Sources */,
 				5EA5BAB7C24401FF5023C121 /* NativeRoomCreationView.swift in Sources */,
 				BFF2ACCB4E89D42D77699871 /* NativeStoreKit.swift in Sources */,
@@ -1629,6 +1627,8 @@
 				7F93F728F9738F43564F3D5A /* PurchaseOwnershipJournal.swift in Sources */,
 				B08B5872746195A4C833BF10 /* QRScannerModel.swift in Sources */,
 				282A6E7CF9C89012647D9E26 /* QRScannerView.swift in Sources */,
+				80E46D25ECF334C277AD182F /* RoomInviteService.swift in Sources */,
+				039118B9DB52E35171B6A317 /* RoomInviteViews.swift in Sources */,
 				3F09CA0C32DB306AADDC7A75 /* SVGIconDecoder.swift in Sources */,
 				D3D148A83E7E0FB5465FC387 /* ScanResult.swift in Sources */,
 				A08273F4BE1EA3F9F674B6B7 /* ScreenshotFeedbackCoordinator.swift in Sources */,
@@ -1916,7 +1916,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = QT792GAY4C;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -2095,7 +2095,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = QT792GAY4C;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -2244,7 +2244,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = QT792GAY4C;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

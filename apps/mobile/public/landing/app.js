@@ -33,6 +33,7 @@
      ======================================================================== */
   const mediaReduced = window.matchMedia('(prefers-reduced-motion: reduce)')
   let userReduced = null // null = 跟随系统
+  let flightAnimation
   const motionToggle = document.getElementById('motionToggle')
 
   function isReducedMotion() {
@@ -43,6 +44,7 @@
     const reduced = isReducedMotion()
     if (reduced) {
       document.documentElement.setAttribute('data-motion', 'reduced')
+      flightAnimation?.finish()
     }
     else {
       document.documentElement.removeAttribute('data-motion')
@@ -284,13 +286,18 @@
       onComplete?.()
     }
 
-    if (isReducedMotion() || !sourceEl) {
+    if (isReducedMotion() || !sourceEl || !Element.prototype.animate) {
       land()
       return
     }
 
     // Measure after the view has moved, so the flight starts and lands in view.
     requestAnimationFrame(() => {
+      if (isReducedMotion()) {
+        land()
+        return
+      }
+
       const startRect = sourceEl.getBoundingClientRect()
       const endRect = target.getBoundingClientRect()
       const { top, bottom } = visibleStage()
@@ -306,28 +313,27 @@
       flyer.innerHTML = app.iconHtml
       flightLayer.appendChild(flyer)
 
-      let startedAt
-      function step(timestamp) {
-        startedAt ??= timestamp
-        const progress = Math.min(1, (timestamp - startedAt) / 560)
+      // Interpolate the arc on the browser's animation timeline.
+      const segments = 16
+      const keyframes = Array.from({ length: segments + 1 }, (_, index) => {
+        const progress = index / segments
         const t = 1 - (1 - progress) ** 3
         const remaining = 1 - t
         const x = remaining ** 2 * startX + 2 * remaining * t * arcX + t ** 2 * endX
         const y = remaining ** 2 * startY + 2 * remaining * t * arcY + t ** 2 * endY
         const bounce = Math.sin(progress * Math.PI)
         const scale = 1 + bounce * 0.28 - progress * 0.08
-        flyer.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${bounce * 12}deg)`
-
-        if (progress < 1 && !isReducedMotion()) {
-          requestAnimationFrame(step)
+        return {
+          transform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${bounce * 12}deg)`,
         }
-        else {
-          flyer.remove()
-          land()
-        }
+      })
+      const animation = flyer.animate(keyframes, { duration: 560, fill: 'forwards' })
+      flightAnimation = animation
+      animation.onfinish = () => {
+        flightAnimation = undefined
+        flyer.remove()
+        land()
       }
-
-      step(performance.now())
     })
   }
 

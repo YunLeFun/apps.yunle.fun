@@ -37,7 +37,8 @@ export async function generateWebBuildPage(
   const idempotencyKey = randomUUID()
   const digest = createHash('sha256').update(JSON.stringify(messages)).digest('hex')
   const signature = createHmac('sha256', config.signingSecret)
-    .update(['v1', applicationId, idempotencyKey, String(timestamp), digest].join('\n')).digest('hex')
+    .update(['v1', applicationId, idempotencyKey, String(timestamp), digest].join('\n'))
+    .digest('hex')
   let result: unknown
   try {
     const response = await fetch(config.endpoint, {
@@ -60,7 +61,8 @@ export async function generateWebBuildPage(
     const output = body.result?.content
     if (typeof output === 'string' && output.length <= 12_000) {
       const text = output.trim()
-      result = JSON.parse(/^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(text)?.[1] ?? text)
+      const fence = /^```(?:json)?[ \t]*\r?\n/i.exec(text)
+      result = JSON.parse(fence && text.endsWith('\n```') ? text.slice(fence[0].length, -3) : text)
     }
   }
   catch {

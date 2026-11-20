@@ -168,6 +168,10 @@ struct WebBuildFriendInviteCard: View {
     @State private var unavailable = false
     @State private var error: String?
     @State private var joined = false
+    @State private var elapsedDeadline: Date?
+
+    private var deadline: Date { Date(timeIntervalSince1970: invite.expiresAt / 1_000) }
+    private var expired: Bool { elapsedDeadline == deadline || deadline <= Date() }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -175,9 +179,13 @@ struct WebBuildFriendInviteCard: View {
                 .font(.subheadline).foregroundStyle(.secondary)
             Text(verbatim: invite.title).font(.title2.bold()).accessibilityAddTraits(.isHeader)
             Text("\(inviterName) 邀请你一起制作网页。").foregroundStyle(.secondary)
-            if unavailable || (invite.expiresAt <= Date().timeIntervalSince1970 * 1000 && !joined) {
+            if unavailable || (expired && !joined && !joining) {
                 Text("邀请已失效").font(.subheadline).foregroundStyle(.secondary)
             } else {
+                if !joined {
+                    Text("有效至 \(deadline, format: .dateTime.month().day().hour().minute())")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }
                 Button { joining = true } label: {
                     if joining { ProgressView().accessibilityLabel("正在加入项目") }
                     else { Text(joined ? "打开项目" : "加入项目").frame(minHeight: 32) }
@@ -185,10 +193,17 @@ struct WebBuildFriendInviteCard: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(joining)
                 .accessibilityIdentifier("webBuild.invitation.join")
+                if let error { Text(verbatim: error).font(.footnote).foregroundStyle(.secondary) }
             }
-            if let error { Text(verbatim: error).font(.footnote).foregroundStyle(.secondary) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .task(id: deadline) {
+            let expiration = deadline
+            let remaining = expiration.timeIntervalSinceNow
+            if remaining > 0 { try? await Task.sleep(for: .seconds(remaining)) }
+            guard !Task.isCancelled else { return }
+            elapsedDeadline = expiration
+        }
         .task(id: joining) {
             guard joining else { return }
             defer { joining = false }

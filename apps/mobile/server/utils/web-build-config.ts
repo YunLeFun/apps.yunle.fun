@@ -1,9 +1,11 @@
 import type { H3Event } from 'h3'
 import { createError, getRequestHeader } from 'h3'
+import { resolveCloudbaseEnvId } from './cloudbase-config'
 
 export const WEB_BUILD_HOST = 'build.yunle.app'
 export const WEB_BUILD_ORIGIN = `https://${WEB_BUILD_HOST}`
 export const webBuildIdPattern = /^[a-f0-9]{32}$/
+const collaborationTestEnvironment = 'yunlefun-8g7ybcxc7345c490'
 
 export function webBuildShareUrl(id: string) {
   return `${WEB_BUILD_ORIGIN}/site/${id}`
@@ -27,8 +29,13 @@ export function getWebBuildTestSession(event: H3Event) {
 export function webBuildEditorEnabled(event: H3Event) {
   const config = useRuntimeConfig()
   return !!getWebBuildWriteToken() && (config.webBuildEnabled === true
-    || config.webBuildCollaborationTestEnabled === true
+    || allowsWebBuildCollaborationTest(event)
     || /^[\w.:-]{1,128}$/.test(config.webBuildPilotUid || '') || !!getWebBuildTestSession(event))
+}
+
+export function allowsWebBuildCollaborationTest(event: H3Event) {
+  const config = useRuntimeConfig(event)
+  return config.webBuildCollaborationTestEnabled === true && resolveCloudbaseEnvId(config) === collaborationTestEnvironment
 }
 
 export function requireWebBuildEditor(event: H3Event) {

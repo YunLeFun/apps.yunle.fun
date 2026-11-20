@@ -4,7 +4,7 @@ import { createError } from 'h3'
 import { invokeAccountApi } from './account-api'
 import { useCloudbaseAdmin } from './cloudbase-admin'
 import { assertVerifiedCloudbasePhone, requireRegisteredCloudbaseUser } from './cloudbase-auth'
-import { getWebBuildTestSession } from './web-build-config'
+import { allowsWebBuildCollaborationTest, getWebBuildTestSession } from './web-build-config'
 
 const unavailableMessage = '暂时无法核对会员状态，请稍后重试'
 const collaborationTestIdentityIds = new Set(['testid_production-web-build-owner', 'testid_production-web-build-member'])
@@ -17,7 +17,7 @@ export async function requireWebBuildMember(event: H3Event) {
   if (personalTestSession) {
     await requireSyntheticPilot(user.uid, personalTestSession)
   }
-  else if (!user.phoneVerified && config.webBuildCollaborationTestEnabled === true) {
+  else if (!user.phoneVerified && allowsWebBuildCollaborationTest(event)) {
     testPeerUid = await findCollaborationTestPeer(user.uid)
   }
   if (!personalTestSession && !testPeerUid)

@@ -211,7 +211,7 @@ export default defineNuxtConfig({
     tmsBizType: '',
     webBuildEnabled: false,
     webBuildCollaborationEnabled: false,
-    webBuildCollaborationTestEnabled: false,
+    webBuildCollaborationTestEnabled: true,
     webBuildWriteToken: '',
     webBuildRuntimeOrigin: '',
     webBuildRuntimeSigningSecret: '',

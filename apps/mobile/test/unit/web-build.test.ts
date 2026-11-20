@@ -190,13 +190,14 @@ describe('web build release workflow', () => {
 
 describe('web build membership at the HTTP routes', () => {
   const nativeFetch = globalThis.fetch
-  const gateway = 'https://fixture-env.api.tcloudbasegateway.com'
   const runtimeOrigin = 'https://runtime.example.test'
   const signingSecret = 'b'.repeat(64)
   const fixtureBearer = 'Bearer fixture-member'
   let server: ReturnType<typeof createServer>
   let api: string
   let enabled: boolean
+  let environmentId: string
+  const gateway = () => `https://${environmentId}.api.tcloudbasegateway.com`
   let collaborationEnabled: boolean
   let collaborationTestEnabled: boolean
   let pilotUid: string
@@ -232,6 +233,7 @@ describe('web build membership at the HTTP routes', () => {
     peers.clear()
     checkInvitePeer.mockReset().mockResolvedValue({ ok: false, code: 'not_mutual' })
     enabled = true
+    environmentId = 'fixture-env'
     collaborationEnabled = true
     collaborationTestEnabled = false
     pilotUid = ''
@@ -247,15 +249,15 @@ describe('web build membership at the HTTP routes', () => {
       webBuildRuntimeOrigin: runtimeOrigin,
       webBuildRuntimeSigningSecret: signingSecret,
       webBuildPilotUid: pilotUid,
-      public: { tcbEnvId: 'fixture-env' },
+      public: { tcbEnvId: environmentId },
     }))
     vi.stubGlobal('fetch', vi.fn(async (url: string | URL, options: RequestInit) => {
       const auth = options.headers && new Headers(options.headers).get('Authorization')
       const peer = auth ? peers.get(auth) : undefined
       switch (String(url)) {
-        case `${gateway}/auth/v1/user/me`:
+        case `${gateway()}/auth/v1/user/me`:
           return Response.json(peer ? { sub: peer.uid, name: peer.uid, phone_verified: peer.verified, status: 'ACTIVE' } : profile)
-        case `${gateway}/v1/functions/account-api`: {
+        case `${gateway()}/v1/functions/account-api`: {
           expect(auth === fixtureBearer || peer !== undefined).toBe(true)
           expect(options.redirect).toBe('error')
           const body = JSON.parse(String(options.body))
@@ -564,6 +566,8 @@ describe('web build membership at the HTTP routes', () => {
     documents.set('synthetic_collaboration', scenario)
     expect((await request('/availability', undefined, owner)).status).toBe(403)
     collaborationTestEnabled = true
+    expect((await request('/availability', undefined, owner)).status).toBe(403)
+    environmentId = 'yunlefun-8g7ybcxc7345c490'
     expect((await request('/availability')).status).toBe(200)
     const { id: personalId } = await (await request('', { action: 'generate', prompt: '个人网页' })).json()
     expect((await request('', { action: 'room.invite', id: personalId })).status).toBe(403)

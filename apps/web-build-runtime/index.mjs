@@ -3,6 +3,7 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 
 const host = 'build.yunle.app'
 const maxHTMLBytes = 24_576
+const manifestTimeoutMs = 12_000
 const pagePath = /^\/site\/([a-f0-9]{32})(?:\/([a-f0-9]{32})\.html)?$/
 const uploadPath = /^\/_publish\/([a-f0-9]{32})\/([a-f0-9]{32})\.html$/
 const idPattern = /^[a-f0-9]{32}$/
@@ -86,7 +87,7 @@ async function serve(request, env, id, version) {
   const response = await fetch(new URL(path, env.APPS_ORIGIN), {
     redirect: 'manual',
     cache: 'no-store',
-    signal: AbortSignal.timeout(5_000),
+    signal: AbortSignal.timeout(manifestTimeoutMs),
   })
   if (response.status === 404)
     return empty(404)

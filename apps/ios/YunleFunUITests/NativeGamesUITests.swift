@@ -32,6 +32,62 @@ final class NativeGamesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["寻乐"].waitForExistence(timeout: 5))
     }
 
+    func testPaperStarFliesWithNativeLandscapeTouchControls() throws {
+        guard ProcessInfo.processInfo.environment["YUNLEFUN_PAPER_STAR_TOUCH"] == "1" else {
+            throw XCTSkip("Requires the local Play preview on port 18146")
+        }
+        let app = XCUIApplication()
+        app.launchEnvironment["YUNLEFUN_PLAY_PREVIEW"] = "1"
+        app.launch()
+        defer {
+            app.terminate()
+            XCUIDevice.shared.orientation = .portrait
+        }
+        let games = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "寻乐")).firstMatch
+        XCTAssertTrue(games.waitForExistence(timeout: 15), app.debugDescription)
+        games.tap()
+        let tutorial = app.buttons["games.launch.paper-star.tutorial"]
+        for _ in 0..<12 {
+            if tutorial.exists && tutorial.isHittable { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(tutorial.isHittable)
+        tutorial.tap()
+        XCUIDevice.shared.orientation = .landscapeRight
+
+        let web = app.webViews.firstMatch
+        let steering = web.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ OR label == %@", "飞行摇杆", "向左转")).firstMatch
+        XCTAssertTrue(steering.waitForExistence(timeout: 45), app.debugDescription)
+        XCTAssertGreaterThan(app.frame.width, app.frame.height)
+        XCTAssertTrue(web.staticTexts["准备滑翔"].waitForNonExistence(timeout: 10))
+        XCTAssertTrue(steering.isEnabled)
+        capture(app, "paper-star-vector-landscape")
+
+        if steering.label.hasPrefix("飞行摇杆") {
+            let center = steering.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            for offset in [-30.0, 30.0] {
+                center.press(forDuration: 0.08, thenDragTo: center.withOffset(CGVector(dx: offset, dy: 0)),
+                             withVelocity: .slow, thenHoldForDuration: 0.4)
+            }
+        } else {
+            steering.press(forDuration: 0.4)
+            web.buttons["向右转"].press(forDuration: 0.4)
+        }
+        func lesson(_ short: String, _ full: String) -> XCUIElement {
+            web.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@ OR label == %@", short, full)).firstMatch
+        }
+        XCTAssertTrue(lesson("按住加速", "让折痕更有力量").waitForExistence(timeout: 5))
+        capture(app, "paper-star-vector-steering")
+
+        web.buttons["加速"].press(forDuration: 0.6)
+        XCTAssertTrue(lesson("连射三次", "连续画出攻击线").waitForExistence(timeout: 5))
+        capture(app, "paper-star-vector-boost")
+
+        web.buttons["发射"].press(forDuration: 1.15)
+        capture(app, "paper-star-vector-fire")
+        XCTAssertTrue(lesson("能量满后点齐射", "释放折纸能量").waitForExistence(timeout: 5))
+    }
+
     func testWorkshopContainsAIFinderAndSearchFocusesOnResults() {
         let app = XCUIApplication()
         app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]

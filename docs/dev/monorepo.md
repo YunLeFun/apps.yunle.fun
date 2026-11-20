@@ -63,6 +63,26 @@ pnpm make:desktop
 
 ## EdgeOne 生产部署
 
+Makers 项目 `yunlefun-apps` 的生产环境绑定 `edgeone-release`，预览自动部署关闭。将 Web 版本标签（例如 `web-v1.2.3`）推送到已验证的 `main` 提交时，[Web 发布工作流](https://github.com/YunLeFun/apps.yunle.fun/blob/main/.github/workflows/web-release.yml) 将生产分支快进到标签提交，再由 Makers 构建并部署。日常合并和客户端版本标签独立运行。
+
+为已验证的提交打标签并只推送这一枚标签。
+
+```bash
+git tag -a web-v1.2.3 <validated-main-sha> -m 'Apps Web 1.2.3'
+git push origin refs/tags/web-v1.2.3
+```
+
+发布后在 Makers 中核对 Production 部署提交与标签一致，再执行本节的线上检查。GitHub Actions 无法启动时，维护者可以用下面的命令推进已推送的标签。将示例标签替换为目标版本。
+
+```bash
+git fetch origin main --tags
+release=$(git rev-parse 'refs/tags/web-v1.2.3^{commit}') &&
+  git merge-base --is-ancestor "$release" origin/main &&
+  git push origin "$release:refs/heads/edgeone-release"
+```
+
+需要恢复上一版本时，在 Makers 回滚生产部署。需要恢复每次合并自动部署时，将生产环境关联分支改回 `main`。
+
 生产站点使用 EdgeOne 官方 Nuxt 自动适配器，浏览器资源、页面 fallback 和 Nitro API 一起验收。控制台的构建目录必须指向实际 Nuxt 工程；仓库根包只负责命令转发，不能让平台正确检测移动 Nuxt 应用。
 
 | 构建设置     | 值                                           |

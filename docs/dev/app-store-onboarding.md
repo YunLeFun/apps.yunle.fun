@@ -117,9 +117,9 @@ LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pnpm sync
 
 ### Web 发布
 
-Web 生产环境由 EdgeOne Pages 的 Git 集成发布。合并到 `main` 后会自动构建，
-本地不需要 SCF、TCR 或部署密钥。运行时所需的服务端变量应配置在 EdgeOne
-项目环境变量中，不得写入仓库。
+Web 生产环境由 EdgeOne Makers 的 Git 集成发布。使用独立的 `web-v*` 标签，详见
+[EdgeOne 生产部署](./monorepo.md#edgeone-生产部署)。运行时的服务端变量保存在
+EdgeOne 项目环境中。
 
 ## 参考链接
 

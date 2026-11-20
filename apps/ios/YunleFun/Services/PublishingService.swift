@@ -121,16 +121,21 @@ struct PublishingService: PublishingServing {
         case 400: throw PublishingError.invalidInput
         case 401: throw PublishingError.unauthorized
         case 403:
-            if data.count <= 4096, (try? JSONDecoder().decode(AccessError.self, from: data))?.data?.code == "MEMBERSHIP_REQUIRED" {
-                throw PublishingError.membershipRequired
+            let code = data.count <= 4096 ? (try? JSONDecoder().decode(AccessError.self, from: data))?.data?.code : nil
+            switch code {
+            case "MEMBERSHIP_REQUIRED": throw PublishingError.membershipRequired
+            case "WEB_BUILD_INVITE_NOT_MUTUAL": throw PublishingError.webBuildInviteNotMutual
+            case "WEB_BUILD_INVITE_PEER_UNAVAILABLE": throw PublishingError.webBuildInvitePeerUnavailable
+            default: throw PublishingError.forbidden
             }
-            throw PublishingError.forbidden
         case 404: throw PublishingError.notFound
         case 409:
-            if data.count <= 4096, (try? JSONDecoder().decode(AccessError.self, from: data))?.data?.code == "WEB_BUILD_ROOM_FULL" {
-                throw PublishingError.webBuildRoomFull
+            let code = data.count <= 4096 ? (try? JSONDecoder().decode(AccessError.self, from: data))?.data?.code : nil
+            switch code {
+            case "WEB_BUILD_ROOM_FULL": throw PublishingError.webBuildRoomFull
+            case "WEB_BUILD_ALREADY_JOINED": throw PublishingError.webBuildAlreadyJoined
+            default: throw PublishingError.conflict
             }
-            throw PublishingError.conflict
         case 412: throw PublishingError.conflict
         case 422: throw PublishingError.contentRejected
         case 428: throw PublishingError.unsupportedServer

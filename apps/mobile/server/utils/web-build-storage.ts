@@ -10,15 +10,18 @@ import { storeWebBuildArtifact } from './web-build-artifacts'
 import { webBuildIdPattern, webBuildShareUrl } from './web-build-config'
 
 const collection = 'web_builds'
-const dailyLimits = { generate: 8, publish: 12, chat: 120 } as const
+const dailyLimits = { generate: 8, publish: 12, chat: 120, friendInvite: 32 } as const
 const limitMessages = {
   generate: '已达到今日网页生成次数上限',
   publish: '已达到今日网页发布次数上限',
   chat: '已达到今日项目聊天发送次数上限',
+  friendInvite: '已达到今日好友邀请次数上限',
 }
 const roomCapacity = 8
 const roomMessageLimit = 50
 const inviteDuration = 24 * 60 * 60 * 1000
+const notificationCollection = 'user_notifications'
+const friendInviteType = 'web_build_invite'
 
 interface RoomMember extends WebBuildRoomMember {
   uid: string
@@ -29,6 +32,16 @@ interface Room {
   members: RoomMember[]
   messages: WebBuildRoomMessage[]
   invite: { digest: string, expiresAt: number } | null
+  friendInvites?: { epoch: string, expiresAt: number } | null
+}
+
+interface FriendInvite {
+  type: typeof friendInviteType
+  userId: string
+  actorId: string
+  webBuildInvite: { projectId: string, title: string, expiresAt: number, epoch: string }
+  read: boolean
+  createdAt: number
 }
 
 interface Project {
@@ -147,6 +160,8 @@ function serialize(id: string, project: Project, uid: string): WebBuildProject {
       viewerId: actor.id,
       messages: room.messages,
       inviteExpiresAt: item.role === 'owner' && room.invite && room.invite.expiresAt > Date.now() ? room.invite.expiresAt : null,
+      ...(item.role === 'owner' && room.friendInvites && room.friendInvites.expiresAt > Date.now()
+        && { friendInvitesExpireAt: room.friendInvites.expiresAt }),
     } }),
   }
 }
@@ -247,15 +262,24 @@ function inviteDigest(code: string) {
   return createHash('sha256').update(code).digest('hex')
 }
 
+function roomForInviting(project: Project, user: ServerAuthUser): Room {
+  if (project.blockedAt)
+    missingWebBuild()
+  const room = project.room ?? { owner: { id: 'owner', name: actorName(user, '项目所有者') }, members: [], messages: [], invite: null }
+  requireRoomSeat(room)
+  return room
+}
+
+function requireRoomSeat(room: Room) {
+  if (room.members.length >= roomCapacity - 1)
+    throw createError({ statusCode: 409, statusMessage: '项目已满（最多 8 人）', data: { code: 'WEB_BUILD_ROOM_FULL' } })
+}
+
 export async function createWebBuildRoomInvite(id: string, user: ServerAuthUser) {
   const db = useCloudbaseAdmin().db
   return db.runTransaction(async (transaction: CloudbaseTransaction) => {
     const project = await owned(transaction, id, user.uid)
-    if (project.blockedAt)
-      missingWebBuild()
-    const current = project.room ?? { owner: { id: 'owner', name: actorName(user, '项目所有者') }, members: [], messages: [], invite: null }
-    if (current.members.length >= roomCapacity - 1)
-      throw createError({ statusCode: 409, statusMessage: '项目已满（最多 8 人）', data: { code: 'WEB_BUILD_ROOM_FULL' } })
+    const current = roomForInviting(project, user)
     const inviteCode = `${id}.${newId()}`
     const room = { ...current, invite: { digest: inviteDigest(inviteCode), expiresAt: Date.now() + inviteDuration } }
     await doc(transaction, id).update({ room })
@@ -269,7 +293,7 @@ export async function revokeWebBuildRoomInvite(id: string, uid: string) {
     const project = await owned(transaction, id, uid)
     if (project.blockedAt || !project.room)
       missingWebBuild()
-    const room = { ...project.room, invite: null }
+    const room = { ...project.room, invite: null, friendInvites: null }
     await doc(transaction, id).update({ room })
     return { project: serialize(id, { ...project, room }, uid) }
   })
@@ -289,13 +313,90 @@ export async function joinWebBuildRoom(code: string, user: ServerAuthUser) {
       return { project: serialize(id, project, user.uid) }
     if (!current.invite || current.invite.expiresAt <= Date.now() || current.invite.digest !== inviteDigest(code))
       missingWebBuild()
-    if (current.members.length >= roomCapacity - 1)
-      throw createError({ statusCode: 409, statusMessage: '项目已满（最多 8 人）', data: { code: 'WEB_BUILD_ROOM_FULL' } })
-    const member = { uid: user.uid, id: newId(), name: actorName(user, '成员') }
-    const room = { ...current, members: [...current.members, member] }
-    const collaboratorUids = room.members.map(member => member.uid)
-    await doc(transaction, id).update({ room, collaboratorUids })
-    return { project: serialize(id, { ...project, room, collaboratorUids }, user.uid) }
+    return addRoomMember(transaction, id, project, current, user)
+  })
+}
+
+async function addRoomMember(db: CloudbaseTransaction, id: string, project: Project, current: Room, user: ServerAuthUser) {
+  requireRoomSeat(current)
+  const member = { uid: user.uid, id: newId(), name: actorName(user, '成员') }
+  const room = { ...current, members: [...current.members, member] }
+  const collaboratorUids = room.members.map(member => member.uid)
+  await doc(db, id).update({ room, collaboratorUids })
+  return { project: serialize(id, { ...project, room, collaboratorUids }, user.uid) }
+}
+
+async function readFriendInvite(db: CloudbaseTransaction, noticeId: string, userId: string) {
+  const { data, code } = await db.collection(notificationCollection).doc(noticeId).get()
+  if (code)
+    throw createError({ statusCode: 503, statusMessage: '暂时无法读取邀约' })
+  const notice = (Array.isArray(data) ? data[0] : data) as FriendInvite | undefined
+  if (notice?.type !== friendInviteType || notice.userId !== userId || !notice.webBuildInvite)
+    return
+  return notice
+}
+
+export async function sendWebBuildFriendInvite(id: string, user: ServerAuthUser, targetId: string, checkPeer: (target: string) => Promise<void>) {
+  const db = useCloudbaseAdmin().db
+  const initial = await owned(db, id, user.uid)
+  roomForInviting(initial, user)
+  await checkPeer(targetId)
+  await reserveWebBuildAction(user.uid, 'friendInvite')
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const project = await owned(transaction, id, user.uid)
+    const current = roomForInviting(project, user)
+    if (roomActor(project, targetId))
+      throw createError({ statusCode: 409, statusMessage: '对方已加入项目', data: { code: 'WEB_BUILD_ALREADY_JOINED' } })
+    const now = Date.now()
+    const epoch = current.friendInvites && current.friendInvites.expiresAt > now ? current.friendInvites.epoch : newId()
+    const noticeId = inviteDigest(JSON.stringify([friendInviteType, id, targetId, epoch])).slice(0, 24)
+    const previous = await readFriendInvite(transaction, noticeId, targetId)
+    if (previous && previous.webBuildInvite.expiresAt > now)
+      return { project: serialize(id, project, user.uid) }
+
+    const expiresAt = now + inviteDuration
+    const room = { ...current, friendInvites: { epoch, expiresAt } }
+    const notice: FriendInvite = {
+      userId: targetId,
+      actorId: user.uid,
+      type: friendInviteType,
+      webBuildInvite: { projectId: id, title: storedPage(project.page).title, expiresAt, epoch },
+      read: false,
+      createdAt: now,
+    }
+    await doc(transaction, id).update({ room })
+    await transaction.collection(notificationCollection).doc(noticeId).set(notice)
+    return { project: serialize(id, { ...project, room }, user.uid) }
+  })
+}
+
+export async function acceptWebBuildFriendInvite(noticeId: string, user: ServerAuthUser, checkPeer: (target: string) => Promise<void>) {
+  const db = useCloudbaseAdmin().db
+  const notice = await readFriendInvite(db, noticeId, user.uid)
+  if (!notice)
+    missingWebBuild()
+  const id = notice.webBuildInvite.projectId
+  const initial = await readProject(db, id)
+  if (initial.blockedAt || initial.ownerUid !== notice.actorId)
+    missingWebBuild()
+  if (roomActor(initial, user.uid))
+    return { project: serialize(id, initial, user.uid) }
+  if (notice.webBuildInvite.expiresAt <= Date.now() || initial.room?.friendInvites?.epoch !== notice.webBuildInvite.epoch)
+    missingWebBuild()
+  await checkPeer(notice.actorId)
+
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const current = await readFriendInvite(transaction, noticeId, user.uid)
+    const project = await readProject(transaction, id)
+    if (!current || current.webBuildInvite.projectId !== id || current.actorId !== notice.actorId
+      || project.ownerUid !== current.actorId || project.blockedAt || !project.room) {
+      missingWebBuild()
+    }
+    if (roomActor(project, user.uid))
+      return { project: serialize(id, project, user.uid) }
+    if (current.webBuildInvite.expiresAt <= Date.now() || project.room.friendInvites?.epoch !== current.webBuildInvite.epoch)
+      missingWebBuild()
+    return addRoomMember(transaction, id, project, project.room, user)
   })
 }
 
@@ -308,7 +409,11 @@ export async function changeWebBuildRoomMembers(id: string, uid: string, removeM
     if (!current || (removeMemberId !== undefined) !== isOwner)
       missingWebBuild()
     const members = current.members.filter(member => isOwner ? member.id !== removeMemberId : member.uid !== uid)
-    const room = { ...current, members, invite: isOwner && current.members.length !== members.length ? null : current.invite }
+    const room = {
+      ...current,
+      members,
+      ...(isOwner && current.members.length !== members.length && { invite: null, friendInvites: null }),
+    }
     await doc(transaction, id).update({ room, collaboratorUids: members.map(member => member.uid) })
     return isOwner ? { project: serialize(id, { ...project, room }, uid) } : {}
   })

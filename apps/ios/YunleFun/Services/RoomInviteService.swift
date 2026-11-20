@@ -18,6 +18,15 @@ struct RoomInviteMessage: Decodable, Identifiable {
             return try? NativeGameRoomIntent(input: inviteCode)
         }
     }
+    struct WebBuild: Decodable {
+        let projectId: String
+        let title: String
+        let expiresAt: Double
+
+        var isValid: Bool {
+            WebBuildValue.id(projectId) && WebBuildValue.text(title, limit: 50) && CommunityValue.timestamp(expiresAt)
+        }
+    }
 
     let id: String
     let actor: Actor
@@ -25,6 +34,13 @@ struct RoomInviteMessage: Decodable, Identifiable {
     let roomInvite: Room?
     let roomInviteReply: String?
     let roomInviteGameId: String?
+    let webBuildInvite: WebBuild?
+
+    var webBuild: WebBuild? {
+        guard type == "web_build_invite", WebBuildValue.inviteID(id),
+              let webBuildInvite, webBuildInvite.isValid else { return nil }
+        return webBuildInvite
+    }
 
     var isLaterReply: Bool { type == "room_invite_reply" && roomInviteReply == "later" }
     var hasRepliedLater: Bool { roomInviteReply == "later" }
@@ -63,7 +79,7 @@ struct RoomInviteService {
     }
 
     func messages(skip: Int, identity: AuthorizedAccount) async throws -> RoomInvitePage<RoomInviteMessage> {
-        try await page("listRoomInvites", skip: skip, identity: identity, includeReplies: true)
+        try await page("listRoomInvites", skip: skip, identity: identity, options: ["includeReplies": true, "includeWebBuild": true])
     }
 
     func send(room: NativeGameRoomIntent, to friend: RoomInviteFriend, identity: AuthorizedAccount) async throws {
@@ -92,10 +108,10 @@ struct RoomInviteService {
     private struct Receipt: Decodable { let ok: Bool; let code: String? }
 
     private func page<Item: Decodable & Identifiable>(_ action: String, skip: Int,
-                                                      identity: AuthorizedAccount, includeReplies: Bool = false) async throws -> RoomInvitePage<Item> {
+                                                      identity: AuthorizedAccount, options: [String: Bool] = [:]) async throws -> RoomInvitePage<Item> {
         guard (0...1_000_000).contains(skip) else { throw RoomInviteError.unavailable }
         var fields: [String: Any] = ["action": action, "skip": skip, "limit": Self.pageSize]
-        if includeReplies { fields["includeReplies"] = true }
+        for (key, value) in options { fields[key] = value }
         let result: RoomInvitePage<Item> = try await call(fields, identity: identity)
         guard result.items.count <= Self.pageSize, Set(result.items.map(\.id)).count == result.items.count,
               result.nextSkip == nil || result.nextSkip == skip + Self.pageSize else { throw RoomInviteError.unavailable }

@@ -69,11 +69,13 @@ struct RoomInviteInbox: View {
     @ObservedObject var accounts: AccountStore
     @EnvironmentObject private var games: NativeGameCatalogStore
     @State private var repliesEnabled = false
+    @State private var joinedProjectID: String?
+    @State private var openWebBuild = false
     let service: RoomInviteService
     let joinRoom: (NativeGameRoomIntent) -> Void
 
     var body: some View {
-        RoomInviteList(emptyTitle: "还没有游戏邀请", emptyIcon: "tray", fetch: fetch) { (message: RoomInviteMessage) in
+        RoomInviteList(emptyTitle: "还没有邀请", emptyIcon: "tray", fetch: fetch) { (message: RoomInviteMessage) in
             if message.isLaterReply {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(verbatim: gameName(for: message.roomInviteGameId)).font(.title2.bold()).accessibilityAddTraits(.isHeader)
@@ -87,9 +89,24 @@ struct RoomInviteInbox: View {
                     joinRoom(room)
                 }
                 .padding(.vertical, 8)
+            } else if let invite = message.webBuild {
+                WebBuildFriendInviteCard(invite: invite, inviterName: message.actor.nickname) {
+                    let access = AccountRequestAccess<PublishingError>(accounts: accounts)
+                    let receipt = try await access.perform(boundary: access.boundary) { identity in
+                        try await WebBuildService().room(.acceptInvite(message.id, projectID: invite.projectId),
+                                                        projectID: nil, identity: identity)
+                    }
+                    guard let project = receipt.project else { throw PublishingError.invalidResponse }
+                    joinedProjectID = project.id
+                    openWebBuild = true
+                }
+                .padding(.vertical, 8)
             }
         }
         .navigationTitle("消息")
+        .navigationDestination(isPresented: $openWebBuild) {
+            if let joinedProjectID { WebBuildEditorView(projectID: joinedProjectID) }
+        }
     }
 
     private func gameName(for id: String?) -> String {
@@ -120,6 +137,21 @@ struct RoomInvitePicker: View {
     let room: NativeGameRoomIntent
     let currentRoom: () -> NativeGameRoomIntent?
 
+    var body: some View {
+        MutualFriendInvitePicker(accounts: accounts, service: service) { friend, identity in
+            guard currentRoom() == room else { throw RoomInviteError.roomUnavailable }
+            try await service.send(room: room, to: friend, identity: identity)
+        }
+    }
+}
+
+@MainActor
+struct MutualFriendInvitePicker: View {
+    @ObservedObject var accounts: AccountStore
+    let service: RoomInviteService
+    var sendIdentifier = "games.invite.send"
+    let send: (RoomInviteFriend, AuthorizedAccount) async throws -> Void
+
     @Environment(\.dismiss) private var dismiss
     @State private var sending: RoomInviteFriend?
     @State private var sent: Set<String> = []
@@ -143,7 +175,7 @@ struct RoomInvitePicker: View {
                         Button("发送") { sending = friend }.buttonStyle(.bordered)
                             .disabled(sending != nil)
                             .accessibilityLabel("发送邀请给\(friend.nickname)")
-                            .accessibilityIdentifier("games.invite.send")
+                            .accessibilityIdentifier(sendIdentifier)
                     }
                 }
             }
@@ -158,12 +190,13 @@ struct RoomInvitePicker: View {
             let access = AccountRequestAccess<RoomInviteError>(accounts: accounts)
             do {
                 try await access.perform(boundary: access.boundary) { identity in
-                    guard currentRoom() == room else { throw RoomInviteError.roomUnavailable }
-                    try await service.send(room: room, to: friend, identity: identity)
+                    try await send(friend, identity)
                 }
                 sent.insert(friend.id)
             } catch {
-                if !Task.isCancelled { sendError = roomInviteErrorMessage(error) }
+                if !Task.isCancelled {
+                    sendError = (error as? PublishingError)?.message ?? roomInviteErrorMessage(error)
+                }
             }
         }
     }

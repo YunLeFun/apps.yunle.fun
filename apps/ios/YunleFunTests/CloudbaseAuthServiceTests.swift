@@ -30,7 +30,7 @@ final class CloudbaseAuthServiceTests: XCTestCase {
     func testInviteRepliesOptInAndPreserveJoiningOlderInvitations() async throws {
         let (transport, fixture) = service([
             (200, #"{"items":[{"id":"invite","actor":{"nickname":"小云"},"roomInvite":{"inviteCode":"ABC234","gameId":"flight-chess"}}],"nextSkip":null}"#),
-            (200, #"{"items":[{"id":"reply","type":"room_invite_reply","actor":{"nickname":"小飞"},"roomInviteReply":"later","roomInviteGameId":"flight-chess"}],"nextSkip":null,"repliesEnabled":true}"#),
+            (200, #"{"items":[{"id":"reply","type":"room_invite_reply","actor":{"nickname":"小飞"},"roomInviteReply":"later","roomInviteGameId":"flight-chess"},{"id":"1234567890abcdef12345678","type":"web_build_invite","actor":{"nickname":"小云"},"webBuildInvite":{"projectId":"1234567890abcdef1234567890abcdef","title":"读书会","expiresAt":1800000000000}}],"nextSkip":null,"repliesEnabled":true}"#),
             (200, #"{"ok":true}"#),
         ])
         let service = RoomInviteService(transport: transport)
@@ -45,6 +45,10 @@ final class CloudbaseAuthServiceTests: XCTestCase {
         XCTAssertTrue(reply.isLaterReply)
         XCTAssertNil(reply.roomInvite)
         XCTAssertEqual(reply.roomInviteGameId, "flight-chess")
+        let webBuildInvite = try XCTUnwrap(page.items.last?.webBuild)
+        XCTAssertEqual(webBuildInvite.projectId, "1234567890abcdef1234567890abcdef")
+        XCTAssertEqual(webBuildInvite.title, "读书会")
+        XCTAssertNil(page.items.last?.roomInvite)
 
         let inviteID = "1234567890abcdef12345678"
         try await service.replyLater(to: inviteID, identity: identity)

@@ -1,11 +1,12 @@
 import { Buffer } from 'node:buffer'
 import { createError, getRequestHeader, readRawBody, setResponseHeader } from 'h3'
 import { parseBearerToken } from '../../utils/cloudbase-auth'
-import { requireWebBuildMember } from '../../utils/web-build-access'
+import { requireWebBuildInvitePeer, requireWebBuildMember } from '../../utils/web-build-access'
 import { getWebBuildTestSession, requireWebBuildEditor } from '../../utils/web-build-config'
 import { submitWebBuildToMarket } from '../../utils/web-build-market'
 import { generateWebBuildPage, getWebBuildRuntimeConfig } from '../../utils/web-build-model'
 import {
+  acceptWebBuildFriendInvite,
   changeWebBuildRoomMembers,
   createWebBuildRoomInvite,
   getEditableWebBuild,
@@ -16,6 +17,7 @@ import {
   reserveWebBuildAction,
   revokeWebBuildRoomInvite,
   saveWebBuildDraft,
+  sendWebBuildFriendInvite,
   sendWebBuildRoomMessage,
   withdrawWebBuild,
 } from '../../utils/web-build-storage'
@@ -59,6 +61,18 @@ export default defineEventHandler(async (event) => {
       case 'room.invite': return createWebBuildRoomInvite(id, user)
       case 'room.revoke': return revokeWebBuildRoomInvite(id, user.uid)
       case 'room.join': return joinWebBuildRoom(typeof input.inviteCode === 'string' ? input.inviteCode.trim() : '', user)
+      case 'room.inviteFriend': {
+        const target = input.targetId
+        if (typeof target !== 'string' || !target || target !== target.trim() || target.length > 128 || target === user.uid)
+          throw createError({ statusCode: 400, statusMessage: '请选择互关好友' })
+        return sendWebBuildFriendInvite(id, user, target, targetId => requireWebBuildInvitePeer(event, targetId))
+      }
+      case 'room.acceptInvite': {
+        const noticeId = input.inviteId
+        if (typeof noticeId !== 'string' || !/^[a-f0-9]{24}$/.test(noticeId))
+          throw createError({ statusCode: 400, statusMessage: '无效的项目邀请' })
+        return acceptWebBuildFriendInvite(noticeId, user, targetId => requireWebBuildInvitePeer(event, targetId))
+      }
       case 'room.leave': return changeWebBuildRoomMembers(id, user.uid)
       case 'room.remove': {
         const memberId = input.memberId

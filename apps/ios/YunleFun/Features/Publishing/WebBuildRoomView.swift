@@ -2,11 +2,13 @@ import SwiftUI
 
 struct WebBuildRoomView: View {
     @ObservedObject var store: WebBuildStore
+    @EnvironmentObject private var accounts: AccountStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @State private var message = ""
     @State private var memberToRemove: WebBuildRoom.Member?
     @State private var confirmLeave = false
+    @State private var inviting = false
 
     var body: some View {
         Form {
@@ -31,12 +33,24 @@ struct WebBuildRoomView: View {
         .task(id: activeRoomID) {
             if let id = activeRoomID { await store.observeRoom(id: id) }
         }
+        .sheet(isPresented: $inviting, onDismiss: {
+            if let id = store.project?.id {
+                Task { await store.loadProject(id: id) }
+            }
+        }) {
+            if let id = store.project?.id {
+                MutualFriendInvitePicker(accounts: accounts, service: RoomInviteService(), sendIdentifier: "webBuild.invite.send") { friend, identity in
+                    try await store.inviteFriend(friend.id, to: id, identity: identity)
+                }
+                .id(accounts.identityGeneration)
+            }
+        }
         .confirmationDialog("移除项目成员？", isPresented: Binding(
             get: { memberToRemove != nil }, set: { if !$0 { memberToRemove = nil } }
         ), titleVisibility: .visible, presenting: memberToRemove) { member in
             Button("移除成员", role: .destructive) { change(.remove(member.id)) }
         } message: { member in
-            Text("「\(member.name)」将失去项目访问权限，当前邀请码也会失效。")
+            Text("「\(member.name)」将失去项目访问权限，当前尚未接受的邀请也会失效。")
         }
         .confirmationDialog("退出项目协作？", isPresented: $confirmLeave, titleVisibility: .visible) {
             Button("退出协作", role: .destructive) {
@@ -121,21 +135,73 @@ struct WebBuildRoomView: View {
                 ShareLink(item: code) { Label("分享邀请码", systemImage: "square.and.arrow.up") }
             }
             if (room?.members.count ?? 1) < 8 {
+                Button { inviting = true } label: {
+                    Label("邀请互关好友", systemImage: "person.badge.plus")
+                }
+                .accessibilityIdentifier("webBuild.room.invite-friends")
+                .disabled(store.isWorking)
                 Button(room?.inviteExpiresAt == nil ? "生成邀请码" : "重新生成邀请码") { change(.invite) }
                     .disabled(store.isWorking)
             }
-            if room?.inviteExpiresAt != nil {
-                Button("撤销邀请码", role: .destructive) { change(.revoke) }
+            if room?.inviteExpiresAt != nil || room?.friendInvitesExpireAt != nil {
+                Button("撤销待接受的邀请", role: .destructive) { change(.revoke) }
                     .disabled(store.isWorking)
             }
         } header: {
             Text("邀请成员")
         } footer: {
-            Text("每个项目最多 8 人，含所有者。邀请码有效 24 小时，成员可查看共享草稿和项目聊天。")
+            Text("好友可从「我 → 消息」打开邀请。邀请有效 24 小时，每个项目最多 8 人，含所有者。")
         }
     }
 
     private func change(_ action: WebBuildRoomAction) {
         Task { await store.changeRoom(action) }
+    }
+}
+
+struct WebBuildFriendInviteCard: View {
+    let invite: RoomInviteMessage.WebBuild
+    let inviterName: String
+    let join: () async throws -> Void
+
+    @State private var joining = false
+    @State private var unavailable = false
+    @State private var error: String?
+    @State private var joined = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("网页项目邀请", systemImage: "person.2")
+                .font(.subheadline).foregroundStyle(.secondary)
+            Text(verbatim: invite.title).font(.title2.bold()).accessibilityAddTraits(.isHeader)
+            Text("\(inviterName) 邀请你一起制作网页。").foregroundStyle(.secondary)
+            if unavailable || (invite.expiresAt <= Date().timeIntervalSince1970 * 1000 && !joined) {
+                Text("邀请已失效").font(.subheadline).foregroundStyle(.secondary)
+            } else {
+                Button { joining = true } label: {
+                    if joining { ProgressView().accessibilityLabel("正在加入项目") }
+                    else { Text(joined ? "打开项目" : "加入项目").frame(minHeight: 32) }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(joining)
+                .accessibilityIdentifier("webBuild.invitation.join")
+            }
+            if let error { Text(verbatim: error).font(.footnote).foregroundStyle(.secondary) }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .task(id: joining) {
+            guard joining else { return }
+            defer { joining = false }
+            error = nil
+            do {
+                try await join()
+                if !Task.isCancelled { joined = true }
+            } catch {
+                guard !Task.isCancelled else { return }
+                if (error as? PublishingError) == .notFound { unavailable = true }
+                else if (error as? PublishingError) == .forbidden { self.error = "请验证手机号后再加入项目。" }
+                else { self.error = PublishingError.message(for: error) }
+            }
+        }
     }
 }

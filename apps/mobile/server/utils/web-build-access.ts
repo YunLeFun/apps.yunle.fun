@@ -34,6 +34,24 @@ export async function requireWebBuildMember(event: H3Event) {
   return user
 }
 
+export async function requireWebBuildInvitePeer(event: H3Event, targetId: string) {
+  const message = '暂时无法核对好友关系'
+  const result = await invokeAccountApi(event, { action: 'checkWebBuildInvitePeer', targetId }, message) as {
+    ok?: boolean
+    code?: string
+  } | null
+  if (result?.ok === true)
+    return
+  if (result?.code === 'not_mutual' || result?.code === 'recipient_unavailable') {
+    throw createError({
+      statusCode: 403,
+      message: result.code === 'not_mutual' ? '互关好友才能接受邀请' : '对方当前无法参与项目协作',
+      data: { code: result.code === 'not_mutual' ? 'WEB_BUILD_INVITE_NOT_MUTUAL' : 'WEB_BUILD_INVITE_PEER_UNAVAILABLE' },
+    })
+  }
+  throw createError({ statusCode: 503, statusMessage: message })
+}
+
 async function requireSyntheticPilot(uid: string, session: string) {
   const { db } = useCloudbaseAdmin()
   const deny = () => createError({ statusCode: 403, message: '网页验收会话无效或已结束' })

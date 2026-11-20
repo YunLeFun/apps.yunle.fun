@@ -69,6 +69,11 @@ final class WebBuildStore: ObservableObject {
         }
     }
 
+    func inviteFriend(_ friend: String, to id: String, identity: AuthorizedAccount) async throws {
+        guard project?.id == id, project?.role == .owner else { throw PublishingError.notFound }
+        _ = try await service.room(.inviteFriend(friend), projectID: id, identity: identity)
+    }
+
     @discardableResult
     func update(_ action: WebBuildEdit) async -> Bool {
         let current = project

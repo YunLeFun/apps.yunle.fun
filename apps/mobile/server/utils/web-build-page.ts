@@ -39,6 +39,7 @@ export interface WebBuildRoom {
   viewerId: string
   messages: WebBuildRoomMessage[]
   inviteExpiresAt: number | null
+  friendInvitesExpireAt?: number
 }
 
 export type WebBuildSummary = Pick<WebBuildProject, 'id' | 'shareUrl' | 'updatedAt' | 'role'> & { title: string }

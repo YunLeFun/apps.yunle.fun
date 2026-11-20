@@ -66,6 +66,7 @@ struct WebBuildRoom: Decodable, Sendable {
     let viewerId: String
     let messages: [Message]
     let inviteExpiresAt: Double?
+    let friendInvitesExpireAt: Double?
 
     var isValid: Bool {
         (1...8).contains(members.count) && members.first?.id == "owner"
@@ -73,6 +74,7 @@ struct WebBuildRoom: Decodable, Sendable {
             && members.contains { $0.id == viewerId }
             && messages.count <= 50 && Set(messages.map(\.id)).count == messages.count && messages.allSatisfy(\.isValid)
             && (inviteExpiresAt.map(CommunityValue.timestamp) ?? true)
+            && (friendInvitesExpireAt.map(CommunityValue.timestamp) ?? true)
     }
 }
 
@@ -125,6 +127,10 @@ enum WebBuildValue {
         guard parts.count == 2, parts.allSatisfy(id) else { return nil }
         return parts[0]
     }
+
+    static func inviteID(_ value: String) -> Bool {
+        value.utf8.count == 24 && value.utf8.allSatisfy { (48...57).contains($0) || (97...102).contains($0) }
+    }
 }
 
 enum WebBuildEdit: Sendable {
@@ -133,6 +139,7 @@ enum WebBuildEdit: Sendable {
 
 enum WebBuildRoomAction: Sendable {
     case invite, revoke, join(String), leave, remove(String), chat(String)
+    case inviteFriend(String), acceptInvite(String, projectID: String)
 }
 
 struct WebBuildRoomReceipt: Decodable, Sendable {
@@ -237,12 +244,17 @@ struct WebBuildService: WebBuildServing {
     func room(_ action: WebBuildRoomAction, projectID: String?, identity: AuthorizedAccount) async throws -> WebBuildRoomReceipt {
         let expectedID: String
         var fields: [String: Any] = [:]
-        if case .join(let code) = action {
+        switch action {
+        case .join(let code):
             let code = code.trimmed
             guard let identifier = WebBuildValue.inviteProject(code) else { throw PublishingError.invalidInput }
             fields["inviteCode"] = code
             expectedID = identifier
-        } else {
+        case .acceptInvite(let noticeID, let projectID):
+            guard WebBuildValue.inviteID(noticeID), WebBuildValue.id(projectID) else { throw PublishingError.invalidInput }
+            fields["inviteId"] = noticeID
+            expectedID = projectID
+        default:
             guard let projectID, WebBuildValue.id(projectID) else { throw PublishingError.invalidInput }
             fields["id"] = projectID
             expectedID = projectID
@@ -252,6 +264,12 @@ struct WebBuildService: WebBuildServing {
         case .invite: fields["action"] = "room.invite"
         case .revoke: fields["action"] = "room.revoke"
         case .join: fields["action"] = "room.join"
+        case .acceptInvite: fields["action"] = "room.acceptInvite"
+        case .inviteFriend(let target):
+            guard !target.isEmpty, target == target.trimmed, target.utf16.count <= 128, target != identity.userID
+            else { throw PublishingError.invalidInput }
+            fields["action"] = "room.inviteFriend"
+            fields["targetId"] = target
         case .leave: fields["action"] = "room.leave"
         case .remove(let member):
             guard WebBuildValue.id(member) else { throw PublishingError.invalidInput }
@@ -275,6 +293,9 @@ struct WebBuildService: WebBuildServing {
                   project.role == .owner, project.room?.inviteExpiresAt != nil else { throw PublishingError.invalidResponse }
         } else if receipt.inviteCode != nil {
             throw PublishingError.invalidResponse
+        }
+        if case .inviteFriend = action {
+            guard project.role == .owner, project.room?.friendInvitesExpireAt != nil else { throw PublishingError.invalidResponse }
         }
         return receipt
     }

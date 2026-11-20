@@ -605,6 +605,7 @@ final class WebBuildTransportTests: XCTestCase {
         let (service, fixture) = makeService(try [
             (200, publishingJSON(["project": shared])),
             (200, publishingJSON(["project": shared])),
+            (200, publishingJSON(["project": shared])),
         ])
 
         let joined = try await service.room(.join(inviteCode), projectID: nil, identity: identity)
@@ -620,11 +621,17 @@ final class WebBuildTransportTests: XCTestCase {
             XCTAssertEqual(error as? PublishingError, .invalidInput)
         }
         _ = try await service.room(.chat("周末前更新"), projectID: project.id, identity: identity)
+        let invitation = String(repeating: "c", count: 24)
+        let accepted = try await service.room(.acceptInvite(invitation, projectID: id), projectID: nil, identity: identity)
+        XCTAssertEqual(accepted.project?.id, project.id)
         let commands = try fixture.requests.map(publishingBody)
-        XCTAssertEqual(commands.count, 2)
+        XCTAssertEqual(commands.count, 3)
         XCTAssertEqual(commands[0]["inviteCode"] as? String, inviteCode)
         XCTAssertEqual(commands[1]["id"] as? String, id)
         XCTAssertEqual(commands[1]["text"] as? String, "周末前更新")
+        XCTAssertEqual(Set(commands[2].keys), ["action", "inviteId"])
+        XCTAssertEqual(commands[2]["action"] as? String, "room.acceptInvite")
+        XCTAssertEqual(commands[2]["inviteId"] as? String, invitation)
     }
 
     func testRejectsUnexpectedShareOriginAndUnpublishedSubmission() async throws {

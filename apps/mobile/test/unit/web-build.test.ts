@@ -203,6 +203,7 @@ describe('web build membership at the HTTP routes', () => {
   const peers = new Map<string, { uid: string, verified: boolean, active: boolean }>()
   const account = vi.fn()
   const model = vi.fn()
+  const checkInvitePeer = vi.fn()
 
   beforeAll(async () => {
     vi.stubGlobal('defineEventHandler', defineEventHandler)
@@ -227,6 +228,7 @@ describe('web build membership at the HTTP routes', () => {
   beforeEach(() => {
     clearCloudbaseAuthCache()
     peers.clear()
+    checkInvitePeer.mockReset().mockResolvedValue({ ok: false, code: 'not_mutual' })
     enabled = true
     pilotUid = ''
     profile = { sub: 'author', phone_verified: true, status: 'ACTIVE' }
@@ -247,11 +249,15 @@ describe('web build membership at the HTTP routes', () => {
       switch (String(url)) {
         case `${gateway}/auth/v1/user/me`:
           return Response.json(peer ? { sub: peer.uid, name: peer.uid, phone_verified: peer.verified, status: 'ACTIVE' } : profile)
-        case `${gateway}/v1/functions/account-api`:
+        case `${gateway}/v1/functions/account-api`: {
           expect(auth === fixtureBearer || peer !== undefined).toBe(true)
           expect(options.redirect).toBe('error')
-          expect(JSON.parse(String(options.body))).toEqual({ action: 'getAccount' })
+          const body = JSON.parse(String(options.body))
+          if (body.action === 'checkWebBuildInvitePeer')
+            return Response.json(await checkInvitePeer(auth, body.targetId))
+          expect(body).toEqual({ action: 'getAccount' })
           return peer && !peer.active ? Response.json({ membership: { isActive: false, expireAt: null } }) : account()
+        }
         case `${runtimeOrigin}/ai/v1/chat`: {
           expect(auth === fixtureBearer || peer !== undefined).toBe(true)
           expect(options.headers).toMatchObject({ 'X-Application-Id': 'web-build', 'Origin': 'https://apps.yunle.fun' })
@@ -293,6 +299,57 @@ describe('web build membership at the HTTP routes', () => {
     peers.set(bearer, { uid, verified, active })
     return bearer
   }
+
+  it('delivers one invitation per mutual friend and only lets that recipient join', async () => {
+    const { id } = await saveWebBuildDraft('author', draftPage, '仅所有者可见的指令')
+    const friend = peerBearer('friend')
+    const other = peerBearer('other')
+    const action = { action: 'room.inviteFriend', id, targetId: 'friend' }
+    expect((await request('', { ...action, targetId: 'other' }, friend)).status).toBe(404)
+    expect((await request('', action)).status).toBe(403)
+    expect([...documents.values()].some(doc => doc.type === 'web_build_invite')).toBe(false)
+    checkInvitePeer.mockImplementation(async (auth, target) => ({ ok: auth === fixtureBearer ? target === 'friend' : auth === friend && target === 'author' }))
+    const deliveries = await Promise.all([request('', action), request('', action)])
+    expect(deliveries.every(delivery => delivery.status === 200)).toBe(true)
+    const notices = [...documents].filter(([, doc]) => doc.type === 'web_build_invite')
+    expect(notices).toHaveLength(1)
+    const [inviteId, notice] = notices[0]!
+    expect(notice).toMatchObject({ userId: 'friend', actorId: 'author', webBuildInvite: { projectId: id, title: '读书会' } })
+    expect(await deliveries[0]!.json()).not.toHaveProperty('inviteCode')
+    const accept = { action: 'room.acceptInvite', inviteId }
+    expect((await request('', accept, '')).status).toBe(401)
+    expect((await request('', accept, peerBearer('unverified', false))).status).toBe(403)
+    expect((await request('', accept, other)).status).toBe(404)
+    checkInvitePeer.mockResolvedValueOnce({ ok: false, code: 'not_mutual' })
+    expect((await request('', accept, friend)).status).toBe(403)
+    const response = await request('', accept, friend)
+    expect(response.status).toBe(200)
+    const { project } = await response.json()
+    expect(project).toMatchObject({ id, role: 'member', prompts: [], room: { members: [{ id: 'owner' }, { name: 'friend' }] } })
+    expect((await request('', accept, friend)).status).toBe(200)
+    expect((await request('', { action: 'room.remove', id, memberId: project.room.viewerId })).status).toBe(200)
+    expect((await request('', accept, friend)).status).toBe(404)
+  })
+
+  it('revokes outstanding cards and preserves the room seat limit when cards are accepted concurrently', async () => {
+    const { id } = await saveWebBuildDraft('author', draftPage, '页面需求')
+    checkInvitePeer.mockResolvedValue({ ok: true })
+    const pending = peerBearer('pending')
+    expect((await request('', { action: 'room.inviteFriend', id, targetId: 'pending' })).status).toBe(200)
+    const [oldNotice] = [...documents].filter(([, doc]) => doc.userId === 'pending')
+    expect((await request('', { action: 'room.revoke', id })).status).toBe(200)
+    expect((await request('', { action: 'room.acceptInvite', inviteId: oldNotice![0] }, pending)).status).toBe(404)
+
+    const users = Array.from({ length: 8 }, (_, i) => `card-peer-${i}`)
+    const bearers = new Map(users.map(user => [user, peerBearer(user)]))
+    const deliveries = await Promise.all(users.map(targetId => request('', { action: 'room.inviteFriend', id, targetId })))
+    expect(deliveries.every(delivery => delivery.status === 200)).toBe(true)
+    const notices = [...documents].filter(([, doc]) => doc.type === 'web_build_invite' && bearers.has(String(doc.userId)))
+    const acceptances = await Promise.all(notices.map(([inviteId, doc]) =>
+      request('', { action: 'room.acceptInvite', inviteId }, bearers.get(String(doc.userId)))))
+    expect(acceptances.filter(response => response.status === 200)).toHaveLength(7)
+    expect(acceptances.filter(response => response.status === 409)).toHaveLength(1)
+  })
 
   it('invites eligible members to one private room with eight seats including the owner', async () => {
     const { id } = await saveWebBuildDraft('author', draftPage, '最早的个人提示词')

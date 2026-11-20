@@ -1,7 +1,10 @@
 import SwiftUI
 
 struct AssistantView: View {
-    private enum Modal: String, Identifiable { case login, membership, history; var id: Self { self } }
+    private enum Modal: String, Identifiable {
+        case login, membership, history, webBuild, webBuildHistory
+        var id: Self { self }
+    }
     private static let end = "assistant-end"
     private static let draftLimit = 4000
     private static let contentWidth: CGFloat = 640
@@ -21,6 +24,8 @@ struct AssistantView: View {
     @State private var focused = false
     @State private var modal: Modal?
     @State private var pendingGuestPrompt: String?
+    @State private var webBuildAccess: AccountRequestBoundary?
+    @State private var webBuildPrompt = ""
     @State private var followLatest = true
     @State private var endVisible = true
     @State private var confirmReset = false
@@ -109,11 +114,28 @@ struct AssistantView: View {
                     modal = nil; followLatest = true
                     return true
                 }
+            case .webBuild:
+                webBuildSheet {
+                    WebBuildEditorView(initialPrompt: webBuildPrompt)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                NavigationLink("我的网页") { WebBuildView() }
+                            }
+                        }
+                }
+            case .webBuildHistory:
+                webBuildSheet { WebBuildView() }
             }
         }
         .task(id: accounts.identityGeneration) { await chat.refreshAccess() }
+        .task(id: accounts.identityGeneration) {
+            let boundary = await WebBuildService().availableBoundary(for: accounts)
+            guard !Task.isCancelled else { return }
+            webBuildAccess = boundary
+        }
         .onChange(of: accounts.identityGeneration) { _ in
             modal = nil
+            webBuildPrompt = ""
             if let prompt = pendingGuestPrompt, accounts.user?.isUsable == true {
                 chat.identityChanged(); fillDraft(prompt); pendingGuestPrompt = nil
             }
@@ -124,6 +146,52 @@ struct AssistantView: View {
         .haptic(.impact, trigger: chat.messages.count) { old, new in new > old }
         .environment(\.openURL, OpenURLAction { url in AssistantMarkdown.safeLink(url) ? .systemAction : .discarded })
     }
+
+    private var canUseWebBuild: Bool {
+        accounts.user?.isUsable == true && webBuildAccess?.generation == accounts.identityGeneration
+    }
+
+    @ViewBuilder
+    private func webBuildSheet<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if canUseWebBuild {
+            NavigationStack {
+                content()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("完成") { modal = nil }
+                        }
+                    }
+            }
+        }
+    }
+
+    private var webBuildActions: some View {
+        ViewThatFits {
+            HStack(spacing: 16) { webBuildButtons }
+            VStack(alignment: .leading) { webBuildButtons }
+        }
+        .font(.subheadline)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder private var webBuildButtons: some View {
+        Button {
+            focused = false
+            webBuildPrompt = chat.draft
+            modal = .webBuild
+        } label: {
+            Label("制作网页", systemImage: "sparkle.magnifyingglass").frame(minHeight: 44)
+        }
+        .accessibilityIdentifier("assistant.web-build.create")
+        Button("我的网页") {
+            focused = false
+            webBuildPrompt = ""
+            modal = .webBuildHistory
+        }
+        .frame(minHeight: 44)
+        .accessibilityIdentifier("assistant.web-build.history")
+    }
+
     private var welcome: some View {
         VStack(spacing: 28) {
             VStack(spacing: 12) {
@@ -191,6 +259,7 @@ struct AssistantView: View {
             // Taps on the padding around the text still focus the field.
             .background { Color.clear.contentShape(Rectangle()).onTapGesture { focused = true } }
             .modifier(AssistantFieldBackground())
+            if canUseWebBuild { webBuildActions }
             accessLine
         }
         .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 8)

@@ -31,6 +31,8 @@ final class AssistantComposerUITests: XCTestCase {
     func testWelcomeAndKeyboardRespectTheAvailableSpace() throws {
         let (app, input) = try openAssistant()
         XCTAssertFalse(app.tabBars.firstMatch.exists, "The conversation owns the bottom safe area")
+        XCTAssertFalse(app.buttons["assistant.web-build.create"].exists)
+        XCTAssertFalse(app.buttons["assistant.web-build.history"].exists)
         let send = app.buttons["assistant.send"]
         XCTAssertFalse(send.isEnabled)
         XCTAssertGreaterThanOrEqual(send.frame.width, 44)

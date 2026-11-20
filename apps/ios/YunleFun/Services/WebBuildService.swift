@@ -99,6 +99,16 @@ struct WebBuildService: WebBuildServing {
         return response.enabled
     }
 
+    @MainActor
+    func availableBoundary(for accounts: any IdentityScopedAccountAuthorizing) async -> AccountRequestBoundary? {
+        guard accounts.user?.isUsable == true else { return nil }
+        let access = AccountRequestAccess<PublishingError>(accounts: accounts)
+        let boundary = access.boundary
+        let enabled = try? await access.perform(boundary: boundary) { try await available(identity: $0) }
+        guard enabled == true, access.isCurrent(boundary), !Task.isCancelled else { return nil }
+        return boundary
+    }
+
     func projects(identity: AuthorizedAccount) async throws -> [WebBuildSummary] {
         let records: [WebBuildSummary] = try await transport.request(endpoint, identity: identity)
         guard records.count <= 100, Set(records.map(\.id)).count == records.count, records.allSatisfy(\.isValid)

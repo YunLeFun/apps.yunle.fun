@@ -75,10 +75,11 @@ private struct WebBuildList: View {
 struct WebBuildEditorView: View {
     @EnvironmentObject private var accounts: AccountStore
     var projectID: String?
+    var initialPrompt = ""
     var service: WebBuildServing = WebBuildService()
 
     var body: some View {
-        WebBuildEditorContent(accounts: accounts, projectID: projectID, service: service)
+        WebBuildEditorContent(accounts: accounts, projectID: projectID, initialPrompt: initialPrompt, service: service)
             .id(accounts.identityGeneration)
             .navigationTitle("制作网页")
             .navigationBarTitleDisplayMode(.inline)
@@ -112,9 +113,10 @@ private struct WebBuildEditorContent: View {
         }
     }
 
-    init(accounts: AccountStore, projectID: String?, service: WebBuildServing) {
+    init(accounts: AccountStore, projectID: String?, initialPrompt: String, service: WebBuildServing) {
         self.accounts = accounts
         self.projectID = projectID
+        _prompt = State(initialValue: initialPrompt)
         _store = StateObject(wrappedValue: WebBuildStore(accounts: accounts, service: service))
     }
 

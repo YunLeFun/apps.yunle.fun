@@ -496,6 +496,55 @@ final class WebBuildTransportTests: XCTestCase {
         super.tearDown()
     }
 
+    @MainActor
+    func testWebBuildEntryRequiresServerApprovalForTheCurrentAccount() async {
+        let (service, fixture) = makeService([
+            (200, #"{"enabled":true}"#),
+            (403, #"{"statusCode":403}"#),
+        ])
+        let accounts = PublishingAccounts(nil)
+        let guest = await service.availableBoundary(for: accounts)
+        XCTAssertNil(guest)
+        XCTAssertTrue(fixture.requests.isEmpty)
+
+        accounts.select("owner")
+        let approved = await service.availableBoundary(for: accounts)
+        XCTAssertEqual(approved, AccountRequestBoundary(uid: "owner", generation: accounts.identityGeneration))
+
+        accounts.select("unverified")
+        let denied = await service.availableBoundary(for: accounts)
+        XCTAssertNil(denied)
+        XCTAssertEqual(fixture.requests.compactMap { $0.value(forHTTPHeaderField: "Authorization") },
+                       ["Bearer test-owner", "Bearer test-unverified"])
+    }
+
+    func testNewWebBuildDraftReopensFromPersonalHistoryForRevision() async throws {
+        let prompt = "做一个读书会邀请页"
+        let history = #"[{"id":"\#(id)","title":"海边读书会","updatedAt":1800000000000}]"#
+        let (service, fixture) = makeService(try [
+            (200, projectJSON(revision: 1)),
+            (200, history),
+            (200, projectJSON(revision: 1)),
+            (200, projectJSON(revision: 2)),
+        ])
+        let created = try await service.update(.generate(prompt), project: nil, identity: identity)
+        let projects = try await service.projects(identity: identity)
+        let summary = try XCTUnwrap(projects.first)
+        XCTAssertEqual(summary.id, created.id)
+        XCTAssertNil(summary.shareUrl)
+        let reopened = try await service.project(id: summary.id, identity: identity)
+        XCTAssertEqual(reopened.prompts, [prompt])
+        let updated = try await service.update(.generate("改成海蓝配色"), project: reopened, identity: identity)
+        XCTAssertEqual(updated.id, created.id)
+        XCTAssertEqual(updated.revision, 2)
+        let createRequest = try publishingBody(XCTUnwrap(fixture.requests.first))
+        XCTAssertEqual(createRequest["prompt"] as? String, prompt)
+        XCTAssertNil(createRequest["id"])
+        let updateRequest = try publishingBody(XCTUnwrap(fixture.requests.last))
+        XCTAssertEqual(updateRequest["id"] as? String, created.id)
+        XCTAssertEqual(updateRequest["revision"] as? Int, 1)
+    }
+
     func testNativeCreationRevisionPublishingAndSubmission() async throws {
         let link = "https://build.yunle.app/site/\(id)"
         let (service, fixture) = makeService(try [

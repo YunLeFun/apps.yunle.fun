@@ -122,12 +122,9 @@ struct CatalogView: View {
     }
 
     private func checkWebBuildAccess() async {
-        guard accounts.user?.isUsable == true else { return }
-        let access = AccountRequestAccess<PublishingError>(accounts: accounts)
-        let boundary = access.boundary
-        let enabled = try? await access.perform(boundary: boundary) { try await WebBuildService().available(identity: $0) }
-        guard access.isCurrent(boundary), !Task.isCancelled else { return }
-        webBuildAccess = enabled == true ? boundary : nil
+        let boundary = await WebBuildService().availableBoundary(for: accounts)
+        guard !Task.isCancelled else { return }
+        webBuildAccess = boundary
     }
 
     private func shortcut<Destination: View>(_ title: String, systemImage: String, entry: Shortcut,

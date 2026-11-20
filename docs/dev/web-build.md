@@ -2,7 +2,7 @@
 
 创作和投稿在 iOS 工坊完成。工坊入口向已验证手机号且账号正常的有效云乐坊会员开放。「我的应用」中的 AI 网页可返回原生编辑器，服务端会先核对会员状态。可用性、项目列表、项目详情、生成、修改、发布、停用和投稿均通过 `account-api` 核对当前账号的会员有效期。发布后的作品可匿名访问。
 
-公开分享地址为 `https://build.yunle.app/site/:id`。送审地址为 `https://build.yunle.app/site/:id/:releaseId.html`，市场继续使用获批快照中的固定地址。
+作者登录并通过会员和手机号验证后，可以在编辑器发布作品并分享 `https://build.yunle.app/site/:id`。访客可以直接打开已发布的作品链接。送审地址为 `https://build.yunle.app/site/:id/:releaseId.html`，市场继续使用获批快照中的固定地址。
 
 ## 发布和访问
 
@@ -18,7 +18,7 @@
 - 用同一个随机 64 位小写十六进制密钥配置 Worker 的 `WEB_BUILD_WRITE_TOKEN` 和 Apps Nitro 的 `NUXT_WEB_BUILD_WRITE_TOKEN`。作品站不承载登录、支付或 SSO，不加入 JSAPI 或跨域授信名单。HTTP 响应使用 CSP 禁止脚本、表单、外部资源和嵌入，并关闭共享缓存。
 - 在目标 CloudBase 环境建立 `web_builds` 集合，应用同名 `ADMINONLY` 规则。为「我的网页」建立 `ownerUid` 升序和 `updatedAt` 降序的联合索引。后台与 Apps 服务使用同一环境。
 - 生成端使用云乐坊 AI Runtime 的 `/ai/v1/chat`，应用 ID 为 `web-build`。配置 `NUXT_WEB_BUILD_RUNTIME_ORIGIN`，并在 Apps 和 Runtime 分别注入同一枚独立签名密钥 `NUXT_WEB_BUILD_RUNTIME_SIGNING_SECRET` 和 `WEB_BUILD_APP_SIGNING_SECRET`。Runtime 使用平台预算承担当次调用费用。账号每日限额为 8 次生成和 12 次发布审核，按上海时区计日。
-- 部署托管 Worker、Apps API 和审核后台，并配置腾讯文本审核。生产验收时保持 `NUXT_WEB_BUILD_ENABLED=false`，通过 `NUXT_WEB_BUILD_PILOT_UID` 仅放行指定的已验证手机号的会员。用该会员验收生成、发布和匿名分享，并核对访客及其他账号被拒绝。通过后开启 `NUXT_WEB_BUILD_ENABLED=true` 并清空验收账号配置。停止开放时同时关闭全量开关和清空验收账号配置。
+- 部署托管 Worker、Apps API 和审核后台，并配置腾讯文本审核。生产验收时保持 `NUXT_WEB_BUILD_ENABLED=false`，通过 `NUXT_WEB_BUILD_PILOT_UID` 仅放行指定的已验证手机号的会员。验收登录生成、发布、获取分享链接及未登录访问已发布作品，并核对不符合资格的账号无法进入编辑器或调用创作接口。验收通过后在 Apps 生产部署中设置 `NUXT_WEB_BUILD_ENABLED=true`，清空验收账号配置。停止开放时关闭全量开关并清空验收账号配置。
 
 ## 受管测试账号验收
 

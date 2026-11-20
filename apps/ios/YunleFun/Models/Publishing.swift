@@ -2,6 +2,7 @@ import Foundation
 
 enum PublishingError: Error, Equatable, AccountRequestFailure {
     case invalidInput, invalidResponse, unauthorized, forbidden, membershipRequired, notFound, conflict, throttled, unavailable, identityChanged, storage, unsupportedServer, contentRejected
+    case webBuildRoomFull
     var isUnauthorized: Bool { self == .unauthorized }
     var message: String {
         switch self {
@@ -12,6 +13,7 @@ enum PublishingError: Error, Equatable, AccountRequestFailure {
         case .membershipRequired: return "AI 制作网页需要有效的云乐坊会员。"
         case .notFound: return "作品已不存在或当前账号无权管理。"
         case .conflict: return "作品、市场短名或审核状态已变化，请刷新后核对。"
+        case .webBuildRoomFull: return "项目已满，最多 8 人。"
         case .throttled: return "操作较频繁，请稍后重试。作品保存还有每日次数限制。"
         case .unavailable: return "暂时无法连接作品服务，请检查网络后重试。"
         case .identityChanged: return "账号已变化，请重新打开作品。"

@@ -12,11 +12,18 @@
 4. Worker 每次访问读取公开发布清单，再直接返回 R2 中的 HTML 文件。清单只包含版本 ID 和摘要。文件目录为私有，作者停用和运营封禁会同时关闭分享地址和所有版本直链。作者重新发布会恢复以前的已发布版本。市场条目由现有后台同步暂停或下架。
 5. 投稿沿用市场短名、审核队列和已批准版本指针。后台对受管作品核对作者、发布记录、固定地址和实际 HTML 响应摘要；常规应用沿用原域名和归属规则。
 
+## 项目协作
+
+- 所有者从编辑器的「项目协作」生成邀请码。有效期为 24 小时，重新生成或撤销会使原邀请码失效。受邀成员在「我的网页 → 加入项目协作」输入邀请码，项目会留在「我的网页」。
+- 一个项目最多 8 人，包含所有者。每位成员都要登录有效会员账号并验证手机号。成员可查看共享草稿和项目最近 50 条聊天或修改消息，在项目聊天中发送消息或应用网页修改。首个邀请码生成前的个人提示词仅所有者可见。
+- 项目编辑和成员变更通过事务保存。多个成员提交基于同一版本的修改时，先保存的修改生效，其他成员收到刷新提示并保留输入。发布、停用、投稿和管理邀请仅由所有者操作。移除成员会使当前邀请码失效。
+
 ## 部署
 
 - Cloudflare 保留 `yunle.app` 现有租户通配路由，用 `build.yunle.app/*` 精确路由接入 `apps/web-build-runtime/wrangler.jsonc`。在该托管账号创建私有 R2 桶 `yunle-web-build`，关闭桶的公开入口。上线前同时检查其他租户域名仍按原路由响应。
 - 用同一个随机 64 位小写十六进制密钥配置 Worker 的 `WEB_BUILD_WRITE_TOKEN` 和 Apps Nitro 的 `NUXT_WEB_BUILD_WRITE_TOKEN`。作品站不承载登录、支付或 SSO，不加入 JSAPI 或跨域授信名单。HTTP 响应使用 CSP 禁止脚本、表单、外部资源和嵌入，并关闭共享缓存。
 - 在目标 CloudBase 环境建立 `web_builds` 集合，应用同名 `ADMINONLY` 规则。为「我的网页」建立 `ownerUid` 升序和 `updatedAt` 降序的联合索引。后台与 Apps 服务使用同一环境。
+- 上线协作前，为 `web_builds` 建立 `collaboratorUids` 升序和 `updatedAt` 降序的联合索引。先部署 Apps API，再分发含协作功能的客户端。已有个人草稿在首次启用协作时补齐房间字段。
 - 生成端使用云乐坊 AI Runtime 的 `/ai/v1/chat`，应用 ID 为 `web-build`。配置 `NUXT_WEB_BUILD_RUNTIME_ORIGIN`，并在 Apps 和 Runtime 分别注入同一枚独立签名密钥 `NUXT_WEB_BUILD_RUNTIME_SIGNING_SECRET` 和 `WEB_BUILD_APP_SIGNING_SECRET`。Runtime 使用平台预算承担当次调用费用。账号每日限额为 8 次生成和 12 次发布审核，按上海时区计日。
 - 部署托管 Worker、Apps API 和审核后台，并配置腾讯文本审核。生产验收时保持 `NUXT_WEB_BUILD_ENABLED=false`，通过 `NUXT_WEB_BUILD_PILOT_UID` 仅放行指定的已验证手机号的会员。验收登录生成、发布、获取分享链接及未登录访问已发布作品，并核对不符合资格的账号无法进入编辑器或调用创作接口。验收通过后在 Apps 生产部署中设置 `NUXT_WEB_BUILD_ENABLED=true`，清空验收账号配置。停止开放时关闭全量开关并清空验收账号配置。
 

@@ -1,11 +1,12 @@
 import { getRouterParam, setResponseHeader } from 'h3'
 import { requireWebBuildMember } from '../../utils/web-build-access'
-import { requireWebBuildEditor } from '../../utils/web-build-config'
-import { getOwnedWebBuild } from '../../utils/web-build-storage'
+import { getWebBuildTestSession, requireWebBuildEditor } from '../../utils/web-build-config'
+import { getEditableWebBuild, getOwnedWebBuild } from '../../utils/web-build-storage'
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
   requireWebBuildEditor(event)
   const user = await requireWebBuildMember(event)
-  return getOwnedWebBuild(getRouterParam(event, 'id') || '', user.uid)
+  const id = getRouterParam(event, 'id') || ''
+  return getWebBuildTestSession(event) ? getOwnedWebBuild(id, user.uid) : getEditableWebBuild(id, user.uid)
 })

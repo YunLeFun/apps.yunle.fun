@@ -73,6 +73,7 @@
 		380589FA5BF968839B7A0609 /* SupportFeedbackProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D32C1369AF7A50469B97AE4 /* SupportFeedbackProtocol.swift */; };
 		386623A4E6458FB6820B3BC3 /* SupportTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2859879109787E421C294A35 /* SupportTicketView.swift */; };
 		38AEB94C3DCC040B927640D4 /* ApplicationShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1318CC60558907B59BA2FE43 /* ApplicationShareCard.swift */; };
+		3ABC5164CBD9F57EBE0DD74B /* WebBuildRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB80DBBDF80375A57C803464 /* WebBuildRoomView.swift */; };
 		3B2FE1DBDFD4C982A25E64DB /* CommunityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C2FA3CD44A87AA76311B25 /* CommunityStore.swift */; };
 		3B75717B26319838C8E5502F /* AssistantHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B10FD63B89481DDC53EB06 /* AssistantHistory.swift */; };
 		3DC2270CE412929DC5C8EBC4 /* DeveloperProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E0F82A4D0FE27885835915 /* DeveloperProfileTests.swift */; };
@@ -628,6 +629,7 @@
 		D9666A0C3834F8EA39CE83D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DB454023D7CC53D637956547 /* FeedbackLoginBenchmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackLoginBenchmarks.swift; sourceTree = "<group>"; };
 		DB4DA55FFFF44325B88FC0FA /* CrossAppAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossAppAuthorization.swift; sourceTree = "<group>"; };
+		DB80DBBDF80375A57C803464 /* WebBuildRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebBuildRoomView.swift; sourceTree = "<group>"; };
 		DB891A24C2837E7FE180BD2E /* WebProfileProcessLiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebProfileProcessLiveTests.swift; sourceTree = "<group>"; };
 		DC77996FA66109517338FD05 /* CommunityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityService.swift; sourceTree = "<group>"; };
 		DFA290EB6F51553FC6D61A2C /* HomeBackupRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeBackupRepository.swift; sourceTree = "<group>"; };
@@ -1051,6 +1053,7 @@
 			children = (
 				A3DB0F68420E7B54EFAB978D /* ApplicationEditorView.swift */,
 				FF89A7ACBC3E65EC7EBFF853 /* MyApplicationsView.swift */,
+				DB80DBBDF80375A57C803464 /* WebBuildRoomView.swift */,
 				5D21684A337E4FA440C493C1 /* WebBuildView.swift */,
 			);
 			path = Publishing;
@@ -1667,6 +1670,7 @@
 				BFEF421A5EB58D120FAD5076 /* WalletView.swift in Sources */,
 				E52932B73D1AE665E6D0C1A2 /* WeChatAuthorization.swift in Sources */,
 				FBDC5E2FE09C2DB4A9CB37CB /* WeChatBindingSection.swift in Sources */,
+				3ABC5164CBD9F57EBE0DD74B /* WebBuildRoomView.swift in Sources */,
 				C0B0522C93B30B3B127360D3 /* WebBuildService.swift in Sources */,
 				1C5655ABE2C4DD351EDA90A2 /* WebBuildStore.swift in Sources */,
 				A22F370A5EA2EC9DE599FA82 /* WebBuildView.swift in Sources */,

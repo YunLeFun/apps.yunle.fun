@@ -592,6 +592,41 @@ final class WebBuildTransportTests: XCTestCase {
         }
     }
 
+    func testJoiningCollaborationKeepsOneProjectAndCanSendChat() async throws {
+        let memberID = String(repeating: "a", count: 32)
+        let inviteCode = id + "." + String(repeating: "b", count: 32)
+        let draft = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(projectJSON(revision: 1).utf8)) as? [String: Any])
+        let owner = ["id": "owner", "name": "所有者"]
+        let member = ["id": memberID, "name": "编辑成员"]
+        var shared = draft
+        shared["role"] = "member"
+        shared["prompts"] = [String]()
+        shared["room"] = ["members": [owner, member], "viewerId": memberID, "messages": []]
+        let (service, fixture) = makeService(try [
+            (200, publishingJSON(["project": shared])),
+            (200, publishingJSON(["project": shared])),
+        ])
+
+        let joined = try await service.room(.join(inviteCode), projectID: nil, identity: identity)
+        let project = try XCTUnwrap(joined.project)
+        XCTAssertEqual(project.id, id)
+        XCTAssertFalse(project.canManagePublication)
+        XCTAssertTrue(project.prompts.isEmpty)
+        XCTAssertEqual(project.room?.viewerId, memberID)
+        do {
+            _ = try await service.update(.publish, project: project, identity: identity)
+            XCTFail("An editor attempted to publish")
+        } catch {
+            XCTAssertEqual(error as? PublishingError, .invalidInput)
+        }
+        _ = try await service.room(.chat("周末前更新"), projectID: project.id, identity: identity)
+        let commands = try fixture.requests.map(publishingBody)
+        XCTAssertEqual(commands.count, 2)
+        XCTAssertEqual(commands[0]["inviteCode"] as? String, inviteCode)
+        XCTAssertEqual(commands[1]["id"] as? String, id)
+        XCTAssertEqual(commands[1]["text"] as? String, "周末前更新")
+    }
+
     func testRejectsUnexpectedShareOriginAndUnpublishedSubmission() async throws {
         let (service, fixture) = makeService(try [
             (200, projectJSON(revision: 1, shareURL: "https://example.test/web/\(id)")),

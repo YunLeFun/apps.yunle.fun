@@ -16,6 +16,10 @@ private struct WebBuildList: View {
     @ObservedObject var accounts: AccountStore
     @StateObject private var store: WebBuildStore
     @State private var showLogin = false
+    @State private var showJoin = false
+    @State private var inviteCode = ""
+    @State private var joinedProjectID: String?
+    @State private var openJoinedProject = false
     let service: WebBuildServing
 
     init(accounts: AccountStore, service: WebBuildServing) {
@@ -39,6 +43,14 @@ private struct WebBuildList: View {
                             Label("新建网页", systemImage: "plus")
                         }
                         .accessibilityIdentifier("webBuild.create")
+                        Button {
+                            inviteCode = ""
+                            joinedProjectID = nil
+                            showJoin = true
+                        } label: {
+                            Label("加入项目协作", systemImage: "person.badge.plus")
+                        }
+                        .accessibilityIdentifier("webBuild.join")
                     }
                 }
                 Section("我的网页") {
@@ -55,7 +67,7 @@ private struct WebBuildList: View {
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(verbatim: project.title)
-                                Text(project.shareUrl == nil ? "私有草稿" : "已发布")
+                                Text(project.role == .member ? "协作项目" : (project.shareUrl == nil ? "草稿" : "已发布"))
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                         }
@@ -68,6 +80,38 @@ private struct WebBuildList: View {
         .sheet(isPresented: $showLogin) {
             LoginView(continuationMessage: "创作需要有效会员和已验证手机号的正式账号。")
                 .environmentObject(accounts)
+        }
+        .sheet(isPresented: $showJoin, onDismiss: { openJoinedProject = joinedProjectID != nil }) {
+            NavigationStack {
+                Form {
+                    TextField("项目邀请码", text: $inviteCode)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    if let error = store.error {
+                        Text(verbatim: error).foregroundStyle(.secondary)
+                    }
+                    Button("加入项目") {
+                        Task {
+                            if await store.changeRoom(.join(inviteCode)), let project = store.project {
+                                joinedProjectID = project.id
+                                showJoin = false
+                            }
+                        }
+                    }
+                    .disabled(store.isWorking || WebBuildValue.inviteProject(inviteCode.trimmed) == nil)
+                }
+                .navigationTitle("加入协作")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("取消") { showJoin = false }.disabled(store.isWorking)
+                    }
+                }
+            }
+            .interactiveDismissDisabled(store.isWorking)
+        }
+        .navigationDestination(isPresented: $openJoinedProject) {
+            if let joinedProjectID { WebBuildEditorView(projectID: joinedProjectID, service: service) }
         }
     }
 }
@@ -89,6 +133,7 @@ struct WebBuildEditorView: View {
 private struct WebBuildEditorContent: View {
     @StateObject private var store: WebBuildStore
     @ObservedObject private var accounts: AccountStore
+    @Environment(\.scenePhase) private var scenePhase
     @State private var prompt = ""
     @State private var shortName = ""
     @State private var confirmation: Confirmation?
@@ -138,10 +183,18 @@ private struct WebBuildEditorContent: View {
                             Label("预览网页", systemImage: "eye")
                         }
                         .accessibilityIdentifier("webBuild.preview")
+                        if project.role != nil {
+                            NavigationLink {
+                                WebBuildRoomView(store: store)
+                            } label: {
+                                Label("项目协作", systemImage: "person.2")
+                            }
+                            .accessibilityIdentifier("webBuild.room")
+                        }
                     }
                 }
                 if !store.membershipRequired && (projectID == nil || store.project != nil) { composer }
-                if let project = store.project { publication(project) }
+                if let project = store.project, project.canManagePublication { publication(project) }
                 if store.isWorking { ProgressView("正在处理网页") }
                 if let error = store.error {
                     Text(error).foregroundStyle(.red)
@@ -154,6 +207,9 @@ private struct WebBuildEditorContent: View {
         }
         .task {
             if let projectID { await store.loadProject(id: projectID) }
+        }
+        .task(id: activeRoomID) {
+            if let id = activeRoomID { await store.observeRoom(id: id) }
         }
         .confirmationDialog(confirmation?.title ?? "", isPresented: Binding(
             get: { confirmation != nil },
@@ -171,6 +227,11 @@ private struct WebBuildEditorContent: View {
         } message: { action in
             Text(action.message)
         }
+    }
+
+    private var activeRoomID: String? {
+        guard scenePhase == .active, store.project?.room != nil else { return nil }
+        return store.project?.id
     }
 
     private var composer: some View {

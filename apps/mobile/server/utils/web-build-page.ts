@@ -17,9 +17,31 @@ export interface WebBuildProject {
   shareUrl: string | null
   publishedRevision: number | null
   updatedAt: number
+  role: 'owner' | 'member'
+  room?: WebBuildRoom
 }
 
-export type WebBuildSummary = Pick<WebBuildProject, 'id' | 'shareUrl' | 'updatedAt'> & { title: string }
+export interface WebBuildRoomMember {
+  id: string
+  name: string
+}
+
+export interface WebBuildRoomMessage {
+  id: string
+  author: WebBuildRoomMember
+  kind: 'chat' | 'edit'
+  text: string
+  createdAt: number
+}
+
+export interface WebBuildRoom {
+  members: WebBuildRoomMember[]
+  viewerId: string
+  messages: WebBuildRoomMessage[]
+  inviteExpiresAt: number | null
+}
+
+export type WebBuildSummary = Pick<WebBuildProject, 'id' | 'shareUrl' | 'updatedAt' | 'role'> & { title: string }
 
 export function parseWebBuildPage(input: unknown): WebBuildPage | null {
   if (!input || typeof input !== 'object')

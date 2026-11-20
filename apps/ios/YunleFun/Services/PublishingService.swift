@@ -126,7 +126,12 @@ struct PublishingService: PublishingServing {
             }
             throw PublishingError.forbidden
         case 404: throw PublishingError.notFound
-        case 409, 412: throw PublishingError.conflict
+        case 409:
+            if data.count <= 4096, (try? JSONDecoder().decode(AccessError.self, from: data))?.data?.code == "WEB_BUILD_ROOM_FULL" {
+                throw PublishingError.webBuildRoomFull
+            }
+            throw PublishingError.conflict
+        case 412: throw PublishingError.conflict
         case 422: throw PublishingError.contentRejected
         case 428: throw PublishingError.unsupportedServer
         case 429: throw PublishingError.throttled

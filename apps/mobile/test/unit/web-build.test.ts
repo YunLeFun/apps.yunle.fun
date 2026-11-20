@@ -22,13 +22,26 @@ const { documents, moderation } = vi.hoisted(() => ({
   moderation: vi.fn(),
 }))
 vi.mock('../../server/utils/cloudbase-admin', () => {
+  let transactionTail: Promise<unknown> = Promise.resolve()
   const db = {
+    command: { in: (values: string[]) => values },
     collection: () => ({
-      where: ({ ownerUid }: { ownerUid: string }) => ({
-        orderBy: () => ({
-          limit: () => ({
-            get: async () => ({
-              data: Array.from(documents, ([_id, data]) => ({ ...data, _id })).filter(data => Reflect.get(data, 'ownerUid') === ownerUid),
+      where: (query: Record<string, string | string[]>) => ({
+        field: () => ({
+          orderBy: () => ({
+            limit: () => ({
+              get: async () => ({
+                data: Array.from(documents, ([_id, data]) => ({ ...data, _id })).filter(data =>
+                  Object.entries(query).every(([field, value]) => {
+                    const actual: unknown = Reflect.get(data, field)
+                    if (Array.isArray(value)) {
+                      return Array.isArray(actual)
+                        ? value.some(item => actual.includes(item))
+                        : typeof actual === 'string' && value.includes(actual)
+                    }
+                    return actual === value
+                  })),
+              }),
             }),
           }),
         }),
@@ -39,12 +52,21 @@ vi.mock('../../server/utils/cloudbase-admin', () => {
         update: async (data: Record<string, unknown>) => documents.set(id, { ...documents.get(id), ...structuredClone(data) }),
       }),
     }),
-    runTransaction: (body: (database: unknown) => unknown) => body(db),
+    runTransaction(body: (database: unknown) => unknown) {
+      const completion = transactionTail.then(() => body(db))
+      transactionTail = completion.catch(() => {})
+      return completion
+    },
   }
   return { useCloudbaseAdmin: () => ({ db }) }
 })
 vi.mock('../../server/utils/moderation', () => ({ moderateText: moderation }))
-vi.mock('../../server/utils/web-build-market', () => ({ submitWebBuildToMarket: vi.fn(async () => ({ slug: 'submitted' })) }))
+vi.mock('../../server/utils/web-build-market', () => ({
+  submitWebBuildToMarket: vi.fn(async (user: { uid: string }, id: string, revision: unknown) => {
+    await getWebBuildForSubmission(id, user.uid, revision)
+    return { slug: 'submitted' }
+  }),
+}))
 
 const origin = 'https://build.yunle.app'
 const token = 'a'.repeat(64)
@@ -178,6 +200,7 @@ describe('web build membership at the HTTP routes', () => {
   let pilotUid: string
   let profile: { sub: string, phone_verified: boolean, status: string }
   let membership: unknown
+  const peers = new Map<string, { uid: string, verified: boolean, active: boolean }>()
   const account = vi.fn()
   const model = vi.fn()
 
@@ -203,6 +226,7 @@ describe('web build membership at the HTTP routes', () => {
 
   beforeEach(() => {
     clearCloudbaseAuthCache()
+    peers.clear()
     enabled = true
     pilotUid = ''
     profile = { sub: 'author', phone_verified: true, status: 'ACTIVE' }
@@ -218,15 +242,19 @@ describe('web build membership at the HTTP routes', () => {
       public: { tcbEnvId: 'fixture-env' },
     }))
     vi.stubGlobal('fetch', vi.fn(async (url: string | URL, options: RequestInit) => {
+      const auth = options.headers && new Headers(options.headers).get('Authorization')
+      const peer = auth ? peers.get(auth) : undefined
       switch (String(url)) {
-        case `${gateway}/auth/v1/user/me`: return Response.json(profile)
+        case `${gateway}/auth/v1/user/me`:
+          return Response.json(peer ? { sub: peer.uid, name: peer.uid, phone_verified: peer.verified, status: 'ACTIVE' } : profile)
         case `${gateway}/v1/functions/account-api`:
-          expect(options.headers).toHaveProperty('Authorization', fixtureBearer)
+          expect(auth === fixtureBearer || peer !== undefined).toBe(true)
           expect(options.redirect).toBe('error')
           expect(JSON.parse(String(options.body))).toEqual({ action: 'getAccount' })
-          return account()
+          return peer && !peer.active ? Response.json({ membership: { isActive: false, expireAt: null } }) : account()
         case `${runtimeOrigin}/ai/v1/chat`: {
-          expect(options.headers).toMatchObject({ 'Authorization': fixtureBearer, 'X-Application-Id': 'web-build', 'Origin': 'https://apps.yunle.fun' })
+          expect(auth === fixtureBearer || peer !== undefined).toBe(true)
+          expect(options.headers).toMatchObject({ 'X-Application-Id': 'web-build', 'Origin': 'https://apps.yunle.fun' })
           expect(options.redirect).toBe('error')
           const requestId = (options.headers as Record<string, string>)['Idempotency-Key']!
           const { applicationId, messages, attestation } = JSON.parse(String(options.body))
@@ -259,6 +287,99 @@ describe('web build membership at the HTTP routes', () => {
       body: body ? JSON.stringify(body) : undefined,
     })
   }
+
+  function peerBearer(uid: string, verified = true, active = true) {
+    const bearer = `Bearer fixture-${uid}`
+    peers.set(bearer, { uid, verified, active })
+    return bearer
+  }
+
+  it('invites eligible members to one private room with eight seats including the owner', async () => {
+    const { id } = await saveWebBuildDraft('author', draftPage, '最早的个人提示词')
+    const invited = await request('', { action: 'room.invite', id })
+    expect(invited.status).toBe(200)
+    const { inviteCode } = await invited.json()
+    expect(inviteCode).toMatch(new RegExp(`^${id}\\.[a-f0-9]{32}$`))
+    expect(JSON.stringify(documents.get(id))).not.toContain(inviteCode)
+    expect((await request('', { action: 'room.join', inviteCode }, '')).status).toBe(401)
+    expect((await request('', { action: 'room.join', inviteCode }, peerBearer('unverified', false))).status).toBe(403)
+    expect((await request('', { action: 'room.join', inviteCode }, peerBearer('nonmember', true, false))).status).toBe(403)
+    const bearers = Array.from({ length: 9 }, (_, i) => peerBearer(`peer-${i}`))
+    const joins = await Promise.all(bearers.map(bearer => request('', { action: 'room.join', inviteCode }, bearer)))
+    expect(joins.filter(response => response.status === 200)).toHaveLength(7)
+    expect(joins.filter(response => response.status === 409)).toHaveLength(2)
+    const admitted = bearers[joins.findIndex(response => response.status === 200)]!
+    const outside = bearers[joins.findIndex(response => response.status === 409)]!
+    const owner = await (await request(`/${id}`)).json()
+    expect(owner.room.members).toHaveLength(8)
+    expect(await (await request('', { action: 'room.join', inviteCode }, admitted)).json()).toMatchObject({
+      project: { id, role: 'member', prompts: [], room: { inviteExpiresAt: null } },
+    })
+    const member = await (await request(`/${id}`, undefined, admitted)).json()
+    expect(member.room.members).toHaveLength(8)
+    expect(member.room.members[1]).not.toHaveProperty('uid')
+    expect(JSON.stringify(member)).not.toContain('最早的个人提示词')
+    expect((await request(`/${id}`, undefined, outside)).status).toBe(404)
+    expect(await (await request('?includeShared=true', undefined, admitted)).json()).toMatchObject([{ id, role: 'member' }])
+    expect(await (await request('', undefined, admitted)).json()).toEqual([])
+    expect((await request(`/public/${id}`, undefined, '')).status).toBe(404)
+  })
+
+  it('shares chat and new revisions while preserving owner-only publishing and removal', async () => {
+    const { id } = await saveWebBuildDraft('author', draftPage, '私有项目说明')
+    const { inviteCode } = await (await request('', { action: 'room.invite', id })).json()
+    const peer = peerBearer('editor')
+    const { project: joined } = await (await request('', { action: 'room.join', inviteCode }, peer)).json()
+    expect((await request('', { action: 'room.invite', id }, peer)).status).toBe(404)
+    moderation.mockResolvedValueOnce({ suggestion: 'Block' })
+    expect((await request('', { action: 'room.chat', id, text: '待审核消息' }, peer)).status).toBe(422)
+    expect((await request('', { action: 'room.chat', id, text: '建议改成海蓝配色' }, peer)).status).toBe(200)
+    let completeGeneration: ((generated: Response) => void) | undefined
+    model.mockImplementationOnce(() => new Promise<Response>((resolve) => {
+      completeGeneration = resolve
+    }))
+    const firstEdit = request('', { action: 'generate', id, revision: 1, prompt: '调整配色' }, peer)
+    await vi.waitFor(() => expect(completeGeneration).toBeDefined())
+    const secondEdit = await request('', { action: 'generate', id, revision: 1, prompt: '调整标题' })
+    expect(secondEdit.status).toBe(200)
+    completeGeneration!(Response.json({ result: { content: JSON.stringify(page) } }))
+    expect((await firstEdit).status).toBe(409)
+    const updated = await (await request(`/${id}`, undefined, peer)).json()
+    expect(updated.revision).toBe(2)
+    expect(updated.room.messages).toMatchObject([
+      { kind: 'chat', text: '建议改成海蓝配色', author: { id: joined.room.viewerId } },
+      { kind: 'edit', text: '调整标题', author: { id: 'owner' } },
+    ])
+    const revised = await request('', { action: 'generate', id, revision: 2, prompt: '补充日程' }, peer)
+    expect(revised.status).toBe(200)
+    expect(await revised.json()).toMatchObject({
+      revision: 3,
+      prompts: ['调整标题', '补充日程'],
+      room: { messages: expect.arrayContaining([{ id: expect.any(String), kind: 'edit', text: '补充日程', author: { id: joined.room.viewerId, name: 'editor' }, createdAt: expect.any(Number) }]) },
+    })
+    for (const action of ['publish', 'withdraw', 'submit'])
+      expect((await request('', { action, id, revision: 3 }, peer)).status).toBe(404)
+    expect((await request('', { action: 'publish', id, revision: 3 })).status).toBe(200)
+    const manifest = await (await request(`/public/${id}`, undefined, '')).json()
+    expect(Object.keys(manifest).sort()).toEqual(['releaseId', 'sha256'])
+    expect((await request('', { action: 'room.remove', id, memberId: joined.room.viewerId })).status).toBe(200)
+    expect((await request(`/${id}`, undefined, peer)).status).toBe(404)
+    expect((await request('', { action: 'room.join', inviteCode }, peer)).status).toBe(404)
+    expect(await (await request('?includeShared=true', undefined, peer)).json()).toEqual([])
+  })
+
+  it('revokes an invitation without removing members already in the room', async () => {
+    const { id } = await saveWebBuildDraft('author', draftPage, '创建')
+    const { inviteCode } = await (await request('', { action: 'room.invite', id })).json()
+    const peer = peerBearer('editor')
+    expect((await request('', { action: 'room.join', inviteCode }, peer)).status).toBe(200)
+    expect((await request('', { action: 'room.revoke', id })).status).toBe(200)
+    expect((await request('', { action: 'room.join', inviteCode }, peerBearer('late'))).status).toBe(404)
+    expect((await request(`/${id}`, undefined, peer)).status).toBe(200)
+    expect((await request('', { action: 'room.leave', id }, peer)).status).toBe(200)
+    expect((await request(`/${id}`, undefined, peer)).status).toBe(404)
+    expect(await (await request('?includeShared=true', undefined, peer)).json()).toEqual([])
+  })
 
   it('keeps the feature off by default and requires login and phone verification when enabled', async () => {
     enabled = false

@@ -1,5 +1,6 @@
-import type { WebBuildPage, WebBuildProject, WebBuildSummary } from '~~/server/utils/web-build-page'
+import type { WebBuildPage, WebBuildProject, WebBuildRoomMember, WebBuildRoomMessage, WebBuildSummary } from '~~/server/utils/web-build-page'
 import type { CloudbaseTransaction } from './cloudbase-admin'
+import type { ServerAuthUser } from './cloudbase-auth'
 import { createHash, randomUUID } from 'node:crypto'
 import { createError } from 'h3'
 import { parseWebBuildPage } from '~~/server/utils/web-build-page'
@@ -9,7 +10,26 @@ import { storeWebBuildArtifact } from './web-build-artifacts'
 import { webBuildIdPattern, webBuildShareUrl } from './web-build-config'
 
 const collection = 'web_builds'
-const dailyLimits = { generate: 8, publish: 12 } as const
+const dailyLimits = { generate: 8, publish: 12, chat: 120 } as const
+const limitMessages = {
+  generate: '已达到今日网页生成次数上限',
+  publish: '已达到今日网页发布次数上限',
+  chat: '已达到今日项目聊天发送次数上限',
+}
+const roomCapacity = 8
+const roomMessageLimit = 50
+const inviteDuration = 24 * 60 * 60 * 1000
+
+interface RoomMember extends WebBuildRoomMember {
+  uid: string
+}
+
+interface Room {
+  owner: WebBuildRoomMember
+  members: RoomMember[]
+  messages: WebBuildRoomMessage[]
+  invite: { digest: string, expiresAt: number } | null
+}
 
 interface Project {
   kind: 'project'
@@ -21,6 +41,8 @@ interface Project {
   publishedRevision: number | null
   blockedAt?: number
   updatedAt: number
+  room?: Room
+  collaboratorUids?: string[]
 }
 
 interface Release {
@@ -64,49 +86,96 @@ function storedPage(page: unknown) {
   return parsed
 }
 
-async function owned(db: CloudbaseTransaction, id: string, uid: string) {
+async function readProject(db: CloudbaseTransaction, id: string) {
   if (id.length !== 32 || !webBuildIdPattern.test(id))
     missingWebBuild()
   const project = await read(db, id)
-  if (project?.kind !== 'project' || project.ownerUid !== uid)
+  if (project?.kind !== 'project')
     missingWebBuild()
   return project
 }
 
-function summary(id: string, project: Project): WebBuildSummary {
+async function owned(db: CloudbaseTransaction, id: string, uid: string) {
+  const project = await readProject(db, id)
+  if (project.ownerUid !== uid)
+    missingWebBuild()
+  return project
+}
+
+function roomActor(project: Project, uid: string): WebBuildRoomMember | undefined {
+  if (!project.room)
+    return
+  if (project.ownerUid === uid)
+    return project.room.owner
+  const member = project.room.members.find(member => member.uid === uid)
+  return member && { id: member.id, name: member.name }
+}
+
+async function editable(db: CloudbaseTransaction, id: string, uid: string) {
+  const project = await readProject(db, id)
+  if (project.blockedAt || (project.ownerUid !== uid && !roomActor(project, uid)))
+    missingWebBuild()
+  return project
+}
+
+type ListedProject = Pick<Project, 'kind' | 'ownerUid' | 'releaseId' | 'blockedAt' | 'updatedAt' | 'collaboratorUids'> & {
+  page: Pick<WebBuildPage, 'title'>
+}
+
+function summary(id: string, project: ListedProject, uid: string): WebBuildSummary {
   return {
     id,
     title: project.page.title,
     updatedAt: project.updatedAt,
+    role: project.ownerUid === uid ? 'owner' : 'member',
     shareUrl: project.releaseId && !project.blockedAt ? webBuildShareUrl(id) : null,
   }
 }
 
-function serialize(id: string, project: Project): WebBuildProject {
-  const { title: _title, ...item } = summary(id, project)
+function serialize(id: string, project: Project, uid: string): WebBuildProject {
+  const { title: _title, ...item } = summary(id, project, uid)
+  const actor = roomActor(project, uid)
+  const room = actor && project.room
   return {
     ...item,
     revision: project.revision,
     page: storedPage(project.page),
-    prompts: project.prompts,
+    prompts: item.role === 'owner' ? project.prompts : room?.messages.filter(message => message.kind === 'edit').slice(-8).map(message => message.text) ?? [],
     publishedRevision: item.shareUrl ? project.publishedRevision : null,
+    ...(room && actor && { room: {
+      members: [room.owner, ...room.members.map(({ id, name }) => ({ id, name }))],
+      viewerId: actor.id,
+      messages: room.messages,
+      inviteExpiresAt: item.role === 'owner' && room.invite && room.invite.expiresAt > Date.now() ? room.invite.expiresAt : null,
+    } }),
   }
 }
 
-export async function listWebBuilds(uid: string) {
+export async function listWebBuilds(uid: string, includeShared = false) {
   const db = useCloudbaseAdmin().db
-  // Projects are the only document type with an ownerUid field.
-  const { data } = await db.collection(collection).where({ ownerUid: uid }).orderBy('updatedAt', 'desc').limit(100).get()
-  return ((data || []) as (Project & { _id: string })[])
-    .filter(project => !project.blockedAt)
-    .map(project => summary(project._id, project))
+  const fields = { _id: true, kind: true, ownerUid: true, page: true, releaseId: true, blockedAt: true, updatedAt: true, collaboratorUids: true }
+  const [owned, shared] = await Promise.all([
+    db.collection(collection).where({ ownerUid: uid }).field(fields).orderBy('updatedAt', 'desc').limit(100).get(),
+    includeShared ? db.collection(collection).where({ collaboratorUids: db.command.in([uid]) }).field(fields).orderBy('updatedAt', 'desc').limit(100).get() : undefined,
+  ])
+  if (!Array.isArray(owned.data) || (shared && !Array.isArray(shared.data)))
+    throw createError({ statusCode: 503, statusMessage: '暂时无法读取网页' })
+  return ([...owned.data, ...(shared?.data || [])] as (ListedProject & { _id: string })[])
+    .filter(project => project.kind === 'project' && !project.blockedAt && (project.ownerUid === uid || project.collaboratorUids?.includes(uid)))
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, 100)
+    .map(project => summary(project._id, project, uid))
 }
 
 export async function getOwnedWebBuild(id: string, uid: string) {
   const project = await owned(useCloudbaseAdmin().db, id, uid)
   if (project.blockedAt)
     missingWebBuild()
-  return serialize(id, project)
+  return serialize(id, project, uid)
+}
+
+export async function getEditableWebBuild(id: string, uid: string) {
+  return serialize(id, await editable(useCloudbaseAdmin().db, id, uid), uid)
 }
 
 export async function reserveWebBuildAction(uid: string, action: keyof typeof dailyLimits) {
@@ -117,13 +186,13 @@ export async function reserveWebBuildAction(uid: string, action: keyof typeof da
     const quota = await read(transaction, key)
     const count = quota?.kind === 'quota' ? quota.count : 0
     if (count >= dailyLimits[action])
-      throw createError({ statusCode: 429, statusMessage: action === 'generate' ? '已达到今日网页生成次数上限' : '已达到今日网页发布次数上限' })
+      throw createError({ statusCode: 429, statusMessage: limitMessages[action] })
     await doc(transaction, key).set({ kind: 'quota', count: count + 1 })
     return true
   })
 }
 
-export async function saveWebBuildDraft(uid: string, page: WebBuildPage, prompt: string, prior?: Pick<WebBuildProject, 'id' | 'revision'>) {
+export async function saveWebBuildDraft(uid: string, page: WebBuildPage, prompt: string, prior?: Pick<WebBuildProject, 'id' | 'revision' | 'room'>) {
   const db = useCloudbaseAdmin().db
   if (!prior) {
     const id = newId()
@@ -138,12 +207,10 @@ export async function saveWebBuildDraft(uid: string, page: WebBuildPage, prompt:
       updatedAt: Date.now(),
     }
     await doc(db, id).set(project)
-    return serialize(id, project)
+    return serialize(id, project, uid)
   }
   return db.runTransaction(async (transaction: CloudbaseTransaction) => {
-    const project = await owned(transaction, prior.id, uid)
-    if (project.blockedAt)
-      missingWebBuild()
+    const project = await editable(transaction, prior.id, uid)
     assertRevision(project, prior.revision)
     const updated: Project = {
       ...project,
@@ -152,13 +219,125 @@ export async function saveWebBuildDraft(uid: string, page: WebBuildPage, prompt:
       prompts: [...project.prompts, prompt].slice(-8),
       updatedAt: Date.now(),
     }
+    const actor = roomActor(project, uid)
+    if (prior.room && actor && project.room)
+      updated.room = appendRoomMessage(project.room, actor, 'edit', prompt)
     await doc(transaction, prior.id).update({
       page: updated.page,
       revision: updated.revision,
       prompts: updated.prompts,
       updatedAt: updated.updatedAt,
+      ...(updated.room && { room: updated.room }),
     })
-    return serialize(prior.id, updated)
+    return serialize(prior.id, updated, uid)
+  })
+}
+
+function appendRoomMessage(room: Room, author: WebBuildRoomMember, kind: WebBuildRoomMessage['kind'], text: string): Room {
+  const message = { id: newId(), author, kind, text, createdAt: Date.now() }
+  return { ...room, messages: [...room.messages, message].slice(-roomMessageLimit) }
+}
+
+function actorName(user: ServerAuthUser, fallback: string) {
+  const name = user.name?.trim()
+  return name && name.length <= 40 ? name : fallback
+}
+
+function inviteDigest(code: string) {
+  return createHash('sha256').update(code).digest('hex')
+}
+
+export async function createWebBuildRoomInvite(id: string, user: ServerAuthUser) {
+  const db = useCloudbaseAdmin().db
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const project = await owned(transaction, id, user.uid)
+    if (project.blockedAt)
+      missingWebBuild()
+    const current = project.room ?? { owner: { id: 'owner', name: actorName(user, '项目所有者') }, members: [], messages: [], invite: null }
+    if (current.members.length >= roomCapacity - 1)
+      throw createError({ statusCode: 409, statusMessage: '项目已满（最多 8 人）', data: { code: 'WEB_BUILD_ROOM_FULL' } })
+    const inviteCode = `${id}.${newId()}`
+    const room = { ...current, invite: { digest: inviteDigest(inviteCode), expiresAt: Date.now() + inviteDuration } }
+    await doc(transaction, id).update({ room })
+    return { project: serialize(id, { ...project, room }, user.uid), inviteCode }
+  })
+}
+
+export async function revokeWebBuildRoomInvite(id: string, uid: string) {
+  const db = useCloudbaseAdmin().db
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const project = await owned(transaction, id, uid)
+    if (project.blockedAt || !project.room)
+      missingWebBuild()
+    const room = { ...project.room, invite: null }
+    await doc(transaction, id).update({ room })
+    return { project: serialize(id, { ...project, room }, uid) }
+  })
+}
+
+export async function joinWebBuildRoom(code: string, user: ServerAuthUser) {
+  if (code.length !== 65 || !/^[a-f0-9]{32}\.[a-f0-9]{32}$/.test(code))
+    throw createError({ statusCode: 400, statusMessage: '请输入完整的项目邀请码' })
+  const id = code.slice(0, 32)
+  const db = useCloudbaseAdmin().db
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const project = await readProject(transaction, id)
+    const current = project.room
+    if (project.blockedAt || !current)
+      missingWebBuild()
+    if (roomActor(project, user.uid))
+      return { project: serialize(id, project, user.uid) }
+    if (!current.invite || current.invite.expiresAt <= Date.now() || current.invite.digest !== inviteDigest(code))
+      missingWebBuild()
+    if (current.members.length >= roomCapacity - 1)
+      throw createError({ statusCode: 409, statusMessage: '项目已满（最多 8 人）', data: { code: 'WEB_BUILD_ROOM_FULL' } })
+    const member = { uid: user.uid, id: newId(), name: actorName(user, '成员') }
+    const room = { ...current, members: [...current.members, member] }
+    const collaboratorUids = room.members.map(member => member.uid)
+    await doc(transaction, id).update({ room, collaboratorUids })
+    return { project: serialize(id, { ...project, room, collaboratorUids }, user.uid) }
+  })
+}
+
+export async function changeWebBuildRoomMembers(id: string, uid: string, removeMemberId?: string) {
+  const db = useCloudbaseAdmin().db
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const project = await editable(transaction, id, uid)
+    const current = project.room
+    const isOwner = project.ownerUid === uid
+    if (!current || (removeMemberId !== undefined) !== isOwner)
+      missingWebBuild()
+    const members = current.members.filter(member => isOwner ? member.id !== removeMemberId : member.uid !== uid)
+    const room = { ...current, members, invite: isOwner && current.members.length !== members.length ? null : current.invite }
+    await doc(transaction, id).update({ room, collaboratorUids: members.map(member => member.uid) })
+    return isOwner ? { project: serialize(id, { ...project, room }, uid) } : {}
+  })
+}
+
+export async function moderateWebBuildRoomMessage(id: string, uid: string, text: string) {
+  const result = await moderateText({ content: text, userId: uid, dataId: `web-build-chat-${id}-${newId()}`, scene: 'web_build_chat' })
+  if (result.error)
+    throw createError({ statusCode: 503, statusMessage: '项目聊天审核暂不可用' })
+  if (result.suggestion !== 'Pass')
+    throw createError({ statusCode: 422, statusMessage: '消息未通过审核，请修改后重试' })
+}
+
+export async function sendWebBuildRoomMessage(id: string, uid: string, text: string) {
+  const db = useCloudbaseAdmin().db
+  const initial = await editable(db, id, uid)
+  if (!initial.room)
+    missingWebBuild()
+  await reserveWebBuildAction(uid, 'chat')
+  await moderateWebBuildRoomMessage(id, uid, text)
+
+  return db.runTransaction(async (transaction: CloudbaseTransaction) => {
+    const project = await editable(transaction, id, uid)
+    const actor = roomActor(project, uid)
+    if (!project.room || !actor)
+      missingWebBuild()
+    const room = appendRoomMessage(project.room, actor, 'chat', text)
+    await doc(transaction, id).update({ room })
+    return { project: serialize(id, { ...project, room }, uid) }
   })
 }
 
@@ -169,7 +348,7 @@ export async function publishWebBuild(id: string, uid: string, revision: unknown
     missingWebBuild()
   assertRevision(project, revision)
   if (project.releaseId && project.publishedRevision === revision)
-    return serialize(id, project)
+    return serialize(id, project, uid)
 
   const page = storedPage(project.page)
   await reserveWebBuildAction(uid, 'publish')
@@ -191,12 +370,12 @@ export async function publishWebBuild(id: string, uid: string, revision: unknown
       missingWebBuild()
     assertRevision(current, revision)
     if (current.releaseId && current.publishedRevision === revision)
-      return serialize(id, current)
+      return serialize(id, current, uid)
     const release: Release = { kind: 'release', projectId: id, revision: current.revision, page, artifactSha256: sha256 }
     const updated = { releaseId, publishedRevision: current.revision, updatedAt: Date.now() }
     await doc(transaction, releaseId).set(release)
     await doc(transaction, id).update(updated)
-    return serialize(id, { ...current, ...updated })
+    return serialize(id, { ...current, ...updated }, uid)
   })
 }
 
@@ -207,7 +386,7 @@ export async function withdrawWebBuild(id: string, uid: string, revision: unknow
     assertRevision(project, revision)
     const updated = { releaseId: null, publishedRevision: null, revision: project.revision + 1, updatedAt: Date.now() }
     await doc(transaction, id).update(updated)
-    return serialize(id, { ...project, ...updated })
+    return serialize(id, { ...project, ...updated }, uid)
   })
 }
 

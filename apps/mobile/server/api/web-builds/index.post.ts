@@ -25,7 +25,7 @@ import {
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
   requireWebBuildEditor(event)
-  const { user, personalTestSession, testPeerUid } = await requireWebBuildMember(event)
+  const { user, personalTestSession, testPeerUid, canCollaborate } = await requireWebBuildMember(event)
   const length = Number(getRequestHeader(event, 'content-length'))
   if (length > 8192)
     throw createError({ statusCode: 413, statusMessage: '请求内容过长' })
@@ -56,6 +56,8 @@ export default defineEventHandler(async (event) => {
   if (typeof action === 'string' && action.startsWith('room.')) {
     if (personalTestSession)
       throw createError({ statusCode: 403, statusMessage: '网页验收会话不支持多人协作' })
+    if (!canCollaborate)
+      throw createError({ statusCode: 403, message: '项目协作暂未开放' })
     if (testPeerUid && (action === 'room.invite' || action === 'room.join'))
       throw createError({ statusCode: 403, statusMessage: '请通过受管测试好友的邀请卡加入' })
     switch (action) {
@@ -101,15 +103,14 @@ export default defineEventHandler(async (event) => {
   const token = parseBearerToken(getRequestHeader(event, 'authorization'))
   if (!token)
     throw createError({ statusCode: 401 })
-  const prior = id ? await (personalTestSession ? getOwnedWebBuild(id, user.uid) : getEditableWebBuild(id, user.uid)) : undefined
+  const prior = id ? await (canCollaborate ? getEditableWebBuild(id, user.uid) : getOwnedWebBuild(id, user.uid)) : undefined
   if (prior && prior.revision !== revision)
     throw createError({ statusCode: 409, statusMessage: '网页已有更新，请刷新后再试' })
+  if (prior?.room && !canCollaborate)
+    throw createError({ statusCode: 403, message: '项目协作暂未开放' })
   await reserveWebBuildAction(user.uid, 'generate')
-  if (prior?.room) {
-    if (personalTestSession)
-      throw createError({ statusCode: 403, statusMessage: '网页验收会话不支持多人协作' })
+  if (prior?.room)
     await moderateWebBuildRoomMessage(id, user.uid, prompt)
-  }
   const page = await generateWebBuildPage(runtime, token, prompt, prior?.page ?? null)
   return saveWebBuildDraft(user.uid, page, prompt, prior)
 })

@@ -6,7 +6,7 @@ import { getEditableWebBuild, getOwnedWebBuild } from '../../utils/web-build-sto
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
   requireWebBuildEditor(event)
-  const { user, personalTestSession } = await requireWebBuildMember(event)
+  const { user, canCollaborate } = await requireWebBuildMember(event)
   const id = getRouterParam(event, 'id') || ''
-  return personalTestSession ? getOwnedWebBuild(id, user.uid) : getEditableWebBuild(id, user.uid)
+  return canCollaborate ? getEditableWebBuild(id, user.uid) : getOwnedWebBuild(id, user.uid)
 })

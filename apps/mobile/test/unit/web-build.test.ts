@@ -197,6 +197,7 @@ describe('web build membership at the HTTP routes', () => {
   let server: ReturnType<typeof createServer>
   let api: string
   let enabled: boolean
+  let collaborationEnabled: boolean
   let collaborationTestEnabled: boolean
   let pilotUid: string
   let profile: { sub: string, phone_verified: boolean, status: string }
@@ -231,6 +232,7 @@ describe('web build membership at the HTTP routes', () => {
     peers.clear()
     checkInvitePeer.mockReset().mockResolvedValue({ ok: false, code: 'not_mutual' })
     enabled = true
+    collaborationEnabled = true
     collaborationTestEnabled = false
     pilotUid = ''
     profile = { sub: 'author', phone_verified: true, status: 'ACTIVE' }
@@ -239,6 +241,7 @@ describe('web build membership at the HTTP routes', () => {
     model.mockReset().mockImplementation(async () => Response.json({ result: { content: JSON.stringify(page) } }))
     vi.stubGlobal('useRuntimeConfig', () => ({
       webBuildEnabled: enabled,
+      webBuildCollaborationEnabled: collaborationEnabled,
       webBuildCollaborationTestEnabled: collaborationTestEnabled,
       webBuildWriteToken: token,
       webBuildRuntimeOrigin: runtimeOrigin,
@@ -537,13 +540,14 @@ describe('web build membership at the HTTP routes', () => {
   })
 
   it('admits only the two ready Admin accounts to a time-limited collaboration scenario', async () => {
+    collaborationEnabled = false
     const owner = peerBearer('test-owner', false)
     const member = peerBearer('test-member', false)
     const outside = peerBearer('other', false)
     const now = Date.now()
     const accounts = [
-      { uid: 'test-owner', identityId: 'owner-identity', virtualPhone: '+12025550160' },
-      { uid: 'test-member', identityId: 'member-identity', virtualPhone: '+12025550161' },
+      { uid: 'test-owner', identityId: 'testid_production-web-build-owner', virtualPhone: '+12025550160' },
+      { uid: 'test-member', identityId: 'testid_production-web-build-member', virtualPhone: '+12025550161' },
     ]
     const scenario = { kind: 'synthetic-collaboration', accounts, issuedAt: now, expiresAt: now + 60_000 }
     for (const { uid, identityId } of accounts) {
@@ -561,6 +565,9 @@ describe('web build membership at the HTTP routes', () => {
     expect((await request('/availability', undefined, owner)).status).toBe(403)
     collaborationTestEnabled = true
     expect((await request('/availability')).status).toBe(200)
+    const { id: personalId } = await (await request('', { action: 'generate', prompt: '个人网页' })).json()
+    expect((await request('', { action: 'room.invite', id: personalId })).status).toBe(403)
+    expect((await request(`/${personalId}`)).status).toBe(200)
     enabled = false
     expect((await request('/availability', undefined, '')).status).toBe(401)
     expect((await request('/availability', undefined, outside)).status).toBe(403)
@@ -581,7 +588,8 @@ describe('web build membership at the HTTP routes', () => {
     expect((await request('', { action: 'room.chat', id, text: '协作验收消息' }, member)).status).toBe(200)
     expect(await (await request('?includeShared=true', undefined, member)).json()).toMatchObject([{ id, role: 'member' }])
 
-    documents.set('member-identity', { ...documents.get('member-identity'), status: 'disabled' })
+    const memberIdentity = accounts[1]!.identityId
+    documents.set(memberIdentity, { ...documents.get(memberIdentity), status: 'disabled' })
     expect((await request(`/${id}`, undefined, owner)).status).toBe(403)
     documents.set('synthetic_collaboration', { ...scenario, expiresAt: now })
     expect((await request(`/${id}`, undefined, member)).status).toBe(403)

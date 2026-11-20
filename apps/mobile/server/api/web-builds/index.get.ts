@@ -6,6 +6,6 @@ import { listWebBuilds } from '../../utils/web-build-storage'
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
   requireWebBuildEditor(event)
-  const { user, personalTestSession } = await requireWebBuildMember(event)
-  return listWebBuilds(user.uid, getQuery(event).includeShared === 'true' && !personalTestSession)
+  const { user, canCollaborate } = await requireWebBuildMember(event)
+  return listWebBuilds(user.uid, getQuery(event).includeShared === 'true' && canCollaborate)
 })

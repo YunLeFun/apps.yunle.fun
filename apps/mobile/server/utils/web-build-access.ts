@@ -7,6 +7,7 @@ import { assertVerifiedCloudbasePhone, requireRegisteredCloudbaseUser } from './
 import { getWebBuildTestSession } from './web-build-config'
 
 const unavailableMessage = '暂时无法核对会员状态，请稍后重试'
+const collaborationTestIdentityIds = new Set(['testid_production-web-build-owner', 'testid_production-web-build-member'])
 
 export async function requireWebBuildMember(event: H3Event) {
   const personalTestSession = getWebBuildTestSession(event)
@@ -38,7 +39,8 @@ export async function requireWebBuildMember(event: H3Event) {
       data: { code: 'MEMBERSHIP_REQUIRED' },
     })
   }
-  return { user, personalTestSession: Boolean(personalTestSession), testPeerUid }
+  const canCollaborate = !personalTestSession && (Boolean(testPeerUid) || config.webBuildCollaborationEnabled === true)
+  return { user, personalTestSession: Boolean(personalTestSession), testPeerUid, canCollaborate }
 }
 
 export async function requireWebBuildInvitePeer(event: H3Event, targetId: string, testPeerUid?: string) {
@@ -83,7 +85,7 @@ async function findCollaborationTestPeer(uid: string) {
     return
   const valid = await Promise.all(accounts.map(async (account) => {
     if (typeof account?.uid !== 'string' || !/^[\w.:-]{1,128}$/.test(account.uid)
-      || typeof account.identityId !== 'string' || !/^[\w-]{1,128}$/.test(account.identityId)
+      || typeof account.identityId !== 'string' || !collaborationTestIdentityIds.has(account.identityId)
       || typeof account.virtualPhone !== 'string' || !/^\+120255501\d{2}$/.test(account.virtualPhone)) {
       return false
     }

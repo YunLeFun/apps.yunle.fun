@@ -3,18 +3,25 @@ import { createHash } from 'node:crypto'
 import { createError } from 'h3'
 import { invokeAccountApi } from './account-api'
 import { useCloudbaseAdmin } from './cloudbase-admin'
-import { requireRegisteredCloudbaseUser, requireVerifiedCloudbaseUser } from './cloudbase-auth'
+import { assertVerifiedCloudbasePhone, requireRegisteredCloudbaseUser } from './cloudbase-auth'
 import { getWebBuildTestSession } from './web-build-config'
 
 const unavailableMessage = '暂时无法核对会员状态，请稍后重试'
 
 export async function requireWebBuildMember(event: H3Event) {
-  const testSession = getWebBuildTestSession(event)
-  const user = testSession ? await requireRegisteredCloudbaseUser(event) : await requireVerifiedCloudbaseUser(event)
+  const personalTestSession = getWebBuildTestSession(event)
+  const user = await requireRegisteredCloudbaseUser(event)
   const config = useRuntimeConfig(event)
-  if (testSession)
-    await requireSyntheticPilot(user.uid, testSession)
-  else if (config.webBuildEnabled !== true && config.webBuildPilotUid !== user.uid)
+  let testPeerUid: string | undefined
+  if (personalTestSession) {
+    await requireSyntheticPilot(user.uid, personalTestSession)
+  }
+  else if (!user.phoneVerified && config.webBuildCollaborationTestEnabled === true) {
+    testPeerUid = await findCollaborationTestPeer(user.uid)
+  }
+  if (!personalTestSession && !testPeerUid)
+    assertVerifiedCloudbasePhone(user)
+  if (!personalTestSession && !testPeerUid && config.webBuildEnabled !== true && config.webBuildPilotUid !== user.uid)
     throw createError({ statusCode: 503, message: 'AI 网页服务暂未开放' })
   const snapshot = await invokeAccountApi(event, { action: 'getAccount' }, unavailableMessage) as {
     membership?: { isActive?: unknown, expireAt?: unknown } | null
@@ -31,10 +38,12 @@ export async function requireWebBuildMember(event: H3Event) {
       data: { code: 'MEMBERSHIP_REQUIRED' },
     })
   }
-  return user
+  return { user, personalTestSession: Boolean(personalTestSession), testPeerUid }
 }
 
-export async function requireWebBuildInvitePeer(event: H3Event, targetId: string) {
+export async function requireWebBuildInvitePeer(event: H3Event, targetId: string, testPeerUid?: string) {
+  if (testPeerUid && targetId !== testPeerUid)
+    throw createError({ statusCode: 403, message: '测试账号只能邀请同一场景的测试好友' })
   const message = '暂时无法核对好友关系'
   const result = await invokeAccountApi(event, { action: 'checkWebBuildInvitePeer', targetId }, message) as {
     ok?: boolean
@@ -50,6 +59,41 @@ export async function requireWebBuildInvitePeer(event: H3Event, targetId: string
     })
   }
   throw createError({ statusCode: 503, statusMessage: message })
+}
+
+async function findCollaborationTestPeer(uid: string) {
+  const { db } = useCloudbaseAdmin()
+  const result = await db.collection('web_builds').doc('synthetic_collaboration').get()
+  const scenario = firstRecord(result.data)
+  const now = Date.now()
+  if (result.code || scenario?.kind !== 'synthetic-collaboration'
+    || typeof scenario.issuedAt !== 'number' || typeof scenario.expiresAt !== 'number'
+    || !Number.isSafeInteger(scenario.issuedAt) || !Number.isSafeInteger(scenario.expiresAt)
+    || scenario.issuedAt > now || scenario.expiresAt <= now || scenario.expiresAt > scenario.issuedAt + 30 * 60_000
+    || !Array.isArray(scenario.accounts) || scenario.accounts.length !== 2) {
+    return
+  }
+
+  const accounts = scenario.accounts.map(firstRecord)
+  const [left, right] = accounts
+  if (!left || !right || left.uid === right.uid || left.identityId === right.identityId || left.virtualPhone === right.virtualPhone)
+    return
+  const peer = left.uid === uid ? right.uid : right.uid === uid ? left.uid : undefined
+  if (typeof peer !== 'string')
+    return
+  const valid = await Promise.all(accounts.map(async (account) => {
+    if (typeof account?.uid !== 'string' || !/^[\w.:-]{1,128}$/.test(account.uid)
+      || typeof account.identityId !== 'string' || !/^[\w-]{1,128}$/.test(account.identityId)
+      || typeof account.virtualPhone !== 'string' || !/^\+120255501\d{2}$/.test(account.virtualPhone)) {
+      return false
+    }
+    const identity = await db.collection('test_identities').doc(account.identityId).get()
+    const record = firstRecord(identity.data)
+    return !identity.code && isReadyTestIdentity(record, account.uid)
+      && Array.isArray(record?.tags) && record.tags.includes('member-active')
+  }))
+  if (valid.every(Boolean))
+    return peer
 }
 
 async function requireSyntheticPilot(uid: string, session: string) {
@@ -70,10 +114,14 @@ async function requireSyntheticPilot(uid: string, session: string) {
 
   const identityRecord = await db.collection('test_identities').doc(pilot.identityId).get()
   const identity = firstRecord(identityRecord.data)
-  if (identityRecord.code || identity?.uid !== uid || identity.synthetic !== true || identity.source !== 'managed'
-    || identity.accountKind !== 'fixed' || identity.environment !== 'production' || identity.status !== 'ready') {
+  if (identityRecord.code || !isReadyTestIdentity(identity, uid)) {
     throw deny()
   }
+}
+
+function isReadyTestIdentity(identity: Record<string, unknown> | null, uid: string) {
+  return identity?.uid === uid && identity.synthetic === true && identity.source === 'managed'
+    && identity.accountKind === 'fixed' && identity.environment === 'production' && identity.status === 'ready'
 }
 
 function firstRecord(data: unknown) {

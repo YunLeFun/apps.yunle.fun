@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { createError, getRequestHeader, readRawBody, setResponseHeader } from 'h3'
 import { parseBearerToken } from '../../utils/cloudbase-auth'
 import { requireWebBuildInvitePeer, requireWebBuildMember } from '../../utils/web-build-access'
-import { getWebBuildTestSession, requireWebBuildEditor } from '../../utils/web-build-config'
+import { requireWebBuildEditor } from '../../utils/web-build-config'
 import { submitWebBuildToMarket } from '../../utils/web-build-market'
 import { generateWebBuildPage, getWebBuildRuntimeConfig } from '../../utils/web-build-model'
 import {
@@ -25,7 +25,7 @@ import {
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Cache-Control', 'private, no-store')
   requireWebBuildEditor(event)
-  const user = await requireWebBuildMember(event)
+  const { user, personalTestSession, testPeerUid } = await requireWebBuildMember(event)
   const length = Number(getRequestHeader(event, 'content-length'))
   if (length > 8192)
     throw createError({ statusCode: 413, statusMessage: '请求内容过长' })
@@ -44,19 +44,20 @@ export default defineEventHandler(async (event) => {
 
   const { action, revision, shortName } = input
   const id = typeof input.id === 'string' ? input.id : ''
-  const testSession = getWebBuildTestSession(event)
   if (action === 'publish')
     return publishWebBuild(id, user.uid, revision)
   if (action === 'withdraw')
     return withdrawWebBuild(id, user.uid, revision)
   if (action === 'submit') {
-    if (testSession)
+    if (personalTestSession || testPeerUid)
       throw createError({ statusCode: 403, message: '网页验收会话仅用于生成和分享' })
     return submitWebBuildToMarket(user, id, revision, shortName)
   }
   if (typeof action === 'string' && action.startsWith('room.')) {
-    if (testSession)
+    if (personalTestSession)
       throw createError({ statusCode: 403, statusMessage: '网页验收会话不支持多人协作' })
+    if (testPeerUid && (action === 'room.invite' || action === 'room.join'))
+      throw createError({ statusCode: 403, statusMessage: '请通过受管测试好友的邀请卡加入' })
     switch (action) {
       case 'room.invite': return createWebBuildRoomInvite(id, user)
       case 'room.revoke': return revokeWebBuildRoomInvite(id, user.uid)
@@ -65,13 +66,13 @@ export default defineEventHandler(async (event) => {
         const target = input.targetId
         if (typeof target !== 'string' || !target || target !== target.trim() || target.length > 128 || target === user.uid)
           throw createError({ statusCode: 400, statusMessage: '请选择互关好友' })
-        return sendWebBuildFriendInvite(id, user, target, targetId => requireWebBuildInvitePeer(event, targetId))
+        return sendWebBuildFriendInvite(id, user, target, targetId => requireWebBuildInvitePeer(event, targetId, testPeerUid))
       }
       case 'room.acceptInvite': {
         const noticeId = input.inviteId
         if (typeof noticeId !== 'string' || !/^[a-f0-9]{24}$/.test(noticeId))
           throw createError({ statusCode: 400, statusMessage: '无效的项目邀请' })
-        return acceptWebBuildFriendInvite(noticeId, user, targetId => requireWebBuildInvitePeer(event, targetId))
+        return acceptWebBuildFriendInvite(noticeId, user, targetId => requireWebBuildInvitePeer(event, targetId, testPeerUid))
       }
       case 'room.leave': return changeWebBuildRoomMembers(id, user.uid)
       case 'room.remove': {
@@ -100,12 +101,12 @@ export default defineEventHandler(async (event) => {
   const token = parseBearerToken(getRequestHeader(event, 'authorization'))
   if (!token)
     throw createError({ statusCode: 401 })
-  const prior = id ? await (testSession ? getOwnedWebBuild(id, user.uid) : getEditableWebBuild(id, user.uid)) : undefined
+  const prior = id ? await (personalTestSession ? getOwnedWebBuild(id, user.uid) : getEditableWebBuild(id, user.uid)) : undefined
   if (prior && prior.revision !== revision)
     throw createError({ statusCode: 409, statusMessage: '网页已有更新，请刷新后再试' })
   await reserveWebBuildAction(user.uid, 'generate')
   if (prior?.room) {
-    if (testSession)
+    if (personalTestSession)
       throw createError({ statusCode: 403, statusMessage: '网页验收会话不支持多人协作' })
     await moderateWebBuildRoomMessage(id, user.uid, prompt)
   }

@@ -197,6 +197,7 @@ describe('web build membership at the HTTP routes', () => {
   let server: ReturnType<typeof createServer>
   let api: string
   let enabled: boolean
+  let collaborationTestEnabled: boolean
   let pilotUid: string
   let profile: { sub: string, phone_verified: boolean, status: string }
   let membership: unknown
@@ -230,6 +231,7 @@ describe('web build membership at the HTTP routes', () => {
     peers.clear()
     checkInvitePeer.mockReset().mockResolvedValue({ ok: false, code: 'not_mutual' })
     enabled = true
+    collaborationTestEnabled = false
     pilotUid = ''
     profile = { sub: 'author', phone_verified: true, status: 'ACTIVE' }
     membership = { isActive: true, expireAt: Date.now() + 86_400_000 }
@@ -237,6 +239,7 @@ describe('web build membership at the HTTP routes', () => {
     model.mockReset().mockImplementation(async () => Response.json({ result: { content: JSON.stringify(page) } }))
     vi.stubGlobal('useRuntimeConfig', () => ({
       webBuildEnabled: enabled,
+      webBuildCollaborationTestEnabled: collaborationTestEnabled,
       webBuildWriteToken: token,
       webBuildRuntimeOrigin: runtimeOrigin,
       webBuildRuntimeSigningSecret: signingSecret,
@@ -531,6 +534,57 @@ describe('web build membership at the HTTP routes', () => {
     documents.delete(pilotId)
     expect((await request('/availability', undefined, fixtureBearer, session)).status).toBe(403)
     expect((await request(`/public/${id}`, undefined, '')).status).toBe(404)
+  })
+
+  it('admits only the two ready Admin accounts to a time-limited collaboration scenario', async () => {
+    const owner = peerBearer('test-owner', false)
+    const member = peerBearer('test-member', false)
+    const outside = peerBearer('other', false)
+    const now = Date.now()
+    const accounts = [
+      { uid: 'test-owner', identityId: 'owner-identity', virtualPhone: '+12025550160' },
+      { uid: 'test-member', identityId: 'member-identity', virtualPhone: '+12025550161' },
+    ]
+    const scenario = { kind: 'synthetic-collaboration', accounts, issuedAt: now, expiresAt: now + 60_000 }
+    for (const { uid, identityId } of accounts) {
+      documents.set(identityId, {
+        uid,
+        source: 'managed',
+        synthetic: true,
+        accountKind: 'fixed',
+        environment: 'production',
+        status: 'ready',
+        tags: ['member-active'],
+      })
+    }
+    documents.set('synthetic_collaboration', scenario)
+    expect((await request('/availability', undefined, owner)).status).toBe(403)
+    collaborationTestEnabled = true
+    expect((await request('/availability')).status).toBe(200)
+    enabled = false
+    expect((await request('/availability', undefined, '')).status).toBe(401)
+    expect((await request('/availability', undefined, outside)).status).toBe(403)
+    expect((await request('/availability')).status).toBe(503)
+    expect((await request('/availability', undefined, owner)).status).toBe(200)
+    expect((await request('/availability', undefined, member)).status).toBe(200)
+
+    const { id } = await (await request('', { action: 'generate', prompt: '网页协作验收' }, owner)).json()
+    expect(id).toMatch(/^[a-f0-9]{32}$/)
+    for (const action of ['room.invite', 'room.join', 'submit'])
+      expect((await request('', { action, id }, owner)).status).toBe(403)
+    expect((await request('', { action: 'room.inviteFriend', id, targetId: 'other' }, owner)).status).toBe(403)
+    expect(checkInvitePeer).not.toHaveBeenCalled()
+    checkInvitePeer.mockImplementation(async (auth, target) => ({ ok: auth === owner ? target === 'test-member' : auth === member && target === 'test-owner' }))
+    expect((await request('', { action: 'room.inviteFriend', id, targetId: 'test-member' }, owner)).status).toBe(200)
+    const inviteId = [...documents].find(([, doc]) => doc.type === 'web_build_invite')![0]
+    expect((await request('', { action: 'room.acceptInvite', inviteId }, member)).status).toBe(200)
+    expect((await request('', { action: 'room.chat', id, text: '协作验收消息' }, member)).status).toBe(200)
+    expect(await (await request('?includeShared=true', undefined, member)).json()).toMatchObject([{ id, role: 'member' }])
+
+    documents.set('member-identity', { ...documents.get('member-identity'), status: 'disabled' })
+    expect((await request(`/${id}`, undefined, owner)).status).toBe(403)
+    documents.set('synthetic_collaboration', { ...scenario, expiresAt: now })
+    expect((await request(`/${id}`, undefined, member)).status).toBe(403)
   })
 
   it('allows a verified member to generate, revise and publish and serves published versions without login', async () => {

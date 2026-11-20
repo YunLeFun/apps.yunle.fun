@@ -95,13 +95,17 @@ export async function requireRegisteredCloudbaseUser(event: H3Event): Promise<Se
 /** 应用提交等高信任操作要求已验证手机号、非匿名且账号状态正常。 */
 export async function requireVerifiedCloudbaseUser(event: H3Event): Promise<ServerAuthUser> {
   const user = await requireRegisteredCloudbaseUser(event)
+  assertVerifiedCloudbasePhone(user)
+  return user
+}
+
+export function assertVerifiedCloudbasePhone(user: ServerAuthUser) {
   if (!user.phoneVerified) {
     throw createError({
       statusCode: 403,
       statusMessage: '提交应用前请先验证云乐坊手机号',
     })
   }
-  return user
 }
 
 export async function tryGetCloudbaseUser(event: H3Event): Promise<ServerAuthUser | null> {

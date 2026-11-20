@@ -210,6 +210,7 @@ export default defineNuxtConfig({
     tmsRegion: 'ap-guangzhou',
     tmsBizType: '',
     webBuildEnabled: false,
+    webBuildCollaborationTestEnabled: false,
     webBuildWriteToken: '',
     webBuildRuntimeOrigin: '',
     webBuildRuntimeSigningSecret: '',

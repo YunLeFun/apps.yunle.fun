@@ -27,6 +27,7 @@ export function getWebBuildTestSession(event: H3Event) {
 export function webBuildEditorEnabled(event: H3Event) {
   const config = useRuntimeConfig()
   return !!getWebBuildWriteToken() && (config.webBuildEnabled === true
+    || config.webBuildCollaborationTestEnabled === true
     || /^[\w.:-]{1,128}$/.test(config.webBuildPilotUid || '') || !!getWebBuildTestSession(event))
 }
 

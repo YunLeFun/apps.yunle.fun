@@ -1,6 +1,81 @@
 import XCTest
 @testable import YunleFun
 
+final class TeamSignupTests: XCTestCase {
+    func testSupportedCommandsAndPortableCard() throws {
+        let id = "0ebd1cfc-e4cf-4a50-bf48-55c77709c04a"
+        XCTAssertEqual(try TeamSignupCommand.parse("创建组队报名"), .create(title: "组队报名", capacity: 4))
+        XCTAssertEqual(try TeamSignupCommand.parse("创建组队报名 6 周末联机"), .create(title: "周末联机", capacity: 6))
+        XCTAssertEqual(try TeamSignupCommand.parse("打开组队报名 " + id.uppercased()), .open(id))
+        XCTAssertThrowsError(try TeamSignupCommand.parse("创建组队报名 20 周末联机"))
+        XCTAssertThrowsError(try TeamSignupCommand.parse("打开组队报名 https://example.com"))
+        let snapshot = TeamSignupSnapshot(schemaVersion: 1, signupId: id, title: "周末联机",
+                                          capacity: 6, memberCount: 2, joined: false, revision: 3)
+        let card = try JSONDecoder().decode(ConversationCard.self, from: JSONEncoder().encode(ConversationCard(teamSignup: snapshot)))
+        XCTAssertEqual(card.teamSignupId, id)
+        XCTAssertEqual(card.id, "team.signup:" + id)
+        XCTAssertEqual(card.fallbackText, "周末联机")
+    }
+
+    func testServiceUsesAuthenticatedStateAndChecksResponseIdentity() async throws {
+        let id = "0ebd1cfc-e4cf-4a50-bf48-55c77709c04a"
+        let host = UUID().uuidString.lowercased() + ".team.test"
+        let snapshot = #"{"schemaVersion":1,"signupId":"0ebd1cfc-e4cf-4a50-bf48-55c77709c04a","title":"周末联机","capacity":6,"memberCount":2,"joined":true,"revision":3}"#
+        let fixture = AuthHTTPFixture(replies: [(200, snapshot), (200, snapshot), (409, #"{"data":{"code":"SIGNUP_FULL"}}"#)])
+        AuthHTTPProtocol.register(host, fixture: fixture); defer { AuthHTTPProtocol.unregister(host) }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AuthHTTPProtocol.self]
+        let service = TeamSignupService(session: URLSession(configuration: configuration), origin: URL(string: "https://" + host)!)
+        let identity = AuthorizedAccount(userID: "fixture", accessToken: "fixture-token")
+        let current = try await service.load(id: id, identity: identity)
+        XCTAssertEqual(current.memberCount, 2)
+        XCTAssertTrue(current.joined)
+        do {
+            _ = try await service.load(id: "3db8b8cd-07bf-4373-bc57-ae46bfa5d809", identity: identity)
+            XCTFail("A snapshot must belong to the requested signup")
+        } catch { XCTAssertEqual(error as? TeamSignupError, .unavailable) }
+        do {
+            _ = try await service.setJoined(true, id: id, identity: identity)
+            XCTFail("Expected full signup")
+        } catch { XCTAssertEqual(error as? TeamSignupError, .full) }
+        XCTAssertEqual(fixture.requests.compactMap(\.httpMethod), ["GET", "GET", "PATCH"])
+        XCTAssertTrue(fixture.requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-token" })
+    }
+
+    @MainActor
+    func testCreateRetryKeepsSignupIdentityAndOpeningStaysLocal() async throws {
+        let agent = AssistantFixture()
+        let chat = AssistantStore(accounts: BillingAccounts(), service: agent, wallet: AssistantWalletFixture(),
+                                  teamSignupService: TeamSignupFixture())
+        chat.draft = "创建组队报名 6 周末联机"
+        await chat.send()?.value
+        let card = try XCTUnwrap(chat.messages.last?.conversationCards?.first)
+        let id = try XCTUnwrap(card.teamSignupId)
+        await chat.retry()?.value
+        XCTAssertEqual(chat.messages.last?.conversationCards, [card])
+        chat.draft = "打开组队报名 " + id
+        await chat.send()?.value
+        XCTAssertEqual(chat.messages.last?.conversationCards, [card])
+        chat.draft = "推荐几款游戏"
+        await chat.send()?.value
+        let inputs = await agent.inputs
+        XCTAssertEqual(inputs.count, 1)
+        XCTAssertFalse(inputs[0].messages.contains { $0.content.contains(id) })
+    }
+}
+
+private struct TeamSignupFixture: TeamSignupServing {
+    func load(id: String, identity: AuthorizedAccount) async throws -> TeamSignupSnapshot {
+        try await create(id: id, title: "周末联机", capacity: 6, identity: identity)
+    }
+    func create(id: String, title: String, capacity: Int, identity: AuthorizedAccount) async throws -> TeamSignupSnapshot {
+        TeamSignupSnapshot(schemaVersion: 1, signupId: id, title: title, capacity: capacity, memberCount: 0, joined: false, revision: 1)
+    }
+    func setJoined(_ joined: Bool, id: String, identity: AuthorizedAccount) async throws -> TeamSignupSnapshot {
+        throw TeamSignupError.unavailable
+    }
+}
+
 func assistantEvent(_ fields: [String: Any]) throws -> AssistantEvent { try AssistantEvent(data: JSONSerialization.data(withJSONObject: fields)) }
 func assistantEvents(input: AssistantRunInput, text: String = " 你好\n世界 ", finish: Bool = true) throws -> [AssistantEvent] {
     var events = try [

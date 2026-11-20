@@ -32,6 +32,7 @@ struct AppRootView: View {
     var body: some View {
         tabs
             .environment(\.screenshotFeedbackCoordinator, screenshotFeedback)
+            .environment(\.requestGameRoom, { room in requestGameLaunch(.room(room)) })
             .environment(\.requestFeedbackLogin, { text in
                 feedbackLogin.begin(text: text, origin: accountBoundary, isRestoring: accounts.isRestoring)
             })
@@ -187,12 +188,27 @@ struct AppRootView: View {
             CatalogView()
                 .navigationDestination(for: CloudApplication.self) { ApplicationDetailView(application: $0) }
                 .navigationDestination(for: NativeDestination.self) { NativeDestinationView(destination: $0) }
+                .navigationDestination(for: ConversationCardLink.self) { link in
+                    LinkedConversationCardView(link: link)
+                }
         }
     }
     private func handleLink(_ url: URL) {
         // 跨 App 授权入口优先：只弹授权面板，不切换 Tab、不打断当前页面
         if crossAppAuthorization.handle(url, runtime: runtime, accounts: accounts) {
             screenshotFeedback.cancelPendingLogin()
+            return
+        }
+        if let link = ConversationCardLink.parse(url) {
+            screenshotFeedback.cancelPendingLogin()
+            let action = NativeGameLaunchIntent.card(link)
+            guard gameLogin.login?.action != action else { return }
+            let boundary = accountBoundary
+            let selection = accounts.selectionOperationGeneration
+            runtime.revealHostForNavigation {
+                guard accountBoundary == boundary, accounts.selectionOperationGeneration == selection else { return }
+                requestGameLaunch(action)
+            }
             return
         }
         if let invitation = NativeGameRoomInvitation.parse(url) {
@@ -255,14 +271,17 @@ struct AppRootView: View {
             deferGameLaunch(action)
             return
         }
-        if accountRestorationInProgress || NativeGameDeferredLaunchCoordinator.waitsForCatalog(
-            hasPlay: catalog.application(id: "play") != nil, isLoading: catalog.isLoading) {
+        if accountRestorationInProgress || (action.needsPlayCatalog && NativeGameDeferredLaunchCoordinator.waitsForCatalog(
+            hasPlay: catalog.application(id: "play") != nil, isLoading: catalog.isLoading)) {
             deferGameLaunch(action)
             return
         }
         deferredGameLaunch.cancel()
         let needsLogin: Bool
-        switch action { case .game(_, let mode): needsLogin = mode.requiresLogin; case .room, .createRoom: needsLogin = true }
+        switch action {
+        case .game(_, let mode): needsLogin = mode.requiresLogin
+        case .room, .createRoom, .card: needsLogin = true
+        }
         if needsLogin, accounts.user == nil {
             gameLogin.begin(action, origin: accountBoundary, isRestoring: accountRestorationInProgress)
             return
@@ -275,6 +294,7 @@ struct AppRootView: View {
     }
 
     private func gameLoginMessage(for action: NativeGameLaunchIntent) -> String {
+        if case .card = action { return "登录后返回这张共享卡片，继续操作。" }
         if case .room = action { return "登录后继续进入这个房间。" }
         return "登录后继续创建房间，或返回所选游戏与房间。进入时会确认玩法和席位。"
     }
@@ -302,6 +322,9 @@ struct AppRootView: View {
             guard let game = games.game(id: selected.gameId), let mode = game.mode(id: selectedMode.id) else { return }
             runtime.openGame(game, mode: mode, catalog: catalog, library: library)
         case .room(let room): runtime.openGameRoom(room, catalog: catalog, library: library)
+        case .card(let link):
+            selectedTab = .workshop
+            workshopPath.append(link)
         case .createRoom(let gameID):
             guard runtime.canCreateGameRoom(catalog: catalog) else { return }
             roomCreation = RoomCreationPresentation(boundary: accountBoundary, gameID: gameID)
@@ -342,7 +365,7 @@ struct AppRootView: View {
             },
             set: { feedbackLogin.updatePath($0, stack: stackBoundary, current: accountBoundary,
                                             isUsable: accounts.user?.isUsable == true, proofIsCurrent: continuationIsCurrent) })) {
-            MeView(navigateTab: { selectedTab = $0 }, joinRoom: { requestGameLaunch(.room($0)) })
+            MeView(navigateTab: { selectedTab = $0 })
                 .navigationDestination(for: FeedbackResumeRoute.self) { route in
                     if let text = feedbackLogin.text(for: route, current: accountBoundary, isUsable: accounts.user?.isUsable == true,
                                                      proofIsCurrent: continuationIsCurrent) {

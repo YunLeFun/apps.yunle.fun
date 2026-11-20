@@ -30,6 +30,15 @@ struct AssistantView: View {
     @State private var endVisible = true
     @State private var confirmReset = false
     @State private var confirmDiscard = false
+    @State private var isVisible = false
+
+    private var roomWatchID: String? {
+        guard isVisible, scenePhase == .active,
+              chat.messages.contains(where: { $0.conversationCards?.contains(where: { $0.publicRoomCode != nil }) == true })
+        else { return nil }
+        return accounts.identityGeneration.uuidString + chat.threadID
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -133,6 +142,10 @@ struct AssistantView: View {
             guard !Task.isCancelled else { return }
             webBuildAccess = boundary
         }
+        .task(id: roomWatchID) {
+            guard roomWatchID != nil else { return }
+            await chat.roomFeed.watch()
+        }
         .onChange(of: accounts.identityGeneration) { _ in
             modal = nil
             webBuildPrompt = ""
@@ -142,8 +155,10 @@ struct AssistantView: View {
         }
         .onChange(of: scenePhase) { if $0 != .active { chat.stop() } }
         // Pushing a card's detail page keeps the reply streaming; leaving the assistant stops it (see AssistantScreenLifetime).
-        .onAppear { lifetime.chat = chat }
+        .onAppear { lifetime.chat = chat; isVisible = true }
+        .onDisappear { isVisible = false }
         .haptic(.impact, trigger: chat.messages.count) { old, new in new > old }
+        .environmentObject(chat.roomFeed)
         .environment(\.openURL, OpenURLAction { url in AssistantMarkdown.safeLink(url) ? .systemAction : .discarded })
     }
 
@@ -289,7 +304,10 @@ struct AssistantView: View {
         let icons: [(symbol: String, color: Color)] = [
             ("chevron.left.forwardslash.chevron.right", .blue),
             ("gamecontroller", Self.gameSuggestionColor),
-            ("lightbulb", .orange)
+            ("lightbulb", .orange),
+            ("person.2", Self.gameSuggestionColor),
+            ("person.2.badge.plus", .blue),
+            ("square.grid.3x3", Self.gameSuggestionColor)
         ]
         return VStack(spacing: 0) {
             ForEach(Array(AssistantStore.examples.enumerated()), id: \.element) { index, prompt in
@@ -428,10 +446,6 @@ private struct AssistantReply: View {
     let isLatest: Bool
     let canRegenerate: Bool
     let regenerate: () -> Void
-    @EnvironmentObject private var catalog: CatalogStore
-    @EnvironmentObject private var runtime: NativeWebRuntime
-    @EnvironmentObject private var library: HomeLibrary
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var copied = false
     private var streaming: Bool { message.status == .streaming }
     private var searching: Bool { streaming && message.cards.isEmpty && Self.searchStates.contains(message.toolStatus ?? "") }
@@ -447,14 +461,18 @@ private struct AssistantReply: View {
             } else if streaming && !searching {
                 AssistantTypingIndicator(status: message.toolStatus)
             }
-            if !message.cards.isEmpty { cards }
-            if searching {
-                HStack(spacing: 8) { ProgressView(); Text(verbatim: message.toolStatus ?? "").foregroundStyle(.secondary) }
-                    .font(.subheadline).accessibilityElement(children: .combine)
-                skeleton
+            if searching || !message.cards.isEmpty {
+                AssistantRecommendations(cards: message.cards, searchStatus: searching ? message.toolStatus : nil)
             } else if streaming, !message.content.isEmpty, let status = message.toolStatus {
                 HStack(spacing: 8) { ProgressView(); Text(verbatim: status).foregroundStyle(.secondary) }
                     .font(.subheadline).accessibilityElement(children: .combine)
+            }
+            if let cards = message.conversationCards {
+                ForEach(cards) { card in
+                    if let code = card.publicRoomCode { AssistantRoomCardView(code: code) }
+                    else if let reference = card.reference { NativeConversationCardView(reference: reference, fallback: card.fallbackText) }
+                    else { Text(verbatim: card.fallbackText).font(.subheadline).foregroundStyle(.secondary) }
+                }
             }
             if message.status == .stopped {
                 Label("已停止", systemImage: "stop.circle").font(.subheadline).foregroundStyle(.secondary)
@@ -467,80 +485,6 @@ private struct AssistantReply: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .haptic(.success, trigger: copied) { _, new in new }
-    }
-    private var cards: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(message.cards.enumerated()), id: \.element.id) { index, card in
-                if index > 0 { Divider().padding(.leading, 16) }
-                cardRow(card)
-            }
-        }
-        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-    /// App Store style: the row opens the detail page, one trailing button opens or gets the app.
-    @ViewBuilder private func cardRow(_ card: AssistantAppCard) -> some View {
-        if let app = card.resolve(in: catalog.applications) {
-            let layout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(spacing: 12))
-            layout {
-                // The assistant is a view destination; keep card details on that same visible stack.
-                NavigationLink {
-                    ApplicationDetailView(application: app)
-                } label: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ApplicationRow(application: app)
-                        if let reason = card.reason {
-                            Text(verbatim: reason).font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                cardAction(app)
-                    .font(.subheadline.weight(.semibold))
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.small)
-            }
-            .padding(.horizontal, 16).padding(.vertical, 12)
-        } else {
-            Label("\(card.name)暂不可用", systemImage: "app.badge").foregroundStyle(.secondary)
-                .padding(.horizontal, 16).padding(.vertical, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-    @ViewBuilder private func cardAction(_ app: CloudApplication) -> some View {
-        if library.contains(app) {
-            Button("打开") { runtime.open(app, catalog: catalog, library: library) }
-                .accessibilityLabel("打开\(app.name)")
-        } else {
-            Button("获取") {
-                if app.canOpenAsGuest { library.add(app) }
-                else { runtime.acquire(app, intent: .install, catalog: catalog, library: library) }
-            }
-            .accessibilityLabel("获取\(app.name)")
-        }
-    }
-    /// Placeholder rows while the Agent searches, so results arrive without pushing the reply around.
-    private var skeleton: some View {
-        VStack(spacing: 0) {
-            ForEach(0..<2, id: \.self) { index in
-                if index > 0 { Divider().padding(.leading, 16) }
-                HStack(spacing: 12) {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.secondary.opacity(0.2)).frame(width: 48, height: 48)
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("应用名称").font(.headline)
-                        Text("一句话介绍这个应用的用途").font(.subheadline)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .redacted(reason: .placeholder)
-                .padding(.horizontal, 16).padding(.vertical, 12)
-            }
-        }
-        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .accessibilityHidden(true)
     }
     private var actions: some View {
         HStack(spacing: 4) {
@@ -564,6 +508,169 @@ private struct AssistantReply: View {
         UIPasteboard.general.string = message.content
         copied = true
         Task { try? await Task.sleep(nanoseconds: 1_500_000_000); copied = false }
+    }
+}
+
+private struct AssistantRecommendations: View {
+    let cards: [AssistantAppCard]
+    let searchStatus: String?
+    @EnvironmentObject private var catalog: CatalogStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var expanded = false
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            if let first = cards.first {
+                VStack(spacing: 0) {
+                    cardRow(first)
+                    if cards.count > 1 {
+                        divider
+                        disclosure
+                        if expanded {
+                            VStack(spacing: 0) {
+                                ForEach(cards.dropFirst()) { card in
+                                    divider
+                                    cardRow(card)
+                                }
+                            }
+                            .transition(.opacity)
+                        }
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(1)
+            } else {
+                skeleton.transition(.opacity)
+            }
+        }
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .animation(reduceMotion ? nil : Motion.fade, value: cards.isEmpty)
+    }
+
+    private var divider: some View { Divider().padding(.leading, 16) }
+
+    private var disclosure: some View {
+        Button {
+            withAnimation(reduceMotion ? nil : Motion.fade) { expanded.toggle() }
+        } label: {
+            HStack(spacing: 8) {
+                Text(expanded ? "收起其他推荐" : "展开其余 \(cards.count - 1) 个结果")
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Image(systemName: expanded ? "chevron.up" : "chevron.down")
+                    .accessibilityHidden(true)
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Color.accentColor)
+        .accessibilityIdentifier("assistant.recommendations.disclosure")
+    }
+
+    @ViewBuilder private func cardRow(_ card: AssistantAppCard) -> some View {
+        if let app = card.resolve(in: catalog.applications) {
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(spacing: 12))
+            layout {
+                // Keep details on the same navigation stack as the assistant.
+                NavigationLink {
+                    ApplicationDetailView(application: app)
+                } label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ApplicationRow(application: app)
+                        if let reason = card.reason {
+                            Text(verbatim: reason).font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                AssistantRecommendationAction(application: app)
+            }
+            .padding(.horizontal, 16).padding(.vertical, 12)
+        } else {
+            Label("\(card.name)暂不可用", systemImage: "app.badge").foregroundStyle(.secondary)
+                .padding(.horizontal, 16).padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var skeleton: some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(spacing: 12))
+        return VStack(alignment: .leading, spacing: 12) {
+            if let searchStatus {
+                HStack(spacing: 8) {
+                    if reduceMotion { Image(systemName: "magnifyingglass").accessibilityHidden(true) }
+                    else { ProgressView() }
+                    Text(verbatim: searchStatus)
+                }
+                .font(.subheadline).foregroundStyle(.secondary)
+                .accessibilityElement(children: .combine)
+            }
+            layout {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.secondary.opacity(0.2)).frame(width: 52, height: 52)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("应用名称").font(.headline)
+                    Text("一句话介绍这个应用的用途").font(.subheadline)
+                }
+            }
+            .redacted(reason: .placeholder)
+            .accessibilityHidden(true)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct AssistantRecommendationAction: View {
+    let application: CloudApplication
+    @EnvironmentObject private var catalog: CatalogStore
+    @EnvironmentObject private var runtime: NativeWebRuntime
+    @EnvironmentObject private var library: HomeLibrary
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var additions = 0
+    @State private var showAddError = false
+
+    var body: some View {
+        let installed = library.contains(application)
+        let directAdd = application.canOpenAsGuest
+        let title: LocalizedStringKey = installed ? "打开" : (directAdd ? "添加" : "获取")
+        Button {
+            if library.contains(application) {
+                runtime.open(application, catalog: catalog, library: library)
+            } else if directAdd {
+                library.add(application)
+                if library.contains(application) { additions += 1 }
+                else { showAddError = true }
+            } else {
+                runtime.acquire(application, intent: .install, catalog: catalog, library: library)
+            }
+        } label: {
+            Label(title, systemImage: installed ? "checkmark" : "plus")
+                .contentTransition(.opacity)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(minHeight: 36)
+        }
+        .font(.subheadline.weight(.semibold))
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.capsule)
+        .accessibilityLabel(installed ? "打开\(application.name)" : (directAdd ? "添加\(application.name)到云居" : "获取\(application.name)"))
+        .accessibilityIdentifier("assistant.recommendation.action.\(application.id)")
+        .animation(reduceMotion ? nil : Motion.fade, value: installed)
+        .haptic(.success, trigger: additions)
+        .alert("暂未添加到云居", isPresented: $showAddError) {
+            Button("好", role: .cancel) { }
+        } message: {
+            Text(library.storageError ?? "请检查云居中的应用数量后重试。")
+        }
     }
 }
 

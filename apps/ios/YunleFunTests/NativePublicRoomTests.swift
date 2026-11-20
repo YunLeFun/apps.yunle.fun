@@ -1,3 +1,4 @@
+import Combine
 import XCTest
 @testable import YunleFun
 
@@ -81,6 +82,75 @@ final class NativePublicRoomTests: XCTestCase {
         await store.load()
         XCTAssertTrue(store.rooms.isEmpty)
         XCTAssertNil(store.error)
+    }
+
+    func testConversationCardMatchesPortableEnvelopeAndKeepsFutureFallback() throws {
+        let publicRoom = try XCTUnwrap(NativePublicRoom.decodeList(data([room("ABC234")])).first)
+        let card = ConversationCard(publicRoom: publicRoom)
+        let encoded = try JSONEncoder().encode(card)
+        let fields = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertEqual(fields["schemaVersion"] as? Int, 1)
+        XCTAssertEqual(fields["type"] as? String, "play.public-room")
+        XCTAssertEqual(fields["id"] as? String, "play-room:ABC234")
+        XCTAssertEqual(fields["payload"] as? [String: String], ["inviteCode": "ABC234"])
+        XCTAssertNil(fields["memberCount"], "History should store the reference rather than the live seats")
+        XCTAssertEqual(try JSONDecoder().decode(ConversationCard.self, from: encoded).publicRoomCode, "ABC234")
+
+        let future = Data(#"{"schemaVersion":2,"type":"play.public-room","id":"play-room:ABC234","fallbackText":"继续查看房间","payload":{"room":{"code":"ABC234"}}}"#.utf8)
+        let decoded = try JSONDecoder().decode(ConversationCard.self, from: future)
+        XCTAssertEqual(decoded.fallbackText, "继续查看房间")
+        XCTAssertNil(decoded.publicRoomCode)
+        let mismatched = Data(#"{"schemaVersion":1,"type":"play.public-room","id":"play-room:ABC234","fallbackText":"公开房间","payload":{"inviteCode":"DEF567"}}"#.utf8)
+        XCTAssertNil(try JSONDecoder().decode(ConversationCard.self, from: mismatched).publicRoomCode)
+    }
+
+    @MainActor
+    func testAssistantLoadsPublicRoomReferencesAndRestoresThemInHistory() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let history = AssistantHistory(directory: directory)
+        let publicRooms = try NativePublicRoom.decodeList(data([
+            room("ABC234"), room("DEF567"), room("GHI890"), room("JKL123")
+        ]))
+        let agent = AssistantFixture()
+        let chat = AssistantStore(accounts: BillingAccounts(), service: agent, wallet: AssistantWalletFixture(),
+                                  history: history, publicRooms: PublicRoomSequence(results: [.success(publicRooms)]))
+        chat.draft = AssistantStore.publicRoomPrompt
+        await chat.send()?.value
+
+        XCTAssertNil(chat.error)
+        let agentInputs = await agent.inputs
+        XCTAssertTrue(agentInputs.isEmpty)
+        XCTAssertEqual(chat.messages.last?.status, .done)
+        XCTAssertEqual(chat.messages.last?.conversationCards?.compactMap(\.publicRoomCode), ["ABC234", "DEF567", "GHI890"])
+        let saved = try XCTUnwrap(history.load(accountID: "alice").first)
+        XCTAssertTrue(chat.reset())
+        XCTAssertTrue(chat.open(saved.id))
+        XCTAssertEqual(chat.messages.last?.conversationCards, saved.messages.last?.conversationCards)
+    }
+
+    @MainActor
+    func testAssistantRoomFeedUpdatesSeatsAndDisablesMissingRoom() async throws {
+        let waiting = try NativePublicRoom.decodeList(data([room("ABC234")]))
+        var updated = room("ABC234", status: "playing")
+        updated["memberCount"] = 2
+        let playing = try NativePublicRoom.decodeList(data([updated]))
+        let feed = AssistantRoomFeed(service: PublicRoomSequence(results: [.success(waiting), .success(playing), .success([])]))
+        let changed = expectation(description: "Every public snapshot arrives in order")
+        changed.expectedFulfillmentCount = 3
+        var snapshots: [[NativePublicRoom]] = []
+        let subscription = feed.$state.sink { state in
+            if case .current(let rooms) = state { snapshots.append(rooms); changed.fulfill() }
+        }
+        let watch = Task { await feed.watch() }
+        await fulfillment(of: [changed], timeout: 16)
+        watch.cancel()
+        await watch.value
+        subscription.cancel()
+
+        XCTAssertEqual(snapshots, [waiting, playing, []])
+        XCTAssertEqual(try XCTUnwrap(snapshots.dropFirst().first?.first).intent().role, .spectator)
+        XCTAssertEqual(feed.state, .loading)
     }
 
     private func room(_ code: String, status: String = "waiting") -> [String: Any] {

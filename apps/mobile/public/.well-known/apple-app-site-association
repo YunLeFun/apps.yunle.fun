@@ -3,7 +3,7 @@
     "details": [
       {
         "appIDs": ["QT792GAY4C.fun.yunle.apps"],
-        "components": [{ "/": "/auth/wechat/*" }]
+        "components": [{ "/": "/auth/wechat/*" }, { "/": "/boards/*" }, { "/": "/cards/*" }]
       },
       {
         "appIDs": ["QT792GAY4C.fun.yunle.apps", "QT792GAY4C.fun.yunle.www"],

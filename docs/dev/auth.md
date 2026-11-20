@@ -9,6 +9,8 @@
 - `/app/*`
 - `/w/*`：个人工坊分享链接，进入 App 后映射为本地 `/w/{id}` 路由
 - `/ulink/*`
+- `/cards/*`：原生 iOS 共享卡片，登录后继续操作
+- `/boards/*`：兼容旧版五子棋邀请
 
 `app/plugins/deeplink.client.ts` 同时处理运行中的 `appUrlOpen` 事件和冷启动
 `App.getLaunchUrl()`，避免 App 未启动时丢失目标页面。未安装 App 的用户会继续

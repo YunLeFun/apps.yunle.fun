@@ -68,14 +68,13 @@ struct RoomInviteCard: View {
 struct RoomInviteInbox: View {
     @ObservedObject var accounts: AccountStore
     @EnvironmentObject private var games: NativeGameCatalogStore
-    @State private var repliesEnabled = false
+    @Environment(\.requestGameRoom) private var joinRoom
     @State private var joinedProjectID: String?
     @State private var openWebBuild = false
     let service: RoomInviteService
-    let joinRoom: (NativeGameRoomIntent) -> Void
 
     var body: some View {
-        RoomInviteList(emptyTitle: "还没有邀请", emptyIcon: "tray", fetch: fetch) { (message: RoomInviteMessage) in
+        RoomInviteList(emptyTitle: "还没有邀请", emptyIcon: "tray", fetch: fetch) { (message: RoomInviteMessage, repliesEnabled: Bool) in
             if message.isLaterReply {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(verbatim: gameName(for: message.roomInviteGameId)).font(.title2.bold()).accessibilityAddTraits(.isHeader)
@@ -86,7 +85,7 @@ struct RoomInviteInbox: View {
                 RoomInviteCard(gameName: gameName(for: invite.gameId), inviterName: message.actor.nickname,
                                hasReplied: message.hasRepliedLater,
                                replyLater: repliesEnabled ? { try await replyLater(to: message.id) } : nil) {
-                    joinRoom(room)
+                    joinRoom?(room)
                 }
                 .padding(.vertical, 8)
             } else if let invite = message.webBuild {
@@ -115,11 +114,9 @@ struct RoomInviteInbox: View {
 
     private func fetch(skip: Int) async throws -> RoomInvitePage<RoomInviteMessage> {
         let access = AccountRequestAccess<RoomInviteError>(accounts: accounts)
-        let page = try await access.perform(boundary: access.boundary) { identity in
+        return try await access.perform(boundary: access.boundary) { identity in
             try await service.messages(skip: skip, identity: identity)
         }
-        if !Task.isCancelled { repliesEnabled = page.repliesEnabled == true }
-        return page
     }
 
     private func replyLater(to id: String) async throws {
@@ -160,7 +157,7 @@ struct MutualFriendInvitePicker: View {
     var body: some View {
         NavigationStack {
             RoomInviteList(emptyTitle: "还没有互关好友", emptyIcon: "person.2", fetch: fetch,
-                           actionError: sendError) { (friend: RoomInviteFriend) in
+                           actionError: sendError) { (friend: RoomInviteFriend, _: Bool) in
                 HStack {
                     VStack(alignment: .leading) {
                         Text(verbatim: friend.nickname)
@@ -215,9 +212,10 @@ private struct RoomInviteList<Item: Identifiable & Decodable, Row: View>: View {
     let emptyIcon: String
     let fetch: (Int) async throws -> RoomInvitePage<Item>
     var actionError: String? = nil
-    @ViewBuilder let row: (Item) -> Row
+    @ViewBuilder let row: (Item, Bool) -> Row
 
     @State private var items: [Item] = []
+    @State private var repliesEnabled = false
     @State private var nextSkip: Int? = 0
     @State private var isLoading = false
     @State private var loadError: String?
@@ -225,7 +223,7 @@ private struct RoomInviteList<Item: Identifiable & Decodable, Row: View>: View {
     var body: some View {
         List {
             if let actionError { Text(actionError).foregroundStyle(.red) }
-            ForEach(items, content: row)
+            ForEach(items) { item in row(item, repliesEnabled) }
             if isLoading {
                 ProgressView("正在载入…")
             } else if let loadError {
@@ -249,6 +247,7 @@ private struct RoomInviteList<Item: Identifiable & Decodable, Row: View>: View {
         do {
             let page = try await fetch(skip)
             try Task.checkCancellation()
+            repliesEnabled = page.repliesEnabled == true
             if skip == 0 { items = page.items }
             else {
                 let existing = Set(items.map(\.id))

@@ -34,7 +34,7 @@ struct NativePublicRoomsView: View {
                                 dismiss()
                             } label: {
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text(gameName(room)).font(.headline).foregroundStyle(.primary)
+                                    Text(room.gameName(in: games)).font(.headline).foregroundStyle(.primary)
                                     Text("\(room.statusTitle) · \(room.memberCount)/\(room.capacity) 人")
                                         .font(.subheadline).foregroundStyle(.secondary)
                                     HStack {
@@ -78,11 +78,5 @@ struct NativePublicRoomsView: View {
     private func createOrRefresh() {
         if let onCreate { onCreate(); dismiss() }
         else { refresh() }
-    }
-    private func gameName(_ room: NativePublicRoom) -> String {
-        guard let id = room.gameId else { return "一起选游戏" }
-        return games.first { $0.gameId == id }?.name
-            ?? ["stone-chess": "石子棋", "animal-chess": "斗兽棋", "dark-animal-chess": "暗兽棋", "ganyandyan": "干瞪眼", "snake": "联机贪吃蛇"][id]
-            ?? "联机游戏"
     }
 }

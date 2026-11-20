@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "conversation-card.v2.schema.json",
+  "title": "YunLeFun native conversation card message v2",
+  "type": "object",
+  "required": ["schemaVersion", "id", "type", "fallbackText", "payload"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "id": { "type": "string", "description": "type plus ':' plus payload.instanceId" },
+    "type": { "$ref": "#/$defs/key" },
+    "fallbackText": { "$ref": "#/$defs/fallbackText" },
+    "payload": {
+      "type": "object",
+      "required": ["instanceId"],
+      "properties": { "instanceId": { "$ref": "#/$defs/instanceId" } }
+    }
+  },
+  "$defs": {
+    "key": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}[.][a-z][a-z0-9-]{0,31}$" },
+    "instanceId": { "$ref": "conversation-card.v1.schema.json#/$defs/instanceId" },
+    "fallbackText": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "reference": {
+      "type": "object",
+      "required": ["type", "instanceId"],
+      "properties": {
+        "type": { "$ref": "#/$defs/key" },
+        "instanceId": { "$ref": "#/$defs/instanceId" }
+      }
+    },
+    "shareLink": {
+      "type": "string",
+      "pattern": "^https://apps[.]yunle[.]fun/cards/[a-z][a-z0-9-]{0,31}[.][a-z][a-z0-9-]{0,31}/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "snapshot": {
+      "type": "object",
+      "required": ["schemaVersion", "reference", "revision", "finished", "fallbackText", "template", "data", "actions"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "reference": { "$ref": "#/$defs/reference" },
+        "revision": { "$ref": "#/$defs/revision" },
+        "finished": { "type": "boolean" },
+        "fallbackText": { "$ref": "#/$defs/fallbackText" },
+        "template": {
+          "type": "object",
+          "required": ["schemaVersion", "components"],
+          "properties": {
+            "schemaVersion": { "const": 1 },
+            "components": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "items": { "$ref": "#/$defs/component" }
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "maxProperties": 32,
+          "additionalProperties": {
+            "anyOf": [
+              { "type": "string", "maxLength": 512 },
+              { "type": "integer" },
+              { "$ref": "conversation-card.v1.schema.json#/$defs/boardSnapshot" }
+            ]
+          }
+        },
+        "actions": {
+          "type": "object",
+          "maxProperties": 16,
+          "propertyNames": { "$ref": "#/$defs/key" },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["label", "enabled"],
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "enabled": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["kind"],
+      "oneOf": [
+        {
+          "required": ["field"],
+          "properties": { "kind": { "enum": ["title", "text"] }, "field": { "type": "string" } }
+        },
+        {
+          "required": ["filled", "total"],
+          "properties": { "kind": { "const": "seats" }, "filled": { "type": "string" }, "total": { "type": "string" } }
+        },
+        {
+          "required": ["action"],
+          "properties": { "kind": { "const": "button" }, "action": { "$ref": "#/$defs/key" } }
+        },
+        {
+          "required": ["field", "action"],
+          "properties": { "kind": { "const": "gomoku" }, "field": { "type": "string" }, "action": { "$ref": "#/$defs/key" } }
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "required": ["schemaVersion", "action", "actionId", "expectedRevision"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "action": { "$ref": "#/$defs/key" },
+        "actionId": { "$ref": "#/$defs/instanceId" },
+        "expectedRevision": { "$ref": "#/$defs/revision" },
+        "input": { "type": "object" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 2,
+      "id": "team.signup:0ebd1cfc-e4cf-4a50-bf48-55c77709c04a",
+      "type": "team.signup",
+      "fallbackText": "周末联机",
+      "payload": { "instanceId": "0ebd1cfc-e4cf-4a50-bf48-55c77709c04a" }
+    }
+  ]
+}

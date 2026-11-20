@@ -21,6 +21,13 @@ struct NativePublicRoom: Decodable, Identifiable, Equatable {
         try NativeGameRoomIntent(input: inviteCode, role: isSpectating ? .spectator : .player)
     }
 
+    func gameName(in games: [NativeGame]) -> String {
+        guard let gameId else { return "一起选游戏" }
+        return games.first { $0.gameId == gameId }?.name
+            ?? ["stone-chess": "石子棋", "animal-chess": "斗兽棋", "dark-animal-chess": "暗兽棋", "ganyandyan": "干瞪眼", "snake": "联机贪吃蛇"][gameId]
+            ?? "联机游戏"
+    }
+
     static func decodeList(_ data: Data) throws -> [Self] {
         struct Response: Decodable { let ok: Bool; let rooms: [NativePublicRoom] }
         guard data.count <= 65_536 else { throw NativePublicRoomError.invalidResponse }

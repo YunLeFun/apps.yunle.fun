@@ -87,7 +87,8 @@ struct AssistantHistory: Sendable {
             var copy = message
             if copy.status == .streaming { copy.status = .stopped }
             copy.toolStatus = nil
-            return copy.role == .assistant && copy.content.isEmpty && copy.cards.isEmpty && copy.status == .done ? nil : copy
+            let empty = copy.content.isEmpty && copy.cards.isEmpty && (copy.conversationCards?.isEmpty ?? true)
+            return copy.role == .assistant && empty && copy.status == .done ? nil : copy
         }
         guard let question = kept.first(where: { $0.role == .user }) else { return nil }
         let words = question.content.split(whereSeparator: \.isWhitespace).joined(separator: " ")

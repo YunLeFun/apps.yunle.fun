@@ -4,7 +4,13 @@ import Combine
 @MainActor
 final class AssistantStore: ObservableObject {
     enum Access { case unknown, ready, membershipRequired, restricted }
-    static let examples = ["找一个适合写代码的开发工具", "推荐几个好玩的应用", "有没有适合整理灵感的工具"]
+    static let publicRoomPrompt = "找联机房间"
+    static let examples = ["找一个适合写代码的开发工具", "推荐几个好玩的应用", "有没有适合整理灵感的工具",
+                           publicRoomPrompt, TeamSignupCommand.createPrompt, ConversationBoardCommand.createPrompt]
+    let roomFeed: AssistantRoomFeed
+    let cardService: NativeConversationCardServing
+    private let teamSignupService: TeamSignupServing
+    private let boardService: ConversationBoardServing
     private let access: AccountRequestAccess<AssistantError>
     private let service: AssistantServing
     private let wallet: WalletServing
@@ -39,8 +45,15 @@ final class AssistantStore: ObservableObject {
     var canSend: Bool { !running && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && draft.utf16.count <= 4000 }
     private var current: Bool { boundary == access.boundary }
     init(accounts: IdentityScopedAccountAuthorizing, service: AssistantServing = AssistantService(), wallet: WalletServing = WalletService(),
-         history: AssistantHistory? = nil) {
+         history: AssistantHistory? = nil, publicRooms: NativePublicRoomServing = NativePublicRoomService(),
+         teamSignupService: TeamSignupServing = TeamSignupService(),
+         boardService: ConversationBoardServing = ConversationBoardService(),
+         cardService: NativeConversationCardServing = NativeConversationCardService()) {
         access = AccountRequestAccess(accounts: accounts); self.service = service; self.wallet = wallet; historyStore = history
+        roomFeed = AssistantRoomFeed(service: publicRooms)
+        self.teamSignupService = teamSignupService
+        self.boardService = boardService
+        self.cardService = cardService
         boundary = access.boundary
         loadHistory()
     }
@@ -163,7 +176,41 @@ final class AssistantStore: ObservableObject {
                 }
                 self.rawMessages.append(AssistantMessage(id: assistantID, role: .assistant, content: "", status: .streaming, toolStatus: "正在连接"))
                 self.scrollRevision += 1
-                let history = self.rawMessages.filter { !$0.content.isEmpty && $0.status != .failed }.suffix(32).map {
+                if let command = try TeamSignupCommand.parse(prompt) {
+                    self.update(assistantID) { $0.toolStatus = "正在打开组队报名" }
+                    let signup = try await self.teamSignup(command, boundary: captured)
+                    guard valid() else { return }
+                    self.update(assistantID) { $0.conversationCards = [ConversationCard(teamSignup: signup)] }
+                    self.finish(assistantID)
+                    return
+                }
+                if let command = try ConversationBoardCommand.parse(prompt) {
+                    self.update(assistantID) { $0.toolStatus = "正在打开联机棋盘" }
+                    let board = try await self.board(command, boundary: captured)
+                    guard valid() else { return }
+                    self.update(assistantID) { $0.conversationCards = [ConversationCard(board: board)] }
+                    self.finish(assistantID)
+                    return
+                }
+                if Self.isPublicRoomQuery(prompt) {
+                    self.update(assistantID) { $0.toolStatus = "正在查找公开房间" }
+                    let rooms = try await self.roomFeed.rooms().prefix(3)
+                    guard valid() else { return }
+                    self.update(assistantID) {
+                        $0.content = rooms.isEmpty ? "暂时没有可加入或观战的公开房间。可以稍后再找，或在「寻乐」创建房间。"
+                            : "找到 \(rooms.count) 个公开房间。"
+                        $0.conversationCards = rooms.map(ConversationCard.init(publicRoom:))
+                    }
+                    self.finish(assistantID)
+                    return
+                }
+                let history = self.rawMessages.filter { message in
+                    !message.content.isEmpty && message.status != .failed
+                        && !(message.role == .user && (
+                            message.content.hasPrefix(TeamSignupCommand.openPrompt + " ")
+                            || message.content.hasPrefix(ConversationBoardCommand.openPrompt + " ")
+                        ))
+                }.suffix(32).map {
                     AssistantRunInput.Message(id: $0.id, role: $0.role, content: String($0.content.unicodeScalars.prefix(4000)))
                 }
                 let input = AssistantRunInput(botId: AssistantService.botID, threadId: self.threadID, runId: "run_" + UUID().uuidString, messages: history)
@@ -192,18 +239,54 @@ final class AssistantStore: ObservableObject {
                 if let reply = self.rawMessages.first(where: { $0.id == assistantID }), reply.content.isEmpty && reply.cards.isEmpty {
                     throw AssistantError.invalidResponse
                 }
-                self.update(assistantID) { $0.status = .done; $0.toolStatus = nil }
-                self.scrollRevision += 1
-                self.rawRunning = false; self.persist()
+                self.finish(assistantID)
             } catch {
                 guard valid() else { return }
                 self.setError(error)
+                if let issue = error as? NativePublicRoomError { self.rawError = issue.errorDescription }
+                if let issue = error as? TeamSignupError { self.rawError = issue.errorDescription }
+                if let issue = error as? ConversationBoardError { self.rawError = issue.errorDescription }
                 self.update(assistantID) { $0.status = .failed; $0.toolStatus = nil }
                 self.rawRunning = false; self.persist()
             }
         }
         task = worker
         return worker
+    }
+    private func teamSignup(_ command: TeamSignupCommand, boundary: AccountRequestBoundary) async throws -> TeamSignupSnapshot {
+        let signupAccess = AccountRequestAccess<TeamSignupError>(accounts: access.accounts)
+        return try await signupAccess.perform(boundary: boundary) { identity in
+            switch command {
+            case .open(let id):
+                return try await teamSignupService.load(id: id, identity: identity)
+            case .create(let title, let capacity):
+                // Retrying the same user message reopens its original signup.
+                let id = String(rawMessages.last(where: { $0.role == .user })?.id.dropFirst(4) ?? "").lowercased()
+                return try await teamSignupService.create(id: id, title: title, capacity: capacity, identity: identity)
+            }
+        }
+    }
+    private func board(_ command: ConversationBoardCommand, boundary: AccountRequestBoundary) async throws -> ConversationBoardSnapshot {
+        let boardAccess = AccountRequestAccess<ConversationBoardError>(accounts: access.accounts)
+        return try await boardAccess.perform(boundary: boundary) { identity in
+            switch command {
+            case .open(let id):
+                return try await boardService.load(id: id, identity: identity)
+            case .create:
+                let id = String(rawMessages.last(where: { $0.role == .user })?.id.dropFirst(4) ?? "").lowercased()
+                return try await boardService.create(id: id, identity: identity)
+            }
+        }
+    }
+
+    private static func isPublicRoomQuery(_ prompt: String) -> Bool {
+        let query = prompt.trimmingCharacters(in: CharacterSet(charactersIn: "。？！?!"))
+        return [publicRoomPrompt, "找个联机房间", "找一个联机房间", "找公开房间"].contains(query)
+    }
+    private func finish(_ id: String) {
+        update(id) { $0.status = .done; $0.toolStatus = nil }
+        scrollRevision += 1
+        rawRunning = false; persist()
     }
     private func account(boundary: AccountRequestBoundary) async throws -> WalletSnapshot {
         try await access.perform(boundary: boundary) { identity in

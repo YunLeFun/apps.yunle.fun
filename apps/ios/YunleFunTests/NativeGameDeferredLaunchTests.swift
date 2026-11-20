@@ -2,6 +2,17 @@ import XCTest
 @testable import YunleFun
 
 final class NativeGameDeferredLaunchTests: XCTestCase {
+    func testColdCardInviteWaitsForAccountRestoreAndOpensWithoutPlayCatalog() throws {
+        var flow = NativeGameDeferredLaunchCoordinator()
+        let link = try XCTUnwrap(ConversationCardLink.parse(URL(string: "https://apps.yunle.fun/cards/team.signup/9fad9eef-b0da-4b0f-8161-79bfc59c88bc")!))
+        let guest = boundary(nil), selected = boundary("alice"), selection = UUID()
+        flow.enqueue(.card(link), boundary: guest, selectionGeneration: selection, isRestoring: true)
+        XCTAssertEqual(take(&flow, current: guest, selection: selection, isRestoring: true,
+                            hasPlay: false, catalogIsLoading: true), .waiting)
+        XCTAssertEqual(take(&flow, current: selected, selection: selection, hasPlay: false, catalogIsLoading: true),
+                       .launch(.card(link)))
+    }
+
     func testInitialRestoreCanAdoptOneIdentityEvenWhenObserversCoalesce() throws {
         var flow = NativeGameDeferredLaunchCoordinator()
         let guest = boundary(nil), alice = boundary("alice"), selection = UUID(), action = try action()

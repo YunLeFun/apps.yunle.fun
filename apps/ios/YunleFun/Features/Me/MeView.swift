@@ -6,7 +6,6 @@ struct MeView: View {
     @EnvironmentObject private var diagnostics: DiagnosticLogStore
     @EnvironmentObject private var runtime: NativeWebRuntime
     let navigateTab: (AppTab) -> Void
-    let joinRoom: (NativeGameRoomIntent) -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showLogin = false
     @State private var returningEntry: Entry?
@@ -54,7 +53,7 @@ struct MeView: View {
             Section {
                 if user != nil {
                     navigationRow("消息", systemImage: "tray.fill", color: .blue, entry: .messages) {
-                        RoomInviteInbox(accounts: accounts, service: runtime.roomInviteService, joinRoom: joinRoom)
+                        RoomInviteInbox(accounts: accounts, service: runtime.roomInviteService)
                             .id(accounts.identityGeneration)
                     }
                     .accessibilityIdentifier("me.messages")

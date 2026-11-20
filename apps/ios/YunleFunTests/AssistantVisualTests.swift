@@ -9,6 +9,43 @@ final class AssistantVisualTests: XCTestCase {
     func testWelcomeInLightMode() async throws { try await render(accessibility: false, conversation: false) }
     func testWelcomeInDarkMode() async throws { try await render(accessibility: false, conversation: false, colorScheme: .dark) }
     func testWelcomeSupportsDarkAccessibilityText() async throws { try await render(accessibility: true, conversation: false) }
+    func testSignupTemplateAndCanvasRenderInTheSameHost() async throws {
+        let host = UUID().uuidString.lowercased() + ".cards.test"
+        let auth = AuthHTTPFixture(replies: [(200, #"{"sub":"alice","status":"ACTIVE"}"#)])
+        AuthHTTPProtocol.register(host, fixture: auth)
+        defer { AuthHTTPProtocol.unregister(host) }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AuthHTTPProtocol.self]
+        var state = AccountVaultState()
+        state.activeID = "alice"
+        state.accounts = [SavedAccount(user: AccountUser(id: "alice"), credential: AccountCredential(
+            accessToken: "fixture-only", refreshToken: "fixture-only", expiresAt: Date().addingTimeInterval(3600)))]
+        let accounts = AccountStore(session: AccountSession(
+            api: CloudbaseAuthService(session: URLSession(configuration: configuration), origin: URL(string: "https://" + host)!),
+            vault: BillingMemoryVault(data: try JSONEncoder().encode(state))
+        ))
+        await accounts.restore()
+        let signup = try XCTUnwrap(ConversationCardReference(type: "team.signup", instanceID: "0ebd1cfc-e4cf-4a50-bf48-55c77709c04a"))
+        let board = try XCTUnwrap(ConversationCardReference(type: "play.board", instanceID: "9fad9eef-b0da-4b0f-8161-79bfc59c88bc"))
+        let service = try VisualNativeCardService(signup: signup, board: board)
+        let chat = AssistantStore(accounts: accounts, cardService: service)
+        let controller = UIHostingController(rootView: ScrollView {
+            VStack(spacing: 12) {
+                NativeConversationCardView(reference: signup, fallback: "报名摘要")
+                NativeConversationCardView(reference: board, fallback: "棋盘摘要")
+            }.padding(16)
+        }
+        .environmentObject(accounts).environmentObject(chat)
+        .environment(\.scenePhase, .active).preferredColorScheme(.light))
+        let image = try await snapshot(controller)
+        let subscriptions = await service.subscriptions
+        XCTAssertEqual(subscriptions, Set([signup, board]))
+        let attachment = XCTAttachment(image: image)
+        attachment.name = "native-conversation-cards"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     func testHistorySheetListsSavedConversations() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -118,4 +155,52 @@ private struct AssistantVisualService: AssistantServing {
         return AsyncThrowingStream { continuation in events.forEach { continuation.yield($0) }; continuation.finish() }
     }
     func search(query: String, identity: AuthorizedAccount) async throws -> [AssistantAppCard] { [] }
+}
+
+
+private actor VisualNativeCardService: NativeConversationCardServing {
+    let documents: [ConversationCardReference: NativeConversationCardSnapshot]
+    private(set) var subscriptions: Set<ConversationCardReference> = []
+
+    init(signup: ConversationCardReference, board: ConversationCardReference) throws {
+        let signupJSON = """
+        {"schemaVersion":1,"reference":{"type":"team.signup","instanceId":"\(signup.instanceId)"},
+        "revision":2,"finished":false,"fallbackText":"报名摘要","template":{"schemaVersion":1,"components":[
+        {"kind":"text","field":"event"},{"kind":"title","field":"title"},{"kind":"seats","filled":"count","total":"capacity"},
+        {"kind":"button","action":"signup.join"}]},"data":{"event":"周末一起玩","title":"联机组队","count":1,"capacity":4},
+        "actions":{"signup.join":{"label":"报名","enabled":true}}}
+        """
+        let boardJSON = """
+        {"schemaVersion":1,"reference":{"type":"play.board","instanceId":"\(board.instanceId)"},
+        "revision":3,"finished":false,"fallbackText":"棋盘摘要","template":{"schemaVersion":1,"components":[
+        {"kind":"title","field":"title"},{"kind":"gomoku","field":"board","action":"board.place"}]},
+        "data":{"title":"联机五子棋","board":{"schemaVersion":1,"boardId":"\(board.instanceId)","scene":{"schemaVersion":1,"size":9,
+        "palette":{"board":"#e4b578","grid":"#583820","black":"#242027","white":"#fff7e9"},"interaction":{"gesture":"drag-to-place","action":"place"}},
+        "revision":3,"status":"playing","seat":"white","turn":"white","winner":null,"pieces":[{"row":4,"column":4,"color":"black"}]}},
+        "actions":{"board.place":{"label":"落子","enabled":true}}}
+        """
+        let signupDocument = try JSONDecoder().decode(NativeConversationCardSnapshot.self, from: Data(signupJSON.utf8))
+        let boardDocument = try JSONDecoder().decode(NativeConversationCardSnapshot.self, from: Data(boardJSON.utf8))
+        try signupDocument.validate(for: signup)
+        try boardDocument.validate(for: board)
+        documents = [signup: signupDocument, board: boardDocument]
+    }
+
+    func load(_ reference: ConversationCardReference, identity: AuthorizedAccount) async throws -> NativeConversationCardSnapshot {
+        guard let document = documents[reference], identity.userID == "alice" else { throw NativeConversationCardError.missing }
+        return document
+    }
+
+    func act(_ action: NativeConversationCardAction, on reference: ConversationCardReference, identity: AuthorizedAccount)
+        async throws -> NativeConversationCardSnapshot { throw NativeConversationCardError.unavailable }
+
+    func events(_ reference: ConversationCardReference, identity: AuthorizedAccount)
+        async throws -> AsyncThrowingStream<NativeConversationCardSnapshot, Error> {
+        let document = try await load(reference, identity: identity)
+        subscriptions.insert(reference)
+        return AsyncThrowingStream { continuation in
+            continuation.yield(document)
+            continuation.finish()
+        }
+    }
 }

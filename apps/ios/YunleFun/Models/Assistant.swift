@@ -49,6 +49,7 @@ struct AssistantMessage: Identifiable, Equatable, Codable, Sendable {
     let role: Role
     var content: String
     var cards: [AssistantAppCard] = []
+    var conversationCards: [ConversationCard]?
     var status: Status = .done
     var toolStatus: String?
 }

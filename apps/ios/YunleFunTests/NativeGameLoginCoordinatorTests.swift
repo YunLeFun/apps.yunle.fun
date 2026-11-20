@@ -3,6 +3,19 @@ import XCTest
 
 @MainActor
 final class NativeGameLoginCoordinatorTests: XCTestCase {
+    func testCardInviteReturnsToExactInstanceAfterMatchingLogin() throws {
+        let flow = NativeGameLoginCoordinator(), origin = boundary(nil), target = boundary("alice")
+        let link = try XCTUnwrap(ConversationCardLink.parse(URL(string: "https://apps.yunle.fun/cards/team.signup/9fad9eef-b0da-4b0f-8161-79bfc59c88bc")!))
+        flow.begin(.card(link), origin: origin, isRestoring: false)
+        let intent = try XCTUnwrap(flow.login)
+        flow.didPresent(intent.id)
+        flow.committed(success(intent, target: target), current: target, isUsable: true, proofIsCurrent: true)
+        flow.identityChanged(to: target, isUsable: true, proofIsCurrent: true)
+        flow.presentationEnded()
+        XCTAssertEqual(flow.consume(current: target, isUsable: true, proofIsCurrent: true), .card(link))
+        XCTAssertNil(flow.consume(current: target, isUsable: true, proofIsCurrent: true))
+    }
+
     func testCommittedLoginReturnsToNativeCreationWithSelectedGame() {
         let flow = NativeGameLoginCoordinator(), origin = boundary(nil), target = boundary("alice")
         flow.begin(.createRoom(gameID: "gomoku"), origin: origin, isRestoring: false)

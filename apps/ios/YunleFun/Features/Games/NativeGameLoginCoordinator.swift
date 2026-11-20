@@ -5,6 +5,12 @@ enum NativeGameLaunchIntent: Equatable {
     case game(NativeGame, NativeGameMode)
     case room(NativeGameRoomIntent)
     case createRoom(gameID: String?)
+    case card(ConversationCardLink)
+
+    var needsPlayCatalog: Bool {
+        if case .card = self { return false }
+        return true
+    }
 }
 
 struct NativeGameLoginIntent: Identifiable {
@@ -98,7 +104,8 @@ struct NativeGameDeferredLaunchCoordinator {
         if !isRestoring { request.mayAdoptRestoredIdentity = false }
         pending = request
         guard !awaitingPresentationDismissal, !isRestoring,
-              !Self.waitsForCatalog(hasPlay: hasPlay, isLoading: catalogIsLoading) else { return .waiting }
+              !request.action.needsPlayCatalog || !Self.waitsForCatalog(hasPlay: hasPlay, isLoading: catalogIsLoading)
+        else { return .waiting }
         cancel()
         return .launch(request.action)
     }

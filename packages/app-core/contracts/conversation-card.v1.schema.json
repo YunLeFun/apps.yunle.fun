@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "YunLeFun conversation card v1",
+  "description": "A reference to a conversation card. Live state is retrieved independently.",
+  "type": "object",
+  "required": ["schemaVersion", "type", "id", "fallbackText", "payload"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "type": { "type": "string" },
+    "id": { "type": "string" },
+    "fallbackText": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "payload": { "type": "object" }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "type": { "const": "play.public-room" },
+        "id": { "pattern": "^play-room:[A-Z0-9]{6}$" },
+        "payload": {
+          "required": ["inviteCode"],
+          "properties": { "inviteCode": { "type": "string", "pattern": "^[A-Z0-9]{6}$" } }
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": { "const": "team.signup" },
+        "id": { "pattern": "^team-signup:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+        "payload": {
+          "required": ["signupId"],
+          "properties": { "signupId": { "$ref": "#/$defs/signupId" } }
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": { "const": "play.board" },
+        "id": { "pattern": "^play-board:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+        "payload": {
+          "required": ["boardId"],
+          "properties": { "boardId": { "$ref": "#/$defs/boardId" } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "signupId": { "$ref": "#/$defs/instanceId" },
+    "instanceId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "teamSignupSnapshot": {
+      "type": "object",
+      "required": ["schemaVersion", "signupId", "title", "capacity", "memberCount", "joined", "revision"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "signupId": { "$ref": "#/$defs/signupId" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "capacity": { "type": "integer", "minimum": 2, "maximum": 16 },
+        "memberCount": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "joined": { "type": "boolean" },
+        "revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+      }
+    },
+    "boardId": { "$ref": "#/$defs/instanceId", "description": "Lowercase UUID v4 for the board instance." },
+    "boardShareLink": {
+      "type": "string",
+      "pattern": "^https://apps[.]yunle[.]fun/boards/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Canonical HTTPS invite and web landing URL. The final segment is the boardId."
+    },
+    "boardColor": { "type": "string", "minLength": 7, "maxLength": 7, "pattern": "^#[0-9a-fA-F]{6}$" },
+    "boardSeat": { "enum": ["black", "white"] },
+    "boardPosition": {
+      "type": "object",
+      "required": ["row", "column"],
+      "properties": {
+        "row": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "column": { "type": "integer", "minimum": 0, "maximum": 14 }
+      },
+      "description": "Zero-based row and column from the upper left. Both must be less than the scene size."
+    },
+    "boardScene": {
+      "type": "object",
+      "required": ["schemaVersion", "size", "palette", "interaction"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "size": { "type": "integer", "minimum": 5, "maximum": 15 },
+        "palette": {
+          "type": "object",
+          "required": ["board", "grid", "black", "white"],
+          "properties": {
+            "board": { "$ref": "#/$defs/boardColor" },
+            "grid": { "$ref": "#/$defs/boardColor" },
+            "black": { "$ref": "#/$defs/boardColor" },
+            "white": { "$ref": "#/$defs/boardColor" }
+          }
+        },
+        "interaction": {
+          "type": "object",
+          "required": ["gesture", "action"],
+          "properties": {
+            "gesture": { "const": "drag-to-place" },
+            "action": { "const": "place" }
+          }
+        }
+      }
+    },
+    "boardSnapshot": {
+      "type": "object",
+      "required": ["schemaVersion", "boardId", "scene", "revision", "status", "seat", "turn", "winner", "pieces"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "boardId": { "$ref": "#/$defs/boardId" },
+        "scene": { "$ref": "#/$defs/boardScene" },
+        "revision": { "type": "integer", "minimum": 1, "maximum": 227 },
+        "status": { "enum": ["waiting", "playing", "won", "draw"] },
+        "seat": { "anyOf": [{ "$ref": "#/$defs/boardSeat" }, { "type": "null" }] },
+        "turn": { "anyOf": [{ "$ref": "#/$defs/boardSeat" }, { "type": "null" }] },
+        "winner": { "anyOf": [{ "$ref": "#/$defs/boardSeat" }, { "type": "null" }] },
+        "pieces": {
+          "type": "array",
+          "maxItems": 225,
+          "uniqueItems": true,
+          "description": "Stones in play order, starting with black. Each intersection is unique.",
+          "items": {
+            "allOf": [
+              { "$ref": "#/$defs/boardPosition" },
+              { "required": ["color"], "properties": { "color": { "$ref": "#/$defs/boardSeat" } } }
+            ]
+          }
+        }
+      }
+    },
+    "boardCreate": {
+      "type": "object",
+      "properties": { "scene": { "$ref": "#/$defs/boardScene" } }
+    },
+    "boardAction": {
+      "type": "object",
+      "required": ["action"],
+      "oneOf": [
+        { "properties": { "action": { "const": "join" } } },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/boardPosition" },
+            {
+              "required": ["actionId", "expectedRevision"],
+              "properties": {
+                "action": { "const": "place" },
+                "actionId": { "$ref": "#/$defs/boardId" },
+                "expectedRevision": { "type": "integer", "minimum": 2, "maximum": 227 }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 1,
+      "type": "play.public-room",
+      "id": "play-room:ABC234",
+      "fallbackText": "公开联机房间 · ABC234",
+      "payload": { "inviteCode": "ABC234" }
+    },
+    {
+      "schemaVersion": 1,
+      "type": "team.signup",
+      "id": "team-signup:0ebd1cfc-e4cf-4a50-bf48-55c77709c04a",
+      "fallbackText": "周末联机",
+      "payload": { "signupId": "0ebd1cfc-e4cf-4a50-bf48-55c77709c04a" }
+    },
+    {
+      "schemaVersion": 1,
+      "type": "play.board",
+      "id": "play-board:9fad9eef-b0da-4b0f-8161-79bfc59c88bc",
+      "fallbackText": "联机五子棋",
+      "payload": { "boardId": "9fad9eef-b0da-4b0f-8161-79bfc59c88bc" }
+    }
+  ]
+}

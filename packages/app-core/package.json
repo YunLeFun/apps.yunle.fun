@@ -7,6 +7,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
+    "./contracts/conversation-card.v1.schema.json": "./contracts/conversation-card.v1.schema.json",
+    "./contracts/conversation-card.v2.schema.json": "./contracts/conversation-card.v2.schema.json",
     "./types/app": "./src/types/app.ts",
     "./utils/appRecord": "./src/utils/appRecord.ts",
     "./utils/appBrowseCategories": "./src/utils/appBrowseCategories.ts",

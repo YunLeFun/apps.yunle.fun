@@ -45,6 +45,53 @@ agents/app-discovery 分离 HTTP 处理与启动代码：注册身份与账户�
 
 搜索只使用已发布的公开市场投影，不能读取私人草稿或把应用本地 slug 当作市场标识；Agent 公开目录请求不转发用户凭据。Apps 搜索备用接口同样要求注册用户，并使用公共目录解析器。这些加固已在本地验证，尚未部署；现网助手成功响应并不能证明新鉴权与事务代码已上线。
 
+## 会话里的公开联机房间
+
+在 iOS 助手发送「找联机房间」会查询 Play 的公开目录，返回最多三张房间卡。会员与历史沿用助手的现有流程，房间查询由客户端直接完成。卡片保存房间引用，历史对话打开时重新读取状态。
+
+Android 可读取 `packages/app-core/contracts/conversation-card.v1.schema.json`，Web 可使用同一个包的 `@yunlefun/app-core/contracts/conversation-card.v1.schema.json` 导出。每张 `play.public-room` 卡片的 `id` 是 `play-room:` 加 `payload.inviteCode`。未知类型、版本或无效引用展示 `fallbackText`。
+
+公开快照沿用 `GET https://api.play.yunle.fun/v1/rooms/public`，响应为 `{ ok: true, rooms: [...] }`。每个房间包含 `inviteCode`、可空的 `gameId`、`status`（`waiting`、`playing`、`completed`）、`memberCount` 和 `capacity`。客户端按房间号关联卡片和快照。Web 使用 `https://play.yunle.fun/room/<inviteCode>` 进入，观战时加 `?role=spectator`。
+
+助手页面可见、处于前台且有房间卡时，共用一次前台轮询。成功后间隔 5 秒，连续失败时退避到最多 30 秒。座位条显示公开接口的房间成员数与容量。公开列表会省略满员、下架或不再具备展示条件的房间，因此缺席显示「房间暂不在公开列表」。等待或结算中的房间走玩家入口，对局中的房间走观战入口，登录、房态与席位仍由原有 Play 进房流程确认。
+
+## 通用原生会话卡片
+
+组队报名和联机棋盘共用 [ConversationCard v2](../../packages/app-core/contracts/conversation-card.v2.schema.json)。新消息保存 `type`、`payload.instanceId` 和 `fallbackText`，`id` 由类型、冒号和实例 ID 拼成。iOS 能从两种旧 v1 引用恢复同一卡片。旧客户端收到 v2 消息时显示摘要。当前客户端遇到未支持的模板版本或组件也显示摘要。
+
+`GET /api/conversation-cards/<type>/<instanceId>` 返回一份面向当前登录用户的快照。快照包含独立版本的模板、数据、动作状态和单调递增的 `revision`。模板按数组顺序渲染标题、文本、席位条、按钮或专用五子棋 Canvas。标题和席位从 `data` 读对应字段。按钮由 `actions` 声明标签和是否可用，省略动作时隐藏按钮。报名模板在服务端配置。棋盘用同一份模板嵌入 `gomoku` 组件，移动和点按反馈在各端本地渲染。
+
+若连接 SSE，向同一地址的 `/events` 发送带 Bearer 的 GET。连接先发完整快照，随后推送更高的 `revision`。服务端约每 2 秒检查报名状态，每 1 秒检查棋局状态。连接约 20 秒轮换，重连直接拿到最新快照。Web 可用带 `Authorization` 请求头的 `fetch` 流式读取。
+
+在同一资源上用 PATCH 提交 `schemaVersion: 1`、`action`、`expectedRevision` 和 UUID v4 的 `actionId`。当前动作是 `signup.join`、`signup.cancel`、`board.join` 和 `board.place`。只有落子还需要 `input: { row, column }`。服务端通过报名和棋局事务校验资格与版本并回传完整快照。冲突时客户端重新读取。
+
+分享使用 `https://apps.yunle.fun/cards/<type>/<instanceId>`，浏览器落地页的原生入口为 `yunlefun://card/<type>/<instanceId>`。iOS 复用账户恢复和登录续接，完成登录后打开原卡。安卓和 Web 可沿用路径及接口。旧棋盘 `/boards/<boardId>` 链接、旧的创建和业务读取接口继续兼容。首版由服务端注册两种卡片模板，发布时沿用已有报名和棋局集合权限。
+
+## 会话里的组队报名
+
+发送「创建组队报名」创建默认四人队，也可发送「创建组队报名 6 周末联机」指定人数和标题。用卡片的「分享卡片」发送通用链接。旧的「打开组队报名 <signupId>」指令也可打开同一张卡。
+
+共用 JSON Schema 的 `team.signup` 类型固定为 `schemaVersion: 1`，卡片 `id` 由 `team-signup:` 加 `payload.signupId` 组成。报名接口使用现有云乐坊 Bearer 鉴权，请求路径为 `/api/team-signups/<signupId>`。`PUT` 用 `{ title, capacity }` 创建，`GET` 读取，`PATCH` 用 `{ joined: true }` 报名或用 `{ joined: false }` 取消。三个请求成功时返回 Schema 中的 `teamSignupSnapshot`。满员返回 HTTP 409 和 `SIGNUP_FULL`。
+
+服务端以同一份 CloudBase 文档做事务，重复操作返回当前快照，真实变化增加 `revision`。通用卡片通过 SSE 读取并按版本更新。旧接口的 `joined` 由当前登录身份决定。部署时先创建 `conversation_team_signups` 集合并应用同名 `ADMINONLY` 规则，再发布 Nitro 路由。
+
+## 会话里的联机棋盘
+
+在 iOS 助手发送「创建联机棋盘」开始一局 9×9 五子棋。创建者执黑，卡片通过通用 `/cards/play.board/<boardId>` 链接分享。iOS 通过 Universal Link 打开同一局，访客完成登录后返回棋盘。空席可加入执白，两席占满时可直接观战。轮到自己时点按空交点即可落子，也可以把棋子从棋盘下方拖过去。VoiceOver 提供行、列和落子控件。SwiftUI Canvas 使用 iOS 16 可用接口。「减少动态效果」启用时即时显示回合切换。
+
+旧的 `/boards/<boardId>` 与 `yunlefun://board/<boardId>` 仍会续接到原棋局。原「打开联机棋盘 <boardId>」指令仍可在助手里使用。
+
+三端共用 [ConversationCard v1](../../packages/app-core/contracts/conversation-card.v1.schema.json)。`play.board` 的 `id` 是 `play-board:` 加 `payload.boardId`。消息只保存棋局引用和降级文案。快照里的 `scene` 单独版本化，声明方格尺寸、纯色画布、线条、两种棋子配色和拖放动作。交点使用从左上起算的零基 `row` / `column`，横纵均以 `size` 为上界。绘制时按棋盘尺寸划分等宽单元，交点位于单元中心。渲染器实现这些动作和绘制指令，服务端应用规则。
+
+所有接口复用云乐坊 Bearer 鉴权与 `private, no-store`。端点 `/api/boards/<boardId>` 支持以下操作。
+
+- `PUT` 用 `{}` 创建默认棋盘，或传 `{ "scene": ... }` 创建自定义版本 1 场景。同一创建者可重试，棋局使用创建时的场景版本。
+- `GET` 获取针对当前身份的 `boardSnapshot`。`seat` 为 `null` 表示观战者，`pieces` 按落子先后排序。
+- `PATCH` 用 `{ "action": "join" }` 执白，或发 `{ "action": "place", "row": 4, "column": 4, "expectedRevision": 2, "actionId": "<uuid-v4>" }`。满席、过期版本、重复占位都由事务校验；已接受的同一落子指令可重试。
+- `GET /api/boards/<boardId>/events` 返回 UTF-8 SSE。每次连接先给完整快照，随后推送更新后的快照，`revision` 单调增加。服务端间隔约 1 秒（等待加入时约 2 秒）读取共享文档。20 秒后重连，断线后直接恢复到最新快照。Web 可使用带 `Authorization` 请求头的 `fetch` 流式读取。
+
+开局后执黑先落，交替在空交点落子，横、竖或斜线连成至少五子即获胜，棋盘填满则判和。此卡有独立的会话棋局 ID。部署时在服务端创建 `conversation_boards` 集合并应用同名 `ADMINONLY` 规则，再发布 Nitro 路由和原生客户端。
+
 ## 受管测试账号
 
 经用户授权，通过 Admin 复用 production-standard、production-member-active、production-zero-balance 三个 ready 固定合成账号。未新建常驻账号、重置余额或修改会员。发现会员测试号的加密主凭据与认证端不一致后，使用既有受管凭据轮换服务修复该号，保留审计；其余账号密码未变。

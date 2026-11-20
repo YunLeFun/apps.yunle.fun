@@ -1,0 +1,6 @@
+{
+  "action": "updateResourcePermission",
+  "resourceType": "noSqlDatabase",
+  "resourceId": "conversation_team_signups",
+  "permission": "ADMINONLY"
+}

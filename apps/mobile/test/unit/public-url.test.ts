@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  boardAppUrl,
   buildPublicWorkshopUrl,
   DEFAULT_PUBLIC_APP_BASE_URL,
 } from '../../app/utils/publicUrl'
+
+it('opens the exact canonical board from the browser fallback', () => {
+  const id = '9fad9eef-b0da-4b0f-8161-79bfc59c88bc'
+  const path = `/boards/${id}`
+  expect(boardAppUrl(path)).toBe(`yunlefun://board/${id}`)
+  for (const candidate of [`${path}/`, `${path}?role=player`, `${path}#login`, `${path}\n`, `/boards/%39${id.slice(1)}`, '/boards/invalid'])
+    expect(boardAppUrl(candidate)).toBeNull()
+})
 
 describe('public workshop URL', () => {
   it('uses the production HTTPS origin by default', () => {

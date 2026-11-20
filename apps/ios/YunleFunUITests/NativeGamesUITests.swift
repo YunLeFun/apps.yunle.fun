@@ -63,6 +63,16 @@ final class NativeGamesUITests: XCTestCase {
         XCTAssertTrue(steering.isEnabled)
         capture(app, "paper-star-vector-landscape")
 
+        let fire = web.buttons["发射"]
+        XCTAssertTrue(fire.isHittable)
+        let fireFrame = fire.frame
+        web.coordinate(withNormalizedOffset: CGVector(dx: 0.54, dy: 0.65)).doubleTap()
+        XCTAssertTrue(fire.isHittable, "Double tapping the playfield must leave the controls in view")
+        fire.doubleTap()
+        XCTAssertEqual(fire.frame.minX, fireFrame.minX, accuracy: 2)
+        XCTAssertEqual(fire.frame.minY, fireFrame.minY, accuracy: 2)
+        XCTAssertEqual(fire.frame.width, fireFrame.width, accuracy: 2)
+
         if steering.label.hasPrefix("飞行摇杆") {
             let center = steering.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             for offset in [-30.0, 30.0] {
@@ -83,7 +93,7 @@ final class NativeGamesUITests: XCTestCase {
         XCTAssertTrue(lesson("连射三次", "连续画出攻击线").waitForExistence(timeout: 5))
         capture(app, "paper-star-vector-boost")
 
-        web.buttons["发射"].press(forDuration: 1.15)
+        fire.press(forDuration: 1.15)
         capture(app, "paper-star-vector-fire")
         XCTAssertTrue(lesson("能量满后点齐射", "释放折纸能量").waitForExistence(timeout: 5))
     }

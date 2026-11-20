@@ -102,10 +102,11 @@ class WebViewController: UIViewController {
     var makeRoomInvitePicker: ((NativeGameRoomIntent) -> UIViewController?)?
     var publicLinkURL: ((URL) -> URL?)?
     var showsApplicationDetails = true
+    private var paperStarLoadingView: UIView?
     private var gameLoadingFailureView: UIView?
     var gameLifecycleOrigin: URL?
     var preferredGameOrientation: String?
-    var offersPaperStarMenu = false
+    var hostsPaperStar = false
     var allowsWebHistorySwipe = true
     /// Set before loading the view for native game sessions; editable fields retain text interaction.
     var usesGameInteractionPolicy = false
@@ -239,6 +240,7 @@ class WebViewController: UIViewController {
         setupOverlay()
         setNeedsStatusBarAppearanceUpdate()
         if let url = url {
+            showPaperStarLoading()
             if let initialContentLoader {
                 isPreparingInitialContent = true
                 initialContentLoader(webView, url) { [weak self] in self?.isPreparingInitialContent = false }
@@ -580,7 +582,61 @@ class WebViewController: UIViewController {
         }
     }
 
+    private func showPaperStarLoading() {
+        guard hostsPaperStar, paperStarLoadingView == nil else { return }
+        let overlay = UIView()
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        overlay.backgroundColor = UIColor(red: 7 / 255, green: 24 / 255, blue: 39 / 255, alpha: 1)
+        let foreground = UIColor(red: 219 / 255, green: 238 / 255, blue: 249 / 255, alpha: 1)
+        let plane = UIImageView(image: UIImage(
+            systemName: "paperplane",
+            withConfiguration: UIImage.SymbolConfiguration(textStyle: .largeTitle)
+        ))
+        plane.tintColor = foreground
+        let title = UILabel()
+        title.text = "星纸"
+        title.textColor = foreground
+        title.font = .preferredFont(forTextStyle: .headline)
+        title.adjustsFontForContentSizeCategory = true
+        let status = UILabel()
+        status.text = "正在展开星域…"
+        status.textColor = foreground.withAlphaComponent(0.78)
+        status.font = .preferredFont(forTextStyle: .footnote)
+        status.adjustsFontForContentSizeCategory = true
+        status.accessibilityIdentifier = "paper-star.launch-loading"
+        let spinner = UIActivityIndicatorView(style: .medium)
+        spinner.color = foreground
+        spinner.startAnimating()
+
+        let stack = UIStackView(arrangedSubviews: [plane, title, status, spinner])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 8
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        overlay.addSubview(stack)
+        view.insertSubview(overlay, aboveSubview: webView)
+        NSLayoutConstraint.activate([
+            overlay.topAnchor.constraint(equalTo: webView.topAnchor),
+            overlay.leadingAnchor.constraint(equalTo: webView.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: webView.trailingAnchor),
+            overlay.bottomAnchor.constraint(equalTo: webView.bottomAnchor),
+            stack.centerXAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.centerYAnchor),
+        ])
+        paperStarLoadingView = overlay
+    }
+
+    private func hidePaperStarLoading() {
+        paperStarLoadingView?.removeFromSuperview()
+        paperStarLoadingView = nil
+    }
+
+    private func reloadWebPage() {
+        if webView.reload() != nil { showPaperStarLoading() }
+    }
+
     private func showGameLoadingFailure() {
+        hidePaperStarLoading()
         guard onGameLifecycleMessage != nil, gameLoadingFailureView == nil else { return }
         onGameNavigationFailure?()
         let overlay = UIView()
@@ -605,6 +661,7 @@ class WebViewController: UIViewController {
             // SPA history item. Recover that destination with a fresh document;
             // a cached error response can otherwise finish as an empty page.
             if let url = self.webView.url ?? self.webView.backForwardList.currentItem?.url ?? self.url {
+                self.showPaperStarLoading()
                 self.webView.load(URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData))
             }
         })
@@ -1188,7 +1245,7 @@ class WebViewController: UIViewController {
         sheet.onCopyLink = { [weak self] in
             UIPasteboard.general.string = (self?.webView.url ?? self?.url)?.absoluteString
         }
-        sheet.onReload = { [weak self] in self?.webView.reload() }
+        sheet.onReload = { [weak self] in self?.reloadWebPage() }
         sheet.onClose = { [weak self] in self?.closeTapped() }
         // 详情页 sheet 内不再显示「查看详情」评分行（避免循环再弹详情）
         sheet.showRatingRow = !isDetailSheet && showsApplicationDetails
@@ -1209,7 +1266,7 @@ class WebViewController: UIViewController {
     }
 
     private var paperStarMenuOrigin: String? {
-        guard offersPaperStarMenu, usesSystemTitleBar,
+        guard hostsPaperStar, usesSystemTitleBar,
               let expected = gameLifecycleOrigin, let current = webView?.url,
               current.scheme == expected.scheme, current.host == expected.host,
               (current.port ?? (current.scheme == "https" ? 443 : 80)) == (expected.port ?? (expected.scheme == "https" ? 443 : 80)),
@@ -1247,7 +1304,7 @@ class WebViewController: UIViewController {
             case .copyLink: UIPasteboard.general.string = self.currentPublicURL?.absoluteString
             case .openBrowser:
                 if let url = self.currentPublicURL { UIApplication.shared.open(url) }
-            case .reload: self.webView.reload()
+            case .reload: self.reloadWebPage()
             case .end: self.closeTapped()
             }
         }
@@ -2020,6 +2077,8 @@ extension WebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
         initialContentFailure = nil
         progressView.isHidden = true
+        // The rendered page owns the remaining game setup and the countdown.
+        hidePaperStarLoading()
     }
 
     func webView(_ webView: WKWebView, didFail _: WKNavigation!, withError error: Error) {

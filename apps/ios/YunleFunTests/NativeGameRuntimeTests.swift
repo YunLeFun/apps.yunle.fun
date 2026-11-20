@@ -3389,11 +3389,12 @@ final class NativeGameLayoutLiveTests: XCTestCase {
             XCTAssertLessThanOrEqual(number(viewport, "height"), 600, modeID)
             let canvas = try XCTUnwrap(report["canvas"] as? [String: Any])
             XCTAssertTrue(canvas["inViewport"] as? Bool == true, "The actual rendered scene must fit: \(modeID)")
-            XCTAssertGreaterThanOrEqual(number(canvas, "height"), 140, "A thin visible strip is not a playable scene")
+            XCTAssertGreaterThanOrEqual(number(canvas, "height"), number(viewport, "height") - 2,
+                                        "Floating controls must leave the full height to the scene")
             XCTAssertGreaterThanOrEqual(number(canvas, "width"), 300)
             let controls = try XCTUnwrap(report["controls"] as? [[String: Any]])
             let safe = try XCTUnwrap(report["nativeSafeArea"] as? [String: Any])
-            XCTAssertEqual(controls.count, 5, "Keep steering, boost, ability and fire available")
+            XCTAssertEqual(controls.count, 4, "Keep the stick, boost, ability and fire available")
             for control in controls {
                 let label = control["label"] as? String ?? "unknown"
                 XCTAssertTrue(control["inViewport"] as? Bool == true, "Off-screen touch control: \(modeID) / \(label)")
@@ -3409,11 +3410,11 @@ final class NativeGameLayoutLiveTests: XCTestCase {
             assertSafeArea(menu, viewport: viewport, safe: safe, label: "game menu")
             if modeID == "tutorial" {
                 let coach = try XCTUnwrap(report["coach"] as? [String: Any])
-                XCTAssertTrue(coach["targetVisible"] as? Bool == true, "Keep the current tutorial objective readable")
-                XCTAssertTrue(coach["skipVisible"] as? Bool == true, "Tutorial skip must remain reachable")
                 XCTAssertTrue(coach["guideVisible"] as? Bool == true, "Detailed guidance must remain reachable")
+                XCTAssertLessThan(number(coach, "width"), number(viewport, "width") / 2, "The objective is a floating chip")
                 let interaction = try XCTUnwrap(report["coachInteraction"] as? [String: Any])
                 XCTAssertTrue(interaction["opened"] as? Bool == true)
+                XCTAssertTrue(interaction["skipVisible"] as? Bool == true)
                 XCTAssertTrue(interaction["controlsPaused"] as? Bool == true, "Opening detailed guidance must stop game input")
                 XCTAssertTrue(interaction["closeFocused"] as? Bool == true)
                 XCTAssertTrue(interaction["closed"] as? Bool == true && interaction["focusReturned"] as? Bool == true)
@@ -3434,11 +3435,24 @@ final class NativeGameLayoutLiveTests: XCTestCase {
             try await fixture.wait(seconds: 90) { ready }
             // The real ready frame and the native orientation transition must both settle.
             try await fixture.wait(seconds: 5) {
-                let value = try? await NativeGameEntryProbe.evaluate(page, script: "return innerWidth > innerHeight;")
+                let value = try? await NativeGameEntryProbe.evaluate(page, script: """
+                    return innerWidth > innerHeight && !!document.querySelector('.site-shell--immersive-paper-star');
+                    """)
                 return value as? Bool == true
             }
+            XCTAssertTrue(browser.navigationController?.isNavigationBarHidden == true)
+            XCTAssertFalse(page.allowsBackForwardNavigationGestures)
             let observation = try await NativeGameEntryProbe.evaluate(page, script: Self.geometryScript)
             var report = try XCTUnwrap(observation as? [String: Any])
+            let hitTargets = try XCTUnwrap(report["topControls"] as? [[String: Any]])
+            XCTAssertEqual(hitTargets.count, modeID == "tutorial" ? 2 : 1)
+            for target in hitTargets {
+                let point = CGPoint(x: number(target, "left") + number(target, "width") / 2,
+                                    y: number(target, "top") + number(target, "height") / 2)
+                let hit = browser.view.hitTest(page.convert(point, to: browser.view), with: nil)
+                XCTAssertTrue(hit === page || hit?.isDescendant(of: page) == true,
+                              "Native controls must leave \(target["label"] ?? "game control") tappable")
+            }
             report["mode"] = modeID
             report["nativeSafeArea"] = ["top": Double(page.safeAreaInsets.top), "bottom": Double(page.safeAreaInsets.bottom),
                                          "left": Double(page.safeAreaInsets.left), "right": Double(page.safeAreaInsets.right)]
@@ -3490,9 +3504,7 @@ final class NativeGameLayoutLiveTests: XCTestCase {
             inViewport, exposedAtCenter: !!hit && (hit === element || element.contains(hit)), disabled: !!element.disabled,
             label: element.getAttribute('aria-label') || (element.textContent || '').trim().slice(0, 60) };
         };
-        const target = document.querySelector('.paper-star-coach h1');
-        const skip = document.querySelector('[aria-label="跳过此步"]');
-        const guide = document.querySelector('[aria-label="查看教程指引"]');
+        const guide = document.querySelector('[data-testid="paper-star-lesson"]');
         const visible = element => { const value = measure(element); return !!value?.inViewport && value.exposedAtCenter; };
         const envProbe = document.createElement('div');
         envProbe.style.cssText = 'position:fixed;pointer-events:none;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
@@ -3508,31 +3520,33 @@ final class NativeGameLayoutLiveTests: XCTestCase {
           viewport: { width: innerWidth, height: innerHeight, landscape: innerWidth > innerHeight,
             coarsePointer: matchMedia('(pointer: coarse)').matches, pixelRatio: devicePixelRatio },
           canvas: measure(document.querySelector('.paper-star-canvas canvas')),
-          controls: Array.from(document.querySelectorAll('.paper-star-touch button')).map(measure),
+          controls: Array.from(document.querySelectorAll('.paper-star-touch button')).filter(visible).map(measure),
           menu: measure(document.querySelector('[aria-label="打开游戏菜单"]')),
+          topControls: [guide, document.querySelector('[aria-label="打开游戏菜单"]')].filter(Boolean).map(measure),
           cssSafeArea, touchPadding: padding('.paper-star-touch'), hudPadding: padding('.paper-star-hud'),
-          coach: { targetVisible: visible(target), skipVisible: visible(skip), guideVisible: visible(guide),
-            target: target?.textContent?.trim() || null },
+          coach: { guideVisible: visible(guide), width: measure(guide)?.width ?? 0 },
           documentSize: { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight }
         };
         """#
 
     private static let coachInteractionScript = #"""
-        const guide = document.querySelector('[aria-label="查看教程指引"]');
+        const guide = document.querySelector('[data-testid="paper-star-lesson"]');
         if (!guide) return { opened: false, reason: 'Guide control missing' };
         const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         guide.click(); await frame();
         const region = document.querySelector('[aria-label="教程指引"]');
         const close = document.querySelector('[aria-label="关闭教程指引"]');
-        const controls = Array.from(document.querySelectorAll('.paper-star-touch button'));
+        const controls = Array.from(document.querySelectorAll('.paper-star-touch button'))
+          .filter(button => button.getBoundingClientRect().width > 0);
         const opened = !!region && guide.getAttribute('aria-expanded') === 'true';
-        const controlsPaused = controls.length === 5 && controls.every(button => button.disabled);
+        const controlsPaused = controls.length === 4 && controls.every(button => button.disabled);
+        const skipVisible = !!region?.querySelector('.paper-star-coach__skip')?.getBoundingClientRect().width;
         const closeFocused = !!close && document.activeElement === close;
         close?.click(); await frame();
-        return { opened, controlsPaused, closeFocused,
+        return { opened, controlsPaused, closeFocused, skipVisible,
           closed: !document.querySelector('[aria-label="教程指引"]') && guide.getAttribute('aria-expanded') === 'false',
           focusReturned: document.activeElement === guide,
-          steeringRestored: Array.from(document.querySelectorAll('.paper-star-touch__steer button')).every(button => !button.disabled)
+          steeringRestored: document.querySelector('.paper-star-stick')?.disabled === false
         };
         """#
 }

@@ -712,17 +712,16 @@ final class NativeWebRuntime: ObservableObject {
             // iOS 16 remains on the existing compatibility path until its
             // persistent isolation and migration policy is implemented.
             controller.url = url
-            if gameContexts[app.id] != nil {
+            if let game = gameContexts[app.id] {
                 controller.usesGameInteractionPolicy = true
                 controller.gameInteractionSettings = gameInteractionSettings
                 controller.showsApplicationDetails = catalog.application(id: app.id) != nil
                 controller.publicLinkURL = { NativeGameLaunchURL.publicURL($0) ?? NativeGameLaunchURL.publicURL(url) }
-                controller.gameLifecycleOrigin = gameContexts[app.id]?.messageOrigin
-                controller.preferredGameOrientation = gameContexts[app.id]?.orientation
-                let hostsPaperStar = gameContexts[app.id]?.gameID == "paper-star"
-                controller.offersPaperStarMenu = hostsPaperStar
-                // Keep landscape edge drags available to the Star Paper joystick.
-                controller.allowsWebHistorySwipe = !hostsPaperStar
+                controller.gameLifecycleOrigin = game.messageOrigin
+                controller.preferredGameOrientation = game.orientation
+                controller.hostsPaperStar = game.gameID == "paper-star"
+                // Keep edge drag input on the playfield in Star Paper. The explicit back button still uses WebKit history.
+                controller.allowsWebHistorySwipe = game.gameID != "paper-star"
                 controller.roomForInvitation = { [weak self, weak controller] in
                     guard let self, let controller else { return nil }
                     return self.roomForInvitation(applicationID: app.id, browser: controller)

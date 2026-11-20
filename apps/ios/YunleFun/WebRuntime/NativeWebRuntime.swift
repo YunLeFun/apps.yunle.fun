@@ -719,6 +719,10 @@ final class NativeWebRuntime: ObservableObject {
                 controller.publicLinkURL = { NativeGameLaunchURL.publicURL($0) ?? NativeGameLaunchURL.publicURL(url) }
                 controller.gameLifecycleOrigin = gameContexts[app.id]?.messageOrigin
                 controller.preferredGameOrientation = gameContexts[app.id]?.orientation
+                let hostsPaperStar = gameContexts[app.id]?.gameID == "paper-star"
+                controller.offersPaperStarMenu = hostsPaperStar
+                // Keep landscape edge drags available to the Star Paper joystick.
+                controller.allowsWebHistorySwipe = !hostsPaperStar
                 controller.roomForInvitation = { [weak self, weak controller] in
                     guard let self, let controller else { return nil }
                     return self.roomForInvitation(applicationID: app.id, browser: controller)

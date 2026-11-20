@@ -105,6 +105,8 @@ class WebViewController: UIViewController {
     private var gameLoadingFailureView: UIView?
     var gameLifecycleOrigin: URL?
     var preferredGameOrientation: String?
+    var offersPaperStarMenu = false
+    var allowsWebHistorySwipe = true
     /// Set before loading the view for native game sessions; editable fields retain text interaction.
     var usesGameInteractionPolicy = false
     var gameInteractionSettings = WebGameInteractionSettings() {
@@ -292,7 +294,7 @@ class WebViewController: UIViewController {
         webView.scrollView.backgroundColor = .systemBackground
         webView.underPageBackgroundColor = .systemBackground
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.allowsBackForwardNavigationGestures = true
+        webView.allowsBackForwardNavigationGestures = allowsWebHistorySwipe
         applyGameInteractionSettings()
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -981,7 +983,7 @@ class WebViewController: UIViewController {
             let button = makeFloatingButton(icon: "ellipsis", pointSize: 17)
             button.accessibilityIdentifier = "runtime.more"
             button.accessibilityLabel = "更多操作"
-            button.addTarget(self, action: #selector(moreTapped), for: .touchUpInside)
+            button.addTarget(self, action: #selector(floatingMenuTapped), for: .touchUpInside)
             return button
         }
         let button = UIButton(type: .system)
@@ -1204,6 +1206,23 @@ class WebViewController: UIViewController {
             presentation.preferredCornerRadius = 20
         }
         present(sheet, animated: true)
+    }
+
+    private var paperStarMenuOrigin: String? {
+        guard offersPaperStarMenu, usesSystemTitleBar,
+              let expected = gameLifecycleOrigin, let current = webView?.url,
+              current.scheme == expected.scheme, current.host == expected.host,
+              (current.port ?? (current.scheme == "https" ? 443 : 80)) == (expected.port ?? (expected.scheme == "https" ? 443 : 80)),
+              current.user == nil, current.password == nil else { return nil }
+        return String(expected.absoluteString.dropLast())
+    }
+
+    @objc private func floatingMenuTapped() {
+        guard presentedViewController == nil else { return }
+        guard paperStarMenuOrigin != nil else { moreTapped(); return }
+        webView.evaluateJavaScript("!window.dispatchEvent(new Event('ylf:paper-star-menu', { cancelable: true }))") { [weak self] handled, _ in
+            if handled as? Bool != true { self?.moreTapped() }
+        }
     }
 
     private var nativeMenuIsCurrent: (() -> Bool)?
@@ -1681,6 +1700,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
             "setCapsuleVisible": .open,
             "setTitleBarVisible": .open,
             "close": .open,
+            "openPaperStarHostMenu": .open,
             "authorize": .trusted,
             "openAuthSession": .trusted,
             "haptic": .trusted,
@@ -1760,6 +1780,7 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
                 "displayMode": displayMode.rawValue,
                 "trusted": trusted,
                 "capsuleVisible": !capsuleHiddenByPage,
+                "paperStarMenuAvailable": paperStarMenuOrigin.map { $0 == sourceOrigin } ?? false,
                 // 标题栏当前是否在显示（沉浸模式恒为 false：无标题栏）
                 "titleBarVisible": displayMode == .titlebar && titleBarVisible,
                 "safeAreaInsets": [
@@ -1782,6 +1803,15 @@ extension WebViewController: WKScriptMessageHandlerWithReply {
 
         case "close":
             closeTapped()
+            reply(nil, nil)
+
+        case "openPaperStarHostMenu":
+            // Limit this entry to the main frame of the registered Star Paper host.
+            guard let origin = paperStarMenuOrigin, sourceOrigin == origin else {
+                reply(nil, "Paper Star host menu unavailable")
+                return
+            }
+            moreTapped()
             reply(nil, nil)
 
         case "authorize":

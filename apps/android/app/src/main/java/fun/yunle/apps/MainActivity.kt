@@ -51,6 +51,7 @@ import `fun`.yunle.apps.home.HomeSyncPhase
 import `fun`.yunle.apps.ui.AppRootScaffold
 import `fun`.yunle.apps.ui.AppTab
 import `fun`.yunle.apps.ui.account.MeScreen
+import `fun`.yunle.apps.ui.assistant.AssistantModalSheet
 import `fun`.yunle.apps.ui.catalog.ApplicationAcquisitionSheet
 import `fun`.yunle.apps.ui.catalog.ApplicationShareSheet
 import `fun`.yunle.apps.ui.catalog.CatalogFeedState
@@ -79,7 +80,9 @@ import `fun`.yunle.apps.ui.games.NativeGameResourcesSheet
 import `fun`.yunle.apps.ui.games.NativeRoomCreationSheet
 import `fun`.yunle.apps.ui.home.HomeBackupsSheet
 import `fun`.yunle.apps.ui.home.HomeScreen
+import `fun`.yunle.apps.ui.publishing.MyApplicationsSheet
 import `fun`.yunle.apps.ui.theme.YunleTheme
+import `fun`.yunle.apps.ui.wallet.WalletModalSheet
 import `fun`.yunle.apps.ui.webruntime.WebProfileRecoverySheet
 import `fun`.yunle.apps.ui.workshop.HomeWorkspacePickerSheet
 import `fun`.yunle.apps.ui.workshop.MyWorkshopsSheet
@@ -159,6 +162,9 @@ class MainActivity : ComponentActivity() {
                 var showJoinRoom by rememberSaveable { mutableStateOf(false) }
                 var showGameResources by rememberSaveable { mutableStateOf(false) }
                 var showAppCacheSettings by rememberSaveable { mutableStateOf(false) }
+                var showAssistant by rememberSaveable { mutableStateOf(false) }
+                var showWallet by rememberSaveable { mutableStateOf(false) }
+                var showMyApplications by rememberSaveable { mutableStateOf(false) }
                 var publicRooms by remember { mutableStateOf<List<NativePublicRoom>>(emptyList()) }
                 var isLoadingRooms by remember { mutableStateOf(false) }
                 var roomsError by remember { mutableStateOf<String?>(null) }
@@ -466,6 +472,7 @@ class MainActivity : ComponentActivity() {
                                 onOpenMyWorkshops = { showMyWorkshops = true },
                                 onOpenWorkshopLookup = { showWorkshopLookup = true },
                                 onOpenScanOrLink = { showScanOrLink = true },
+                                onOpenAssistant = { showAssistant = true },
                                 onOpenReviews = { app -> reviewsApp = app },
                                 onOpenDeveloper = { login -> activeDeveloperLogin = login },
                                 onAcquireApp = { app -> acquiringApp = app },
@@ -503,6 +510,9 @@ class MainActivity : ComponentActivity() {
                                 onOpenMyWorkshops = { showMyWorkshops = true },
                                 onOpenWorkshopLookup = { showWorkshopLookup = true },
                                 onOpenMyReports = { showMyReports = true },
+                                onOpenWallet = { showWallet = true },
+                                onOpenMyApplications = { showMyApplications = true },
+                                onOpenAssistant = { showAssistant = true },
                                 gameBackConfirmEnabled = gameBackConfirmEnabled,
                                 onGameBackConfirmChange = YunleContainer.preferences::setGameBackConfirmEnabled,
                                 onOpenAppCache = { showAppCacheSettings = true },
@@ -642,7 +652,8 @@ class MainActivity : ComponentActivity() {
                                 selectedTab = AppTab.ME
                             },
                             onOpenWallet = {
-                                openInCustomTab(this@MainActivity, Uri.parse("https://www.yunle.fun/wallet"))
+                                acquiringApp = null
+                                showWallet = true
                             },
                             onDismiss = { acquiringApp = null },
                         )
@@ -694,6 +705,64 @@ class MainActivity : ComponentActivity() {
                             catalogApps = loadedApps,
                             cacheStore = YunleContainer.applicationCacheStore,
                             onDismiss = { showAppCacheSettings = false },
+                        )
+                    }
+
+                    if (showAssistant) {
+                        val loadedApps = (uiState.feed as? CatalogFeedState.Loaded)?.apps.orEmpty()
+                        val installedIds = remember(homeSnapshot, loadedApps) {
+                            val raw = homeSnapshot.installedIds.toSet() + homeSnapshot.dockIds.toSet()
+                            raw + loadedApps.filter { homeSnapshot.contains(it) }.map { it.id }
+                        }
+                        AssistantModalSheet(
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.assistantService,
+                            historyStore = YunleContainer.assistantHistoryStore,
+                            catalogApps = loadedApps,
+                            homeInstalledIds = installedIds,
+                            onLaunchApp = ::openApplication,
+                            onToggleHome = { app ->
+                                if (YunleContainer.homeLibrary.contains(app)) {
+                                    YunleContainer.homeLibrary.remove(app)
+                                } else {
+                                    YunleContainer.homeLibrary.add(app)
+                                }
+                            },
+                            onSelectAppDetail = ::openTransientAppDetail,
+                            onOpenWallet = { showWallet = true },
+                            onNavigateToMe = {
+                                showAssistant = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showAssistant = false },
+                        )
+                    }
+
+                    if (showWallet) {
+                        WalletModalSheet(
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.walletService,
+                            journal = YunleContainer.purchaseJournal,
+                            onOpenCheckoutUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
+                            onNavigateToMe = {
+                                showWallet = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showWallet = false },
+                        )
+                    }
+
+                    if (showMyApplications) {
+                        MyApplicationsSheet(
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.publishingService,
+                            draftVault = YunleContainer.draftVault,
+                            onLaunchPreview = ::openApplication,
+                            onNavigateToMe = {
+                                showMyApplications = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showMyApplications = false },
                         )
                     }
 
@@ -779,6 +848,7 @@ private fun WorkshopTabContent(
     onOpenMyWorkshops: (() -> Unit)? = null,
     onOpenWorkshopLookup: (() -> Unit)? = null,
     onOpenScanOrLink: (() -> Unit)? = null,
+    onOpenAssistant: (() -> Unit)? = null,
     onOpenReviews: ((CatalogApp) -> Unit)? = null,
     onOpenDeveloper: ((String) -> Unit)? = null,
     onAcquireApp: ((CatalogApp) -> Unit)? = null,
@@ -831,6 +901,7 @@ private fun WorkshopTabContent(
                         onOpenMyWorkshops = onOpenMyWorkshops,
                         onOpenWorkshopLookup = onOpenWorkshopLookup,
                         onOpenScanOrLink = onOpenScanOrLink,
+                        onOpenAssistant = onOpenAssistant,
                     )
                 }
                 entry<DetailRoute>(

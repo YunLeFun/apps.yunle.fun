@@ -119,6 +119,9 @@ internal fun MeScreen(
     onOpenMyWorkshops: () -> Unit = {},
     onOpenWorkshopLookup: () -> Unit = {},
     onOpenMyReports: () -> Unit = {},
+    onOpenWallet: () -> Unit = {},
+    onOpenMyApplications: () -> Unit = {},
+    onOpenAssistant: () -> Unit = {},
     gameBackConfirmEnabled: Boolean = true,
     onGameBackConfirmChange: (Boolean) -> Unit = {},
     onOpenAppCache: () -> Unit = {},
@@ -353,8 +356,14 @@ internal fun MeScreen(
                 MeSectionCard {
                     MeMenuRow(
                         title = "钱包与云乐坊会员",
-                        subtitle = "查看乐币余额、收支明细与会员权益",
-                        onClick = { onOpenUrl("https://www.yunle.fun/wallet") },
+                        subtitle = "查看云币余额、收支明细与会员权益",
+                        onClick = onOpenWallet,
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    MeMenuRow(
+                        title = "AI 助手",
+                        subtitle = "对话检索并发现适合你的云乐坊应用",
+                        onClick = onOpenAssistant,
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     MeMenuRow(
@@ -377,8 +386,8 @@ internal fun MeScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     MeMenuRow(
                         title = "我的应用发布",
-                        subtitle = "发布管理云应用",
-                        onClick = { onOpenUrl("https://apps.yunle.fun/studio") },
+                        subtitle = "新建、编辑、投稿审核与管理云应用",
+                        onClick = onOpenMyApplications,
                     )
                 }
             }

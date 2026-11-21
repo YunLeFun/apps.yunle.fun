@@ -110,6 +110,7 @@ internal fun CatalogScreen(
     onOpenMyWorkshops: (() -> Unit)? = null,
     onOpenWorkshopLookup: (() -> Unit)? = null,
     onOpenScanOrLink: (() -> Unit)? = null,
+    onOpenAssistant: (() -> Unit)? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -362,7 +363,7 @@ internal fun CatalogScreen(
                                 }
                             }
 
-                            if (onOpenMyWorkshops != null || onOpenWorkshopLookup != null || onOpenScanOrLink != null) {
+                            if (onOpenMyWorkshops != null || onOpenWorkshopLookup != null || onOpenScanOrLink != null || onOpenAssistant != null) {
                                 item(key = "workshop_footer_shortcuts") {
                                     Surface(
                                         shape = MaterialTheme.shapes.large,
@@ -385,6 +386,11 @@ internal fun CatalogScreen(
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                             ) {
+                                                onOpenAssistant?.let { openAi ->
+                                                    FilledTonalButton(onClick = openAi) {
+                                                        Text("AI 找应用")
+                                                    }
+                                                }
                                                 onOpenMyWorkshops?.let { openMine ->
                                                     OutlinedButton(onClick = openMine) {
                                                         Text("个人工坊")

@@ -5,6 +5,9 @@ import `fun`.yunle.apps.account.AccountSession
 import `fun`.yunle.apps.account.AccountStore
 import `fun`.yunle.apps.account.CloudbaseAuthService
 import `fun`.yunle.apps.account.KeystoreAccountVault
+import `fun`.yunle.apps.assistant.AssistantHistoryStore
+import `fun`.yunle.apps.assistant.AssistantService
+import `fun`.yunle.apps.assistant.AssistantServing
 import `fun`.yunle.apps.cache.ApplicationCacheRepository
 import `fun`.yunle.apps.cache.ApplicationCacheStore
 import `fun`.yunle.apps.cache.NativeGameResourceCacheStore
@@ -25,6 +28,12 @@ import `fun`.yunle.apps.games.NativeRoomCreationService
 import `fun`.yunle.apps.home.HomeLibrary
 import `fun`.yunle.apps.home.HomeSyncCoordinator
 import `fun`.yunle.apps.home.HomeSyncService
+import `fun`.yunle.apps.publishing.ApplicationDraftVault
+import `fun`.yunle.apps.publishing.PublishingService
+import `fun`.yunle.apps.publishing.PublishingServing
+import `fun`.yunle.apps.wallet.PurchaseOwnershipJournal
+import `fun`.yunle.apps.wallet.WalletService
+import `fun`.yunle.apps.wallet.WalletServing
 import `fun`.yunle.apps.webruntime.HostAuthorizationService
 import `fun`.yunle.apps.webruntime.WebProfileRepository
 import `fun`.yunle.apps.workshop.WorkshopService
@@ -117,6 +126,15 @@ object YunleContainer {
     internal lateinit var applicationCacheStore: ApplicationCacheStore
         private set
 
+    internal lateinit var assistantHistoryStore: AssistantHistoryStore
+        private set
+
+    internal lateinit var purchaseJournal: PurchaseOwnershipJournal
+        private set
+
+    internal lateinit var draftVault: ApplicationDraftVault
+        private set
+
     val hostAuthService: HostAuthorizationService = HostAuthorizationService()
     internal val workshopService: WorkshopServing = WorkshopService()
     internal val communityService: CommunityServing = CommunityService()
@@ -125,6 +143,9 @@ object YunleContainer {
     internal val discoveryService: WorkshopDiscoveryServing = WorkshopDiscoveryService()
     internal val publicRoomService: NativePublicRoomServing = NativePublicRoomService()
     internal val roomCreationService: NativeRoomCreating = NativeRoomCreationService(hostAuthService)
+    internal val assistantService: AssistantServing = AssistantService()
+    internal val walletService: WalletServing = WalletService()
+    internal val publishingService: PublishingServing = PublishingService()
 
     internal fun ensureInitialized(context: Context, accountSession: AccountSession? = null) {
         if (initialized) return
@@ -161,6 +182,16 @@ object YunleContainer {
                 repository = appCacheRepo,
                 prefs = prefs.rawPreferences(),
             )
+            val aiHistory = AssistantHistoryStore(
+                directory = File(appContext.noBackupFilesDir, "Assistant/History"),
+            )
+            aiHistory.activate(null)
+            val journal = PurchaseOwnershipJournal(
+                file = File(appContext.noBackupFilesDir, "Wallet/purchase-owners-v2.json"),
+            )
+            val drafts = ApplicationDraftVault(
+                directory = File(appContext.noBackupFilesDir, "ApplicationDrafts"),
+            )
             val session = accountSession ?: AccountSession(api = CloudbaseAuthService(), vault = KeystoreAccountVault(appContext))
             var coordinator: HomeSyncCoordinator? = null
             val store = AccountStore(
@@ -173,6 +204,7 @@ object YunleContainer {
                     HostSession.closeAll()
                     library.activateAccount(activeId)
                     gameHistory.activate(activeId)
+                    aiHistory.activate(activeId)
                     coordinator?.identityChanged()
                 },
             )
@@ -191,6 +223,9 @@ object YunleContainer {
             nativeGameHistoryStore = gameHistory
             gameResourceCache = gameResources
             applicationCacheStore = appCache
+            assistantHistoryStore = aiHistory
+            purchaseJournal = journal
+            draftVault = drafts
             accounts = store
             initialized = true
         }

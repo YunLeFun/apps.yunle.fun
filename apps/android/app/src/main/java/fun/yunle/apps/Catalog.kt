@@ -80,11 +80,14 @@ internal data class CatalogApp(
             workshopId: String? = null,
             personalMarketLogin: String? = null,
             allowAuthorizedLaunch: Boolean = false,
+            allowCreatorOwned: Boolean = false,
         ): CatalogApp? {
             val rawAudience = record.readString("audience")
-            val audienceValid = rawAudience == "public" || (allowWorkshopAudience && rawAudience == "workshop")
+            val audienceValid = rawAudience == "public" ||
+                (allowWorkshopAudience && rawAudience == "workshop") ||
+                allowCreatorOwned
             if (!audienceValid) return null
-            if (rawAudience == "public") {
+            if (!allowCreatorOwned && rawAudience == "public") {
                 if (record.opt("isPublic") != true ||
                     record.readString("status") != "approved" ||
                     record.readString("publicationStatus") != "published"

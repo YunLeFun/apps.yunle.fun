@@ -12,7 +12,7 @@
 
 ## 历史对话
 
-登录账号的对话保存在本机：Application Support/Assistant/<sha256(uid)>.json，每个账号一个文件，文件名不含账号 ID，写入使用 completeUnlessOpen 文件保护并排除在 iCloud / iTunes 备份之外。每段对话以 threadId 为标识，标题取首个提问前 40 个字，保存更新时间与消息（流式中的回复存为“已停止”，失败 / 停止原样保留，不保存工具进度）；最多 20 段、单文件 2 MiB，按更新时间倒序。一次回复结束（完成、停止或失败）以及开始新对话前保存，内容未变化时不重写，避免打开旧对话就改变排序。导航栏“历史对话”打开列表，可左滑删除、清除全部（需确认）或点开继续同一线程。访客不保存；切换账号后只显示当前账号的历史；退出并移除账号时删除该账号的文件。
+登录账号的对话保存在本机：`Application Support/Assistant/<sha256(uid)>.json`，每个账号一个文件，文件名不含账号 ID，写入使用 completeUnlessOpen 文件保护并排除在 iCloud / iTunes 备份之外。每段对话以 threadId 为标识，标题取首个提问前 40 个字，保存更新时间与消息（流式中的回复存为“已停止”，失败 / 停止原样保留，不保存工具进度）；最多 20 段、单文件 2 MiB，按更新时间倒序。一次回复结束（完成、停止或失败）以及开始新对话前保存，内容未变化时不重写，避免打开旧对话就改变排序。导航栏“历史对话”打开列表，可左滑删除、清除全部（需确认）或点开继续同一线程。访客不保存；切换账号后只显示当前账号的历史；退出并移除账号时删除该账号的文件。
 
 ## 入口灰度开关
 
@@ -79,7 +79,7 @@ Android 可读取 `packages/app-core/contracts/conversation-card.v1.schema.json`
 
 在 iOS 助手发送「创建联机棋盘」开始一局 9×9 五子棋。创建者执黑，卡片通过通用 `/cards/play.board/<boardId>` 链接分享。iOS 通过 Universal Link 打开同一局，访客完成登录后返回棋盘。空席可加入执白，两席占满时可直接观战。轮到自己时点按空交点即可落子，也可以把棋子从棋盘下方拖过去。VoiceOver 提供行、列和落子控件。SwiftUI Canvas 使用 iOS 16 可用接口。「减少动态效果」启用时即时显示回合切换。
 
-旧的 `/boards/<boardId>` 与 `yunlefun://board/<boardId>` 仍会续接到原棋局。原「打开联机棋盘 <boardId>」指令仍可在助手里使用。
+旧的 `/boards/<boardId>` 与 `yunlefun://board/<boardId>` 仍会续接到原棋局。原「`打开联机棋盘 <boardId>`」指令仍可在助手里使用。
 
 三端共用 [ConversationCard v1](../../packages/app-core/contracts/conversation-card.v1.schema.json)。`play.board` 的 `id` 是 `play-board:` 加 `payload.boardId`。消息只保存棋局引用和降级文案。快照里的 `scene` 单独版本化，声明方格尺寸、纯色画布、线条、两种棋子配色和拖放动作。交点使用从左上起算的零基 `row` / `column`，横纵均以 `size` 为上界。绘制时按棋盘尺寸划分等宽单元，交点位于单元中心。渲染器实现这些动作和绘制指令，服务端应用规则。
 

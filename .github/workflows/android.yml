@@ -74,3 +74,11 @@ jobs:
             (./gradlew --no-daemon connectedDebugAndroidTest
             -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.CatalogSessionFlowTest#publicCatalogOpensOneRealGuestAppReadOnly'
             -Pandroid.testInstrumentationRunnerArguments.publicCatalogLive=1 || echo "::warning::Read-only live public catalog smoke check failed")
+      - name: Upload failed emulator test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-emulator-test-results
+          path: apps/android/app/build/outputs/androidTest-results/connected/
+          if-no-files-found: ignore
+          retention-days: 7

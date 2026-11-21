@@ -472,9 +472,13 @@ class CatalogSessionFlowTest {
             if (condition()) return
             Thread.sleep(100)
         }
-        assertTrue(
-            "Condition was not satisfied within ${timeoutSeconds}s.\nTree:\n${dumpAccessibilityTree()}",
-            condition(),
+        if (condition()) return
+        val caller = Throwable().stackTrace.firstOrNull { frame ->
+            frame.className == CatalogSessionFlowTest::class.java.name && frame.methodName.startsWith("catalog")
+        }
+        throw AssertionError(
+            "Condition at ${caller ?: "unknown test call site"} was not satisfied within ${timeoutSeconds}s.\n" +
+                "Tree:\n${dumpAccessibilityTree()}",
         )
     }
 

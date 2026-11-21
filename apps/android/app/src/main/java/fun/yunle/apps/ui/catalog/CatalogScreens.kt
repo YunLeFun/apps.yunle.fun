@@ -87,6 +87,7 @@ import `fun`.yunle.apps.BoundedHttpsImageLoader
 import `fun`.yunle.apps.CatalogApp
 import `fun`.yunle.apps.R
 import `fun`.yunle.apps.account.AccountUser
+import `fun`.yunle.apps.catalog.ApplicationShareExporter
 import `fun`.yunle.apps.ui.account.AccountAvatar
 import java.util.Locale
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -112,6 +113,7 @@ internal fun CatalogScreen(
     onOpenMyWorkshops: (() -> Unit)? = null,
     onOpenWorkshopLookup: (() -> Unit)? = null,
     onOpenScanOrLink: (() -> Unit)? = null,
+    onOpenShareCatalog: (() -> Unit)? = null,
     onOpenAssistant: (() -> Unit)? = null,
 ) {
     val focusManager = LocalFocusManager.current
@@ -367,7 +369,9 @@ internal fun CatalogScreen(
                                 }
                             }
 
-                            if (onOpenMyWorkshops != null || onOpenWorkshopLookup != null || onOpenScanOrLink != null || onOpenAssistant != null) {
+                            if (onOpenMyWorkshops != null || onOpenWorkshopLookup != null || onOpenScanOrLink != null ||
+                                onOpenAssistant != null || onOpenShareCatalog != null
+                            ) {
                                 item(key = "workshop_footer_shortcuts") {
                                     Surface(
                                         shape = MaterialTheme.shapes.large,
@@ -408,6 +412,11 @@ internal fun CatalogScreen(
                                                 onOpenScanOrLink?.let { openScan ->
                                                     OutlinedButton(onClick = openScan) {
                                                         Text("识别链接")
+                                                    }
+                                                }
+                                                onOpenShareCatalog?.let { openShareCatalog ->
+                                                    OutlinedButton(onClick = openShareCatalog) {
+                                                        Text("批量分享海报")
                                                     }
                                                 }
                                             }
@@ -1134,7 +1143,8 @@ internal fun DetailScreen(
                                 }
                             }
 
-                            if (onOpenReviews != null || onShareApp != null) {
+                            val canShareApp = onShareApp != null && ApplicationShareExporter.publicUrlOrNull(app) != null
+                            if (onOpenReviews != null || canShareApp) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1149,7 +1159,7 @@ internal fun DetailScreen(
                                             Text(text = "评分与评价")
                                         }
                                     }
-                                    if (onShareApp != null) {
+                                    if (canShareApp) {
                                         OutlinedButton(
                                             onClick = { onShareApp(app) },
                                             modifier = Modifier

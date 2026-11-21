@@ -7,6 +7,8 @@ import android.net.Uri
 import android.util.LruCache
 import android.view.View
 import android.widget.ImageView
+import `fun`.yunle.apps.media.SvgIconDecoder
+import `fun`.yunle.apps.media.SvgResourcePolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -88,10 +90,14 @@ internal object BoundedHttpsImageLoader {
                 if (code !in 200..299) return@runCatching null
                 val mimeType = connection.contentType.orEmpty().substringBefore(';').trim().lowercase()
                 if (mimeType !in ALLOWED_IMAGE_MIME_TYPES) return@runCatching null
-                if (connection.contentLengthLong > MAXIMUM_IMAGE_BYTES) return@runCatching null
+                val maximumBytes = if (mimeType == SVG_MIME_TYPE) SvgResourcePolicy.MAXIMUM_BYTES else MAXIMUM_IMAGE_BYTES
+                if (connection.contentLengthLong > maximumBytes) return@runCatching null
                 val bytes = connection.inputStream.use {
-                    readBounded(it, MAXIMUM_IMAGE_BYTES)
+                    readBounded(it, maximumBytes)
                 } ?: return@runCatching null
+                if (mimeType == SVG_MIME_TYPE) {
+                    return@runCatching SvgIconDecoder.decode(bytes, maximumPixelSize = MAXIMUM_DECODED_DIMENSION.toInt())
+                }
                 return@runCatching decodeBoundedImage(bytes)
             } finally {
                 connection.disconnect()
@@ -148,11 +154,13 @@ internal object BoundedHttpsImageLoader {
         )
     }
 
+    private const val SVG_MIME_TYPE = "image/svg+xml"
     private val ALLOWED_IMAGE_MIME_TYPES = setOf(
         "image/gif",
         "image/jpeg",
         "image/jpg",
         "image/png",
+        SVG_MIME_TYPE,
         "image/webp",
     )
     private val REDIRECT_STATUS_CODES = setOf(301, 302, 303, 307, 308)

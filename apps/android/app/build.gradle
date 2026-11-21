@@ -83,6 +83,7 @@ dependencies {
     implementation 'androidx.camera:camera-lifecycle:1.4.2'
     implementation 'androidx.camera:camera-view:1.4.2'
     implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.caverock:androidsvg-aar:1.4'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.10.0'
     implementation 'androidx.navigation3:navigation3-runtime:1.2.1'

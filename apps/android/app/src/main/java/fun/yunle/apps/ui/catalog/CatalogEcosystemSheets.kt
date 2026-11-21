@@ -4,22 +4,36 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -27,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,14 +50,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import `fun`.yunle.apps.BoundedHttpsImageLoader
 import `fun`.yunle.apps.CatalogApp
 import `fun`.yunle.apps.account.AccountStore
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionError
@@ -50,11 +68,22 @@ import `fun`.yunle.apps.catalog.ApplicationAcquisitionException
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionQuote
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionServing
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionState
+import `fun`.yunle.apps.catalog.ApplicationShareAppearance
+import `fun`.yunle.apps.catalog.ApplicationShareCardRenderer
+import `fun`.yunle.apps.catalog.ApplicationShareExportDirectory
+import `fun`.yunle.apps.catalog.ApplicationShareExporter
 import `fun`.yunle.apps.catalog.DeveloperProfile
 import `fun`.yunle.apps.catalog.DeveloperProfileError
 import `fun`.yunle.apps.catalog.DeveloperProfileServing
 import `fun`.yunle.apps.catalog.PersonalMarketLaunchAuthorization
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.OutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -487,126 +516,340 @@ internal fun ApplicationAcquisitionSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ApplicationShareSheet(
-    app: CatalogApp,
-    onDismiss: () -> Unit,
-) {
+internal fun ApplicationShareSheet(app: CatalogApp, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val shareUrl = remember(app.key) { "https://apps.yunle.fun/app/${app.key}" }
-    var darkCard by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val shareUrl = remember(app) { ApplicationShareExporter.publicUrlOrNull(app) }
+    var appearance by remember(app.key) { mutableStateOf(ApplicationShareAppearance.LIGHT) }
+    var preview by remember(app, appearance) { mutableStateOf<Bitmap?>(null) }
+    var previewError by remember(app, appearance) { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var pendingPoster by remember { mutableStateOf<Bitmap?>(null) }
+    val savePng = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("image/png")) { uri ->
+        val poster = pendingPoster
+        pendingPoster = null
+        if (uri != null && poster != null) {
+            busy = true
+            scope.launch {
+                try {
+                    withShareFeedback(context) {
+                        writeShareDocument(context, uri) { it.write(ApplicationShareCardRenderer.pngBytes(poster)) }
+                        Toast.makeText(context, "海报已保存", Toast.LENGTH_SHORT).show()
+                    }
+                } finally {
+                    busy = false
+                }
+            }
+        }
+    }
 
-    val cardContainer = if (darkCard) Color(0xFF181A1F) else Color(0xFFFDFCFB)
-    val cardText = if (darkCard) Color(0xFFF3F4F6) else Color(0xFF181A1F)
-    val cardSubtext = if (darkCard) Color(0xFF9CA3AF) else Color(0xFF5F6368)
-    val cardBorder = if (darkCard) Color(0xFF2D313B) else MaterialTheme.colorScheme.outlineVariant
+    LaunchedEffect(app, appearance) {
+        try {
+            ApplicationShareExporter.requirePosterUrl(app)
+            val icon = ApplicationShareExporter.loadIcon(app) { BoundedHttpsImageLoader.loadBitmap(it.logo) }
+            preview = withContext(Dispatchers.Default) { ApplicationShareCardRenderer.render(app, appearance, icon) }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            previewError = error.localizedMessage ?: "无法生成海报预览。"
+        }
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(
-                text = "分享应用卡片",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.semantics { heading() },
-            )
-
+            Text("分享应用海报", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = !darkCard,
-                    onClick = { darkCard = false },
-                    label = { Text("浅色卡片") },
-                )
-                FilterChip(
-                    selected = darkCard,
-                    onClick = { darkCard = true },
-                    label = { Text("深色卡片") },
-                )
-            }
-
-            Surface(
-                shape = MaterialTheme.shapes.extraLarge,
-                color = cardContainer,
-                border = BorderStroke(1.dp, cardBorder),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    ) {
-                        AppIconBadge(app = app, size = 56.dp)
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = app.name,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = cardText,
-                            )
-                            Text(
-                                text = "${app.author} · ${app.browseCategory}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = cardSubtext,
-                            )
-                        }
-                    }
-                    Text(
-                        text = app.description.ifBlank { "在云乐坊工坊发现并使用这个轻量云应用。" },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cardText.copy(alpha = 0.9f),
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    HorizontalDivider(color = cardBorder.copy(alpha = 0.6f))
-                    Text(
-                        text = shareUrl,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = cardSubtext,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                for (option in ApplicationShareAppearance.entries) {
+                    FilterChip(
+                        selected = appearance == option,
+                        onClick = { appearance = option },
+                        enabled = !busy,
+                        label = { Text(option.label) },
                     )
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
+            val poster = preview
+            val error = previewError
+            when {
+                poster != null -> Image(
+                    bitmap = poster.asImageBitmap(),
+                    contentDescription = "${app.name} · ${appearance.label}二维码海报",
+                    modifier = Modifier.fillMaxWidth().height(320.dp),
+                    contentScale = ContentScale.Fit,
+                )
+                error != null -> Text(error, color = MaterialTheme.colorScheme.error)
+                else -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
+
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedButton(
+                    enabled = shareUrl != null,
                     onClick = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                        clipboard?.setPrimaryClip(ClipData.newPlainText(app.name, shareUrl))
-                        Toast.makeText(context, "链接已复制", Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text("复制链接")
-                }
-                Button(
-                    onClick = {
-                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_SUBJECT, app.name)
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "推荐一个云乐坊应用「${app.name}」\n$shareUrl",
-                            )
+                        if (shareUrl != null) {
+                            context.getSystemService(ClipboardManager::class.java)
+                                ?.setPrimaryClip(ClipData.newPlainText(app.name, shareUrl))
+                            Toast.makeText(context, "链接已复制", Toast.LENGTH_SHORT).show()
                         }
-                        context.startActivity(Intent.createChooser(shareIntent, "分享 ${app.name}"))
-                        onDismiss()
                     },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text("系统分享")
+                ) { Text("复制链接") }
+                OutlinedButton(
+                    enabled = poster != null && !busy,
+                    onClick = {
+                        if (poster == null) return@OutlinedButton
+                        val filename = ApplicationShareExporter.posterFilename(app, appearance)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            busy = true
+                            scope.launch {
+                                try {
+                                    withShareFeedback(context) {
+                                        val bytes = withContext(Dispatchers.Default) {
+                                            ApplicationShareCardRenderer.pngBytes(poster)
+                                        }
+                                        ApplicationShareExporter.savePngToGallery(context, bytes, filename)
+                                        Toast.makeText(context, "海报已保存至相册", Toast.LENGTH_SHORT).show()
+                                    }
+                                } finally {
+                                    busy = false
+                                }
+                            }
+                        } else {
+                            pendingPoster = poster
+                            scope.launch { withShareFeedback(context) { savePng.launch(filename) } }
+                        }
+                    },
+                ) { Text("保存海报") }
+                Button(
+                    enabled = poster != null && !busy,
+                    onClick = {
+                        val selectedAppearance = appearance
+                        busy = true
+                        scope.launch {
+                            try {
+                                withShareFeedback(context) {
+                                    val file = ApplicationShareExporter.exportSinglePng(context, app, selectedAppearance)
+                                    shareExport(context, file, "image/png", "分享 ${app.name}")
+                                }
+                            } finally {
+                                busy = false
+                            }
+                        }
+                    },
+                ) { Text("分享海报") }
+            }
+        }
+    }
+}
+
+private data class ShareExportProgress(val completed: Int, val total: Int, val name: String)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ApplicationShareCatalogSheet(apps: List<CatalogApp>, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val exporter = remember(context) { ApplicationShareExporter(context.cacheDir) }
+    val publicApps = remember(apps) {
+        apps.filter { ApplicationShareExporter.publicUrlOrNull(it) != null }.distinctBy(CatalogApp::key)
+    }
+    var selectedKeys by remember { mutableStateOf(emptySet<String>()) }
+    val selectedApps = publicApps.filter { it.key in selectedKeys }
+    var appearances by remember { mutableStateOf(setOf(ApplicationShareAppearance.LIGHT)) }
+    var exportJob by remember { mutableStateOf<Job?>(null) }
+    var savingZip by remember { mutableStateOf(false) }
+    var notice by remember { mutableStateOf<String?>(null) }
+    val exportState = remember { mutableStateOf<ApplicationShareExportDirectory?>(null) }
+    var exported by exportState
+    val progressState = remember { MutableStateFlow<ShareExportProgress?>(null) }
+    val progress by progressState.collectAsStateWithLifecycle()
+    val saveZip = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        val file = exported?.zipFile
+        if (uri != null && file != null) {
+            savingZip = true
+            scope.launch {
+                try {
+                    withShareFeedback(context) {
+                        writeShareDocument(context, uri) { output -> file.inputStream().use { it.copyTo(output) } }
+                        Toast.makeText(context, "ZIP 已保存", Toast.LENGTH_SHORT).show()
+                    }
+                } finally {
+                    savingZip = false
                 }
             }
         }
+    }
+    DisposableEffect(Unit) {
+        onDispose { exportState.value?.discard() }
+    }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.86f).padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text("批量分享海报", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+            notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            val result = exported
+            when {
+                exportJob != null -> {
+                    val current = progress
+                    if (current == null) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    } else {
+                        LinearProgressIndicator(
+                            progress = { current.completed.toFloat() / current.total },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Text(if (current.completed == current.total) "正在打包 ZIP…" else {
+                            "已处理 ${current.completed} / ${current.total} · ${current.name}"
+                        })
+                    }
+                    OutlinedButton(onClick = { exportJob?.cancel() }) { Text("取消") }
+                }
+                result != null -> {
+                    Text("已导出 ${result.manifest.cards.size} 张海报", style = MaterialTheme.typography.titleMedium)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (result.manifest.cards.isNotEmpty()) {
+                            Button(onClick = {
+                                scope.launch {
+                                    withShareFeedback(context) {
+                                        shareExport(context, result.zipFile, "application/zip", "分享导出包 (ZIP)")
+                                    }
+                                }
+                            }) { Text("分享导出包 (ZIP)") }
+                            OutlinedButton(
+                                enabled = !savingZip,
+                                onClick = {
+                                    scope.launch {
+                                        withShareFeedback(context) { saveZip.launch(ApplicationShareExporter.ZIP_FILENAME) }
+                                    }
+                                },
+                            ) { Text("保存 ZIP") }
+                        }
+                        TextButton(
+                            enabled = !savingZip,
+                            onClick = {
+                                result.discard()
+                                exported = null
+                            },
+                        ) { Text("重新选择") }
+                    }
+                    if (result.manifest.failures.isNotEmpty()) {
+                        Text("导出失败 · ${result.manifest.failures.size} 个应用", style = MaterialTheme.typography.titleSmall)
+                        LazyColumn(
+                            contentPadding = PaddingValues(bottom = 24.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(result.manifest.failures, key = { it.slug }) { failure ->
+                                Text("${failure.slug}：${failure.message}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        for (appearance in ApplicationShareAppearance.entries) {
+                            FilterChip(
+                                selected = appearance in appearances,
+                                onClick = {
+                                    appearances = if (appearance in appearances) appearances - appearance else appearances + appearance
+                                },
+                                label = { Text(appearance.label) },
+                            )
+                        }
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Button(
+                            enabled = selectedApps.isNotEmpty() && appearances.isNotEmpty(),
+                            onClick = {
+                                val requestedAppearances = appearances.toList()
+                                notice = null
+                                progressState.value = null
+                                exportJob = scope.launch {
+                                    try {
+                                        exported = exporter.exportDirectory(
+                                            apps = selectedApps,
+                                            appearances = requestedAppearances,
+                                            progress = { done, total, name ->
+                                                progressState.value = ShareExportProgress(done, total, name)
+                                            },
+                                            iconLoader = { BoundedHttpsImageLoader.loadBitmap(it.logo) },
+                                        )
+                                    } catch (error: CancellationException) {
+                                        notice = "已取消导出。"
+                                        throw error
+                                    } catch (error: Exception) {
+                                        notice = error.localizedMessage ?: "无法导出海报。"
+                                    } finally {
+                                        exportJob = null
+                                    }
+                                }
+                            },
+                        ) { Text("导出海报") }
+                        TextButton(
+                            enabled = publicApps.isNotEmpty(),
+                            onClick = {
+                                selectedKeys = if (selectedApps.size == publicApps.size) emptySet()
+                                else publicApps.mapTo(mutableSetOf(), CatalogApp::key)
+                            },
+                        ) { Text(if (publicApps.isNotEmpty() && selectedApps.size == publicApps.size) "清空选择" else "全选公开应用") }
+                    }
+                    if (publicApps.isEmpty()) {
+                        Text("当前没有可分享的公开应用。")
+                    } else {
+                        Text("已选 ${selectedApps.size} / ${publicApps.size} 个应用", style = MaterialTheme.typography.labelLarge)
+                        LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
+                            items(publicApps, key = CatalogApp::key) { app ->
+                                val checked = app.key in selectedKeys
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().toggleable(checked, role = Role.Checkbox) {
+                                        selectedKeys = if (it) selectedKeys + app.key else selectedKeys - app.key
+                                    }.padding(vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Checkbox(checked = checked, onCheckedChange = null)
+                                    Text(app.name, style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun shareExport(context: Context, file: File, mimeType: String, title: String) {
+    val uri = ApplicationShareExporter.uriFor(context, file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = mimeType
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = ClipData.newRawUri(file.name, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, title))
+}
+
+private suspend fun writeShareDocument(context: Context, uri: Uri, write: (OutputStream) -> Unit) {
+    withContext(Dispatchers.IO) {
+        checkNotNull(context.contentResolver.openOutputStream(uri, "wt")) { "无法打开保存位置。" }.use(write)
+    }
+}
+
+private suspend fun withShareFeedback(context: Context, action: suspend () -> Unit) {
+    try {
+        action()
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: Exception) {
+        Toast.makeText(context, error.localizedMessage ?: "无法完成分享或保存。", Toast.LENGTH_SHORT).show()
     }
 }

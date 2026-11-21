@@ -61,6 +61,7 @@ import `fun`.yunle.apps.ui.AppTab
 import `fun`.yunle.apps.ui.account.MeScreen
 import `fun`.yunle.apps.ui.assistant.AssistantModalSheet
 import `fun`.yunle.apps.ui.catalog.ApplicationAcquisitionSheet
+import `fun`.yunle.apps.ui.catalog.ApplicationShareCatalogSheet
 import `fun`.yunle.apps.ui.catalog.ApplicationShareSheet
 import `fun`.yunle.apps.ui.catalog.CatalogFeedState
 import `fun`.yunle.apps.ui.catalog.CatalogPaneMetadata
@@ -172,6 +173,7 @@ class MainActivity : ComponentActivity() {
                 var showWorkspacePicker by rememberSaveable { mutableStateOf(false) }
                 var showMyReports by rememberSaveable { mutableStateOf(false) }
                 var showScanOrLink by rememberSaveable { mutableStateOf(false) }
+                var showShareCatalog by remember { mutableStateOf(false) }
                 var showCreateRoom by rememberSaveable { mutableStateOf(false) }
                 var showJoinRoom by rememberSaveable { mutableStateOf(false) }
                 var showGameResources by rememberSaveable { mutableStateOf(false) }
@@ -488,6 +490,7 @@ class MainActivity : ComponentActivity() {
                                 onOpenMyWorkshops = { showMyWorkshops = true },
                                 onOpenWorkshopLookup = { showWorkshopLookup = true },
                                 onOpenScanOrLink = { showScanOrLink = true },
+                                onOpenShareCatalog = { showShareCatalog = true },
                                 onOpenAssistant = { showAssistant = true },
                                 onOpenReviews = { app -> reviewsApp = app },
                                 onOpenDeveloper = { login -> activeDeveloperLogin = login },
@@ -682,6 +685,13 @@ class MainActivity : ComponentActivity() {
                         ApplicationShareSheet(
                             app = targetApp,
                             onDismiss = { sharingApp = null },
+                        )
+                    }
+
+                    if (showShareCatalog) {
+                        ApplicationShareCatalogSheet(
+                            apps = (uiState.feed as? CatalogFeedState.Loaded)?.apps.orEmpty(),
+                            onDismiss = { showShareCatalog = false },
                         )
                     }
 
@@ -987,6 +997,7 @@ private fun WorkshopTabContent(
     onOpenMyWorkshops: (() -> Unit)? = null,
     onOpenWorkshopLookup: (() -> Unit)? = null,
     onOpenScanOrLink: (() -> Unit)? = null,
+    onOpenShareCatalog: (() -> Unit)? = null,
     onOpenAssistant: (() -> Unit)? = null,
     onOpenReviews: ((CatalogApp) -> Unit)? = null,
     onOpenDeveloper: ((String) -> Unit)? = null,
@@ -1040,6 +1051,7 @@ private fun WorkshopTabContent(
                         onOpenMyWorkshops = onOpenMyWorkshops,
                         onOpenWorkshopLookup = onOpenWorkshopLookup,
                         onOpenScanOrLink = onOpenScanOrLink,
+                        onOpenShareCatalog = onOpenShareCatalog,
                         onOpenAssistant = onOpenAssistant,
                     )
                 }

@@ -33,6 +33,9 @@ internal data class CatalogApp(
     val accessWorkshopId: String? = null,
     val personalMarketOwnerLogin: String? = null,
     val rawWebsiteUrl: String? = null,
+    val isPublic: Boolean = false,
+    val accessOwnerId: String? = null,
+    val isUnavailable: Boolean = false,
 ) {
     val homeKey: String get() = homeReference ?: id
     val browseCategory: String get() = category.trim().ifBlank { "其他" }
@@ -153,9 +156,12 @@ internal data class CatalogApp(
                 requiresMembership = requiresMembership,
                 coinCost = coinCost,
                 audience = rawAudience,
-                accessWorkshopId = workshopId,
-                personalMarketOwnerLogin = personalMarketLogin,
+                accessWorkshopId = workshopId ?: record.readString("accessWorkshopId") ?: record.readString("accessWorkshopID"),
+                personalMarketOwnerLogin = personalMarketLogin ?: record.readString("personalMarketOwnerLogin"),
                 rawWebsiteUrl = url,
+                isPublic = record.opt("isPublic") == true,
+                accessOwnerId = record.readString("accessOwnerId") ?: record.readString("accessOwnerID"),
+                isUnavailable = isUnavailable,
             )
         }
 
@@ -168,7 +174,7 @@ internal data class CatalogApp(
             "give-me-money" to "https://gmm.yunle.fun/",
         )
 
-        private fun isHttps(value: String): Boolean = runCatching {
+        internal fun isHttps(value: String): Boolean = runCatching {
             val url = URI(value)
             url.scheme.equals("https", ignoreCase = true) && !url.host.isNullOrEmpty() && url.userInfo == null &&
                 url.port in listOf(-1, 443)

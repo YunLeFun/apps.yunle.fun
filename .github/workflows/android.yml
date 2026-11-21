@@ -66,7 +66,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
-            set -euo pipefail
+            set -eu
             cd apps/android
             ./gradlew --no-daemon connectedDebugAndroidTest \
               -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.HostChromeTest,fun.yunle.apps.RenderProcessTerminationTest,fun.yunle.apps.CatalogSessionFlowTest#catalogSearchDetailTryMinimizeAndResumeKeepsSameSession,fun.yunle.apps.CatalogSessionFlowTest#catalogErrorRetriesAndRotationPreservesLoadedStateWithoutRefetch,fun.yunle.apps.CatalogSessionFlowTest#wideScreenTwoPaneAndDarkLargeFontAndKeyboardNavigationWork'

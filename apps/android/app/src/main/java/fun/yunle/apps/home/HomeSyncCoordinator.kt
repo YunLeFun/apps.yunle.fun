@@ -43,6 +43,7 @@ internal class HomeSyncCoordinator(
     val phase: StateFlow<HomeSyncPhase> = _phase.asStateFlow()
 
     private val syncMutex = Mutex()
+    private val jobLock = Any()
     private var scheduledJob: Job? = null
     private var activeSyncJob: Job? = null
 
@@ -53,33 +54,37 @@ internal class HomeSyncCoordinator(
     }
 
     fun identityChanged() {
-        scheduledJob?.cancel()
-        scheduledJob = null
-        activeSyncJob?.cancel()
-        activeSyncJob = null
-        _phase.value = HomeSyncPhase.Idle
-        if (accounts.user != null && library.snapshot.value.syncEnabled) {
-            synchronize()
+        synchronized(jobLock) {
+            scheduledJob?.cancel()
+            scheduledJob = null
+            activeSyncJob?.cancel()
+            activeSyncJob = null
+            _phase.value = HomeSyncPhase.Idle
+            if (accounts.user != null && library.snapshot.value.syncEnabled) {
+                synchronize()
+            }
         }
     }
 
     fun schedule() {
-        scheduledJob?.cancel()
-        scheduledJob = null
-        val snap = library.snapshot.value
-        if (accounts.user == null || !snap.syncEnabled || !snap.autoSyncEnabled) {
-            return
-        }
-        val expectedGeneration = accounts.identityGeneration.value
-        val expectedAccountId = accounts.overview.value.activeID ?: return
-        scheduledJob = scope.launch {
-            delay(debounceMillis)
-            if (accounts.identityGeneration.value != expectedGeneration ||
-                accounts.overview.value.activeID != expectedAccountId
-            ) {
-                return@launch
+        synchronized(jobLock) {
+            scheduledJob?.cancel()
+            scheduledJob = null
+            val snap = library.snapshot.value
+            if (accounts.user == null || !snap.syncEnabled || !snap.autoSyncEnabled) {
+                return
             }
-            synchronize()
+            val expectedGeneration = accounts.identityGeneration.value
+            val expectedAccountId = accounts.overview.value.activeID ?: return
+            scheduledJob = scope.launch {
+                delay(debounceMillis)
+                if (accounts.identityGeneration.value != expectedGeneration ||
+                    accounts.overview.value.activeID != expectedAccountId
+                ) {
+                    return@launch
+                }
+                synchronize()
+            }
         }
     }
 
@@ -91,22 +96,24 @@ internal class HomeSyncCoordinator(
     }
 
     fun synchronize(): Job? {
-        scheduledJob?.cancel()
-        scheduledJob = null
-        val snap = library.snapshot.value
-        val accountId = accounts.overview.value.activeID
-        if (accounts.user == null || accountId == null || !snap.syncEnabled) {
-            _phase.value = HomeSyncPhase.Idle
-            return null
-        }
-        val expectedGeneration = accounts.identityGeneration.value
-        val job = scope.launch {
-            syncMutex.withLock {
-                runSyncLocked(expectedGeneration = expectedGeneration, expectedAccountId = accountId)
+        synchronized(jobLock) {
+            scheduledJob?.cancel()
+            scheduledJob = null
+            val snap = library.snapshot.value
+            val accountId = accounts.overview.value.activeID
+            if (accounts.user == null || accountId == null || !snap.syncEnabled) {
+                _phase.value = HomeSyncPhase.Idle
+                return null
             }
+            val expectedGeneration = accounts.identityGeneration.value
+            val job = scope.launch {
+                syncMutex.withLock {
+                    runSyncLocked(expectedGeneration = expectedGeneration, expectedAccountId = accountId)
+                }
+            }
+            activeSyncJob = job
+            return job
         }
-        activeSyncJob = job
-        return job
     }
 
     fun resolve(resolution: HomeSyncResolution): Job? {

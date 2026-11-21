@@ -6,8 +6,14 @@ import `fun`.yunle.apps.scanner.ScanPurpose
 import `fun`.yunle.apps.scanner.ScanResult
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
+import com.google.zxing.Result
+import com.google.zxing.ResultMetadataType
+import com.google.zxing.ResultPoint
+import com.google.zxing.common.DecoderResult
 import com.google.zxing.qrcode.QRCodeWriter
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class P1QrScannerTest {
@@ -107,6 +113,39 @@ class P1QrScannerTest {
         val frame = qrFrame("inverted QR", inverted = true)
         assertEquals(listOf("inverted QR"), frame.decodeLuma())
         assertEquals(listOf("inverted QR"), frame.decodePixels())
+    }
+
+    @Test
+    fun decodesTwoStandaloneQrsInSingleRgbBuffer() {
+        val first = "https://apps.yunle.fun/app/notes"
+        val second = "https://apps.yunle.fun/developer/YunYouJun"
+        val frame = qrFrame(first, second)
+        assertEquals(listOf(first, second).sorted(), frame.decodePixels().sorted())
+    }
+
+    @Test
+    fun rejectsStructuredAppendFragmentsAndResultsWithoutPoints() {
+        val safeDecoded = DecoderResult(byteArrayOf(), "https://apps.yunle.fun/app/notes", null, "L")
+        val fragmentDecoded = DecoderResult(byteArrayOf(), "https://apps.yunle.fun/", null, "L", 0, 0x2A)
+        assertTrue(QrCodeDecoder.isSafeDecodedResult(safeDecoded))
+        assertFalse(QrCodeDecoder.isSafeDecodedResult(fragmentDecoded))
+
+        val points = arrayOf(ResultPoint(10f, 10f), ResultPoint(20f, 10f), ResultPoint(10f, 20f))
+        val safeResult = Result("https://apps.yunle.fun/app/notes", byteArrayOf(), points, BarcodeFormat.QR_CODE)
+        assertTrue(QrCodeDecoder.isSafeQrResult(safeResult))
+
+        val noPoints = Result("https://apps.yunle.fun/app/notes", byteArrayOf(), emptyArray(), BarcodeFormat.QR_CODE)
+        assertFalse(QrCodeDecoder.isSafeQrResult(noPoints))
+
+        val sequenceResult = Result("part1", byteArrayOf(), points, BarcodeFormat.QR_CODE).apply {
+            putMetadata(ResultMetadataType.STRUCTURED_APPEND_SEQUENCE, 0)
+        }
+        assertFalse(QrCodeDecoder.isSafeQrResult(sequenceResult))
+
+        val parityResult = Result("part1", byteArrayOf(), points, BarcodeFormat.QR_CODE).apply {
+            putMetadata(ResultMetadataType.STRUCTURED_APPEND_PARITY, 0x2A)
+        }
+        assertFalse(QrCodeDecoder.isSafeQrResult(parityResult))
     }
 
     private fun qrFrame(vararg payloads: String, inverted: Boolean = false): QrFrame {

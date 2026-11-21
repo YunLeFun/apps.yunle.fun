@@ -72,6 +72,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import `fun`.yunle.apps.NativeDestination
 import `fun`.yunle.apps.WorkshopLink
+import `fun`.yunle.apps.scanner.MAX_SCAN_PAYLOAD_BYTES
 import `fun`.yunle.apps.scanner.QrCodeDecoder
 import `fun`.yunle.apps.scanner.ScanCandidate
 import `fun`.yunle.apps.scanner.ScanImageError
@@ -115,8 +116,8 @@ internal fun QRScannerSheet(
     }
     var cameraPermissionPending by rememberSaveable { mutableStateOf(false) }
     var manualMode by rememberSaveable { mutableStateOf(false) }
-    var input by rememberSaveable { mutableStateOf("") }
-    var payloads by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var input by remember { mutableStateOf("") }
+    var payloads by remember { mutableStateOf(emptyList<String>()) }
     var pickingPhoto by rememberSaveable { mutableStateOf(false) }
     var decodingPhoto by remember { mutableStateOf(false) }
     var scanError by remember { mutableStateOf<String?>(null) }
@@ -219,8 +220,12 @@ internal fun QRScannerSheet(
                     OutlinedTextField(
                         value = input,
                         onValueChange = {
-                            input = it
-                            manualError = null
+                            if (it.toByteArray(Charsets.UTF_8).size <= MAX_SCAN_PAYLOAD_BYTES) {
+                                input = it
+                                manualError = null
+                            } else {
+                                manualError = "内容长度超出限制，请精简后重试。"
+                            }
                         },
                         label = { Text("链接或 6 位工坊编号") },
                         placeholder = { Text("https://apps.yunle.fun/… 或 A2B3C4") },
@@ -232,11 +237,14 @@ internal fun QRScannerSheet(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = {
                             val pasted = clipboard?.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
-                            if (pasted.isBlank()) {
-                                manualError = "剪贴板为空。"
-                            } else {
-                                input = pasted
-                                manualError = null
+                            when {
+                                pasted.isBlank() -> manualError = "剪贴板为空。"
+                                pasted.toByteArray(Charsets.UTF_8).size > MAX_SCAN_PAYLOAD_BYTES ->
+                                    manualError = "剪贴板内容超出长度限制，无法粘贴。"
+                                else -> {
+                                    input = pasted
+                                    manualError = null
+                                }
                             }
                         }) { Text("从剪贴板粘贴") }
                         Button(enabled = input.isNotBlank(), onClick = {
@@ -351,8 +359,20 @@ private fun ScannerCamera(onPayloads: (List<String>) -> Unit) {
     var cameraError by remember { mutableStateOf<String?>(null) }
     var setTorch by remember { mutableStateOf<((Boolean) -> Unit)?>(null) }
     var torchEnabled by remember { mutableStateOf(false) }
+    var isResumed by remember { mutableStateOf(false) }
 
-    DisposableEffect(previewView, lifecycleOwner) {
+    LifecycleResumeEffect(lifecycleOwner, lifecycleOwner = lifecycleOwner) {
+        isResumed = true
+        onPauseOrDispose { isResumed = false }
+    }
+
+    DisposableEffect(previewView, lifecycleOwner, isResumed) {
+        if (!isResumed) {
+            setTorch = null
+            torchEnabled = false
+            return@DisposableEffect onDispose {}
+        }
+        cameraError = null
         val analysisExecutor = Executors.newSingleThreadExecutor()
         val mainExecutor = ContextCompat.getMainExecutor(context)
         val preview = Preview.Builder().build().apply { setSurfaceProvider(previewView.surfaceProvider) }

@@ -55,11 +55,13 @@ internal fun LegacyMigrationSheet(
     val archive by store.archive.collectAsStateWithLifecycle()
     val isLoading by store.isLoading.collectAsStateWithLifecycle()
     val isLoaded by store.isLoaded.collectAsStateWithLifecycle()
+    val isApplying by store.isApplying.collectAsStateWithLifecycle()
     val error by store.error.collectAsStateWithLifecycle()
     val overview by accounts.overview.collectAsStateWithLifecycle()
     val accountGeneration by accounts.identityGeneration.collectAsStateWithLifecycle()
     val libraryGeneration = library.generation.collectAsStateWithLifecycle().value
     val scope = rememberCoroutineScope()
+    var isPreparing by remember { mutableStateOf(false) }
     var confirmation by remember { mutableStateOf<LegacyImportConfirmation?>(null) }
     var targetChanged by remember { mutableStateOf(false) }
     val user = overview.activeUser
@@ -120,7 +122,7 @@ internal fun LegacyMigrationSheet(
                         targetChanged = false
                         scope.launch { store.load(retry = true) }
                     },
-                    enabled = !isLoading,
+                    enabled = !isLoading && !isApplying && !isPreparing,
                     modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                 ) {
                     Text("重新读取")
@@ -135,6 +137,13 @@ internal fun LegacyMigrationSheet(
                     CircularProgressIndicator(Modifier.size(20.dp))
                     LegacyStatus("正在读取旧版记录")
                 }
+                isApplying -> Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    CircularProgressIndicator(Modifier.size(20.dp))
+                    LegacyStatus("正在导入旧版数据")
+                }
                 archive != null && visibleArchive == null ->
                     LegacyStatus("此旧版记录已由另一个云居认领，请切换到原账号查看")
                 isLoaded && visibleArchive?.claim?.completed == true ->
@@ -144,8 +153,16 @@ internal fun LegacyMigrationSheet(
                     Button(
                         onClick = {
                             targetChanged = false
-                            confirmation = store.prepareConfirmation()
+                            scope.launch {
+                                isPreparing = true
+                                try {
+                                    confirmation = store.prepareConfirmation()
+                                } finally {
+                                    isPreparing = false
+                                }
+                            }
                         },
+                        enabled = !isPreparing && !isApplying && !isLoading,
                         modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp),
                     ) {
                         Text("导入到当前云居")
@@ -170,10 +187,13 @@ internal fun LegacyMigrationSheet(
                 Text("将导入到$targetLabel。当前云居会先保存一份本机备份，再应用旧版布局和对应设置。旧版原记录会继续保留。")
             },
             confirmButton = {
-                Button(onClick = {
-                    confirmation = null
-                    store.apply(pending)
-                }) {
+                Button(
+                    enabled = !isApplying && !isLoading && !isPreparing,
+                    onClick = {
+                        confirmation = null
+                        scope.launch { store.apply(pending) }
+                    },
+                ) {
                     Text("确认导入")
                 }
             },

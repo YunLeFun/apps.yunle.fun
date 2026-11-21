@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.net.toUri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -620,7 +621,7 @@ class MainActivity : ComponentActivity() {
                         QRScannerSheet(
                             onDestination = ::handleNativeDestination,
                             onWorkshopCode = { code -> activePublicWorkshopId = code },
-                            onOpenWebUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
+                            onOpenWebUrl = { url -> openInCustomTab(this@MainActivity, url.toUri()) },
                             onDismiss = { showScanOrLink = false },
                         )
                     }

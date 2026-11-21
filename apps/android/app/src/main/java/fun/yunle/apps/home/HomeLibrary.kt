@@ -850,8 +850,14 @@ internal class HomeLibrary(
         return restoredOk
     }
 
-    fun importLegacy(record: LegacyLocalData, expectedAccountId: String?, expectedGeneration: Int): Boolean {
+    fun importLegacy(
+        record: LegacyLocalData,
+        expectedAccountId: String?,
+        expectedGeneration: Int,
+        verifyBoundary: () -> Unit = {},
+    ): Boolean {
         synchronized(lock) {
+            verifyBoundary()
             if (activeAccountId != expectedAccountId || _generation.value != expectedGeneration) {
                 throw LegacyImportException(LegacyImportError.IDENTITY_CHANGED)
             }

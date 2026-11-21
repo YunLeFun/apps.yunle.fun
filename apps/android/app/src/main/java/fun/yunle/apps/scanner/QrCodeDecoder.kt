@@ -8,10 +8,14 @@ import com.google.zxing.LuminanceSource
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.ReaderException
+import com.google.zxing.Result
+import com.google.zxing.ResultMetadataType
+import com.google.zxing.common.DecoderResult
 import com.google.zxing.common.GlobalHistogramBinarizer
 import com.google.zxing.common.HybridBinarizer
-import com.google.zxing.multi.qrcode.QRCodeMultiReader
+import com.google.zxing.multi.qrcode.detector.MultiDetector
 import com.google.zxing.qrcode.QRCodeReader
+import com.google.zxing.qrcode.decoder.Decoder
 
 internal object QrCodeDecoder {
     const val MAX_IMAGE_BYTES = 20 * 1024 * 1024
@@ -73,17 +77,40 @@ internal object QrCodeDecoder {
         }
     }
 
+    internal fun isSafeDecodedResult(result: DecoderResult): Boolean = !result.hasStructuredAppend()
+
+    internal fun isSafeQrResult(result: Result): Boolean {
+        if (result.resultPoints.isNullOrEmpty()) return false
+        val metadata = result.resultMetadata ?: return true
+        return !metadata.containsKey(ResultMetadataType.STRUCTURED_APPEND_SEQUENCE) &&
+            !metadata.containsKey(ResultMetadataType.STRUCTURED_APPEND_PARITY)
+    }
+
+    private fun decodeMultipleStandalone(bitmap: BinaryBitmap): List<String> {
+        val detected = try {
+            MultiDetector(bitmap.blackMatrix).detectMulti(hints)
+        } catch (_: ReaderException) {
+            return emptyList()
+        }
+        val decoder = Decoder()
+        return detected.mapNotNull { detectorResult ->
+            try {
+                val decoded = decoder.decode(detectorResult.bits, hints)
+                decoded.text.takeIf { isSafeDecodedResult(decoded) }
+            } catch (_: ReaderException) {
+                null
+            }
+        }
+    }
+
     private fun decode(source: LuminanceSource, useGlobalHistogram: Boolean): List<String> {
         val payloads = linkedSetOf<String>()
         fun collect(bitmap: BinaryBitmap) {
-            val multiple = try {
-                QRCodeMultiReader().decodeMultiple(bitmap, hints).map { it.text }
-            } catch (_: ReaderException) {
-                emptyList()
-            }
+            val multiple = decodeMultipleStandalone(bitmap)
             val texts = multiple.ifEmpty {
                 try {
-                    listOf(QRCodeReader().decode(bitmap, hints).text)
+                    val single = QRCodeReader().decode(bitmap, hints)
+                    if (isSafeQrResult(single)) listOf(single.text) else emptyList()
                 } catch (_: ReaderException) {
                     emptyList()
                 }

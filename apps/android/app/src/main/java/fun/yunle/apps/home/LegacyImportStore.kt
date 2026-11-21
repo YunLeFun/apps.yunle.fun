@@ -9,11 +9,22 @@ import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.NoSuchFileException
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 internal class LegacyImportStore(
@@ -32,12 +43,19 @@ internal class LegacyImportStore(
     ) : this(library, accounts, reader, directory, preferences::persistImportedAppearance)
 
     private val archiveFile = File(directory, "record-v1.json")
+    private val archiveMutex = mutexFor(directory)
+    private val storeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val loadLock = Any()
+    private var inFlightLoad: Job? = null
+
     private val _archive = MutableStateFlow<LegacyImportArchive?>(null)
     val archive = _archive.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
     private val _isLoaded = MutableStateFlow(false)
     val isLoaded = _isLoaded.asStateFlow()
+    private val _isApplying = MutableStateFlow(false)
+    val isApplying = _isApplying.asStateFlow()
     private val _error = MutableStateFlow<LegacyImportError?>(null)
     val error = _error.asStateFlow()
 
@@ -49,20 +67,36 @@ internal class LegacyImportStore(
         get() = archive.value?.takeIf(::belongsToTarget)
 
     suspend fun load(retry: Boolean = false) {
-        synchronized(archiveLock) {
-            if (_isLoading.value || (_isLoaded.value && !retry)) return
-            _isLoading.value = true
-            _isLoaded.value = false
-            _error.value = null
-        }
-        try {
-            val stored = withContext(Dispatchers.IO) {
-                synchronized(archiveLock) { readStoredArchive() }
+        val job = synchronized(loadLock) {
+            val active = inFlightLoad?.takeIf { !it.isCompleted }
+            if (active != null) {
+                active
+            } else if (_isLoaded.value && !retry) {
+                return
+            } else {
+                _isLoading.value = true
+                _isLoaded.value = false
+                _error.value = null
+                storeScope.launch(start = CoroutineStart.LAZY) { runLoad() }.also {
+                    inFlightLoad = it
+                }
             }
-            val loaded = if (stored != null) stored else {
+        }
+        job.start()
+        job.join()
+    }
+
+    private suspend fun runLoad() {
+        try {
+            val stored = archiveMutex.withLock {
+                withContext(Dispatchers.IO) { readStoredArchive() }
+            }
+            val loaded = if (stored != null) {
+                stored
+            } else {
                 val values = reader.read()
-                withContext(Dispatchers.IO) {
-                    synchronized(archiveLock) {
+                archiveMutex.withLock {
+                    withContext(Dispatchers.IO) {
                         ensureActive()
                         // A different store may have saved a destination during the read.
                         readStoredArchive() ?: LegacyLocalData(values)
@@ -71,8 +105,10 @@ internal class LegacyImportStore(
                     }
                 }
             }
-            _archive.value = loaded
-            _isLoaded.value = true
+            synchronized(loadLock) {
+                _archive.value = loaded
+                _isLoaded.value = true
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: LegacyImportException) {
@@ -80,18 +116,23 @@ internal class LegacyImportStore(
         } catch (_: Exception) {
             _error.value = LegacyImportError.UNREADABLE
         } finally {
-            _isLoading.value = false
+            val currentJob = currentCoroutineContext()[Job]
+            synchronized(loadLock) {
+                if (inFlightLoad === currentJob) {
+                    inFlightLoad = null
+                }
+                _isLoading.value = false
+            }
         }
     }
 
-    // Confirmation and application run synchronously with account selection on Main.
-    fun prepareConfirmation(): LegacyImportConfirmation? = synchronized(archiveLock) {
+    suspend fun prepareConfirmation(): LegacyImportConfirmation? = archiveMutex.withLock {
         val displayed = _archive.value
-        if (!_isLoaded.value || _isLoading.value || displayed == null) return null
+        if (!_isLoaded.value || _isLoading.value || displayed == null) return@withLock null
         try {
-            val current = refreshArchive(displayed.record.id)
+            val current = withContext(Dispatchers.IO) { refreshArchive(displayed.record.id) }
             if (!belongsToTarget(current)) throw LegacyImportException(LegacyImportError.ALREADY_CLAIMED)
-            if (current.claim?.completed == true) return null
+            if (current.claim?.completed == true) return@withLock null
             val confirmation = LegacyImportConfirmation(
                 recordID = current.record.id,
                 accountID = library.activeAccountId,
@@ -101,56 +142,72 @@ internal class LegacyImportStore(
             checkBoundary(confirmation)
             _error.value = null
             confirmation
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: LegacyImportException) {
             _error.value = e.error
+            null
+        } catch (_: Exception) {
+            _error.value = LegacyImportError.UNREADABLE
             null
         }
     }
 
-    fun apply(confirmation: LegacyImportConfirmation) {
-        synchronized(archiveLock) {
-            try {
-                if (!_isLoaded.value || _isLoading.value || _archive.value == null) {
-                    throw LegacyImportException(LegacyImportError.IDENTITY_CHANGED)
-                }
-                checkBoundary(confirmation)
-                val current = refreshArchive(confirmation.recordID)
-                if (current.claim != null && current.claim.accountID != confirmation.accountID) {
-                    throw LegacyImportException(LegacyImportError.ALREADY_CLAIMED)
-                }
-                if (current.claim?.completed == true) return
-
-                // Persist the destination before changing Home so failures can only resume there.
-                val claim = LegacyImportArchive.Claim(accountID = confirmation.accountID)
-                val claimed = current.copy(claim = claim)
-                save(claimed)
-                _archive.value = claimed
-
-                checkBoundary(confirmation)
-                library.importLegacy(current.record, confirmation.accountID, confirmation.libraryGeneration)
-                current.record.appearance?.let {
-                    if (!saveAppearance(AppAppearance.fromKey(it))) {
-                        throw LegacyImportException(LegacyImportError.STORAGE)
+    suspend fun apply(confirmation: LegacyImportConfirmation) {
+        withContext(NonCancellable + Dispatchers.IO) {
+            archiveMutex.withLock {
+                _isApplying.value = true
+                try {
+                    if (!_isLoaded.value || _isLoading.value || _archive.value == null) {
+                        throw LegacyImportException(LegacyImportError.IDENTITY_CHANGED)
                     }
-                }
+                    checkBoundary(confirmation)
+                    val current = refreshArchive(confirmation.recordID)
+                    if (current.claim != null && current.claim.accountID != confirmation.accountID) {
+                        throw LegacyImportException(LegacyImportError.ALREADY_CLAIMED)
+                    }
+                    if (current.claim?.completed == true) return@withLock
 
-                val completed = claimed.copy(claim = claim.copy(completed = true))
-                save(completed)
-                _archive.value = completed
-                _error.value = null
-            } catch (e: LegacyImportException) {
-                _error.value = e.error
-            } catch (_: Exception) {
-                _error.value = LegacyImportError.STORAGE
+                    // Persist the destination before changing Home so failures can only resume there.
+                    val claim = LegacyImportArchive.Claim(accountID = confirmation.accountID)
+                    val claimed = current.copy(claim = claim)
+                    save(claimed)
+                    _archive.value = claimed
+
+                    checkBoundary(confirmation)
+                    library.importLegacy(
+                        record = current.record,
+                        expectedAccountId = confirmation.accountID,
+                        expectedGeneration = confirmation.libraryGeneration,
+                        verifyBoundary = { checkBoundary(confirmation) },
+                    )
+                    current.record.appearance?.let {
+                        if (!saveAppearance(AppAppearance.fromKey(it))) {
+                            throw LegacyImportException(LegacyImportError.STORAGE)
+                        }
+                    }
+
+                    val completed = claimed.copy(claim = claim.copy(completed = true))
+                    save(completed)
+                    _archive.value = completed
+                    _error.value = null
+                } catch (e: LegacyImportException) {
+                    _error.value = e.error
+                } catch (_: Exception) {
+                    _error.value = LegacyImportError.STORAGE
+                } finally {
+                    _isApplying.value = false
+                }
             }
         }
     }
 
     fun identityChanged() {
-        synchronized(archiveLock) {
-            val previous = _error.value
+        _error.update { previous ->
             if (previous == LegacyImportError.ALREADY_CLAIMED || previous == LegacyImportError.IDENTITY_CHANGED) {
-                _error.value = null
+                null
+            } else {
+                previous
             }
         }
     }
@@ -231,7 +288,10 @@ internal class LegacyImportStore(
 
     private companion object {
         const val MAXIMUM_ARCHIVE_BYTES = 1_048_576
-        val archiveLock = Any()
+        private val directoryMutexes = ConcurrentHashMap<String, Mutex>()
+
+        private fun mutexFor(directory: File): Mutex =
+            directoryMutexes.computeIfAbsent(directory.canonicalPath) { Mutex() }
     }
 }
 

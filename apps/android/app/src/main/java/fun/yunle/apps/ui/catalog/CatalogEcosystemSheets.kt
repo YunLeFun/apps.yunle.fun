@@ -665,8 +665,7 @@ internal fun ApplicationShareCatalogSheet(apps: List<CatalogApp>, onDismiss: () 
     var exportJob by remember { mutableStateOf<Job?>(null) }
     var savingZip by remember { mutableStateOf(false) }
     var notice by remember { mutableStateOf<String?>(null) }
-    val exportState = remember { mutableStateOf<ApplicationShareExportDirectory?>(null) }
-    var exported by exportState
+    var exported by remember { mutableStateOf<ApplicationShareExportDirectory?>(null) }
     val progressState = remember { MutableStateFlow<ShareExportProgress?>(null) }
     val progress by progressState.collectAsStateWithLifecycle()
     val saveZip = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
@@ -684,9 +683,6 @@ internal fun ApplicationShareCatalogSheet(apps: List<CatalogApp>, onDismiss: () 
                 }
             }
         }
-    }
-    DisposableEffect(Unit) {
-        onDispose { exportState.value?.discard() }
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -735,10 +731,7 @@ internal fun ApplicationShareCatalogSheet(apps: List<CatalogApp>, onDismiss: () 
                         }
                         TextButton(
                             enabled = !savingZip,
-                            onClick = {
-                                result.discard()
-                                exported = null
-                            },
+                            onClick = { exported = null },
                         ) { Text("重新选择") }
                     }
                     if (result.manifest.failures.isNotEmpty()) {

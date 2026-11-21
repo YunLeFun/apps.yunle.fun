@@ -12,6 +12,7 @@ import `fun`.yunle.apps.account.InMemoryAccountVault
 import `fun`.yunle.apps.account.SavedAccount
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -291,6 +292,35 @@ class LegacyImportTest {
         val ownerName = reloadedLibrary.currentFileName
         val backup = repository.list(ownerName).single()
         assertEquals(before, repository.preview(backup.id, ownerName).snapshot)
+    }
+
+    @Test
+    fun `quick close and reopen awaits the in-flight load and finishes cleanly`() = runBlocking {
+        val fixture = Fixture()
+        var reads = 0
+        val started = CompletableDeferred<Unit>()
+        val finish = CompletableDeferred<Unit>()
+        val store = fixture.store(LegacyLocalDataReading {
+            reads++
+            started.complete(Unit)
+            finish.await()
+            recordValues
+        })
+
+        val first = launch { store.load() }
+        started.await()
+        first.cancelAndJoin()
+
+        val second = launch { store.load() }
+        finish.complete(Unit)
+        second.join()
+
+        assertTrue(store.isLoaded.value)
+        assertFalse(store.isLoading.value)
+        assertNull(store.error.value)
+        assertEquals(1, reads)
+        assertNotNull(store.archive.value)
+        assertNotNull(store.prepareConfirmation())
     }
 
     private fun assertInvalid(values: Map<String, String>) {

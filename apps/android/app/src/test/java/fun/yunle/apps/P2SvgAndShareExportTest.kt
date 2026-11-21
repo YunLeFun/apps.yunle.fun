@@ -68,6 +68,8 @@ class P2SvgAndShareExportTest {
             "<svg><animateMotion/></svg>",
             "<svg><animateTransform/></svg>",
             "<svg><set/></svg>",
+            "<svg><pattern/></svg>",
+            "<svg><pattern id='p' width='1' height='1'><rect width='1' height='1'/></pattern><rect fill='url(#p)' width='10' height='10'/></svg>",
             "<svg onclick='action()'/>",
             "<svg><use href='https://example.org/a.svg#x'/></svg>",
             "<svg><use href='#'/></svg>",
@@ -223,6 +225,35 @@ class P2SvgAndShareExportTest {
             }
         }
         assertTrue(File(temporary.root, "ShareExports").listFiles().orEmpty().isEmpty())
+    }
+
+    @Test
+    fun batchExportsRetainUpToFiveRecentZipsOnDisk() = runBlocking {
+        val exporter = ApplicationShareExporter(temporary.root) { _, _, _ -> png }
+        val exports = mutableListOf<File>()
+        val baseTime = System.currentTimeMillis() - 60_000L
+        repeat(7) { index ->
+            val result = exporter.exportDirectory(
+                apps = listOf(publicApp("app$index")),
+                appearances = listOf(ApplicationShareAppearance.LIGHT),
+                progress = { _, _, _ -> },
+                iconLoader = { null },
+            )
+            result.directory.setLastModified(baseTime + index * 1_000L)
+            exports += result.directory
+        }
+
+        val retained = File(temporary.root, "ShareExports").listFiles().orEmpty().map { it.name }.toSet()
+        assertEquals(5, retained.size)
+        exports.take(2).forEach { old -> assertFalse(old.exists()) }
+        exports.drop(2).forEach { recent ->
+            assertTrue(recent.isDirectory)
+            val zip = File(recent, ApplicationShareExporter.ZIP_FILENAME)
+            assertTrue(zip.isFile)
+            ZipFile(zip).use { archive ->
+                assertTrue(archive.getEntry("manifest.json") != null)
+            }
+        }
     }
 
     private fun publicApp(key: String) = CatalogApp(

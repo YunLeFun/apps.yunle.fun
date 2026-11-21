@@ -324,6 +324,7 @@ internal class ApplicationShareExporter(
             val result = withContext(Dispatchers.IO) {
                 val root = File(cacheDir, SHARE_EXPORTS)
                 check(root.isDirectory || root.mkdirs() || root.isDirectory) { "无法创建导出目录。" }
+                pruneOldExports(root, prefix)
                 val directory = File(root, prefix + UUID.randomUUID())
                 check(directory.mkdir()) { "无法创建导出目录。" }
                 pendingDirectory = directory
@@ -343,6 +344,21 @@ internal class ApplicationShareExporter(
     companion object {
         const val ZIP_FILENAME = "yunlefun-catalog-share.zip"
         private const val SHARE_EXPORTS = "ShareExports"
+        private const val RETENTION_MS = 24 * 60 * 60 * 1000L
+        private const val MAX_RETAINED_PER_PREFIX = 5
+
+        private fun pruneOldExports(root: File, prefix: String) {
+            val expiry = System.currentTimeMillis() - RETENTION_MS
+            val matching = root.listFiles()
+                ?.filter { it.name.startsWith(prefix) }
+                ?.sortedByDescending { it.lastModified() }
+                .orEmpty()
+            matching.forEachIndexed { index, dir ->
+                if (index >= MAX_RETAINED_PER_PREFIX - 1 || dir.lastModified() < expiry) {
+                    dir.deleteRecursively()
+                }
+            }
+        }
 
         fun publicUrlOrNull(app: CatalogApp): String? {
             if (!app.isPublic || app.isUnavailable || (app.audience != null && app.audience != "public") ||

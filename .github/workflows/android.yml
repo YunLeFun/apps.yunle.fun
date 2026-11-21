@@ -65,13 +65,12 @@ jobs:
           arch: x86_64
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: |
-            set -eu
-            cd apps/android
-            ./gradlew --no-daemon connectedDebugAndroidTest \
-              -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.HostChromeTest,fun.yunle.apps.RenderProcessTerminationTest,fun.yunle.apps.CatalogSessionFlowTest#catalogSearchDetailTryMinimizeAndResumeKeepsSameSession,fun.yunle.apps.CatalogSessionFlowTest#catalogErrorRetriesAndRotationPreservesLoadedStateWithoutRefetch,fun.yunle.apps.CatalogSessionFlowTest#wideScreenTwoPaneAndDarkLargeFontAndKeyboardNavigationWork'
-            ./gradlew --no-daemon connectedDebugAndroidTest \
-              -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.WebProfileIsolationTest'
-            ./gradlew --no-daemon connectedDebugAndroidTest \
-              -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.CatalogSessionFlowTest#publicCatalogOpensOneRealGuestAppReadOnly' \
-              -Pandroid.testInstrumentationRunnerArguments.publicCatalogLive=1 || echo "::warning::Read-only live public catalog smoke check failed"
+          script: >-
+            cd apps/android &&
+            ./gradlew --no-daemon connectedDebugAndroidTest
+            -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.HostChromeTest,fun.yunle.apps.RenderProcessTerminationTest,fun.yunle.apps.CatalogSessionFlowTest#catalogSearchDetailTryMinimizeAndResumeKeepsSameSession,fun.yunle.apps.CatalogSessionFlowTest#catalogErrorRetriesAndRotationPreservesLoadedStateWithoutRefetch,fun.yunle.apps.CatalogSessionFlowTest#wideScreenTwoPaneAndDarkLargeFontAndKeyboardNavigationWork' &&
+            ./gradlew --no-daemon connectedDebugAndroidTest
+            -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.WebProfileIsolationTest' &&
+            (./gradlew --no-daemon connectedDebugAndroidTest
+            -Pandroid.testInstrumentationRunnerArguments.class='fun.yunle.apps.CatalogSessionFlowTest#publicCatalogOpensOneRealGuestAppReadOnly'
+            -Pandroid.testInstrumentationRunnerArguments.publicCatalogLive=1 || echo "::warning::Read-only live public catalog smoke check failed")

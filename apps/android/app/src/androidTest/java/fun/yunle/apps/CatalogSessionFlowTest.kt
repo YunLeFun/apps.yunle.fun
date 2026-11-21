@@ -3,8 +3,10 @@ package `fun`.yunle.apps
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.view.KeyEvent
@@ -329,13 +331,23 @@ class CatalogSessionFlowTest {
             awaitNode { nodeText(it) == "今天来做菜" }
             waitFor(5) { findNode { nodeText(it) == "会员专享笔记" } == null }
 
-            // Rotate to landscape and back without re-fetching catalog
-            scenario.onActivity { it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
+            // Finish the search before rotating to verify the filtered catalog state, not the IME.
+            if (Build.VERSION.SDK_INT >= 30) {
+                val search = awaitNode {
+                    it.isEditable && it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER)
+                }
+                assertTrue(search.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.id))
+            }
+            rotateTo(scenario, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, Configuration.ORIENTATION_LANDSCAPE)
+            awaitNode { it.isEditable && nodeText(it) == "做菜" }
             awaitNode { nodeText(it) == "今天来做菜" }
+            assertNull(findNode { nodeText(it) == "会员专享笔记" })
             assertEquals(2, calls.get())
 
-            scenario.onActivity { it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT }
+            rotateTo(scenario, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, Configuration.ORIENTATION_PORTRAIT)
+            awaitNode { it.isEditable && nodeText(it) == "做菜" }
             awaitNode { nodeText(it) == "今天来做菜" }
+            assertNull(findNode { nodeText(it) == "会员专享笔记" })
             assertEquals(2, calls.get())
 
             // OS process death does not fabricate a minimized session
@@ -446,6 +458,15 @@ class CatalogSessionFlowTest {
         }
     }
 
+    private fun rotateTo(scenario: ActivityScenario<MainActivity>, requested: Int, expected: Int) {
+        scenario.onActivity { it.requestedOrientation = requested }
+        waitFor(10) {
+            var orientation = Configuration.ORIENTATION_UNDEFINED
+            scenario.onActivity { orientation = it.resources.configuration.orientation }
+            orientation == expected
+        }
+    }
+
     private fun saveScreenshot(scenario: ActivityScenario<MainActivity>, fileName: String) {
         var dir: File? = null
         scenario.onActivity { dir = it.getExternalFilesDir(null) }
@@ -472,9 +493,13 @@ class CatalogSessionFlowTest {
             if (condition()) return
             Thread.sleep(100)
         }
-        assertTrue(
-            "Condition was not satisfied within ${timeoutSeconds}s.\nTree:\n${dumpAccessibilityTree()}",
-            condition(),
+        if (condition()) return
+        val caller = Throwable().stackTrace.firstOrNull { frame ->
+            frame.className == CatalogSessionFlowTest::class.java.name && frame.methodName.startsWith("catalog")
+        }
+        throw AssertionError(
+            "Condition at ${caller ?: "unknown test call site"} was not satisfied within ${timeoutSeconds}s.\n" +
+                "Tree:\n${dumpAccessibilityTree()}",
         )
     }
 

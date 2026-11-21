@@ -26,9 +26,19 @@ internal data class CatalogApp(
     val isOfficial: Boolean = false,
     val releaseStage: String? = null,
     val tags: List<String> = emptyList(),
+    val accessMode: String? = null,
+    val requiresMembership: Boolean = false,
+    val coinCost: Int = 0,
+    val audience: String? = null,
+    val accessWorkshopId: String? = null,
+    val personalMarketOwnerLogin: String? = null,
+    val rawWebsiteUrl: String? = null,
 ) {
     val homeKey: String get() = homeReference ?: id
     val browseCategory: String get() = category.trim().ifBlank { "其他" }
+
+    fun withAuthorizedLaunchUrl(): CatalogApp =
+        if (launchUrl != null || rawWebsiteUrl == null) this else copy(launchUrl = rawWebsiteUrl)
 
     fun matches(query: String): Boolean {
         val trimmed = query.trim()
@@ -56,19 +66,45 @@ internal data class CatalogApp(
     }
 
     companion object {
-        fun read(record: JSONObject): CatalogApp? {
-            if (record.opt("isPublic") != true || record.readString("status") != "approved" ||
-                record.readString("publicationStatus") != "published" ||
-                record.readString("audience") != "public"
-            ) return null
+        fun read(record: JSONObject): CatalogApp? = readScoped(
+            record = record,
+            allowWorkshopAudience = false,
+            workshopId = null,
+            personalMarketLogin = null,
+            allowAuthorizedLaunch = false,
+        )
+
+        fun readScoped(
+            record: JSONObject,
+            allowWorkshopAudience: Boolean = false,
+            workshopId: String? = null,
+            personalMarketLogin: String? = null,
+            allowAuthorizedLaunch: Boolean = false,
+        ): CatalogApp? {
+            val rawAudience = record.readString("audience")
+            val audienceValid = rawAudience == "public" || (allowWorkshopAudience && rawAudience == "workshop")
+            if (!audienceValid) return null
+            if (rawAudience == "public") {
+                if (record.opt("isPublic") != true ||
+                    record.readString("status") != "approved" ||
+                    record.readString("publicationStatus") != "published"
+                ) {
+                    return null
+                }
+            }
             val id = record.readString("_id")?.takeIf(::validKey) ?: return null
             val key = record.readString("marketShortName")?.takeIf(::validKey) ?: id
             val slug = record.readString("slug")?.takeIf(::validKey)
             val name = record.readString("name")?.trim()?.takeIf(String::isNotEmpty) ?: return null
-            val guestAccess = record.readString("accessMode") == "public" &&
-                !record.optBoolean("isUnavailable", false) &&
-                (record.isNull("requiresMembership") || record.opt("requiresMembership") == false) &&
-                (record.isNull("coinCost") || (record.opt("coinCost") as? Number)?.toDouble() == 0.0)
+            val accessMode = record.readString("accessMode")
+            val isUnavailable = record.optBoolean("isUnavailable", false)
+            val requiresMembership = !record.isNull("requiresMembership") && record.opt("requiresMembership") == true
+            val coinNumber = (record.opt("coinCost") as? Number)?.toDouble()
+            val coinCost = coinNumber?.takeIf { it.isFinite() && it >= 0.0 && it <= Int.MAX_VALUE }?.toInt() ?: 0
+            val guestAccess = accessMode == "public" &&
+                !isUnavailable &&
+                !requiresMembership &&
+                (coinNumber == null || coinNumber == 0.0)
             val canonicalUrl = (CANONICAL_WEBSITE_URLS[key]
                 ?: slug?.let { CANONICAL_WEBSITE_URLS[it] }
                 ?: CANONICAL_WEBSITE_URLS[id])
@@ -85,22 +121,38 @@ internal data class CatalogApp(
             }
             val parsedRating = (record.opt("rating") as? Number)?.toDouble()
                 ?.takeIf { it.isFinite() && it in 0.0..5.0 }
+            val launchTarget = url.takeIf { guestAccess || (allowAuthorizedLaunch && !isUnavailable) }
             return CatalogApp(
-                id, key, name.take(160), record.optString("description").take(3000),
-                (record.readString("developerName")?.takeIf(String::isNotBlank)
+                id = id,
+                key = key,
+                name = name.take(160),
+                description = record.optString("description").take(3000),
+                author = (record.readString("developerName")?.takeIf(String::isNotBlank)
                     ?: record.readString("ownerLogin") ?: "独立开发者").take(100),
-                record.readString("ownerLogin")?.takeIf(::validKey),
-                record.optString("category").take(40),
-                record.readString("emoji")?.takeIf(String::isNotBlank)?.take(12) ?: "☁️",
-                url.takeIf { guestAccess }, logo, record.readString("themeColor"),
-                if (hosts == null) emptyList() else (0 until minOf(50, hosts.length()))
-                    .mapNotNull { hosts.opt(it) as? String },
-                record.readString("displayMode") == "immersive",
+                ownerLogin = record.readString("ownerLogin")?.takeIf(::validKey),
+                category = record.optString("category").take(40),
+                emoji = record.readString("emoji")?.takeIf(String::isNotBlank)?.take(12) ?: "☁️",
+                launchUrl = launchTarget,
+                logo = logo,
+                themeColor = record.readString("themeColor"),
+                trustedHosts = if (personalMarketLogin != null || hosts == null) {
+                    emptyList()
+                } else {
+                    (0 until minOf(50, hosts.length())).mapNotNull { hosts.opt(it) as? String }
+                },
+                immersive = record.readString("displayMode") == "immersive",
                 slug = slug,
                 rating = parsedRating,
                 isOfficial = record.opt("isOfficial") == true,
                 releaseStage = record.readString("releaseStage")?.take(32),
                 tags = parsedTags,
+                accessMode = accessMode,
+                requiresMembership = requiresMembership,
+                coinCost = coinCost,
+                audience = rawAudience,
+                accessWorkshopId = workshopId,
+                personalMarketOwnerLogin = personalMarketLogin,
+                rawWebsiteUrl = url,
             )
         }
 

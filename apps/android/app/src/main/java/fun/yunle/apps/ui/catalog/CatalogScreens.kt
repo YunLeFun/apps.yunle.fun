@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,6 +107,9 @@ internal fun CatalogScreen(
     onSelectApp: (CatalogApp) -> Unit,
     onLaunchApp: (CatalogApp) -> Unit = {},
     onToggleHome: ((CatalogApp) -> Unit)? = null,
+    onOpenMyWorkshops: (() -> Unit)? = null,
+    onOpenWorkshopLookup: (() -> Unit)? = null,
+    onOpenScanOrLink: (() -> Unit)? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -355,6 +359,50 @@ internal fun CatalogScreen(
                                         thickness = 0.5.dp,
                                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                                     )
+                                }
+                            }
+
+                            if (onOpenMyWorkshops != null || onOpenWorkshopLookup != null || onOpenScanOrLink != null) {
+                                item(key = "workshop_footer_shortcuts") {
+                                    Surface(
+                                        shape = MaterialTheme.shapes.large,
+                                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(14.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        ) {
+                                            Text(
+                                                text = "工坊入口",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                            FlowRow(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                            ) {
+                                                onOpenMyWorkshops?.let { openMine ->
+                                                    OutlinedButton(onClick = openMine) {
+                                                        Text("个人工坊")
+                                                    }
+                                                }
+                                                onOpenWorkshopLookup?.let { openLookup ->
+                                                    OutlinedButton(onClick = openLookup) {
+                                                        Text("按编号打开")
+                                                    }
+                                                }
+                                                onOpenScanOrLink?.let { openScan ->
+                                                    OutlinedButton(onClick = openScan) {
+                                                        Text("识别链接")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -831,6 +879,7 @@ internal fun DetailScreen(
     uiState: CatalogUiState,
     showBackNavigation: Boolean,
     isInHome: Boolean = false,
+    fallbackApp: CatalogApp? = null,
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onResumeSession: () -> Unit,
@@ -838,6 +887,10 @@ internal fun DetailScreen(
     onToggleHome: ((CatalogApp) -> Unit)? = null,
     onOpenWebDetails: (CatalogApp) -> Unit,
     onOpenAppData: ((CatalogApp) -> Unit)? = null,
+    onOpenReviews: ((CatalogApp) -> Unit)? = null,
+    onOpenDeveloper: ((String) -> Unit)? = null,
+    onAcquireApp: ((CatalogApp) -> Unit)? = null,
+    onShareApp: ((CatalogApp) -> Unit)? = null,
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -916,7 +969,7 @@ internal fun DetailScreen(
                 }
 
                 is CatalogFeedState.Loaded -> {
-                    val app = uiState.findApp(appId)
+                    val app = uiState.findApp(appId) ?: fallbackApp
                     if (app == null) {
                         Box(
                             modifier = Modifier
@@ -961,10 +1014,14 @@ internal fun DetailScreen(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     ) {
                                         if (app.author.isNotBlank()) {
+                                            val authorClickable = onOpenDeveloper != null && !app.ownerLogin.isNullOrBlank()
                                             Text(
-                                                text = app.author,
+                                                text = if (authorClickable) "${app.author} ›" else app.author,
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.clickable(enabled = authorClickable) {
+                                                    app.ownerLogin?.let { login -> onOpenDeveloper?.invoke(login) }
+                                                },
                                             )
                                         }
                                         if (app.isOfficial) {
@@ -1038,6 +1095,45 @@ internal fun DetailScreen(
                                         .defaultMinSize(minHeight = 48.dp),
                                 ) {
                                     Text(text = "应用数据")
+                                }
+                            }
+
+                            if (app.launchUrl == null && onAcquireApp != null) {
+                                OutlinedButton(
+                                    onClick = { onAcquireApp(app) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .defaultMinSize(minHeight = 48.dp),
+                                ) {
+                                    Text(text = "获取与权益")
+                                }
+                            }
+
+                            if (onOpenReviews != null || onShareApp != null) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    if (onOpenReviews != null) {
+                                        OutlinedButton(
+                                            onClick = { onOpenReviews(app) },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .defaultMinSize(minHeight = 48.dp),
+                                        ) {
+                                            Text(text = "评分与评价")
+                                        }
+                                    }
+                                    if (onShareApp != null) {
+                                        OutlinedButton(
+                                            onClick = { onShareApp(app) },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .defaultMinSize(minHeight = 48.dp),
+                                        ) {
+                                            Text(text = "分享")
+                                        }
+                                    }
                                 }
                             }
 

@@ -78,6 +78,7 @@ class HostWebViewActivity : AppCompatActivity() {
     private lateinit var progressView: ProgressBar
 
     private var initialUrl = ""
+    private var currentOptionsJson = "{}"
     private var customTitle = ""
     private var displayMode = "titlebar"
     private var titleBarVisible = true
@@ -100,10 +101,15 @@ class HostWebViewActivity : AppCompatActivity() {
     val sessionKey: String
         get() = appInfo.readString("id")?.takeIf { it.isNotBlank() } ?: initialUrl
 
+    internal fun currentOptions(): String = currentOptionsJson
+    internal fun currentUrl(): String = initialUrl
+    internal fun currentWebViewOrNull(): WebView? = webView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val rawOptions = intent.getStringExtra(EXTRA_OPTIONS)
-        val options = runCatching { JSONObject(rawOptions ?: "{}") }.getOrElse { JSONObject() }
+        currentOptionsJson = rawOptions ?: "{}"
+        val options = runCatching { JSONObject(currentOptionsJson) }.getOrElse { JSONObject() }
         if (!readOptions(options)) {
             finish()
             return
@@ -120,6 +126,50 @@ class HostWebViewActivity : AppCompatActivity() {
                 if (activeWeb != null && activeWeb.canGoBack()) activeWeb.goBack() else finish()
             }
         })
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val rawOptions = intent.getStringExtra(EXTRA_OPTIONS)
+        if (rawOptions.isNullOrBlank()) {
+            HostSession.attach(this)
+            return
+        }
+        if (rawOptions == currentOptionsJson && webView != null && accountBoundary == YunleContainer.accounts.currentBoundary) {
+            HostSession.attach(this)
+            return
+        }
+
+        cancelPendingAuthorizations("switched active application")
+        val previousWeb = webView
+        if (previousWeb != null && !isFinishing && !isDestroyed) {
+            val snapshot = PooledWebSession(
+                sessionKey = sessionKey,
+                appId = appInfo.readString("id") ?: sessionKey,
+                appName = sessionName(),
+                launchUrl = initialUrl,
+                optionsJson = currentOptionsJson,
+                accountBoundary = accountBoundary,
+                handle = WebViewRuntimeHandle(previousWeb),
+                lastUsedAtMillis = System.currentTimeMillis(),
+            )
+            webView = null
+            documentStartBridgeInstalled = false
+            HostSession.parkWebView(snapshot, HostSession.maxPooledSessions(this))
+        }
+
+        currentOptionsJson = rawOptions
+        val options = runCatching { JSONObject(rawOptions) }.getOrElse { JSONObject() }
+        if (!readOptions(options)) {
+            finish()
+            return
+        }
+        accountBoundary = YunleContainer.accounts.currentBoundary
+        progressView.progress = 0
+        progressView.visibility = View.GONE
+        updateNativeChrome()
+        attachFreshWebView(initialUrl)
     }
 
     /** Return to the native catalog while retaining this cloud app. */
@@ -561,6 +611,27 @@ class HostWebViewActivity : AppCompatActivity() {
             return
         }
 
+        val pooled = HostSession.takePooledWebView(sessionKey, url, accountBoundary)
+        if (pooled != null && pooled.handle is WebViewRuntimeHandle) {
+            val reused = pooled.handle.webView
+            documentStartBridgeInstalled = true
+            runCatching {
+                val profile = WebViewCompat.getProfile(reused)
+                configureWebView(reused, profile.cookieManager)
+            }
+            webView = reused
+            webContainer.addView(
+                reused,
+                0,
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                ),
+            )
+            HostSession.attach(this)
+            return
+        }
+
         var pendingView: WebView? = null
         val created = try {
             val selection = YunleContainer.selectWebProfile(appInfo.readString("id").orEmpty(), url)
@@ -714,6 +785,7 @@ class HostWebViewActivity : AppCompatActivity() {
         val allowedOrigins = HostNavigationPolicy.allowedOriginRules(initialUrl, isDebuggable())
         if (allowedOrigins.isEmpty()) return
 
+        runCatching { WebViewCompat.removeWebMessageListener(targetWebView, "ylfHost") }
         WebViewCompat.addWebMessageListener(
             targetWebView,
             "ylfHost",
@@ -722,7 +794,9 @@ class HostWebViewActivity : AppCompatActivity() {
             handleHostMessage(message, sourceOrigin, isMainFrame, replyProxy)
         }
 
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+        if (!documentStartBridgeInstalled &&
+            WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+        ) {
             WebViewCompat.addDocumentStartJavaScript(targetWebView, BRIDGE_SCRIPT, allowedOrigins)
             documentStartBridgeInstalled = true
         }
@@ -1079,6 +1153,7 @@ class HostWebViewActivity : AppCompatActivity() {
         applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
     override fun onPause() {
+        webView?.onPause()
         if (systemAuthorization != null || systemExternalAuthorization != null) {
             systemAuthorizationWasPaused = true
         }
@@ -1087,6 +1162,7 @@ class HostWebViewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        webView?.onResume()
         localPageLaunchPending = false
         val active = systemAuthorization
         val external = systemExternalAuthorization
@@ -1100,6 +1176,11 @@ class HostWebViewActivity : AppCompatActivity() {
                 }
             }, SYSTEM_AUTHORIZATION_RETURN_GRACE_MS)
         }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        HostSession.trimMemory(level)
     }
 
     override fun onDestroy() {

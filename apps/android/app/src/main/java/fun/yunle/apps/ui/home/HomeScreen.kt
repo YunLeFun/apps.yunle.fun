@@ -1,11 +1,13 @@
 package `fun`.yunle.apps.ui.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,6 +18,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -55,6 +59,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import `fun`.yunle.apps.CatalogApp
+import `fun`.yunle.apps.RunningAppSession
 import `fun`.yunle.apps.account.AccountUser
 import `fun`.yunle.apps.home.HomeFolder
 import `fun`.yunle.apps.home.HomeGridItem
@@ -96,6 +101,13 @@ internal fun HomeScreen(
     onSyncNow: () -> Unit = {},
     onResolveSyncConflict: (HomeSyncResolution) -> Unit = {},
     onOpenSyncSettings: () -> Unit = {},
+    runningSessions: List<RunningAppSession> = emptyList(),
+    onResumeRunningSession: (String) -> Unit = {},
+    onCloseRunningSession: (String) -> Unit = {},
+    activeWorkspaceName: String? = null,
+    onOpenWorkspacePicker: (() -> Unit)? = null,
+    workshopApps: List<CatalogApp>? = null,
+    onExitWorkspace: () -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     var editing by rememberSaveable { mutableStateOf(false) }
@@ -104,6 +116,9 @@ internal fun HomeScreen(
     var folderPickerApp by remember { mutableStateOf<CatalogApp?>(null) }
     var confirmDissolveFolder by remember { mutableStateOf<HomeFolder?>(null) }
 
+    val workshopTitle = activeWorkspaceName?.takeIf { it.isNotBlank() }
+    val workshopGridApps = workshopApps
+    val inWorkshopMode = workshopGridApps != null && workshopTitle != null
     val dockApps = snapshot.dockApplications
     val mainApps = snapshot.mainApplications
     val mainItems = remember(mainApps, snapshot.configuration.folders) {
@@ -111,8 +126,8 @@ internal fun HomeScreen(
     }
     val hasDesktopApps = dockApps.isNotEmpty() || mainItems.isNotEmpty()
 
-    LaunchedEffect(hasDesktopApps) {
-        if (editing && !hasDesktopApps) {
+    LaunchedEffect(hasDesktopApps, inWorkshopMode) {
+        if (editing && (!hasDesktopApps || inWorkshopMode)) {
             editing = false
         }
     }
@@ -124,7 +139,7 @@ internal fun HomeScreen(
                 title = {
                     Column {
                         Text(
-                            text = "我的云居",
+                            text = if (workshopGridApps != null && workshopTitle != null) workshopTitle else "我的云居",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
@@ -132,7 +147,11 @@ internal fun HomeScreen(
                             modifier = Modifier.semantics { heading() },
                         )
                         Text(
-                            text = activeUser?.let { "当前账号：${it.displayName}" } ?: "访客云居 · 登录后可多账号独立保存",
+                            text = if (inWorkshopMode) {
+                                "工坊桌面 · 只读启动"
+                            } else {
+                                activeUser?.let { "当前账号：${it.displayName}" } ?: "访客云居 · 登录后可多账号独立保存"
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
@@ -146,17 +165,22 @@ internal fun HomeScreen(
                             Text("完成")
                         }
                     } else {
-                        if (hasDesktopApps) {
+                        if (!inWorkshopMode && hasDesktopApps) {
                             TextButton(onClick = { editing = true }) {
                                 Text("编辑")
                             }
                         }
-                        if (activeUser != null) {
+                        if (!inWorkshopMode && activeUser != null) {
                             TextButton(
                                 onClick = onSyncNow,
                                 enabled = syncPhase !is HomeSyncPhase.Syncing,
                             ) {
                                 Text(if (syncPhase is HomeSyncPhase.Syncing) "同步中" else "同步")
+                            }
+                        }
+                        if (activeUser != null && onOpenWorkspacePicker != null) {
+                            TextButton(onClick = onOpenWorkspacePicker) {
+                                Text("切换")
                             }
                         }
                         TextButton(onClick = onBrowseWorkshop) {
@@ -177,12 +201,34 @@ internal fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            minimizedAppName?.let { name ->
-                ResumeSessionBanner(
-                    appName = name,
-                    onResume = onResumeSession,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            if (runningSessions.size > 1) {
+                RunningSessionsStrip(
+                    sessions = runningSessions,
+                    onResumeSession = onResumeRunningSession,
+                    onCloseSession = onCloseRunningSession,
                 )
+            } else {
+                minimizedAppName?.let { name ->
+                    ResumeSessionBanner(
+                        appName = name,
+                        onResume = onResumeSession,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    )
+                }
+            }
+
+            if (workshopGridApps != null && workshopTitle != null) {
+                WorkshopDesktopGrid(
+                    workspaceName = workshopTitle,
+                    apps = workshopGridApps,
+                    onLaunchOrDetail = onLaunchOrDetail,
+                    onOpenDetail = onOpenDetail,
+                    onExitWorkspace = onExitWorkspace,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                )
+                return@Column
             }
 
             if (activeUser != null) {
@@ -945,6 +991,158 @@ private fun HomeSyncBanner(
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(onClick = { onResolveConflict(HomeSyncResolution.CLOUD) }) {
                             Text("使用云端版本")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RunningSessionsStrip(
+    sessions: List<RunningAppSession>,
+    onResumeSession: (String) -> Unit,
+    onCloseSession: (String) -> Unit,
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(sessions, key = { it.sessionKey }) { session ->
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            ) {
+                Row(
+                    modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = "运行中 · ${session.appName}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clickable { onResumeSession(session.sessionKey) },
+                    )
+                    Text(
+                        text = "×",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier
+                            .clickable { onCloseSession(session.sessionKey) }
+                            .padding(horizontal = 4.dp)
+                            .semantics { contentDescription = "关闭 ${session.appName}" },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WorkshopDesktopGrid(
+    workspaceName: String,
+    apps: List<CatalogApp>,
+    onLaunchOrDetail: (CatalogApp) -> Unit,
+    onOpenDetail: (CatalogApp) -> Unit,
+    onExitWorkspace: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = HomeGridMetrics.MARGIN, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = workspaceName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = "共 ${apps.size} 个精选应用 · 长按查看详情",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                TextButton(onClick = onExitWorkspace) {
+                    Text("返回个人云居")
+                }
+            }
+        }
+
+        if (apps.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "该工坊暂未精选应用",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val metrics = HomeGridMetrics.calculate(maxWidth)
+                val rows = apps.chunked(metrics.columns)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(HomeGridMetrics.ROW_SPACING),
+                ) {
+                    rows.forEach { rowApps ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(HomeGridMetrics.COLUMN_SPACING),
+                        ) {
+                            for (column in 0 until metrics.columns) {
+                                val app = rowApps.getOrNull(column)
+                                if (app != null) {
+                                    key("ws:${app.homeKey}") {
+                                        Box(
+                                            modifier = Modifier.weight(1f),
+                                            contentAlignment = Alignment.TopCenter,
+                                        ) {
+                                            HomeAppGlyph(
+                                                name = app.name,
+                                                labelWidth = Dp.Unspecified,
+                                                isUnavailable = app.launchUrl == null,
+                                                onClick = { onLaunchOrDetail(app) },
+                                                onLongClick = { onOpenDetail(app) },
+                                            ) {
+                                                AppIconBadge(
+                                                    app = app,
+                                                    size = HomeGridMetrics.ICON_SIZE,
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                 }

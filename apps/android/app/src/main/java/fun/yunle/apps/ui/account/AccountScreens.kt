@@ -116,6 +116,9 @@ internal fun MeScreen(
     onAutoSyncEnabledChange: (Boolean) -> Unit = {},
     onResolveSyncConflict: (HomeSyncResolution) -> Unit = {},
     onOpenHomeBackups: () -> Unit = {},
+    onOpenMyWorkshops: () -> Unit = {},
+    onOpenWorkshopLookup: () -> Unit = {},
+    onOpenMyReports: () -> Unit = {},
     onClearRecent: () -> Unit,
     onOpenUrl: (String) -> Unit,
 ) {
@@ -352,8 +355,26 @@ internal fun MeScreen(
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     MeMenuRow(
-                        title = "我的应用与个人工坊",
-                        subtitle = "发布管理云应用、维护个人工坊",
+                        title = "个人工坊",
+                        subtitle = "创建与管理我的工坊、审批访客及已加入工坊",
+                        onClick = onOpenMyWorkshops,
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    MeMenuRow(
+                        title = "按编号打开工坊",
+                        subtitle = "输入 6 位编号或工坊链接直达",
+                        onClick = onOpenWorkshopLookup,
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    MeMenuRow(
+                        title = "我的举报",
+                        subtitle = "查看应用或评价举报与审核结果",
+                        onClick = onOpenMyReports,
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    MeMenuRow(
+                        title = "我的应用发布",
+                        subtitle = "发布管理云应用",
                         onClick = { onOpenUrl("https://apps.yunle.fun/studio") },
                     )
                 }

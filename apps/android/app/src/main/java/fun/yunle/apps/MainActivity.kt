@@ -51,6 +51,8 @@ import `fun`.yunle.apps.home.HomeSyncPhase
 import `fun`.yunle.apps.ui.AppRootScaffold
 import `fun`.yunle.apps.ui.AppTab
 import `fun`.yunle.apps.ui.account.MeScreen
+import `fun`.yunle.apps.ui.catalog.ApplicationAcquisitionSheet
+import `fun`.yunle.apps.ui.catalog.ApplicationShareSheet
 import `fun`.yunle.apps.ui.catalog.CatalogFeedState
 import `fun`.yunle.apps.ui.catalog.CatalogPaneMetadata
 import `fun`.yunle.apps.ui.catalog.CatalogRoute
@@ -59,12 +61,20 @@ import `fun`.yunle.apps.ui.catalog.CatalogUiState
 import `fun`.yunle.apps.ui.catalog.CatalogViewModel
 import `fun`.yunle.apps.ui.catalog.DetailRoute
 import `fun`.yunle.apps.ui.catalog.DetailScreen
+import `fun`.yunle.apps.ui.catalog.DeveloperApplicationsSheet
 import `fun`.yunle.apps.ui.catalog.ListDetailSceneStrategy
+import `fun`.yunle.apps.ui.catalog.WorkshopScanOrLinkDialog
+import `fun`.yunle.apps.ui.community.ApplicationReviewsSheet
+import `fun`.yunle.apps.ui.community.MyReportsSheet
 import `fun`.yunle.apps.ui.games.GamesScreen
 import `fun`.yunle.apps.ui.home.HomeBackupsSheet
 import `fun`.yunle.apps.ui.home.HomeScreen
 import `fun`.yunle.apps.ui.theme.YunleTheme
 import `fun`.yunle.apps.ui.webruntime.WebProfileRecoverySheet
+import `fun`.yunle.apps.ui.workshop.HomeWorkspacePickerSheet
+import `fun`.yunle.apps.ui.workshop.MyWorkshopsSheet
+import `fun`.yunle.apps.ui.workshop.PublicWorkshopSheet
+import `fun`.yunle.apps.ui.workshop.WorkshopLookupDialog
 import `fun`.yunle.apps.webruntime.HostAuthorizationError
 import `fun`.yunle.apps.webruntime.HostAuthorizationException
 import `fun`.yunle.apps.webruntime.HostSsoPolicy
@@ -116,13 +126,28 @@ class MainActivity : ComponentActivity() {
                 val homeSnapshot by YunleContainer.homeLibrary.snapshot.collectAsStateWithLifecycle()
                 val homeStorageError by YunleContainer.homeLibrary.storageError.collectAsStateWithLifecycle()
                 val homeSyncPhase by YunleContainer.homeSync.phase.collectAsStateWithLifecycle()
+                val runningSessions by HostSession.runningSessions.collectAsStateWithLifecycle()
 
                 var selectedTab by rememberSaveable {
                     mutableStateOf(if (initialDetailKey != null) AppTab.WORKSHOP else AppTab.HOME)
                 }
                 var openSyncSettingsInMe by rememberSaveable { mutableStateOf(false) }
                 var showHomeBackups by rememberSaveable { mutableStateOf(false) }
+                var showMyWorkshops by rememberSaveable { mutableStateOf(false) }
+                var showWorkshopLookup by rememberSaveable { mutableStateOf(false) }
+                var showWorkspacePicker by rememberSaveable { mutableStateOf(false) }
+                var showMyReports by rememberSaveable { mutableStateOf(false) }
+                var showScanOrLink by rememberSaveable { mutableStateOf(false) }
+                var activePublicWorkshopId by rememberSaveable { mutableStateOf<String?>(null) }
+                var activeDeveloperLogin by rememberSaveable { mutableStateOf<String?>(null) }
+                var activeWorkspaceId by rememberSaveable { mutableStateOf<String?>(null) }
+                var activeWorkspaceName by rememberSaveable { mutableStateOf<String?>(null) }
+                var activeWorkshopApps by remember { mutableStateOf<List<CatalogApp>?>(null) }
                 var recoveringApp by remember { mutableStateOf<CatalogApp?>(null) }
+                var reviewsApp by remember { mutableStateOf<CatalogApp?>(null) }
+                var acquiringApp by remember { mutableStateOf<CatalogApp?>(null) }
+                var sharingApp by remember { mutableStateOf<CatalogApp?>(null) }
+                var transientDetailApps by remember { mutableStateOf<Map<String, CatalogApp>>(emptyMap()) }
                 var linkDialogDestination by remember { mutableStateOf<NativeDestination?>(null) }
 
                 val startRoute: NavKey = remember {
@@ -133,6 +158,12 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     YunleContainer.accounts.prepareInitialRestore()
                     YunleContainer.accounts.consumeInitialRestore()
+                }
+
+                LaunchedEffect(accountOverview.activeID) {
+                    activeWorkspaceId = null
+                    activeWorkspaceName = null
+                    activeWorkshopApps = null
                 }
 
                 LaunchedEffect(uiState.feed) {
@@ -149,18 +180,28 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                fun handleNativeDestination(destination: NativeDestination) {
+                    when (destination) {
+                        is NativeDestination.Application -> {
+                            selectedTab = AppTab.WORKSHOP
+                            pushDetailRoute(workshopBackStack, destination.key)
+                        }
+                        is NativeDestination.Workshop -> {
+                            activePublicWorkshopId = destination.id
+                        }
+                        is NativeDestination.Developer -> {
+                            activeDeveloperLogin = destination.login
+                        }
+                        else -> {
+                            linkDialogDestination = destination
+                        }
+                    }
+                }
+
                 val incomingDestination = pendingDestination
                 LaunchedEffect(incomingDestination) {
                     if (incomingDestination != null) {
-                        when (incomingDestination) {
-                            is NativeDestination.Application -> {
-                                selectedTab = AppTab.WORKSHOP
-                                pushDetailRoute(workshopBackStack, incomingDestination.key)
-                            }
-                            else -> {
-                                linkDialogDestination = incomingDestination
-                            }
-                        }
+                        handleNativeDestination(incomingDestination)
                         pendingDestination = null
                     }
                 }
@@ -176,6 +217,12 @@ class MainActivity : ComponentActivity() {
                     YunleContainer.homeLibrary.recordUse(app)
                     HostSession.open(this@MainActivity, app)
                     if (launchedFromApp) finish()
+                }
+
+                fun openTransientAppDetail(app: CatalogApp) {
+                    transientDetailApps = transientDetailApps + (app.id to app) + (app.key to app)
+                    selectedTab = AppTab.WORKSHOP
+                    pushDetailRoute(workshopBackStack, app.id)
                 }
 
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -199,13 +246,11 @@ class MainActivity : ComponentActivity() {
                                     if (app.launchUrl != null) {
                                         openApplication(app)
                                     } else {
-                                        selectedTab = AppTab.WORKSHOP
-                                        pushDetailRoute(workshopBackStack, app.id)
+                                        openTransientAppDetail(app)
                                     }
                                 },
                                 onOpenDetail = { app ->
-                                    selectedTab = AppTab.WORKSHOP
-                                    pushDetailRoute(workshopBackStack, app.id)
+                                    openTransientAppDetail(app)
                                 },
                                 onAddApp = YunleContainer.homeLibrary::add,
                                 onTogglePin = { app, pinned ->
@@ -243,6 +288,21 @@ class MainActivity : ComponentActivity() {
                                     openSyncSettingsInMe = true
                                     selectedTab = AppTab.ME
                                 },
+                                runningSessions = runningSessions,
+                                onResumeRunningSession = { sessionKey ->
+                                    HostSession.resumeSession(this@MainActivity, sessionKey)
+                                },
+                                onCloseRunningSession = { sessionKey ->
+                                    HostSession.closeSession(sessionKey)
+                                },
+                                activeWorkspaceName = activeWorkspaceName,
+                                onOpenWorkspacePicker = { showWorkspacePicker = true },
+                                workshopApps = activeWorkshopApps,
+                                onExitWorkspace = {
+                                    activeWorkspaceId = null
+                                    activeWorkspaceName = null
+                                    activeWorkshopApps = null
+                                },
                             )
 
                             AppTab.GAMES -> GamesScreen(
@@ -265,6 +325,7 @@ class MainActivity : ComponentActivity() {
                                     raw + loaded.filter { homeSnapshot.contains(it) }.map { it.id }
                                 },
                                 activeUser = accountOverview.activeUser,
+                                transientApps = transientDetailApps,
                                 viewModel = viewModel,
                                 onOpenAccount = { selectedTab = AppTab.ME },
                                 onResumeSession = { HostSession.resume(this@MainActivity) },
@@ -292,6 +353,13 @@ class MainActivity : ComponentActivity() {
                                 } else {
                                     null
                                 },
+                                onOpenMyWorkshops = { showMyWorkshops = true },
+                                onOpenWorkshopLookup = { showWorkshopLookup = true },
+                                onOpenScanOrLink = { showScanOrLink = true },
+                                onOpenReviews = { app -> reviewsApp = app },
+                                onOpenDeveloper = { login -> activeDeveloperLogin = login },
+                                onAcquireApp = { app -> acquiringApp = app },
+                                onShareApp = { app -> sharingApp = app },
                                 onFinishActivity = ::finish,
                             )
 
@@ -322,6 +390,9 @@ class MainActivity : ComponentActivity() {
                                     YunleContainer.homeSync.resolve(resolution)
                                 },
                                 onOpenHomeBackups = { showHomeBackups = true },
+                                onOpenMyWorkshops = { showMyWorkshops = true },
+                                onOpenWorkshopLookup = { showWorkshopLookup = true },
+                                onOpenMyReports = { showMyReports = true },
                                 onClearRecent = YunleContainer.homeLibrary::clearRecent,
                                 onOpenUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
                             )
@@ -343,6 +414,131 @@ class MainActivity : ComponentActivity() {
                             accounts = YunleContainer.accounts,
                             homeLibrary = YunleContainer.homeLibrary,
                             onDismiss = { showHomeBackups = false },
+                        )
+                    }
+
+                    if (showMyWorkshops) {
+                        MyWorkshopsSheet(
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.workshopService,
+                            onOpenWorkshop = { workshopId ->
+                                showMyWorkshops = false
+                                activePublicWorkshopId = workshopId
+                            },
+                            onDismiss = { showMyWorkshops = false },
+                        )
+                    }
+
+                    if (showWorkshopLookup) {
+                        WorkshopLookupDialog(
+                            onOpenWorkshop = { workshopId ->
+                                showWorkshopLookup = false
+                                activePublicWorkshopId = workshopId
+                            },
+                            onDismiss = { showWorkshopLookup = false },
+                        )
+                    }
+
+                    if (showWorkspacePicker) {
+                        HomeWorkspacePickerSheet(
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.workshopService,
+                            activeWorkshopId = activeWorkspaceId,
+                            onSelectPersonal = {
+                                activeWorkspaceId = null
+                                activeWorkspaceName = null
+                                activeWorkshopApps = null
+                                showWorkspacePicker = false
+                            },
+                            onSelectWorkshop = { workshop, page ->
+                                activeWorkspaceId = workshop.id
+                                activeWorkspaceName = workshop.name
+                                activeWorkshopApps = page.apps
+                                showWorkspacePicker = false
+                            },
+                            onDismiss = { showWorkspacePicker = false },
+                        )
+                    }
+
+                    if (showScanOrLink) {
+                        WorkshopScanOrLinkDialog(
+                            onDestination = ::handleNativeDestination,
+                            onWorkshopCode = { code -> activePublicWorkshopId = code },
+                            onDismiss = { showScanOrLink = false },
+                        )
+                    }
+
+                    activePublicWorkshopId?.let { workshopId ->
+                        PublicWorkshopSheet(
+                            workshopId = workshopId,
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.workshopService,
+                            onLaunchApp = ::openApplication,
+                            onSelectAppDetail = ::openTransientAppDetail,
+                            onNavigateToMe = {
+                                activePublicWorkshopId = null
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { activePublicWorkshopId = null },
+                        )
+                    }
+
+                    activeDeveloperLogin?.let { login ->
+                        DeveloperApplicationsSheet(
+                            login = login,
+                            service = YunleContainer.developerProfileService,
+                            onLaunchApp = ::openApplication,
+                            onSelectAppDetail = ::openTransientAppDetail,
+                            onDismiss = { activeDeveloperLogin = null },
+                        )
+                    }
+
+                    reviewsApp?.let { targetApp ->
+                        ApplicationReviewsSheet(
+                            app = targetApp,
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.communityService,
+                            onNavigateToMe = {
+                                reviewsApp = null
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { reviewsApp = null },
+                        )
+                    }
+
+                    if (showMyReports) {
+                        MyReportsSheet(
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.communityService,
+                            onNavigateToMe = {
+                                showMyReports = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showMyReports = false },
+                        )
+                    }
+
+                    acquiringApp?.let { targetApp ->
+                        ApplicationAcquisitionSheet(
+                            app = targetApp,
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.acquisitionService,
+                            onLaunchAuthorized = ::openApplication,
+                            onNavigateToMe = {
+                                acquiringApp = null
+                                selectedTab = AppTab.ME
+                            },
+                            onOpenWallet = {
+                                openInCustomTab(this@MainActivity, Uri.parse("https://www.yunle.fun/wallet"))
+                            },
+                            onDismiss = { acquiringApp = null },
+                        )
+                    }
+
+                    sharingApp?.let { targetApp ->
+                        ApplicationShareSheet(
+                            app = targetApp,
+                            onDismiss = { sharingApp = null },
                         )
                     }
 
@@ -417,6 +613,7 @@ private fun WorkshopTabContent(
     uiState: CatalogUiState,
     homeInstalledIds: Set<String>,
     activeUser: AccountUser?,
+    transientApps: Map<String, CatalogApp> = emptyMap(),
     viewModel: CatalogViewModel,
     onOpenAccount: () -> Unit,
     onResumeSession: () -> Unit,
@@ -424,6 +621,13 @@ private fun WorkshopTabContent(
     onToggleHome: (CatalogApp) -> Unit,
     onOpenWebDetails: (CatalogApp) -> Unit,
     onOpenAppData: ((CatalogApp) -> Unit)? = null,
+    onOpenMyWorkshops: (() -> Unit)? = null,
+    onOpenWorkshopLookup: (() -> Unit)? = null,
+    onOpenScanOrLink: (() -> Unit)? = null,
+    onOpenReviews: ((CatalogApp) -> Unit)? = null,
+    onOpenDeveloper: ((String) -> Unit)? = null,
+    onAcquireApp: ((CatalogApp) -> Unit)? = null,
+    onShareApp: ((CatalogApp) -> Unit)? = null,
     onFinishActivity: () -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -469,17 +673,23 @@ private fun WorkshopTabContent(
                         onSelectApp = { app -> pushDetailRoute(backStack, app.id) },
                         onLaunchApp = onLaunchApp,
                         onToggleHome = onToggleHome,
+                        onOpenMyWorkshops = onOpenMyWorkshops,
+                        onOpenWorkshopLookup = onOpenWorkshopLookup,
+                        onOpenScanOrLink = onOpenScanOrLink,
                     )
                 }
                 entry<DetailRoute>(
                     metadata = CatalogPaneMetadata.detailPane(),
                 ) { route ->
-                    val appInHome = uiState.findApp(route.appId)?.id?.let { homeInstalledIds.contains(it) } == true
+                    val fallbackApp = transientApps[route.appId]
+                    val resolvedApp = uiState.findApp(route.appId) ?: fallbackApp
+                    val appInHome = resolvedApp?.id?.let { homeInstalledIds.contains(it) } == true
                     DetailScreen(
                         appId = route.appId,
                         uiState = uiState,
                         showBackNavigation = !currentShowTwoPane || !hasCatalogEntryState.value,
                         isInHome = appInHome,
+                        fallbackApp = fallbackApp,
                         onBack = {
                             if (backStack.size > 1) {
                                 backStack.removeAt(backStack.lastIndex)
@@ -493,6 +703,10 @@ private fun WorkshopTabContent(
                         onToggleHome = onToggleHome,
                         onOpenWebDetails = onOpenWebDetails,
                         onOpenAppData = onOpenAppData,
+                        onOpenReviews = onOpenReviews,
+                        onOpenDeveloper = onOpenDeveloper,
+                        onAcquireApp = onAcquireApp,
+                        onShareApp = onShareApp,
                     )
                 }
             },

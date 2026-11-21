@@ -5,11 +5,21 @@ import `fun`.yunle.apps.account.AccountSession
 import `fun`.yunle.apps.account.AccountStore
 import `fun`.yunle.apps.account.CloudbaseAuthService
 import `fun`.yunle.apps.account.KeystoreAccountVault
+import `fun`.yunle.apps.catalog.ApplicationAcquisitionService
+import `fun`.yunle.apps.catalog.ApplicationAcquisitionServing
+import `fun`.yunle.apps.catalog.DeveloperProfileService
+import `fun`.yunle.apps.catalog.DeveloperProfileServing
+import `fun`.yunle.apps.catalog.WorkshopDiscoveryService
+import `fun`.yunle.apps.catalog.WorkshopDiscoveryServing
+import `fun`.yunle.apps.community.CommunityService
+import `fun`.yunle.apps.community.CommunityServing
 import `fun`.yunle.apps.home.HomeLibrary
 import `fun`.yunle.apps.home.HomeSyncCoordinator
 import `fun`.yunle.apps.home.HomeSyncService
 import `fun`.yunle.apps.webruntime.HostAuthorizationService
 import `fun`.yunle.apps.webruntime.WebProfileRepository
+import `fun`.yunle.apps.workshop.WorkshopService
+import `fun`.yunle.apps.workshop.WorkshopServing
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -77,6 +87,11 @@ object YunleContainer {
         private set
 
     val hostAuthService: HostAuthorizationService = HostAuthorizationService()
+    internal val workshopService: WorkshopServing = WorkshopService()
+    internal val communityService: CommunityServing = CommunityService()
+    internal val developerProfileService: DeveloperProfileServing = DeveloperProfileService()
+    internal val acquisitionService: ApplicationAcquisitionServing = ApplicationAcquisitionService()
+    internal val discoveryService: WorkshopDiscoveryServing = WorkshopDiscoveryService()
 
     internal fun ensureInitialized(context: Context, accountSession: AccountSession? = null) {
         if (initialized) return

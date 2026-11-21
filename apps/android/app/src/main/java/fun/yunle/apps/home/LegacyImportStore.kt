@@ -168,18 +168,20 @@ internal class LegacyImportStore(
                     }
                     if (current.claim?.completed == true) return@withLock
 
-                    // Persist the destination before changing Home so failures can only resume there.
+                    // Commit the destination inside HomeLibrary's lock right after boundary checks pass.
                     val claim = LegacyImportArchive.Claim(accountID = confirmation.accountID)
                     val claimed = current.copy(claim = claim)
-                    save(claimed)
-                    _archive.value = claimed
-
-                    checkBoundary(confirmation)
                     library.importLegacy(
                         record = current.record,
                         expectedAccountId = confirmation.accountID,
                         expectedGeneration = confirmation.libraryGeneration,
                         verifyBoundary = { checkBoundary(confirmation) },
+                        commitClaim = {
+                            if (current.claim != claim) {
+                                save(claimed)
+                                _archive.value = claimed
+                            }
+                        },
                     )
                     current.record.appearance?.let {
                         if (!saveAppearance(AppAppearance.fromKey(it))) {

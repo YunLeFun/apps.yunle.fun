@@ -70,6 +70,8 @@ class P2SvgAndShareExportTest {
             "<svg><set/></svg>",
             "<svg><pattern/></svg>",
             "<svg><pattern id='p' width='1' height='1'><rect width='1' height='1'/></pattern><rect fill='url(#p)' width='10' height='10'/></svg>",
+            "<svg><marker/></svg>",
+            "<svg><defs><marker id='m'><circle r='1'/></marker></defs><path d='M0 0 L1 1 L2 2' marker-mid='url(#m)'/></svg>",
             "<svg onclick='action()'/>",
             "<svg><use href='https://example.org/a.svg#x'/></svg>",
             "<svg><use href='#'/></svg>",

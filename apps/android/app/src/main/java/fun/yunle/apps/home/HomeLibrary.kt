@@ -160,6 +160,7 @@ internal class HomeLibrary(
     private val lock = Any()
     private var currentFile: File = fileForAccount(null)
     private var canWrite = true
+    @Volatile
     private var _activeAccountId: String? = null
 
     private val _snapshot = MutableStateFlow(HomeLibrarySnapshot())
@@ -174,7 +175,7 @@ internal class HomeLibrary(
     var onUserChange: (() -> Unit)? = null
 
     val activeAccountId: String?
-        get() = synchronized(lock) { _activeAccountId }
+        get() = _activeAccountId
 
     val storageDirectory: File
         get() = directory
@@ -855,18 +856,24 @@ internal class HomeLibrary(
         expectedAccountId: String?,
         expectedGeneration: Int,
         verifyBoundary: () -> Unit = {},
+        commitClaim: () -> Unit = {},
     ): Boolean {
+        var changed = false
         synchronized(lock) {
             verifyBoundary()
-            if (activeAccountId != expectedAccountId || _generation.value != expectedGeneration) {
+            if (_activeAccountId != expectedAccountId || _generation.value != expectedGeneration) {
                 throw LegacyImportException(LegacyImportError.IDENTITY_CHANGED)
             }
             val current = _snapshot.value
             if (!canWrite) throw LegacyImportException(LegacyImportError.STORAGE)
-            if (current.legacyImportId == record.id) return true
+            if (current.legacyImportId == record.id) {
+                commitClaim()
+                return true
+            }
 
             val configuration = record.configuration ?: current.configuration
             configuration.validate()
+            commitClaim()
             if (!writeBackupLocked(HomeBackupKind.LEGACY, record.id)) {
                 throw LegacyImportException(LegacyImportError.STORAGE)
             }
@@ -880,8 +887,9 @@ internal class HomeLibrary(
             if (!saveLocked(next, markUserEdit = true, durable = true)) {
                 throw LegacyImportException(LegacyImportError.STORAGE)
             }
+            changed = true
         }
-        onUserChange?.invoke()
+        if (changed) onUserChange?.invoke()
         return true
     }
 

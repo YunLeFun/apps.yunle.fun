@@ -26,7 +26,7 @@ internal object SvgResourcePolicy {
     private const val MAXIMUM_EXPANSION_DEPTH = 64
     private const val MAXIMUM_EXPANSION_COST = 50_000
     private val disallowedElements = setOf(
-        "script", "foreignobject", "animate", "animatetransform", "animatemotion", "set", "image", "pattern",
+        "script", "foreignobject", "animate", "animatetransform", "animatemotion", "set", "image", "pattern", "marker",
     )
     private val xmlEncoding = Regex("""\bencoding\s*=\s*(['"])([^'"]+)\1""")
     private val urlStart = Regex("""url\s*\(""", RegexOption.IGNORE_CASE)

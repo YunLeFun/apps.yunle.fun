@@ -323,13 +323,40 @@ class LegacyImportTest {
         assertNotNull(store.prepareConfirmation())
     }
 
+    @Test
+    fun `unwritable destination fails apply without leaving an orphan durable claim`() = runBlocking {
+        val libraryDir = tempFolder.newFolder("UnwritableGuest")
+        File(libraryDir, "guest.json").writeText("{not-json")
+        val library = HomeLibrary(libraryDir)
+        val fixture = Fixture(customLibrary = library)
+        val store = fixture.store(library = library)
+        store.load()
+        val confirmation = checkNotNull(store.prepareConfirmation())
+
+        store.apply(confirmation)
+
+        assertEquals(LegacyImportError.STORAGE, store.error.value)
+        assertNull(fixture.readArchive().claim)
+        assertNull(store.archive.value?.claim)
+
+        fixture.accounts.select("alice")
+        store.apply(checkNotNull(store.prepareConfirmation()))
+
+        assertNull(store.error.value)
+        assertEquals(LegacyImportArchive.Claim("alice", completed = true), fixture.readArchive().claim)
+        assertTrue(library.contains("notes"))
+    }
+
     private fun assertInvalid(values: Map<String, String>) {
         val error = assertThrows(LegacyImportException::class.java) { LegacyLocalData(values) }
         assertEquals(LegacyImportError.INVALID_DATA, error.error)
     }
 
-    private inner class Fixture(activateHomeOnSelection: Boolean = true) {
-        val library = HomeLibrary(tempFolder.newFolder("HomeLibrary"))
+    private inner class Fixture(
+        activateHomeOnSelection: Boolean = true,
+        customLibrary: HomeLibrary? = null,
+    ) {
+        val library = customLibrary ?: HomeLibrary(tempFolder.newFolder("HomeLibrary"))
         private val archiveDirectory = File(tempFolder.root, "LegacyImport")
         val archiveFile = File(archiveDirectory, "record-v1.json")
         private val savedAccounts = listOf("alice", "bob").map { id ->

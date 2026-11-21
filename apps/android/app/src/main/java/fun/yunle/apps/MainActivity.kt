@@ -9,22 +9,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.core.content.ContextCompat
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -65,6 +73,7 @@ import `fun`.yunle.apps.ui.catalog.DetailScreen
 import `fun`.yunle.apps.ui.catalog.DeveloperApplicationsSheet
 import `fun`.yunle.apps.ui.catalog.ListDetailSceneStrategy
 import `fun`.yunle.apps.ui.catalog.WorkshopScanOrLinkDialog
+import `fun`.yunle.apps.diagnostics.DiagnosticLogLevel
 import `fun`.yunle.apps.games.NativeGame
 import `fun`.yunle.apps.games.NativeGameError
 import `fun`.yunle.apps.games.NativeGameLaunchUrl
@@ -78,6 +87,8 @@ import `fun`.yunle.apps.ui.games.GamesScreen
 import `fun`.yunle.apps.ui.games.JoinRoomByCodeDialog
 import `fun`.yunle.apps.ui.games.NativeGameResourcesSheet
 import `fun`.yunle.apps.ui.games.NativeRoomCreationSheet
+import `fun`.yunle.apps.ui.support.HelpAndDiagnosticsSheet
+import `fun`.yunle.apps.ui.support.SupportCenterSheet
 import `fun`.yunle.apps.ui.home.HomeBackupsSheet
 import `fun`.yunle.apps.ui.home.HomeScreen
 import `fun`.yunle.apps.ui.publishing.MyApplicationsSheet
@@ -101,6 +112,8 @@ class MainActivity : ComponentActivity() {
     private var launchedFromApp by mutableStateOf(false)
     private var externalDetailRequest by mutableStateOf<String?>(null)
     private var pendingDestination by mutableStateOf<NativeDestination?>(null)
+    private var showScreenshotBanner by mutableStateOf(false)
+    private var screenCaptureCallback: Any? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -118,9 +131,10 @@ class MainActivity : ComponentActivity() {
             handleIncomingIntent(intent)
         }
 
-        val appVersionName = runCatching {
-            packageManager.getPackageInfo(packageName, 0).versionName ?: "1.0"
-        }.getOrDefault("1.0")
+        val (appVersionName, appVersionCode) = runCatching {
+            val info = packageManager.getPackageInfo(packageName, 0)
+            (info.versionName ?: "1.0") to PackageInfoCompat.getLongVersionCode(info).toString()
+        }.getOrDefault("1.0" to "1")
 
         setContent {
             val appearance by YunleContainer.preferences.appearance.collectAsStateWithLifecycle()
@@ -165,6 +179,8 @@ class MainActivity : ComponentActivity() {
                 var showAssistant by rememberSaveable { mutableStateOf(false) }
                 var showWallet by rememberSaveable { mutableStateOf(false) }
                 var showMyApplications by rememberSaveable { mutableStateOf(false) }
+                var showSupportCenter by rememberSaveable { mutableStateOf(false) }
+                var showHelpAndDiagnostics by rememberSaveable { mutableStateOf(false) }
                 var publicRooms by remember { mutableStateOf<List<NativePublicRoom>>(emptyList()) }
                 var isLoadingRooms by remember { mutableStateOf(false) }
                 var roomsError by remember { mutableStateOf<String?>(null) }
@@ -516,6 +532,8 @@ class MainActivity : ComponentActivity() {
                                 gameBackConfirmEnabled = gameBackConfirmEnabled,
                                 onGameBackConfirmChange = YunleContainer.preferences::setGameBackConfirmEnabled,
                                 onOpenAppCache = { showAppCacheSettings = true },
+                                onOpenSupportCenter = { showSupportCenter = true },
+                                onOpenHelpAndDiagnostics = { showHelpAndDiagnostics = true },
                                 onClearRecent = YunleContainer.homeLibrary::clearRecent,
                                 onOpenUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
                             )
@@ -766,6 +784,89 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    if (showSupportCenter) {
+                        SupportCenterSheet(
+                            accounts = YunleContainer.accounts,
+                            supportService = YunleContainer.supportService,
+                            ticketService = YunleContainer.supportTicketClient,
+                            shareHistory = YunleContainer.sharedFeedbackHistory,
+                            appVersionName = appVersionName,
+                            onOpenUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
+                            onNavigateToMe = {
+                                showSupportCenter = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showSupportCenter = false },
+                        )
+                    }
+
+                    if (showHelpAndDiagnostics) {
+                        HelpAndDiagnosticsSheet(
+                            accounts = YunleContainer.accounts,
+                            logs = YunleContainer.diagnosticLogStore,
+                            uploadStore = YunleContainer.diagnosticUploadStore,
+                            screenshotFeedbackEnabled = screenshotFeedbackEnabled,
+                            onScreenshotFeedbackChange = YunleContainer.preferences::setScreenshotFeedbackEnabled,
+                            appVersionName = appVersionName,
+                            appVersionCode = appVersionCode,
+                            onOpenSupportCenter = { showSupportCenter = true },
+                            onOpenUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
+                            onNavigateToMe = {
+                                showHelpAndDiagnostics = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showHelpAndDiagnostics = false },
+                        )
+                    }
+
+                    if (showScreenshotBanner) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .statusBarsPadding()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            contentAlignment = Alignment.TopCenter,
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                tonalElevation = 6.dp,
+                                shadowElevation = 6.dp,
+                                color = MaterialTheme.colorScheme.inverseSurface,
+                                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        text = "检测到截屏，需要提交反馈吗？",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    TextButton(
+                                        onClick = {
+                                            showScreenshotBanner = false
+                                            showSupportCenter = true
+                                        },
+                                    ) {
+                                        Text(
+                                            text = "去反馈",
+                                            color = MaterialTheme.colorScheme.inversePrimary,
+                                        )
+                                    }
+                                    TextButton(onClick = { showScreenshotBanner = false }) {
+                                        Text(
+                                            text = "忽略",
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     linkDialogDestination?.let { destination ->
                         IncomingDestinationDialog(
                             destination = destination,
@@ -787,6 +888,43 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerScreenCaptureDetection()
+        }
+    }
+
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            unregisterScreenCaptureDetection()
+        }
+        super.onStop()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun registerScreenCaptureDetection() {
+        if (screenCaptureCallback != null) return
+        val callback = ScreenCaptureCallback {
+            YunleContainer.diagnosticLogStore.record(
+                DiagnosticLogLevel.INFO,
+                "Screen capture detected on main shell",
+            )
+            if (YunleContainer.preferences.screenshotFeedbackEnabled.value) {
+                showScreenshotBanner = true
+            }
+        }
+        screenCaptureCallback = callback
+        runCatching { registerScreenCaptureCallback(ContextCompat.getMainExecutor(this), callback) }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun unregisterScreenCaptureDetection() {
+        val callback = screenCaptureCallback as? ScreenCaptureCallback ?: return
+        screenCaptureCallback = null
+        runCatching { unregisterScreenCaptureCallback(callback) }
     }
 
     override fun onNewIntent(intent: Intent) {

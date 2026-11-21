@@ -125,6 +125,8 @@ internal fun MeScreen(
     gameBackConfirmEnabled: Boolean = true,
     onGameBackConfirmChange: (Boolean) -> Unit = {},
     onOpenAppCache: () -> Unit = {},
+    onOpenSupportCenter: () -> Unit = {},
+    onOpenHelpAndDiagnostics: () -> Unit = {},
     onClearRecent: () -> Unit,
     onOpenUrl: (String) -> Unit,
 ) {
@@ -405,15 +407,15 @@ internal fun MeScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 MeSectionCard {
                     MeMenuRow(
-                        title = "使用帮助",
-                        subtitle = "了解云居、工坊与账号常见问题",
-                        onClick = { onOpenUrl("https://www.yunle.fun/docs") },
+                        title = "帮助与诊断日志",
+                        subtitle = "查看使用文档、截图反馈开关与上报脱敏日志",
+                        onClick = onOpenHelpAndDiagnostics,
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     MeMenuRow(
-                        title = "反馈与建议",
-                        subtitle = "提交问题反馈、功能建议或查看支持工单",
-                        onClick = { onOpenUrl("https://www.yunle.fun/support") },
+                        title = "支持中心与反馈",
+                        subtitle = "提交问题反馈、查看需求墙与我的反馈工单",
+                        onClick = onOpenSupportCenter,
                     )
                 }
             }

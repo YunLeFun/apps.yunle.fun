@@ -36,8 +36,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -51,6 +53,7 @@ import androidx.webkit.WebViewFeature
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import `fun`.yunle.apps.account.AccountRequestBoundary
+import `fun`.yunle.apps.diagnostics.DiagnosticLogLevel
 import `fun`.yunle.apps.games.NativeGameLaunchContext
 import `fun`.yunle.apps.games.NativeGameLaunchUrl
 import `fun`.yunle.apps.games.NativeGameLifecycleEvent
@@ -100,6 +103,7 @@ class HostWebViewActivity : AppCompatActivity() {
     private var gameContext: NativeGameLaunchContext? = null
     private var requestedOrientationMode: String? = null
     private var lastBackPressMillis = 0L
+    private var screenCaptureCallback: Any? = null
     private lateinit var accountBoundary: AccountRequestBoundary
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -1240,6 +1244,47 @@ class HostWebViewActivity : AppCompatActivity() {
 
     private fun isDebuggable(): Boolean =
         applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+
+    override fun onStart() {
+        super.onStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerScreenCaptureDetection()
+        }
+    }
+
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            unregisterScreenCaptureDetection()
+        }
+        super.onStop()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun registerScreenCaptureDetection() {
+        if (screenCaptureCallback != null) return
+        val callback = ScreenCaptureCallback {
+            YunleContainer.diagnosticLogStore.record(
+                DiagnosticLogLevel.INFO,
+                "Screen capture detected in app runtime ($sessionKey)",
+            )
+            if (YunleContainer.preferences.screenshotFeedbackEnabled.value) {
+                Toast.makeText(
+                    this@HostWebViewActivity,
+                    "检测到截屏，可在「我的 -> 支持中心」或系统分享菜单中提交截图反馈",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+        screenCaptureCallback = callback
+        runCatching { registerScreenCaptureCallback(ContextCompat.getMainExecutor(this), callback) }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun unregisterScreenCaptureDetection() {
+        val callback = screenCaptureCallback as? ScreenCaptureCallback ?: return
+        screenCaptureCallback = null
+        runCatching { unregisterScreenCaptureCallback(callback) }
+    }
 
     override fun onPause() {
         webView?.onPause()

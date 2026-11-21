@@ -134,6 +134,16 @@ object YunleContainer {
 
     internal lateinit var draftVault: ApplicationDraftVault
         private set
+    internal lateinit var sharedFeedbackHistory: `fun`.yunle.apps.support.SharedFeedbackHistoryStore
+        private set
+    internal lateinit var diagnosticLogStore: `fun`.yunle.apps.diagnostics.DiagnosticLogStore
+        private set
+    internal lateinit var diagnosticUploadStore: `fun`.yunle.apps.diagnostics.DiagnosticUploadStore
+        private set
+
+    private val supportScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main.immediate,
+    )
 
     val hostAuthService: HostAuthorizationService = HostAuthorizationService()
     internal val workshopService: WorkshopServing = WorkshopService()
@@ -146,6 +156,12 @@ object YunleContainer {
     internal val assistantService: AssistantServing = AssistantService()
     internal val walletService: WalletServing = WalletService()
     internal val publishingService: PublishingServing = PublishingService()
+    internal val supportService: `fun`.yunle.apps.support.SupportCenterService by lazy {
+        `fun`.yunle.apps.support.SupportCenterService(authorization = hostAuthService)
+    }
+    internal val supportTicketClient: `fun`.yunle.apps.support.SupportTicketClient by lazy {
+        `fun`.yunle.apps.support.SupportTicketClient()
+    }
 
     internal fun ensureInitialized(context: Context, accountSession: AccountSession? = null) {
         if (initialized) return
@@ -192,8 +208,17 @@ object YunleContainer {
             val drafts = ApplicationDraftVault(
                 directory = File(appContext.noBackupFilesDir, "ApplicationDrafts"),
             )
+            val shareHistory = `fun`.yunle.apps.support.SharedFeedbackHistoryStore(
+                file = File(appContext.noBackupFilesDir, "Support/share-history.json"),
+            )
+            shareHistory.activate(null)
+            val diagLogs = `fun`.yunle.apps.diagnostics.DiagnosticLogStore(
+                directory = File(appContext.noBackupFilesDir, "Diagnostics/Logs"),
+            )
+            diagLogs.activateAccount(null)
             val session = accountSession ?: AccountSession(api = CloudbaseAuthService(), vault = KeystoreAccountVault(appContext))
             var coordinator: HomeSyncCoordinator? = null
+            var diagUploads: `fun`.yunle.apps.diagnostics.DiagnosticUploadStore? = null
             val store = AccountStore(
                 session = session,
                 accountWillRemove = { removedId ->
@@ -205,8 +230,25 @@ object YunleContainer {
                     library.activateAccount(activeId)
                     gameHistory.activate(activeId)
                     aiHistory.activate(activeId)
+                    shareHistory.activate(activeId)
+                    diagLogs.activateAccount(activeId)
+                    diagUploads?.identityChanged()
                     coordinator?.identityChanged()
                 },
+            )
+            shareHistory.activate(store.user?.id)
+            diagLogs.activateAccount(store.user?.id)
+            val uploads = `fun`.yunle.apps.diagnostics.DiagnosticUploadStore(
+                accounts = store,
+                logs = diagLogs,
+                service = `fun`.yunle.apps.diagnostics.DiagnosticService(),
+                receiptDirectory = File(appContext.noBackupFilesDir, "Diagnostics/Receipts"),
+                scope = supportScope,
+            )
+            diagUploads = uploads
+            diagLogs.record(
+                `fun`.yunle.apps.diagnostics.DiagnosticLogLevel.INFO,
+                "Application initialized",
             )
             val sync = HomeSyncCoordinator(
                 service = HomeSyncService(),
@@ -226,6 +268,9 @@ object YunleContainer {
             assistantHistoryStore = aiHistory
             purchaseJournal = journal
             draftVault = drafts
+            sharedFeedbackHistory = shareHistory
+            diagnosticLogStore = diagLogs
+            diagnosticUploadStore = uploads
             accounts = store
             initialized = true
         }

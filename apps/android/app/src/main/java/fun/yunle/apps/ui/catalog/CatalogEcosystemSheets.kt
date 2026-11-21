@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +23,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,9 +44,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import `fun`.yunle.apps.CatalogApp
-import `fun`.yunle.apps.NativeDeepLinkRouter
-import `fun`.yunle.apps.NativeDestination
-import `fun`.yunle.apps.WorkshopLink
 import `fun`.yunle.apps.account.AccountStore
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionError
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionException
@@ -614,93 +609,4 @@ internal fun ApplicationShareSheet(
             }
         }
     }
-}
-
-@Composable
-internal fun WorkshopScanOrLinkDialog(
-    onDestination: (NativeDestination) -> Unit,
-    onWorkshopCode: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val context = LocalContext.current
-    var input by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("识别链接或口令") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    text = "粘贴或输入云乐坊应用链接、个人主页、跨应用授权链接，或 6 位工坊编号：",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = {
-                        input = it
-                        errorMessage = null
-                    },
-                    placeholder = { Text("https://apps.yunle.fun/... 或 A2B3C4") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = {
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                            val pasted = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()?.trim().orEmpty()
-                            if (pasted.isNotEmpty()) {
-                                input = pasted
-                                errorMessage = null
-                            } else {
-                                Toast.makeText(context, "剪贴板为空", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                    ) {
-                        Text("从剪贴板粘贴")
-                    }
-                }
-                errorMessage?.let { msg ->
-                    Text(
-                        text = msg,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("取消")
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val trimmed = input.trim()
-                    val destination = NativeDeepLinkRouter.parse(trimmed)
-                    if (destination != null) {
-                        onDismiss()
-                        onDestination(destination)
-                        return@Button
-                    }
-                    val code = WorkshopLink.parse(trimmed)
-                    if (code != null) {
-                        onDismiss()
-                        onWorkshopCode(code)
-                        return@Button
-                    }
-                    errorMessage = "暂未识别该链接或工坊编号，请检查格式后重试。"
-                },
-                enabled = input.isNotBlank(),
-            ) {
-                Text("打开")
-            }
-        },
-    )
 }

@@ -72,7 +72,6 @@ import `fun`.yunle.apps.ui.catalog.DetailRoute
 import `fun`.yunle.apps.ui.catalog.DetailScreen
 import `fun`.yunle.apps.ui.catalog.DeveloperApplicationsSheet
 import `fun`.yunle.apps.ui.catalog.ListDetailSceneStrategy
-import `fun`.yunle.apps.ui.catalog.WorkshopScanOrLinkDialog
 import `fun`.yunle.apps.diagnostics.DiagnosticLogLevel
 import `fun`.yunle.apps.games.NativeGame
 import `fun`.yunle.apps.games.NativeGameError
@@ -92,6 +91,7 @@ import `fun`.yunle.apps.ui.support.SupportCenterSheet
 import `fun`.yunle.apps.ui.home.HomeBackupsSheet
 import `fun`.yunle.apps.ui.home.HomeScreen
 import `fun`.yunle.apps.ui.publishing.MyApplicationsSheet
+import `fun`.yunle.apps.ui.scanner.QRScannerSheet
 import `fun`.yunle.apps.ui.theme.YunleTheme
 import `fun`.yunle.apps.ui.wallet.WalletModalSheet
 import `fun`.yunle.apps.ui.webruntime.WebProfileRecoverySheet
@@ -602,9 +602,10 @@ class MainActivity : ComponentActivity() {
                     }
 
                     if (showScanOrLink) {
-                        WorkshopScanOrLinkDialog(
+                        QRScannerSheet(
                             onDestination = ::handleNativeDestination,
                             onWorkshopCode = { code -> activePublicWorkshopId = code },
+                            onOpenWebUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
                             onDismiss = { showScanOrLink = false },
                         )
                     }

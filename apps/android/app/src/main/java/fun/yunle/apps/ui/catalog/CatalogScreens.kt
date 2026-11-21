@@ -837,6 +837,7 @@ internal fun DetailScreen(
     onLaunchApp: (CatalogApp) -> Unit,
     onToggleHome: ((CatalogApp) -> Unit)? = null,
     onOpenWebDetails: (CatalogApp) -> Unit,
+    onOpenAppData: ((CatalogApp) -> Unit)? = null,
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -1027,6 +1028,17 @@ internal fun DetailScreen(
                                     .defaultMinSize(minHeight = 48.dp),
                             ) {
                                 Text(text = "网页详情")
+                            }
+
+                            if (onOpenAppData != null && app.launchUrl != null) {
+                                OutlinedButton(
+                                    onClick = { onOpenAppData(app) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .defaultMinSize(minHeight = 48.dp),
+                                ) {
+                                    Text(text = "应用数据")
+                                }
                             }
 
                             HorizontalDivider(

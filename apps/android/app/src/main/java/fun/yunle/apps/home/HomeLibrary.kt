@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.nio.file.Files
 import java.util.Base64
 import java.util.UUID
 
@@ -26,6 +27,7 @@ internal data class HomeLibrarySnapshot(
     val autoSyncEnabled: Boolean = true,
     val dockVisible: Boolean = true,
     val lastSyncedAtMillis: Long? = null,
+    val lastRestoreId: String? = null,
 ) {
     val installedIds: List<String> get() = configuration.installedApps.map { it.appId }
     val dockIds: List<String> get() = configuration.dockApps.map { it.appId }
@@ -171,6 +173,15 @@ internal class HomeLibrary(
 
     val activeAccountId: String?
         get() = synchronized(lock) { _activeAccountId }
+
+    val storageDirectory: File
+        get() = directory
+
+    val currentFileName: String
+        get() = synchronized(lock) { currentFile.name }
+
+    val needsRecovery: Boolean
+        get() = synchronized(lock) { !canWrite }
 
     init {
         synchronized(lock) {
@@ -775,6 +786,8 @@ internal class HomeLibrary(
     fun keepCloud(remote: RemoteHomeScreen, expectedAccountId: String?, catalog: List<CatalogApp> = emptyList()) {
         synchronized(lock) {
             if (!canWrite || _activeAccountId != expectedAccountId) return@synchronized
+            writeBackupLocked(HomeBackupKind.CONFLICT)
+            _generation.value += 1
             val current = _snapshot.value
             val adopted = current.configuration.adopting(remote)
             val mergedCache = mergeCatalogIntoCache(current.cachedApplications, adopted, catalog)
@@ -786,9 +799,53 @@ internal class HomeLibrary(
                     hasPendingChanges = false,
                     lastSyncedAtMillis = nowMillis(),
                 ),
-                markUserEdit = true,
+                markUserEdit = false,
             )
         }
+    }
+
+    fun restoreBackup(
+        restored: HomeLibrarySnapshot,
+        restoreSettings: Boolean,
+        restoreId: String,
+        expectedAccountId: String?,
+        expectedGeneration: Int,
+    ): Boolean {
+        var restoredOk = false
+        synchronized(lock) {
+            if (_activeAccountId != expectedAccountId || _generation.value != expectedGeneration) {
+                return@synchronized
+            }
+            val current = _snapshot.value
+            if (current.lastRestoreId == restoreId) {
+                restoredOk = true
+                return@synchronized
+            }
+            writeBackupLocked(HomeBackupKind.RESTORE)
+            val mergedCache = (restored.cachedApplications + current.cachedApplications)
+                .associateBy { it.id }
+                .values
+                .toList()
+            val nextConfig = restored.configuration
+                .copy(updatedAt = nowMillis())
+                .sanitizingFolders()
+            val next = current.copy(
+                configuration = nextConfig,
+                cachedApplications = mergedCache,
+                lastRestoreId = restoreId,
+                syncEnabled = if (restoreSettings) restored.syncEnabled else current.syncEnabled,
+                autoSyncEnabled = if (restoreSettings) restored.autoSyncEnabled else current.autoSyncEnabled,
+                dockVisible = if (restoreSettings) restored.dockVisible else current.dockVisible,
+            )
+            val previousCanWrite = canWrite
+            canWrite = true
+            restoredOk = saveLocked(next, markUserEdit = true)
+            if (!restoredOk) {
+                canWrite = previousCanWrite
+            }
+        }
+        if (restoredOk) onUserChange?.invoke()
+        return restoredOk
     }
 
     fun setSyncEnabled(enabled: Boolean) {
@@ -856,6 +913,34 @@ internal class HomeLibrary(
         return (filtered + HomeApplicationSource(appId = refId, ownerLogin = owner)).sortedBy { it.appId }
     }
 
+    private fun writeBackupLocked(kind: HomeBackupKind): Boolean {
+        val token = when (kind) {
+            HomeBackupKind.CONFLICT -> "conflict"
+            HomeBackupKind.RESTORE -> "before-restore"
+            HomeBackupKind.LEGACY, HomeBackupKind.NATIVE_MIGRATION -> return false
+        }
+        if (!currentFile.exists()) return false
+        return try {
+            val path = currentFile.toPath()
+            if (Files.isSymbolicLink(path) || !currentFile.isFile) return false
+            if (currentFile.length() > HomeBackupRepository.MAXIMUM_BYTES) return false
+            val bytes = currentFile.readBytes()
+            if (bytes.size > HomeBackupRepository.MAXIMUM_BYTES) return false
+            if (!directory.exists()) directory.mkdirs()
+            val ownerBase = currentFile.name.removeSuffix(".json")
+            val backupFile = File(directory, "$ownerBase.$token-${UUID.randomUUID().toString().lowercase()}.json")
+            val temp = File(directory, "${backupFile.name}.tmp")
+            temp.writeBytes(bytes)
+            if (!temp.renameTo(backupFile)) {
+                backupFile.writeBytes(bytes)
+                temp.delete()
+            }
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
     private fun saveLocked(next: HomeLibrarySnapshot, markUserEdit: Boolean): Boolean {
         val finalNext = if (markUserEdit) {
             _generation.value += 1
@@ -894,101 +979,11 @@ internal class HomeLibrary(
         return File(directory, "$name.json")
     }
 
-    private fun serializeSnapshot(snapshot: HomeLibrarySnapshot): JSONObject = JSONObject().apply {
-        put("version", snapshot.version)
-        put("configuration", snapshot.configuration.toJson())
-        put("base", snapshot.base?.toJson() ?: JSONObject.NULL)
-        put("mutationId", snapshot.mutationId)
-        put("hasPendingChanges", snapshot.hasPendingChanges)
-        put("syncEnabled", snapshot.syncEnabled)
-        put("autoSyncEnabled", snapshot.autoSyncEnabled)
-        put("dockVisible", snapshot.dockVisible)
-        put("lastSyncedAtMillis", snapshot.lastSyncedAtMillis ?: JSONObject.NULL)
-        put(
-            "cachedApps",
-            JSONArray().apply {
-                snapshot.cachedApplications.forEach { app ->
-                    put(serializeCachedApp(app))
-                }
-            },
-        )
-    }
+    private fun serializeSnapshot(snapshot: HomeLibrarySnapshot): JSONObject =
+        serializeSnapshotJson(snapshot)
 
-    private fun serializeCachedApp(app: CatalogApp): JSONObject = JSONObject().apply {
-        put("id", app.id)
-        put("key", app.key)
-        app.slug?.let { put("slug", it) }
-        put("name", app.name)
-        put("description", app.description)
-        put("author", app.author)
-        app.ownerLogin?.let { put("ownerLogin", it) }
-        put("category", app.category)
-        put("emoji", app.emoji)
-        app.launchUrl?.let { put("launchUrl", it) }
-        app.logo?.let { put("logo", it) }
-        app.themeColor?.let { put("themeColor", it) }
-        put("trustedHosts", JSONArray(app.trustedHosts))
-        put("immersive", app.immersive)
-    }
-
-    private fun parseSnapshot(json: JSONObject): HomeLibrarySnapshot {
-        val cachedApplications = parseCachedApps(json.optJSONArray("cachedApps"))
-        val configJson = json.optJSONObject("configuration")
-        return if (configJson != null) {
-            val configuration = HomeConfiguration.fromJson(configJson)
-            val baseJson = json.optJSONObject("base")
-            val base = baseJson?.let { runCatching { RemoteHomeScreen.fromJson(it) }.getOrNull() }
-            val lastSyncedAt = if (json.has("lastSyncedAtMillis") && !json.isNull("lastSyncedAtMillis")) {
-                json.optLong("lastSyncedAtMillis").takeIf { it > 0L }
-            } else {
-                null
-            }
-            HomeLibrarySnapshot(
-                version = 3,
-                configuration = configuration,
-                cachedApplications = cachedApplications,
-                base = base,
-                mutationId = json.optString("mutationId").ifEmpty { UUID.randomUUID().toString() },
-                hasPendingChanges = json.optBoolean("hasPendingChanges", false),
-                syncEnabled = json.optBoolean("syncEnabled", true),
-                autoSyncEnabled = json.optBoolean("autoSyncEnabled", true),
-                dockVisible = json.optBoolean("dockVisible", true),
-                lastSyncedAtMillis = lastSyncedAt,
-            )
-        } else {
-            // Backward compatibility with legacy M1 flat snapshot JSON
-            val installed = parseRefArray(json.optJSONArray("installedApps"))
-            val dock = parseRefArray(json.optJSONArray("dockApps")).take(4)
-            val recentArray = json.optJSONArray("recentApps") ?: JSONArray()
-            val recent = buildList {
-                for (i in 0 until recentArray.length()) {
-                    val item = recentArray.optJSONObject(i) ?: continue
-                    val appId = item.optString("appId").trim().takeIf { it.isNotEmpty() } ?: continue
-                    val usedAt = item.optLong("usedAt", 0L).coerceAtLeast(0L)
-                    add(HomeRecentReference(appId = appId, usedAt = usedAt))
-                }
-            }
-            val configuration = HomeConfiguration(
-                installedApps = installed,
-                dockApps = dock,
-                recentApps = recent,
-                updatedAt = json.optLong("updatedAt", 0L).coerceAtLeast(0L),
-            )
-            val hasLocalItems = installed.isNotEmpty() || dock.isNotEmpty() || recent.isNotEmpty()
-            HomeLibrarySnapshot(
-                version = 3,
-                configuration = configuration,
-                cachedApplications = cachedApplications,
-                base = null,
-                mutationId = UUID.randomUUID().toString(),
-                hasPendingChanges = hasLocalItems,
-                syncEnabled = true,
-                autoSyncEnabled = true,
-                dockVisible = json.optBoolean("dockVisible", true),
-                lastSyncedAtMillis = null,
-            )
-        }
-    }
+    private fun parseSnapshot(json: JSONObject): HomeLibrarySnapshot =
+        parseSnapshotJson(json)
 
     companion object {
         fun folderName(raw: String): String {
@@ -996,6 +991,153 @@ internal class HomeLibrary(
                 .filterNot { it.code < 32 || it.code == 127 }
                 .trim()
             return if (cleaned.isEmpty()) "文件夹" else cleaned.take(HomeFolder.NAME_LIMIT)
+        }
+
+        internal fun serializeSnapshotJson(snapshot: HomeLibrarySnapshot): JSONObject = JSONObject().apply {
+            put("version", snapshot.version)
+            put("configuration", snapshot.configuration.toJson())
+            put("base", snapshot.base?.toJson() ?: JSONObject.NULL)
+            put("mutationId", snapshot.mutationId)
+            put("hasPendingChanges", snapshot.hasPendingChanges)
+            put("syncEnabled", snapshot.syncEnabled)
+            put("autoSyncEnabled", snapshot.autoSyncEnabled)
+            put("dockVisible", snapshot.dockVisible)
+            put("lastSyncedAtMillis", snapshot.lastSyncedAtMillis ?: JSONObject.NULL)
+            put("lastRestoreId", snapshot.lastRestoreId ?: JSONObject.NULL)
+            put(
+                "cachedApps",
+                JSONArray().apply {
+                    snapshot.cachedApplications.forEach { app ->
+                        put(serializeCachedAppJson(app))
+                    }
+                },
+            )
+        }
+
+        private fun serializeCachedAppJson(app: CatalogApp): JSONObject = JSONObject().apply {
+            put("id", app.id)
+            put("key", app.key)
+            app.slug?.let { put("slug", it) }
+            put("name", app.name)
+            put("description", app.description)
+            put("author", app.author)
+            app.ownerLogin?.let { put("ownerLogin", it) }
+            put("category", app.category)
+            put("emoji", app.emoji)
+            app.launchUrl?.let { put("launchUrl", it) }
+            app.logo?.let { put("logo", it) }
+            app.themeColor?.let { put("themeColor", it) }
+            put("trustedHosts", JSONArray(app.trustedHosts))
+            put("immersive", app.immersive)
+        }
+
+        internal fun parseSnapshotJson(json: JSONObject): HomeLibrarySnapshot {
+            val cachedApplications = parseCachedAppsJson(json.optJSONArray("cachedApps"))
+            val configJson = json.optJSONObject("configuration")
+            return if (configJson != null) {
+                val configuration = HomeConfiguration.fromJson(configJson)
+                val baseJson = json.optJSONObject("base")
+                val base = baseJson?.let { runCatching { RemoteHomeScreen.fromJson(it) }.getOrNull() }
+                val lastSyncedAt = if (json.has("lastSyncedAtMillis") && !json.isNull("lastSyncedAtMillis")) {
+                    json.optLong("lastSyncedAtMillis").takeIf { it > 0L }
+                } else {
+                    null
+                }
+                val lastRestoreId = json.optString("lastRestoreId")
+                    .takeIf { it.isNotBlank() && !json.isNull("lastRestoreId") }
+                HomeLibrarySnapshot(
+                    version = 3,
+                    configuration = configuration,
+                    cachedApplications = cachedApplications,
+                    base = base,
+                    mutationId = json.optString("mutationId").ifEmpty { UUID.randomUUID().toString() },
+                    hasPendingChanges = json.optBoolean("hasPendingChanges", false),
+                    syncEnabled = json.optBoolean("syncEnabled", true),
+                    autoSyncEnabled = json.optBoolean("autoSyncEnabled", true),
+                    dockVisible = json.optBoolean("dockVisible", true),
+                    lastSyncedAtMillis = lastSyncedAt,
+                    lastRestoreId = lastRestoreId,
+                )
+            } else {
+                // Backward compatibility with legacy M1 flat snapshot JSON
+                val installed = parseRefArrayJson(json.optJSONArray("installedApps"))
+                val dock = parseRefArrayJson(json.optJSONArray("dockApps")).take(4)
+                val recentArray = json.optJSONArray("recentApps") ?: JSONArray()
+                val recent = buildList {
+                    for (i in 0 until recentArray.length()) {
+                        val item = recentArray.optJSONObject(i) ?: continue
+                        val appId = item.optString("appId").trim().takeIf { it.isNotEmpty() } ?: continue
+                        val usedAt = item.optLong("usedAt", 0L).coerceAtLeast(0L)
+                        add(HomeRecentReference(appId = appId, usedAt = usedAt))
+                    }
+                }
+                val configuration = HomeConfiguration(
+                    installedApps = installed,
+                    dockApps = dock,
+                    recentApps = recent,
+                    updatedAt = json.optLong("updatedAt", 0L).coerceAtLeast(0L),
+                )
+                val hasLocalItems = installed.isNotEmpty() || dock.isNotEmpty() || recent.isNotEmpty()
+                HomeLibrarySnapshot(
+                    version = 3,
+                    configuration = configuration,
+                    cachedApplications = cachedApplications,
+                    base = null,
+                    mutationId = UUID.randomUUID().toString(),
+                    hasPendingChanges = hasLocalItems,
+                    syncEnabled = true,
+                    autoSyncEnabled = true,
+                    dockVisible = json.optBoolean("dockVisible", true),
+                    lastSyncedAtMillis = null,
+                )
+            }
+        }
+
+        private fun parseRefArrayJson(array: JSONArray?): List<HomeAppReference> {
+            if (array == null) return emptyList()
+            val seen = mutableSetOf<String>()
+            return buildList {
+                for (i in 0 until array.length()) {
+                    val ref = HomeAppReference.fromJson(array.opt(i)) ?: continue
+                    if (seen.add(ref.appId)) add(ref)
+                }
+            }
+        }
+
+        private fun parseCachedAppsJson(cachedArray: JSONArray?): List<CatalogApp> {
+            if (cachedArray == null) return emptyList()
+            return buildList {
+                for (i in 0 until cachedArray.length()) {
+                    val item = cachedArray.optJSONObject(i) ?: continue
+                    val id = item.optString("id").takeIf { it.isNotBlank() } ?: continue
+                    val hostsArr = item.optJSONArray("trustedHosts")
+                    val hosts = buildList {
+                        if (hostsArr != null) {
+                            for (t in 0 until hostsArr.length()) {
+                                hostsArr.optString(t).takeIf { it.isNotBlank() }?.let { add(it) }
+                            }
+                        }
+                    }
+                    add(
+                        CatalogApp(
+                            id = id,
+                            key = item.optString("key", id),
+                            name = item.optString("name", id),
+                            description = item.optString("description"),
+                            author = item.optString("author", "独立开发者"),
+                            ownerLogin = item.optString("ownerLogin").takeIf { it.isNotBlank() && !item.isNull("ownerLogin") },
+                            category = item.optString("category", "生活"),
+                            emoji = item.optString("emoji", "☁️"),
+                            launchUrl = item.optString("launchUrl").takeIf { it.isNotBlank() && !item.isNull("launchUrl") },
+                            logo = item.optString("logo").takeIf { it.isNotBlank() && !item.isNull("logo") },
+                            themeColor = item.optString("themeColor").takeIf { it.isNotBlank() && !item.isNull("themeColor") },
+                            trustedHosts = hosts,
+                            immersive = item.optBoolean("immersive", false),
+                            slug = item.optString("slug").takeIf { it.isNotBlank() && !item.isNull("slug") },
+                        ),
+                    )
+                }
+            }
         }
 
         private fun gathering(
@@ -1012,53 +1154,6 @@ internal class HomeLibrary(
             val moving = members.mapNotNull { byId[it] }
             rest.addAll(before.coerceAtMost(rest.size), moving)
             return rest
-        }
-    }
-
-    private fun parseRefArray(array: JSONArray?): List<HomeAppReference> {
-        if (array == null) return emptyList()
-        val seen = mutableSetOf<String>()
-        return buildList {
-            for (i in 0 until array.length()) {
-                val ref = HomeAppReference.fromJson(array.opt(i)) ?: continue
-                if (seen.add(ref.appId)) add(ref)
-            }
-        }
-    }
-
-    private fun parseCachedApps(cachedArray: JSONArray?): List<CatalogApp> {
-        if (cachedArray == null) return emptyList()
-        return buildList {
-            for (i in 0 until cachedArray.length()) {
-                val item = cachedArray.optJSONObject(i) ?: continue
-                val id = item.optString("id").takeIf { it.isNotBlank() } ?: continue
-                val hostsArr = item.optJSONArray("trustedHosts")
-                val hosts = buildList {
-                    if (hostsArr != null) {
-                        for (t in 0 until hostsArr.length()) {
-                            hostsArr.optString(t).takeIf { it.isNotBlank() }?.let { add(it) }
-                        }
-                    }
-                }
-                add(
-                    CatalogApp(
-                        id = id,
-                        key = item.optString("key", id),
-                        name = item.optString("name", id),
-                        description = item.optString("description"),
-                        author = item.optString("author", "独立开发者"),
-                        ownerLogin = item.optString("ownerLogin").takeIf { it.isNotBlank() && !item.isNull("ownerLogin") },
-                        category = item.optString("category", "生活"),
-                        emoji = item.optString("emoji", "☁️"),
-                        launchUrl = item.optString("launchUrl").takeIf { it.isNotBlank() && !item.isNull("launchUrl") },
-                        logo = item.optString("logo").takeIf { it.isNotBlank() && !item.isNull("logo") },
-                        themeColor = item.optString("themeColor").takeIf { it.isNotBlank() && !item.isNull("themeColor") },
-                        trustedHosts = hosts,
-                        immersive = item.optBoolean("immersive", false),
-                        slug = item.optString("slug").takeIf { it.isNotBlank() && !item.isNull("slug") },
-                    ),
-                )
-            }
         }
     }
 }

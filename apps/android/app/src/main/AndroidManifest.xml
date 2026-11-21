@@ -24,6 +24,52 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="apps.yunle.fun"
+                    android:pathPrefix="/app/"
+                    android:scheme="https" />
+                <data
+                    android:host="apps.yunle.fun"
+                    android:pathPrefix="/w/"
+                    android:scheme="https" />
+                <data
+                    android:host="apps.yunle.fun"
+                    android:pathPrefix="/developer/"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="www.yunle.fun"
+                    android:path="/auth/app"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="app"
+                    android:scheme="yunlefun" />
+                <data
+                    android:host="w"
+                    android:scheme="yunlefun" />
+                <data
+                    android:host="workshop"
+                    android:scheme="yunlefun" />
+                <data
+                    android:host="developer"
+                    android:scheme="yunlefun" />
+            </intent-filter>
+
         </activity>
 
         <activity

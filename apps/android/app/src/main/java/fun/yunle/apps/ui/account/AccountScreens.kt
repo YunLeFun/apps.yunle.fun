@@ -115,6 +115,7 @@ internal fun MeScreen(
     onSyncEnabledChange: (Boolean) -> Unit = {},
     onAutoSyncEnabledChange: (Boolean) -> Unit = {},
     onResolveSyncConflict: (HomeSyncResolution) -> Unit = {},
+    onOpenHomeBackups: () -> Unit = {},
     onClearRecent: () -> Unit,
     onOpenUrl: (String) -> Unit,
 ) {
@@ -432,6 +433,10 @@ internal fun MeScreen(
             onSyncEnabledChange = onSyncEnabledChange,
             onAutoSyncEnabledChange = onAutoSyncEnabledChange,
             onResolveSyncConflict = onResolveSyncConflict,
+            onOpenHomeBackups = {
+                showSettings = false
+                onOpenHomeBackups()
+            },
             onClearRecent = onClearRecent,
             onDismiss = { showSettings = false },
         )
@@ -1161,6 +1166,7 @@ private fun SettingsModalSheet(
     onSyncEnabledChange: (Boolean) -> Unit,
     onAutoSyncEnabledChange: (Boolean) -> Unit,
     onResolveSyncConflict: (HomeSyncResolution) -> Unit,
+    onOpenHomeBackups: () -> Unit = {},
     onClearRecent: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -1301,6 +1307,15 @@ private fun SettingsModalSheet(
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            FilledTonalButton(
+                onClick = onOpenHomeBackups,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 48.dp),
+            ) {
+                Text("云居备份与恢复")
+            }
 
             OutlinedButton(
                 onClick = { confirmClearRecent = true },

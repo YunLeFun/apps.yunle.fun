@@ -69,7 +69,7 @@ Android 可读取 `packages/app-core/contracts/conversation-card.v1.schema.json`
 
 ## 会话里的组队报名
 
-发送「创建组队报名」创建默认四人队，也可发送「创建组队报名 6 周末联机」指定人数和标题。用卡片的「分享卡片」发送通用链接。旧的「打开组队报名 <signupId>」指令也可打开同一张卡。
+发送「创建组队报名」创建默认四人队，也可发送「创建组队报名 6 周末联机」指定人数和标题。用卡片的「分享卡片」发送通用链接。旧的「`打开组队报名 <signupId>`」指令也可打开同一张卡。
 
 共用 JSON Schema 的 `team.signup` 类型固定为 `schemaVersion: 1`，卡片 `id` 由 `team-signup:` 加 `payload.signupId` 组成。报名接口使用现有云乐坊 Bearer 鉴权，请求路径为 `/api/team-signups/<signupId>`。`PUT` 用 `{ title, capacity }` 创建，`GET` 读取，`PATCH` 用 `{ joined: true }` 报名或用 `{ joined: false }` 取消。三个请求成功时返回 Schema 中的 `teamSignupSnapshot`。满员返回 HTTP 409 和 `SIGNUP_FULL`。
 

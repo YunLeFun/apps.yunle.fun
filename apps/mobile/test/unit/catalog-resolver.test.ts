@@ -59,14 +59,24 @@ describe('catalogResolver', () => {
   })
 
   it('uses the approved revision for the public market instead of the owner current revision', async () => {
+    const appReads = vi.fn()
     const resolver = createCatalogResolver({
-      async listApps() {
+      async listApps(ids?: readonly string[]) {
+        appReads(ids)
         return [{
           _id: 'app-1',
           ownerUid: 'owner-1',
           audience: 'public',
           publicationStatus: 'published',
           currentRevisionId: 'revision-current',
+          createdAt: 1,
+          updatedAt: 2,
+        }, {
+          _id: 'private-app',
+          ownerUid: 'owner-1',
+          audience: 'owner',
+          publicationStatus: 'published',
+          currentRevisionId: 'revision-private',
           createdAt: 1,
           updatedAt: 2,
         }]
@@ -77,6 +87,16 @@ describe('catalogResolver', () => {
           status: 'listed',
           shortName: 'example',
           approvedRevisionId: 'revision-approved',
+        }, {
+          appId: 'private-app',
+          status: 'listed',
+          shortName: 'stale-listing',
+          approvedRevisionId: 'revision-private',
+        }, {
+          appId: 'delisted-app',
+          status: 'delisted',
+          shortName: 'delisted',
+          approvedRevisionId: 'revision-delisted',
         }]
       },
       async getRevisions() {
@@ -103,6 +123,12 @@ describe('catalogResolver', () => {
               websiteUrl: 'https://current.example.com/',
             },
           },
+          {
+            _id: 'revision-private',
+            appId: 'private-app',
+            revision: 1,
+            snapshot: { name: '私有应用', slug: 'private-app' },
+          },
         ]
       },
       async getWorkshop() {
@@ -115,6 +141,7 @@ describe('catalogResolver', () => {
 
     const view = await resolver.resolveCatalog({ surface: 'public_market' }, null)
 
+    expect(appReads).toHaveBeenCalledExactlyOnceWith(['app-1', 'private-app'])
     expect(view.apps).toEqual([
       expect.objectContaining({
         _id: 'app-1',

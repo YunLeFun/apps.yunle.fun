@@ -93,7 +93,7 @@ export interface WorkshopMembership {
 }
 
 export interface CatalogDataSource {
-  listApps: () => Promise<CatalogAppRecord[]>
+  listApps: (ids?: readonly string[]) => Promise<CatalogAppRecord[]>
   listPublicMarketListings: () => Promise<PublicMarketListing[]>
   getRevisions: (ids: readonly string[]) => Promise<CatalogRevision[]>
   getWorkshop: (id: string) => Promise<PersonalWorkshop | null>
@@ -162,33 +162,27 @@ export function createCatalogResolver(source: CatalogDataSource): CatalogResolve
       if (request.surface === 'workshop')
         return resolveWorkshop(source, request.workshopId, principal)
 
-      const [apps, listings] = await Promise.all([
-        source.listApps(),
-        source.listPublicMarketListings(),
+      const listings = (await source.listPublicMarketListings())
+        .filter(listing => listing.status === 'listed' && listing.shortName && listing.approvedRevisionId)
+      const appIds = new Set(listings.map(listing => listing.appId))
+      const revisionIds = new Set(listings.flatMap(listing =>
+        listing.approvedRevisionId ? [listing.approvedRevisionId] : [],
+      ))
+      const [apps, revisions] = await Promise.all([
+        source.listApps([...appIds]),
+        source.getRevisions([...revisionIds]),
       ])
       const appById = new Map(apps.map(app => [app._id, app]))
-      const visibleListings = listings.filter((listing) => {
-        const app = appById.get(listing.appId)
-        return listing.status === 'listed'
-          && Boolean(listing.shortName)
-          && Boolean(listing.approvedRevisionId)
-          && app?.audience === 'public'
-          && app.publicationStatus === 'published'
-      })
-      const revisionIds = visibleListings
-        .map(listing => listing.approvedRevisionId)
-        .filter((id): id is string => Boolean(id))
-      const revisions = await source.getRevisions(revisionIds)
       const revisionById = new Map(revisions.map(revision => [revision._id, revision]))
 
       return {
         surface: 'public_market',
-        apps: visibleListings.flatMap((listing) => {
+        apps: listings.flatMap((listing) => {
           const app = appById.get(listing.appId)
           const revision = listing.approvedRevisionId
             ? revisionById.get(listing.approvedRevisionId)
             : undefined
-          if (!app || !revision || revision.appId !== app._id)
+          if (app?.audience !== 'public' || app.publicationStatus !== 'published' || revision?.appId !== app._id)
             return []
           return [{ ...toAppView(app, revision), marketShortName: listing.shortName }]
         }),

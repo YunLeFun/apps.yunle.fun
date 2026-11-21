@@ -47,25 +47,17 @@ export async function resolveOwnerUidByLogin(
 
 export function createCloudbaseCatalogDataSource(db: CloudbaseAdminDb): CatalogDataSource {
   return {
-    async listApps() {
-      const records = await listCollection<AppRecord>(db, 'apps')
+    async listApps(ids) {
+      const records = ids === undefined
+        ? await listCollection<AppRecord>(db, 'apps')
+        : await getCollectionRecordsById<AppRecord>(db, 'apps', ids)
       return records.map(normalizeCatalogApp).filter(isPresent)
     },
     async listPublicMarketListings() {
       return listCollection<PublicMarketListing>(db, PUBLIC_MARKET_LISTINGS_COLLECTION)
     },
     async getRevisions(ids) {
-      if (!ids.length)
-        return []
-      const records: AppSubmission[] = []
-      for (let offset = 0; offset < ids.length; offset += PAGE_SIZE) {
-        const pageIds = ids.slice(offset, offset + PAGE_SIZE)
-        const { data } = await db.collection('app_submissions')
-          .where({ _id: db.command.in([...pageIds]) })
-          .limit(pageIds.length)
-          .get()
-        records.push(...asArray<AppSubmission>(data))
-      }
+      const records = await getCollectionRecordsById<AppSubmission>(db, 'app_submissions', ids)
       return records.map(toCatalogRevision)
     },
     async getWorkshop(id) {
@@ -209,6 +201,23 @@ async function listCollection<T>(
     records.push(...page)
     if (page.length < PAGE_SIZE)
       break
+  }
+  return records
+}
+
+async function getCollectionRecordsById<T>(
+  db: CloudbaseAdminDb,
+  collectionName: string,
+  ids: readonly string[],
+): Promise<T[]> {
+  const records: T[] = []
+  for (let offset = 0; offset < ids.length; offset += PAGE_SIZE) {
+    const pageIds = ids.slice(offset, offset + PAGE_SIZE)
+    const { data } = await db.collection(collectionName)
+      .where({ _id: db.command.in([...pageIds]) })
+      .limit(pageIds.length)
+      .get()
+    records.push(...asArray<T>(data))
   }
   return records
 }

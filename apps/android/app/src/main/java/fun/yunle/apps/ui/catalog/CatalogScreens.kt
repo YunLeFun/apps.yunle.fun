@@ -9,7 +9,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -178,12 +180,12 @@ internal fun CatalogScreen(
         },
         containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
-        Column(
+        CatalogContentLayout(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .imePadding(),
-        ) {
+        ) { compact ->
             uiState.minimizedAppName?.let { minimizedName ->
                 ResumeSessionBanner(
                     appName = minimizedName,
@@ -194,9 +196,11 @@ internal fun CatalogScreen(
 
             WorkshopSearchHeader(
                 query = uiState.query,
+                compact = compact,
                 categories = uiState.availableCategories,
                 selectedCategory = uiState.selectedCategory,
-                showCategories = uiState.feed is CatalogFeedState.Loaded && uiState.availableCategories.size > 1,
+                showCategories = uiState.feed is CatalogFeedState.Loaded &&
+                    uiState.availableCategories.size > 1 && (!compact || uiState.query.isBlank()),
                 onQueryChange = onQueryChange,
                 onCategoryChange = { category ->
                     keyboardController?.hide()
@@ -289,7 +293,7 @@ internal fun CatalogScreen(
                                 }
                             }
 
-                            item(key = "workshop_list_header") {
+                            if (!compact) item(key = "workshop_list_header") {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -419,10 +423,23 @@ internal fun CatalogScreen(
     }
 }
 
+@Composable
+private fun CatalogContentLayout(
+    modifier: Modifier,
+    content: @Composable ColumnScope.(compact: Boolean) -> Unit,
+) {
+    BoxWithConstraints(modifier) {
+        // Reserve room for results when the IME or landscape leaves a short viewport.
+        val compact = maxHeight < 200.dp
+        Column(Modifier.fillMaxSize()) { content(compact) }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WorkshopSearchHeader(
     query: String,
+    compact: Boolean,
     categories: List<String>,
     selectedCategory: String,
     showCategories: Boolean,
@@ -440,26 +457,28 @@ private fun WorkshopSearchHeader(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = "探索应用",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.semantics { heading() },
-                )
-                Text(
-                    text = "发现创作工具与小游戏",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+            if (!compact) {
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = "探索应用",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    Text(
+                        text = "发现创作工具与小游戏",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-            Spacer(modifier = Modifier.height(8.dp))
 
             Surface(
                 shape = RoundedCornerShape(28.dp),

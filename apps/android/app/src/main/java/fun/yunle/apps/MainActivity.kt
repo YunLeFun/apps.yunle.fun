@@ -90,6 +90,7 @@ import `fun`.yunle.apps.ui.games.NativeRoomCreationSheet
 import `fun`.yunle.apps.ui.support.HelpAndDiagnosticsSheet
 import `fun`.yunle.apps.ui.support.SupportCenterSheet
 import `fun`.yunle.apps.ui.home.HomeBackupsSheet
+import `fun`.yunle.apps.ui.home.LegacyMigrationSheet
 import `fun`.yunle.apps.ui.home.HomeScreen
 import `fun`.yunle.apps.ui.publishing.MyApplicationsSheet
 import `fun`.yunle.apps.ui.scanner.QRScannerSheet
@@ -168,6 +169,7 @@ class MainActivity : ComponentActivity() {
                 }
                 var openSyncSettingsInMe by rememberSaveable { mutableStateOf(false) }
                 var showHomeBackups by rememberSaveable { mutableStateOf(false) }
+                var showLegacyMigration by rememberSaveable { mutableStateOf(false) }
                 var showMyWorkshops by rememberSaveable { mutableStateOf(false) }
                 var showWorkshopLookup by rememberSaveable { mutableStateOf(false) }
                 var showWorkspacePicker by rememberSaveable { mutableStateOf(false) }
@@ -526,6 +528,7 @@ class MainActivity : ComponentActivity() {
                                     YunleContainer.homeSync.resolve(resolution)
                                 },
                                 onOpenHomeBackups = { showHomeBackups = true },
+                                onOpenLegacyMigration = { showLegacyMigration = true },
                                 onOpenMyWorkshops = { showMyWorkshops = true },
                                 onOpenWorkshopLookup = { showWorkshopLookup = true },
                                 onOpenMyReports = { showMyReports = true },
@@ -558,6 +561,15 @@ class MainActivity : ComponentActivity() {
                             accounts = YunleContainer.accounts,
                             homeLibrary = YunleContainer.homeLibrary,
                             onDismiss = { showHomeBackups = false },
+                        )
+                    }
+
+                    if (showLegacyMigration) {
+                        LegacyMigrationSheet(
+                            store = YunleContainer.legacyImportStore,
+                            accounts = YunleContainer.accounts,
+                            library = YunleContainer.homeLibrary,
+                            onDismiss = { showLegacyMigration = false },
                         )
                     }
 

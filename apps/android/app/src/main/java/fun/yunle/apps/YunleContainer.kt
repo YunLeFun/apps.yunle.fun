@@ -1,5 +1,6 @@
 package `fun`.yunle.apps
 
+import android.annotation.SuppressLint
 import android.content.Context
 import `fun`.yunle.apps.account.AccountSession
 import `fun`.yunle.apps.account.AccountStore
@@ -28,6 +29,8 @@ import `fun`.yunle.apps.games.NativeRoomCreationService
 import `fun`.yunle.apps.home.HomeLibrary
 import `fun`.yunle.apps.home.HomeSyncCoordinator
 import `fun`.yunle.apps.home.HomeSyncService
+import `fun`.yunle.apps.home.LegacyImportStore
+import `fun`.yunle.apps.home.WebViewLegacyLocalDataReader
 import `fun`.yunle.apps.publishing.ApplicationDraftVault
 import `fun`.yunle.apps.publishing.PublishingService
 import `fun`.yunle.apps.publishing.PublishingServing
@@ -74,6 +77,13 @@ class YunlePreferences(context: Context) {
         _appearance.value = next
     }
 
+    @SuppressLint("UseKtx") // The import claim can complete only if commit reports success.
+    internal fun persistImportedAppearance(next: AppAppearance): Boolean {
+        if (!prefs.edit().putString("appearance", next.key).commit()) return false
+        _appearance.value = next
+        return true
+    }
+
     fun setShowRecent(enabled: Boolean) {
         prefs.edit().putBoolean("home.showRecent", enabled).apply()
         _showRecent.value = enabled
@@ -106,6 +116,9 @@ object YunleContainer {
         private set
 
     internal lateinit var homeSync: HomeSyncCoordinator
+        private set
+
+    internal lateinit var legacyImportStore: LegacyImportStore
         private set
 
     @Volatile
@@ -234,6 +247,7 @@ object YunleContainer {
                     diagLogs.activateAccount(activeId)
                     diagUploads?.identityChanged()
                     coordinator?.identityChanged()
+                    if (::legacyImportStore.isInitialized) legacyImportStore.identityChanged()
                 },
             )
             shareHistory.activate(store.user?.id)
@@ -260,6 +274,13 @@ object YunleContainer {
             webProfiles = profilesRepo
             homeLibrary = library
             homeSync = sync
+            legacyImportStore = LegacyImportStore(
+                library = library,
+                accounts = store,
+                reader = WebViewLegacyLocalDataReader(appContext),
+                directory = File(appContext.noBackupFilesDir, "LegacyImport"),
+                preferences = prefs,
+            )
             preferences = prefs
             nativeGameCatalogStore = gameCatalog
             nativeGameHistoryStore = gameHistory

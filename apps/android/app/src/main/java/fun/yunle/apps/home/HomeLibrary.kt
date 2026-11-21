@@ -8,6 +8,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.util.Base64
 import java.util.UUID
 
@@ -28,6 +29,7 @@ internal data class HomeLibrarySnapshot(
     val dockVisible: Boolean = true,
     val lastSyncedAtMillis: Long? = null,
     val lastRestoreId: String? = null,
+    val legacyImportId: String? = null,
 ) {
     val installedIds: List<String> get() = configuration.installedApps.map { it.appId }
     val dockIds: List<String> get() = configuration.dockApps.map { it.appId }
@@ -848,6 +850,35 @@ internal class HomeLibrary(
         return restoredOk
     }
 
+    fun importLegacy(record: LegacyLocalData, expectedAccountId: String?, expectedGeneration: Int): Boolean {
+        synchronized(lock) {
+            if (activeAccountId != expectedAccountId || _generation.value != expectedGeneration) {
+                throw LegacyImportException(LegacyImportError.IDENTITY_CHANGED)
+            }
+            val current = _snapshot.value
+            if (!canWrite) throw LegacyImportException(LegacyImportError.STORAGE)
+            if (current.legacyImportId == record.id) return true
+
+            val configuration = record.configuration ?: current.configuration
+            configuration.validate()
+            if (!writeBackupLocked(HomeBackupKind.LEGACY, record.id)) {
+                throw LegacyImportException(LegacyImportError.STORAGE)
+            }
+            val next = current.copy(
+                configuration = configuration,
+                syncEnabled = record.syncEnabled ?: current.syncEnabled,
+                autoSyncEnabled = record.autoSyncEnabled ?: current.autoSyncEnabled,
+                dockVisible = record.dockVisible ?: current.dockVisible,
+                legacyImportId = record.id,
+            )
+            if (!saveLocked(next, markUserEdit = true, durable = true)) {
+                throw LegacyImportException(LegacyImportError.STORAGE)
+            }
+        }
+        onUserChange?.invoke()
+        return true
+    }
+
     fun setSyncEnabled(enabled: Boolean) {
         var shouldTrigger = false
         synchronized(lock) {
@@ -913,11 +944,33 @@ internal class HomeLibrary(
         return (filtered + HomeApplicationSource(appId = refId, ownerLogin = owner)).sortedBy { it.appId }
     }
 
-    private fun writeBackupLocked(kind: HomeBackupKind): Boolean {
+    private fun writeBackupLocked(kind: HomeBackupKind, tokenSuffix: String? = null): Boolean {
         val token = when (kind) {
             HomeBackupKind.CONFLICT -> "conflict"
             HomeBackupKind.RESTORE -> "before-restore"
-            HomeBackupKind.LEGACY, HomeBackupKind.NATIVE_MIGRATION -> return false
+            HomeBackupKind.LEGACY -> "before-legacy"
+            HomeBackupKind.NATIVE_MIGRATION -> return false
+        }
+        val ownerBase = currentFile.name.removeSuffix(".json")
+        if (kind == HomeBackupKind.LEGACY) {
+            val digestHex = tokenSuffix ?: return false
+            val name = "$ownerBase.$token-$digestHex.json"
+            // Validate the deterministic backup name with the same rules used to list it.
+            if (HomeBackupRepository.kind(name, currentFile.name) != kind) return false
+            val backup = File(directory, name)
+            return try {
+                if (Files.exists(backup.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+                    HomeBackupRepository(directory).preview(name, currentFile.name)
+                } else {
+                    // A first import can target a Home with no file yet.
+                    val bytes = serializeSnapshot(_snapshot.value).toString().toByteArray()
+                    if (bytes.size > HomeBackupRepository.MAXIMUM_BYTES) return false
+                    writeLegacyMigrationFile(backup, bytes)
+                }
+                true
+            } catch (_: Exception) {
+                false
+            }
         }
         if (!currentFile.exists()) return false
         return try {
@@ -927,7 +980,6 @@ internal class HomeLibrary(
             val bytes = currentFile.readBytes()
             if (bytes.size > HomeBackupRepository.MAXIMUM_BYTES) return false
             if (!directory.exists()) directory.mkdirs()
-            val ownerBase = currentFile.name.removeSuffix(".json")
             val backupFile = File(directory, "$ownerBase.$token-${UUID.randomUUID().toString().lowercase()}.json")
             val temp = File(directory, "${backupFile.name}.tmp")
             temp.writeBytes(bytes)
@@ -941,7 +993,7 @@ internal class HomeLibrary(
         }
     }
 
-    private fun saveLocked(next: HomeLibrarySnapshot, markUserEdit: Boolean): Boolean {
+    private fun saveLocked(next: HomeLibrarySnapshot, markUserEdit: Boolean, durable: Boolean = false): Boolean {
         val finalNext = if (markUserEdit) {
             _generation.value += 1
             next.copy(
@@ -955,11 +1007,15 @@ internal class HomeLibrary(
         return try {
             if (!directory.exists()) directory.mkdirs()
             val serialized = serializeSnapshot(finalNext).toString()
-            val temp = File(directory, "${currentFile.name}.tmp")
-            temp.writeText(serialized, Charsets.UTF_8)
-            if (!temp.renameTo(currentFile)) {
-                currentFile.writeText(serialized, Charsets.UTF_8)
-                temp.delete()
+            if (durable) {
+                writeLegacyMigrationFile(currentFile, serialized.toByteArray())
+            } else {
+                val temp = File(directory, "${currentFile.name}.tmp")
+                temp.writeText(serialized, Charsets.UTF_8)
+                if (!temp.renameTo(currentFile)) {
+                    currentFile.writeText(serialized, Charsets.UTF_8)
+                    temp.delete()
+                }
             }
             _snapshot.value = finalNext
             _storageError.value = null
@@ -1004,6 +1060,7 @@ internal class HomeLibrary(
             put("dockVisible", snapshot.dockVisible)
             put("lastSyncedAtMillis", snapshot.lastSyncedAtMillis ?: JSONObject.NULL)
             put("lastRestoreId", snapshot.lastRestoreId ?: JSONObject.NULL)
+            snapshot.legacyImportId?.let { put("legacyImportId", it) }
             put(
                 "cachedApps",
                 JSONArray().apply {
@@ -1057,6 +1114,7 @@ internal class HomeLibrary(
                     dockVisible = json.optBoolean("dockVisible", true),
                     lastSyncedAtMillis = lastSyncedAt,
                     lastRestoreId = lastRestoreId,
+                    legacyImportId = json.opt("legacyImportId") as? String,
                 )
             } else {
                 // Backward compatibility with legacy M1 flat snapshot JSON

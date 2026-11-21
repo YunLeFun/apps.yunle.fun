@@ -116,6 +116,7 @@ internal fun MeScreen(
     onAutoSyncEnabledChange: (Boolean) -> Unit = {},
     onResolveSyncConflict: (HomeSyncResolution) -> Unit = {},
     onOpenHomeBackups: () -> Unit = {},
+    onOpenLegacyMigration: () -> Unit = {},
     onOpenMyWorkshops: () -> Unit = {},
     onOpenWorkshopLookup: () -> Unit = {},
     onOpenMyReports: () -> Unit = {},
@@ -471,6 +472,10 @@ internal fun MeScreen(
             onOpenHomeBackups = {
                 showSettings = false
                 onOpenHomeBackups()
+            },
+            onOpenLegacyMigration = {
+                showSettings = false
+                onOpenLegacyMigration()
             },
             gameBackConfirmEnabled = gameBackConfirmEnabled,
             onGameBackConfirmChange = onGameBackConfirmChange,
@@ -1208,6 +1213,7 @@ private fun SettingsModalSheet(
     onAutoSyncEnabledChange: (Boolean) -> Unit,
     onResolveSyncConflict: (HomeSyncResolution) -> Unit,
     onOpenHomeBackups: () -> Unit = {},
+    onOpenLegacyMigration: () -> Unit = {},
     gameBackConfirmEnabled: Boolean = true,
     onGameBackConfirmChange: (Boolean) -> Unit = {},
     onOpenAppCache: () -> Unit = {},
@@ -1374,6 +1380,15 @@ private fun SettingsModalSheet(
                     .defaultMinSize(minHeight = 48.dp),
             ) {
                 Text("云居备份与恢复")
+            }
+
+            FilledTonalButton(
+                onClick = onOpenLegacyMigration,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 48.dp),
+            ) {
+                Text("旧版数据导入")
             }
 
             OutlinedButton(

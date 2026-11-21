@@ -119,6 +119,9 @@ internal fun MeScreen(
     onOpenMyWorkshops: () -> Unit = {},
     onOpenWorkshopLookup: () -> Unit = {},
     onOpenMyReports: () -> Unit = {},
+    gameBackConfirmEnabled: Boolean = true,
+    onGameBackConfirmChange: (Boolean) -> Unit = {},
+    onOpenAppCache: () -> Unit = {},
     onClearRecent: () -> Unit,
     onOpenUrl: (String) -> Unit,
 ) {
@@ -457,6 +460,12 @@ internal fun MeScreen(
             onOpenHomeBackups = {
                 showSettings = false
                 onOpenHomeBackups()
+            },
+            gameBackConfirmEnabled = gameBackConfirmEnabled,
+            onGameBackConfirmChange = onGameBackConfirmChange,
+            onOpenAppCache = {
+                showSettings = false
+                onOpenAppCache()
             },
             onClearRecent = onClearRecent,
             onDismiss = { showSettings = false },
@@ -1188,6 +1197,9 @@ private fun SettingsModalSheet(
     onAutoSyncEnabledChange: (Boolean) -> Unit,
     onResolveSyncConflict: (HomeSyncResolution) -> Unit,
     onOpenHomeBackups: () -> Unit = {},
+    gameBackConfirmEnabled: Boolean = true,
+    onGameBackConfirmChange: (Boolean) -> Unit = {},
+    onOpenAppCache: () -> Unit = {},
     onClearRecent: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -1243,6 +1255,12 @@ private fun SettingsModalSheet(
                 subtitle = "截屏后短暂显示反馈按钮，不会读取或上传截图",
                 checked = screenshotFeedbackEnabled,
                 onCheckedChange = onScreenshotFeedbackChange,
+            )
+            SettingsToggleRow(
+                title = "游戏返回防误触",
+                subtitle = "对局内无法网页后退时，需连续按两次返回才会退出",
+                checked = gameBackConfirmEnabled,
+                onCheckedChange = onGameBackConfirmChange,
             )
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -1328,6 +1346,15 @@ private fun SettingsModalSheet(
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            FilledTonalButton(
+                onClick = onOpenAppCache,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 48.dp),
+            ) {
+                Text("离线缓存管理")
+            }
 
             FilledTonalButton(
                 onClick = onOpenHomeBackups,

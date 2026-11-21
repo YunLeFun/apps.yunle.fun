@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -23,6 +24,7 @@ import android.webkit.CookieManager
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -49,11 +51,15 @@ import androidx.webkit.WebViewFeature
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import `fun`.yunle.apps.account.AccountRequestBoundary
+import `fun`.yunle.apps.games.NativeGameLaunchContext
+import `fun`.yunle.apps.games.NativeGameLaunchUrl
+import `fun`.yunle.apps.games.NativeGameLifecycleEvent
 import `fun`.yunle.apps.webruntime.HostAuthorizationException
 import `fun`.yunle.apps.webruntime.HostSsoRequest
 import `fun`.yunle.apps.webruntime.NativeAuthorizationSheet
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.io.FileInputStream
 import java.security.SecureRandom
 import java.util.Base64
 import java.util.UUID
@@ -90,6 +96,10 @@ class HostWebViewActivity : AppCompatActivity() {
     private var extraTrustedHosts = emptySet<String>()
     private var documentStartBridgeInstalled = false
     private var localPageLaunchPending = false
+    private var activeProfileKey = "guest"
+    private var gameContext: NativeGameLaunchContext? = null
+    private var requestedOrientationMode: String? = null
+    private var lastBackPressMillis = 0L
     private lateinit var accountBoundary: AccountRequestBoundary
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -117,13 +127,26 @@ class HostWebViewActivity : AppCompatActivity() {
 
         YunleContainer.ensureInitialized(this)
         accountBoundary = YunleContainer.accounts.currentBoundary
+        applyRequestedOrientation()
         buildNativeChrome()
         attachFreshWebView(initialUrl)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val activeWeb = webView
-                if (activeWeb != null && activeWeb.canGoBack()) activeWeb.goBack() else finish()
+                if (activeWeb != null && activeWeb.canGoBack()) {
+                    activeWeb.goBack()
+                    return
+                }
+                if (gameContext != null && YunleContainer.preferences.gameBackConfirmEnabled.value) {
+                    val now = System.currentTimeMillis()
+                    if (now - lastBackPressMillis > 2000L) {
+                        lastBackPressMillis = now
+                        Toast.makeText(this@HostWebViewActivity, "再按一次返回退出当前对局", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                }
+                finish()
             }
         })
     }
@@ -166,6 +189,8 @@ class HostWebViewActivity : AppCompatActivity() {
             return
         }
         accountBoundary = YunleContainer.accounts.currentBoundary
+        lastBackPressMillis = 0L
+        applyRequestedOrientation()
         progressView.progress = 0
         progressView.visibility = View.GONE
         updateNativeChrome()
@@ -281,7 +306,9 @@ class HostWebViewActivity : AppCompatActivity() {
             ?.takeIf { it == "default-browser" || it == "safari-view" }
             ?: "safari-view"
         toolbarColor = options.readString("toolbarColor")
-        options.optJSONObject("app")?.let { appInfo = it }
+        options.optJSONObject("app")?.let { appInfo = it } ?: run { appInfo = JSONObject() }
+        requestedOrientationMode = options.readString("orientation")
+        gameContext = NativeGameLaunchUrl.extractContext(url)
 
         val hosts = mutableSetOf<String>()
         val rawHosts = options.optJSONArray("trustedHosts")
@@ -414,6 +441,19 @@ class HostWebViewActivity : AppCompatActivity() {
             theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, ripple, true)
             setBackgroundResource(ripple.resourceId)
         }
+
+    private fun applyRequestedOrientation() {
+        val smallestWidthDp = resources.configuration.smallestScreenWidthDp
+        requestedOrientation = if (smallestWidthDp >= 600) {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        } else {
+            when (requestedOrientationMode) {
+                "portrait" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                "landscape" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
+    }
 
     private fun updateNativeChrome() {
         if (!::toolbar.isInitialized) return
@@ -617,6 +657,7 @@ class HostWebViewActivity : AppCompatActivity() {
             documentStartBridgeInstalled = true
             runCatching {
                 val profile = WebViewCompat.getProfile(reused)
+                activeProfileKey = profile.name
                 configureWebView(reused, profile.cookieManager)
             }
             webView = reused
@@ -635,6 +676,7 @@ class HostWebViewActivity : AppCompatActivity() {
         var pendingView: WebView? = null
         val created = try {
             val selection = YunleContainer.selectWebProfile(appInfo.readString("id").orEmpty(), url)
+            activeProfileKey = selection.profileName
             WebView(this).also { view ->
                 pendingView = view
                 // Bind before configuring or loading anything. The default profile belongs to the old shell.
@@ -734,6 +776,22 @@ class HostWebViewActivity : AppCompatActivity() {
             }
         }
         targetWebView.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+                val ctx = gameContext ?: return null
+                if (!request.method.equals("GET", ignoreCase = true)) return null
+                if (request.requestHeaders.keys.any { it.equals("Range", ignoreCase = true) }) return null
+                val target = request.url
+                if (target.encodedPath?.startsWith("/api/") == true) return null
+                val cached = YunleContainer.gameResourceCache.openCachedResource(
+                    url = target.toString(),
+                    gameId = ctx.gameId,
+                    profileKey = activeProfileKey,
+                ) ?: return null
+                return runCatching {
+                    WebResourceResponse(cached.mimeType, null, FileInputStream(cached.file))
+                }.getOrNull()
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val target = request.url
                 val scheme = target.scheme?.lowercase()
@@ -906,6 +964,37 @@ class HostWebViewActivity : AppCompatActivity() {
             }
             "authorize" -> beginAuthorization(messageId, replyProxy, sourceOrigin, params)
             "openAuthSession" -> beginExternalAuthorization(messageId, replyProxy, sourceOrigin, params)
+            "reportGameLifecycle" -> {
+                val ctx = gameContext
+                if (ctx == null) {
+                    replyError(messageId, replyProxy, "bad request: game context unavailable")
+                } else {
+                    val event = NativeGameLifecycleEvent.parse(
+                        json = params,
+                        sourceOrigin = exactOrigin(sourceOrigin),
+                        expectedLaunchId = ctx.launchId,
+                        expectedGameId = ctx.gameId,
+                        expectedModeId = ctx.modeId,
+                        expectedOrigin = if (isDebuggable() && sourceOrigin.host == "127.0.0.1") {
+                            exactOrigin(sourceOrigin)
+                        } else {
+                            "https://play.yunle.fun"
+                        },
+                    )
+                    if (event == null) {
+                        replyError(messageId, replyProxy, "bad request: invalid game lifecycle event")
+                    } else {
+                        if (event.state == NativeGameLifecycleEvent.State.READY) {
+                            YunleContainer.nativeGameHistoryStore.recordReady(
+                                gameId = event.gameId,
+                                modeId = event.modeId,
+                                accountId = accountBoundary.uid,
+                            )
+                        }
+                        replySuccess(messageId, replyProxy, JSONObject().put("accepted", true))
+                    }
+                }
+            }
         }
     }
 
@@ -1233,6 +1322,7 @@ class HostWebViewActivity : AppCompatActivity() {
             "openAuthSession" to JsapiAccess.TRUSTED,
             "haptic" to JsapiAccess.TRUSTED,
             "setClipboard" to JsapiAccess.TRUSTED,
+            "reportGameLifecycle" to JsapiAccess.TRUSTED,
         )
 
         private val BRIDGE_SCRIPT = """
@@ -1274,7 +1364,8 @@ class HostWebViewActivity : AppCompatActivity() {
                 showTitleBar: function () { return invoke('setTitleBarVisible', { visible: true }) },
                 closeBrowser: function () { return invoke('close') },
                 haptic: function (style) { return invoke('haptic', { style: style }) },
-                setClipboard: function (text) { return invoke('setClipboard', { text: text }) }
+                setClipboard: function (text) { return invoke('setClipboard', { text: text }) },
+                reportGameLifecycle: function (params) { return invoke('reportGameLifecycle', params) }
               }
             })()
         """.trimIndent()

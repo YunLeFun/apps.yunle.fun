@@ -5,6 +5,9 @@ import `fun`.yunle.apps.account.AccountSession
 import `fun`.yunle.apps.account.AccountStore
 import `fun`.yunle.apps.account.CloudbaseAuthService
 import `fun`.yunle.apps.account.KeystoreAccountVault
+import `fun`.yunle.apps.cache.ApplicationCacheRepository
+import `fun`.yunle.apps.cache.ApplicationCacheStore
+import `fun`.yunle.apps.cache.NativeGameResourceCacheStore
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionService
 import `fun`.yunle.apps.catalog.ApplicationAcquisitionServing
 import `fun`.yunle.apps.catalog.DeveloperProfileService
@@ -13,6 +16,12 @@ import `fun`.yunle.apps.catalog.WorkshopDiscoveryService
 import `fun`.yunle.apps.catalog.WorkshopDiscoveryServing
 import `fun`.yunle.apps.community.CommunityService
 import `fun`.yunle.apps.community.CommunityServing
+import `fun`.yunle.apps.games.NativeGameCatalogStore
+import `fun`.yunle.apps.games.NativeGameHistoryStore
+import `fun`.yunle.apps.games.NativePublicRoomService
+import `fun`.yunle.apps.games.NativePublicRoomServing
+import `fun`.yunle.apps.games.NativeRoomCreating
+import `fun`.yunle.apps.games.NativeRoomCreationService
 import `fun`.yunle.apps.home.HomeLibrary
 import `fun`.yunle.apps.home.HomeSyncCoordinator
 import `fun`.yunle.apps.home.HomeSyncService
@@ -48,6 +57,9 @@ class YunlePreferences(context: Context) {
     private val _screenshotFeedbackEnabled = MutableStateFlow(prefs.getBoolean("feedback.screenshotPrompt", true))
     val screenshotFeedbackEnabled: StateFlow<Boolean> = _screenshotFeedbackEnabled.asStateFlow()
 
+    private val _gameBackConfirmEnabled = MutableStateFlow(prefs.getBoolean("games.backConfirmEnabled", true))
+    val gameBackConfirmEnabled: StateFlow<Boolean> = _gameBackConfirmEnabled.asStateFlow()
+
     fun setAppearance(next: AppAppearance) {
         prefs.edit().putString("appearance", next.key).apply()
         _appearance.value = next
@@ -62,6 +74,13 @@ class YunlePreferences(context: Context) {
         prefs.edit().putBoolean("feedback.screenshotPrompt", enabled).apply()
         _screenshotFeedbackEnabled.value = enabled
     }
+
+    fun setGameBackConfirmEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("games.backConfirmEnabled", enabled).apply()
+        _gameBackConfirmEnabled.value = enabled
+    }
+
+    internal fun rawPreferences(): android.content.SharedPreferences = prefs
 }
 
 object YunleContainer {
@@ -86,12 +105,26 @@ object YunleContainer {
     lateinit var preferences: YunlePreferences
         private set
 
+    internal lateinit var nativeGameCatalogStore: NativeGameCatalogStore
+        private set
+
+    internal lateinit var nativeGameHistoryStore: NativeGameHistoryStore
+        private set
+
+    internal lateinit var gameResourceCache: NativeGameResourceCacheStore
+        private set
+
+    internal lateinit var applicationCacheStore: ApplicationCacheStore
+        private set
+
     val hostAuthService: HostAuthorizationService = HostAuthorizationService()
     internal val workshopService: WorkshopServing = WorkshopService()
     internal val communityService: CommunityServing = CommunityService()
     internal val developerProfileService: DeveloperProfileServing = DeveloperProfileService()
     internal val acquisitionService: ApplicationAcquisitionServing = ApplicationAcquisitionService()
     internal val discoveryService: WorkshopDiscoveryServing = WorkshopDiscoveryService()
+    internal val publicRoomService: NativePublicRoomServing = NativePublicRoomService()
+    internal val roomCreationService: NativeRoomCreating = NativeRoomCreationService(hostAuthService)
 
     internal fun ensureInitialized(context: Context, accountSession: AccountSession? = null) {
         if (initialized) return
@@ -104,7 +137,30 @@ object YunleContainer {
             val library = HomeLibrary(
                 directory = File(appContext.noBackupFilesDir, "HomeLibrary"),
             )
+            val gameHistory = NativeGameHistoryStore(
+                directory = File(appContext.noBackupFilesDir, "Games/History"),
+            )
+            gameHistory.activate(null)
             val prefs = YunlePreferences(appContext)
+            val gameCatalog = NativeGameCatalogStore(
+                cacheFile = File(appContext.cacheDir, "Games/catalog-v1.json"),
+                bundledLoader = {
+                    runCatching {
+                        appContext.assets.open("native-game-catalog-v1.json").bufferedReader().use { it.readText() }
+                    }.getOrNull()
+                },
+            )
+            val gameResources = NativeGameResourceCacheStore(
+                rootDir = File(appContext.cacheDir, "GameResources"),
+                prefs = prefs.rawPreferences(),
+            )
+            val appCacheRepo = ApplicationCacheRepository(
+                directory = File(appContext.cacheDir, "CloudApplicationDownloads"),
+            )
+            val appCache = ApplicationCacheStore(
+                repository = appCacheRepo,
+                prefs = prefs.rawPreferences(),
+            )
             val session = accountSession ?: AccountSession(api = CloudbaseAuthService(), vault = KeystoreAccountVault(appContext))
             var coordinator: HomeSyncCoordinator? = null
             val store = AccountStore(
@@ -116,6 +172,7 @@ object YunleContainer {
                 identityDidChange = { activeId ->
                     HostSession.closeAll()
                     library.activateAccount(activeId)
+                    gameHistory.activate(activeId)
                     coordinator?.identityChanged()
                 },
             )
@@ -130,6 +187,10 @@ object YunleContainer {
             homeLibrary = library
             homeSync = sync
             preferences = prefs
+            nativeGameCatalogStore = gameCatalog
+            nativeGameHistoryStore = gameHistory
+            gameResourceCache = gameResources
+            applicationCacheStore = appCache
             accounts = store
             initialized = true
         }

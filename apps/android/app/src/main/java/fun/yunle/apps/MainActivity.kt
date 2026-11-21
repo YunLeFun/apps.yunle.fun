@@ -64,9 +64,19 @@ import `fun`.yunle.apps.ui.catalog.DetailScreen
 import `fun`.yunle.apps.ui.catalog.DeveloperApplicationsSheet
 import `fun`.yunle.apps.ui.catalog.ListDetailSceneStrategy
 import `fun`.yunle.apps.ui.catalog.WorkshopScanOrLinkDialog
+import `fun`.yunle.apps.games.NativeGame
+import `fun`.yunle.apps.games.NativeGameError
+import `fun`.yunle.apps.games.NativeGameLaunchUrl
+import `fun`.yunle.apps.games.NativeGameMode
+import `fun`.yunle.apps.games.NativeGameRoomIntent
+import `fun`.yunle.apps.games.NativePublicRoom
+import `fun`.yunle.apps.ui.cache.ApplicationCacheSettingsSheet
 import `fun`.yunle.apps.ui.community.ApplicationReviewsSheet
 import `fun`.yunle.apps.ui.community.MyReportsSheet
 import `fun`.yunle.apps.ui.games.GamesScreen
+import `fun`.yunle.apps.ui.games.JoinRoomByCodeDialog
+import `fun`.yunle.apps.ui.games.NativeGameResourcesSheet
+import `fun`.yunle.apps.ui.games.NativeRoomCreationSheet
 import `fun`.yunle.apps.ui.home.HomeBackupsSheet
 import `fun`.yunle.apps.ui.home.HomeScreen
 import `fun`.yunle.apps.ui.theme.YunleTheme
@@ -79,6 +89,9 @@ import `fun`.yunle.apps.webruntime.HostAuthorizationError
 import `fun`.yunle.apps.webruntime.HostAuthorizationException
 import `fun`.yunle.apps.webruntime.HostSsoPolicy
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.UUID
 
 /** Android renders its 4-tab Material 3 shell and cloud application runtime host. */
 class MainActivity : ComponentActivity() {
@@ -110,6 +123,7 @@ class MainActivity : ComponentActivity() {
             val appearance by YunleContainer.preferences.appearance.collectAsStateWithLifecycle()
             val showRecent by YunleContainer.preferences.showRecent.collectAsStateWithLifecycle()
             val screenshotFeedbackEnabled by YunleContainer.preferences.screenshotFeedbackEnabled.collectAsStateWithLifecycle()
+            val gameBackConfirmEnabled by YunleContainer.preferences.gameBackConfirmEnabled.collectAsStateWithLifecycle()
 
             val darkTheme = when (appearance) {
                 AppAppearance.SYSTEM -> isSystemInDarkTheme()
@@ -127,6 +141,9 @@ class MainActivity : ComponentActivity() {
                 val homeStorageError by YunleContainer.homeLibrary.storageError.collectAsStateWithLifecycle()
                 val homeSyncPhase by YunleContainer.homeSync.phase.collectAsStateWithLifecycle()
                 val runningSessions by HostSession.runningSessions.collectAsStateWithLifecycle()
+                val nativeGames by YunleContainer.nativeGameCatalogStore.games.collectAsStateWithLifecycle()
+                val recentGameHistory by YunleContainer.nativeGameHistoryStore.entries.collectAsStateWithLifecycle()
+                val scope = rememberCoroutineScope()
 
                 var selectedTab by rememberSaveable {
                     mutableStateOf(if (initialDetailKey != null) AppTab.WORKSHOP else AppTab.HOME)
@@ -138,6 +155,14 @@ class MainActivity : ComponentActivity() {
                 var showWorkspacePicker by rememberSaveable { mutableStateOf(false) }
                 var showMyReports by rememberSaveable { mutableStateOf(false) }
                 var showScanOrLink by rememberSaveable { mutableStateOf(false) }
+                var showCreateRoom by rememberSaveable { mutableStateOf(false) }
+                var showJoinRoom by rememberSaveable { mutableStateOf(false) }
+                var showGameResources by rememberSaveable { mutableStateOf(false) }
+                var showAppCacheSettings by rememberSaveable { mutableStateOf(false) }
+                var publicRooms by remember { mutableStateOf<List<NativePublicRoom>>(emptyList()) }
+                var isLoadingRooms by remember { mutableStateOf(false) }
+                var roomsError by remember { mutableStateOf<String?>(null) }
+                var pendingGameLaunch by remember { mutableStateOf<Pair<NativeGame, NativeGameMode>?>(null) }
                 var activePublicWorkshopId by rememberSaveable { mutableStateOf<String?>(null) }
                 var activeDeveloperLogin by rememberSaveable { mutableStateOf<String?>(null) }
                 var activeWorkspaceId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -158,6 +183,80 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     YunleContainer.accounts.prepareInitialRestore()
                     YunleContainer.accounts.consumeInitialRestore()
+                }
+
+                suspend fun refreshPublicRooms() {
+                    isLoadingRooms = true
+                    roomsError = null
+                    val res = runCatching { YunleContainer.publicRoomService.rooms() }
+                    isLoadingRooms = false
+                    res.fold(
+                        onSuccess = { publicRooms = it },
+                        onFailure = { roomsError = NativeGameError.message(it) },
+                    )
+                }
+
+                fun openNativeGame(game: NativeGame, mode: NativeGameMode) {
+                    if (mode.requiresLogin && accountOverview.activeUser?.isUsable != true) {
+                        pendingGameLaunch = game to mode
+                        selectedTab = AppTab.ME
+                        return
+                    }
+                    val base = runCatching { game.launchUrl(mode) }.getOrNull() ?: return
+                    val launchUrl = NativeGameLaunchUrl.addingContext(
+                        raw = base,
+                        launchId = UUID.randomUUID(),
+                        gameId = game.gameId,
+                        modeId = mode.id,
+                    ) ?: return
+                    val options = JSONObject()
+                        .put("url", launchUrl)
+                        .put("title", game.name)
+                        .put("orientation", mode.orientation ?: "system")
+                        .put("displayMode", "immersive")
+                        .put("trustedHosts", JSONArray().put("play.yunle.fun"))
+                        .put(
+                            "app",
+                            JSONObject()
+                                .put("id", game.appId)
+                                .put("slug", game.gameId)
+                                .put("name", game.name)
+                                .put("emoji", "🎮")
+                                .put("description", game.description),
+                        )
+                    HostSession.openRaw(this@MainActivity, game.appId, options.toString())
+                }
+
+                fun openGameRoom(intent: NativeGameRoomIntent) {
+                    val options = JSONObject()
+                        .put("url", intent.url)
+                        .put("title", "联机房间 #${intent.inviteCode}")
+                        .put("displayMode", "titlebar")
+                        .put("trustedHosts", JSONArray().put("play.yunle.fun"))
+                        .put(
+                            "app",
+                            JSONObject()
+                                .put("id", "play")
+                                .put("slug", "play")
+                                .put("name", "云乐坊游戏大厅")
+                                .put("emoji", "🎮"),
+                        )
+                    HostSession.openRaw(this@MainActivity, "play-room-${intent.inviteCode}", options.toString())
+                }
+
+                LaunchedEffect(selectedTab) {
+                    if (selectedTab == AppTab.GAMES) {
+                        launch { YunleContainer.nativeGameCatalogStore.load() }
+                        launch { refreshPublicRooms() }
+                    }
+                }
+
+                LaunchedEffect(accountOverview.activeID, accountOverview.activeUser) {
+                    val pending = pendingGameLaunch
+                    if (pending != null && accountOverview.activeUser?.isUsable == true) {
+                        pendingGameLaunch = null
+                        openNativeGame(pending.first, pending.second)
+                    }
                 }
 
                 LaunchedEffect(accountOverview.activeID) {
@@ -314,6 +413,17 @@ class MainActivity : ComponentActivity() {
                                     pushDetailRoute(workshopBackStack, app.id)
                                 },
                                 onRetry = viewModel::retry,
+                                nativeGames = nativeGames,
+                                recentHistory = recentGameHistory,
+                                publicRooms = publicRooms,
+                                isLoadingRooms = isLoadingRooms,
+                                roomsError = roomsError,
+                                onLaunchNativeGame = ::openNativeGame,
+                                onJoinPublicRoom = ::openGameRoom,
+                                onRefreshRooms = { scope.launch { refreshPublicRooms() } },
+                                onCreateRoom = { showCreateRoom = true },
+                                onJoinByCode = { showJoinRoom = true },
+                                onManageGameResources = { showGameResources = true },
                             )
 
                             AppTab.WORKSHOP -> WorkshopTabContent(
@@ -393,6 +503,9 @@ class MainActivity : ComponentActivity() {
                                 onOpenMyWorkshops = { showMyWorkshops = true },
                                 onOpenWorkshopLookup = { showWorkshopLookup = true },
                                 onOpenMyReports = { showMyReports = true },
+                                gameBackConfirmEnabled = gameBackConfirmEnabled,
+                                onGameBackConfirmChange = YunleContainer.preferences::setGameBackConfirmEnabled,
+                                onOpenAppCache = { showAppCacheSettings = true },
                                 onClearRecent = YunleContainer.homeLibrary::clearRecent,
                                 onOpenUrl = { url -> openInCustomTab(this@MainActivity, Uri.parse(url)) },
                             )
@@ -539,6 +652,48 @@ class MainActivity : ComponentActivity() {
                         ApplicationShareSheet(
                             app = targetApp,
                             onDismiss = { sharingApp = null },
+                        )
+                    }
+
+                    if (showCreateRoom) {
+                        NativeRoomCreationSheet(
+                            games = nativeGames,
+                            accounts = YunleContainer.accounts,
+                            service = YunleContainer.roomCreationService,
+                            onRoomCreated = ::openGameRoom,
+                            onNavigateToMe = {
+                                showCreateRoom = false
+                                selectedTab = AppTab.ME
+                            },
+                            onDismiss = { showCreateRoom = false },
+                        )
+                    }
+
+                    if (showJoinRoom) {
+                        JoinRoomByCodeDialog(
+                            onJoinRoom = ::openGameRoom,
+                            onDismiss = { showJoinRoom = false },
+                        )
+                    }
+
+                    if (showGameResources) {
+                        val playProfileKey = remember(accountOverview.activeID) {
+                            YunleContainer.selectWebProfile("play", "https://play.yunle.fun/").profileName
+                        }
+                        NativeGameResourcesSheet(
+                            games = nativeGames,
+                            profileKey = playProfileKey,
+                            cacheStore = YunleContainer.gameResourceCache,
+                            onDismiss = { showGameResources = false },
+                        )
+                    }
+
+                    if (showAppCacheSettings) {
+                        val loadedApps = (uiState.feed as? CatalogFeedState.Loaded)?.apps.orEmpty()
+                        ApplicationCacheSettingsSheet(
+                            catalogApps = loadedApps,
+                            cacheStore = YunleContainer.applicationCacheStore,
+                            onDismiss = { showAppCacheSettings = false },
                         )
                     }
 

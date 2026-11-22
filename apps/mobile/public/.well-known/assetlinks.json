@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "fun.yunle.apps",
+      "sha256_cert_fingerprints": [
+        "75:51:09:C6:DA:29:87:AE:00:25:A7:60:5A:8A:1D:50:A5:61:D5:EA:B1:2F:E5:FD:B5:4A:60:9D:3C:D9:FB:E8"
+      ]
+    }
+  }
+]
